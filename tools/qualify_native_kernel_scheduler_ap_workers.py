@@ -25,7 +25,7 @@ from tools import qualify_native_pooleboot  # noqa: E402
 DEFAULT_TOOLCHAIN_ROOT = ROOT / ".toolchains" / "rust-1.97.0"
 DEFAULT_QEMU_ROOT = native_tier0.DEFAULT_QEMU_ROOT
 DEFAULT_OUT = ROOT / ap_workers.READINESS_RELATIVE
-HOSTILE_CASE_COUNT = 226
+HOSTILE_CASE_COUNT = sum(ap_workers.NEGATIVE_CONTROL_CASE_COUNTS)
 
 
 class QualificationError(RuntimeError):
@@ -67,6 +67,8 @@ def _probe_operation(lines: list[str]) -> Callable[[], Any]:
 def _require_rejections(
     control_id: str, operations: list[Callable[[], Any]]
 ) -> dict[str, Any]:
+    if not operations:
+        raise QualificationError(f"PKSCHED5 empty hostile control: {control_id}")
     for operation in operations:
         try:
             operation()
@@ -127,18 +129,87 @@ def _run_host_probe(toolchain_root: Path, target_dir: Path) -> dict[str, Any]:
     return result
 
 
+def _build_native_control_library(toolchain_root: Path, target: Path):
+    cargo, rustc, env = qualify_native_kernel_entry._toolchain(toolchain_root)
+    result = subprocess.run(
+        [str(cargo), "build", "--locked", "--offline", "--lib", "--package", "poolekernel",
+         "--manifest-path", str(ROOT / "native/Cargo.toml"), "--target", qualify_native_kernel_entry.HOST_TARGET,
+         "--target-dir", str(target)], cwd=ROOT, env=env, stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT, check=False, timeout=180,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    if result.returncode:
+        raise QualificationError(f"PKSCHED5 native library build failed: {result.stdout.decode('utf-8', errors='replace')[-3000:]}")
+    return target / qualify_native_kernel_entry.HOST_TARGET / "debug", rustc, env
+
+
+def _build_native_control_probe(toolchain_root: Path, target: Path, source: bytes | None = None, library=None):
+    artifacts, rustc, env = library or _build_native_control_library(toolchain_root, target / "library")
+    target.mkdir(parents=True, exist_ok=True)
+    fixture, native, _ = (ROOT / p for p in ap_workers.NATIVE_CONTROL_SOURCES)
+    (target / "workers.rs").write_bytes((native.read_bytes() if source is None else source) + b"\n" + fixture.read_bytes())
+    harness = target / "harness.rs"
+    harness.write_text('pub use poolekernel::smp_ipi;\nmod workers;\nfn main() { workers::controls_main(); }\n', encoding="utf-8")
+    executable = target / "pksched5-controls.exe"
+    result = subprocess.run(
+        [str(rustc), "--edition=2024", "--crate-name", "pksched5_controls", str(harness),
+         "--extern", f"poolekernel={artifacts / 'libpoolekernel.rlib'}", "-L", f"dependency={artifacts / 'deps'}",
+         "-o", str(executable)], cwd=ROOT, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        check=False, timeout=120, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    if result.returncode:
+        raise QualificationError(f"PKSCHED5 native control build failed: {result.stdout.decode('utf-8', errors='replace')[-3000:]}")
+    return executable, env
+
+
+def _run_native_control_probe(toolchain_root: Path, target: Path) -> dict[str, Any]:
+    executable, env = _build_native_control_probe(toolchain_root, target)
+    result = subprocess.run([str(executable)], cwd=ROOT, env=env, stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT, check=False, timeout=30, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    output = result.stdout.decode("utf-8", errors="strict").replace("\r\n", "\n")
+    if result.returncode:
+        raise QualificationError(f"PKSCHED5 native controls failed: {output[-3000:]}")
+    controls = ap_workers.parse_native_control_output(output)
+    return {"scope": "host_execution_of_native_AP_workers_not_privileged_guest_execution",
+        "exit_code": result.returncode, "lines": output.splitlines(),
+        "output_sha256": ap_workers.sha256_bytes(output.encode("utf-8")),
+        "executable_sha256": ap_workers.sha256_bytes(executable.read_bytes()),
+        "controls": controls, "verified_cases_total": sum(c["case_count"] for c in controls),
+        "sources": [ap_workers.file_binding(ROOT, p) for p in ap_workers.NATIVE_CONTROL_SOURCES]}
+
+
 def _source_audit() -> dict[str, Any]:
-    paths = {
-        "workers": ROOT / "native/kernel/src/scheduler_ap_workers.rs",
-        "ipi": ROOT / "native/kernel/src/smp_ipi.rs",
-        "arch": ROOT / "native/kernel/src/arch/x86_64.rs",
-        "main": ROOT / "native/kernel/src/main.rs",
-        "boot_exit": ROOT / "native/boot/src/exit.rs",
-        "boot_manifest": ROOT / "native/boot/Cargo.toml",
-        "bootexit": ROOT / "native/bootexit/src/lib.rs",
-        "pooleboot_qualifier": ROOT / "tools/qualify_native_pooleboot.py",
-    }
+    paths = {name: ROOT / path for name, path in ap_workers.SOURCE_AUDIT_PATHS.items()}
     texts = {name: path.read_text(encoding="utf-8") for name, path in paths.items()}
+    return dict(_audit_source_text(texts), files={name: {
+        "path": path.relative_to(ROOT).as_posix(), "sha256": ap_workers.sha256_bytes(path.read_bytes())
+    } for name, path in paths.items()})
+
+
+def _scope(text: str, start: str, end: str) -> str:
+    if text.count(start) != 1:
+        raise QualificationError("PKSCHED5 source scope start is missing or ambiguous")
+    body = text.split(start, 1)[1]
+    if end not in body:
+        raise QualificationError("PKSCHED5 source scope end is missing")
+    return body.split(end, 1)[0]
+
+
+AP_ENTRIES = ("reschedule", "shootdown", "call_function", "diagnostic", "panic", "stop")
+AP_REGISTERS = ("rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15")
+LIFECYCLE_GUARDS = tuple(f"proof.lifecycle.{name}_mask != smp_ipi::TARGET_CPU_MASK"
+                         for name in ("online", "quiesced", "parked", "released")) + (
+    "workers.after_park.online_mask != 1", "!workers.flush_complete", "!workers.stale_id_rejected")
+SCRUB_GUARDS = ("receipt.kind != ScrubKind::Release", "receipt.page_count != smp_runtime::RESOURCE_PAGE_COUNT",
+    "receipt.zeroed_bytes != expected_bytes", "receipt.verified_bytes != expected_bytes", ".free_scrubbed_automatic(allocation, access)")
+STACK_GUARDS = (
+    ("runtime", "put_u64(&mut page, tss + 36, layout.ist1_top());"),
+    ("runtime", "get_u64(descriptor_page, TSS_OFFSET as usize + 36) != layout.ist1_top()"),
+    ("ipi", "handlers.for_operation(operation),\n            1,"),
+    ("ipi", "page[offset + 4] = ist;"),
+    ("workers", "pub const WORKER_STACK_BYTES: u32 = 8 * 1024"),
+)
+
+
+def _audit_source_text(texts: dict[str, str]) -> dict[str, Any]:
     required_workers = (
         "pub const AP_COUNT: usize = 3",
         "pub const WORK_CAPACITY: usize = 15",
@@ -208,8 +279,28 @@ def _source_audit() -> dict[str, Any]:
         raise QualificationError("PKSCHED5 selector isolation source audit failed")
     if texts["workers"].count("#[test]") != 10:
         raise QualificationError("PKSCHED5 focused Rust test count changed")
-    if re.search(r"\b(?:Vec|Box|String|HashMap|dyn)\b", texts["workers"]):
+    if re.search(r"\b(?:Vec|Box|String|HashMap|dyn)\b|\bfn\s*\(", texts["workers"]):
         raise QualificationError("PKSCHED5 controller gained heap or dynamic storage")
+    for key, token in STACK_GUARDS:
+        if texts[key].count(token) != 1:
+            raise QualificationError("PKSCHED5 IST1 stack gate changed")
+    arch = texts["arch"]
+    for name in AP_ENTRIES:
+        body = _scope(arch, f"poole_ap_ipi_{name}:\n", ".Lpoole_ap_ipi_common")
+        if body.strip().splitlines()[0].strip() != "push rax":
+            raise QualificationError("PKSCHED5 AP entry does not save RAX")
+    common = _scope(arch, ".Lpoole_ap_ipi_common:\n", ".Lpoole_ap_ipi_return:\n")
+    if [s.strip() for s in common.splitlines()[:13]] != ["push " + r for r in AP_REGISTERS]:
+        raise QualificationError("PKSCHED5 AP register save order changed")
+    restore = _scope(arch, ".Lpoole_ap_ipi_return:\n", ".Lpoole_ap_ipi_terminal_stop:")
+    if [s.strip() for s in restore.splitlines() if s.strip()] != [*("pop " + r for r in reversed(AP_REGISTERS)), "pop rax", "iretq"]:
+        raise QualificationError("PKSCHED5 AP register restore order changed")
+    if re.search(r"\b(?:rbp|ebp|bp|bpl)\b", common):
+        raise QualificationError("PKSCHED5 unsaved RBP is touched")
+    lifecycle = _scope(texts["main"], "let workers = proof.ap_workers.unwrap_or_else(|| {", "logger.write_bytes(&PKSCHED5_TOPOLOGY);")
+    scrub = _scope(texts["main"], "fn smp_runtime_release_resources_with_live_mmio(", "\nfn ")
+    if not all(t in lifecycle for t in LIFECYCLE_GUARDS) or not all(t in scrub for t in SCRUB_GUARDS):
+        raise QualificationError("PKSCHED5 park/scrub/release changed")
     return {
         "max_development_trap_scenario": int(maximum_match.group(1)),
         "focused_rust_test_count": 10,
@@ -220,18 +311,47 @@ def _source_audit() -> dict[str, Any]:
         "arbitrary_callback_count": 0,
         "ap_handler_saved_register_count": 15,
         "live_marker_count": ap_workers.MARKER_COUNT,
-        "files": {
-            name: {
-                "path": path.relative_to(ROOT).as_posix(),
-                "sha256": ap_workers.sha256_bytes(path.read_bytes()),
-            }
-            for name, path in paths.items()
-        },
     }
 
 
+def _source_controls(texts: dict[str, str]) -> list[dict[str, Any]]:
+    _audit_source_text(texts)
+
+    def mutation(key, scope, old, new):
+        if scope.count(old) != 1 or texts[key].count(scope) != 1:
+            raise QualificationError("PKSCHED5 source mutation is not uniquely scoped")
+        changed = dict(texts)
+        changed[key] = texts[key].replace(scope, scope.replace(old, new, 1), 1)
+        return lambda: _audit_source_text(changed)
+
+    ids = ap_workers.NEGATIVE_CONTROL_IDS
+    operations = []
+    for token in ("Vec<u8>", "Box<u8>", "String", "HashMap<u8, u8>", "dyn Fn()", "fn(u64)"):
+        changed = dict(texts, workers=texts["workers"] + "\ntype Injected = " + token + ";\n")
+        operations.append(lambda changed=changed: _audit_source_text(changed))
+    controls = [_require_rejections(ids[16], operations)]
+    controls.append(_require_rejections(ids[30], [mutation(k, texts[k], t, "REMOVED") for k, t in STACK_GUARDS]))
+    arch = texts["arch"]
+    operations = []
+    for name in AP_ENTRIES:
+        scope = f"poole_ap_ipi_{name}:\n" + _scope(arch, f"poole_ap_ipi_{name}:\n", ".Lpoole_ap_ipi_common")
+        operations.append(mutation("arch", scope, "push rax", "nop"))
+    common = _scope(arch, ".Lpoole_ap_ipi_common:\n", ".Lpoole_ap_ipi_return:\n")
+    operations.extend(mutation("arch", common, "push " + r + "\n", "nop\n") for r in AP_REGISTERS)
+    restore = _scope(arch, ".Lpoole_ap_ipi_return:\n", ".Lpoole_ap_ipi_terminal_stop:")
+    operations.extend(mutation("arch", restore, "pop " + r + "\n", "nop\n") for r in (*AP_REGISTERS, "rax"))
+    operations.extend((mutation("arch", restore, "iretq", "ret"), mutation("arch", common, "mov r15d, eax", "mov rbp, rax")))
+    controls.append(_require_rejections(ids[31], operations))
+    lifecycle = _scope(texts["main"], "let workers = proof.ap_workers.unwrap_or_else(|| {", "logger.write_bytes(&PKSCHED5_TOPOLOGY);")
+    scrub = _scope(texts["main"], "fn smp_runtime_release_resources_with_live_mmio(", "\nfn ")
+    operations = [mutation("main", lifecycle, t, "false") for t in LIFECYCLE_GUARDS]
+    operations.extend(mutation("main", scrub, t, "false") for t in SCRUB_GUARDS)
+    controls.append(_require_rejections(ids[32], operations))
+    return controls
+
+
 def _negative_controls(
-    markers: list[str], probe_lines: list[str], source_audit: dict[str, Any]
+    markers: list[str], probe_lines: list[str], native_controls: dict[str, Any], audit_controls: dict[str, Any]
 ) -> list[dict[str, Any]]:
     ap_workers.validate_markers(markers)
     ap_workers.parse_probe_output("\n".join(probe_lines) + "\n")
@@ -261,16 +381,16 @@ def _negative_controls(
     oracle_hostile = probe_lines.copy()
     oracle_hostile[2] = _set_field(oracle_hostile[2], "trace", "1:0,1:1,1:2,1:3;2:5,2:6,2:4,2:7;3:9,3:10,3:8,3:11")
     controls.append(_require_rejections(ids[14], [_probe_operation(oracle_hostile)]))
-    if source_audit["focused_rust_test_count"] != 10 or source_audit["typed_consumer_count"] != 2:
-        raise QualificationError("PKSCHED5 source controls lack passing evidence")
-    for control_id in ids[15:33]:
-        controls.append({"id": control_id, "status": "pass", "expected": "rejected", "case_count": 1})
+    executed = {c["id"]: c for c in [*native_controls["controls"], *audit_controls["controls"]]}
+    controls.extend(executed[name] for name in ids[15:33])
     controls.append(_require_rejections(ids[33], [lambda: ap_workers.file_binding(ROOT, "../outside")]))
     if [item["id"] for item in controls] != list(ids):
         raise QualificationError("PKSCHED5 negative-control order diverged")
     case_count = sum(item["case_count"] for item in controls)
     if case_count != HOSTILE_CASE_COUNT:
         raise QualificationError(f"PKSCHED5 hostile-case count changed: {case_count}")
+    if controls != ap_workers.expected_controls():
+        raise QualificationError("PKSCHED5 exact control accounting diverged")
     return controls
 
 
@@ -297,6 +417,7 @@ def make_readiness(
     with tempfile.TemporaryDirectory(prefix="pksched5-qualification-", dir=temporary_parent) as temporary:
         temporary_root = Path(temporary)
         host_probe = _run_host_probe(toolchain_root, temporary_root / "host-probe")
+        native_controls = _run_native_control_probe(toolchain_root, temporary_root / "native-controls")
         default_boot, default_build = qualify_native_pooleboot._build_and_test(toolchain_root, temporary_root / "default-boot")
         worker_boot, worker_build = qualify_native_pooleboot._build_and_test(toolchain_root, temporary_root / "scheduler-ap-workers-boot", development_feature=ap_workers.FEATURE)
         if b"POOLEBOOT/0.1 TRANSFER_ARM PASS" in default_boot or b"POOLEBOOT/0.1 STOP BEFORE TRANSFER" not in default_boot:
@@ -304,6 +425,9 @@ def make_readiness(
         if ap_workers.sha256_bytes(default_boot) == ap_workers.sha256_bytes(worker_boot):
             raise QualificationError("default and PKSCHED5 PooleBoot binaries are not distinct")
         source_audit = _source_audit()
+        texts = {name: (ROOT / value["path"]).read_text(encoding="utf-8") for name, value in source_audit["files"].items()}
+        audit_controls = {"scope": "mutated_callback_stack_register_cleanup_source_not_hardware_fault_injection",
+                          "files": source_audit["files"], "controls": _source_controls(texts)}
         linked_invlpg_audit = qualify_native_kernel_smp_ipi._linked_invlpg_audit(toolchain_root, kernel, temporary_root / "linked-audit")
         media_one = native_kernel_load.build_media_bytes(worker_boot, config, manifest, kernel, artifact_files)
         media_two = native_kernel_load.build_media_bytes(worker_boot, config, manifest, kernel, artifact_files)
@@ -351,7 +475,7 @@ def make_readiness(
             raise QualificationError("two PKSCHED5 runs produced different frames")
         if handoffs[0] != handoffs[1]:
             raise QualificationError("two PKSCHED5 runs produced different PBP1 bytes")
-    controls = _negative_controls(runs[0]["markers"], host_probe["lines"], source_audit)
+    controls = _negative_controls(runs[0]["markers"], host_probe["lines"], native_controls, audit_controls)
     observation = ap_workers.validate_markers(runs[0]["markers"])
     firmware = {item["role"]: item for item in lock["firmware"]["files"]}
     report = {
@@ -376,7 +500,9 @@ def make_readiness(
             "default_stop_marker_present": True,
             "default_transfer_marker_absent": True,
             "host_probe": host_probe,
+            "native_control_probe": native_controls,
             "source_audit": source_audit,
+            "audit_controls": audit_controls,
             "linked_invlpg_audit": linked_invlpg_audit,
         },
         "media": {"clean_generation_count": 2, "exact_clean_generation_match": True, "sha256": ap_workers.sha256_bytes(media_one), "byte_count": len(media_one), "inspection": media_inspection, "ordinary_workspace_file_only": True, "physical_media_write_performed": False},

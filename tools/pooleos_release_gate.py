@@ -499,6 +499,18 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 215 repairs AP-worker admission and eighteen constant-only control groups. Two final "
+    "four-vCPU boots pass 34 groups/325 cases; 19 focused tests reject 343 corrupted records and "
+    "ten independent gate cases, and detect 29 disabled safeguard/transaction variants. Diagnostic "
+    "baseline and four harness failure records are preserved. Selected readiness is 24/27; SMP "
+    "preemption, atomics, locks and at least 17 control groups remain from N12-SCHED-SMP-PREEMPT-001. "
+    "Full exact-candidate canonical, Doctor, release, publication and configured GitHub/review gates "
+    "still precede main merge. Cloud branch backup is separate. No native byte, phase, flag, demo "
+    "ISO or production status changes. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -3123,6 +3135,8 @@ def check_native_kernel_scheduler_ap_workers_readiness(
             or "native kernel scheduler AP-worker readiness is not an object",
         )
     errors.extend(native_kernel_scheduler_ap_workers.readiness_errors(artifact, ROOT))
+    if errors:
+        return readiness.make_check("native_kernel_scheduler_ap_workers_readiness", False, "; ".join(errors[:8]))
     build = artifact.get("build", {})
     kernel_summary = (
         build.get("kernel_entry", {}).get("summary", {})
@@ -3160,9 +3174,10 @@ def check_native_kernel_scheduler_ap_workers_readiness(
         or linked.get("successor_profile_invlpg_instruction_count") != 1
         or linked.get("successor_profile_executed") is not False
         or linked.get("runtime_execution_count") != 3
-        or linked.get("relocation_count") != 1327
+        or type(linked.get("relocation_count")) is not int
+        or linked.get("relocation_count") != 1323
         or linked.get("canonical_sha256")
-        != "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8"
+        != "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A"
         or linked.get("status") != "pass"
     ):
         errors.append("PKSCHED5 host oracle, source, or linked INVLPG audit changed")
@@ -3229,7 +3244,7 @@ def check_native_kernel_scheduler_ap_workers_readiness(
         not isinstance(controls, list)
         or len(controls) != 34
         or sum(item.get("case_count", 0) for item in controls if isinstance(item, dict))
-        != 226
+        != 325
     ):
         errors.append("PKSCHED5 hostile-control evidence is incomplete")
     if artifact.get("claims") != native_kernel_scheduler_ap_workers.expected_claims():
@@ -3245,7 +3260,7 @@ def check_native_kernel_scheduler_ap_workers_readiness(
         "contract=PKSCHED5; sandybridge_vcpus=4; aps=3; workers=3; runs=2/2; "
         "markers=74/74; worker_tests=10; kernel_tests=246; typed_calls=12; "
         "queued_cancel=1; remote_cancel=1; timeout_rollbacks=1; reclaimed=13; "
-        "scrub=417792/417792; controls=34/34; cases=226; arbitrary_callbacks=false; "
+        "scrub=417792/417792; controls=34/34; cases=325; native_cases=59; arbitrary_callbacks=false; "
         "n12_exit=false; production_ready=false"
     )
     return readiness.make_check(

@@ -358,6 +358,24 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle215-ap-worker-admission-and-controls.md",
+      "sha256": "BD0FF68B719CEDABE9FF402D64512F4008E0645F44F60ECEA325295719ABE28A",
+      "byte_count": 6510,
+      "line_count": 107
+    },
+    {
+      "path": "tests/test_native_ap_worker_controls.py",
+      "sha256": "C39A509F23DA8716F22A8861CE54769BBD08EEF5AA77620F89D48C68A616D8B6",
+      "byte_count": 9858,
+      "line_count": 150
+    },
+    {
+      "path": "tests/fixtures/pksched5_control_probe.rs",
+      "sha256": "3858CE54D97E9017E6A05C7BD36974E58D36B3672B2E828B04E1DF702A3E1700",
+      "byte_count": 12134,
+      "line_count": 229
+    },
+    {
       "path": "docs/checkpoints/cycle214-current-kernel-smp-scheduler-replay.md",
       "sha256": "9FBD91036BBC58945797D1AE9E882F452DB9A815B738B378D111ECA3EF797AEE",
       "byte_count": 5701,
@@ -833,9 +851,9 @@
     },
     {
       "path": "tools/pooleos_release_gate.py",
-      "sha256": "004C9557DBE60479B6681D58671B9FB19C69822E53684DFB2D2E7AF01614711E",
-      "byte_count": 373560,
-      "line_count": 7430
+      "sha256": "1EA623BF2CF2486C035C36C3EA928E0EAF53FAFF6D7C949F9F335FEC5E076EB4",
+      "byte_count": 374550,
+      "line_count": 7445
     },
     {
       "path": "docs/checkpoints/cycle184-boot-host-provenance.md",
@@ -1361,15 +1379,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "31152CAAE2C29576CD426E688DA87B129E42DA1B9FE44D8EE7097C9D75F1660F",
-      "byte_count": 118032,
-      "line_count": 1588
+      "sha256": "D7E32D24744C2AC8141512552EB000B734C3BEA35BA847E916F14AC36EE5E34C",
+      "byte_count": 118878,
+      "line_count": 1600
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "10E17C0AEED1E0B855A8A44BBA37C11ED57683F10BAE36C78D6558FCD31FB438",
-      "byte_count": 477863,
-      "line_count": 4140
+      "sha256": "4F8F8877C4EDC38CC8B5D5BEF2D9555E12C72CE8740B668A70295BA06A3B81CD",
+      "byte_count": 480177,
+      "line_count": 4175
     },
     {
       "path": "docs/publication-boundary.md",

@@ -21,7 +21,27 @@ new private-state fault cases; fifteen disabled-repair variants must be detected
 The controller remains at most 2,048 bytes. These tests require exclusive
 controller ownership and do not establish cross-CPU atomicity or live injected
 fault recovery. Recorded-evidence admission, eighteen constant-only control
-groups and fresh current-kernel AP execution remain open.
+groups and fresh current-kernel AP execution were still open at that checkpoint.
+
+## Recorded Evidence and Executed Controls
+
+The qualifier now requires 34 executed control groups covering 325 cases:
+266 marker, host-output, input-binding and source-audit rejections plus 59
+compiled native-controller boundary scenarios. Fourteen native groups exercise
+typed requests, top-half context, EOI ordering, duplicate suppression, queued
+and remote cancellation, exact acknowledgement binding, timeout, rollback,
+late replies, priority fairness, flush watermarks, generations and stale IDs.
+Four source-audit groups execute 58 callback, IST1, register preservation and
+park/scrub/release mutations. Source mutations are not injected hardware faults.
+
+Recorded admission reconstructs paired markers, summaries, digests, handoff
+bindings, host-probe lines and observations, with type-sensitive equality.
+It checks the exact run IDs, emulator/firmware identity, native/source control
+records, linked-image accounting, claim boundaries and canonical calendar dates.
+Malformed objects reject without raising an admission exception. A matching
+record is consistency evidence, not authentication, freshness or independent
+reproduction. A fresh source-bound qualifier run and the aggregate gate remain
+required before admitting a current receipt; the broader roadmap flag stays open.
 
 ## Ownership Contract
 
@@ -53,7 +73,7 @@ The independent Python oracle reproduces the exact AP traces:
 - CPU 2: `5,6,4,7`;
 - CPU 3: `9,10,8,11`.
 
-The qualifier requires two exact fresh-vars QEMU runs, six host-probe receipts, ten focused Rust tests within the 214-test kernel suite, input hashes, exact marker/frame/PBP1 equality, source and linked-handler audits, and 34 hostile-control categories covering 226 rejected cases. Both runs must reproduce all 37 markers, twelve typed `CallFunction` executions, both cancellation paths, offline rollback, flush-gated reclamation, and complete cleanup.
+The qualifier requires two exact fresh-vars QEMU runs, six host-probe receipts, ten focused Rust tests within the 246-test kernel suite, input hashes, exact marker/frame/PBP1 equality, source and linked-handler audits, and the 34 executed control categories described above. The historical 226-case report included eighteen constant-only entries and is not sufficient current evidence. Both runs must reproduce all 37 markers, twelve typed `CallFunction` executions, both cancellation paths, offline rollback, flush-gated reclamation, and complete cleanup.
 
 Cycle 146 also requalifies the expanded PKENTRY1 layout: entry `0xA000`, text end `0x69000`, RELRO end and writable-data start `0x76000`, and unchanged image end `0x88000`. The canonical kernel is 485,000 bytes with 1,222 relocations and SHA-256 `D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33`; the in-memory image remains 557,056 bytes or 136 pages with no writable-executable mapping.
 

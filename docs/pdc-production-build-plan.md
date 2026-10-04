@@ -1,13 +1,48 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-03
-Plan version: 2.117.0-native-smp-scheduler-current-image-replay
-Roadmap cycle: PooleOS Cycle 214
+Plan version: 2.118.0-native-ap-worker-admission-controls
+Roadmap cycle: PooleOS Cycle 215
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 215: AP-Worker Admission and Executed Controls
+
+`N12-SCHED-AP-WORKERS-001` advances N12.5/N12.6/N12.7 and N36 under
+`ADD-N12-SCHED-AP-WORKERS-001` and `ADD-N36-RECEIPT-COVERAGE-001`.
+AP-worker recorded admission now validates typed observations, build identities,
+paired runs, source bindings and exact controls. Eighteen constant-only groups
+are replaced by fourteen compiled-native groups (59 boundary scenarios) and
+four source-audit groups (58 mutations). Two final four-vCPU boots on unchanged
+kernel210 pass 34 groups/325 cases: 266 rejections and 59 native scenarios.
+All 19 focused tests pass, including 343 corrupt records, ten independent gate
+cases, fourteen disabled native safeguards and fifteen disabled transaction
+repairs. Thirty transaction cases pass at both optimization levels. Counts
+overlap; these are not independent physical-hardware samples.
+
+The two initial boots are diagnostic only. Before repair the runtime accepted
+279 corruptions with four exceptions; after correcting obsolete image pins,
+the aggregate gate accepted 178 corruptions with nineteen exceptions. The
+294-case common audit now rejects all cases cleanly through both validators.
+An initial five-test control run produced four failure records: an incorrect
+declared total, a masked mutation and two overly narrow panic expectations.
+The repaired harness passes. All failures remain evidence, not passing results.
+
+Readiness is 24/27; next is `N12-SCHED-SMP-PREEMPT-001`, then atomics and
+locks. At least 17 SMP-preemption control groups remain. Twenty-two parent
+progress records are archived verbatim; eleven retained/current dependency
+receipts now include AP workers. Inventory is 1121 Python tests, not a full-suite
+pass. Native source, entry/core, previous receipts/checkpoints, owner evidence,
+locked checklist and demo ISO are preserved. No phase or flag closes.
+Main merge requires exact-candidate canonical/Doctor/release/publication and
+configured GitHub/review gates; checkpoint branch backup is separate.
+[Evidence](checkpoints/cycle215-ap-worker-admission-and-controls.md).
+Corrected roadmap/architecture/checklist regression passes 62/62, zero skips,
+after preserved 59/62 and 61/62 stale-progress failures. Conservation verifies
+362 source bindings, 1121-test inventory and 22 archived parent records.
 
 ## Cycle 214: Current-Kernel SMP Scheduler Replay
 
