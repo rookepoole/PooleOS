@@ -194,13 +194,34 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
         self.assertTrue(positive["ok"], positive["detail"])
         self.assertEqual(module.readiness_errors(receipt), [])
         for field, wrong in (("canonical_sha256", "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31"),
-                             ("relocation_count", 1326), ("relocation_count", 1323.0)):
+                             ("canonical_sha256", "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A"),
+                             ("relocation_count", 1323), ("relocation_count", 1323.0),
+                             ("relocation_count", 1326.0), ("relocation_count", False)):
             candidate = copy.deepcopy(receipt)
             actual = candidate["build"]["linked_invlpg_audit"][field]
             self.assertTrue(type(actual) is not type(wrong) or actual != wrong)
             candidate["build"]["linked_invlpg_audit"][field] = wrong
             with self.subTest(field=field, wrong=wrong), patch.object(module, "readiness_errors", return_value=[]), patch.object(gate, "_load_schema_artifact", return_value=(candidate, [])):
                 result = gate.check_native_kernel_scheduler_smp_readiness()
+                self.assertFalse(result["ok"], result["detail"])
+                self.assertIn("host oracle, source, or linked INVLPG audit changed", result["detail"])
+
+    def test_current_ap_worker_gate_independently_rejects_stale_and_wrong_typed_pins(self) -> None:
+        module = gate.native_kernel_scheduler_ap_workers
+        receipt = module.read_json(module.ROOT / module.READINESS_RELATIVE)
+        positive = gate.check_native_kernel_scheduler_ap_workers_readiness()
+        self.assertTrue(positive["ok"], positive["detail"])
+        self.assertEqual(module.readiness_errors(receipt), [])
+        for field, wrong in (("canonical_sha256", "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31"),
+                             ("canonical_sha256", "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A"),
+                             ("relocation_count", 1323), ("relocation_count", 1323.0),
+                             ("relocation_count", 1326.0), ("relocation_count", False)):
+            candidate = copy.deepcopy(receipt)
+            actual = candidate["build"]["linked_invlpg_audit"][field]
+            self.assertTrue(type(actual) is not type(wrong) or actual != wrong)
+            candidate["build"]["linked_invlpg_audit"][field] = wrong
+            with self.subTest(field=field, wrong=wrong), patch.object(module, "readiness_errors", return_value=[]), patch.object(gate, "_load_schema_artifact", return_value=(candidate, [])):
+                result = gate.check_native_kernel_scheduler_ap_workers_readiness()
                 self.assertFalse(result["ok"], result["detail"])
                 self.assertIn("host oracle, source, or linked INVLPG audit changed", result["detail"])
 

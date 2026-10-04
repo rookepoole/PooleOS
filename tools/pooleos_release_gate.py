@@ -3088,9 +3088,9 @@ def check_native_kernel_scheduler_smp_readiness(
         or linked.get("successor_profile_executed") is not False
         or linked.get("runtime_execution_count") != 3
         or type(linked.get("relocation_count")) is not int
-        or linked.get("relocation_count") != 1323
+        or linked.get("relocation_count") != 1326
         or linked.get("canonical_sha256")
-        != "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A"
+        != "FD6C2A0C709957B9EDFFC0647D534E060ED68215C075F07D70AB2AEBCA6C81D1"
         or linked.get("status") != "pass"
     ):
         errors.append("PKSCHED4 host oracle, source, or linked INVLPG audit changed")
@@ -3236,9 +3236,9 @@ def check_native_kernel_scheduler_ap_workers_readiness(
         or linked.get("successor_profile_executed") is not False
         or linked.get("runtime_execution_count") != 3
         or type(linked.get("relocation_count")) is not int
-        or linked.get("relocation_count") != 1323
+        or linked.get("relocation_count") != 1326
         or linked.get("canonical_sha256")
-        != "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A"
+        != "FD6C2A0C709957B9EDFFC0647D534E060ED68215C075F07D70AB2AEBCA6C81D1"
         or linked.get("status") != "pass"
     ):
         errors.append("PKSCHED5 host oracle, source, or linked INVLPG audit changed")

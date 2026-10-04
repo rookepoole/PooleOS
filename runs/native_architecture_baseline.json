@@ -358,6 +358,12 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle221-current-kernel-smp-and-ap-worker-replay.md",
+      "sha256": "91E3FF6C85E5E89B9C0760E4FBADD4DE8A2F7B1BC33E7458D7522D2C94C3877E",
+      "byte_count": 5438,
+      "line_count": 92
+    },
+    {
       "path": "docs/checkpoints/cycle220-current-kernel-scheduler-replay.md",
       "sha256": "2130DF5BB2FF27924E1074377C34D50D417BAFF35B732F65BA350525BD7769D2",
       "byte_count": 5334,
@@ -917,7 +923,7 @@
     },
     {
       "path": "tools/pooleos_release_gate.py",
-      "sha256": "45C19A480419DFAC0A7D10DC1AEB6635937943C37464835733262C47F86C0A92",
+      "sha256": "BB148FFF50B91DBC3DF2F14662AFC38B7E41C087A99A40AD4ACE1867A7756C56",
       "byte_count": 378313,
       "line_count": 7506
     },
@@ -1145,9 +1151,9 @@
     },
     {
       "path": "tests/test_native_dependency_release_gate.py",
-      "sha256": "8E7B6210758FB3B1352DC7F1CEE42570FB82DAE4C1753DBFBDA7C8A507460E9E",
-      "byte_count": 17326,
-      "line_count": 277
+      "sha256": "C3DDC45E694ABA9D9470F50AC4028EB90941DF13ECE4467328432632A9647AF9",
+      "byte_count": 19089,
+      "line_count": 298
     },
     {
       "path": "docs/checkpoints/cycle177-dispatch-execution-holds.md",
@@ -1445,15 +1451,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "D19F064E5582CA2F0089DFB25EB8164350E121F587E7B41FBB9E08B2B51795A1",
-      "byte_count": 123036,
-      "line_count": 1656
+      "sha256": "BC67A0BB12817E0AF03F50FF52F789926A9657E1C7D4A33E168104FB201484C9",
+      "byte_count": 123827,
+      "line_count": 1667
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "99E1D984B3530DB75E63C762FB4E6E5468151B6072AEB2D92E4E582E35BBC385",
-      "byte_count": 489402,
-      "line_count": 4315
+      "sha256": "CF7CE4EB966AD0A6CF89B95BFF46148BB3DF85147E1668021058F9FA7D2C876C",
+      "byte_count": 491239,
+      "line_count": 4343
     },
     {
       "path": "docs/publication-boundary.md",

@@ -7,9 +7,20 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 220
+Last roadmap reconciliation: PooleOS Cycle 221
 
-Cycle 220 qualifies scheduling, BSP preemption and deferred work on unchanged
+Cycle 221 qualifies SMP scheduling and AP workers on unchanged kernel216:
+four four-vCPU boots, 66 control groups/628 cases and 39 focused tests pass.
+Four measured image expectations are corrected; both rejected admissions and
+identical candidate receipts remain recorded. Readiness24/27 leaves SMP
+preemption, atomics and locks, including seventeen control groups and admission.
+Next N12-SCHED-SMP-PREEMPT-001. No normative requirement, phase/flag, native
+code, ISO or production status changes. Full qualification precedes main merge.
+[Cycle 221 evidence](checkpoints/cycle221-current-kernel-smp-and-ap-worker-replay.md).
+Corrected metadata passes 68/68 and conservation passes; two earlier failed
+metadata runs remain recorded. Normative completion conditions are unchanged.
+
+Historical Cycle 220 qualifies scheduling, BSP preemption and deferred work on unchanged
 kernel216: six virtual boots, 83 control groups/595 cases and 47 focused tests
 pass. Two measured image expectations are repaired; the initial failed admission
 is retained. Readiness22/27 leaves five profiles from N12-SCHED-SMP-001, plus
