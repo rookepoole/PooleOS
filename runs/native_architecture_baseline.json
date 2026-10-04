@@ -358,6 +358,12 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle213-current-kernel-scheduler-replay.md",
+      "sha256": "A0A26A79912445B5461DC7F8B213B26B2239E381881156182D72BDF5768430E0",
+      "byte_count": 5798,
+      "line_count": 98
+    },
+    {
       "path": "docs/checkpoints/cycle212-current-kernel-memory-and-multiprocessor-replay.md",
       "sha256": "4C1D401B2FEAE3C9079E86DCF493A609602347DD474D00D4DDDC1537F8FBB29C",
       "byte_count": 6124,
@@ -533,9 +539,9 @@
     },
     {
       "path": "runs/native-kernel-scheduler-deferred-readiness.json",
-      "sha256": "FAC1F18E866A871BFEF1F3569CB2667F5FDA36656FC9B0F4384F474C80AB0507",
-      "byte_count": 198840,
-      "line_count": 5392
+      "sha256": "E956D15D43CEA3B0E5E14821115123DE69DAEFB9E75AC46C2F89A159CD93219F",
+      "byte_count": 199268,
+      "line_count": 5402
     },
     {
       "path": "docs/checkpoints/cycle198-symbol-admission-and-boot-replay.md",
@@ -821,9 +827,9 @@
     },
     {
       "path": "tools/pooleos_release_gate.py",
-      "sha256": "9BE18651C065961DA80260785299E7E7EACED3686EA4A7B735B8A85C7F8EE925",
-      "byte_count": 371736,
-      "line_count": 7403
+      "sha256": "9BD7029EF912D872A3C71B15058AC7897BBC9E7EE889AA3F18D2E5A714CECB14",
+      "byte_count": 372671,
+      "line_count": 7417
     },
     {
       "path": "docs/checkpoints/cycle184-boot-host-provenance.md",
@@ -1049,9 +1055,9 @@
     },
     {
       "path": "tests/test_native_dependency_release_gate.py",
-      "sha256": "8EEDE74094C3AC6B250D6E3528CF1A736CCAAF41278F151F8957E05FC5D28524",
-      "byte_count": 15508,
-      "line_count": 254
+      "sha256": "AFF0A2C84E99F2677209B1C5C851F6EF8803B1E93CB50A4EA06DE47D412A2B49",
+      "byte_count": 15667,
+      "line_count": 256
     },
     {
       "path": "docs/checkpoints/cycle177-dispatch-execution-holds.md",
@@ -1349,15 +1355,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "A1017B02F88829EEF62F6D6D690D5498695CC755CB5E5C1C0121135523D97EEB",
-      "byte_count": 116444,
-      "line_count": 1566
+      "sha256": "D5930B053B5ABF0D7CEDDE43A2F1E412408044A0BACA9CEAEAC46D789C45DD0F",
+      "byte_count": 117313,
+      "line_count": 1578
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "ED15127185EB62031DE281B8BF1AF7EBDA2A4284700B650D2AA8C0D3E1B73D56",
-      "byte_count": 473447,
-      "line_count": 4073
+      "sha256": "DD81C239AEB8101E6031FC76266736AB45441B6F3FD557B2F5D7BA6F0A840A40",
+      "byte_count": 475704,
+      "line_count": 4108
     },
     {
       "path": "docs/publication-boundary.md",

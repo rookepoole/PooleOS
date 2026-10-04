@@ -1,13 +1,48 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-03
-Plan version: 2.115.0-native-memory-and-multiprocessor-replay
-Roadmap cycle: PooleOS Cycle 212
+Plan version: 2.116.0-native-scheduler-current-image-replay
+Roadmap cycle: PooleOS Cycle 213
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 213: Current-Kernel Scheduler Replay
+
+`N12-SCHED-001`, `N12-SCHED-PREEMPT-001` and `N12-SCHED-DEFERRED-001`
+advance N12.4/N12.5/N12.6/N12.7 and N36 under the corresponding
+`ADD-N12-SCHED-FOUNDATION-001`, `ADD-N12-SCHED-PREEMPT-001`,
+`ADD-N12-SCHED-DEFERRED-001` and `ADD-N36-RECEIPT-COVERAGE-001` requirements.
+The unchanged Cycle 210 kernel passes six fresh boots across three profiles,
+83 control groups and 595 cases (545 rejections and 50 native boundary cases).
+All 47 focused tests pass without skips, including 768 corrupted records,
+14 independent linked-identity mutations and 19 disabled native safeguards.
+Case counts overlap tests; these are not independent physical hardware samples.
+
+The deferred qualifier passed before the aggregate gate rejected two obsolete
+image pins. Independent evidence reconciled the hash and 1323 relocations;
+the same candidate then passed without guest reruns or rewritten observations.
+An isolated aggregate check accepted float 1323.0 when component validation was
+deliberately bypassed. The actual full gate already rejected it. Exact integer
+admission now rejects it independently, with before/after evidence preserved.
+
+Selected readiness advances from 19/27 to 22/27. Six memory receipts212,
+five CPU receipts211, six boot receipts210, ownership evidence212, entry/core,
+native source and the demo ISO remain unchanged. Twenty-two current records are
+archived verbatim. Inventory is 1109 Python tests, not a full-suite result.
+No phase or flag closes, and existing requirements cover this discovered work.
+
+Next is `N12-SCHED-SMP-001`: current-image SMP replay, AP-worker recorded
+admission and remaining AP-worker/SMP-preemption controls, then atomics and locks.
+At least 35 unproven control groups remain; SMP controls repaired in Cycle 208
+are not counted as still open. Main merge still requires exact-candidate
+canonical runtime-inclusive qualification, Doctor, release, publication and
+configured GitHub/review gates. Branch backup does not require a main merge.
+[Evidence](checkpoints/cycle213-current-kernel-scheduler-replay.md).
+Corrected metadata passes 60/60, zero skips, after three preserved stale-progress
+assertions (57/60). Conservation verifies 358 bindings and 22 archived records.
 
 ## Cycle 212: Current-Kernel Memory and Multiprocessor Replay
 

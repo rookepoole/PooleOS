@@ -166,13 +166,15 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
         mutations = [("canonical_sha256", wrong) for wrong in (
             "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1",
             "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8",
+            "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31",
             "0" * 64, None, False, "",
         )]
-        mutations.extend(("relocation_count", wrong) for wrong in (1305, 1319, 1321, None, False))
+        mutations.extend(("relocation_count", wrong) for wrong in (1305, 1319, 1321, 1326, 1323.0, None, False))
         for field, wrong in mutations:
             with self.subTest(field=field, wrong=wrong):
                 candidate = copy.deepcopy(receipt)
-                self.assertNotEqual(candidate["build"]["linked_switch_audit"][field], wrong)
+                actual = candidate["build"]["linked_switch_audit"][field]
+                self.assertTrue(type(actual) is not type(wrong) or actual != wrong)
                 candidate["build"]["linked_switch_audit"][field] = wrong
                 # Isolate aggregate admission only after the genuine positive passes.
                 with patch.object(gate, "_load_schema_artifact", return_value=(candidate, [])), \
