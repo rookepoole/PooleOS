@@ -11,7 +11,19 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 218 fixes a screenshot capture race and
+**Current development checkpoint:** Cycle 219 qualifies memory, interrupts and
+multiprocessor foundations on the unchanged rebuilt kernel. **12 virtual boots**
+and **93 focused tests** pass. Ten obsolete measured gate expectations are
+updated; the three initial rejected admissions remain recorded.
+Selected readiness is **19/27**; eight scheduler/atomic/lock profiles and seventeen
+SMP-preemption control groups remain. [Cycle 219 evidence](docs/checkpoints/cycle219-current-kernel-memory-replay.md).
+Source checkpoints are cloud-backed through [PR #78](https://github.com/rookepoole/PooleOS/pull/78);
+main still requires full qualification. Native code and the demo ISO are unchanged.
+Next: `N12-SCHED-001`. Pre-production; no physical-hardware or general retirement claim.
+Corrected progress tests pass 66/66; the initial ten failures remain recorded.
+Conservation verifies 372 source bindings and all 25 archived parent records.
+
+**Historical development checkpoint:** Cycle 218 fixes a screenshot capture race and
 qualifies the rebuilt kernel's CPU profiles. **20 final virtual boots** and
 **64 focused tests** pass. Native kernel and boot code are unchanged.
 Selected readiness is **13/27**; fourteen memory-through-lock profiles and

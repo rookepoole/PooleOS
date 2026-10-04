@@ -1,15 +1,37 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-04
-Plan version: 2.121.0-terminal-capture-and-cpu-replay
-Roadmap cycle: PooleOS Cycle 218
+Plan version: 2.122.0-current-kernel-memory-replay
+Roadmap cycle: PooleOS Cycle 219
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 218: Terminal Capture and CPU Replay
+## Cycle 219: Current-Kernel Memory Replay
+
+`N9-PMM-ACPI-CONSUMER-001`, N9.1-N9.4 with N8.1/N8.3/N8.5, N10/N36,
+advances under `ADD-MEM-001`, `ADD-TIME-001` and `ADD-N36-RECEIPT-COVERAGE-001`.
+Six profiles pass **12 virtual boots**, 421 control groups/1137 cases, and
+**93 focused tests**. Ten obsolete memory-accounting/image pins are corrected
+only after independent current-kernel validation. Initial aggregate rejections
+remain recorded; the same candidates then pass without altered guest evidence.
+Native kernel/boot code, entry/core, boot/CPU218 evidence and demo ISO are unchanged.
+[Cycle 219 evidence](checkpoints/cycle219-current-kernel-memory-replay.md).
+
+Readiness is **19/27**; eight scheduler/atomic/lock profiles remain from
+`N12-SCHED-001`, plus seventeen SMP-preemption control groups and admission.
+Bounded VM/AP ownership replay is current, but general task/CPU retirement is not
+proved. Shared-helper transitive bindings remain under N36. All 25 parent records,
+phase/flag statuses, locked checklist and PooleGlyph Phase65/66 boundary are
+preserved. Inventory is 1136 Python tests; architecture binds 372 sources.
+No main merge or production promotion follows without full exact-candidate gates.
+Corrected progress/architecture/checklist tests pass 66/66; the initial 56/66
+result remains recorded. Conservation passes all 372 bindings and 25 archived
+parent records, preserving native code, the checklist, owner files and demo ISO.
+
+## Historical Cycle 218: Terminal Capture and CPU Replay
 
 `N7-TRAP-001` advances N7.5/N7.6 and N7.1/N7.3/N7.4, with N5 replay and
 N36 under `ADD-N36-RECEIPT-COVERAGE-001`. A shared QMP capture race is fixed:

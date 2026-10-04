@@ -68,8 +68,9 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 371)
-        for path in ("docs/checkpoints/cycle218-terminal-capture-and-cpu-replay.md",
+        self.assertEqual(len(self.artifact["bound_sources"]), 372)
+        for path in ("docs/checkpoints/cycle219-current-kernel-memory-replay.md",
+                     "docs/checkpoints/cycle218-terminal-capture-and-cpu-replay.md",
                      "tests/test_native_boot_capture.py",
                      "docs/checkpoints/cycle217-current-kernel-boot-replay.md",
                      "docs/checkpoints/cycle216-native-smp-preempt-transactions.md",

@@ -548,6 +548,18 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 219 qualifies six current-kernel memory/IRQ/SMP profiles: twelve virtual boots, "
+    "421 control groups/1137 cases and 93 focused tests pass. Ten obsolete accounting/image "
+    "pins are reconciled after independent validation; initial rejected admissions remain. "
+    "Readiness is 19/27; eight scheduler/atomic/lock profiles remain from N12-SCHED-001, plus "
+    "seventeen SMP-preemption control groups and recorded admission. Shared-helper binding "
+    "review remains N36. No phase, flag, native byte, ISO or production status change; full "
+    "exact-candidate gates precede main merge and cloud branch backup is separate. "
+    + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -2021,8 +2033,8 @@ def check_native_kernel_physical_memory_readiness(
         "bootstrap_temporary_pte_writes": 23172,
         "complete_address_space_mapping_operations": 0,
         "final_temporary_alias_revoked": True,
-        "loader_reserved_pages_protected": 926,
-        "managed_pages": 129078,
+        "loader_reserved_pages_protected": 927,
+        "managed_pages": 129077,
         "marker_count": 45,
         "memory_entry_count": 98,
         "metadata_allocation_records_at_handoff": 1,
@@ -2082,7 +2094,7 @@ def check_native_kernel_physical_memory_readiness(
         "scrub_receipts": 128,
         "scrubbed_bytes": 46993408,
         "signature_verifications": 0,
-        "source_usable_pages": 117818,
+        "source_usable_pages": 117817,
         "verified_bytes": 46993408,
     }
     if artifact.get("summary") != expected_summary:
@@ -2096,7 +2108,7 @@ def check_native_kernel_physical_memory_readiness(
         errors.append("PKPMM7 overclaims N9 exit or production readiness")
     detail = (
         "contract=PKPMM7+PKACPI1; qemu64_bsp=1; runs=2/2; markers=45/45; controls=191/191; "
-        "map_entries=98; usable=117818; managed=129078; stack_pages=36; "
+        "map_entries=98; usable=117817; managed=129077; stack_pages=36; "
         "metadata=5+2_guards; manager_bytes=15632; metadata_receipts=1; "
         "ledger_growth=4_to_8_to_15_to_29_pages; capacities=2048/256/2048/128/16; "
         "ledger_guards=4; ledger_pte_writes=83; ledger_retired=27; "
@@ -2140,17 +2152,17 @@ def check_native_kernel_virtual_memory_readiness(
         "active_invalidation_receipts": 3,
         "active_leaf_mutations": 3,
         "authority_grants": 0,
-        "bootstrap_hardware_tlb_invalidations": 950714,
-        "coverage_checksum": "0x656180DA21378063",
+        "bootstrap_hardware_tlb_invalidations": 950722,
+        "coverage_checksum": "0x9339363AADE5E533",
         "direct_directory_tables": 1,
-        "direct_map_gap_pages": 12948,
+        "direct_map_gap_pages": 12949,
         "direct_map_ranges": 11,
         "direct_page_tables": 237,
         "generation_retirement_receipts": 1,
         "marker_count": 40,
-        "mapped_owned_pages": 117817,
+        "mapped_owned_pages": 117816,
         "negative_controls_passed": 48,
-        "physical_table_writes": 367404,
+        "physical_table_writes": 367403,
         "production_claim_count": 0,
         "qemu_run_count": 2,
         "remote_shootdowns_pending": 0,
@@ -2158,7 +2170,7 @@ def check_native_kernel_virtual_memory_readiness(
         "signature_verifications": 0,
         "table_pages_materialized": 243,
         "retained_free_rejections": 6,
-        "temporary_pte_writes": 950714,
+        "temporary_pte_writes": 950722,
     }
     if artifact.get("summary") != expected_summary:
         errors.append("PKVM3 readiness summary changed")
@@ -2171,8 +2183,8 @@ def check_native_kernel_virtual_memory_readiness(
         errors.append("PKVM3 overclaims N9 exit or production readiness")
     detail = (
         "contract=PKVM3; qemu64_bsp=1; runs=2/2; markers=40/40; controls=48/48; "
-        "ranges=11; gaps=12948; tables=243; owned_pages=117817; "
-        "physical_writes=367404; temporary_pte_writes=950714; cr3_writes=2; "
+        "ranges=11; gaps=12949; tables=243; owned_pages=117816; "
+        "physical_writes=367403; temporary_pte_writes=950722; cr3_writes=2; "
         "active_invlpg=3; retirement_receipts=1; remote_shootdowns=0; authority=0; "
         "target=false; n9_exit=false; production_ready=false"
     )
@@ -2495,7 +2507,7 @@ def check_native_kernel_smp_ipi_readiness(
     kernel = build.get("kernel_entry", {}) if isinstance(build, dict) else {}
     if not isinstance(kernel, dict) or native_kernel_entry.readiness_errors(kernel):
         errors.append("PKSMP5 embedded kernel entry evidence is stale")
-    elif kernel.get("product", {}).get("canonical_sha256") != "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A":
+    elif kernel.get("product", {}).get("canonical_sha256") != "FD6C2A0C709957B9EDFFC0647D534E060ED68215C075F07D70AB2AEBCA6C81D1":
         errors.append("PKSMP5 embedded kernel identity changed")
     expected_summary = {
         "application_processors_online": 3,
