@@ -5394,21 +5394,33 @@ fn scheduler_smp_preempt_tick(
     let cpu = scheduler_smp_cpu(request.cpu_value)?;
     let owner = controller.current(cpu)?;
     let frame = scheduler_smp_preempt_frame(cpu, owner, request.epoch, request.epoch);
-    let outcome = controller.handle_tick(&frame, request.attempt, request.sequence)?;
-    if let Some(ticket) = outcome.remote_ticket {
-        if controller.current(cpu)? != owner {
-            return Err(scheduler_smp_preempt::Error::Invariant.into());
+    let mut outcome = controller.handle_tick(&frame, request.attempt, request.sequence)?;
+    for _ in 0..=scheduler_smp_preempt::EVENT_CAPACITY_PER_CPU {
+        if let Some(ticket) = outcome.remote_ticket {
+            if controller.current(cpu)? != owner {
+                return Err(scheduler_smp_preempt::Error::Invariant.into());
+            }
+            scheduler_smp_preempt_deliver_ticket(
+                controller,
+                hardware,
+                access,
+                period_femtoseconds,
+                resources,
+                ticket,
+            )?;
         }
-        scheduler_smp_preempt_deliver_ticket(
-            controller,
-            hardware,
-            access,
-            period_femtoseconds,
-            resources,
-            ticket,
-        )?;
+        if !controller.tick_pending() {
+            return Ok(outcome);
+        }
+        let sequence = outcome
+            .remote_ticket
+            .ok_or(scheduler_smp_preempt::Error::Invariant)?
+            .request_sequence
+            .checked_add(1)
+            .ok_or(scheduler_smp_preempt::Error::Counter)?;
+        outcome = controller.resume_tick(request.attempt, sequence)?;
     }
-    Ok(outcome)
+    Err(scheduler_smp_preempt::Error::Invariant.into())
 }
 
 fn scheduler_smp_preempt_live_profile(

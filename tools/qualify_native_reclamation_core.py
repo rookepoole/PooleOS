@@ -17,6 +17,10 @@ sys.path.insert(0, str(ROOT))
 from tools import qualify_native_kernel_entry as entry  # noqa: E402
 
 SOURCES = (
+    "native/kernel/src/scheduler_smp_preempt.rs",
+    "tests/fixtures/pksched6_transaction_probe.rs",
+    "tests/fixtures/pksched6_event_progress_probe.rs",
+    "tests/test_native_smp_preempt_transactions.py",
     "native/kernel/src/scheduler_deferred.rs",
     "tests/fixtures/pksched3_transaction_probe.rs",
     "tests/test_native_deferred_transactions.py",
@@ -80,7 +84,7 @@ STACK_TESTS = (
     "overlapping_stacks_from_distinct_manager_namespaces_cannot_share_scheduler",
     "full_scrub_receipt_ledger_retains_the_next_stack_without_writes",
 )
-KERNEL_SHA256 = "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A"
+KERNEL_SHA256 = "FD6C2A0C709957B9EDFFC0647D534E060ED68215C075F07D70AB2AEBCA6C81D1"
 STAGES = (
     "format", "host-build-debug", "test-build-debug", "tests-debug",
     "lifetime-build-debug", "lifetime-tests-debug",
@@ -157,7 +161,7 @@ def validate_report(report: dict, root: Path = ROOT) -> None:
         "task_execution_live_verified": False,
         "task_stack_contract_id": "PKSTACK1", "task_stack_page_count": 4,
         "task_stack_test_count": len(STACK_TESTS), "task_stack_live_verified": False,
-        "linked_kernel_sha256": KERNEL_SHA256, "linked_kernel_byte_count": 534168,
+        "linked_kernel_sha256": KERNEL_SHA256, "linked_kernel_byte_count": 538264,
     }
     if not isinstance(report, dict) or set(report) != set(expected) | {"sources", "stages"}:
         raise ValueError("reclamation report fields changed")
@@ -264,7 +268,7 @@ def qualify(work: Path) -> dict:
         env = host_env
     linked = (target / entry.PRODUCT_TARGET / "release/PooleKernelLinked").read_bytes()
     canonical, _ = entry.kernel_image.canonicalize_linked_image(linked)
-    if len(canonical) != 534168 or hashlib.sha256(canonical).hexdigest().upper() != KERNEL_SHA256:
+    if len(canonical) != 538264 or hashlib.sha256(canonical).hexdigest().upper() != KERNEL_SHA256:
         raise ValueError("linked kernel changed; existing live receipts cannot be inherited")
     if before != bind_sources():
         raise ValueError("source changed during qualification")

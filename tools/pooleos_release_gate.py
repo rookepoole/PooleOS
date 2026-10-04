@@ -511,6 +511,19 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 216 repairs native SMP-preemption transactions and bounded same-tick continuation. "
+    "Twenty-seven native cases in two host profiles, fourteen disabled variants, 17 core stages, "
+    "two matching builds and 43 selected host tests pass. New kernel bytes invalidate old live "
+    "evidence: selected readiness is 3/27, with 24 profiles requiring replay from "
+    "N5-SYMBOLS-SEMANTICS-001. The SMP-preemption flag is reopened; seventeen control groups "
+    "and recorded admission remain. The old live-transfer positive remains a failing merge gate. "
+    "No current-image guest boot, phase closure, demo ISO change or production claim follows. "
+    "Full exact-candidate qualification precedes main merge; cloud branch backup is separate. "
+    + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -4159,11 +4172,11 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         errors.append("PKENTRY1 qualification summary changed")
     product = artifact.get("product", {})
     expected_product = {
-        "canonical_byte_count": 534_168,
-        "image_byte_count": 606_208,
+        "canonical_byte_count": 538_264,
+        "image_byte_count": 610_304,
         "entry_offset": 0xA000,
-        "relocation_count": 1323,
-        "canonical_sha256": "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A",
+        "relocation_count": 1326,
+        "canonical_sha256": "FD6C2A0C709957B9EDFFC0647D534E060ED68215C075F07D70AB2AEBCA6C81D1",
     }
     if not isinstance(product, dict) or any(
         type(product.get(key)) is not type(value) or product.get(key) != value
@@ -4174,8 +4187,8 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         errors.append("PKENTRY1 claim boundary changed")
     detail = (
         "contract=PKENTRY1; kernel_tests=246/246; clean_builds=2/2; negative=43/43; "
-        "exact_loaded=2/2; bytes=534168; image_bytes=606208; entry=0xA000; "
-        "relocations=1323; live_transfer=false; "
+        "exact_loaded=2/2; bytes=538264; image_bytes=610304; entry=0xA000; "
+        "relocations=1326; live_transfer=false; "
         "target_execution=false; n6_exit=false; production_ready=false"
     )
     return readiness.make_check(

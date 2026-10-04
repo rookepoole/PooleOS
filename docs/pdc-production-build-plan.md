@@ -1,13 +1,46 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-10-03
-Plan version: 2.118.0-native-ap-worker-admission-controls
-Roadmap cycle: PooleOS Cycle 215
+Status date: 2026-10-04
+Plan version: 2.119.0-native-smp-preemption-transactions
+Roadmap cycle: PooleOS Cycle 216
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 216: Native SMP-Preemption Transactions and Tick Continuation
+
+`N12-SCHED-SMP-PREEMPT-001` advances N12.5/N12.6/N12.7 and N36 under
+`ADD-N12-SCHED-SMP-PREEMPT-001` and `ADD-N36-RECEIPT-COVERAGE-001`.
+Native state changes are transactional across acknowledgement, event admission,
+offline operations and shutdown. Queries preserve diagnostics; exhausted frame
+epochs reject. Same-tick remote events and quantum expiry now use at most five
+acknowledged operations without advancing the timer again. Whole-tick capacity
+preview operates only on a discarded copy and cannot grant live ownership.
+
+Twenty-seven native cases pass in both host profiles; fourteen disabled repairs
+are detected and one redundant guard is a positive control. All 17 core stages,
+two matching clean builds, 246 kernel tests and 43 image controls pass. The
+selected host regression passes 43/43; the known failing live-transfer positive
+is explicitly excluded and remains a merge blocker. Native failures, harness
+mistakes, fixed-linker overflow and stale contract/receipt-ordering failures are
+preserved. [Full evidence](checkpoints/cycle216-native-smp-preempt-transactions.md).
+
+The new kernel is 149 pages, SHA-256
+`FD6C2A0C709957B9EDFFC0647D534E060ED68215C075F07D70AB2AEBCA6C81D1`.
+Selected readiness is **3/27**; 24 old-image profiles need replay beginning
+`N5-SYMBOLS-SEMANTICS-001`. The SMP-preemption flag is reopened; seventeen
+control groups and recorded admission remain open. No phase closes. All 23
+parent progress dictionaries and old live receipts are retained as history.
+Source inventory is 1124 Python tests, not a full-suite pass. PooleGlyph Phase
+65/66, the locked checklist, owner changes and the demo ISO are preserved.
+No current-image guest boot, main merge, signing or production claim follows.
+Checkpoint source is backed up on the PR #78 development branch; main merge
+still requires full exact-candidate qualification and configured review gates.
+Progress, architecture and checklist regression passes 63/63 with zero skips.
+Earlier metadata failures and a historical-inventory conservation failure are
+retained in the checkpoint; old records are not promoted or silently replaced.
 
 ## Cycle 215: AP-Worker Admission and Executed Controls
 

@@ -152,6 +152,13 @@ pub struct TickOutcome {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct TickProgress {
+    outcome: TickOutcome,
+    attempt: u64,
+    sequence: u64,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Summary {
     pub online_mask: u8,
     pub frame_epochs: [u64; CPU_COUNT],
@@ -228,6 +235,7 @@ pub struct SmpPreemption {
     frame_owner_revocations: u32,
     timer_owner_revocations: u32,
     pending_remote: Option<TransferTicket>,
+    active_tick: Option<TickProgress>,
 }
 
 impl SmpPreemption {
@@ -262,6 +270,7 @@ impl SmpPreemption {
             frame_owner_revocations: 0,
             timer_owner_revocations: 0,
             pending_remote: None,
+            active_tick: None,
         };
         value.validate()?;
         Ok(value)
@@ -279,11 +288,19 @@ impl SmpPreemption {
         &mut self,
         task: TaskId,
     ) -> Result<crate::scheduler_smp::TaskSnapshot, Error> {
-        self.scheduler.task_snapshot(task).map_err(Into::into)
+        let mut snapshot = self.scheduler;
+        snapshot.task_snapshot(task).map_err(Into::into)
     }
 
     pub fn queue_event(&mut self, owner: CpuId, event: Event) -> Result<(), Error> {
-        if self.pending_remote.is_some() {
+        let mut next = *self;
+        next.queue_event_inner(owner, event)?;
+        *self = next;
+        Ok(())
+    }
+
+    fn queue_event_inner(&mut self, owner: CpuId, event: Event) -> Result<(), Error> {
+        if self.pending_remote.is_some() || self.active_tick.is_some() {
             return Err(Error::PendingRemote);
         }
         let lane = &self.lanes[owner.index()];
@@ -299,6 +316,18 @@ impl SmpPreemption {
         if lane.events[..lane.event_count].contains(&Some(event)) {
             return Err(Error::EventDuplicate);
         }
+        if lane.events[..lane.event_count]
+            .iter()
+            .flatten()
+            .any(|e| e.sequence == event.sequence)
+            || self
+                .lanes
+                .iter()
+                .flat_map(|l| l.events.iter().flatten())
+                .any(|e| e.kind.task() == event.kind.task())
+        {
+            return Err(Error::EventDuplicate);
+        }
         let task = self.scheduler.task_snapshot(event.kind.task())?;
         match event.kind {
             EventKind::Cancel { .. }
@@ -308,14 +337,17 @@ impl SmpPreemption {
                 return Err(Error::EventOwner);
             }
             EventKind::Wake { target, .. }
-                if target != owner || task.state != TaskState::Blocked =>
+                if target != owner
+                    || task.state != TaskState::Blocked
+                    || task.affinity_mask & target.mask() == 0 =>
             {
                 return Err(Error::EventOwner);
             }
             EventKind::Migrate { target, .. }
                 if target == owner
                     || task.owner_cpu != Some(owner)
-                    || task.state != TaskState::Runnable =>
+                    || task.state != TaskState::Runnable
+                    || task.affinity_mask & target.mask() == 0 =>
             {
                 return Err(Error::EventOwner);
             }
@@ -345,12 +377,18 @@ impl SmpPreemption {
         attempt: u64,
         sequence: u64,
     ) -> Result<TickOutcome, Error> {
-        if self.pending_remote.is_some() {
+        if self.pending_remote.is_some() || self.active_tick.is_some() {
             return Err(Error::PendingRemote);
         }
         self.validate_frame(frame)?;
         let before = *self;
-        match self.handle_tick_inner(frame.cpu, attempt, sequence) {
+        let result = self
+            .handle_tick_inner(frame.cpu, attempt, sequence)
+            .and_then(|outcome| {
+                self.preflight_tick_completion()?;
+                Ok(outcome)
+            });
+        match result {
             Ok(value) => Ok(value),
             Err(error) => {
                 *self = before;
@@ -374,9 +412,52 @@ impl SmpPreemption {
             .checked_sub(1)
             .ok_or(Error::Invariant)?;
         let tick = lane.timer_ticks;
-        let mut processed = 0u8;
-        let mut order = [0u8; EVENT_CAPACITY_PER_CPU];
-        let mut cause = Cause::None;
+        self.active_tick = Some(TickProgress {
+            outcome: TickOutcome {
+                cpu,
+                tick,
+                previous,
+                cause: Cause::None,
+                events_processed: 0,
+                event_order: [0; EVENT_CAPACITY_PER_CPU],
+                remote_ticket: None,
+                quantum_remaining: lane.quantum_remaining,
+            },
+            attempt,
+            sequence,
+        });
+        self.advance_tick(attempt, sequence, true)
+    }
+
+    pub fn tick_pending(&self) -> bool {
+        self.active_tick.is_some()
+    }
+
+    pub fn resume_tick(&mut self, attempt: u64, sequence: u64) -> Result<TickOutcome, Error> {
+        let progress = self.active_tick.ok_or(Error::PendingRemote)?;
+        if self.pending_remote.is_some() {
+            return Err(Error::PendingRemote);
+        }
+        if attempt < progress.attempt || sequence <= progress.sequence {
+            return Err(Error::EventSequence);
+        }
+        let mut next = *self;
+        let outcome = next.advance_tick(attempt, sequence, false)?;
+        next.preflight_tick_completion()?;
+        *self = next;
+        Ok(outcome)
+    }
+
+    fn advance_tick(
+        &mut self,
+        attempt: u64,
+        sequence: u64,
+        charge_watchdog: bool,
+    ) -> Result<TickOutcome, Error> {
+        let mut progress = self.active_tick.ok_or(Error::Invariant)?;
+        let mut outcome = progress.outcome;
+        let cpu = outcome.cpu;
+        let tick = outcome.tick;
         let mut ticket = None;
 
         while self.lanes[cpu.index()].event_count != 0 {
@@ -390,18 +471,22 @@ impl SmpPreemption {
                 return Err(Error::Watchdog);
             }
             self.maximum_event_latency = self.maximum_event_latency.max(latency);
-            order[usize::from(processed)] = event.kind.order();
-            processed = processed.checked_add(1).ok_or(Error::Counter)?;
+            let index = usize::from(outcome.events_processed);
+            *outcome.event_order.get_mut(index).ok_or(Error::Invariant)? = event.kind.order();
+            outcome.events_processed = outcome
+                .events_processed
+                .checked_add(1)
+                .ok_or(Error::Counter)?;
             match event.kind {
                 EventKind::Cancel { task } => {
                     self.scheduler.cancel_task(task)?;
                     self.cancelled_events = increment(self.cancelled_events)?;
-                    cause = Cause::Cancel;
+                    outcome.cause = Cause::Cancel;
                 }
                 EventKind::Wake { task, target } => {
                     let staged = self.scheduler.stage_wake(task, target, attempt, sequence)?;
                     self.wake_events = increment(self.wake_events)?;
-                    cause = Cause::Wake;
+                    outcome.cause = Cause::Wake;
                     ticket = Some(staged);
                     break;
                 }
@@ -410,7 +495,7 @@ impl SmpPreemption {
                         .scheduler
                         .stage_migration(task, target, attempt, sequence)?;
                     self.migration_events = increment(self.migration_events)?;
-                    cause = Cause::Migration;
+                    outcome.cause = Cause::Migration;
                     ticket = Some(staged);
                     break;
                 }
@@ -421,14 +506,14 @@ impl SmpPreemption {
             if self.scheduler.queue_len(cpu)? != 0 {
                 let staged = self.scheduler.stage_preempt(cpu, attempt, sequence)?;
                 self.quantum_preemptions = increment(self.quantum_preemptions)?;
-                cause = Cause::Quantum;
+                outcome.cause = Cause::Quantum;
                 ticket = Some(staged);
             } else {
                 self.lanes[cpu.index()].quantum_remaining = QUANTUM_TICKS;
                 self.lanes[cpu.index()].watchdog_age = 0;
             }
         }
-        if self.scheduler.queue_len(cpu)? != 0 {
+        if charge_watchdog && self.scheduler.queue_len(cpu)? != 0 {
             self.lanes[cpu.index()].watchdog_age = self.lanes[cpu.index()]
                 .watchdog_age
                 .checked_add(1)
@@ -441,20 +526,31 @@ impl SmpPreemption {
                 .max(self.lanes[cpu.index()].watchdog_age);
         }
         self.pending_remote = ticket;
+        outcome.remote_ticket = ticket;
+        outcome.quantum_remaining = self.lanes[cpu.index()].quantum_remaining;
+        progress.outcome = outcome;
+        progress.attempt = attempt;
+        progress.sequence = sequence;
+        self.active_tick = ticket.map(|_| progress);
         self.validate()?;
-        Ok(TickOutcome {
-            cpu,
-            tick,
-            previous,
-            cause,
-            events_processed: processed,
-            event_order: order,
-            remote_ticket: ticket,
-            quantum_remaining: self.lanes[cpu.index()].quantum_remaining,
-        })
+        if let Some(ticket) = ticket {
+            self.preflight_pending_commit(ticket)?;
+        }
+        Ok(outcome)
     }
 
     pub fn acknowledge_reschedule(
+        &mut self,
+        ticket: TransferTicket,
+        ack: RemoteAck,
+    ) -> Result<(), Error> {
+        let mut next = *self;
+        next.acknowledge_reschedule_inner(ticket, ack)?;
+        *self = next;
+        Ok(())
+    }
+
+    fn acknowledge_reschedule_inner(
         &mut self,
         ticket: TransferTicket,
         ack: RemoteAck,
@@ -475,6 +571,13 @@ impl SmpPreemption {
                 self.context_switches = increment(self.context_switches)?;
             }
         }
+        if let Some(mut progress) = self.active_tick {
+            let lane = &self.lanes[progress.outcome.cpu.index()];
+            progress.outcome.remote_ticket = None;
+            progress.outcome.quantum_remaining = lane.quantum_remaining;
+            let events_due = lane.events[0].is_some_and(|event| event.due_tick <= lane.timer_ticks);
+            self.active_tick = (events_due || lane.quantum_remaining == 0).then_some(progress);
+        }
         self.validate()
     }
 
@@ -484,8 +587,10 @@ impl SmpPreemption {
         attempt: u64,
         sequence: u64,
     ) -> Result<TransferTicket, Error> {
-        let ticket = self.stage_offline_probe(task, attempt, sequence)?;
-        self.timeout_offline(ticket)?;
+        let mut next = *self;
+        let ticket = next.stage_offline_probe_inner(task, attempt, sequence)?;
+        next.timeout_offline_inner(ticket)?;
+        *self = next;
         Ok(ticket)
     }
 
@@ -495,7 +600,19 @@ impl SmpPreemption {
         attempt: u64,
         sequence: u64,
     ) -> Result<TransferTicket, Error> {
-        if self.pending_remote.is_some() {
+        let mut next = *self;
+        let ticket = next.stage_offline_probe_inner(task, attempt, sequence)?;
+        *self = next;
+        Ok(ticket)
+    }
+
+    fn stage_offline_probe_inner(
+        &mut self,
+        task: TaskId,
+        attempt: u64,
+        sequence: u64,
+    ) -> Result<TransferTicket, Error> {
+        if self.pending_remote.is_some() || self.active_tick.is_some() {
             return Err(Error::PendingRemote);
         }
         let ticket =
@@ -503,10 +620,18 @@ impl SmpPreemption {
                 .stage_offline_probe(task, OFFLINE_PROBE_CPU, attempt, sequence)?;
         self.pending_remote = Some(ticket);
         self.validate()?;
+        self.preflight_pending_commit(ticket)?;
         Ok(ticket)
     }
 
     pub fn timeout_offline(&mut self, ticket: TransferTicket) -> Result<(), Error> {
+        let mut next = *self;
+        next.timeout_offline_inner(ticket)?;
+        *self = next;
+        Ok(())
+    }
+
+    fn timeout_offline_inner(&mut self, ticket: TransferTicket) -> Result<(), Error> {
         if self.pending_remote != Some(ticket) || ticket.kind != TransferKind::OfflineProbe {
             return Err(Error::PendingRemote);
         }
@@ -531,7 +656,17 @@ impl SmpPreemption {
     }
 
     pub fn finish_shutdown(&mut self, tasks: [TaskId; TASK_CAPACITY]) -> Result<(), Error> {
-        if self.pending_remote.is_some() || self.lanes.iter().any(|lane| lane.event_count != 0) {
+        let mut next = *self;
+        next.finish_shutdown_inner(tasks)?;
+        *self = next;
+        Ok(())
+    }
+
+    fn finish_shutdown_inner(&mut self, tasks: [TaskId; TASK_CAPACITY]) -> Result<(), Error> {
+        if self.pending_remote.is_some()
+            || self.active_tick.is_some()
+            || self.lanes.iter().any(|lane| lane.event_count != 0)
+        {
             return Err(Error::Shutdown);
         }
         for value in 0..CPU_COUNT as u8 {
@@ -597,15 +732,24 @@ impl SmpPreemption {
         if self.pending_remote.is_some() != self.scheduler.has_pending() {
             return Err(Error::Invariant);
         }
+        if let Some(progress) = self.active_tick {
+            let lane = &self.lanes[progress.outcome.cpu.index()];
+            if progress.outcome.tick != lane.timer_ticks
+                || progress.outcome.events_processed as usize > EVENT_CAPACITY_PER_CPU
+                || progress.outcome.remote_ticket != self.pending_remote
+                || progress.outcome.quantum_remaining != lane.quantum_remaining
+            {
+                return Err(Error::Invariant);
+            }
+        }
         for lane in &self.lanes {
             if lane.cpu.index() >= CPU_COUNT
                 || lane.apic_id != u32::from(lane.cpu.value())
                 || lane.frame_epoch != lane.timer_ticks
                 || lane.quantum_remaining == 0
-                    && self.pending_remote.is_none_or(|ticket| {
-                        ticket.kind != TransferKind::Preempt
-                            || ticket.target_cpu as usize != lane.cpu.index()
-                    })
+                    && self
+                        .active_tick
+                        .is_none_or(|progress| progress.outcome.cpu != lane.cpu)
                 || lane.quantum_remaining > QUANTUM_TICKS
                 || lane.watchdog_age > MAX_WATCHDOG_TICKS
                 || lane.event_count > EVENT_CAPACITY_PER_CPU
@@ -620,7 +764,11 @@ impl SmpPreemption {
             for event in lane.events[..lane.event_count].iter().copied() {
                 let event = event.ok_or(Error::Invariant)?;
                 let key = (event.due_tick, event.kind.order(), event.sequence);
-                if event.due_tick <= lane.timer_ticks || key < prior {
+                let active_due = event.due_tick == lane.timer_ticks
+                    && self
+                        .active_tick
+                        .is_some_and(|progress| progress.outcome.cpu == lane.cpu);
+                if event.due_tick <= lane.timer_ticks && !active_due || key < prior {
                     return Err(Error::Invariant);
                 }
                 prior = key;
@@ -640,7 +788,9 @@ impl SmpPreemption {
         if frame.frame_owner != self.current(frame.cpu)? {
             return Err(Error::EventOwner);
         }
-        if frame.frame_epoch != lane.frame_epoch + 1 || frame.timer_epoch != lane.timer_ticks + 1 {
+        let next_frame_epoch = lane.frame_epoch.checked_add(1).ok_or(Error::Counter)?;
+        let next_timer_epoch = lane.timer_ticks.checked_add(1).ok_or(Error::Counter)?;
+        if frame.frame_epoch != next_frame_epoch || frame.timer_epoch != next_timer_epoch {
             return Err(Error::FrameEpoch);
         }
         if frame.vector != u64::from(TIMER_VECTOR) {
@@ -679,6 +829,42 @@ impl SmpPreemption {
             return Err(Error::FrameStack);
         }
         Ok(())
+    }
+
+    fn preflight_pending_commit(&self, ticket: TransferTicket) -> Result<(), Error> {
+        if self.pending_remote != Some(ticket) {
+            return Err(Error::PendingRemote);
+        }
+        // Reserve local completion accounting before the caller can issue an IPI.
+        // This does not synthesize an acknowledgement or change task ownership.
+        if ticket.kind == TransferKind::OfflineProbe {
+            increment(self.timeout_rollbacks)?;
+            increment(self.stale_ack_rejections)?;
+            increment(self.scheduler.summary().stale_rejection_count)?;
+        } else {
+            increment(self.remote_reschedule_acks)?;
+            if ticket.kind == TransferKind::Preempt {
+                increment(self.context_switches)?;
+            }
+        }
+        Ok(())
+    }
+
+    fn preflight_tick_completion(&self) -> Result<(), Error> {
+        // This bounded, discarded copy checks the entire admitted tick before any
+        // IPI is issued. Hypothetical acknowledgements here confer no live authority.
+        let mut trial = *self;
+        for _ in 0..=EVENT_CAPACITY_PER_CPU + 1 {
+            if let Some(ticket) = trial.pending_remote {
+                trial.acknowledge_reschedule_inner(ticket, canonical_reschedule_ack(ticket))?;
+            }
+            let Some(progress) = trial.active_tick else {
+                return Ok(());
+            };
+            let sequence = progress.sequence.checked_add(1).ok_or(Error::Counter)?;
+            trial.advance_tick(progress.attempt, sequence, false)?;
+        }
+        Err(Error::Invariant)
     }
 }
 

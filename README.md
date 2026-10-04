@@ -11,7 +11,21 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 215 repairs AP-worker evidence admission
+**Current development checkpoint:** Cycle 216 repairs native SMP-preemption
+transactions and same-tick event/quantum progress. Twenty-seven native cases
+pass in both host profiles, fourteen disabled repairs are detected, and all
+17 ownership/core stages plus two clean matching kernel builds pass. The
+selected host regression passes 43/43. The new 149-page kernel has not yet
+booted in this cycle: readiness is **3/27**, with 24 profiles needing replay
+from `N5-SYMBOLS-SEMANTICS-001`. The stale live-transfer positive remains a
+failing merge gate, and seventeen scheduler control groups remain open.
+[Cycle 216 evidence](docs/checkpoints/cycle216-native-smp-preempt-transactions.md).
+Checkpoints are backed up on the development branch in
+[PR #78](https://github.com/rookepoole/PooleOS/pull/78); main merge requires
+full exact-candidate qualification. The demo ISO is unchanged. Pre-production.
+Progress, architecture and checklist tests pass 63/63, with earlier failures retained.
+
+**Historical development checkpoint:** Cycle 215 repairs AP-worker evidence admission
 and replaces eighteen constant-only control groups with executed checks. Two final
 four-vCPU boots pass 34 groups covering 325 cases. All 19 focused tests pass,
 including 343 corrupted records, ten independent gate cases and 29 disabled

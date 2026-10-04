@@ -358,6 +358,42 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle216-native-smp-preempt-transactions.md",
+      "sha256": "61A0701B046BE9D7D79E99D7F2F6B1AAA1A9BBEB6F7316E977C61719CE7EBF26",
+      "byte_count": 6029,
+      "line_count": 101
+    },
+    {
+      "path": "native/kernel/src/scheduler_smp_preempt.rs",
+      "sha256": "C4A8A1AD77524FB37BA68AA01E73198F9171C4A990EBC97751E91EA2B2328A1E",
+      "byte_count": 38203,
+      "line_count": 1080
+    },
+    {
+      "path": "native/kernel/src/bin/pksched6_probe.rs",
+      "sha256": "FFDB631F84D1EE57959CD2B5513DEBB62B8E9C2D5690D6338872080A254F16C6",
+      "byte_count": 6928,
+      "line_count": 188
+    },
+    {
+      "path": "tests/test_native_smp_preempt_transactions.py",
+      "sha256": "77C18ADF244C55148029DCA9A1982F70E2D18C1B5BC44EEC0EAD4F19E2DEA9A5",
+      "byte_count": 6619,
+      "line_count": 107
+    },
+    {
+      "path": "tests/fixtures/pksched6_transaction_probe.rs",
+      "sha256": "7F1D594259AD6A365AD88ACD7C3EA33F1D66D89386F921C0A46FF63928F1AE21",
+      "byte_count": 9797,
+      "line_count": 247
+    },
+    {
+      "path": "tests/fixtures/pksched6_event_progress_probe.rs",
+      "sha256": "597169419FE73DDABF98A815209B40E86B7C2C31653706C3D4F05DB259C9F807",
+      "byte_count": 8477,
+      "line_count": 177
+    },
+    {
       "path": "docs/checkpoints/cycle215-ap-worker-admission-and-controls.md",
       "sha256": "BD0FF68B719CEDABE9FF402D64512F4008E0645F44F60ECEA325295719ABE28A",
       "byte_count": 6510,
@@ -479,13 +515,13 @@
     },
     {
       "path": "native/kernel/src/lib.rs",
-      "sha256": "2D250350037711690B64B4F67041FBA7F9EAFA4E08794B33363D179FF0521720",
+      "sha256": "7EF9889DE2EE78E7DFE0499465141EEDEC0735F064B9F77C4C6DE257BA2BEAD3",
       "byte_count": 65667,
       "line_count": 2034
     },
     {
       "path": "native/kernel/manifest.pkm",
-      "sha256": "EF44B0C7C860CF885EC8C8412064975394157EBF7EFAFDBEAAA7F762F342A2D3",
+      "sha256": "4AE53650627ABA7740B172C18D8F7806D6AFF6A564DA7BA547F37B496D565575",
       "byte_count": 447,
       "line_count": 10
     },
@@ -599,7 +635,7 @@
     },
     {
       "path": "runtime/native_kernel_transfer.py",
-      "sha256": "1238DD6BA928CBA2A4775F67C5875C47C31FB9B11F460248805FC28D814E8D57",
+      "sha256": "516A25590505C5E3C6850BE6DDA8F80673F2D3B2F1A7CC00C181B12C33C60AC7",
       "byte_count": 23961,
       "line_count": 590
     },
@@ -785,9 +821,9 @@
     },
     {
       "path": "native/kernel/src/main.rs",
-      "sha256": "9A796DDEB435DF8CC87621F3B3E104FD06A2034408BE2F61FCE4900A5BA742B6",
-      "byte_count": 538452,
-      "line_count": 12540
+      "sha256": "1AEE208C09FD72069CF3E16495E352EF8A88EA9BCE06BC24DDF661FEF847531D",
+      "byte_count": 539008,
+      "line_count": 12552
     },
     {
       "path": "native/kernel/src/smp_runtime.rs",
@@ -851,9 +887,9 @@
     },
     {
       "path": "tools/pooleos_release_gate.py",
-      "sha256": "1EA623BF2CF2486C035C36C3EA928E0EAF53FAFF6D7C949F9F335FEC5E076EB4",
-      "byte_count": 374550,
-      "line_count": 7445
+      "sha256": "892DDAAFC9D05EB44F5C4C5EA017AFF4BC65252E2FE18A183111BDFC5CA82B94",
+      "byte_count": 375358,
+      "line_count": 7458
     },
     {
       "path": "docs/checkpoints/cycle184-boot-host-provenance.md",
@@ -1019,9 +1055,9 @@
     },
     {
       "path": "runtime/native_kernel_entry.py",
-      "sha256": "8CC1AD6EA388583DD5E0C35EB3D063E050D6B9CA120CD7322649755EEB66532E",
-      "byte_count": 9714,
-      "line_count": 222
+      "sha256": "D6CD230A5EE6E17D9AD4270F97E08785DF7CBB4976AF99D65C2FC242C31C918A",
+      "byte_count": 9892,
+      "line_count": 225
     },
     {
       "path": "docs/checkpoints/cycle181-memory-qualification.md",
@@ -1055,9 +1091,9 @@
     },
     {
       "path": "tests/test_native_kernel_transfer.py",
-      "sha256": "7D51CD5E287234D7D0E23A2E691378C21BC607590B2076C1B2A31E1B19BD2E74",
-      "byte_count": 11837,
-      "line_count": 170
+      "sha256": "1E319D7DB3D27B990D872B5B7E0D277D8350FA51A0BFE2F6D71EA7EA4A9E8D98",
+      "byte_count": 11963,
+      "line_count": 171
     },
     {
       "path": "tests/test_native_kernel_revalidation.py",
@@ -1073,7 +1109,7 @@
     },
     {
       "path": "tests/test_native_kernel_entry.py",
-      "sha256": "DB47CAAA9EE99772BDD341FF33759D23975235D00F60331436E223255D1A0B8F",
+      "sha256": "5E101AC0188D86E586EFFFA95247836D5C0BF85A48FE25885F40FD10C712E548",
       "byte_count": 10928,
       "line_count": 217
     },
@@ -1379,15 +1415,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "D7E32D24744C2AC8141512552EB000B734C3BEA35BA847E916F14AC36EE5E34C",
-      "byte_count": 118878,
-      "line_count": 1600
+      "sha256": "C965D4C661E49F9F58677E9A403AFD0DF81AB691EFE5AF7ECA94F25A99D574CA",
+      "byte_count": 119761,
+      "line_count": 1612
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "4F8F8877C4EDC38CC8B5D5BEF2D9555E12C72CE8740B668A70295BA06A3B81CD",
-      "byte_count": 480177,
-      "line_count": 4175
+      "sha256": "9D43A52B656E74902B182F1CBB7EDC061C873800749318FEF1D6C0F6258DBF50",
+      "byte_count": 482368,
+      "line_count": 4208
     },
     {
       "path": "docs/publication-boundary.md",
@@ -1463,9 +1499,9 @@
     },
     {
       "path": "runs/native_kernel_entry_readiness.json",
-      "sha256": "080A019D50DBBA7CCA32FAD792D70949A4E0A21DC43E9F52031B371227B56E53",
-      "byte_count": 32134,
-      "line_count": 917
+      "sha256": "1B5A40C248B02809CFEA397D058973DFD43DE5B85468BA31BD368EE3D8ED7CC7",
+      "byte_count": 32720,
+      "line_count": 932
     },
     {
       "path": "runs/native_kernel_load_readiness.json",
@@ -1823,13 +1859,13 @@
     },
     {
       "path": "specs/native-kernel-entry-contract.json",
-      "sha256": "8A2371202166E06787A0193EF1C94E2F3F038B061048ACBCD9973E53C10A4FD6",
+      "sha256": "21C754A8DEA3496FDC1C33CA528A091CC67C6CE3D6CE1821BF34C013DC639ABA",
       "byte_count": 10872,
       "line_count": 236
     },
     {
       "path": "specs/native-kernel-entry-contract.schema.json",
-      "sha256": "1F4E6E514F930AB092F8B7ADB2F914AF35F66F784337CB40611D28B2F9ACAF8A",
+      "sha256": "0D9EDA08890522A9FA0E9829BAAA142BD67AC7D4F40058404EF822C829683B76",
       "byte_count": 3952,
       "line_count": 87
     },
@@ -2201,9 +2237,9 @@
     },
     {
       "path": "tools/qualify_native_reclamation_core.py",
-      "sha256": "073209A3EE2FE1DCBA59629E19077D592BBCFFF89A51F26E81BBD242152CB89A",
-      "byte_count": 16379,
-      "line_count": 314
+      "sha256": "C8455122CD398DAAB2584B47499DDECCF841A0396ABD6EEB8E22CC83C0B53910",
+      "byte_count": 16589,
+      "line_count": 318
     },
     {
       "path": "tests/test_native_reclamation_core.py",
@@ -2219,9 +2255,9 @@
     },
     {
       "path": "runs/native-kernel-reclamation-core-readiness.json",
-      "sha256": "E752211396320793A4EE7C28FADF9A4DE51A503D17B6D9FF264DDD5F49D43650",
-      "byte_count": 8629,
-      "line_count": 163
+      "sha256": "8AA5643002A3FBE416C1B40ECA0BD3D1DFAE7785E500ACBD06292FFAFFAB9DCB",
+      "byte_count": 9111,
+      "line_count": 167
     },
     {
       "path": "runtime/native_kernel_physical_memory.py",

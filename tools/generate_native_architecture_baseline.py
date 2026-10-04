@@ -24,6 +24,12 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle216-native-smp-preempt-transactions.md",
+    "native/kernel/src/scheduler_smp_preempt.rs",
+    "native/kernel/src/bin/pksched6_probe.rs",
+    "tests/test_native_smp_preempt_transactions.py",
+    "tests/fixtures/pksched6_transaction_probe.rs",
+    "tests/fixtures/pksched6_event_progress_probe.rs",
     "docs/checkpoints/cycle215-ap-worker-admission-and-controls.md",
     "tests/test_native_ap_worker_controls.py",
     "tests/fixtures/pksched5_control_probe.rs",

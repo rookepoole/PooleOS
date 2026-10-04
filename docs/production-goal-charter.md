@@ -1,15 +1,27 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-10-03
+Status date: 2026-10-04
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 215
+Last roadmap reconciliation: PooleOS Cycle 216
 
-Cycle 215 repairs AP-worker admission and eighteen constant-only control groups:
+Cycle 216 repairs native SMP-preemption transactions and same-tick continuation.
+Twenty-seven native cases in both host profiles, fourteen disabled variants,
+17 core stages, two matching builds and 43 selected host tests pass. Kernel bytes
+changed: readiness is 3/27, with 24 profiles requiring replay from
+N5-SYMBOLS-SEMANTICS-001. Seventeen control groups and recorded admission remain;
+the SMP-preemption flag is reopened. All initial failures are retained. No phase,
+normative condition, demo ISO or production claim changes. Cloud branch backup
+is separate from main qualification; the stale live-transfer test remains a gate.
+[Cycle 216 evidence](checkpoints/cycle216-native-smp-preempt-transactions.md).
+Progress/architecture/checklist regression passes 63/63; earlier metadata and
+conservation failures remain recorded. No normative completion condition changes.
+
+Historical Cycle 215 repairs AP-worker admission and eighteen constant-only control groups:
 two final four-vCPU boots pass 34 groups/325 cases and 19 focused tests pass.
 The suite rejects 343 corrupted records and ten independent gate cases, and
 detects 29 disabled native safeguard/transaction variants. Diagnostic baseline

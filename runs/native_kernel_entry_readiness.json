@@ -4,12 +4,12 @@
     "contract": {
       "byte_count": 10872,
       "path": "specs/native-kernel-entry-contract.json",
-      "sha256": "8A2371202166E06787A0193EF1C94E2F3F038B061048ACBCD9973E53C10A4FD6"
+      "sha256": "21C754A8DEA3496FDC1C33CA528A091CC67C6CE3D6CE1821BF34C013DC639ABA"
     },
     "contract_schema": {
       "byte_count": 3952,
       "path": "specs/native-kernel-entry-contract.schema.json",
-      "sha256": "1F4E6E514F930AB092F8B7ADB2F914AF35F66F784337CB40611D28B2F9ACAF8A"
+      "sha256": "0D9EDA08890522A9FA0E9829BAAA142BD67AC7D4F40058404EF822C829683B76"
     },
     "implementation_inputs": [
       {
@@ -40,22 +40,22 @@
       {
         "byte_count": 2048,
         "path": "native/kernel/linker.ld",
-        "sha256": "891C725E24D882C2243BE0816B002D23857C2BE341F507B922B360204D9CFD87"
+        "sha256": "01FD262DEAD5729E7EE446D2997D0BE3462C979764CAEFE66DE078EFD71FDEE3"
       },
       {
         "byte_count": 447,
         "path": "native/kernel/manifest.pkm",
-        "sha256": "EF44B0C7C860CF885EC8C8412064975394157EBF7EFAFDBEAAA7F762F342A2D3"
+        "sha256": "4AE53650627ABA7740B172C18D8F7806D6AFF6A564DA7BA547F37B496D565575"
       },
       {
         "byte_count": 65667,
         "path": "native/kernel/src/lib.rs",
-        "sha256": "2D250350037711690B64B4F67041FBA7F9EAFA4E08794B33363D179FF0521720"
+        "sha256": "7EF9889DE2EE78E7DFE0499465141EEDEC0735F064B9F77C4C6DE257BA2BEAD3"
       },
       {
-        "byte_count": 538452,
+        "byte_count": 539008,
         "path": "native/kernel/src/main.rs",
-        "sha256": "9A796DDEB435DF8CC87621F3B3E104FD06A2034408BE2F61FCE4900A5BA742B6"
+        "sha256": "1AEE208C09FD72069CF3E16495E352EF8A88EA9BCE06BC24DDF661FEF847531D"
       },
       {
         "byte_count": 162769,
@@ -143,9 +143,9 @@
         "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
       },
       {
-        "byte_count": 9714,
+        "byte_count": 9892,
         "path": "runtime/native_kernel_entry.py",
-        "sha256": "8CC1AD6EA388583DD5E0C35EB3D063E050D6B9CA120CD7322649755EEB66532E"
+        "sha256": "D6CD230A5EE6E17D9AD4270F97E08785DF7CBB4976AF99D65C2FC242C31C918A"
       },
       {
         "byte_count": 25233,
@@ -155,7 +155,7 @@
       {
         "byte_count": 10928,
         "path": "tests/test_native_kernel_entry.py",
-        "sha256": "DB47CAAA9EE99772BDD341FF33759D23975235D00F60331436E223255D1A0B8F"
+        "sha256": "5E101AC0188D86E586EFFFA95247836D5C0BF85A48FE25885F40FD10C712E548"
       },
       {
         "byte_count": 4248,
@@ -176,6 +176,21 @@
         "byte_count": 13612,
         "path": "tests/fixtures/pksched5_transaction_probe.rs",
         "sha256": "8E5F5EFA7587BE6491CEDC3AFCC650B24A8932DDC4ACB8B2A476C54C48B52126"
+      },
+      {
+        "byte_count": 6619,
+        "path": "tests/test_native_smp_preempt_transactions.py",
+        "sha256": "77C18ADF244C55148029DCA9A1982F70E2D18C1B5BC44EEC0EAD4F19E2DEA9A5"
+      },
+      {
+        "byte_count": 9797,
+        "path": "tests/fixtures/pksched6_transaction_probe.rs",
+        "sha256": "7F1D594259AD6A365AD88ACD7C3EA33F1D66D89386F921C0A46FF63928F1AE21"
+      },
+      {
+        "byte_count": 8477,
+        "path": "tests/fixtures/pksched6_event_progress_probe.rs",
+        "sha256": "597169419FE73DDABF98A815209B40E86B7C2C31653706C3D4F05DB259C9F807"
       },
       {
         "byte_count": 7799,
@@ -313,9 +328,9 @@
         "sha256": "7CCC0E7F5C39A00EDC569B0E61137E6A85634287381FC583F43E88ECFCA0C7AD"
       },
       {
-        "byte_count": 6364,
+        "byte_count": 6928,
         "path": "native/kernel/src/bin/pksched6_probe.rs",
-        "sha256": "1DEAC6140ABCBF887AC2FE393C12DC8C9E788351CFC5A5B7F4749BECCACBA7D0"
+        "sha256": "FFDB631F84D1EE57959CD2B5513DEBB62B8E9C2D5690D6338872080A254F16C6"
       },
       {
         "byte_count": 35114,
@@ -363,9 +378,9 @@
         "sha256": "392A986CFEC545BB56A54A669005011096FAE243FB863036C6FC3F06909461D4"
       },
       {
-        "byte_count": 31212,
+        "byte_count": 38203,
         "path": "native/kernel/src/scheduler_smp_preempt.rs",
-        "sha256": "136026047A7C28693585DB3FB6338096527036EEA6154DDB722F1ACE4EE5EDBA"
+        "sha256": "C4A8A1AD77524FB37BA68AA01E73198F9171C4A990EBC97751E91EA2B2328A1E"
       },
       {
         "byte_count": 23749,
@@ -789,31 +804,31 @@
     "N6.6": "partial"
   },
   "product": {
-    "canonical_byte_count": 534168,
-    "canonical_sha256": "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A",
+    "canonical_byte_count": 538264,
+    "canonical_sha256": "FD6C2A0C709957B9EDFFC0647D534E060ED68215C075F07D70AB2AEBCA6C81D1",
     "entry_offset": 40960,
     "entry_prefix_hex": "FAFC4889E14885C9743B48F7C10F00000075324889C848C1E01048C1F8104839C87522410F20D89C",
     "host_leakage_hits": [],
-    "image_byte_count": 606208,
-    "linked_byte_count": 7091272,
-    "linked_sha256": "6B168F59888CE36050918908E9D7DDB4EEA87F4B8A13FF90EB80E26E0C248BD5",
-    "loaded_sha256": "8288BA39AD5B65499B1E59280D3ED9F088609A95760952D1E8489B42CA8391EE",
+    "image_byte_count": 610304,
+    "linked_byte_count": 7158864,
+    "linked_sha256": "5E40AB31AFB4BCE79BEDB32D7B66D64D957B42CA915B2B70D2F15049F90B7D91",
+    "loaded_sha256": "5D660D084136430C0D152EAAF4D29D5704E9B974F6679205BEBAB54F24687967",
     "manifest_fields": {
-      "build_id": "PKBUILD1-CYCLE210-N5-KMAP-BOUND-V1-000000001",
+      "build_id": "PKBUILD1-CYCLE216-N12-SMP-TXN-V1-00000000001",
       "entry_contract": "PKENTRY1",
       "entry_offset": "0x0000A000",
       "handoff_contract": "PBP1",
       "image_contract": "PKELF1",
       "pbp1_contract_sha256": "89EA7517EF7D2E30C7EBEC4C28D092E3F01D95519EC6768E7B4D5C0F586B58E7",
       "pkelf1_contract_sha256": "A0CE48E9EF992B97333D84ECB2850E221D482E2ACF11BB312B5F769DAFF992AA",
-      "pkentry1_contract_sha256": "8A2371202166E06787A0193EF1C94E2F3F038B061048ACBCD9973E53C10A4FD6"
+      "pkentry1_contract_sha256": "21C754A8DEA3496FDC1C33CA528A091CC67C6CE3D6CE1821BF34C013DC639ABA"
     },
     "manifest_offset": 544,
-    "relocation_canonical_offset": 475200,
-    "relocation_count": 1323,
-    "relocation_source_offset": 475360,
+    "relocation_canonical_offset": 479296,
+    "relocation_count": 1326,
+    "relocation_source_offset": 479456,
     "relro_byte_count": 57344,
-    "relro_offset": 475136
+    "relro_offset": 479232
   },
   "production_promotion_allowed": false,
   "production_ready": false,

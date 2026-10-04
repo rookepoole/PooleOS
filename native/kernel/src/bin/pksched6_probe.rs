@@ -16,19 +16,33 @@ fn tick(
 ) -> poolekernel::scheduler_smp_preempt::TickOutcome {
     let owner = controller.current(cpu(cpu_value)).expect("current owner");
     let frame = canonical_frame(cpu(cpu_value), owner, epoch, epoch);
-    let outcome = controller
+    let mut outcome = controller
         .handle_tick(&frame, attempt, sequence)
         .expect("timer tick");
-    if let Some(ticket) = outcome.remote_ticket {
-        assert_eq!(
-            controller.current(cpu(cpu_value)).expect("gated owner"),
-            owner
-        );
-        controller
-            .acknowledge_reschedule(ticket, canonical_reschedule_ack(ticket))
-            .expect("reschedule acknowledgement");
+    for _ in 0..=poolekernel::scheduler_smp_preempt::EVENT_CAPACITY_PER_CPU {
+        if let Some(ticket) = outcome.remote_ticket {
+            assert_eq!(
+                controller.current(cpu(cpu_value)).expect("gated owner"),
+                owner
+            );
+            controller
+                .acknowledge_reschedule(ticket, canonical_reschedule_ack(ticket))
+                .expect("reschedule acknowledgement");
+        }
+        if !controller.tick_pending() {
+            return outcome;
+        }
+        let sequence = outcome
+            .remote_ticket
+            .expect("completed ticket")
+            .request_sequence
+            .checked_add(1)
+            .expect("continuation sequence");
+        outcome = controller
+            .resume_tick(attempt, sequence)
+            .expect("tick continuation");
     }
-    outcome
+    panic!("tick continuation exceeded its fixed bound")
 }
 
 fn main() {
