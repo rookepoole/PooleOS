@@ -76,7 +76,14 @@ class NativeBootChainReleaseGateTests(unittest.TestCase):
             with mock.patch.object(module, validator, return_value=[]):
                 with mock.patch.object(gate, "_load_schema_artifact", return_value=(receipt, [])):
                     self.assertTrue(check()["ok"])
-                for value in (previous, "0" * 64, None, False):
+                latest_previous = {
+                    "inner_set_retained_set_sha256": "C48B7C41E73F79F0326B9E0146BF9DC001B902E5A95F5560400FE854530C9B58",
+                    "inner_retained_set_sha256": "C48B7C41E73F79F0326B9E0146BF9DC001B902E5A95F5560400FE854530C9B58",
+                    "retained_set_sha256": "C48B7C41E73F79F0326B9E0146BF9DC001B902E5A95F5560400FE854530C9B58",
+                    "trust_policy_sha256": "DF9BD076267061F731263B86BDE62EBE161B8666605EDC3AA32606870EEE2049",
+                    "trust_state_sha256": "073CEB317F1B6314274452846AC1959F988EFE9537A72456AEFB493F1DEB69CE",
+                }[field]
+                for value in (previous, latest_previous, "0" * 64, None, False):
                     with self.subTest(profile=profile, field=field, value=value):
                         candidate = copy.deepcopy(receipt)
                         candidate[section][field] = value

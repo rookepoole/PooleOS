@@ -80,7 +80,7 @@ STACK_TESTS = (
     "overlapping_stacks_from_distinct_manager_namespaces_cannot_share_scheduler",
     "full_scrub_receipt_ledger_retains_the_next_stack_without_writes",
 )
-KERNEL_SHA256 = "72C37783A5729229E6A259E38DC8DF55034FD467B77839FFFC4AA62B66E33EBF"
+KERNEL_SHA256 = "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A"
 STAGES = (
     "format", "host-build-debug", "test-build-debug", "tests-debug",
     "lifetime-build-debug", "lifetime-tests-debug",

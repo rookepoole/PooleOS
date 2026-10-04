@@ -24,6 +24,7 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle210-retained-map-growth-and-boot-replay.md",
     "docs/checkpoints/cycle209-native-ap-worker-transactions.md",
     "tests/test_native_ap_worker_transactions.py",
     "tests/fixtures/pksched5_transaction_probe.rs",

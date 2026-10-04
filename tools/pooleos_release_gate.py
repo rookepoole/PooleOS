@@ -438,6 +438,19 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 210 repairs the 148-page kernel's collision with the old retained-stack guard. "
+    "A fixed 192-page reservation, unmapped gaps/guards, NX permissions and first-table handoff bound "
+    "pass fifteen native cases per profile, fresh core/entry qualification and six final VM boots, "
+    "including two kernel entries. All 97 focused and 212 combined scoped tests pass without skips, "
+    "including 57 repaired metadata tests; counts overlap. Selected readiness is 8/27; "
+    "nineteen current-image CPU/memory/scheduler profiles remain from N7-TRAP-001, alongside at least "
+    "35 unproven executed-control groups. Failed and superseded attempts are preserved. No phase/flag "
+    "closes, demo ISO changes or production promotion. Full exact-candidate canonical qualification, "
+    "publication and review still gate main merge; cloud branch backup is separate. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -1274,7 +1287,7 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
         "inner_set_parser_count": 6,
         "inner_set_cross_binding_count": 6,
         "inner_set_development_denial_count": 6,
-        "inner_set_retained_set_sha256": "C48B7C41E73F79F0326B9E0146BF9DC001B902E5A95F5560400FE854530C9B58",
+        "inner_set_retained_set_sha256": "163EDAC3648C52267DAD983A6283D0860668B04B2E9B077A40F1855046A81DB1",
         "inner_set_authority_grants": 0,
         "inner_set_actions_authorized": 0,
         "inner_set_state_writes": 0,
@@ -1289,8 +1302,8 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
         "policy_profile": "synthetic_qualification_only",
         "trust_binding_count": 14,
         "trust_denial": "pbtrust_policy_unsigned",
-        "trust_policy_sha256": "DF9BD076267061F731263B86BDE62EBE161B8666605EDC3AA32606870EEE2049",
-        "trust_state_sha256": "073CEB317F1B6314274452846AC1959F988EFE9537A72456AEFB493F1DEB69CE",
+        "trust_policy_sha256": "957F07706B7B7CA495B9745CB50721B0698AAE79EBFE87A4BDB8B10F6892CEDC",
+        "trust_state_sha256": "CC015F3A79444B1BB91B1F7BEB985BEC9024759CAC2A688BA62339CCD48CAEF2",
         "trust_authority_grants": 0,
         "trust_state_writes": 0,
         "production_claim_count": 0,
@@ -1304,7 +1317,7 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
     detail = (
         "contract=POOLEOS-N5-POOLEBOOT-7; host_tests=8/8; builds=2/2; media=2/2; "
         "guest_runs=2/2; markers=25; serial_debugcon=2/2; gop_frames=2/2; "
-        "retained_files=9; inner=6/6; inner_sha256=C48B7C41E73F; authority=0; actions=0; state=0; hardware=0; "
+        "retained_files=9; inner=6/6; inner_sha256=163EDAC3648C; authority=0; actions=0; state=0; hardware=0; "
         "trust=unsigned-deny; trust_bindings=14; trust_authority=0; trust_writes=0; "
         "pbp1=2/2; kmap=2/2; exit=2/2; negatives=155/155; pmcu1=synthetic-never-apply; pfwm1=synthetic-never-apply; ppol1=qualification-only; production_claims=0; n5_exit=false; production_ready=false"
     )
@@ -1333,7 +1346,7 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     summary = artifact.get("summary", {})
     if summary.get("guest_runs_passed") != 2 or summary.get("guest_runs_total") != 2:
         errors.append("PKLOAD6 guest-run evidence is incomplete")
-    if summary.get("rust_host_tests_passed") != 331 or summary.get("rust_host_tests_total") != 331:
+    if summary.get("rust_host_tests_passed") != 332 or summary.get("rust_host_tests_total") != 332:
         errors.append("PKLOAD6 Rust host-test evidence is incomplete")
     if summary.get("ordered_marker_count") != 25:
         errors.append("PKLOAD6 marker evidence is incomplete")
@@ -1346,7 +1359,7 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     ) != 155:
         errors.append("PKLOAD6 negative controls are incomplete")
     if summary.get("inner_retained_set_sha256") != (
-        "C48B7C41E73F79F0326B9E0146BF9DC001B902E5A95F5560400FE854530C9B58"
+        "163EDAC3648C52267DAD983A6283D0860668B04B2E9B077A40F1855046A81DB1"
     ):
         errors.append("PKLOAD6 retained inner-set identity changed")
     if artifact.get("claims") != native_kernel_load.expected_claims():
@@ -1356,9 +1369,9 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     ) is not False:
         errors.append("PKLOAD6 overclaims N5 exit or production readiness")
     detail = (
-        "contract=PKLOAD6; rust_tests=331/331; boot_builds=2/2; kernel_builds=2/2; "
+        "contract=PKLOAD6; rust_tests=332/332; boot_builds=2/2; kernel_builds=2/2; "
         "media=2/2; guest_runs=2/2; markers=25; retained_files=9; inner=6/6; "
-        "inner_sha256=C48B7C41E73F; "
+        "inner_sha256=163EDAC3648C; "
         "trust=unsigned-deny; trust_bindings=14; trust_authority=0; trust_writes=0; "
         "oracle=2/2; pbp1=2/2; kmap=2/2; exit=2/2; firmware_after_exit=0; "
         "negatives=155/155; pmcu1=synthetic-never-apply; pfwm1=synthetic-never-apply; "
@@ -1418,7 +1431,7 @@ def check_native_kernel_revalidation_readiness(
     ) != (
         9,
         9,
-        "C48B7C41E73F79F0326B9E0146BF9DC001B902E5A95F5560400FE854530C9B58",
+        "163EDAC3648C52267DAD983A6283D0860668B04B2E9B077A40F1855046A81DB1",
         "pbtrust_policy_unsigned",
         0,
         0,
@@ -4081,7 +4094,7 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         "image_byte_count": 606_208,
         "entry_offset": 0xA000,
         "relocation_count": 1323,
-        "canonical_sha256": "72C37783A5729229E6A259E38DC8DF55034FD467B77839FFFC4AA62B66E33EBF",
+        "canonical_sha256": "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A",
     }
     if not isinstance(product, dict) or any(
         type(product.get(key)) is not type(value) or product.get(key) != value

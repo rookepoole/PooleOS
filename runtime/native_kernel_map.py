@@ -30,7 +30,8 @@ FNV_OFFSET = 0xCBF2_9CE4_8422_2325
 FNV_PRIME = 0x0000_0100_0000_01B3
 ORACLE_ORIGINAL_ROOT = 0x0010_0000
 ORACLE_TABLE_BASE = 0x0300_0000
-STACK_GUARD_LOW_PAGE = 147
+KERNEL_PAGE_CAPACITY = 192
+STACK_GUARD_LOW_PAGE = KERNEL_PAGE_CAPACITY
 STACK_FIRST_PAGE = STACK_GUARD_LOW_PAGE + 1
 STACK_PAGE_COUNT = 36
 STACK_GUARD_HIGH_PAGE = STACK_FIRST_PAGE + STACK_PAGE_COUNT
@@ -442,7 +443,7 @@ def build_retained_model(
         and _canonical_48(stack_top - 1)
         and _canonical_48(handoff_virtual)
         and _canonical_48(handoff_end - 1)
-        and handoff_end <= request.virtual_base + RETAINED_WINDOW_BYTES,
+        and handoff_end <= request.virtual_base + WINDOW_BYTES,
         "retained virtual range is invalid",
     )
     fingerprint = FNV_OFFSET

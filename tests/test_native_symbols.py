@@ -53,7 +53,7 @@ class NativeSymbolTests(unittest.TestCase):
         self.assertEqual(bundle.identity, psym1.canonical_identity())
         self.assertEqual(bundle.segments, psym1.canonical_segments())
         self.assertEqual(bundle.symbols, psym1.canonical_symbols())
-        self.assertEqual(bundle.image_bytes, 0x93000)
+        self.assertEqual(bundle.image_bytes, 0x94000)
         self.assertEqual(bundle.entry_offset, 0xA000)
 
     def test_readiness_binds_kernel_entry_evidence_and_validator(self) -> None:

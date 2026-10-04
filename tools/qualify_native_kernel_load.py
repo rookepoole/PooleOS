@@ -75,7 +75,7 @@ def _host_checks(toolchain_root: Path, temporary_root: Path) -> dict[str, Any]:
         ("poole-boot-trust", 4),
         ("poole-handoff", 8),
         ("poole-live-handoff", 8),
-        ("poole-kmap", 14),
+        ("poole-kmap", 15),
         ("poole-boot-exit", 5),
     ):
         package_output = qualify_native_pooleboot._run_checked(
@@ -1073,15 +1073,16 @@ def _negative_controls(
         retained_request, stack_physical_base=retained["kernel_physical_base"]
     )
     retained_stack_shape = dataclasses.replace(retained_request, stack_page_count=7)
+    guard_extra_pages = native_kernel_map.KERNEL_PAGE_CAPACITY + 1 - runtime_kmap_request.page_count
     guard_mappings = list(runtime_kmap_request.mappings)
     guard_mappings[-1] = dataclasses.replace(
         guard_mappings[-1],
-        byte_count=guard_mappings[-1].byte_count + native_kernel_map.PAGE_SIZE,
+        byte_count=guard_mappings[-1].byte_count + guard_extra_pages * native_kernel_map.PAGE_SIZE,
     )
     guard_request = dataclasses.replace(
         runtime_kmap_request,
-        image_bytes=runtime_kmap_request.image_bytes + native_kernel_map.PAGE_SIZE,
-        page_count=runtime_kmap_request.page_count + 1,
+        image_bytes=runtime_kmap_request.image_bytes + guard_extra_pages * native_kernel_map.PAGE_SIZE,
+        page_count=runtime_kmap_request.page_count + guard_extra_pages,
         mappings=tuple(guard_mappings),
     )
 

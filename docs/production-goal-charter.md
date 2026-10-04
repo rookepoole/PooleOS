@@ -1,15 +1,26 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-09-30
+Status date: 2026-10-03
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 209
+Last roadmap reconciliation: PooleOS Cycle 210
 
-Cycle 209 repairs native AP-worker state transactions, generation wrap and wide
+Cycle 210 repairs the retained guard collision from kernel growth. A 192-page
+reservation with before-write overflow rejection passes native boundary tests,
+fresh core/entry qualification and six final VM boots, including two kernel entries.
+All 97 focused tests pass. Readiness is 8/27; nineteen downstream profiles and
+at least 35 unproven control groups remain from N7-TRAP-001. Main merge still
+requires full exact-candidate qualification. No normative condition, phase,
+flag status, demo ISO or production claim changes.
+[Cycle 210 evidence](checkpoints/cycle210-retained-map-growth-and-boot-replay.md).
+Combined scoped regression passes 212/212, including 57 repaired metadata tests,
+with no skips. Counts overlap; full canonical qualification is still pending.
+
+Historical Cycle 209 repairs native AP-worker state transactions, generation wrap and wide
 counter validation. Thirty native cases in two host profiles, fifteen disabled
 variants, 17 core stages, two matching builds, 246 kernel tests and 43 image
 controls pass. Kernel bytes changed; readiness is 3/27, with 24 profiles needing

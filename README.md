@@ -11,7 +11,19 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 209 repairs native AP-worker failure
+**Current development checkpoint:** Cycle 210 fixes a real boot-layout failure:
+the 148-page kernel collided with the old retained-stack guard. A 192-page
+reservation, unmapped guards, NX permissions and before-write overflow rejection
+now pass native boundary tests and six final VM boots, including two kernel entries.
+The 97-test scoped regression passes without skips. Readiness is **8/27**;
+19 downstream profiles and at least 35 control groups remain. Work is backed up
+on the development branch; main merge requires full exact-candidate qualification.
+No phase or flag closes, and the demo ISO is unchanged.
+[Cycle 210 evidence](docs/checkpoints/cycle210-retained-map-growth-and-boot-replay.md).
+Combined regression passes 212/212 with no skips, including 57 repaired metadata
+tests. Counts overlap the focused tests; full canonical qualification is pending.
+
+**Historical development checkpoint:** Cycle 209 repairs native AP-worker failure
 atomicity, generation wrap and counter validation. Thirty native cases in each
 of two host profiles and fifteen disabled-repair variants pass. Core qualification
 passes all 17 stages; two clean kernel builds match, with 246 kernel tests and

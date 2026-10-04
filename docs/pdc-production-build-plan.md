@@ -1,15 +1,45 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-09-30
-Plan version: 2.112.0-native-ap-worker-transactions
-Roadmap cycle: PooleOS Cycle 209
+Status date: 2026-10-03
+Plan version: 2.113.0-native-retained-map-growth
+Roadmap cycle: PooleOS Cycle 210
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 209: Native AP-Worker Transactions
+## Cycle 210: Retained Map Growth and Boot Replay
+
+`N5-KMAP-001` and `N6-KENTRY-001`, N5/N6/N36, repair a genuine loader failure
+discovered during `N5-SYMBOLS-SEMANTICS-001`. The 148-page kernel overlapped the
+old guard at page 147. A fixed 192-page kernel reservation preserves an unmapped
+gap, stack guards and RW/NX stack plus R/NX handoff permissions. The handoff must
+fit the first populated table. Pages 148 and 192 work; 193 rejects before any
+table write. Work is covered by `ADD-MEM-001`, `ADD-BOOT-007` and
+`ADD-N36-RECEIPT-COVERAGE-001`; no checklist line or requirement is removed.
+
+Fifteen native mapping cases per debug/optimized profile, 17 core stages, two
+matching clean kernel builds, 246 kernel tests and 43 image controls pass.
+Six fresh VM boots include two kernel entries and terminate at unsigned denial
+without authority creation, state writes or post-exit firmware calls. Symbols,
+policy, loader, PooleBoot, revalidation and transfer receipts are current.
+All 97 focused Python tests pass, including 650 corrupt-symbol rejection cases
+at each admission boundary and 25 independent prior-identity rejections.
+Failed and superseded attempts remain documented separately.
+
+Readiness is 8/27. Next is `N7-TRAP-001`; nineteen CPU/memory/scheduler profiles
+need current-image replay and at least 35 executed-control groups remain unproven.
+No phase or flag status changes. Full exact-candidate canonical qualification,
+publication and review remain prerequisites to main merge. N0 custody,
+authenticated boot, general retirement, independent builders and production
+remain open. The demo ISO and locked checklist are unchanged.
+[Evidence](checkpoints/cycle210-retained-map-growth-and-boot-replay.md).
+Combined scoped regression passes 212/212, zero skips, including native transaction,
+entry/core, host provenance, boot and 57 repaired metadata tests. Counts overlap;
+this is not full canonical merge qualification.
+
+## Historical Cycle 209: Native AP-Worker Transactions
 
 `N12-SCHED-AP-WORKERS-001`, N12.4-N12.7/N36 and N6 image qualification, advances
 under `ADD-N12-SCHED-AP-WORKERS-001` and `ADD-N36-RECEIPT-COVERAGE-001`.
