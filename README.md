@@ -11,7 +11,19 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 226 expands the source guard to all
+**Current development checkpoint:** Cycle 227 repairs errata evidence admission.
+Both validation paths reject **1,742 corrupted records without exceptions** and
+accept the genuinely requalified receipt. All **34 focused tests** pass. The
+hardware policy still denies the target for the same six reasons; no kernel or
+demo ISO bytes changed. Twenty-six other source records remain untouched.
+[Cycle 227 evidence](docs/checkpoints/cycle227-errata-recorded-admission.md).
+Next: data/tool dependency review and full exact-candidate qualification before
+merging PR #78. Development checkpoints remain cloud-backed; pre-production.
+Combined regression passes **126/126**, zero skips. The explicit data-binding
+inventory is consistent; coverage of all actual file reads and tool inputs remains
+to be reviewed before full canonical qualification.
+
+**Historical development checkpoint:** Cycle 226 expands the source guard to all
 27 selected profiles and 78 Python files; **22/22 focused tests** pass. A fresh
 errata host run passes while retaining the hardware denial. Its receipt validator
 has a demonstrated defect: six corrupted records are accepted and two malformed

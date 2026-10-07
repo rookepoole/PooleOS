@@ -594,6 +594,11 @@ DEFAULT_GAPS[4] = (
 
 
 DEFAULT_GAPS[4] = (
+    "Cycle 227 repairs errata recorded admission: both paths reject1742 corruptions without exceptions; "
+    "34 focused tests and fresh host qualification pass while retaining six target-denial reasons. "
+    "Twenty-six other profiles and native/ISO bytes are unchanged. Non-Python dependency review and "
+    "full exact-candidate canonical qualification still precede main merge. No phase or production "
+    "claim closes. Earlier errata admission failures below are historical. "
     "Cycle 226 extends static-source coverage to all27 selected profiles and78 Python files. One fresh "
     "errata host qualification retains the exact target denial;22 focused tests pass and no guest boot "
     "occurs. Errata receipt admission remains defective: six invalid records pass and two malformed "
@@ -1842,6 +1847,8 @@ def check_native_kernel_errata_policy_readiness(
             "; ".join(errors) or "native kernel errata policy readiness is not an object",
         )
     errors.extend(native_kernel_errata_policy.readiness_errors(artifact, ROOT))
+    if errors:
+        return readiness.make_check("native_kernel_errata_policy_readiness", False, "; ".join(errors[:8]))
     summary = artifact.get("summary", {})
     expected_summary = {
         "actions_authorized_count": 0,
@@ -1861,9 +1868,13 @@ def check_native_kernel_errata_policy_readiness(
         "rust_host_tests_total": 6,
         "source_register_count": 7,
     }
-    if summary != expected_summary:
+    if (not isinstance(summary, dict) or set(summary) != set(expected_summary)
+            or any(type(summary[key]) is not int or summary[key] != expected for key, expected in expected_summary.items())):
         errors.append("PKERR1 readiness summary changed")
-    if artifact.get("claims") != native_kernel_errata_policy.expected_claims():
+    claims = artifact.get("claims")
+    expected_claims = native_kernel_errata_policy.expected_claims()
+    if (not isinstance(claims, dict) or set(claims) != set(expected_claims)
+            or any(claims[key] is not expected for key, expected in expected_claims.items())):
         errors.append("PKERR1 claim boundary changed")
     if artifact.get("n7_exit_gate_satisfied") is not False or artifact.get("production_ready") is not False:
         errors.append("PKERR1 overclaims N7 exit or production readiness")

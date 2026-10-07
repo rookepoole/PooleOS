@@ -72,3 +72,19 @@ The current target is denied for exactly six reasons:
 The denial creates zero authority grants, zero authorized actions, and zero
 state writes. A synthetic all-true fixture exists only to prove that each
 validator branch is reachable; it is not target or trust evidence.
+
+## Recorded Evidence Admission
+
+Cycle 227 reconstructs the complete recorded receipt with exact JSON types, not
+only pass labels or totals. Admission checks the bound toolchain lock, Rust build
+accounting, source audit, all sixteen ordered registry records, both policy
+decisions, independently derived vector outcomes and every control result. Counts,
+claims, open items and non-claims must agree. Malformed or incomplete sections,
+noncanonical dates, numeric/boolean substitutions and unsupported observation
+profiles reject without granting authority. The prior receipt is retained as
+historical evidence and cannot be rebound after an input changes.
+
+This verifies recorded consistency. It does not authenticate execution, turn an
+OS registry observation into a native MSR measurement, qualify a firmware floor,
+or remove any of the six target-denial reasons. Fresh affected qualification and
+the separate execution-source guard remain required after bound source edits.

@@ -67,11 +67,6 @@
     },
     "implementation_inputs": [
       {
-        "byte_count": 4017,
-        "path": "specs/native-toolchain-lock.json",
-        "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E"
-      },
-      {
         "byte_count": 601,
         "path": "native/Cargo.toml",
         "sha256": "210BCDAF2778606B42C688E7BACD950FC0EEF3045081E884CF7846B9A7D78DF4"
@@ -97,14 +92,14 @@
         "sha256": "8F39F780EA72FEFC8F507B7A10AA639CBC5A279E6F0D4C5F47A1FB1D87603252"
       },
       {
-        "byte_count": 29405,
+        "byte_count": 22422,
         "path": "runtime/native_kernel_errata_policy.py",
-        "sha256": "C97198B1E9608357D475FA6EFBFCC6D0804C74739B76ED034323F64CC0B80981"
+        "sha256": "30C8B88E420AAA2F7B96E52E238631D6EEDF27C9D6DBD4F1852FD0839929EADA"
       },
       {
-        "byte_count": 22308,
+        "byte_count": 23766,
         "path": "tools/qualify_native_kernel_errata_policy.py",
-        "sha256": "EF1C61AB60B2854F3012FB5767ABB6D70EA0A3C88B1F71BDD816214EA349D77F"
+        "sha256": "E4812161CC33769F215658201C492E85315CD2EF9C8E531BB18E8AD40B8064AB"
       },
       {
         "byte_count": 5011,
@@ -112,20 +107,15 @@
         "sha256": "BE45FE684235FA64DAEF4B06EA216B49BDEEC6520A21BC3C2C43EEE59D6F551C"
       },
       {
-        "byte_count": 8918,
-        "path": "tests/test_native_errata_admission.py",
-        "sha256": "0B8B269249774BBC9A88B77891B410996F03C63551E963489E64041F5F331E25"
-      },
-      {
-        "byte_count": 4509,
+        "byte_count": 3533,
         "path": "docs/native-kernel-errata-policy.md",
-        "sha256": "D599CDDFFABB4AB2BA7C8D2A1FA0DD6768F844E7A506F1F4AD5E76BFFE59D947"
+        "sha256": "42FE277C5285409BF3905618A2FA76AB897EA294BAC478FF8145F3A991B8AB96"
       }
     ],
     "readiness_schema": {
-      "byte_count": 3247,
+      "byte_count": 2013,
       "path": "specs/native-kernel-errata-policy-readiness.schema.json",
-      "sha256": "E6CD3F79E9EE0C7DFD4F1CEDD94A65940937204C71DC3B164B7A17F14D657384"
+      "sha256": "2D70FF4F0C581408F4EA7029453D695AB43550362F1D0EB013B8089ECF715BE8"
     }
   },
   "n7_exit_gate_satisfied": false,

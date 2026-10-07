@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -98,6 +99,7 @@ FEATURE_NAMES = (
 )
 
 IMPLEMENTATION_INPUTS = (
+    "specs/native-toolchain-lock.json",
     "native/Cargo.toml",
     "native/Cargo.lock",
     "native/cpupolicy/Cargo.toml",
@@ -106,6 +108,7 @@ IMPLEMENTATION_INPUTS = (
     "runtime/native_kernel_errata_policy.py",
     "tools/qualify_native_kernel_errata_policy.py",
     "tests/test_native_kernel_errata_policy.py",
+    "tests/test_native_errata_admission.py",
     "docs/native-kernel-errata-policy.md",
 )
 
@@ -137,6 +140,21 @@ NEGATIVE_CONTROL_IDS = (
 )
 
 AGESA_PATTERN = re.compile(r"^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)([a-z]?)$")
+
+OPEN_ITEMS = (
+    "Physically confirm the exact B650M GAMING PLUS WIFI board revision before selecting the F or FA firmware lineage.",
+    "Acquire and hash an applicable AMD Family 1Ah Models 40h-4Fh revision guide or retain a reviewed vendor-response gap.",
+    "Obtain a direct AMD numeric client microcode floor or ratify a replacement rule that does not invent one.",
+    "Hash the exact stable board firmware image selected after board-revision confirmation and complete supersession review.",
+    "Perform reviewed native per-processor read-only CPUID and MSR_PATCH_LEVEL observation on a separately safe target path.",
+    "Prove all processors are homogeneous and bind the result to the exact firmware, reset state, and target identity.",
+    "Integrate PKERR1 into PooleKernel before feature activation and application-processor online transitions.",
+    "Implement and test RDSEED masking or the reviewed 64-bit-only fallback until remediated firmware is qualified.",
+    "Complete the broader transient-execution, branch, return-stack, store-bypass, SMT, and control-flow matrix.",
+    "Obtain a cryptographically retained GIGABYTE support-page or exact firmware metadata snapshot.",
+    "Reproduce the policy and target evidence on a second clean builder and target-firmware boot.",
+    "Complete N7 and every signed-media, physical-hardware, release, and production gate.",
+)
 
 
 class KernelErrataPolicyError(ValueError):
@@ -512,32 +530,128 @@ def expected_contract() -> dict[str, Any]:
     }
 
 
-def contract_errors(value: dict[str, Any], root: Path = ROOT) -> list[str]:
-    errors = validate_json(value, read_json(root / CONTRACT_SCHEMA_RELATIVE))
-    if value != expected_contract():
-        errors.append("PKERR1 contract differs from the canonical oracle")
-    return errors
+def _typed_equal(actual: Any, expected: Any, label: str) -> None:
+    if json.dumps(actual, sort_keys=True, allow_nan=False) != json.dumps(expected, sort_keys=True, allow_nan=False):
+        raise KernelErrataPolicyError(f"PKERR1 {label} differs from the recorded contract")
 
 
-def readiness_errors(value: dict[str, Any], root: Path = ROOT) -> list[str]:
-    errors = validate_json(value, read_json(root / READINESS_SCHEMA_RELATIVE))
-    if value.get("contract_id") != CONTRACT_ID or value.get("selected_move_id") != SELECTED_MOVE_ID:
-        errors.append("PKERR1 readiness identity changed")
-    if value.get("inputs") != expected_inputs(root):
-        errors.append("PKERR1 readiness inputs are stale")
-    if value.get("claims") != expected_claims():
-        errors.append("PKERR1 readiness claims changed")
-    controls = value.get("negative_controls")
-    if not isinstance(controls, list) or [item.get("id") for item in controls] != list(NEGATIVE_CONTROL_IDS):
-        errors.append("PKERR1 hostile-control set changed")
-    elif not all(item.get("status") == "pass" for item in controls):
-        errors.append("PKERR1 hostile control failed")
-    decision = value.get("current_policy_decision", {})
-    if decision.get("failure_mask") != f"0x{CURRENT_EXPECTED_FAILURES:08X}" or decision.get("policy_satisfied") is not False:
-        errors.append("PKERR1 current target was not denied exactly")
-    summary = value.get("summary", {})
-    if summary.get("negative_controls_passed") != len(NEGATIVE_CONTROL_IDS):
-        errors.append("PKERR1 hostile-control count changed")
-    if value.get("production_ready") is not False or value.get("n7_exit_gate_satisfied") is not False:
-        errors.append("PKERR1 readiness overclaims completion")
-    return errors
+def contract_errors(value: Any, root: Path = ROOT) -> list[str]:
+    try:
+        issues = validate_json(value, read_json(root / CONTRACT_SCHEMA_RELATIVE))
+        if issues:
+            return [f"schema {issue.path}: {issue.message}" for issue in issues]
+        _typed_equal(value, expected_contract(), "contract")
+    except (KeyError, TypeError, ValueError, OSError, RecursionError) as error:
+        return [f"PKERR1 contract invalid: {error}"]
+    return []
+
+
+def expected_controls() -> list[dict[str, Any]]:
+    # Independent expected outcomes for the qualifier's sixteen evaluator mutations.
+    masks = (1, 2, 12, 8, 8, 16, 272, 32, 32, 32, 64, 128, 128, 256, 272, 512)
+    controls = [
+        {"id": name, "status": "pass", "expected": "deny", "failure_mask": f"0x{mask:08X}",
+         "failure_codes": [code for bit, code in FAILURE_NAMES.items() if mask & bit]}
+        for name, mask in zip(NEGATIVE_CONTROL_IDS[:16], masks, strict=True)
+    ]
+    return controls + [{"id": name, "status": "pass", "expected": "contract_rejected"}
+                       for name in NEGATIVE_CONTROL_IDS[16:]]
+
+
+def expected_vectors() -> dict[str, Any]:
+    """Reconstruct the frozen selector outcomes independently of the live Rust probe."""
+    masks = (1, 2, 12, 8, 8, 272, 32, 32, 32, 64, 128, 128, 256, 512, 0)
+    state, union, satisfied = 0x504B_4552_5231_0121, 0, 0
+    digest = hashlib.sha256()
+    for index in range(128):
+        state ^= (state << 13) & ((1 << 64) - 1)
+        state ^= state >> 7
+        state = (state ^ (state << 17)) & ((1 << 64) - 1)
+        failure = masks[state % len(masks)]
+        union |= failure
+        satisfied += int(failure == 0)
+        digest.update(index.to_bytes(4, "little") + failure.to_bytes(4, "little"))
+    if union != sum(FAILURE_NAMES):
+        raise KernelErrataPolicyError("PKERR1 frozen vectors no longer cover all failure bits")
+    return {"status": "pass", "case_count": 128, "mismatch_count": 0,
+            "satisfied_case_count": satisfied, "failure_bit_coverage": union.bit_count(),
+            "outcome_sha256": digest.hexdigest().upper()}
+
+
+def _recorded_fields(root: Path) -> dict[str, Any]:
+    contract = read_json(root / CONTRACT_RELATIVE)
+    errors = contract_errors(contract, root)
+    if errors:
+        raise KernelErrataPolicyError("; ".join(errors))
+    lock = read_json(root / "specs/native-toolchain-lock.json")
+    current = evaluate(current_observation())
+    synthetic = evaluate(synthetic_qualification_fixture())
+    forbidden = ("unsafe", "asm!", "wrmsr", "xsetbv", "write_volatile", "std::")
+    source = (root / "native/cpupolicy/src/lib.rs").read_text(encoding="utf-8").lower()
+    if any(token in source for token in forbidden):
+        raise KernelErrataPolicyError("PKERR1 policy source violates the recorded no-I/O audit")
+    revision = f"0x{WINDOWS_REPORTED_MICROCODE_REVISION:08X}"
+    identifier = "AMD64 Family 26 Model 68 Stepping 0"
+    return {
+        "schema_version": "1.0",
+        "artifact_kind": "pooleos_native_kernel_errata_policy_readiness",
+        "status": "pass_policy_denies_current_target", "contract_id": CONTRACT_ID,
+        "selected_move_id": SELECTED_MOVE_ID, "production_ready": False,
+        "production_promotion_allowed": False, "n7_exit_gate_satisfied": False,
+        "phase_status": {"N7": "partial", "N7.2": "partial", "N15.1": "partial"},
+        "inputs": expected_inputs(root),
+        "build_qualification": {
+            "status": "pass", "rustc": "rustc " + lock["channel_manifest"]["rust_version"],
+            "host_tests_passed": 6, "host_tests_total": 6, "rustfmt_packages": 1,
+            "clippy_targets": 1, "no_std_targets": ["x86_64-unknown-none", "x86_64-unknown-uefi"],
+        },
+        "source_audit": {"status": "pass_pure_policy_no_cpu_or_firmware_io",
+            "forbidden_tokens": list(forbidden), "forbidden_hits": [],
+            "privileged_reads": 0, "cpu_or_firmware_writes": 0},
+        "windows_registry_observation": {
+            "status": "pass_read_only_unprivileged_os_report", "read_only": True,
+            "record_count": 16, "unique_revision_count": 1, "normalized_revision": revision,
+            "identifier": identifier, "raw_registers_read": False, "msr_reads": 0,
+            "privileged_reads": 0, "driver_loaded": False, "writes": 0,
+            "records": [{"processor": processor, "identifier": identifier,
+                "revision_bytes_little_endian": WINDOWS_REPORTED_MICROCODE_REVISION.to_bytes(4, "little").hex().upper(),
+                "normalized_revision": revision} for processor in range(16)],
+        },
+        "current_policy_decision": {**current, "failure_mask": f"0x{current['failure_mask']:08X}",
+                                    "decision": "deny"},
+        "synthetic_policy_decision": {**synthetic, "failure_mask": f"0x{synthetic['failure_mask']:08X}",
+            "decision": "policy_satisfied_without_authority", "is_hardware_or_trust_evidence": False},
+        "cross_language_vectors": expected_vectors(), "negative_controls": expected_controls(),
+        "claims": expected_claims(),
+        "summary": {
+            "rust_host_tests_passed": 6, "rust_host_tests_total": 6,
+            "no_std_target_builds_passed": 2, "no_std_target_builds_total": 2,
+            "cross_language_vector_count": 128, "cross_language_mismatch_count": 0,
+            "negative_controls_passed": len(NEGATIVE_CONTROL_IDS), "negative_controls_total": len(NEGATIVE_CONTROL_IDS),
+            "current_failure_count": len(current["failure_codes"]),
+            "source_register_count": len(contract["source_register"]),
+            "applicable_source_count": sum(s["target_applicable"] for s in contract["source_register"]),
+            "privileged_read_count": 0, "cpu_or_firmware_write_count": 0,
+            "authority_grant_count": 0, "actions_authorized_count": 0, "production_claim_count": 0,
+        },
+        "open_items": list(OPEN_ITEMS), "non_claims": contract["non_claims"],
+    }
+
+
+def readiness_errors(value: Any, root: Path = ROOT) -> list[str]:
+    """Admit exact recorded consistency, not authentication or fresh execution."""
+    try:
+        issues = validate_json(value, read_json(root / READINESS_SCHEMA_RELATIVE))
+        if issues:
+            return [f"schema {issue.path}: {issue.message}" for issue in issues]
+        status_date = value["status_date"]
+        if len(status_date) != 10 or date.fromisoformat(status_date).isoformat() != status_date:
+            raise KernelErrataPolicyError("PKERR1 date is not canonical")
+        expected = _recorded_fields(root)
+        if set(value) != set(expected) | {"status_date"}:
+            raise KernelErrataPolicyError("PKERR1 readiness fields changed")
+        for field, required in expected.items():
+            _typed_equal(value[field], required, field)
+    except (KeyError, TypeError, ValueError, OSError, RecursionError) as error:
+        return [f"PKERR1 recorded evidence invalid: {error}"]
+    return []

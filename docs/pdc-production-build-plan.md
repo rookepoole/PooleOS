@@ -1,13 +1,46 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-07
-Plan version: 2.129.0-selected-profile-source-coverage
-Roadmap cycle: PooleOS Cycle 226
+Plan version: 2.130.0-errata-recorded-admission
+Roadmap cycle: PooleOS Cycle 227
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 227: Errata Recorded Admission
+
+N36.1, `N36-RECEIPT-COVERAGE-001`, existing `ADD-N36-RECEIPT-COVERAGE-001`.
+Exact JSON-typed reconstruction replaces shallow errata receipt checks. Build and
+source evidence, all sixteen registry records, both decisions, vector outcomes,
+control results, counts, claims and open items must agree. Toolchain-lock and
+adversarial-test sources are now bound. Malformed inputs reject without exceptions;
+the aggregate gate retains an independent exact-integer summary check.
+
+Before repair, 1,708 mutations produced 1,085 component and 1,015 aggregate invalid
+acceptances, with 54 and 165 exceptions. After repair, all 1,742 mutations of the
+fresh current receipt reject through both paths with zero exceptions. The same
+generator adds 34 cases for the two added input bindings. All original eight
+counterexamples reject; 34 focused tests pass without skips. This is finite
+recorded-consistency evidence, not authentication or complete fault coverage.
+
+Fresh host qualification passes six Rust tests, two no_std builds, 128 vectors
+and 24 controls while preserving all six target-denial reasons. Only errata input
+bindings and its execution-source record change; the other 26 profiles, native
+kernel and demo ISO are unchanged. No QEMU boot or hardware mutation occurs.
+
+Next: review non-Python data/tool dependencies, then exact-candidate canonical,
+Doctor, release, publication, GitHub and review gates before main merge. The
+demonstrated errata admission defect is repaired; N36 remains open. No phase,
+flag, checklist requirement or production condition is marked complete.
+[Cycle 227 evidence](checkpoints/cycle227-errata-recorded-admission.md).
+Combined regression passes 126/126 without skips. Conservation verifies 393 bound
+sources, 29 archived parent records and 802 preserved files; 1,192 tests are
+discovered, not all executed. Explicit non-Python binding inventory accounts for
+2,392 repository path/hash pairs, 462 logical-media entries and one verified tool
+token. Review actual reads/tool inputs absent from those pairs next; do not infer
+complete dependency coverage from this inventory.
 
 ## Cycle 226: Selected Profile Source Coverage
 

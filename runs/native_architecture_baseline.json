@@ -358,6 +358,30 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle227-errata-recorded-admission.md",
+      "sha256": "5571705FCD40D1804DC89AAE5590EBAB02AE7D9C9C762A23ED2472B0764C8030",
+      "byte_count": 7318,
+      "line_count": 119
+    },
+    {
+      "path": "tests/test_native_errata_admission.py",
+      "sha256": "0B8B269249774BBC9A88B77891B410996F03C63551E963489E64041F5F331E25",
+      "byte_count": 8918,
+      "line_count": 191
+    },
+    {
+      "path": "tests/fixtures/cycle226-errata-readiness.json",
+      "sha256": "9C25E26A8C53AF2A908DE41F51887E15AC7571C7C79EDF1318BAC13539F489B0",
+      "byte_count": 15891,
+      "line_count": 499
+    },
+    {
+      "path": "tests/fixtures/cycle226-execution-sources.json",
+      "sha256": "B67E6FEB381D0799182F88378A455B31C4718E8404B5B12B12CF9D1AA06AF7DD",
+      "byte_count": 151688,
+      "line_count": 3805
+    },
+    {
       "path": "docs/checkpoints/cycle226-selected-profile-source-coverage.md",
       "sha256": "AA9781A3A6AE4F8413C7E1AC07570AD8F62FCAB9E696943713AC342BF6F6C597",
       "byte_count": 7243,
@@ -395,7 +419,7 @@
     },
     {
       "path": "runs/native_execution_sources.json",
-      "sha256": "B67E6FEB381D0799182F88378A455B31C4718E8404B5B12B12CF9D1AA06AF7DD",
+      "sha256": "6DF3A8CBD4F56CC4CB3A3D7FB232C0B7C8EEBE0D647AFB7F2587358DC319D409",
       "byte_count": 151688,
       "line_count": 3805
     },
@@ -1013,9 +1037,9 @@
     },
     {
       "path": "tools/pooleos_release_gate.py",
-      "sha256": "41E358A2618B6FE425E12069572FC4A90FCDCA9D9B357632FA7236FDE1ABEA12",
-      "byte_count": 382877,
-      "line_count": 7574
+      "sha256": "3D91EDFC1083D85909F88435D80E92019A651145F29D679129E2339693ACBEE5",
+      "byte_count": 383850,
+      "line_count": 7585
     },
     {
       "path": "docs/checkpoints/cycle184-boot-host-provenance.md",
@@ -1415,9 +1439,9 @@
     },
     {
       "path": "docs/native-kernel-errata-policy.md",
-      "sha256": "42FE277C5285409BF3905618A2FA76AB897EA294BAC478FF8145F3A991B8AB96",
-      "byte_count": 3533,
-      "line_count": 74
+      "sha256": "D599CDDFFABB4AB2BA7C8D2A1FA0DD6768F844E7A506F1F4AD5E76BFFE59D947",
+      "byte_count": 4509,
+      "line_count": 90
     },
     {
       "path": "docs/native-kernel-xstate-policy.md",
@@ -1541,15 +1565,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "313010F41B107878A55A108668385B9E906D94FB52A085FC59F21E9C3CCA5B8B",
-      "byte_count": 127254,
-      "line_count": 1714
+      "sha256": "83D0BB165AD01DA906946F31346CE890C6858709AB89715B95BCEC56EF617B92",
+      "byte_count": 127901,
+      "line_count": 1723
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "0C754B1502537672765367157F79B2B7452E7223A503C5DD18B87A57CBE663C0",
-      "byte_count": 500155,
-      "line_count": 4477
+      "sha256": "DE2FE03D412C23E1AD0E989F173EDA663A4C5684FF87B1D508ED89B68BBF2E79",
+      "byte_count": 502291,
+      "line_count": 4510
     },
     {
       "path": "docs/publication-boundary.md",
@@ -1661,9 +1685,9 @@
     },
     {
       "path": "runs/native-kernel-errata-policy-readiness.json",
-      "sha256": "9C25E26A8C53AF2A908DE41F51887E15AC7571C7C79EDF1318BAC13539F489B0",
-      "byte_count": 15891,
-      "line_count": 499
+      "sha256": "975C57DDFB54EDB9C1573D2A1B5ABD5B2242996B7FE32028740780A22319ABD8",
+      "byte_count": 16260,
+      "line_count": 509
     },
     {
       "path": "runs/native-kernel-xstate-policy-readiness.json",
@@ -2099,21 +2123,21 @@
     },
     {
       "path": "specs/native-kernel-errata-policy-readiness.schema.json",
-      "sha256": "2D70FF4F0C581408F4EA7029453D695AB43550362F1D0EB013B8089ECF715BE8",
-      "byte_count": 2013,
-      "line_count": 55
+      "sha256": "E6CD3F79E9EE0C7DFD4F1CEDD94A65940937204C71DC3B164B7A17F14D657384",
+      "byte_count": 3247,
+      "line_count": 61
     },
     {
       "path": "runtime/native_kernel_errata_policy.py",
-      "sha256": "30C8B88E420AAA2F7B96E52E238631D6EEDF27C9D6DBD4F1852FD0839929EADA",
-      "byte_count": 22422,
-      "line_count": 543
+      "sha256": "C97198B1E9608357D475FA6EFBFCC6D0804C74739B76ED034323F64CC0B80981",
+      "byte_count": 29405,
+      "line_count": 657
     },
     {
       "path": "tools/qualify_native_kernel_errata_policy.py",
-      "sha256": "E4812161CC33769F215658201C492E85315CD2EF9C8E531BB18E8AD40B8064AB",
-      "byte_count": 23766,
-      "line_count": 583
+      "sha256": "EF1C61AB60B2854F3012FB5767ABB6D70EA0A3C88B1F71BDD816214EA349D77F",
+      "byte_count": 22308,
+      "line_count": 570
     },
     {
       "path": "tests/test_native_kernel_errata_policy.py",

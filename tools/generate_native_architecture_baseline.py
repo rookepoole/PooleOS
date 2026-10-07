@@ -24,6 +24,10 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle227-errata-recorded-admission.md",
+    "tests/test_native_errata_admission.py",
+    "tests/fixtures/cycle226-errata-readiness.json",
+    "tests/fixtures/cycle226-execution-sources.json",
     "docs/checkpoints/cycle226-selected-profile-source-coverage.md",
     "tests/fixtures/cycle225-execution-sources.json",
     "docs/checkpoints/cycle225-retained-execution-source-closure.md",

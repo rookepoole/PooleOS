@@ -1041,7 +1041,7 @@
       "profile": "errata_policy",
       "receipt": {
         "path": "runs/native-kernel-errata-policy-readiness.json",
-        "sha256": "975C57DDFB54EDB9C1573D2A1B5ABD5B2242996B7FE32028740780A22319ABD8"
+        "sha256": "9C25E26A8C53AF2A908DE41F51887E15AC7571C7C79EDF1318BAC13539F489B0"
       },
       "sources": [
         {
@@ -1050,7 +1050,7 @@
         },
         {
           "path": "runtime/native_kernel_errata_policy.py",
-          "sha256": "C97198B1E9608357D475FA6EFBFCC6D0804C74739B76ED034323F64CC0B80981"
+          "sha256": "30C8B88E420AAA2F7B96E52E238631D6EEDF27C9D6DBD4F1852FD0839929EADA"
         },
         {
           "path": "runtime/schema_validation.py",
@@ -1058,13 +1058,13 @@
         },
         {
           "path": "tools/qualify_native_kernel_errata_policy.py",
-          "sha256": "EF1C61AB60B2854F3012FB5767ABB6D70EA0A3C88B1F71BDD816214EA349D77F"
+          "sha256": "E4812161CC33769F215658201C492E85315CD2EF9C8E531BB18E8AD40B8064AB"
         }
       ],
       "capture": {
-        "record_sha256": "AD1079FB2890D57800E91071510EBE0C688F287C696535CDD1765813EAB641CC",
+        "record_sha256": "D3A9495C6032D2BD7B43DDAECDA18B0995E9A0B24B486ACD436CE96EC8853180",
         "log_sha256": "8DC57B55A31EC23061832E2377C460920D370AF0A1F1A7F90F0840FBCAD8C0E5",
-        "source_snapshot_sha256": "DAA2932F586CC8D40277264D28958DD18DEDF9BDB9C458BD2797FDE2F54E1566",
+        "source_snapshot_sha256": "6B572203A0C155C89E4D4282CB01A887BD3DB578FD8D41F0A374F5ECD3B4A15A",
         "return_code": 0,
         "source_unchanged": true
       }

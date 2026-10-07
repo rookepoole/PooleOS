@@ -539,20 +539,7 @@ def make_readiness(toolchain_root: Path, status_date: str) -> dict[str, Any]:
             "actions_authorized_count": 0,
             "production_claim_count": 0,
         },
-        "open_items": [
-            "Physically confirm the exact B650M GAMING PLUS WIFI board revision before selecting the F or FA firmware lineage.",
-            "Acquire and hash an applicable AMD Family 1Ah Models 40h-4Fh revision guide or retain a reviewed vendor-response gap.",
-            "Obtain a direct AMD numeric client microcode floor or ratify a replacement rule that does not invent one.",
-            "Hash the exact stable board firmware image selected after board-revision confirmation and complete supersession review.",
-            "Perform reviewed native per-processor read-only CPUID and MSR_PATCH_LEVEL observation on a separately safe target path.",
-            "Prove all processors are homogeneous and bind the result to the exact firmware, reset state, and target identity.",
-            "Integrate PKERR1 into PooleKernel before feature activation and application-processor online transitions.",
-            "Implement and test RDSEED masking or the reviewed 64-bit-only fallback until remediated firmware is qualified.",
-            "Complete the broader transient-execution, branch, return-stack, store-bypass, SMT, and control-flow matrix.",
-            "Obtain a cryptographically retained GIGABYTE support-page or exact firmware metadata snapshot.",
-            "Reproduce the policy and target evidence on a second clean builder and target-firmware boot.",
-            "Complete N7 and every signed-media, physical-hardware, release, and production gate.",
-        ],
+        "open_items": list(pkerr1.OPEN_ITEMS),
         "non_claims": contract["non_claims"],
     }
 
