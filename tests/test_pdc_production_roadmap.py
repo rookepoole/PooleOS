@@ -154,8 +154,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 227)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1192)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 228)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1201)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -196,7 +196,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
         self.assertEqual(current["qualification_status"], "all_selected_profiles_current_shared_binding_review_and_full_gate_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 227)
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 228)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -1009,7 +1009,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
                 check = getattr(pooleos_release_gate, "check_native_kernel_" + name + "_readiness")()
                 self.assert_current_gate_projection(check)
         audit = current["current_control_execution_audit"]
-        self.assertEqual((audit["cycle"], audit["status"]), (227, "open"))
+        self.assertEqual((audit["cycle"], audit["status"]), (228, "open"))
         self.assertTrue(audit["blocks_merge_qualification"])
         self.assertFalse(audit["production_ready"])
         self.assertEqual(audit["requirement_id"], "ADD-N36-RECEIPT-COVERAGE-001")
@@ -3357,7 +3357,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(gate["current_control_execution_audit"]["blocks_merge_qualification"])
         self.assertFalse(gate["current_closeout_regression"]["canonical_full_replay_performed"])
 
-        attempt = gate["current_candidate_audit"]["latest_completed_attempt"]
+        attempt = gate["historical_cycle227_candidate_audit"]["latest_completed_attempt"]
         self.assertEqual(attempt["status"], "fail")
         self.assertEqual(attempt["commit"], "79adf4aa452daf36f52e24b99c176c49b2523935")
         self.assertEqual((attempt["checks_passed"], attempt["checks_total"]), (105, 106))
@@ -3366,6 +3366,28 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(attempt["failed_test_names_retained"])
         self.assertFalse(attempt["applies_to_later_metadata_edits"])
         self.assertFalse(attempt["merge_qualified"])
+
+    def test_cycle228_host_reproduction_and_diagnostics_do_not_promote_fixtures(self) -> None:
+        gate = self.roadmap["baseline"]["native_consistency_release_gate"]
+        repair = gate["current_host_reproduction_repair"]
+        self.assertEqual(repair["cycle"], 228)
+        self.assertEqual(repair["diagnostic"]["scope"], "failfast_not_full_suite")
+        self.assertEqual((repair["diagnostic"]["tests_run"], repair["diagnostic"]["failures"],
+                          repair["diagnostic"]["skips"]), (882, 1, 1))
+        self.assertFalse(repair["diagnostic"]["complete_original_canonical_failure_set_known"])
+        reproduction = repair["reproduction"]
+        self.assertEqual(reproduction["observed_windows_version"], [10, 0, 26300])
+        self.assertTrue(reproduction["historical_ledger_unchanged"])
+        self.assertTrue(reproduction["shared_qualifier_unchanged"])
+        self.assertTrue(reproduction["all_other_report_bytes_exact"])
+        self.assertTrue(all(repair["reporting"].values()))
+        self.assertEqual(repair["initial_repair_failure"]["failing_timeout_subtests"], 3)
+        self.assertEqual(repair["fresh_guest_boots"], 0)
+        self.assertFalse(repair["native_bytes_changed"])
+        self.assertFalse(repair["production_ready"])
+        self.assertEqual(gate["current_closeout_regression"]["tests_passed"], 19)
+        self.assertFalse(gate["current_closeout_regression"]["canonical_full_replay_performed"])
+        self.assertTrue(gate["current_control_execution_audit"]["blocks_merge_qualification"])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]

@@ -358,6 +358,24 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle228-toolchain-host-observation.md",
+      "sha256": "198CFBF9E4E9F32F38C9A6E20FE6DDD06A850FD5CF00CEFE91238C1D0C102E87",
+      "byte_count": 4933,
+      "line_count": 82
+    },
+    {
+      "path": "tools/pooleos_doctor.py",
+      "sha256": "770A640CE26678FC44B9F58EA2A86407BB5D0AEBAABE7A26C2E381CDFC7A9206",
+      "byte_count": 209689,
+      "line_count": 4292
+    },
+    {
+      "path": "tests/test_pooleos_doctor.py",
+      "sha256": "4CC6654497662F6BA1A42B5BA9DE8604AD644C47770E364FBD97D1AFE2EE95F0",
+      "byte_count": 7691,
+      "line_count": 145
+    },
+    {
       "path": "docs/checkpoints/cycle227-errata-recorded-admission.md",
       "sha256": "989C10D96D7EADEBE755F9B55652F0E3971B72FEB3080CF33C6ABBD41DD94254",
       "byte_count": 9217,
@@ -1037,9 +1055,9 @@
     },
     {
       "path": "tools/pooleos_release_gate.py",
-      "sha256": "84A1EC486A8DFFDA03F2D0B71D25B4C0CF4E6D7889AECBF677C753C9280C4EA1",
-      "byte_count": 384060,
-      "line_count": 7587
+      "sha256": "462EF890E7F6C459995DA20B936DC541B296E7922B9A59029E74126A4C2C8873",
+      "byte_count": 384626,
+      "line_count": 7597
     },
     {
       "path": "docs/checkpoints/cycle184-boot-host-provenance.md",
@@ -1199,9 +1217,9 @@
     },
     {
       "path": "tests/test_native_toolchain_qualification.py",
-      "sha256": "E2FE69E871374E8E5B721BDE08CCD81E63363B3294523BD0260FAAECD6FB961F",
-      "byte_count": 10595,
-      "line_count": 223
+      "sha256": "11254D58FD98D2424CDE37B462D9754C882692A0822C4178927CF517A430E79D",
+      "byte_count": 14571,
+      "line_count": 287
     },
     {
       "path": "runtime/native_kernel_entry.py",
@@ -1565,15 +1583,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "D709388E87F47C490D032D4743446AFE32A989F95075594D01ABA298D12D2708",
-      "byte_count": 128298,
-      "line_count": 1728
+      "sha256": "933D3561440C757237A2E763E81A99A969D46A7380E5FC3151D6792CD9BA2076",
+      "byte_count": 128873,
+      "line_count": 1736
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "EA086AB626254C02119C6EEBB655E12D5A8B5FBE471D81CA44A68B9F3ECD6440",
-      "byte_count": 502932,
-      "line_count": 4519
+      "sha256": "667E53D23BB3F4408116565110F2E7F74712B0771F93E64148851ED0B9250190",
+      "byte_count": 504716,
+      "line_count": 4546
     },
     {
       "path": "docs/publication-boundary.md",

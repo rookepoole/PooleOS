@@ -11,7 +11,17 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 227 repairs errata evidence admission.
+**Current development checkpoint:** Cycle 228 repairs the reproduced toolchain
+test failure caused by the Windows host build changing from 26200 to 26300.
+The test independently measures that build and still compares every other report
+byte exactly. The original qualification ledger is preserved. Doctor and the
+release gate now retain full failure diagnostics; all **19 focused tests** pass.
+[Cycle 228 evidence](docs/checkpoints/cycle228-toolchain-host-observation.md).
+Full exact-candidate qualification and the remaining dependency review still
+precede the main merge. The integration branch provides cloud backup separately.
+Native kernel and demo ISO are unchanged; this remains pre-production.
+
+**Historical development checkpoint:** Cycle 227 repairs errata evidence admission.
 Both validation paths reject **1,742 corrupted records without exceptions** and
 accept the genuinely requalified receipt. All **34 focused tests** pass. The
 hardware policy still denies the target for the same six reasons; no kernel or

@@ -10422,7 +10422,79 @@ def apply_cycle227(roadmap: dict, test_count: int) -> dict:
     )
     phase = next(p for p in roadmap["phases"] if p["id"] == "N36")
     phase["current_evidence"].insert(0, evidence)
-    phase["current_evidence"].insert(0, f"Cycle 227 source inventory: {test_count} tests discovered; precloseout canonical attempt fails in unittest, not merge-qualified")
+    phase["current_evidence"].insert(0, "Cycle 227 source inventory: 1192 tests discovered; precloseout canonical attempt fails in unittest, not merge-qualified")
+    phase["current_gaps"].insert(0, gap)
+    next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N36-RECEIPT-COVERAGE-001")["evidence"].insert(0, checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle228(roadmap, test_count)
+
+
+def apply_cycle228(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle228-toolchain-host-observation.md"
+    move = "N36-RECEIPT-COVERAGE-001"
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for key, value in list(gate.items()):
+        if key.startswith("current_") and isinstance(value, dict):
+            suffix = "source_projection" if key == "current_focused_source_projection" else key.removeprefix("current_")
+            gate["historical_cycle227_" + suffix] = copy.deepcopy(value)
+    roadmap["baseline"]["pooleos_cycle"] = 228
+    roadmap["execution_protocol"].update(last_updated_cycle=228, selected_move_id=move,
+                                         owner_independent_next_move_id=move)
+    roadmap["execution_protocol"]["required_records"].insert(0, checkpoint)
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=228)
+    gate["current_control_execution_audit"] = dict(gate["current_control_execution_audit"], cycle=228)
+    gate["current_host_reproduction_repair"] = {
+        "cycle": 228, "status": "focused_pass_full_candidate_pending",
+        "diagnostic": {
+            "commit": "03355140368b00b5d453442f6bb161a6ad767ee1",
+            "scope": "failfast_not_full_suite", "tests_run": 882, "failures": 1, "skips": 1,
+            "elapsed_seconds": 779.435, "source_unchanged": True, "owner_report_unchanged": True,
+            "failing_test": "test_generator_reproduces_public_ledger_when_local_toolchain_is_available",
+            "log_sha256": "B726AD7EECB65CD5FA6C8E8AB59EB4D9AD5D1559568E6E9F4E7468E1BEB06B24",
+            "complete_original_canonical_failure_set_known": False,
+        },
+        "reproduction": {
+            "only_report_difference": "toolchain.versions.cargo Windows host build 26200 -> 26300",
+            "independent_observation": "sys.getwindowsversion", "observed_windows_version": [10, 0, 26300],
+            "fixture_targets": 2, "clean_builds_per_target": 2, "identical_artifact_targets": 2,
+            "negative_controls_passed": 3, "historical_ledger_unchanged": True,
+            "shared_qualifier_unchanged": True, "all_other_report_bytes_exact": True,
+            "log_sha256": "7EBFEE07F63812AABD560649F6F1AA496532BE44CDEE3414A3E79F0FFDB74023",
+        },
+        "reporting": {"failed_command_full_output_retained": True,
+            "failed_doctor_full_output_retained": True, "timeout_partial_output_retained": True,
+            "success_output_compact": True, "nonzero_exit_still_fails": True},
+        "initial_repair_failure": {"tests_run": 19, "failing_timeout_subtests": 3,
+            "cause": "handler_inserted_at_wrong_exception_block_corrected_before_passing_run",
+            "log_sha256": "4D602A5A49E65BA9D30B1593168061FA92486C045C34421E88B96ED24F09F006"},
+        "fresh_guest_boots": 0, "native_bytes_changed": False, "production_ready": False,
+    }
+    gate["current_closeout_regression"] = {
+        "cycle": 228, "status": "pass", "scope": "toolchain_host_observation_and_failure_reporting_not_full_canonical",
+        "tests_run": 19, "tests_passed": 19, "tests_failed": 0, "tests_skipped": 0,
+        "elapsed_seconds": 2.175, "runner_elapsed_seconds": 3.094,
+        "log_sha256": "9D805995ED97026A694E3382BFC6197AE57F47E77A70FCD2B71C41431520020E",
+        "source_unchanged_during_execution": True, "owner_report_unchanged": True,
+        "canonical_full_replay_performed": False, "merge_qualified": False, "production_ready": False,
+    }
+    evidence = (
+        "Cycle 228: " + checkpoint + " reproduces one failfast toolchain test failure caused only by "
+        "Windows host build 26200 -> 26300. The repaired test independently measures that observation "
+        "and compares all other report bytes exactly. Nineteen focused tests pass; original ledger, "
+        "qualifier, native receipts and native/ISO bytes are preserved. Failure and timeout diagnostics "
+        "now survive both reporting layers. No new guest boot or full-suite pass is claimed."
+    )
+    gap = (
+        "Next " + move + ": run full exact-committed canonical/Doctor/release qualification with runtime, "
+        "bundle and replay inputs; finish non-Python data/tool dependency review and publication/GitHub/"
+        "review gates before main merge. The old canonical failure and initial repair failure remain "
+        "historical. Branch cloud backup is separate. N36, N0 custody, N5 authentication, native task-state, "
+        "hardware and independent-builder gaps remain open."
+    )
+    phase = next(p for p in roadmap["phases"] if p["id"] == "N36")
+    phase["current_evidence"].insert(0, evidence)
+    phase["current_evidence"].insert(0, f"Cycle 228 source inventory: {test_count} tests discovered; full exact-candidate qualification pending")
     phase["current_gaps"].insert(0, gap)
     next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N36-RECEIPT-COVERAGE-001")["evidence"].insert(0, checkpoint)
     roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
@@ -10433,7 +10505,7 @@ def apply_cycle227(roadmap: dict, test_count: int) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1192)
+    parser.add_argument("--test-count", type=int, default=1201)
     parser.add_argument("--status-date", default="2026-10-07")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

@@ -7,9 +7,17 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 227
+Last roadmap reconciliation: PooleOS Cycle 228
 
-Cycle 227 repairs errata recorded admission: 1,742 corrupted records reject through
+Cycle 228 repairs an observed toolchain test failure due solely to the Windows
+build observation changing from 26200 to 26300. Every other report byte remains
+strictly compared; the original ledger is unchanged. Doctor and the release gate
+retain complete failure diagnostics. Nineteen focused tests pass without skips.
+Full exact-candidate qualification and dependency review still precede main merge.
+Native/ISO bytes and normative requirements are unchanged; branch backup is separate.
+[Cycle 228 evidence](checkpoints/cycle228-toolchain-host-observation.md).
+
+Historical Cycle 227 repairs errata recorded admission: 1,742 corrupted records reject through
 both paths without exceptions; 34 focused tests and fresh host qualification pass.
 All six target-denial reasons remain. Twenty-six other source records, native
 kernel, demo ISO and normative completion conditions are unchanged. Next: data/tool

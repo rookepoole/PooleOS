@@ -24,6 +24,9 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle228-toolchain-host-observation.md",
+    "tools/pooleos_doctor.py",
+    "tests/test_pooleos_doctor.py",
     "docs/checkpoints/cycle227-errata-recorded-admission.md",
     "tests/test_native_errata_admission.py",
     "tests/fixtures/cycle226-errata-readiness.json",

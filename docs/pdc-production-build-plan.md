@@ -1,13 +1,40 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-07
-Plan version: 2.130.0-errata-recorded-admission
-Roadmap cycle: PooleOS Cycle 227
+Plan version: 2.131.0-reproducible-host-observation
+Roadmap cycle: PooleOS Cycle 228
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 228: Reproducible Host Observation
+
+N36.1, `N36-RECEIPT-COVERAGE-001`, existing `ADD-N36-RECEIPT-COVERAGE-001`.
+An unchanged-source fail-fast diagnostic attempts 882 tests and stops with one
+failure and one skip. It identifies a toolchain-reproduction assertion: Cargo's
+verbose OS build changed from Windows 26200 to 26300. A fresh fixture qualification
+and recursive typed comparison find no other report difference. Two fixtures each
+build twice with identical bytes; all three controls pass. These are compiler
+fixtures, not an OS boot or production qualification.
+
+The repaired test measures the current Windows build independently and permits
+only that exact observation in its expected report. Compiler/library/input/artifact
+hashes, edition, major/minor version, counts and typed claims remain byte-exact.
+The historical qualification ledger and shared qualifier are unchanged. Doctor
+and release-gate failures now retain full captured diagnostics; timeout output is
+also retained. Success output stays compact and nonzero exits remain failures.
+All 19 focused tests pass without skips, including a real failing subprocess and
+adversarial report changes. An initial timeout-handler placement mistake caused
+three failing subtests and was corrected; that failed run remains recorded.
+
+Next: commit the source-bound candidate and run the complete canonical gate with
+runtime, bundle and replay inputs; finish remaining data/tool dependency review
+before the main merge. No full pass is claimed by this prequalification record.
+No native source, native receipt, ISO, phase, flag, requirement or normative goal
+condition is promoted. The branch remains the cloud backup while merge is gated.
+[Cycle 228 evidence](checkpoints/cycle228-toolchain-host-observation.md).
 
 ## Cycle 227: Errata Recorded Admission
 

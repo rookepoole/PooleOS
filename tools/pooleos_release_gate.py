@@ -618,6 +618,17 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 228 repairs an observed toolchain-reproduction failure caused only by Windows host build "
+    "26200 -> 26300. The test independently measures that value and requires every other report byte "
+    "to match. The original ledger and shared qualifier remain unchanged. Nineteen focused tests pass. "
+    "Doctor and release-gate failures now retain full diagnostics; timeout partial output is preserved. "
+    "Full exact-candidate qualification and remaining data/tool dependency review precede main merge. "
+    "No native/ISO byte, phase, flag or production change. Earlier failures below remain historical. "
+    + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -634,8 +645,7 @@ def run_doctor(*, include_runtime: bool) -> dict:
     if completed.returncode == 0:
         detail = "\n".join(output_lines[-8:])
     else:
-        failure_lines = [line for line in output_lines if line.startswith("FAIL ")]
-        detail = "\n".join([*failure_lines[-12:], "--- doctor tail ---", *output_lines[-8:]])
+        detail = f"doctor exit={completed.returncode}\n{completed.stdout}"
     return readiness.make_check("pooleos_doctor", completed.returncode == 0, detail)
 
 
