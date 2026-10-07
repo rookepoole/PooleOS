@@ -10594,9 +10594,89 @@ def apply_cycle229(roadmap: dict, test_count: int) -> dict:
     )
     phase = next(p for p in roadmap["phases"] if p["id"] == "N36")
     phase["current_evidence"].insert(0, evidence)
-    phase["current_evidence"].insert(0, f"Cycle 229 source inventory: {test_count} tests discovered; new exact-candidate qualification pending")
+    phase["current_evidence"].insert(0, "Cycle 229 source inventory: 1207 tests discovered; new exact-candidate qualification pending")
     phase["current_gaps"].insert(0, gap)
     next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N36-RECEIPT-COVERAGE-001")["evidence"].insert(0, checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle230(roadmap, test_count)
+
+
+def apply_cycle230(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle230-native-iso-inspection.md"
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    gate["historical_cycle229_candidate_audit"] = copy.deepcopy(gate["current_candidate_audit"])
+    roadmap["baseline"]["pooleos_cycle"] = 230
+    roadmap["execution_protocol"].update(last_updated_cycle=230,
+        selected_move_id="N0-ISO-INSPECTION-001",
+        owner_independent_next_move_id="N5-FAT32-PARENT-001")
+    roadmap["execution_protocol"]["required_records"].insert(0, checkpoint)
+    merge = {
+        "cycle": 229, "status": "merged", "pull_request": 78,
+        "url": "https://github.com/rookepoole/PooleOS/pull/78",
+        "source_commit": "31099c64b276f6636dc9ad34db8ea755aa803023",
+        "main_commit": "08d4dbe707e546ffb33e0db102ff76dbf8f6daeb",
+        "tree": "5f4e95ddad0b2f3195134b6945067083cdc13943",
+        "merged_at": "2026-10-07T21:11:11Z", "tree_equality_verified": True,
+        "checks_passed": 106, "checks_total": 106,
+        "doctor_checks_passed": 708, "doctor_checks_total": 708,
+        "unittest_return_code": 0, "individual_test_counts_retained": False,
+        "elapsed_seconds": 1103.594, "tracked_files": 1635,
+        "source_unchanged": True, "owner_report_unchanged": True,
+        "report_sha256": "75AA0DB76D701C92AF23426BE6A625EE0261F367BB1EC7147C05882C83BC5AE5",
+        "log_sha256": "CA9FDC2BA04BD0F5520C2F75FD2FC898717EAB12790A964C6E3DB3124DF8F05D",
+        "publication_violations": 0, "applies_to_later_metadata_edits": False,
+        "production_ready": False,
+    }
+    gate["current_main_merge"] = merge
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=230,
+        latest_completed_attempt=dict(merge, status="pass", commit=merge["source_commit"],
+            scope="exact_cycle229_committed_candidate_with_runtime_bundle_and_replay"))
+    gate["qualification_status"] = "cycle229_merged_cycle230_scoped_iso_inspection_full_candidate_pending"
+    gate["current_iso_inspection"] = {
+        "cycle": 230, "status": "scoped_tests_pass_actual_demo_rejected",
+        "requirement_id": "ADD-N0-ISO-INSPECTION-001", "profile": "optical_iso9660_single_efi_fat32",
+        "new_tests_passed": 19, "combined_tests_run": 28,
+        "combined_tests_passed": 27, "combined_tests_skipped": 1,
+        "skip_reason": "Windows_symlink_permission", "elapsed_seconds": 8.594,
+        "log_sha256": "E1B7D7354C0A5A23B956CFA20B857C4C42AF6D2C75D01EC0A800DE409C1DEE46",
+        "initial_fixture_failure": "fragmentation_mutation_truncated_three_cluster_chain_repaired_in_test",
+        "initial_failure_log_sha256": "134468D89857ADA579684206CBA194C37DE92BB9D02B6B851F1FF2318BF4DBD9",
+        "demo_iso_sha256": "3533965B0DFEA0BFC55399929A9770979B50E4077E77201A68B8331D76570378",
+        "inventory_files": 17, "inner_payload_hashes_match_original_manifest": 12,
+        "structural_violations": 1, "missing_production_objects": 4,
+        "demo_architecture_conformance_passed": False,
+        "report_sha256": "C75EBB6A29C1B71A30FDD97F33540C29D631264E85B3392197E85C3F0E1376FB",
+        "memory_only_parent_entry_correction_structural_pass": True,
+        "writer_repaired": False, "original_iso_unchanged": True,
+        "fresh_guest_boots": 0, "native_kernel_changed": False, "production_ready": False,
+    }
+    evidence = (
+        "Cycle 230: " + checkpoint + " adds bounded actual-ISO and EFI FAT32 architecture inspection. "
+        "Nineteen new tests pass; combined28 runs yield27 passes and one expected Windows symlink skip. "
+        "The unchanged demo inventories17 files and matches12 original native payload hashes but fails "
+        "with a root-parent dotdot encoding defect and four missing required production objects. "
+        "A memory-only parent-entry correction isolates the writer defect; no image or receipt is rewritten. "
+        "Cycle229 exact31099c passed106/106 canonical and708/708 Doctor checks and was merged through PR78 "
+        "as08d4dbe with identical tree; that qualification does not apply to Cycle230 edits."
+    )
+    gap = (
+        "Qualify and cloud-back up the exact Cycle230 candidate before main merge; next native move "
+        "N5-FAT32-PARENT-001 repairs the media writer and replays affected evidence. Full production "
+        "layout/parser coverage, authenticated objects, independent builders and hardware remain open. "
+        "Optional --native-iso adds an actual-image check; omission does not assert ISO conformance."
+    )
+    for phase_id in ("N0", "N5"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    for phase_id, suffix, condition in (
+        ("N0", "ISO-INSPECTION-001", "Qualify supported production ISO layouts, independent parser agreement and mandatory exact-distribution gate integration."),
+        ("N5", "FAT32-PARENT-001", "Repair root-parent dotdot encoding, verify generated media independently and replay all affected source-bound boot evidence."),
+    ):
+        roadmap["implementation_flags"].append({"id": "FLAG-" + phase_id + "-" + suffix,
+            "class": "REQUIRED", "status": "open", "phase_id": phase_id,
+            "closure_condition": condition, "evidence": [checkpoint, "docs/native-iso-inspection.md"]})
     roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
@@ -10605,7 +10685,7 @@ def apply_cycle229(roadmap: dict, test_count: int) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1207)
+    parser.add_argument("--test-count", type=int, default=1227)
     parser.add_argument("--status-date", default="2026-10-07")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

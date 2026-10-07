@@ -640,6 +640,18 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 229 exact31099c passed106/106 canonical and708/708 Doctor checks and was merged via PR78 "
+    "as08d4dbe with identical tree. Cycle230 adds bounded actual ISO/EFI FAT32 inspection:19 new tests "
+    "pass, combined27 passes/one Windows symlink skip. The unchanged demo inventories17 files but "
+    "fails architecture policy with one root-parent dotdot defect and four missing production objects. "
+    "ADD-N0-ISO-INSPECTION-001 and ADD-N5-FAT32-PARENT-001 remain open; next repair the media writer "
+    "and replay affected evidence. New exact-candidate qualification is pending. --native-iso inspects "
+    "provided image bytes; omission makes no image-conformance claim. No native/ISO bytes changed. "
+    "Earlier PR78 merge holds below are historical, not current pending merges. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -7046,9 +7058,24 @@ def check_permission_capability_matrix(
     )
 
 
+def check_native_iso_architecture(path: Path) -> dict:
+    from tools.check_native_iso_architecture import inspect_file
+
+    try:
+        report = inspect_file(path)
+    except (OSError, ValueError) as error:
+        return readiness.make_check("native_iso_architecture", False, "ISO inspection failed: " + type(error).__name__)
+    result = readiness.make_check("native_iso_architecture", report["architecture_conformance_passed"],
+                                  "actual ISO/EFI content inspected; not provenance, signature or boot qualification")
+    result["iso_sha256"] = report["iso_sha256"]
+    result["violations"] = report["violations"]
+    return result
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Emit a PooleOS release-gate JSON report.")
     parser.add_argument("--bundle", type=Path)
+    parser.add_argument("--native-iso", type=Path, help="Inspect actual optical ISO bytes against native architecture policy")
     parser.add_argument("--replay-proof", type=Path)
     parser.add_argument("--pdc-source-intake", type=Path, default=ROOT / "runs" / "pdc_source_intake.json")
     parser.add_argument("--pdc-math-contract", type=Path, default=ROOT / "runs" / "pdc_math_contract.json")
@@ -7598,6 +7625,8 @@ def main(argv: list[str] | None = None) -> int:
         )
         if path is not None
     ]
+    if args.native_iso is not None:
+        checks.append(check_native_iso_architecture(args.native_iso))
     report = readiness.make_readiness_report(checks=checks, artifacts=artifacts, remaining_gaps=DEFAULT_GAPS)
     readiness.write_readiness_report(report, args.out)
     print(args.out)

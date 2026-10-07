@@ -24,6 +24,12 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle230-native-iso-inspection.md",
+    "docs/native-iso-inspection.md",
+    "runtime/native_iso_media.py",
+    "tools/check_native_iso_architecture.py",
+    "tests/fixtures/native_iso_fixture.py",
+    "tests/test_native_iso_architecture.py",
     "docs/checkpoints/cycle229-reviewed-execution-inputs.md",
     "tests/fixtures/cycle228-execution-sources.json",
     "specs/native-boot-exit-contract.schema.json",
