@@ -24,6 +24,11 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle225-retained-execution-source-closure.md",
+    "runtime/native_execution_sources.py",
+    "tools/qualify_native_execution_sources.py",
+    "tests/test_native_execution_sources.py",
+    "runs/native_execution_sources.json",
     "docs/checkpoints/cycle224-locks-admission-and-current-kernel-replay.md",
     "tests/test_native_locks_admission.py",
     "tests/fixtures/cycle181-locks-readiness.json",

@@ -11,7 +11,18 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 224 repairs lock evidence admission.
+**Current development checkpoint:** Cycle 225 adds a release-gate check for the
+static Python source dependencies of 14 retained execution profiles. It binds 62
+distinct files to their original run snapshots; changed helpers invalidate the
+record. All 12 focused tests pass. No boot receipt was rewritten or relabeled fresh.
+[Cycle 225 evidence](docs/checkpoints/cycle225-retained-execution-source-closure.md).
+Upstream and non-Python dependency review, then full exact-candidate qualification,
+still precede the main merge. Pre-production; native kernel and demo ISO unchanged.
+Combined regression passes **102/102**, with zero skips. Upstream capture search
+accounts for 12 of 13 additional profiles; errata policy needs earlier evidence
+reconciliation before deciding replay. No full-suite or merge qualification claimed.
+
+**Historical development checkpoint:** Cycle 224 repairs lock evidence admission.
 Two final four-CPU virtual boots and **21/21 focused tests** pass; both validators
 reject 631 corrupted records. All **27/27 selected native checks** now pass.
 [Cycle 224 evidence](docs/checkpoints/cycle224-locks-admission-and-current-kernel-replay.md).

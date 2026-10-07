@@ -22,6 +22,7 @@ from runtime import native_boot_config  # noqa: E402
 from runtime import native_boot_handoff  # noqa: E402
 from runtime import native_boot_trust  # noqa: E402
 from runtime import native_elf_loader  # noqa: E402
+from runtime import native_execution_sources  # noqa: E402
 from runtime import native_firmware  # noqa: E402
 from runtime import native_kernel_entry  # noqa: E402
 from runtime import native_kernel_load  # noqa: E402
@@ -593,6 +594,9 @@ DEFAULT_GAPS[4] = (
 
 
 DEFAULT_GAPS[4] = (
+    "Cycle 225 adds a static Python execution-source guard for fourteen retained profiles and 62 distinct "
+    "files. The original receipts are unchanged and no new boot is claimed. Upstream and non-Python "
+    "dependency review and full exact-candidate qualification remain required before main merge. "
     "Cycle 224 repairs lock recorded admission and qualifies two final four-vCPU boots on unchanged "
     "kernel216. All27 selected native checks and21 focused tests pass; both gates reject631 corrupted "
     "records and detect three disabled validators. Earlier diagnostic invalid admissions/exceptions "
@@ -3616,6 +3620,17 @@ def check_native_kernel_atomics_readiness(
         not errors,
         detail if not errors else "; ".join(errors[:8]),
     )
+
+
+def check_native_execution_sources(path: Path = ROOT / native_execution_sources.RECEIPT) -> dict:
+    try:
+        artifact = json.loads(path.read_bytes())
+        errors = native_execution_sources.evidence_errors(artifact, ROOT)
+    except (OSError, ValueError) as error:
+        errors = [str(error)]
+    return {"name": "native_execution_sources", "ok": not errors,
+            "detail": "static source closure for fourteen retained profiles; not fresh execution or authentication",
+            "errors": errors}
 
 
 def check_native_kernel_locks_readiness(
@@ -7248,6 +7263,7 @@ def main(argv: list[str] | None = None) -> int:
         run_doctor(include_runtime=args.include_runtime),
         check_native_architecture_plan(args.native_roadmap, args.native_checklist_coverage),
         check_native_architecture_baseline(args.native_architecture_baseline),
+        check_native_execution_sources(),
         check_native_v1_objectives_readiness(args.native_v1_objectives_readiness),
         check_adr_ratification_readiness(args.adr_ratification_readiness),
         check_n0_owner_decision_packet(args.n0_owner_decision_packet),

@@ -7,9 +7,19 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 224
+Last roadmap reconciliation: PooleOS Cycle 225
 
-Cycle 224 repairs lock evidence admission and qualifies two final four-vCPU
+Cycle 225 enforces a separate static-source evidence record for 14 retained
+memory-through-lock profiles and 62 distinct Python inputs. Twelve focused tests
+pass, including 33 malformed records through component and aggregate checks.
+Original boot receipts, native code, ISO and normative charter remain unchanged.
+No new guest execution or authentication is claimed. Next: upstream and non-Python
+dependency review, then full exact-candidate qualification before main merge.
+[Cycle 225 evidence](checkpoints/cycle225-retained-execution-source-closure.md).
+Corrected combined regression passes 102/102 without skips. Conservation preserves
+28 parent records and 801 native, receipt and historical checkpoint files.
+
+Historical Cycle 224 repairs lock evidence admission and qualifies two final four-vCPU
 boots on unchanged kernel216. All27 selected native checks and21 focused tests
 pass; both gates reject631 corrupted records. Three disabled validators are
 detected. Diagnostic invalid admissions and exceptions remain preserved.

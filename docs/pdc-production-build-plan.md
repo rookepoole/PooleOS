@@ -1,13 +1,39 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-07
-Plan version: 2.127.0-locks-admission-and-current-kernel-replay
-Roadmap cycle: PooleOS Cycle 224
+Plan version: 2.128.0-retained-execution-source-closure
+Roadmap cycle: PooleOS Cycle 225
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 225: Retained Execution Source Closure
+
+`N36-RECEIPT-COVERAGE-001` advances existing `ADD-N36-RECEIPT-COVERAGE-001`.
+The release gate now validates a separate static Python input record for fourteen
+memory-through-lock profiles. Each profile retains its exact original receipt,
+capture hash, log hash and source snapshot identity. Recomputed import closures
+cover 62 distinct files, including relative imports and package initializers.
+Missing/changed helpers invalidate evidence; generation refuses failed captures,
+modified outputs/logs and rebinding missing or changed original input hashes.
+
+Twelve focused tests pass, including 33 malformed records through component and
+aggregate paths and shared-leaf invalidation across all fourteen captures.
+The first projection failed on a Windows path separator mismatch, preserved and
+repaired without editing the original capture. No new boot or native change.
+All 27 selected native checks are retained; this is not full qualification.
+Corrected combined regression passes 102/102 without skips; one initial stale
+next-step assertion failure is preserved. Conservation verifies 387 bindings,
+1176 discovered tests and 801 unchanged native/receipt/historical files.
+[Cycle 225 evidence](checkpoints/cycle225-retained-execution-source-closure.md).
+
+Next: review the thirteen upstream selected profiles and non-Python data/tool
+dependency coverage, then full exact-candidate canonical/Doctor/release/publication/
+GitHub/review gates before main merge. This scoped guard does not authenticate
+execution or close N36. No phase/flag closes. All 28 parent progress records,
+checklist coverage, native/kernel/demo bytes and PooleGlyph boundaries are retained.
 
 ## Cycle 224: Locks Admission and Current-Kernel Replay
 
