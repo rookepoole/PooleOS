@@ -3513,13 +3513,19 @@ def run_command(name: str, cmd: list[str], cwd: Path, timeout: int) -> CheckResu
             timeout=timeout,
             check=False,
         )
+    except subprocess.TimeoutExpired as exc:
+        output = exc.stdout or ""
+        if isinstance(output, bytes):
+            output = output.decode("utf-8", errors="replace")
+        return CheckResult(name, False, f"timed out after {timeout}s\n{output}")
     except Exception as exc:  # pragma: no cover - diagnostic path
         return CheckResult(name, False, f"failed to start: {exc}")
 
     tail = "\n".join(completed.stdout.splitlines()[-6:])
     if completed.returncode == 0:
         return CheckResult(name, True, tail or "ok")
-    return CheckResult(name, False, f"exit={completed.returncode}\n{tail}")
+    # A failure name or traceback may precede many later result lines.
+    return CheckResult(name, False, f"exit={completed.returncode}\n{completed.stdout}")
 
 
 def run_pooleglyph_baseline(pooleglyph: Path, full: bool) -> list[CheckResult]:

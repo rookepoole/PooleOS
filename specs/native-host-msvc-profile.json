@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "POOLEOS-HOST-MSVC-1",
+  "status_date": "2026-09-26",
+  "status": "observed_inputs_pinned_for_single_host_qualification",
+  "msvc_version": "14.44.35207",
+  "windows_sdk_version": "10.0.18362.0",
+  "production_ready": false,
+  "input_trees": [
+    {
+      "role": "msvc_linker_tree",
+      "tree_sha256": "9708AAEEC11AEEFC322575D14D4DEEDF0493DF637A3DB8CF621D328AF51EB6FE",
+      "file_count": 91,
+      "byte_count": 98923198
+    },
+    {
+      "role": "msvc_library_tree",
+      "tree_sha256": "A6DE11219837213C0FAE9BD5D02BB49BA84740C549765D2C5FF6D31EAB5EFA42",
+      "file_count": 149,
+      "byte_count": 525209873
+    },
+    {
+      "role": "sdk_ucrt_library_tree",
+      "tree_sha256": "C56C5F61CAB9D19E03C08EFCA34EFE3E239F64A65814CAD0D1B24F68903EF60E",
+      "file_count": 4,
+      "byte_count": 135146190
+    },
+    {
+      "role": "sdk_um_library_tree",
+      "tree_sha256": "59EAE3DA7BFEA0091C80C134D59A18EC45F2ABDD2DB7D2F19C9E0F569E60BE57",
+      "file_count": 476,
+      "byte_count": 129932968
+    }
+  ],
+  "fingerprint_format": "SHA256 of sorted relative UTF-8 path, NUL, and raw file SHA256 for every file; existing bounded tree_binding implementation",
+  "source": "Owner-installed Microsoft Visual Studio 2022 Build Tools and Windows 10 SDK; not downloaded by this cycle",
+  "license": "Microsoft proprietary developer-tool licenses; no tool binaries redistributed",
+  "scope": "Recursive linker-directory and MSVC/UCRT/UM library-tree fingerprints, not complete host execution attestation",
+  "open_items": [
+    "Independent builder reproduction",
+    "Installer provenance and complete signed supply-chain closure",
+    "System DLLs, host OS, concurrent tamper, Cargo parent configuration and host executable timestamps/debug paths are outside this pin"
+  ],
+  "references": [
+    "https://doc.rust-lang.org/cargo/reference/config.html",
+    "https://learn.microsoft.com/en-us/cpp/build/reference/linking?view=msvc-170",
+    "https://learn.microsoft.com/en-us/cpp/build/reference/libpath-additional-libpath?view=msvc-170"
+  ]
+}

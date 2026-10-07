@@ -1,15 +1,1527 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-09-12
-Plan version: 2.79.0-native-memory-entry-provenance
-Roadmap cycle: PooleOS Cycle 175
+Status date: 2026-10-07
+Plan version: 2.132.0-reviewed-execution-inputs
+Roadmap cycle: PooleOS Cycle 229
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 175: Memory Entry Provenance And Replay
+## Cycle 229: Reviewed Execution Inputs
+
+N36.1 / `N36-RECEIPT-COVERAGE-001`, existing requirement and flag remain open
+for broader production qualification. The specific development dependency-review
+hold is resolved; full exact-candidate and GitHub/review gates still control merge.
+The preceding commit `293383d` passed 106/106 canonical and 708/708 Doctor checks
+in 1,079.750s with runtime, bundle and replay inputs and unchanged source/owner
+snapshots. This historical pass does not qualify this cycle's changed candidate.
+
+The execution-input guard now binds 18 previously unrepresented data observations
+across 13 specification files. Current contents must match their recorded hashes;
+projection must also match the original successful capture snapshots. All original
+profile identities, receipt hashes, Python source closures and capture hashes are
+unchanged. The original guard artifact is retained as a historical fixture. All
+19 focused tests pass, including changed, missing, reordered, duplicate, malformed,
+overclaimed and rehashed inputs. Recorded consistency is not authentication.
+
+The bounded review accounts for 312 observations through existing hash-matching
+receipt references plus these 18 bindings. Media review matches 438 logical pairs
+to regenerated payloads or retained exact kernel bytes and 24 to original clean
+boot-build records. It does not rebuild those boot binaries or replay guests.
+Existing Rust executable/library, QEMU/firmware, MSVC/SDK and disassembly-tool pins
+match. Complete dynamic subprocess/OS/compiler dependency closure remains a
+production supply-chain requirement, not an implied result of this review.
+
+Next: qualify the exact committed candidate, scan publication boundaries, recheck
+GitHub protections and reviews, and merge PR #78 only if those gates pass. Preserve
+the full result externally against that commit to avoid self-referential hash
+updates. No native, ISO, phase, flag or production completion is asserted.
+[Cycle 229 evidence](checkpoints/cycle229-reviewed-execution-inputs.md).
+
+## Cycle 228: Reproducible Host Observation
+
+N36.1, `N36-RECEIPT-COVERAGE-001`, existing `ADD-N36-RECEIPT-COVERAGE-001`.
+An unchanged-source fail-fast diagnostic attempts 882 tests and stops with one
+failure and one skip. It identifies a toolchain-reproduction assertion: Cargo's
+verbose OS build changed from Windows 26200 to 26300. A fresh fixture qualification
+and recursive typed comparison find no other report difference. Two fixtures each
+build twice with identical bytes; all three controls pass. These are compiler
+fixtures, not an OS boot or production qualification.
+
+The repaired test measures the current Windows build independently and permits
+only that exact observation in its expected report. Compiler/library/input/artifact
+hashes, edition, major/minor version, counts and typed claims remain byte-exact.
+The historical qualification ledger and shared qualifier are unchanged. Doctor
+and release-gate failures now retain full captured diagnostics; timeout output is
+also retained. Success output stays compact and nonzero exits remain failures.
+All 19 focused tests pass without skips, including a real failing subprocess and
+adversarial report changes. An initial timeout-handler placement mistake caused
+three failing subtests and was corrected; that failed run remains recorded.
+
+Next: commit the source-bound candidate and run the complete canonical gate with
+runtime, bundle and replay inputs; finish remaining data/tool dependency review
+before the main merge. No full pass is claimed by this prequalification record.
+No native source, native receipt, ISO, phase, flag, requirement or normative goal
+condition is promoted. The branch remains the cloud backup while merge is gated.
+[Cycle 228 evidence](checkpoints/cycle228-toolchain-host-observation.md).
+
+## Cycle 227: Errata Recorded Admission
+
+Late precloseout qualification of exact commit `79adf4a` fails after 1,089.266s:
+105/106 canonical checks and 707/708 Doctor checks pass; `pooleos:unittest` exits 1.
+Source and owner snapshots stay unchanged. The outer report does not preserve
+individual failing test names, so no individual failure count or root cause is
+claimed. Immediate next move: retain complete unittest diagnostics and repair
+the failure, then finish dependency review and requalify before any main merge.
+This is not a timeout, a passing full suite, or a failure of the scoped 126-test run.
+The development branch is backed up on GitHub; `main` remains unchanged.
+
+N36.1, `N36-RECEIPT-COVERAGE-001`, existing `ADD-N36-RECEIPT-COVERAGE-001`.
+Exact JSON-typed reconstruction replaces shallow errata receipt checks. Build and
+source evidence, all sixteen registry records, both decisions, vector outcomes,
+control results, counts, claims and open items must agree. Toolchain-lock and
+adversarial-test sources are now bound. Malformed inputs reject without exceptions;
+the aggregate gate retains an independent exact-integer summary check.
+
+Before repair, 1,708 mutations produced 1,085 component and 1,015 aggregate invalid
+acceptances, with 54 and 165 exceptions. After repair, all 1,742 mutations of the
+fresh current receipt reject through both paths with zero exceptions. The same
+generator adds 34 cases for the two added input bindings. All original eight
+counterexamples reject; 34 focused tests pass without skips. This is finite
+recorded-consistency evidence, not authentication or complete fault coverage.
+
+Fresh host qualification passes six Rust tests, two no_std builds, 128 vectors
+and 24 controls while preserving all six target-denial reasons. Only errata input
+bindings and its execution-source record change; the other 26 profiles, native
+kernel and demo ISO are unchanged. No QEMU boot or hardware mutation occurs.
+
+Next: review non-Python data/tool dependencies, then exact-candidate canonical,
+Doctor, release, publication, GitHub and review gates before main merge. The
+demonstrated errata admission defect is repaired; N36 remains open. No phase,
+flag, checklist requirement or production condition is marked complete.
+[Cycle 227 evidence](checkpoints/cycle227-errata-recorded-admission.md).
+Combined regression passes 126/126 without skips. Conservation verifies 393 bound
+sources, 29 archived parent records and 802 preserved files; 1,192 tests are
+discovered, not all executed. Explicit non-Python binding inventory accounts for
+2,392 repository path/hash pairs, 462 logical-media entries and one verified tool
+token. Review actual reads/tool inputs absent from those pairs next; do not infer
+complete dependency coverage from this inventory.
+
+## Cycle 226: Selected Profile Source Coverage
+
+N36.1, `N36-RECEIPT-COVERAGE-001`, existing `ADD-N36-RECEIPT-COVERAGE-001`.
+The static Python guard now covers all 27 selected profiles, 78 distinct files
+and 4-38 inputs per profile. Twenty-six original profile receipts remain unchanged;
+one fresh bounded errata host run changes only its receipt's status date. Six Rust
+tests, two no_std builds, 128 cross-language vectors and 24 negative controls pass,
+with all six hardware-denial reasons retained. No new QEMU boot or native change.
+The original fourteen source records are preserved byte-exactly in a historical
+fixture and remain identical within the new record. Focused regression: 22/22,
+zero skips. This is not a full canonical pass.
+
+Eight targeted errata receipt counterexamples expose six invalid acceptances and
+two unhandled exceptions through both component and aggregate validators. Missing
+build/vector/registry evidence and false write/authority claims must reject.
+This is an explicit merge blocker, not a hardware failure or an owner-action gate.
+
+Next: repair exact typed errata recorded admission and malformed-input handling;
+add adversarial regressions, freshly requalify changed bound inputs and refresh
+only affected source records. Then finish non-Python data/tool dependency review
+and exact-candidate canonical/Doctor/release/publication/GitHub/review gates.
+Do not repeat unaffected boots by default. No phase, flag, target, ISO, production
+or normative charter condition closes. Parent progress records remain historical.
+[Cycle 226 evidence](checkpoints/cycle226-selected-profile-source-coverage.md).
+Combined regression passes113/113 without skips. Conservation verifies389 source
+bindings,29 unchanged archived parent records and801 retained files;1179 tests
+are discovered, not claimed executed. The errata admission blocker remains open.
+
+## Cycle 225: Retained Execution Source Closure
+
+`N36-RECEIPT-COVERAGE-001` advances existing `ADD-N36-RECEIPT-COVERAGE-001`.
+The release gate now validates a separate static Python input record for fourteen
+memory-through-lock profiles. Each profile retains its exact original receipt,
+capture hash, log hash and source snapshot identity. Recomputed import closures
+cover 62 distinct files, including relative imports and package initializers.
+Missing/changed helpers invalidate evidence; generation refuses failed captures,
+modified outputs/logs and rebinding missing or changed original input hashes.
+
+Twelve focused tests pass, including 33 malformed records through component and
+aggregate paths and shared-leaf invalidation across all fourteen captures.
+The first projection failed on a Windows path separator mismatch, preserved and
+repaired without editing the original capture. No new boot or native change.
+All 27 selected native checks are retained; this is not full qualification.
+Corrected combined regression passes 102/102 without skips; one initial stale
+next-step assertion failure is preserved. Conservation verifies 387 bindings,
+1176 discovered tests and 801 unchanged native/receipt/historical files.
+[Cycle 225 evidence](checkpoints/cycle225-retained-execution-source-closure.md).
+
+Next: review the thirteen upstream selected profiles and non-Python data/tool
+dependency coverage, then full exact-candidate canonical/Doctor/release/publication/
+GitHub/review gates before main merge. This scoped guard does not authenticate
+execution or close N36. No phase/flag closes. All 28 parent progress records,
+checklist coverage, native/kernel/demo bytes and PooleGlyph boundaries are retained.
+
+## Cycle 224: Locks Admission and Current-Kernel Replay
+
+`N12-CONCURRENCY-LOCKS-001`, N12.2/N36, advances existing
+`ADD-N12-CONCURRENCY-LOCKS-001` and `ADD-N36-RECEIPT-COVERAGE-001`.
+Recorded admission now reconstructs both runs, typed controls, host probes,
+source/tool identities and boot/media/kernel consistency. Malformed records
+reject without exceptions; empty controls reject and host probes are bounded.
+Two final four-vCPU boots pass 30 groups/103 cases and 246 kernel tests.
+The 21-test focused suite passes without skips, including all-profile entry
+provenance; 631 corrupted records reject through both admission paths and
+three disabled validators are detected. Final timeout-cleanup regression passes
+137/137 without skips. All 14 static helper closures match the preserved successful
+producer snapshots; runtime enforcement and broader dependency review remain
+pending. Original failures are retained.
+[Cycle 224 evidence](checkpoints/cycle224-locks-admission-and-current-kernel-replay.md).
+
+All **27/27 selected native checks** pass. Next **N36-RECEIPT-COVERAGE-001**:
+shared-helper transitive-binding review, then full exact-candidate canonical,
+Doctor, release, publication and GitHub/review gates before main merge.
+This does not close N36 or any phase/flag. All27 parent progress records and
+the exact historical lock receipt are preserved. Inventory1163 tests and382
+source bindings. Native code, demo ISO, checklist and PooleGlyph boundaries
+are unchanged. N0 custody, N5 authentication, full task state, general retirement,
+hardware, independent builders and signed production media remain open.
+The corrected combined regression passes **137/137**, zero skips, including71
+metadata tests. Three initial stale metadata assertions remain recorded as failed.
+Conservation passes. A preliminary14-profile import inventory identifies20-27
+missing explicit helper bindings per profile with no stale recorded hashes.
+Reconcile existing execution snapshots and dependency receipts before deciding
+replay scope; this inventory alone does not prove the executions used wrong code.
+
+## Historical Cycle 223: Atomics Admission and Instruction Audit
+
+`N12-CONCURRENCY-ATOMICS-001`, N12.1/N36, advances
+`ADD-N12-CONCURRENCY-ATOMICS-001` and `ADD-N36-RECEIPT-COVERAGE-001`.
+Recorded admission now reconstructs typed run, probe, source and image evidence;
+linked audits validate instruction bytes, operands and the retry branch, not
+words in comments. Two final one-BSP boots pass 29 groups/78 cases; 22 focused
+tests pass. Both gates reject 356 corrupted receipts. Eight disabled native
+guards are detected at optimization 0 and 3. Prior validator defects and one
+invalid test mutation remain recorded; new qualification follows its repair.
+[Cycle 223 evidence](checkpoints/cycle223-atomics-admission-and-instruction-audit.md).
+
+Readiness **26/27**. Next **N12-CONCURRENCY-LOCKS-001**, then N36 shared-helper
+transitive-binding review and full exact-candidate qualification before main
+merge. Inventory 1157 tests, 379 source bindings; all 26 parent records archived.
+No native/kernel/ISO, phase/flag, checklist, PooleGlyph boundary or production
+change. Existing ADD requirements cover these repairs; no new requirement is
+needed. N0 custody, N5 authentication, complete task state, general retirement,
+independent builders and physical qualification remain open.
+The final bound-source combined regression passes **146/146**, zero skips,
+including all 22 focused tests and 70 metadata tests. Conservation passes all
+379 bindings and preserves all 26 parent records. The initial 69/70 metadata
+result remains a recorded failure; its stale pending-profile assertion is fixed.
+
+## Historical Cycle 222: SMP-Preemption Admission and Controls
+
+`N12-SCHED-SMP-PREEMPT-001`, N12.5-N12.7/N36, advances
+`ADD-N12-SCHED-SMP-PREEMPT-001` and `ADD-N36-RECEIPT-COVERAGE-001`,
+retaining N12.1-N12.4 dependencies. Seventeen constant-only groups now have
+executed evidence:61 native boundary scenarios and46 source mutations.
+Recorded admission reconstructs both runs, typed counts, probes and audits.
+Two final four-vCPU boots pass34groups/322cases;19 focused tests pass,
+rejecting339 corrupted records and11 independent gate cases and detecting29
+disabled native variants. Prior diagnostic failures, a masked watchdog mutation,
+an optional-log skip and six non-final boots remain preserved separately.
+[Cycle 222 evidence](checkpoints/cycle222-smp-preemption-admission-and-controls.md).
+
+Readiness **25/27**. Next **N12-CONCURRENCY-ATOMICS-001**, then locks,
+shared-helper transitive-binding review and full exact-candidate qualification
+before main merge. Known constant-only scheduler groups are repaired; broader
+N36 verification remains open. No phase/flag closure or new ADD requirement.
+All25 parent records are archived; checklist, PooleGlyph boundaries, native
+kernel, earlier receipts and demo ISO are preserved. Inventory1149 tests,
+377 source bindings. N0 custody, N5 authentication, full task state, general
+retirement, physical hardware and independent builders remain open.
+Combined regression passes **167/167**, zero skips, including 69 progress and
+architecture tests. Initial metadata failures and a historical-count conservation
+failure remain recorded; corrected conservation preserves all parent records.
+
+## Historical Cycle 221: Current-Kernel SMP and AP-Worker Replay
+
+`N12-SCHED-SMP-001` and `N12-SCHED-AP-WORKERS-001`, N12.4-N12.7/N36,
+advance `ADD-N12-SCHED-SMP-001`, `ADD-N12-SCHED-AP-WORKERS-001` and
+`ADD-N36-RECEIPT-COVERAGE-001`. Four fresh four-vCPU boots pass 66 control
+groups/628 cases on unchanged kernel216. All 39 focused tests pass, rejecting
+669 corrupt records and 30 independent aggregate cases, and detecting 51
+disabled native variants. Four measured image expectations replace obsolete
+pins; both initial admissions remain recorded. Identical guest candidates pass
+after repair, without rewritten evidence or guest reruns.
+[Cycle 221 evidence](checkpoints/cycle221-current-kernel-smp-and-ap-worker-replay.md).
+
+Readiness **24/27** leaves SMP preemption, atomics and locks. Next is
+`N12-SCHED-SMP-PREEMPT-001`, including seventeen control groups and recorded
+admission. Shared-helper transitive bindings remain N36. Preserve all 25 parent
+records, phase/flag statuses, native bytes, prior receipts, checklist, PooleGlyph
+boundaries and demo ISO. Inventory1139 tests; 374 architecture bindings. No new
+ADD requirement or phase closure. Full exact-candidate qualification precedes
+main merge; cloud branch backup is separate. N0 custody, N5 authentication,
+full task state, general retirement, hardware and independent builders remain open.
+Corrected metadata passes 68/68; the earlier 63/68 and 67/68 failures remain
+recorded. Conservation passes 374 source bindings and 25 parent archives.
+
+## Historical Cycle 220: Current-Kernel Scheduler Replay
+
+`N12-SCHED-001`, `N12-SCHED-PREEMPT-001` and `N12-SCHED-DEFERRED-001` advance
+N12.4-N12.7/N36, preserving the existing N12.1-N12.3 boundaries. Requirements:
+`ADD-N12-SCHED-FOUNDATION-001`, `ADD-N12-SCHED-PREEMPT-001`,
+`ADD-N12-SCHED-DEFERRED-001`, `ADD-N36-RECEIPT-COVERAGE-001`.
+
+Three profiles pass **six virtual boots**, 83 control groups/595 cases and
+**47 focused tests**. Two deferred-image expectations are updated only after
+independent validation of the current kernel hash and 1326 relocations. The
+initial rejected admission remains; the same candidate passes without altered
+guest evidence or extra guest runs. [Cycle 220 evidence](checkpoints/cycle220-current-kernel-scheduler-replay.md).
+
+Readiness is **22/27**. Next is `N12-SCHED-SMP-001`, then AP workers, SMP preemption,
+atomics and locks. Five profiles plus seventeen SMP-preemption control groups
+and admission remain. N36 shared-helper bindings, N0 custody, N5 authentication,
+general retirement and hardware qualification stay open. All 25 parent records,
+phase/flag statuses, checklist and PooleGlyph boundaries are preserved. Native
+code, boot/CPU218 and memory219 evidence, and the demo ISO are unchanged.
+Inventory: 1137 Python tests, 373 architecture bindings. No phase closure or
+promotion follows; full exact-candidate qualification precedes main merge.
+Progress/architecture/checklist regression passes 67/67. Conservation verifies
+all 373 source bindings and 25 archived parent records, preserving prior failures.
+
+## Historical Cycle 219: Current-Kernel Memory Replay
+
+`N9-PMM-ACPI-CONSUMER-001`, N9.1-N9.4 with N8.1/N8.3/N8.5, N10/N36,
+advances under `ADD-MEM-001`, `ADD-TIME-001` and `ADD-N36-RECEIPT-COVERAGE-001`.
+Six profiles pass **12 virtual boots**, 421 control groups/1137 cases, and
+**93 focused tests**. Ten obsolete memory-accounting/image pins are corrected
+only after independent current-kernel validation. Initial aggregate rejections
+remain recorded; the same candidates then pass without altered guest evidence.
+Native kernel/boot code, entry/core, boot/CPU218 evidence and demo ISO are unchanged.
+[Cycle 219 evidence](checkpoints/cycle219-current-kernel-memory-replay.md).
+
+Readiness is **19/27**; eight scheduler/atomic/lock profiles remain from
+`N12-SCHED-001`, plus seventeen SMP-preemption control groups and admission.
+Bounded VM/AP ownership replay is current, but general task/CPU retirement is not
+proved. Shared-helper transitive bindings remain under N36. All 25 parent records,
+phase/flag statuses, locked checklist and PooleGlyph Phase65/66 boundary are
+preserved. Inventory is 1136 Python tests; architecture binds 372 sources.
+No main merge or production promotion follows without full exact-candidate gates.
+Corrected progress/architecture/checklist tests pass 66/66; the initial 56/66
+result remains recorded. Conservation passes all 372 bindings and 25 archived
+parent records, preserving native code, the checklist, owner files and demo ISO.
+
+## Historical Cycle 218: Terminal Capture and CPU Replay
+
+`N7-TRAP-001` advances N7.5/N7.6 and N7.1/N7.3/N7.4, with N5 replay and
+N36 under `ADD-N36-RECEIPT-COVERAGE-001`. A shared QMP capture race is fixed:
+screenshots are taken after validated terminal markers instead of early frame
+readiness. Nine tests reproduce four old failures and pass after repair.
+Native boot/kernel bytes and exact frame comparisons are unchanged.
+
+All **20 final virtual boots** pass: six boot-chain and fourteen CPU runs,
+with 225 CPU controls and one separate expected TCG limitation probe. All
+**64/64 focused tests** pass, including 3,398 control-record corruptions,
+371 paired-evidence corruptions, 33 identity/promotion cases and 80 malformed
+nested-build cases. Two failed initial trap runs and six diagnostic runs remain
+separate. Original differing frames were not retained; their exact pixel cause
+is unproven. [Cycle 218 evidence](checkpoints/cycle218-terminal-capture-and-cpu-replay.md).
+
+Readiness is **13/27**; fourteen profiles remain from `N9-PMM-ACPI-CONSUMER-001`,
+plus seventeen SMP-preemption control groups and recorded admission. Shared-helper
+transitive bindings remain within N36. All 24 parent progress records, phase/flag
+statuses, locked checklist, PooleGlyph Phase65/66 boundary and demo ISO are preserved.
+Inventory is 1135 Python tests, not a full-suite pass. No main merge or promotion;
+full exact-candidate qualification is required and cloud branch backup is separate.
+Corrected progress/architecture/checklist regression passes 65/65; the initial
+60/65 result is retained. Conservation verifies 371 architecture bindings and
+all 24 archived parent records without closing any phase or flag.
+
+## Historical Cycle 217: Current-Kernel Boot Replay
+
+`N5-SYMBOLS-SEMANTICS-001`, N5.6/N5.9 and N36, advances under existing
+`ADD-BOOT-007` and `ADD-N36-RECEIPT-COVERAGE-001`. Symbols and dependent
+artifacts now bind independently measured kernel216 bytes. Native symbol-test
+addresses and the PKMAP2 host probe's 149-page geometry are repaired; production
+kernel implementation, the 192-page reservation and overflow checks are unchanged.
+
+Six fresh virtual boots pass, including two kernel entries that revalidate nine
+retained files and stop at the required unsigned-development denial. No authority,
+authorized actions, state writes or post-exit firmware calls occur. All **97/97**
+focused tests pass, including the formerly failing live-transfer positive,
+650 corrupted symbol receipts, 30 independent identity rejections and 16 map tests.
+Initial symbol-address and map-probe failures remain recorded. Matching builds
+are on one host, not independent-builder proof.
+[Cycle 217 evidence](checkpoints/cycle217-current-kernel-boot-replay.md).
+
+Selected readiness is **8/27**; nineteen downstream profiles remain from
+`N7-TRAP-001`. Seventeen SMP-preemption control groups and recorded admission
+remain open before full canonical qualification. All 24 parent progress records
+are retained as history; no phase or flag closes. The 1125 discovered Python
+tests are inventory, not full-suite evidence. PooleGlyph Phase 65/66, owner
+changes, the locked checklist and demo ISO are preserved. No production trust,
+physical boot, new ISO or promotion is claimed. Source checkpoints are backed
+up through the PR #78 branch; main still requires full exact-candidate gates.
+Corrected roadmap/architecture/checklist regression passes 64/64; the initial
+62/64 run is retained. Conservation verifies 369 bindings and all 24 parent
+progress records without changing prior checkpoint history or phase statuses.
+
+## Historical Cycle 216: Native SMP-Preemption Transactions and Tick Continuation
+
+`N12-SCHED-SMP-PREEMPT-001` advances N12.5/N12.6/N12.7 and N36 under
+`ADD-N12-SCHED-SMP-PREEMPT-001` and `ADD-N36-RECEIPT-COVERAGE-001`.
+Native state changes are transactional across acknowledgement, event admission,
+offline operations and shutdown. Queries preserve diagnostics; exhausted frame
+epochs reject. Same-tick remote events and quantum expiry now use at most five
+acknowledged operations without advancing the timer again. Whole-tick capacity
+preview operates only on a discarded copy and cannot grant live ownership.
+
+Twenty-seven native cases pass in both host profiles; fourteen disabled repairs
+are detected and one redundant guard is a positive control. All 17 core stages,
+two matching clean builds, 246 kernel tests and 43 image controls pass. The
+selected host regression passes 43/43; the known failing live-transfer positive
+is explicitly excluded and remains a merge blocker. Native failures, harness
+mistakes, fixed-linker overflow and stale contract/receipt-ordering failures are
+preserved. [Full evidence](checkpoints/cycle216-native-smp-preempt-transactions.md).
+
+The new kernel is 149 pages, SHA-256
+`FD6C2A0C709957B9EDFFC0647D534E060ED68215C075F07D70AB2AEBCA6C81D1`.
+Selected readiness is **3/27**; 24 old-image profiles need replay beginning
+`N5-SYMBOLS-SEMANTICS-001`. The SMP-preemption flag is reopened; seventeen
+control groups and recorded admission remain open. No phase closes. All 23
+parent progress dictionaries and old live receipts are retained as history.
+Source inventory is 1124 Python tests, not a full-suite pass. PooleGlyph Phase
+65/66, the locked checklist, owner changes and the demo ISO are preserved.
+No current-image guest boot, main merge, signing or production claim follows.
+Checkpoint source is backed up on the PR #78 development branch; main merge
+still requires full exact-candidate qualification and configured review gates.
+Progress, architecture and checklist regression passes 63/63 with zero skips.
+Earlier metadata failures and a historical-inventory conservation failure are
+retained in the checkpoint; old records are not promoted or silently replaced.
+
+## Cycle 215: AP-Worker Admission and Executed Controls
+
+`N12-SCHED-AP-WORKERS-001` advances N12.5/N12.6/N12.7 and N36 under
+`ADD-N12-SCHED-AP-WORKERS-001` and `ADD-N36-RECEIPT-COVERAGE-001`.
+AP-worker recorded admission now validates typed observations, build identities,
+paired runs, source bindings and exact controls. Eighteen constant-only groups
+are replaced by fourteen compiled-native groups (59 boundary scenarios) and
+four source-audit groups (58 mutations). Two final four-vCPU boots on unchanged
+kernel210 pass 34 groups/325 cases: 266 rejections and 59 native scenarios.
+All 19 focused tests pass, including 343 corrupt records, ten independent gate
+cases, fourteen disabled native safeguards and fifteen disabled transaction
+repairs. Thirty transaction cases pass at both optimization levels. Counts
+overlap; these are not independent physical-hardware samples.
+
+The two initial boots are diagnostic only. Before repair the runtime accepted
+279 corruptions with four exceptions; after correcting obsolete image pins,
+the aggregate gate accepted 178 corruptions with nineteen exceptions. The
+294-case common audit now rejects all cases cleanly through both validators.
+An initial five-test control run produced four failure records: an incorrect
+declared total, a masked mutation and two overly narrow panic expectations.
+The repaired harness passes. All failures remain evidence, not passing results.
+
+Readiness is 24/27; next is `N12-SCHED-SMP-PREEMPT-001`, then atomics and
+locks. At least 17 SMP-preemption control groups remain. Twenty-two parent
+progress records are archived verbatim; eleven retained/current dependency
+receipts now include AP workers. Inventory is 1121 Python tests, not a full-suite
+pass. Native source, entry/core, previous receipts/checkpoints, owner evidence,
+locked checklist and demo ISO are preserved. No phase or flag closes.
+Main merge requires exact-candidate canonical/Doctor/release/publication and
+configured GitHub/review gates; checkpoint branch backup is separate.
+[Evidence](checkpoints/cycle215-ap-worker-admission-and-controls.md).
+Corrected roadmap/architecture/checklist regression passes 62/62, zero skips,
+after preserved 59/62 and 61/62 stale-progress failures. Conservation verifies
+362 source bindings, 1121-test inventory and 22 archived parent records.
+
+## Cycle 214: Current-Kernel SMP Scheduler Replay
+
+`N12-SCHED-SMP-001` advances N12.5/N12.6/N12.7 and N36 under
+`ADD-N12-SCHED-SMP-001` and `ADD-N36-RECEIPT-COVERAGE-001`. Two four-vCPU
+boots on unchanged kernel210 pass 32 control groups/303 cases: 244 rejection
+cases and 59 compiled-native boundary scenarios. All 19 focused tests pass,
+including 326 corrupt records, 11 independent aggregate cases and 22 disabled
+native safeguard/transaction variants. Nineteen native tests pass at each of
+two optimization levels. Counts overlap; these are not physical-hardware trials.
+
+The aggregate SMP gate initially rejected obsolete hash/relocation pins.
+Independent evidence establishes the current kernel and integer 1323 relocations.
+An isolated wrong-type check accepted float 1323.0 only with component validation
+bypassed; full admission already rejected it. The independent pin now rejects it.
+A first regression edit invalidated the receipt's test-source binding. Admission
+stopped, but a prematurely launched suite still read the old public receipt and
+failed 5/18. The aggregate-only regression was relocated, the original bound test
+restored exactly, and the unchanged candidate admitted before a passing 19/19 rerun.
+No guest evidence was rewritten, fabricated or rerun for these corrections.
+
+Readiness is 23/27; next is `N12-SCHED-AP-WORKERS-001`, then SMP preemption,
+atomics and locks. At least 35 AP-worker/SMP-preemption control groups remain.
+Cycle208's repaired SMP groups are not counted as open. Retained nine memory/
+scheduler receipts, CPU211, boot210, ownership212, native source, entry/core,
+owner evidence and demo ISO are unchanged. Twenty-two current records are archived;
+source inventory is 1111 tests, not a full-suite result. No phase or flag closes.
+Full exact-candidate canonical/Doctor/release/publication/GitHub/review gates
+remain prerequisites to main merge; branch checkpoint backup is separate.
+[Evidence](checkpoints/cycle214-current-kernel-smp-scheduler-replay.md).
+Progress/architecture/checklist regression passes 61/61 without skips.
+Conservation verifies 359 source bindings, 1111-test inventory and 22 archives.
+
+## Cycle 213: Current-Kernel Scheduler Replay
+
+`N12-SCHED-001`, `N12-SCHED-PREEMPT-001` and `N12-SCHED-DEFERRED-001`
+advance N12.4/N12.5/N12.6/N12.7 and N36 under the corresponding
+`ADD-N12-SCHED-FOUNDATION-001`, `ADD-N12-SCHED-PREEMPT-001`,
+`ADD-N12-SCHED-DEFERRED-001` and `ADD-N36-RECEIPT-COVERAGE-001` requirements.
+The unchanged Cycle 210 kernel passes six fresh boots across three profiles,
+83 control groups and 595 cases (545 rejections and 50 native boundary cases).
+All 47 focused tests pass without skips, including 768 corrupted records,
+14 independent linked-identity mutations and 19 disabled native safeguards.
+Case counts overlap tests; these are not independent physical hardware samples.
+
+The deferred qualifier passed before the aggregate gate rejected two obsolete
+image pins. Independent evidence reconciled the hash and 1323 relocations;
+the same candidate then passed without guest reruns or rewritten observations.
+An isolated aggregate check accepted float 1323.0 when component validation was
+deliberately bypassed. The actual full gate already rejected it. Exact integer
+admission now rejects it independently, with before/after evidence preserved.
+
+Selected readiness advances from 19/27 to 22/27. Six memory receipts212,
+five CPU receipts211, six boot receipts210, ownership evidence212, entry/core,
+native source and the demo ISO remain unchanged. Twenty-two current records are
+archived verbatim. Inventory is 1109 Python tests, not a full-suite result.
+No phase or flag closes, and existing requirements cover this discovered work.
+
+Next is `N12-SCHED-SMP-001`: current-image SMP replay, AP-worker recorded
+admission and remaining AP-worker/SMP-preemption controls, then atomics and locks.
+At least 35 unproven control groups remain; SMP controls repaired in Cycle 208
+are not counted as still open. Main merge still requires exact-candidate
+canonical runtime-inclusive qualification, Doctor, release, publication and
+configured GitHub/review gates. Branch backup does not require a main merge.
+[Evidence](checkpoints/cycle213-current-kernel-scheduler-replay.md).
+Corrected metadata passes 60/60, zero skips, after three preserved stale-progress
+assertions (57/60). Conservation verifies 358 bindings and 22 archived records.
+
+## Cycle 212: Current-Kernel Memory and Multiprocessor Replay
+
+`N9-PMM-ACPI-CONSUMER-001`, N9.1/N9.2 through N9.3/N9.4 and dependent
+N8.1/N8.3/N8.5/N8.6, supports N10/N36 under `ADD-MEM-001`, `ADD-TIME-001`
+and `ADD-N36-RECEIPT-COVERAGE-001`. The unchanged Cycle 210 kernel completes
+twelve fresh VM boots across physical/virtual memory, interrupts, first AP,
+per-CPU runtime and IPI. All 421 control groups covering 1137 cases pass.
+
+All 93 focused tests pass with no skips: 1896 recorded-evidence corruptions,
+360 raw-mailbox cases, eight isolated IPI identity cases, 23 memory summary
+cases, 189 PMM marker-validator calls and disabled-parser/oracle detection.
+These counts overlap tests; they do not denote independent hardware samples.
+Three PMM and six VM accounting pins plus one IPI image pin were obsolete.
+Their genuine admission failures remain recorded; independently measured
+corrections admit identical candidates without rewriting or rerunning guests.
+
+Selected readiness advances from 13/27 to 19/27. Host ownership evidence is
+still Cycle 210; bounded live VM/IPI evidence is now Cycle 212. Exact original
+root restoration, local invalidation and AP resource release do not establish
+general task/CPU retirement. Six boot receipts210 and five CPU receipts211,
+native source, entry/core, prior checkpoints and the demo ISO remain unchanged.
+The 94 flags (38 open), 40 phases, 301 subphases, 57 added requirements and
+locked checklist coverage are preserved. Twenty-two current dictionaries are
+archived verbatim; the source inventory is 1108 tests, not an execution count.
+
+Next is `N12-SCHED-001`: eight scheduler/atomic/lock current-image profiles,
+AP-worker recorded admission and at least 35 executed-control groups remain.
+Canonical runtime-inclusive qualification, Doctor, release gate, exact-index
+publication scan and configured GitHub/review gates still precede main merge.
+Checkpoint commits can be pushed to PR #78 for cloud backup before those gates
+pass. No phase closes and no production claim changes.
+[Evidence](checkpoints/cycle212-current-kernel-memory-and-multiprocessor-replay.md).
+Corrected metadata passes 59/59 after one preserved stale IPI progress assertion
+failure (58/59). Conservation verifies 357 source bindings and 22 unchanged
+archived records. These focused results are not a canonical full-suite pass.
+
+## Cycle 211: Current-Kernel CPU Admission and Replay
+
+`N7-TRAP-001`, N7.1/N7.3/N7.4/N7.5/N7.6 and N36, advances under
+`ADD-N7-XSTATE-001` and `ADD-N36-RECEIPT-COVERAGE-001`. Five current-image CPU
+profiles pass fourteen final VM runs and 225 controls; the expected TCG exception
+limitation probe is separate. Kernel210, entry/core and boot receipts are unchanged.
+All 55 focused tests pass, including 3398 corrupt-control cases, 371 run-evidence
+cases, 32 independent identity/promotion cases and 80 malformed nested-build cases.
+
+The aggregate gate previously raised twelve exceptions for malformed nested
+objects and accepted a float relocation only when schema/component validation
+was deliberately bypassed. Guarded extraction and exact integer admission repair
+these counterexamples; all eighty full-gate cases now reject without exceptions.
+The full gate accepted none before repair. The stale trap image pin is updated
+from measured kernel evidence, not by rewriting guest receipts.
+
+Readiness is 13/27. Next is `N9-PMM-ACPI-CONSUMER-001`; fourteen memory/IRQ/SMP/
+scheduler/atomic/lock profiles, AP-worker recorded admission and at least 35
+executed-control groups remain. No phase/flag status changes or production
+promotion. Full canonical, Doctor, release, publication and configured GitHub/
+review checks still gate main merge. Checkpoints can be backed up on the branch
+without weakening those gates. No checkpoint, checklist, owner data, native byte
+or demo ISO is discarded. [Evidence](checkpoints/cycle211-current-kernel-cpu-admission-and-replay.md).
+Corrected metadata passes 58/58 without skips. Initial metadata passed 56/58;
+the combined run passed 248/249 with a remaining stale current-CPU expectation.
+That expectation is repaired and covered by the corrected metadata replay;
+the failed combined run is preserved, not promoted to a clean suite result.
+
+## Historical Cycle 210: Retained Map Growth and Boot Replay
+
+`N5-KMAP-001` and `N6-KENTRY-001`, N5/N6/N36, repair a genuine loader failure
+discovered during `N5-SYMBOLS-SEMANTICS-001`. The 148-page kernel overlapped the
+old guard at page 147. A fixed 192-page kernel reservation preserves an unmapped
+gap, stack guards and RW/NX stack plus R/NX handoff permissions. The handoff must
+fit the first populated table. Pages 148 and 192 work; 193 rejects before any
+table write. Work is covered by `ADD-MEM-001`, `ADD-BOOT-007` and
+`ADD-N36-RECEIPT-COVERAGE-001`; no checklist line or requirement is removed.
+
+Fifteen native mapping cases per debug/optimized profile, 17 core stages, two
+matching clean kernel builds, 246 kernel tests and 43 image controls pass.
+Six fresh VM boots include two kernel entries and terminate at unsigned denial
+without authority creation, state writes or post-exit firmware calls. Symbols,
+policy, loader, PooleBoot, revalidation and transfer receipts are current.
+All 97 focused Python tests pass, including 650 corrupt-symbol rejection cases
+at each admission boundary and 25 independent prior-identity rejections.
+Failed and superseded attempts remain documented separately.
+
+Readiness is 8/27. Next is `N7-TRAP-001`; nineteen CPU/memory/scheduler profiles
+need current-image replay and at least 35 executed-control groups remain unproven.
+No phase or flag status changes. Full exact-candidate canonical qualification,
+publication and review remain prerequisites to main merge. N0 custody,
+authenticated boot, general retirement, independent builders and production
+remain open. The demo ISO and locked checklist are unchanged.
+[Evidence](checkpoints/cycle210-retained-map-growth-and-boot-replay.md).
+Combined scoped regression passes 212/212, zero skips, including native transaction,
+entry/core, host provenance, boot and 57 repaired metadata tests. Counts overlap;
+this is not full canonical merge qualification.
+
+## Historical Cycle 209: Native AP-Worker Transactions
+
+`N12-SCHED-AP-WORKERS-001`, N12.4-N12.7/N36 and N6 image qualification, advances
+under `ADD-N12-SCHED-AP-WORKERS-001` and `ADD-N36-RECEIPT-COVERAGE-001`.
+The actual native controller now preserves state on failed enqueue, dispatch,
+acknowledgement, cancellation, timeout, reclaim, retirement, offlining and
+shutdown. It rejects generation wrap and uses checked/wide validation sums.
+Dispatch preflights all pending local consumer commits in transaction order;
+this neither fabricates remote acknowledgements nor proves cross-CPU atomicity.
+
+Before repair, 16 of 28 native cases failed in each host profile. Thirty final
+cases in debug and optimized builds, fifteen disabled-repair variants and six
+combined AP/SMP/deferred transaction test methods pass. All 17 core stages,
+two matching clean builds, 246 kernel tests and 43 hostile image controls pass.
+Compiler, order/anchor-test and three measured linker-boundary failures remain
+preserved. Each required layout endpoint grew by one page with W^X separation.
+
+Selected readiness is 3/27: entry, policy and errata remain current. Twenty-four
+profiles require changed-image replay from `N5-SYMBOLS-SEMANTICS-001`, then boot,
+CPU, memory and scheduler dependencies. The AP-worker flag is reopened;
+recorded admission and eighteen constant-only groups remain within at least
+35 unproven groups. No phase closes. N0 custody, N5 authentication, general
+task/CPU retirement, independent builders and full merge qualification remain.
+No new-kernel guest boot, new ISO or production promotion is claimed.
+[Evidence](checkpoints/cycle209-native-ap-worker-transactions.md).
+Final combined scoped regression passes 117/117 with zero skips, including 56
+metadata tests. Both initial combined failures (old transfer ID, then its
+synthetic fixture) are preserved and repaired. Conservation passes twenty
+unchanged archived records, 354 source bindings and 1,103 discovered tests.
+These counts overlap; this is not full canonical merge qualification.
+
+## Historical Cycle 208: SMP Admission and Executed Controls
+
+`N12-SCHED-SMP-001`, N12.4-N12.7/N36, advances under `ADD-N12-SCHED-SMP-001`
+and `ADD-N36-RECEIPT-COVERAGE-001`. Recorded SMP evidence is now reparsed and
+type-checked, including actual exits, paired runs, marker and handoff consistency,
+observations, host/native probes, source bindings, linked identity and control counts.
+The genuine before audit accepted 264/279 corruptions at runtime and 168/279 at
+the aggregate gate, with 4/18 exceptions. Fresh after-repair evidence rejects
+all 279 at both boundaries without exceptions.
+
+Sixteen constant-only groups are replaced by thirteen compiled-native groups
+(59 boundary scenarios) and three source-audit groups (51 rejected mutations).
+Two final boots pass all 32 groups/303 cases. All 18 focused tests pass, including
+47 additional record mutations, eight independent gate checks, detection of
+thirteen disabled safeguards and nine disabled transaction repairs, and nineteen
+native transaction tests in both debug and optimized builds. Two diagnostic boots,
+two superseded register-label boots, the obsolete aggregate image pin, both
+test-harness failures and both metadata assertion failures remain separate.
+Repaired metadata passes 55/55 and combined scoped regression 183/183, zero skips.
+Counts overlap and do not represent the full exact-candidate canonical suite.
+
+Readiness is 23/27. Next: `N12-SCHED-AP-WORKERS-001`, inspect and repair recorded
+admission plus eighteen constant-only groups before fresh qualification. SMP
+preemption, atomics and locks follow; at least 35 groups remain overall. The SMP
+flag stays open pending downstream integration and closure review. N0 custody,
+N5 authentication, general task/CPU retirement and full exact-candidate main-merge
+qualification remain open. No native kernel, prior qualified receipt, demo ISO,
+phase, flag, N12 exit or production status change is claimed. Source audit mutation
+is not hardware fault injection. [Evidence](checkpoints/cycle208-smp-admission-and-controls.md).
+
+## Historical Cycle 207: Current-Kernel Scheduler Replay
+
+`N12-SCHED-001`, preemption and deferred work, N12.4-N12.7/N36, advance under
+the foundation, preemption, deferred and N36 receipt-coverage requirements.
+Three fresh receipts bind unchanged kernel203. Six virtual boots, 83 groups and
+595 executed cases pass, including 545 rejections and 50 native boundary cases.
+All 47 focused tests pass, rejecting 768 corrupted records and eleven independent
+linked-identity mutations while detecting 19 disabled native variants. The stale
+deferred aggregate-pin failure is retained; the same candidate passes after its
+measured correction. No guest bytes were rewritten or boots rerun.
+
+Current-image readiness is 22/27. Five profiles remain from `N12-SCHED-SMP-001`:
+SMP scheduling, AP workers, SMP preemption, atomics and locks. SMP recorded
+admission and 16 executed-control groups come next; at least 51 groups remain
+overall. Prior records, native/entry/core/boot/CPU/memory bytes, owner data,
+checklist, normative charter and demo ISO are preserved. No phase/flag closure,
+general task/CPU retirement or N12 exit is claimed. Full exact-candidate
+qualification still precedes main merge; cloud backup is separate.
+[Evidence and limitations](checkpoints/cycle207-current-kernel-scheduler-replay.md).
+Combined scoped regression passes 166/166, zero skips; repaired metadata passes
+54/54 and conservation verifies 348 bindings and 19 unchanged archived records.
+Both initial metadata failures remain documented; counts overlap and full
+canonical merge qualification is still pending.
+
+## Historical Cycle 206: Current-Kernel Memory and Multiprocessor Replay
+
+`N9-PMM-ACPI-CONSUMER-001`, N9.1/N9.2 and N9.3/N9.4, followed by dependent
+N8.1/N8.3/N8.5/N8.6, advances under `ADD-MEM-001`, `ADD-TIME-001` and
+`ADD-N36-RECEIPT-COVERAGE-001`. Six fresh receipts bind unchanged kernel203;
+twelve virtual boots and 421 control groups covering 1,137 cases pass.
+All 93 focused tests pass, including 1,896 corrupted records, 360 raw mailbox
+cases, seven independent IPI image-pin cases and twenty memory-summary cases.
+Counts overlap. The initial obsolete IPI aggregate-pin rejection is retained;
+its measured correction admits the same candidate without rewriting guest bytes.
+
+Bounded VM/AP ownership is current again; general task/CPU retirement is not.
+Selected readiness is 19/27, with eight profiles remaining from `N12-SCHED-001`.
+SMP recorded admission and at least 51 later control groups remain open. Prior
+records, phase/flag statuses, native source, entry/core and boot/CPU receipts,
+PooleGlyph owner data, checklist and demo ISO remain unchanged. No N8/N9 exit,
+physical qualification or production promotion is claimed. Full exact-candidate
+qualification precedes main merge; branch backup is separate.
+[Evidence and limitations](checkpoints/cycle206-memory-and-multiprocessor-replay.md).
+Combined scoped regression passes 283/283, zero skips; corrected metadata passes
+53/53 and conservation verifies 347 bindings and 19 unchanged archived records.
+The initial three stale current-progress assertions and their correction remain
+recorded. Counts overlap; this is not full canonical merge qualification.
+
+## Historical Cycle 205: Current-Kernel CPU Replay
+
+`N7-TRAP-001`, N7.5/N7.6 and dependent N7.1/N7.3/N7.4, advances under
+`ADD-N7-XSTATE-001` and `ADD-N36-RECEIPT-COVERAGE-001`. Five fresh CPU
+receipts bind unchanged kernel203; fourteen virtual boots and 225 controls pass.
+Two WHPX exception runs deliver three exceptions and two recoveries each; one
+expected TCG limitation probe is retained separately. The obsolete aggregate
+trap kernel pin is reconciled from the measured image, without weakening gates.
+
+All 54 focused tests pass, including 3,398 corrupt control records, 371 malformed
+run-evidence cases and 26 aggregate identity/promotion rejections. The trap test
+observes 51 marker-validator calls and detects a disabled validator. Existing
+control-admission failures remain historical, not claimed as new repairs.
+Selected readiness is 13/27; fourteen memory/IRQ/SMP/scheduler/atomic/lock
+profiles remain from `N9-PMM-ACPI-CONSUMER-001`. At least 51 later scheduler
+control groups and SMP recorded admission remain open. No native source, prior
+boot receipt, phase, flag, demo ISO or production condition changes. Full exact-
+candidate qualification still precedes main merge; cloud backup is separate.
+[Evidence and limitations](checkpoints/cycle205-current-kernel-cpu-replay.md).
+Combined scoped regression passes 242/242, zero skips; metadata passes 52/52
+and conservation verifies 346 source bindings and 19 unchanged parent records.
+Counts overlap; full canonical qualification remains pending.
+
+## Historical Cycle 204: Current-Kernel Boot Replay
+
+`N5-SYMBOLS-SEMANTICS-001`, N5.6/N5.9 and N36, advances under existing
+`ADD-BOOT-007` and `ADD-N36-RECEIPT-COVERAGE-001`. Measured symbol pins and
+canonical PSYM1/PPOL1 vectors now bind unchanged kernel203. Fresh symbols,
+policy, load, PooleBoot, revalidation and transfer receipts pass. Six virtual
+boots include two actual kernel entries terminating in unsigned-development
+denial, with no authority, state writes or post-exit firmware calls.
+
+All 81 focused tests pass, including 650 corrupted symbol receipts and 20
+independent old-identity pin rejections. Two failed symbol attempts are retained.
+Selected readiness rises from 2/27 to 8/27; 19 dependent profiles remain from
+`N7-TRAP-001`. At least 51 later scheduler control groups and SMP recorded
+admission remain open. No native source, entry/core receipt, phase status,
+flag status, demo ISO or production condition changes. Full exact-candidate
+qualification still precedes main merge; branch backup is separate.
+[Evidence and limitations](checkpoints/cycle204-current-kernel-boot-replay.md).
+Combined scoped regression passes 188/188 with zero skips, including native
+transaction tests, exact entry reproduction, publication and 51 metadata/checklist
+tests. Conservation verifies 345 bindings and 19 unchanged parent-record archives.
+Initial roadmap/architecture checks pass 43/43. Counts overlap; full qualification
+remains pending.
+
+## Historical Cycle 203: Native SMP Transactions
+
+`N12-SCHED-SMP-001`, N12.1-N12.7 and N36, advances under existing
+`ADD-N12-SCHED-SMP-001` and `ADD-N36-RECEIPT-COVERAGE-001`. Native failure
+injection exposed partial queue, task, pending-ticket and counter mutations.
+Allocation-free copy/commit now protects acknowledgement, dispatch, cancellation,
+timeout and retirement. Ticket publication preflights the local commit and
+rollback paths; it does not fabricate a remote acknowledgement.
+
+Seven reproduced failures now pass. Expanded 19-case debug/optimized native
+runs and nine disabled-repair variants verify the bounded state repair. All
+17 reclamation-core stages pass; two clean builds match, with 246 kernel tests,
+43 image controls and 12 independent entry-gate rejection cases. Failed injector,
+manifest/build-ID attempts and the initial 57/58 focused regression are retained.
+
+The kernel changed, so current selected readiness is 2/27, not the historical
+22/27. Replay 25 source-dependent profiles from `N5-SYMBOLS-SEMANTICS-001`,
+including policy, boot, CPU, memory and scheduler dependencies. SMP recorded
+admission and its 16 constant-only groups remain open; at least 51 groups remain
+across three profiles. Reopen `FLAG-N12-SCHED-SMP-001`. No phase closes, and no
+new-kernel QEMU boot, cross-CPU atomicity proof, ISO or production promotion is
+claimed. Full canonical/Doctor/release/publication/check/review qualification
+still precedes main merge; cloud branch backup is separate.
+[Evidence and limitations](checkpoints/cycle203-native-smp-transactions.md).
+Combined scoped regression passes 109/109 with zero skips, including the corrected
+58-test focused scope, independent entry-gate check and 50 metadata tests.
+Conservation verifies 344 bindings and all 18 unchanged parent progress records.
+Initial 40/50 and 49/50 metadata failures remain recorded; counts overlap.
+
+## Historical Cycle 202: Deferred Admission and Executed Controls
+
+`N12-SCHED-DEFERRED-001`, N12.1-N12.7 and N36, advances under
+`ADD-N36-RECEIPT-COVERAGE-001`. Strict recorded admission and 14 executed
+control groups replace the previous unchecked records and constant-only entries.
+Two final virtual boots pass with 254 cases across 30 groups: 194 marker/probe/
+path rejections, 50 native boundary scenarios and ten source-audit rejections.
+All 17 focused tests pass, including 315 corrupted records, twelve disabled
+native variants and the existing debug/optimized transaction regressions.
+The original admission defects and failed mutation-target test are preserved.
+Combined scoped regression passes 144/144, zero skips; repaired metadata passes
+49/49 after two preserved stale-expectation failures. Conservation verifies
+338 source bindings and 17 unchanged parent-record archives. Counts overlap.
+
+Selected readiness is 22/27; at least 51 control groups remain unproven in
+three later scheduler profiles. Next is `N12-SCHED-SMP-001`: inspect recorded
+admission and implement its 16 executed groups before fresh qualification.
+AP workers, SMP preemption, atomics, locks and full exact-candidate qualification
+follow. No phase, flag, native kernel byte, demo ISO or production status changes.
+N0 custody, N5 authentication, general task/CPU retirement and PooleGlyph Phase 66
+remain open. [Evidence and limitations](checkpoints/cycle202-deferred-admission-and-controls.md).
+
+## Historical Cycle 201: Scheduler and Preemption Replay
+
+`N12-SCHED-001` and dependent `N12-SCHED-PREEMPT-001`, supporting
+N12.1/N12.2/N12.5/N12.6/N12.7 and N36, advance under
+`ADD-N36-RECEIPT-COVERAGE-001`. Four fresh virtual boots, 53 control groups,
+341 rejection cases and all 31 focused tests pass on the unchanged Cycle 197
+kernel. Evidence covers native two-task cooperative switching and four-task
+BSP timer/wakeup preemption, independent trace and linked-switch checks,
+453 malformed records and seven disabled native preemption variants.
+
+Selected readiness is 21/27. Six later profiles remain, starting with
+`N12-SCHED-DEFERRED-001`: repair recorded admission and execute its 14
+constant-only control groups before qualification. The at-least-65-group
+aggregate gap, full exact-candidate canonical/Doctor/release/publication/check/
+review qualification, general task/CPU retirement, N0 custody, N5 authentication,
+independent builders and production remain open. Retained Cycle 200 memory/AP
+evidence is not fresh Cycle 201 execution. No phase, flag, native source or ISO
+changes. The test inventory is 1,072, not full-suite execution.
+[Evidence and next steps](checkpoints/cycle201-scheduler-and-preemption-replay.md).
+Combined scoped regression passes 128 tests with zero skips in 171.172 seconds,
+including entry/core, deferred transactions, IRQ, scheduler/preemption and metadata.
+Repaired metadata passes 48/48; conservation verifies 17 parent records and 327
+bindings. Two failed metadata runs remain preserved; full qualification is pending.
+
+## Historical Cycle 200: Memory and Multiprocessor Replay
+
+`N9-PMM-ACPI-CONSUMER-001`, N9.1/N9.2 supporting N10/N36 and dependent
+VM/IRQ/AP/IPI profiles, advances under `ADD-N36-RECEIPT-COVERAGE-001`.
+Six profiles pass twelve fresh virtual boots, 421 control groups and 1,137
+executed rejection cases on the unchanged Cycle 197 kernel. All 93 scoped tests
+pass, including 1,896 corrupted records, 360 mailbox mutations, disabled-validator
+detection, 20 memory gate cases and four independent IPI pin rejection cases.
+
+Initial IPI admission failed because the aggregate gate retained the Cycle 192
+image hash. Its runtime and guest qualifier had passed. After the pin correction,
+the same unchanged receipt passes runtime and gate; the original failure remains
+recorded. No guest evidence is rewritten or extra boot counted.
+
+Selected readiness is 19/27. Current bounded VM and AP ownership is established,
+not general task-stack or CPU-retirement integration. Eight profiles remain from
+`N12-SCHED-001`, followed by preemption, deferred work, SMP scheduling, AP workers,
+SMP preemption, atomics and locks. Deferred admission and at least 65 control
+groups remain open. Full exact-candidate canonical/Doctor/publication/check/review
+qualification still precedes main merge. No phase, flag, kernel byte, ISO or
+production condition changes. Test inventory is 1,071, not full-suite execution.
+[Evidence and next steps](checkpoints/cycle200-memory-and-multiprocessor-replay.md).
+Combined scoped regression passes 327 tests with zero skips in 472.891 seconds.
+Corrected metadata passes 47/47 after six obsolete stale-receipt assertions were
+reconciled; the initial failure remains recorded. Conservation verifies 17
+archived parent records and 326 architecture bindings. Full qualification is pending.
+
+## Historical Cycle 199: CPU Control Admission and Replay
+
+`N7-TRAP-001` at N7.5/N7.6, followed by N7.1/N7.3/N7.4 CPU dependencies,
+advances under `ADD-N36-RECEIPT-COVERAGE-001`. A genuine current-positive trap
+audit found 663 of 1,084 corrupted control records accepted through runtime and
+aggregate gate, plus five runtime exceptions. Exact ordered field/type/value
+admission and malformed-root rejection repair this bounded defect. All original
+cases now reject through both paths without exceptions. This is recorded
+consistency, not authentication, proof of freshness or exclusion of coherent forgery.
+
+Five final profiles pass fourteen virtual boots and 225 executed controls on
+the unchanged Cycle 197 kernel. Six initial trap boots are superseded; one
+expected TCG exception limitation is separate from the two qualifying WHPX runs.
+All 54 focused Python tests pass, including 3,398 malformed control records,
+371 paired-run corruptions, 80 embedded-entry cases, 20 invalid dependencies and
+21 aggregate-gate cases. A failed stale aggregate-pin test remains preserved.
+
+Current selected readiness is 13/27. Resume at `N9-PMM-ACPI-CONSUMER-001` for
+fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles, then deferred admission
+repairs, at least 65 open control-execution groups and full exact-candidate
+canonical/Doctor/publication/configured-check/review qualification before merge.
+The discovered test inventory is 1,069, not a full-suite pass. No phase or flag
+closes; no new native kernel bytes, ISO, independent builder, physical target,
+signature or production promotion is claimed. Earlier evidence remains historical.
+[Evidence, failure history and next steps](checkpoints/cycle199-cpu-control-admission-and-replay.md).
+Combined scoped regression passes 233 tests with zero skips in 343.453 seconds;
+initial metadata passes 46/46 and conservation verifies 17 archived parent records
+and 325 current architecture bindings. This is not full canonical qualification.
+
+## Historical Cycle 198: Symbol Admission and Boot Replay
+
+`N5-SYMBOLS-SEMANTICS-001`, N5.6/N5.9 and N36, under existing
+`ADD-N36-RECEIPT-COVERAGE-001`, repairs symbol receipt admission. The genuine
+646-case pre-repair audit admitted 494 corruptions in runtime and 467 through
+the release gate, with six and eleven exceptions respectively. Strict typed
+evidence, bindings, reconstructed parser/activation results and exact control
+ordering now reject all 650 final cases through both paths without exceptions.
+Four additional cases cover the newly bound test source. This is recorded
+consistency, not authentication or proof of fresh execution.
+
+The symbol and policy campaigns pass; loader, PooleBoot and kernel transfer
+produce six final successful virtual boots, including two real native entries
+ending at the expected unsigned-development halt. All 80 focused Python tests
+pass. The first transfer qualification and one identity regression failed
+because the transfer validator still expected the Cycle 192 build ID. The
+corrected validator, three identity tests and two final transfer boots pass;
+the failed attempt remains historical, not counted as final qualification.
+
+Selected readiness is 8/27, with 19 profiles pending from `N7-TRAP-001`:
+CPU, then memory/IRQ/SMP, scheduler, atomics and locks. Deferred admission
+defects and at least 65 control-execution groups remain open. Full exact-source
+canonical/Doctor, release, publication, configured-check and review gates must
+pass before main merge. A pushed development checkpoint provides cloud backup
+without waiving these requirements. No phase or flag closes, no native kernel
+bytes or ISO change, and no release or production promotion occurs.
+[Evidence, failure history and next steps](checkpoints/cycle198-symbol-admission-and-boot-replay.md).
+Closeout's combined scoped regression passes 178 tests, zero skips; initial
+metadata passes 45/45. Conservation validates 16 parent-record archives and
+324 current source bindings while preserving owner, checklist and ISO evidence.
+
+## Cycle 197: Native Deferred Transactions
+
+`N12-SCHED-DEFERRED-001`, under existing `ADD-N12-SCHED-DEFERRED-001` and
+`ADD-N36-RECEIPT-COVERAGE-001`, exposed native state changes after rejected
+counter-exhaustion operations, premature shutdown retirement and fault-path
+fairness changes. Fixed-size candidate state now commits only accepted
+operations and the explicitly documented diagnostic transitions. Shutdown
+must close intake before retirement. This is controller transaction integrity,
+not new cross-CPU synchronization or arbitrary callbacks.
+
+Eleven of the original 19 native tests failed before repair; all 19 passed
+afterward. Expanded coverage passes 21 tests at each of optimization levels
+0 and 3. Four independently compiled disabled-fix variants fail as intended.
+All 17 native core stages, two exact matching builds, 43 entry rejection
+controls and 54 scoped Python tests pass. The measured kernel has 530,072
+canonical bytes, 602,112 loaded bytes and 1,326 relocations, SHA-256
+`B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1`.
+
+The new image has 3/27 current selected checks; earlier passes remain historical
+evidence for their exact kernels. Reopen `FLAG-N12-SCHED-DEFERRED-001` until
+corrected native guest and hostile-control qualification passes. The roadmap
+retains 94 flags, now 36 open, and all 57 existing additions without changing
+the locked 8,996-requirement checklist or its coverage. No phase closes.
+
+Required next subphases, in dependency order:
+
+1. Requalify N5 symbols, then boot/load/revalidation/transfer dependencies.
+2. Replay affected CPU, memory, IRQ and SMP profiles on the changed image.
+3. Repair deferred recorded-evidence admission, then replace all 14 constant-only
+   deferred control groups with executed, source-bound controls and fresh boots.
+4. Finish remaining scheduler, atomic and lock evidence; at least 65 known
+   control-execution groups remain unproved across four qualifiers.
+5. Run full exact-candidate canonical/Doctor, publication and review gates before
+   main merge. No release or production promotion follows from host passes.
+
+The genuine pre-repair 121-case audit admitted 114 malformed records in runtime
+and 47 through the release gate; four runtime exceptions and one gate exception
+also remain recorded. The private old-kernel two-boot diagnostic is not final
+qualification, and no new-kernel guest boot or ISO is claimed this cycle.
+[Evidence and failure history](checkpoints/cycle197-native-deferred-transactions.md).
+
+## Cycle 196: Executed Preemption Controls
+
+`N12-SCHED-PREEMPT-001`, supporting N12.1/N12.2/N12.3/N12.5/N12.6/N12.7 and N36,
+now executes the nine formerly constant-only groups. Fifty native-controller
+host rejection cases and seven linked/source audit cases replace those records.
+Seven disabled native variants and disabled-auditor regressions detect missing
+validation. Strict recorded evidence and typed counts are required before
+admission, and rejected qualification cannot replace or create output.
+
+Two final guest boots, 246 kernel host tests, 226 rejection cases in 25 groups
+and 17 focused tests pass, including 232 corrupt records. Four earlier boots
+are superseded, not counted as final. All history and the mistaken pre-test
+runner invocation are retained. No native kernel byte or ISO changed.
+
+The current selected projection is 21/27. Six profiles remain, beginning
+`N12-SCHED-DEFERRED-001`; at least 65 control-execution gaps remain in four
+later qualifiers. Full exact-candidate canonical/Doctor/publication/review
+gates still precede main merge. Roadmap 196 preserves Cycle 195 as historical
+records. The 1,060 discovered Python tests are inventory, not a suite pass.
+No phase, flag or production condition closes. Evidence and non-claims are in
+[the Cycle 196 checkpoint](checkpoints/cycle196-preemption-executed-controls.md).
+Broader regression passes 339 tests with zero skips, including exact kernel
+reproduction. Initial conservation passes; final metadata and publication
+checks remain mandatory before committing this checkpoint.
+
+## Cycle 195: Scheduler Recorded Evidence
+
+`N12-SCHED-001`, supporting N12.1/N12.2/N12.5/N12.6/N12.7 and N36, repairs
+recorded scheduler receipt admission. Two final guest boots, 115 executed
+rejection cases in 28 groups and 246 native kernel host tests pass. All 14
+scheduler tests pass, including 221 corrupted receipts; the cloud-backup
+regression passes 23 scheduler/publication tests with zero skips.
+
+The selected current-kernel projection is 20/27. Seven profiles still fail
+current-image admission: preemption, deferred work, SMP scheduling, AP workers,
+SMP preemption, atomics and locks. At least 74 control-execution gaps also
+remain: nine newly verified preemption controls plus the prior 65 in four
+later qualifiers. The nine-record loop appends constant pass records without
+per-control rejection calls; source audit and a regression bind this finding.
+This does not prove a kernel preemption defect. Existing receipt-coverage and
+preemption flags track the repair. GitHub reports a conflict-free draft, not
+qualifying check results.
+Completed checkpoints are backed up on the development branch. The intermediate
+backup is retained as history, not rewritten after reconciliation. Roadmap 195
+archives five replaced current records; retained memory/AP/IPI evidence is not
+counted as new scheduler execution. Architecture now directly binds scheduler
+sources, the audited preemption qualifier and both checkpoints, for 310 bindings.
+The 1,050 discovered Python
+tests are inventory, not a full-suite pass. No prior failure is erased.
+
+The original 219-record audit admitted 172 runtime and 100 actual-gate corruptions
+and raised four/nine exceptions. After repair all 219 reject without exceptions.
+An early payload test used a stale public receipt: two passes, one failure, one
+error. Genuine fresh evidence and positive-baseline checks resolved that failure
+without weakening validation. Two initial boots remain superseded, not final.
+
+Combined scoped regression passes 322 tests, zero skips, including exact entry
+reproduction. The first metadata run passed 42/43; an old assertion still
+expected scheduler evidence to be stale. Corrected 43/43 passes, preserving the
+failed run. Final metadata and conservation checks cover closeout changes.
+
+Next: `N12-SCHED-PREEMPT-001`, repairing recorded-evidence admission and the nine
+constant-only controls before accepting fresh qualification, then the remaining
+dependencies. No phase, flag or production gate closes. Full exact-
+candidate canonical/Doctor/publication/configured-check/review gates remain
+required before main merge. Native kernel and demo ISO bytes are unchanged.
+[Evidence, failure history and resume order](checkpoints/cycle195-scheduler-recorded-evidence.md).
+
+## Cycle 194: Current-Kernel Memory and AP Replay
+
+N9.1/N9.2 supporting N10/N36 begins with `N9-PMM-ACPI-CONSUMER-001` and
+freshly qualifies PMM, VM, IRQ, first AP and per-CPU runtime on the unchanged
+Cycle 192 kernel. Ten fresh boots, 388 control groups, 528 executed rejection
+cases and 246 native kernel host tests per qualifier pass. All 57 focused tests
+pass, including 990 corrupted records through runtime and actual release gates.
+A new regression detects disabled PMM parser and independent accounting checks.
+
+Selected readiness is 19/27. Current active-root VM ownership is re-established;
+IPI192 and CPU193 remain valid retained evidence, not new Cycle194 boots.
+Six replaced current records are archived without changing historical evidence.
+Architecture binds 303 sources; 1,044 discovered Python tests are inventory,
+not a full-suite pass. The initial private measurement-helper summary-key error
+is retained and corrected by counting independently validated execution arrays.
+
+Next is `N12-SCHED-001`, then preemption, deferred work, SMP scheduling, AP
+workers, SMP preemption, atomics and locks. The existing 65 scheduler control
+execution gaps must be repaired before full exact-candidate canonical/Doctor/
+publication/configured-check/review qualification and main merge. No phase,
+flag, production gate, checklist, PooleGlyph owner file or demo ISO changes.
+[Exact evidence and limitations](checkpoints/cycle194-memory-runtime-replay.md).
+Combined scoped regression passes 307 tests, zero skips, including exact entry
+reproduction; initial metadata passes 42/42 and conservation passes. The initial
+combined invocation ran zero tests because of argument order, then the corrected
+invocation passed. This failure remains recorded, not counted as a test result.
+
+## Cycle 193: Current-Kernel CPU Replay
+
+N7.3-N7.6 supporting N36, beginning `N7-TRAP-001`, now has five freshly
+qualified profiles on the unchanged Cycle 192 kernel: traps, CPU policy, xstate
+ownership, xstate exceptions and privilege/MSR policy. Fourteen final guest
+boots, 225 executed rejection controls, linked exception/MSR audits and 246
+kernel host tests per qualifier pass. One expected software-emulator limitation
+probe is retained separately from the two hardware-accelerated exception boots.
+
+The 51-test focused regression rejects 371 corrupted execution records through
+runtime and actual release gates, 80 malformed embedded-entry records, and 20
+invalid current-entry dependencies. A new regression verifies all 51 trap
+control calls and detects a deliberately disabled validator. Prior receipts
+remain historical; none were rebound to the new image.
+
+Selected readiness is 14/27. Next is `N9-PMM-ACPI-CONSUMER-001`, then VM,
+interrupt/time, first AP, per-CPU runtime, scheduler, preemption, deferred work,
+SMP scheduling, AP workers, SMP preemption, atomics and locks. The 65 scheduler
+control-execution gaps and full exact-candidate canonical/Doctor/publication/
+configured-check/review requirements still block main merge. No phase, flag or
+production gate closes. The checklist, PooleGlyph owner data and demo ISO remain
+unchanged. Architecture binds 302 sources; 1,042 discovered tests are inventory,
+not a full-suite pass.
+[Exact evidence and limitations](checkpoints/cycle193-current-kernel-cpu-replay.md).
+Combined regression passes 249 tests, zero skips, including exact entry
+reproduction. The initial metadata 40/41 result exposed one stale projection
+assertion; corrected 41/41 passes, and the failure remains preserved.
+Requirement, history and owner-data conservation pass.
+
+## Cycle 192: Native Mailbox Oracle
+
+`N8-SMP-MAILBOX-ORACLE-001` now passes bounded live qualification: two final
+four-vCPU boots, 609 rejection cases in 33 groups and 246 native kernel host
+tests. Loader, PooleBoot, revalidation and transfer receipts are admitted;
+57 scoped regression tests pass. The changed kernel's selected projection is
+9/27; Cycle 191's 19/27 is historical, not evidence for the new image.
+
+Eighteen dependent CPU, memory, interrupt, AP, scheduler, atomic and lock profiles
+still need qualification, starting with `N7-TRAP-001`. At least 65 scheduler
+control-execution gaps and full exact-candidate qualification remain. Roadmap 192
+archives all eleven prior current records, binds the new receipts, and explicitly
+marks current CPU/VM qualification pending. Architecture inventory is 299 source
+bindings; Python inventory is 1,041 discovered tests, not a full-suite pass.
+No phase, subphase, flag or gap is closed. Earlier backups and failed results
+remain preserved, along with the unchanged checklist, demo and PooleGlyph data.
+[Evidence and ordered subphases](checkpoints/cycle192-native-mailbox-oracle.md).
+Combined regression passes 189 tests, zero skips. Corrected reconciliation passes
+33/33; the initial 30/33 result is retained. Checklist and history conservation
+pass. This remains scoped evidence, not full canonical or main-merge qualification.
+
+## Cycle 191: IPI Recorded Evidence
+
+`N8-SMP-IPI-001`, N8.5/N8.6/N9.5 supporting N36, repairs strict recorded
+execution, typed accounting, raw frame-address checksums, exact control counts
+and pre-write admission. Three constant-only controls now exercise the real
+release-accounting validator. Two final four-vCPU boots, 249 executed cases in
+30 categories and all 31 focused tests pass. All 66 initial counterexamples
+reject without exceptions; the original failures and initial boots are retained.
+
+Selected readiness is 19/27. The bounded PKAPOWN1 AP-ownership replay is current,
+but full AP mailbox inputs are not exported for independent host checksum
+recomputation. Next is `N8-SMP-MAILBOX-ORACLE-001`, under existing
+`ADD-N36-RECEIPT-COVERAGE-001` / `FLAG-N36-RECEIPT-COVERAGE-001`: export native
+baseline/runtime snapshots, independently recompute before normalization, reject
+coherent input corruption, and requalify the changed kernel and its dependencies.
+Then resume eight scheduler-through-lock profiles, the 65 scheduler control
+gaps and full exact qualification. This mailbox gap blocks merge qualification.
+
+All requirement, phase and flag states are preserved. Inventory is 1,028 methods
+and 289 bindings, not a full-suite pass. Kernel/ISO bytes and PooleGlyph are
+unchanged. General task-stack/CPU retirement, hardware and production remain open.
+[Detailed evidence and ordered subphases](checkpoints/cycle191-ipi-recorded-evidence.md).
+Combined scoped regression passes all 314 tests, zero skipped. The initial
+312/314 historical-assertion failure is retained; conservation passes.
+This is not full canonical qualification or main-merge acceptance.
+
+## Cycle 190: Per-CPU Recorded Evidence
+
+`N8-SMP-PERCPU-RUNTIME-001`, N8.5 supporting N36, repairs raw recorded execution,
+typed runtime/cleanup accounting, dynamic dual-checksum comparison, malformed
+input handling and exact per-category rejection counts. All 69 initial cases
+now reject without exceptions; the earlier 57 runtime and 48 gate admissions,
+one runtime and four gate exceptions remain preserved.
+
+Two final virtual boots, 159 executed cases in 19 categories and all 10 focused
+tests pass. Permanent regression covers 253 record corruptions, six root/control
+shapes and two output-preservation cases. Two initial boots remain superseded.
+Selected readiness is 18/27; nine profiles remain from `N8-SMP-IPI-001`, then
+the 65 scheduler evidence gaps and full exact qualification before PR #78 merge.
+
+Existing `ADD-N36-RECEIPT-COVERAGE-001` tracks the repair. Requirements, additions,
+history and phase/flag states are retained. Inventory is 1,021 discovered methods
+and 288 architecture bindings, not a full-suite pass. Native kernel/ISO bytes
+and PooleGlyph are unchanged. General AP ownership integration, CPU retirement,
+hardware, independent builders and production remain open.
+[Cycle 190 evidence](checkpoints/cycle190-percpu-recorded-evidence.md).
+
+Combined scoped regression passes 282 distinct tests, zero skipped. Checklist,
+history, native products and owner data are conserved. Development-branch backup
+does not satisfy full canonical qualification or authorize main merge.
+
+## Cycle 189: First-AP Recorded Evidence
+
+`N8-SMP-FIRST-AP-001` at N8.5, supporting N36, repairs recorded execution,
+typed lifecycle/cleanup accounting and fail-closed malformed input. Each raw
+run validates before allowing only TSC/checksum differences. All67 initial
+counterexamples now reject; earlier55runtime/46gate admissions and1runtime/
+4gate exceptions remain preserved.
+
+Two final virtual boots,72 executed controls and all12 focused tests pass,
+including159 recorded mutations, six root/control shapes and two rejected-output
+cases. Synthetic dynamic consistency is explicitly separate from live evidence.
+Two initial boots and two failed intake-helper pins are retained separately.
+Selected readiness is17/27; ten profiles remain from
+`N8-SMP-PERCPU-RUNTIME-001`, followed by the65scheduler execution-evidence gaps
+and full exact-candidate qualification before PR #78 merge.
+
+Existing `ADD-N36-RECEIPT-COVERAGE-001` tracks this repair. All requirements,
+additions, historical evidence and phase/flag states are retained. Inventory is
+1,016 discovered methods and287 architecture bindings, not a full-suite pass.
+Native kernel/ISO bytes and PooleGlyph are unchanged; no phase, flag, native
+feature, general CPU retirement or production gate closes.
+[Cycle 189 evidence](checkpoints/cycle189-first-ap-recorded-evidence.md).
+
+Combined scoped regressions pass 271 distinct tests, zero skipped. Checklist,
+history, native-product and owner-data conservation pass. This checkpoint is
+eligible for development-branch backup, not main merge or production promotion.
+
+## Cycle 188: Interrupt/Time Recorded Evidence
+
+`N8-IRQ-001` at N8.1/N8.3, supporting N36, repairs recorded-run admission,
+typed observation/summary checks and bounded calibration before frequency
+arithmetic. The initial 64-case audit exposed 52 runtime and 44 gate admissions,
+one runtime and four gate exceptions, and a zero-sample division error. All
+original cases now reject without validator exceptions; failures are preserved.
+
+Two final virtual boots, 58 executed controls and all 12 focused tests pass,
+including 229 recorded mutations, six malformed root/control cases, six direct
+clock cases and two output-preservation cases. Initial boots are superseded.
+Selected readiness is 16/27; eleven profiles remain from
+`N8-SMP-FIRST-AP-001`, followed by at least 65 scheduler control-execution gaps
+and exact full qualification before PR #78 merge.
+
+Existing `ADD-N36-RECEIPT-COVERAGE-001` tracks the repair. Inventory is 1,011
+discovered tests and 286 architecture bindings, not a full-suite pass. All
+requirements, additions, phase/flag states and historical evidence are retained.
+No native feature, phase, flag, ISO or production gate closes. PooleGlyph and
+kernel/demo bytes are unchanged.
+[Cycle 188 evidence](checkpoints/cycle188-irq-recorded-evidence.md).
+
+The combined scoped suite passes 258 tests, zero skipped, with unchanged source
+snapshots. Checklist, history, phase/flag, native product and owner-data
+conservation pass; full canonical qualification remains a separate gate.
+
+## Cycle 187: Virtual-Memory Recorded Evidence
+
+`N9-VM-DIRECT-MAP-001` at N9.3/N9.4, supporting N36, repairs saved VM
+execution, direct-map accounting and typed-summary admission. The initial audit
+found 46/65 corruptions accepted by runtime and 45/65 by the actual gate;
+all 65 now reject on genuine regenerated evidence. Strict pair validation and
+independent handoff-derived accounting preserve existing retention checks.
+
+Two final virtual boots, 48 controls and all 10 focused tests pass, including
+115 malformed records through runtime and gate plus two rejected-output cases.
+The initial two boots remain superseded, and no positive receipt is rebound.
+Selected readiness is 15/27; twelve profiles remain from `N8-IRQ-001`, followed
+by individually bound rejection evidence for at least 65 scheduler controls
+and full exact-candidate qualification before PR #78 merge.
+
+Existing `ADD-N36-RECEIPT-COVERAGE-001` tracks this work. Inventory is 1,006
+discovered tests and 285 architecture bindings, not a full-suite pass. All
+requirements, additions, prior evidence and normative conditions remain; no
+phase or flag closes. Kernel/ISO bytes and PooleGlyph are unchanged. No new
+kernel feature, target hardware or production readiness is claimed.
+[Cycle 187 evidence](checkpoints/cycle187-vm-recorded-evidence.md).
+
+The combined suite passes 245 distinct methods, zero skipped; its raw repaired
+run includes 16 repeated host-toolchain executions, recorded separately. The
+initial 244/245 historical-hash assertion failure remains preserved. Checklist,
+historical evidence, native products and owner-data conservation pass.
+
+## Cycle 186: PMM Recorded Evidence
+
+`N9-PMM-ACPI-CONSUMER-001` at N9.1/N9.2, supporting N10/N36, repairs
+saved PMM execution and ACPI accounting admission. Before repair, 62/65
+corruptions passed the runtime and 61/65 passed the actual gate. Strict two-run
+validation and independently rederived memory accounting now reject malformed
+records. The qualifier also preserves output when validation rejects.
+
+Two final virtual boots, 191 marker controls and all 12 focused tests pass,
+including 234 recorded-evidence corruptions through runtime and actual gate.
+The two initial boots and their audit remain superseded evidence. No positive
+receipt is rebound; kernel product bytes and prior CPU/boot receipts are unchanged.
+
+Selected readiness is 14/27, with thirteen profiles pending from
+`N9-VM-DIRECT-MAP-001`. At least 65 scheduler execution-evidence gaps and full
+exact-candidate qualification still precede PR #78 merge. Existing
+`ADD-N36-RECEIPT-COVERAGE-001` tracks this work; no phase or flag closes.
+Inventory is 1,002 discovered tests and 284 architecture bindings. All checklist
+requirements, additions, historical records and normative conditions remain.
+No new kernel feature, target hardware, independent builder, ISO or production
+readiness is claimed. [Cycle 186 evidence](checkpoints/cycle186-pmm-recorded-evidence.md).
+
+The combined scoped suite passes 234 tests, zero skipped. The initial 233/234
+historical-record assertion failure and private conservation-helper failure
+remain preserved. All 65 original counterexamples now reject in both runtime
+and gate; historical/checklist/product/owner-data conservation passes.
+
+## Cycle 185: CPU Recorded Evidence
+
+`N7-TRAP-001` at N7.5/N7.6, supporting N3.5 and N36.1/N36.2, now validates
+strictly typed recorded execution across five CPU profiles. The old trap
+validator and aggregate gate accepted all 42 malformed exit-status mutations;
+the shared pair validator repairs that gap. Null run-list and revalidation
+objects now fail the CPU gate instead of raising exceptions.
+
+Five genuine regenerated receipts pass fourteen final virtual boots and 225
+marker controls on unchanged kernel bytes. All 50 focused tests pass, including
+98 exit, 112 coverage and 161 evidence mutations through both runtime and actual
+gates. Positive receipts are never rebound. The expected TCG diagnostic is
+separate from two successful WHPX exception boots. Six superseded trap boots,
+the initial test-field mistake and both gate exceptions remain preserved.
+
+Selected readiness is 13/27; firmware, boot-trust and ELF separately pass.
+Eight prior boot receipts remain unchanged. Next is `N9-PMM-ACPI-CONSUMER-001`
+and fourteen memory-through-lock replays. At least 65 scheduler controls still
+need individually bound rejection execution before exact-candidate canonical/
+Doctor/publication/review qualification and PR #78 merge. This work remains
+under `ADD-N36-RECEIPT-COVERAGE-001`; no phase or flag closes.
+
+The inventory is 998 discovered tests and 283 architecture bindings, not a full
+suite pass. All 8,996 requirements, 57 additions, 40 phases, 301 subphases,
+94 flags with 35 open and 20 gaps remain accounted for. Historical records and
+the normative charter are preserved. No new kernel feature, target-hardware
+proof, independent builder, new ISO or production readiness is claimed.
+[Cycle 185 evidence and exact next move](checkpoints/cycle185-cpu-recorded-evidence.md).
+
+The combined closeout passes 221 tests with zero skips. Two initially stale
+roadmap assertions were corrected; the failed 219/221 run is preserved.
+Checklist, historical evidence, source/product and owner-data conservation pass.
+
+## Cycle 184: Boot-Chain Host Provenance
+
+`N5-SYMBOLS-SEMANTICS-001` at N5.6/N5.9, supporting N3.5 and N36.1/N36.2/N36.10,
+now has eight current generated boot-chain/prerequisite receipts. Six host
+qualifiers isolate ambient build options and verify pinned host inputs.
+Typed profile evidence and source-binding sets are enforced; malformed output
+rejects before writing. Trust/PooleBoot schema counts match declared inputs.
+PooleBoot's two counters now require the eight tests actually executed, and
+twelve forged-count cases reject through the real release gate. Repeated
+roadmap generation no longer mutates prior phase-gap results.
+
+All 109 focused boot-chain methods pass. Six final headless QEMU boots include
+two entries into the unchanged kernel; eight superseded successful boots and
+thirteen failed runner records remain separate, including the first metadata
+closeout's stale schema pins. The selected projection is 8/27;
+separate firmware, boot-trust and ELF checks pass. N5's broader exit stays open.
+The source inventory is 994 discovered tests and 279 architecture bindings,
+not a full-suite pass. All 8,996 requirements, 57 additions, 40 phases, 301
+subphases, 94 flags (35 open) and 20 program gaps remain accounted for.
+
+Next is `N7-TRAP-001` and nineteen CPU/memory dependencies, followed by the
+existing 65 scheduler control-execution gaps and full exact-candidate
+canonical/Doctor/publication/review qualification before PR #78 merge.
+The schema and evidence work remains under `ADD-N36-RECEIPT-COVERAGE-001`;
+no existing phase, subphase or flag closes. PooleGlyph, native Rust, kernel
+bytes and the frozen demo are unchanged. No independent builder, new native
+feature, new ISO or production readiness is claimed.
+[Cycle 184 evidence and limits](checkpoints/cycle184-boot-host-provenance.md).
+
+Closeout: the repaired metadata/checklist/architecture/core suite passes all
+46 methods, the combined hostile-environment regression passes all 171, and
+history/source/product conservation passes. No skips or full-canonical claim.
+Current partial measurements remain separate from the historical release-gate
+file, which is not qualification for this candidate.
+
+## Historical Cycle 183: Shared Loader And Entry Provenance
+
+`N5-ELF-001` at N5.5, supported by N3.5 and N36.1/N36.2/N36.10, now requires
+typed host-profile evidence and binds eight additional build/profile/test
+inputs. The qualifier rejects invalid receipts before creating or replacing
+output. Kernel entry inherits all 19 declared loader inputs in 72 total source
+bindings; its positive source-mutation test now uses the untouched generated
+receipt. Actual ELF and entry qualifications pass with pinned host inputs and
+hostile environment overrides, and all 59 focused regression tests pass.
+
+ELF executes 12 Rust tests, 129 negative controls and 16,384 differential cases
+with zero mismatches. Entry executes 245 host tests and 43 controls with two
+matching clean builds. Exact receipts reproduce; all kernel product fields and
+bytes remain unchanged. Old receipts, failures and the earlier interrupted
+cloud checkpoint remain separate historical evidence.
+
+The separate ELF gate passes; the measured selected projection is still 3/27,
+with 24 dependent checks stale. Next is `N5-SYMBOLS-SEMANTICS-001`, followed by
+ordered N5 policy/boot and CPU/memory replay. At least 65 scheduler controls
+still need individually bound execution evidence before final qualification.
+Full canonical/Doctor, publication and review conditions precede PR #78 merge.
+
+The reconciled inventory is 986 discovered Python tests and 263 architecture
+bindings, not a full-suite pass. All 8,996 requirements, 57 additions, 40 phases,
+301 subphases and phase/flag states are conserved. N0 custody, broader N3/N36
+host/evidence work, independent builders, native feature work and production
+exits remain open. No new guest boot, native feature, ISO, phase/flag closure or
+production promotion is claimed. PooleGlyph and the frozen demo are unchanged.
+[Cycle 183 evidence and limits](checkpoints/cycle183-elf-loader-provenance.md).
+
+The combined focused suite passes 105 Python tests with zero failures or skips,
+including twelve aggregate entry rejection cases. The separate 45-test
+metadata/core/checklist suite and historical/source conservation check pass.
+These results are not the full canonical release gate or a production exit.
+
+## Historical Cycle 182: Host Toolchain Reproduction Repair
+
+`N6-KENTRY-001` at N6.4-N6.6 and N3.3/N3.5/N3.6 isolates the probe-size drift
+to MSVC CRT library selection through seven controlled builds. Four hash-pinned
+host input trees and shared environment sanitation restore exact kernel-entry
+and fixture receipt reproduction. The first hostile run exposes a UEFI fixture
+linker-option leak; the repaired suite passes all 39 tests with zero skips.
+Kernel bytes remain unchanged. Entry binds six additional host inputs; no exact
+comparison is weakened and all failed/superseded evidence remains preserved.
+
+The selected consistency projection is now 3/27: 24 dependent checks reject
+stale entry/fixture provenance, not changed kernel functionality. Replay `N5-ELF-001` and
+N5 symbols/boot, then CPU/memory dependencies. Implement individual execution
+evidence for the existing 65 scheduler control gaps before final scheduler
+qualification, full canonical/Doctor/publication/review gates and PR #78 merge.
+Then resume N12.3 live task contexts. Main stays qualified Cycle 176.
+
+The host pin is not complete host attestation: system DLLs, parent Cargo config,
+concurrent tamper, installer/source provenance and independent builders remain
+open under N3/N36. No phase or flag closes, no native/PooleGlyph/demo bytes or
+normative charter conditions change, and no new ISO or production claim follows.
+[Cycle 182 evidence](checkpoints/cycle182-host-toolchain-repair.md).
+
+Progress reconciliation passes 45 metadata/core/checklist tests. Architecture
+binds 259 paths and discovery inventories 981 Python tests, not a full-suite
+pass. Historical failures, all requirement counts and all phase/flag states
+are conserved; complete qualification and production exits remain open.
+
+## Historical Cycle 181: Memory Replay And Control-Evidence Gap
+
+`N9-PMM-ACPI-CONSUMER-001` at N9.2-N9.4 and the dependent N8/N12 profiles
+pass fourteen final qualifiers and 28 virtual boots on unchanged Cycle 177
+native bytes. Four earlier atomics/locks boots are superseded and one SMP
+source-audit failure occurred before guest launch. All 27 selected native
+consistency checks pass; 164 focused tests pass and two optional transcripts
+skip. Fresh guest markers, current entry, independent memory oracles and
+the exact generated receipts are checked without in-memory receipt rebinding.
+
+The source audit now pins ten SMP scheduler Rust tests and both exhaustion
+regressions. Four source-audit negatives and 79 aggregate identity/accounting
+cases pass. However, the 660 reported control groups / 2,126 cases include at
+least 65 PKSCHED3/4/5/6 attestations without individual rejection execution.
+This is a merge blocker under existing `ADD-N36-RECEIPT-COVERAGE-001`, not a
+new phase or a reason to describe all reported cases as executed rejections.
+
+The September 26 resumption reconciles the interrupted September 12/13
+checkpoint. Architecture binds 251 paths; the 962-test discovery inventory is
+not a full-suite pass. N0 custody remains separate, all phase/flag states and
+the normative charter remain unchanged, and main remains qualified Cycle 176.
+The combined closeout has 331 passes, one exact-entry-reproduction failure and
+two skips. A retained rebuild matches kernel bytes and every product field;
+only the host-only PKELF1 probe size differs (148,480 versus 147,968 bytes).
+The cause remains unproven; no public receipt is replaced or test weakened.
+Next resolve `N6-KENTRY-001` with N2 host-tool provenance, then repair PKSCHED3
+control execution, PKSCHED4/5/6 and broader coverage;
+run full exact-candidate qualification/publication/review before PR #78 merge
+and N12.3 live context/CPU-retirement integration. No new ISO or production
+claim follows. [Cycle 181 evidence](checkpoints/cycle181-memory-qualification.md).
+
+## Historical Cycle 180: Current-Kernel CPU Qualification
+
+`N7-TRAP-001` at N7.5/N7.6 and the dependent N7.1/N7.3/N7.4 profiles pass
+fourteen fresh virtual boots and 225 controls on the unchanged Cycle 177 kernel.
+Two WHPX exception boots are separate from one expected TCG limitation probe.
+All 46 focused CPU tests pass, including eighty entry substitutions, twenty
+invalid entry dependencies and nineteen aggregate gate controls. Positive tests
+now use untouched generated receipts; old trap digest/relocation pins are
+repaired from fresh measurements. Failures and old receipts remain preserved.
+
+The combined CPU/boot/entry/roadmap/core/checklist closeout passes 174 tests,
+including exact entry-product reproduction. This includes the 46-test subset.
+
+Selected readiness is 13/27. Fourteen memory-through-lock profiles remain stale,
+beginning `N9-PMM-ACPI-CONSUMER-001`. Exact source/marker/channel/entry/core
+bindings are checked; the 962-test inventory is not a full-suite result.
+Architecture binds 250 paths. Main remains qualified Cycle 176; draft PR #78
+still needs ordered replay and full exact-candidate canonical/Doctor and review
+gates. Native Rust, entry/boot/core receipts, PooleGlyph, demo ISO, normative
+charter and all phase/flag states are unchanged. No production claim follows.
+[Cycle 180 evidence and limits](checkpoints/cycle180-cpu-qualification.md).
+
+## Historical Cycle 179: Boot Chain Requalification
+
+`N5-SYMBOLS-SEMANTICS-001` at N5.6/N5.9 and `ADD-BOOT-007` advances through
+PSYM1, PPOL1, PKLOAD6, PooleBoot, PKREVAL1 and PKXFER1 for the unchanged
+Cycle 177 kernel. Six final headless QEMU boots include two actual kernel
+entries, independent nine-file revalidation and terminal unsigned-policy denial.
+The symbol debug product reproduces twice, the loader passes 330 host tests,
+and the complete focused boot-chain suite passes 71 Python tests.
+
+The combined closeout suite passes 128 tests, including exact kernel-entry
+reproduction and progress/checklist conservation. Source backup proceeds on
+draft PR #78 independently of main qualification; private logs/media remain local.
+
+The transfer build-ID pin, revalidation host-count pins and aggregate artifact
+identities now match fresh measurements. A reproduced qualifier admission gap
+is repaired: complete semantic validation is required before returning a
+qualification and before the CLI writes its receipt or prints PASS. Three
+specific invalid receipts reject without output; thirteen aggregate controls
+reject old artifact/trust identities and host-test counts. The failed attempts
+and two superseded transfer boots remain separate from final qualification.
+
+Selected readiness is 8/27; nineteen CPU and memory-through-lock profiles still
+need replay, beginning `N7-TRAP-001`. Architecture binds 249 paths, including
+four directly bound boot-chain tests and this checkpoint; 962 Python tests are
+discovered, not all executed. No native Rust, kernel bytes, PooleGlyph, frozen
+demo, normative charter, phase/flag state or production condition changes.
+Main stays qualified Cycle 176 and PR #78 remains draft pending the complete
+exact-candidate canonical audit and review gates.
+[Cycle 179 evidence and limitations](checkpoints/cycle179-boot-chain-requalification.md).
+
+## Historical Cycle 178: Kernel Entry Requalification
+
+`N6-KENTRY-001` at N6.4-N6.6 requalifies the unchanged Cycle 177 kernel.
+Two clean linked/canonical builds match, 245 kernel tests and 43 ELF rejection
+controls pass, and 55 bindings cover all 39 kernel Rust source files. The final
+canonical digest remains
+`563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA`.
+
+Entry regression and release-gate pins now match the measured image. Twelve
+targeted gate controls reject stale identities, numerically equal wrong types
+and malformed product/summary objects. The type/error-path repair is scoped to
+this gate and does not close the broader N36 evidence audit.
+The combined 57-test entry, roadmap, architecture, ownership-core, checklist
+and entry-gate suite passes, including exact receipt/product reproduction.
+
+The selected projection improves to 3/27. Twenty-four dependent boot, CPU and
+memory-through-lock receipts still require replay, starting with
+`N5-SYMBOLS-SEMANTICS-001`. The inventory is 961 discovered Python tests and
+244 architecture bindings. There is no fresh QEMU execution, independent-host
+reproduction, phase/flag closure or full canonical pass. Main remains the
+qualified Cycle 176 baseline; PR #78 remains draft.
+[Cycle 178 evidence](checkpoints/cycle178-kernel-entry-requalification.md).
+
+## Historical Cycle 177: Dispatch Execution Holds
+
+Cycle 176 qualified the exact candidate with 105/105 canonical gates and
+708/708 Doctor checks, then merged PR #77 to main at `ac15d1d`.
+Cycle 177 implements PKEXEC1 mandatory dispatch execution holds and repairs
+transaction/bypass exhaustion admission rollback under
+`N12-CONCURRENCY-RECLAMATION-001` / `ADD-N12-CONCURRENCY-RECLAMATION-001`.
+The 17-stage host/core qualifier passes. The changed image passes only 2/27
+selected native readiness checks; entry and dependent receipts need replay.
+
+The core has 245 kernel, 40 lifecycle, 19 pool and 15 compile-fail tests. Six
+execution-hold cases cover real resource retention, drop/forget/unwind loss,
+pin-budget rollback, invalid admission, per-CPU release and stale-generation ACK.
+Architectural quiescence is an unsafe caller obligation, not detected by this
+host-tested mechanism. No live selector consumes the hold yet.
+
+The roadmap preserves the qualified Cycle 176 baseline separately from the
+current 2/27 selected checks. Twenty-five current-image dependencies need replay
+starting with `N6-KENTRY-001`, then ordered downstream qualification and the
+exact-candidate canonical merge gate. No phase or flag is closed. The inventory
+is 960 discovered Python tests and 241 architecture bindings, not a full pass.
+The focused reconciliation suite passes 37 tests. An expanded 60-method run
+fails nine reports across five stale-dependent acceptance tests, with 55
+methods passing. That failed evidence is retained; the positive acceptance
+checks remain unchanged until fresh replay succeeds.
+[Evidence and limitations](checkpoints/cycle177-dispatch-execution-holds.md).
+
+## Historical Cycle 175: Memory Entry Provenance And Replay
 
 `N9-PMM-ACPI-CONSUMER-001` at N9.2-N9.4 and the dependent N8/N12 profiles
 pass fourteen final qualifiers: 28 fresh virtual boots, 660 control groups and
@@ -1304,6 +2816,13 @@ Exit gate: Tier 0 and Tier 1 manifests are complete and hashed; destructive-test
 
 ### N3 - Toolchain, Build, CI, and Low-Level Safety (`partial`)
 
+Cycle 182 pins four MSVC/linker/SDK library trees and repairs ambient build-option
+leakage. Exact entry and fixture receipts reproduce under hostile overrides;
+39 focused regressions pass. N3.3/N3.5/N3.6 remain partial: host OS/system DLLs,
+parent Cargo configuration, concurrent tamper, source provenance and second
+builder closure are not established. Dependent qualification must be regenerated
+from real runs, not rebound. See the Cycle 182 checkpoint and existing N36 flag.
+
 Inherited sections: `008-011`.  
 Goal: produce hermetic freestanding artifacts without host leakage and enforce low-level safety before hardware execution.
 
@@ -1377,6 +2896,12 @@ N4.1-N4.6 are partial. The N4 qualification itself remains a paused non-boot pro
 Exit gate: one command launches each pinned native test profile; logs and artifacts are deterministic where declared; formal models have executable counterexample checks; no Buildroot guest is required.
 
 ### N5 - Boot Media, Boot Protocol, and PooleBoot UEFI Loader (`partial`)
+
+Cycle 179 requalifies six N5 components against the current kernel and exact
+PSYM1-derived artifacts. Six final boots, two kernel entries, nine retained
+files, 71 focused Python tests and thirteen stale-identity/count gate controls
+pass. Two earlier transfer boots are superseded after repairing revalidation
+receipt admission. N5 remains partial and unsigned; no authority is enabled.
 
 Inherited sections: `013-015`. Added: `ADD-BOOT-001`, `ADD-BOOT-004`, `ADD-BOOT-005`, `ADD-BOOT-006`, `ADD-BOOT-007`, `ADD-BOOT-008`, `ADD-BOOT-009`, `ADD-BOOT-010`, `ADD-BOOT-011`, `ADD-BOOT-012`.
 Goal: author the complete firmware-to-kernel transition without third-party bootloader code in the production chain.
@@ -1599,6 +3124,18 @@ Exit gate: PooleBoot reproducibly boots under pinned OVMF and target firmware, v
 
 ### N6 - Boot Trust, Kernel Image, Early Runtime, and Emergency Diagnostics (`partial`)
 
+Cycle 178 requalifies the entry boundary for the unchanged Cycle 177 kernel:
+two clean builds, 245 host tests, 43 rejection controls, 55 implementation inputs
+and 39 kernel Rust sources. Current entry evidence passes while 24 dependent
+profiles remain stale. Exact image pin and integer-type gate repairs pass
+twelve isolated controls. No N6 exit or production boot claim follows.
+
+Historical Cycle 177 changes the build identity and canonical kernel digest to
+`563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA`.
+The linked build is measured, but the old PKENTRY1 receipt does not cover the
+new source or 245-test count. `N6-KENTRY-001` must reproduce clean entry evidence
+before the affected N5/N7/N8/N9/N12 profiles can qualify this image.
+
 Inherited sections: `016-019`, `148-149`. Added: `ADD-BOOT-002`, `ADD-BOOT-003`, `ADD-KERNEL-001`.
 Goal: make the earliest native path authenticated, measurable, diagnosable, and recoverable before higher services exist.
 
@@ -1624,6 +3161,12 @@ Cycle 101 PKENTRY1 evidence:
 Exit gate: every accepted boot is signature/digest/version bound; revocation and malformed signatures fail closed into recovery; deliberate failures at every early stage yield retained serial evidence without silent reset loops.
 
 ### N7 - x86-64 CPU, Privilege, Descriptor, and Fault Foundation (`partial`)
+
+Cycle 180 replay: five current-kernel profiles pass fourteen final virtual
+boots and 225 controls, plus one separate expected TCG diagnostic. Forty-six
+focused regressions pass with genuine generated positive receipts. This does
+not qualify every vector, guarded IST/user contexts, target errata, physical
+hardware, general scheduler xstate ownership or the N7 exit gate.
 
 Inherited sections: `020-022`. Added: `ADD-N7-ERRATA-SOURCE-001`, `ADD-N7-XSTATE-001`.
 Goal: establish a correct processor contract before concurrency or user execution.
@@ -1751,6 +3294,11 @@ Subphases:
 Exit gate: all 16 logical processors repeatedly start under Tier 0 and Tier 1 profiles; timer monotonicity, interrupt routing, IPI, and SMP stress tests pass with bounded skew and no lost/duplicate work.
 
 ### N9 - Physical and Virtual Memory, MMIO, Allocation, and Reclaim (`partial`)
+
+Cycle 181 replays current PKPMM7/PKACPI1 and PKVM3 with independent marker
+oracles and exact entry provenance. The bounded active-root/AP ownership
+evidence is current again; general live task contexts and CPU retirement remain
+open. This replay does not close N9 or the cross-profile control-evidence audit.
 
 Cycle 175 requalifies PMM/ACPI reclaim and sparse VM against current kernel-entry
 evidence with four fresh boots and 239 controls. Broader allocator/VM behavior
@@ -1913,6 +3461,21 @@ Subphases:
 Exit gate: a hostile driver/device cannot DMA outside its granted pages or inject unowned interrupts; all mappings disappear on teardown; fault evidence names exact requester and authority.
 
 ### N12 - Concurrency, Scheduler, Deferred Work, and Context Switching (`partial`)
+
+Cycle 181 refreshes the unchanged kernel's scheduler/atomic/lock execution
+receipts. At least 65 source-control attestations in PKSCHED3/4/5/6 lack
+individually executed rejection evidence. Resolve the existing N36 coverage
+requirement before merge; live task-context/architectural retirement ownership
+remains the next N12.3 implementation boundary, not a completed replay claim.
+
+Cycle 177 adds mandatory PKEXEC1 dispatch holds before remote scheduler queue
+mutation. Scheduler ACK, Dead, drop, forget and unwind do not release execution
+ownership; consuming unsafe architectural quiescence is required. Two reproduced
+counter-exhaustion defects now reject before queue mutation. Six execution cases,
+40 lifecycle tests and 15 compile-fail cases pass within the 17-stage core
+qualifier. Guarded live stacks, stable architectural contexts, active-root
+integration and acknowledged CPU retirement remain open under the existing
+N12.3 reclamation requirement and flag. No fresh guest execution is claimed.
 
 Cycle 175 requalifies eight scheduler/atomic/lock profiles with sixteen final
 boots. The existing host-only PKSTACK1 receipt remains current but does not prove
@@ -2479,6 +4042,42 @@ Exit gate: supported failures either recover locally or enter a known safe state
 
 ### N36 - Verification, Fuzzing, Fault Injection, Security, and Conformance (`partial`)
 
+Cycle 181 identifies a concrete control-evidence gap: PKSCHED3/4/5/6 append
+14/16/18/17 success records without executing each rejection. Track these under
+`ADD-N36-RECEIPT-COVERAGE-001` and its open flag, starting PKSCHED3. Preserve
+all raw receipts and failed attempts, distinguish static attestations from
+execution, and audit other profiles. Selected consistency passes do not waive
+this gap, the exact-candidate audit, independent builders or release evidence.
+
+Cycle 180 strengthens CPU provenance regressions with untouched generated
+positive receipts, eighty embedded-entry substitutions, twenty invalid current
+dependencies and nineteen aggregate gate controls. Forty-six focused tests
+pass; the broader transitive evidence and full exact-candidate audit remain
+open under the existing receipt-coverage requirement and flag.
+
+Cycle 179 repairs the reproduced PKREVAL1 schema-only receipt admission gap
+under `ADD-N36-RECEIPT-COVERAGE-001`. Both generation and CLI publication now
+require semantic acceptance; three malformed/stale/overclaim receipts reject
+before any output file is created. Four boot-chain test files and the new
+checkpoint add five direct architecture bindings (249 total). This does not
+close the broader transitive-evidence audit, independent review or production
+qualification. All prior failures, flag states and exit requirements remain.
+
+Cycle 178 adds direct architecture bindings for the entry and dependency-gate
+tests and its checkpoint (244 total). PKENTRY1 entry/source coverage and exact
+reproduction are current; twelve independent entry-gate controls reject old
+image pins, float/boolean substitutions and null objects. The reproduced
+six numeric acceptance failures and one malformed-product error are repaired
+within this gate. Full transitive provenance, all downstream current receipts,
+independent builders and production qualification remain open.
+
+Cycle 177 retains the exact Cycle 176 passing main receipt and all older failures.
+The current host core receipt binds 30 inputs and 17 executed stage logs; its
+new execution-case parser has 30 rejection controls. Current selected readiness
+is 2/27, not the historical 105-gate pass. The 241 architecture bindings and 960
+discovered tests are inventories. Complete transitive qualification, independent
+builders, live execution ownership and full current canonical replay remain open.
+
 Cycle 175 advances the existing receipt-coverage requirement across fourteen
 profiles with exact JSON-typed entry identity, 224 substitution cases and 56
 invalid dependencies. Combined regressions caught and verified repair of four
@@ -2679,7 +4278,7 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 | `FLAG-N12-SCHED-FOUNDATION-001` | REQUIRED | Closed in Cycle 142 | PKSCHED1 freezes and qualifies a bounded allocation-free four-CPU/eight-task core, generation-safe identity and lifecycle, deterministic fixed-priority queues with a bypass bound, affinity and modeled migration, selected lifetime/locking primitives, an independent stress oracle, and an exact live two-task cooperative BSP context switch with stack isolation and clearing; preemption, live AP dispatch, ring 3, address-space switching, full per-task architectural state, target, N12 exit, and production remain open |
 | `FLAG-N12-SCHED-PREEMPT-001` | REQUIRED | Closed in Cycle 143 | PKSCHED2 composes PKSCHED1 and PKIRQ1 through exact interrupt frames and proves bounded BSP quantum/wakeup preemption, deterministic event ordering, balanced EOIs, stack ownership, rollback, teardown, and complete stack/MMIO cleanup without live-AP, ring-3, address-space, target, N12-exit, or production promotion |
 | `FLAG-N12-SCHED-DEFERRED-001` | REQUIRED | Closed in Cycle 144 | PKSCHED3 proves a bounded allocation-free eight-slot deferred-work controller with typed operations, generation-safe ownership, duplicate suppression, EOI-gated dispatch, bounded priority bypass, queued/running cancellation, flush, five rollback boundaries, exact retirement/shutdown, two private BSP worker stacks, independent oracle agreement, and complete cleanup without arbitrary callbacks, consumers, AP dispatch, target, N12-exit, or production promotion |
-| `FLAG-N12-SCHED-SMP-001` | REQUIRED | Closed in Cycle 145 | PKSCHED4 proves explicit CPU ownership, four local queues, acknowledgement-gated remote wake and migration, offline-target timeout rollback, topology balancing, idle ownership, live AP dispatch, stale rejection, and exact park/scrub/release teardown only for one frozen four-vCPU development topology |
+| `FLAG-N12-SCHED-SMP-001` | REQUIRED | Reopened in Cycle 203 | Native state transactions are repaired and host-tested; changed-image replay, recorded admission and 16 executed-control groups remain pending. Cycle 145's bounded topology evidence is preserved as historical, not current qualification |
 | `FLAG-N12-SCHED-AP-WORKERS-001` | REQUIRED | Closed in Cycle 146 | PKSCHED5 proves three AP-local queues and workers, fixed typed timer-driver and generation-reclaim consumers, EOI-gated dispatch, queued and remote cancellation, offline rollback, flush-before-reclaim, bounded priority bypass, exact retirement, and complete park/scrub/release only for one frozen four-vCPU development topology |
 | `FLAG-N12-SCHED-SMP-PREEMPT-001` | REQUIRED | Closed in Cycle 147 | PKSCHED6 proves four bounded timer/event/frame/run-queue lanes, deterministic cancel/wake/migration ordering, eight live acknowledgement-gated reschedule IPIs, three quantum switches, offline rollback, watchdog/fairness bounds, eight task retirements, and exact 102-page teardown only for one frozen four-vCPU development topology; AP-local timer interrupts and general SMP remain open |
 | `FLAG-N12-CONCURRENCY-ATOMICS-001` | REQUIRED | Closed in Cycle 148 | PKATOM1 freezes allocation-free typed `u32`/`u64`/`usize`/pointer atomics and operation-specific order types; rejects invalid orderings; proves host publication, contended RMW/CAS, sequential consistency, overflow-safe reference counts, seven linked x86-64 mappings, and one BSP process-to-interrupt release/acquire plus RMW path ordered before EOI without claiming general locks, live multi-AP contention, reclamation, portability, target, N12 exit, or production |
@@ -2715,7 +4314,105 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 ## 12. Near-Term Execution Sequence
 
-Current Cycle 175 sequence: all 27 selected native checks and fourteen final
+Cycle 221 current sequence: `N12-SCHED-SMP-PREEMPT-001`, including seventeen
+control groups and recorded admission, then atomics/locks and full exact-candidate
+canonical/Doctor/release/publication/GitHub/review qualification before PR78 merge.
+Readiness24/27; three profiles remain. No new owner action for development.
+
+Historical Cycle 220 sequence: `N12-SCHED-SMP-001`, AP-worker replay, SMP-preemption
+control/admission completion and replay, atomics and locks, then full exact-candidate
+canonical/Doctor/release/publication/GitHub/review qualification before PR78 merge.
+Readiness22/27; five profiles and seventeen control groups remain. The historical
+sequences below preserve prior decisions, not additional current instructions.
+
+Current Cycle 207 sequence: save the three qualified scheduler profiles, then
+repair `N12-SCHED-SMP-001` recorded admission and execute its sixteen missing
+control groups before fresh SMP qualification on unchanged kernel203 if possible.
+Repair SMP recorded admission and the remaining 51 executed-control groups,
+then qualify the remaining scheduler/atomic/lock profiles and full exact candidate.
+Eight selected profiles remain pending. Main merge still requires complete
+canonical/Doctor/release/publication/check/review qualification.
+
+Historical Cycle 205 sequence: save the five qualified CPU profiles, then replay
+`N9-PMM-ACPI-CONSUMER-001` and the remaining memory, IRQ, SMP, scheduler,
+atomic and lock dependencies on unchanged kernel203. Repair SMP recorded
+admission and execute the remaining 51 scheduler control groups before their
+admission. Fourteen selected profiles remain pending. Full exact-candidate
+qualification and review precede main merge; branch backup remains separate.
+
+Historical Cycle 204 sequence: save the six qualified boot-chain profiles on the
+development branch, then replay `N7-TRAP-001` and the remaining CPU, memory,
+interrupt and scheduler dependencies on the same kernel. Repair SMP recorded
+admission and execute the remaining scheduler controls before their admission.
+Full exact-candidate qualification and review precede main merge. Cloud backup
+does not require main merge; 19 selected profiles remain pending.
+
+Historical Cycle 203 sequence: save the verified native SMP transaction checkpoint
+to the development branch; requalify symbols and policy for the changed image,
+then boot/CPU/memory/scheduler dependencies. Repair SMP recorded admission and
+execute its 16 control groups before its fresh qualification, followed by AP
+workers, SMP preemption, atomics, locks and full exact-candidate qualification.
+Do not rebind old positive boot receipts or merge while required checks fail.
+
+Historical Cycle 184 sequence: the boot chain and its firmware/trust prerequisites
+pass current-source qualification. Start `N7-TRAP-001`, then the remaining CPU
+and memory/IRQ/SMP/scheduler/atomic/lock profiles. Nineteen selected checks are
+still unqualified. Repair at least 65 individually unproven scheduler rejection
+controls before full exact-candidate canonical/Doctor, publication and review
+gates, then PR #78 merge and N12.3 live contexts. N0 custody and physical target
+prerequisites remain separate blockers. No phase or production exit is implied.
+
+Historical Cycle 182 sequence: replay N5-ELF-001 after the host-tool repair, then
+N5-SYMBOLS-SEMANTICS-001 and boot/CPU/memory dependencies. Before final scheduler
+qualification, resolve the 65 control-execution gaps and broader N36 audit.
+Full exact-candidate qualification and publication/review precede PR78 merge;
+N12.3 live task contexts follow. The selected current projection is 3/27.
+
+Historical Cycle 181 sequence: memory-through-lock replay passes all 27 selected
+consistency checks, but 65 individually unproven scheduler control groups block
+merge qualification. The resumed combined suite also fails exact entry-receipt
+reproduction despite matching kernel bytes. First resolve `N6-KENTRY-001`
+host-probe build/evidence drift, retaining the failing artifacts and exact
+comparison. Then repair `ADD-N36-RECEIPT-COVERAGE-001` starting PKSCHED3,
+then PKSCHED4/5/6 and the broader coverage audit. Requalify affected evidence;
+pass full exact-candidate canonical/Doctor, publication and review gates before
+PR #78 merge, then resume N12.3 live contexts and architectural CPU retirement.
+N0 custody and physical target prerequisites remain separate blockers.
+
+Historical Cycle 180 sequence: the five CPU profiles pass. Continue with
+`N9-PMM-ACPI-CONSUMER-001`, followed by VM/IRQ/SMP/scheduler/atomic/lock replay.
+Fourteen of 27 selected checks remain stale. Full runtime-inclusive exact-source
+canonical/Doctor qualification and publication/review gate the draft PR #78
+merge before N12.3 live task contexts and architectural CPU retirement resume.
+N0 custody and physical target prerequisites remain separate blockers.
+
+Historical Cycle 179 sequence: the six-component boot chain passes. Continue with
+`N7-TRAP-001`, then the remaining CPU profiles and fourteen memory-through-lock
+profiles in dependency order. Nineteen of 27 selected checks remain stale.
+The runtime-inclusive exact-candidate canonical audit, publication and GitHub
+review/check gates precede PR #78 merge; N12.3 live task contexts and CPU
+retirement remain subsequent foundation work. N0 custody remains separate.
+
+Historical Cycle 178 sequence: entry reproduction passes; continue with
+`N5-SYMBOLS-SEMANTICS-001`, then N5 load/boot/revalidation/transfer, the five N7
+CPU profiles and fourteen memory-through-lock profiles in dependency order.
+Entry, policy and errata policy pass among 27 selected checks. The full exact
+runtime-inclusive canonical audit, publication scan and GitHub review/check
+gates still precede PR #78 merge. General live task contexts and CPU retirement
+remain N12.3 work after this qualification. N0 custody is a separate external
+blocker; local qualification needs no additional owner approval.
+
+Historical Cycle 177 sequence: reproduce the changed kernel through
+`N6-KENTRY-001`, then replay N5 symbols/load/boot/revalidation/transfer, the five
+N7 CPU profiles and fourteen memory-through-lock profiles in dependency order.
+Only policy and errata policy currently pass among 27 selected checks. Run the
+exact full canonical suite with `--include-runtime`, `--bundle` and
+`--replay-proof`, then publication and GitHub review/check gates before merging
+draft PR #78. Continue N12.3 guarded mappings, live contexts and architectural
+CPU retirement after qualification. N0 custody remains a separate external
+blocker and does not block these owner-independent builds and replays.
+
+Historical Cycle 175 sequence (completed by Cycle 176): all 27 selected native checks and fourteen final
 dependency profiles pass. Run the exact full canonical qualification with
 `--include-runtime`, `--bundle` and `--replay-proof`; then publication and GitHub
 review/merge gates for PR #77. Resume N12.3 live guarded task stacks, context

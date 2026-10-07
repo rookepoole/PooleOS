@@ -5,7 +5,9 @@ from __future__ import annotations
 import dataclasses
 import hashlib
 import json
+import random
 import struct
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Final, Iterable
 
@@ -109,16 +111,16 @@ PREFERRED_VIRTUAL_BASE: Final = 0xFFFF_FFFF_8000_0000
 VIRTUAL_WINDOW_END_EXCLUSIVE: Final = 0xFFFF_FFFF_C000_0000
 SLIDE_ALIGNMENT: Final = 2 * 1024 * 1024
 
-CANONICAL_IMAGE_BYTES: Final = 602_112
+CANONICAL_IMAGE_BYTES: Final = 610_304
 CANONICAL_ENTRY_OFFSET: Final = 0xA000
-CANONICAL_FILE_SHA256: Final = "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625"
-CANONICAL_LOADED_SHA256: Final = "940D941A32AAA3DC1E5F75295AFC47ECFB1FD07B75E359D9D4C5963A36E488BC"
-CANONICAL_BUILD_ID: Final = "PKBUILD1-CYCLE168-N12-AP-OWN-V002-0000000001"
-CANONICAL_BUILD_ID_SHA256: Final = "62AC16F52550AAF62455B196A632E785825739656A473C627239DB0A839B667C"
-CANONICAL_DEBUG_SHA256: Final = "87B12B0278881804BDDA57132657950CF8CD8F515B7A0CC4BC9E2B6326FA1C0A"
-CANONICAL_DEBUG_BYTES: Final = 7_025_584
+CANONICAL_FILE_SHA256: Final = "FD6C2A0C709957B9EDFFC0647D534E060ED68215C075F07D70AB2AEBCA6C81D1"
+CANONICAL_LOADED_SHA256: Final = "5D660D084136430C0D152EAAF4D29D5704E9B974F6679205BEBAB54F24687967"
+CANONICAL_BUILD_ID: Final = "PKBUILD1-CYCLE216-N12-SMP-TXN-V1-00000000001"
+CANONICAL_BUILD_ID_SHA256: Final = "5B30B49AC910CAAE250569E91A4B7AD48C47A9E32BA1739988662C7CB3063738"
+CANONICAL_DEBUG_SHA256: Final = "5E40AB31AFB4BCE79BEDB32D7B66D64D957B42CA915B2B70D2F15049F90B7D91"
+CANONICAL_DEBUG_BYTES: Final = 7_158_864
 CANONICAL_SOURCE_MANIFEST_SHA256: Final = (
-    "51BD6E01E5A300FE3444EC2FF6352F7A6EAFE38C4728014596C540290A4779F2"
+    "4AE53650627ABA7740B172C18D8F7806D6AFF6A564DA7BA547F37B496D565575"
 )
 PUBLIC_SYMBOL_NAMES: Final = (
     "poole_kernel_entry",
@@ -139,6 +141,13 @@ REQUIRED_DWARF5_SECTIONS: Final = (
 )
 
 IMPLEMENTATION_INPUTS: Final = (
+    "native/.cargo/config.toml",
+    "native/rust-toolchain.toml",
+    "specs/native-toolchain-lock.json",
+    "specs/native-host-msvc-profile.json",
+    "tools/native_host_toolchain.py",
+    "tools/qualify_native_toolchain.py",
+    "tests/test_native_boot_host_toolchain.py",
     "native/Cargo.toml",
     "native/Cargo.lock",
     "native/symbols/Cargo.toml",
@@ -154,6 +163,7 @@ IMPLEMENTATION_INPUTS: Final = (
     "tools/generate_native_symbol_vectors.py",
     "tools/qualify_native_symbols.py",
     "tests/test_native_symbols.py",
+    "tests/test_native_symbol_admission.py",
     "docs/native-symbol-bundle.md",
 )
 
@@ -853,9 +863,9 @@ def authorize_consumption(bundle: Bundle, context: ConsumptionContext) -> None:
 def canonical_segments() -> tuple[Segment, ...]:
     return (
         Segment(1, SEGMENT_RODATA, SEGMENT_READ, 0, 0xA000),
-        Segment(2, SEGMENT_TEXT, SEGMENT_READ | SEGMENT_EXECUTE, 0xA000, 0x69000),
-        Segment(3, SEGMENT_RELRO_DATA, SEGMENT_READ | SEGMENT_RELRO, 0x73000, 0xE000),
-        Segment(4, SEGMENT_DATA_BSS, SEGMENT_READ | SEGMENT_WRITE, 0x81000, 0x12000),
+        Segment(2, SEGMENT_TEXT, SEGMENT_READ | SEGMENT_EXECUTE, 0xA000, 0x6B000),
+        Segment(3, SEGMENT_RELRO_DATA, SEGMENT_READ | SEGMENT_RELRO, 0x75000, 0xE000),
+        Segment(4, SEGMENT_DATA_BSS, SEGMENT_READ | SEGMENT_WRITE, 0x83000, 0x12000),
     )
 
 
@@ -863,8 +873,8 @@ def canonical_symbols() -> tuple[Symbol, ...]:
     public = SYMBOL_EXECUTABLE | SYMBOL_DIAGNOSTIC_PUBLIC
     return (
         Symbol(1, 2, SYMBOL_FUNCTION, BIND_GLOBAL, VISIBILITY_DEFAULT, PRIVACY_PUBLIC, public | SYMBOL_ENTRY, 0xA000, 71, "poole_kernel_entry"),
-        Symbol(2, 2, SYMBOL_FUNCTION, BIND_GLOBAL, VISIBILITY_DEFAULT, PRIVACY_PUBLIC, public | SYMBOL_PANIC_SAFE, 0x2A604, 198, "poole_kernel_emergency_panic"),
-        Symbol(3, 2, SYMBOL_FUNCTION, BIND_GLOBAL, VISIBILITY_DEFAULT, PRIVACY_PUBLIC, public, 0x2A6CA, 70_876, "poole_kernel_rust_entry"),
+        Symbol(2, 2, SYMBOL_FUNCTION, BIND_GLOBAL, VISIBILITY_DEFAULT, PRIVACY_PUBLIC, public | SYMBOL_PANIC_SAFE, 174_238, 198, "poole_kernel_emergency_panic"),
+        Symbol(3, 2, SYMBOL_FUNCTION, BIND_GLOBAL, VISIBILITY_DEFAULT, PRIVACY_PUBLIC, public, 174_436, 70_900, "poole_kernel_rust_entry"),
     )
 
 
@@ -1376,8 +1386,169 @@ def golden_errors(value: dict[str, Any]) -> list[str]:
     return errors
 
 
-def readiness_errors(value: dict[str, Any], root: Path = ROOT) -> list[str]:
-    errors = validate_json(value, read_json(root / READINESS_SCHEMA_RELATIVE))
+def expected_readiness_claims() -> dict[str, bool]:
+    return {
+        "format_frozen": True, "python_oracle_implemented": True,
+        "no_std_parser_implemented": True, "bounded_lookup_implemented": True,
+        "split_debug_correspondence_qualified": True, "development_activation_denied": True,
+        "symbol_consumption_enabled": False, "pooleboot_enforced": False,
+        "poolekernel_enforced": False, "kernel_export_authority_created": False,
+        "full_debug_file_on_boot_media": False, "runtime_addresses_disclosed_by_default": False,
+        "n5_exit_gate_satisfied": False, "production_ready": False,
+    }
+
+
+@lru_cache(maxsize=1)
+def _expected_negative_results(canonical: bytes) -> tuple[tuple[str, str, str], ...]:
+    # Reconstruct the deterministic parser controls without trusting recorded outcomes.
+    rng = random.Random(0x5053_594D_31FF)
+    rows = []
+    for attempt in range(1, 4097):
+        mutated = bytearray(canonical)
+        position = rng.randrange(len(mutated))
+        mutated[position] ^= 1 << rng.randrange(8)
+        if attempt % 2 == 0 and position >= HEADER_BYTES:
+            mutated[304:336] = hashlib.sha256(mutated[HEADER_BYTES:]).digest()
+        try:
+            parse(bytes(mutated))
+        except SymbolError as error:
+            rows.append((f"NEG-PSYM1-PARSER-{len(rows) + 1:03d}", "parser", f"ERR:{error.code}"))
+        if len(rows) == 128:
+            break
+    if len(rows) != 128:
+        raise SymbolError("psym_readiness_parser_controls")
+    bundle = parse(canonical)
+    qualified = synthetic_qualified_consumption_context(bundle)
+    contexts = [development_consumption_context(bundle)]
+    for mutation in (
+        {"outer_signature_verified": False}, {"inner_signature_verified": False},
+        {"manifest_signature_verified": False}, {"kernel_signature_verified": False},
+        {"outer_role": 3}, {"outer_version": 2}, {"outer_payload_sha256": "0" * 64},
+        {"expected_outer_file_sha256": "B" * 64}, {"canonical_file_sha256": "B" * 64},
+        {"preferred_loaded_sha256": "B" * 64}, {"build_id_sha256": "B" * 64},
+        {"debug_file_sha256": "B" * 64}, {"source_manifest_sha256": "B" * 64},
+        {"identity_evidence_verified": False}, {"stripped_correspondence_verified": False},
+        {"dwarf5_verified": False}, {"public_policy_verified": False},
+        {"source_paths_absent": False}, {"pointer_redaction_enabled": False},
+        {"diagnostics_authorized": False}, {"runtime_base": bundle.preferred_virtual_base + 1},
+        {"symbol_capacity": 0}, {"string_capacity": 0}, {"lookup_step_capacity": 0},
+        {"authority_effect_requested": True},
+    ):
+        contexts.append(dataclasses.replace(qualified, **mutation))
+    for index, context in enumerate(contexts, start=1):
+        try:
+            authorize_consumption(bundle, context)
+        except SymbolError as error:
+            rows.append((f"NEG-PSYM1-ACTIVATION-{index:03d}", "activation", f"ERR:{error.code}"))
+        else:
+            raise SymbolError("psym_readiness_activation_control")
+    rows.extend((f"NEG-PSYM1-DEBUG-{name}", "debug_elf", error) for name, error in (
+        ("TRUNCATED", "psym_debug_elf_size"), ("MAGIC", "psym_debug_elf_ident"),
+        ("TYPE", "psym_debug_elf_header"), ("HOST-PATH", "psym_debug_host_path"),
+    ))
+    return tuple(rows)
+
+
+def _recorded_evidence_errors(value: dict[str, Any], root: Path) -> list[str]:
+    def same(actual: Any, expected: Any) -> bool:
+        return json.dumps(actual, sort_keys=True) == json.dumps(expected, sort_keys=True)
+
+    kernel = read_json(root / native_kernel_entry.READINESS_RELATIVE)
+    product = kernel["product"]
+    lock = read_json(root / "specs/native-toolchain-lock.json")
+    golden = make_golden_vectors()
+    expected = {
+        "phase_status": {"N5": "partial", "N5.6": "partial", "N5.9": "partial"},
+        "validator_qualification": {
+            "status": "pass", "rustc": "rustc " + lock["channel_manifest"]["rust_version"],
+            "host_tests": 4, "rustfmt_packages": 1, "clippy_targets": 1,
+            "no_std_targets": ["x86_64-unknown-none", "x86_64-unknown-uefi"],
+            "host_toolchain": {
+                "profile_id": "POOLEOS-HOST-MSVC-1",
+                "profile_sha256": sha256_bytes((root / "specs/native-host-msvc-profile.json").read_bytes()),
+                "verified_before_build": True,
+                "scope": "host_linker_and_library_trees_not_complete_host_attestation",
+            },
+        },
+        "debug_correspondence": {
+            "status": "pass", "debug_build_count": 2, "debug_builds_byte_identical": True,
+            "debug_file_byte_count": CANONICAL_DEBUG_BYTES, "debug_file_sha256": CANONICAL_DEBUG_SHA256,
+            "dwarf_compilation_unit_count": 61, "pooleos_leading_dwarf5_unit_count": 3,
+            "observed_dwarf_versions": [4, 5], "required_section_count": len(REQUIRED_DWARF5_SECTIONS),
+            "public_symbol_count": len(canonical_symbols()),
+            "canonical_file_byte_count": product["canonical_byte_count"],
+            "canonical_file_sha256": CANONICAL_FILE_SHA256, "canonical_image_byte_count": CANONICAL_IMAGE_BYTES,
+            "canonical_entry_offset": CANONICAL_ENTRY_OFFSET, "stripped_and_debug_plans_equal": False,
+            "stripped_symtab_absent": True, "stripped_debug_sections_absent": True,
+            "source_paths_absent": True, "debug_file_staged_on_boot_media": False,
+            "debug_derived_bundle_sha256": sha256_bytes(canonical_bundle()),
+        },
+        "golden_vectors": [{
+            "id": vector["id"], "bundle_sha256": vector["bundle_sha256"],
+            "lookup_sample_count": len(vector["lookup_samples"]), "python_result": "pass",
+            "rust_result": "pass", "status": "pass",
+        } for vector in golden["vectors"]],
+        "negative_controls": [{"id": identifier, "surface": surface, "expected": result,
+            "observed": result, "status": "pass"}
+            for identifier, surface, result in _expected_negative_results(canonical_bundle())],
+        "activation_qualification": {
+            "status": "pass", "synthetic_all_true_result": "OK:activation",
+            "synthetic_all_true_context_is_trust_evidence": False,
+            "current_unsigned_development_activation_allowed": False,
+            "individual_rejecting_context_count": 26,
+        },
+        "parser_differential": {
+            "campaign_id": "PSYM1-PARSER-DIFF-1", "seed": "0x5053594D3101",
+            "case_count": 16384, "accepted_count": 860, "rejected_count": 15524,
+            "digest_repaired_deep_mutations": True, "mismatch_count": 0,
+            "corpus_published": False, "status": "pass",
+        },
+        "lookup_differential": {
+            "campaign_id": "PSYM1-LOOKUP-DIFF-1", "seed": "0x5053594D3102",
+            "case_count": 16384, "hit_count": 4479, "miss_count": 5718, "rejected_count": 6187,
+            "mismatch_count": 0, "maximum_observed_steps": 2, "corpus_published": False, "status": "pass",
+        },
+        "summary": {
+            "rust_host_tests_passed": 4, "rust_host_tests_total": 4,
+            "no_std_target_builds_passed": 2, "no_std_target_builds_total": 2,
+            "golden_vectors_matched": 3, "golden_vectors_total": 3,
+            "negative_controls_passed": 158, "negative_controls_total": 158,
+            "parser_differential_cases": 16384, "lookup_differential_cases": 16384,
+            "differential_mismatches": 0, "debug_reproducible_builds": 2,
+            "public_symbols": 3, "production_claim_count": 0,
+        },
+        "claims": expected_readiness_claims(),
+    }
+    bindings = {name: _binding_record(root / path) for name, path in (
+        ("contract", CONTRACT_RELATIVE), ("contract_schema", CONTRACT_SCHEMA_RELATIVE),
+        ("golden_vectors", GOLDEN_RELATIVE), ("golden_schema", GOLDEN_SCHEMA_RELATIVE),
+        ("readiness_schema", READINESS_SCHEMA_RELATIVE),
+    )}
+    bindings["implementation_inputs"] = implementation_bindings(root)
+    expected["bindings"] = bindings
+    errors = [f"PSYM1 recorded {name} evidence changed" for name, record in expected.items()
+              if not same(value.get(name), record)]
+    for name in ("production_ready", "production_promotion_allowed", "n5_exit_gate_satisfied"):
+        if value.get(name) is not False:
+            errors.append(f"PSYM1 {name} must remain false")
+    return errors
+
+
+def readiness_errors(value: Any, root: Path = ROOT) -> list[str]:
+    errors = [f"PSYM1 {issue.path}: {issue.message}"
+              for issue in validate_json(value, read_json(root / READINESS_SCHEMA_RELATIVE))]
+    if errors:
+        return errors
+    build = value.get("validator_qualification", {})
+    host = build.get("host_toolchain") if isinstance(build, dict) else None
+    expected_host = {
+        "profile_id": "POOLEOS-HOST-MSVC-1",
+        "profile_sha256": hashlib.sha256((root / "specs/native-host-msvc-profile.json").read_bytes()).hexdigest().upper(),
+        "verified_before_build": True,
+        "scope": "host_linker_and_library_trees_not_complete_host_attestation",
+    }
+    if json.dumps(host, sort_keys=True) != json.dumps(expected_host, sort_keys=True):
+        errors.append("PSYM1 host-toolchain profile mismatch")
     # The debug correspondence is meaningful only for current, matching entry evidence.
     try:
         kernel = read_json(root / native_kernel_entry.READINESS_RELATIVE)
@@ -1401,6 +1572,10 @@ def readiness_errors(value: dict[str, Any], root: Path = ROOT) -> list[str]:
                 errors.append("PSYM1 kernel entry identity changed: build_id")
     except (OSError, ValueError, KeyError, TypeError, AttributeError):
         errors.append("PSYM1 kernel entry evidence is unavailable or malformed")
+    try:
+        errors.extend(_recorded_evidence_errors(value, root))
+    except (OSError, ValueError, KeyError, TypeError, AttributeError, SymbolError):
+        errors.append("PSYM1 recorded evidence dependencies are unavailable or malformed")
     if value.get("contract_id") != CONTRACT_ID or value.get("status") != "pass":
         errors.append("PSYM1 readiness status changed")
     if value.get("production_ready") is not False or value.get("production_promotion_allowed") is not False:

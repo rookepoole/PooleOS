@@ -58,9 +58,9 @@
         "sha256": "9937D6DBE1F55646B042B81D9CD0BC5A4AC150E8710A469C2BD378F229F1A5DD"
       },
       {
-        "byte_count": 30903,
+        "byte_count": 31837,
         "path": "runtime/native_elf_loader.py",
-        "sha256": "AD180E0C5B4139DE61FA0889F19AE3DE4922906818720D9C0EA6ECDF0EC55F2D"
+        "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
       },
       {
         "byte_count": 3946,
@@ -68,14 +68,54 @@
         "sha256": "8A28A89C340BC4B59E532E16E52B89FA78B91D111D9A3289F158E7D3459CFD74"
       },
       {
-        "byte_count": 33464,
+        "byte_count": 33002,
         "path": "tools/qualify_native_elf_loader.py",
-        "sha256": "759985D99657DEC333C7EF7E5734D66C3F3FE74AD35F2E2309A487A94D0DCCE6"
+        "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
       },
       {
         "byte_count": 5451,
         "path": "docs/native-elf-loader.md",
         "sha256": "C67E4C762280B7799733AF6ACB6ADCBA62B7EA083A78F41E530F41D8A35FC38D"
+      },
+      {
+        "byte_count": 539,
+        "path": "native/.cargo/config.toml",
+        "sha256": "7983881C5CAD2B909CCA64BFA7F5895EC56377B0E52967444CB2818A69FA4FE1"
+      },
+      {
+        "byte_count": 131,
+        "path": "native/rust-toolchain.toml",
+        "sha256": "06C4E0BD63FE84DCB26A0FAE52D96F23C38979DBE6F154D58EAB1547F81FA26B"
+      },
+      {
+        "byte_count": 4017,
+        "path": "specs/native-toolchain-lock.json",
+        "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E"
+      },
+      {
+        "byte_count": 2092,
+        "path": "specs/native-host-msvc-profile.json",
+        "sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182"
+      },
+      {
+        "byte_count": 5317,
+        "path": "tools/native_host_toolchain.py",
+        "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+      },
+      {
+        "byte_count": 22364,
+        "path": "tools/qualify_native_toolchain.py",
+        "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+      },
+      {
+        "byte_count": 12903,
+        "path": "tests/test_native_elf_loader.py",
+        "sha256": "95961C82225CC2FAB3E49984B735C1AD1497D34DD11859E5D34F597EF0F48C1B"
+      },
+      {
+        "byte_count": 8341,
+        "path": "tests/test_native_host_toolchain.py",
+        "sha256": "EAB54E9FDE9435B29C56866CD5A4A6600E54AB2CB14BE0604818685105316393"
       }
     ],
     "readiness_schema": {
@@ -1099,6 +1139,12 @@
     "host_probe_artifact_identity_recorded": false,
     "host_probe_byte_count": 148480,
     "host_probe_role": "ephemeral host-only differential and exact-byte transport",
+    "host_toolchain": {
+      "profile_id": "POOLEOS-HOST-MSVC-1",
+      "profile_sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+      "scope": "host_linker_and_library_trees_not_complete_host_attestation",
+      "verified_before_build": true
+    },
     "no_std_target_builds": [
       {
         "byte_count": 93930,

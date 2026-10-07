@@ -2,6 +2,18 @@
 
 ## Scope
 
+Cycle 197 repairs native state transactions, priority accounting on rejected
+pre-execution faults, and shutdown admission. Counter-exhaustion rejection
+preserves slots, generations, owners, lanes and accounting, including compound
+dispatch and batch retirement. Accepted duplicate diagnostics and injected
+faults retain their specified counters and consumed reservation generations.
+The fixed-size candidate copy allocates no heap and adds no callback API.
+This is state-transaction integrity under the existing BSP/lock contract, not
+cross-CPU atomicity. Twenty-one native tests pass in debug and optimized host
+builds, with four disabled-fix variants detected. Changed-image guest replay,
+recorded-evidence admission repair and 14 executed control groups are pending;
+historical qualification below does not qualify the new kernel.
+
 PKSCHED3 advances `N12-SCHED-DEFERRED-001` with one allocation-free deferred-work controller and two fixed BSP kernel workers. It composes the PKIRQ1 local-APIC timer path, the PKSCHED1 scheduler primitives, and the PKSCHED2 interrupt-return foundation. It does not create a general callback facility, driver API, service API, AP scheduler, or production authority.
 
 The selector-17 development profile is isolated behind `development-scheduler-deferred`. Default PooleBoot still stops before transfer. A selector-17 build cannot be combined with another post-transfer development scenario.
@@ -57,13 +69,37 @@ A separate live-kernel controller injects faults after reservation, after queue 
 
 The qualification requires:
 
-- seven focused PKSCHED3 Rust tests within 214 PooleKernel tests;
+- seven focused PKSCHED3 Rust tests within 246 PooleKernel tests;
 - a five-receipt Rust host probe checked by an independent Python priority and operation oracle;
 - two byte-identical selector-17 QEMU/OVMF runs with exactly 37 ordered markers;
 - exact screenshot and PBP1 handoff equality;
 - source audits for fixed storage, EOI ordering, private-stack execution, cleanup, and selector isolation;
-- 30 ordered hostile-control categories;
+- 30 ordered control categories: 194 marker/probe/path rejection cases,
+  50 executed native boundary scenarios, and ten source-audit rejection cases;
 - exact media, kernel, contract, input, and toolchain bindings.
+
+The twelve native control groups compile the actual allocation-free controller
+into a host-only executable. Capacity, duplicates, top-half context, recursion,
+EOI permits, priority bypass, queued/running cancellation, flush watermarks,
+stale generations, five fault points and shutdown ordering execute separately.
+Each receipt is printed only after that group's assertions complete. The 50
+cases include expected error returns and successful transition invariants;
+they are not all rejected API calls. The host fixture may allocate test data;
+the native controller may not. Tests compile twelve deliberately damaged
+controller variants and require their selected groups to fail assertions.
+
+The remaining two groups inject six heap/callback source mutations and four
+retained-worker-stack guard mutations. Those are source-audit tests, not
+privileged stack fault injection or physical execution. Disabled-auditor tests
+must fail. An empty negative-control operation list cannot pass.
+
+Recorded admission validates canonical dates and exact JSON types, reparses
+both ordered runs and their markers, binds PBP1/revalidation/frame evidence,
+reconstructs the observation and independent host trace, checks per-control
+counts and outcomes, and binds raw native-control receipts plus source audits.
+It rejects malformed shapes without raising an exception. Recorded consistency
+does not establish authenticity, freshness or independent execution; coherent
+forgery, independent-builder attestation and signed evidence remain outside it.
 
 ## Claim boundary
 

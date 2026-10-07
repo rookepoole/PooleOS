@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import os
 import random
 import re
 import struct
@@ -22,6 +21,8 @@ sys.path.insert(0, str(ROOT))
 
 from runtime import native_kernel_image as kernel_image  # noqa: E402
 from runtime import native_symbols as psym1  # noqa: E402
+from tools.native_host_toolchain import profile_receipt, verified_environment  # noqa: E402
+from tools.qualify_native_toolchain import QualificationError as HostToolchainError, isolated_environment  # noqa: E402
 
 
 NATIVE_ROOT = ROOT / "native"
@@ -75,42 +76,11 @@ def _toolchain(toolchain_root: Path) -> tuple[Path, Path, dict[str, str]]:
     rustc = installed / "bin" / "rustc.exe"
     if not cargo.is_file() or not rustc.is_file():
         raise QualificationError("workspace-local Rust toolchain is missing")
-    env = dict(os.environ)
-    for key in (
-        "CARGO_BUILD_RUSTC",
-        "CARGO_ENCODED_RUSTFLAGS",
-        "CARGO_HOME",
-        "CARGO_INCREMENTAL",
-        "CARGO_TARGET_DIR",
-        "RUSTC",
-        "RUSTC_BOOTSTRAP",
-        "RUSTC_WRAPPER",
-        "RUSTDOCFLAGS",
-        "RUSTFLAGS",
-        "RUSTUP_HOME",
-        "RUSTUP_TOOLCHAIN",
-    ):
-        env.pop(key, None)
-    system_root = Path(env.get("SystemRoot", r"C:\Windows"))
-    env.update(
-        {
-            "CARGO_HOME": str(toolchain_root / "cargo"),
-            "CARGO_INCREMENTAL": "0",
-            "LANG": "C",
-            "LC_ALL": "C",
-            "PATH": os.pathsep.join(
-                [
-                    str(installed / "bin"),
-                    str(toolchain_root / "cargo" / "bin"),
-                    str(system_root / "System32"),
-                ]
-            ),
-            "RUSTC": str(rustc),
-            "RUSTUP_HOME": str(toolchain_root / "rustup"),
-            "SOURCE_DATE_EPOCH": "0",
-            "TZ": "UTC",
-        }
-    )
+    env = isolated_environment(toolchain_root, installed / "bin", rustc)
+    try:
+        env = verified_environment(env, ROOT)
+    except HostToolchainError as exc:
+        raise QualificationError(str(exc)) from exc
     remap = f"--remap-path-prefix={NATIVE_ROOT.resolve()}=/pooleos/native"
     for target in ("X86_64_UNKNOWN_UEFI", "X86_64_UNKNOWN_NONE"):
         env[f"CARGO_TARGET_{target}_RUSTFLAGS"] = " ".join(
@@ -237,6 +207,7 @@ def _build_validators(
             "status": "pass",
             "rustc": _run([str(rustc), "--version"], cwd=ROOT, env=env).strip(),
             "host_tests": 4,
+            "host_toolchain": profile_receipt(ROOT),
             "rustfmt_packages": 1,
             "clippy_targets": 1,
             "no_std_targets": ["x86_64-unknown-none", "x86_64-unknown-uefi"],
@@ -729,22 +700,7 @@ def _qualify_debug_correspondence(
 
 
 def expected_readiness_claims() -> dict[str, bool]:
-    return {
-        "format_frozen": True,
-        "python_oracle_implemented": True,
-        "no_std_parser_implemented": True,
-        "bounded_lookup_implemented": True,
-        "split_debug_correspondence_qualified": True,
-        "development_activation_denied": True,
-        "symbol_consumption_enabled": False,
-        "pooleboot_enforced": False,
-        "poolekernel_enforced": False,
-        "kernel_export_authority_created": False,
-        "full_debug_file_on_boot_media": False,
-        "runtime_addresses_disclosed_by_default": False,
-        "n5_exit_gate_satisfied": False,
-        "production_ready": False,
-    }
+    return psym1.expected_readiness_claims()
 
 
 def make_readiness(toolchain_root: Path) -> dict[str, Any]:
@@ -752,7 +708,7 @@ def make_readiness(toolchain_root: Path) -> dict[str, Any]:
     golden = psym1.read_json(ROOT / psym1.GOLDEN_RELATIVE)
     errors = psym1.contract_errors(contract) + psym1.golden_errors(golden)
     if errors:
-        raise QualificationError("; ".join(errors))
+        raise QualificationError("; ".join(str(error) for error in errors))
     (ROOT / "tmp").mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="psym1-", dir=ROOT / "tmp") as temporary:
         temporary_root = Path(temporary)
@@ -836,15 +792,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     args = parser.parse_args(argv)
     readiness = make_readiness(args.toolchain_root.resolve())
+    errors = psym1.readiness_errors(readiness)
+    if errors:
+        raise QualificationError("; ".join(str(error) for error in errors))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(
         json.dumps(readiness, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
         newline="\n",
     )
-    errors = psym1.readiness_errors(readiness)
-    if errors:
-        raise QualificationError("; ".join(errors))
     print(
         f"PSYM1 qualification passed: tests={readiness['summary']['rust_host_tests_passed']}; "
         f"negative={readiness['summary']['negative_controls_passed']}; "

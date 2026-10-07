@@ -25,7 +25,7 @@ from tools import qualify_native_pooleboot  # noqa: E402
 DEFAULT_TOOLCHAIN_ROOT = ROOT / ".toolchains" / "rust-1.97.0"
 DEFAULT_QEMU_ROOT = native_tier0.DEFAULT_QEMU_ROOT
 DEFAULT_OUT = ROOT / scheduler_smp.READINESS_RELATIVE
-HOSTILE_CASE_COUNT = 209
+HOSTILE_CASE_COUNT = sum(scheduler_smp.NEGATIVE_CONTROL_CASE_COUNTS)
 
 
 class QualificationError(RuntimeError):
@@ -65,6 +65,8 @@ def _probe_operation(lines: list[str]) -> Callable[[], Any]:
 
 
 def _require_rejections(control_id: str, operations: list[Callable[[], Any]]) -> dict[str, Any]:
+    if not operations:
+        raise QualificationError(f"PKSCHED4 hostile control has no executed cases: {control_id}")
     for operation in operations:
         try:
             operation()
@@ -107,18 +109,70 @@ def _run_host_probe(toolchain_root: Path, target_dir: Path) -> dict[str, Any]:
     return result
 
 
-def _source_audit() -> dict[str, Any]:
-    paths = {
-        "scheduler": ROOT / "native/kernel/src/scheduler_smp.rs",
-        "ipi": ROOT / "native/kernel/src/smp_ipi.rs",
-        "arch": ROOT / "native/kernel/src/arch/x86_64.rs",
-        "main": ROOT / "native/kernel/src/main.rs",
-        "boot_exit": ROOT / "native/boot/src/exit.rs",
-        "boot_manifest": ROOT / "native/boot/Cargo.toml",
-        "bootexit": ROOT / "native/bootexit/src/lib.rs",
-        "pooleboot_qualifier": ROOT / "tools/qualify_native_pooleboot.py",
+def _build_native_control_probe(toolchain_root: Path, target_dir: Path, source: bytes | None = None) -> tuple[Path, dict[str, str]]:
+    _, rustc, env = qualify_native_kernel_entry._toolchain(toolchain_root)
+    target_dir.mkdir(parents=True, exist_ok=True)
+    combined = target_dir / "pksched4_controls.rs"
+    fixture, native = (ROOT / path for path in scheduler_smp.NATIVE_CONTROL_SOURCES)
+    combined.write_bytes((native.read_bytes() if source is None else source) + b"\n" + fixture.read_bytes())
+    executable = target_dir / "pksched4-controls.exe"
+    completed = subprocess.run(
+        [str(rustc), "--edition=2021", "--crate-name", "pksched4_controls", str(combined), "-o", str(executable)],
+        cwd=ROOT, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
+        timeout=120, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+    )
+    if completed.returncode:
+        raise QualificationError(f"PKSCHED4 native control build failed: {completed.stdout.decode('utf-8', errors='replace')[-3000:]}")
+    return executable, env
+
+
+def _run_native_control_probe(toolchain_root: Path, target_dir: Path) -> dict[str, Any]:
+    executable, env = _build_native_control_probe(toolchain_root, target_dir)
+    result = subprocess.run([str(executable)], cwd=ROOT, env=env, stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT, check=False, timeout=30,
+                            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    output = result.stdout.decode("utf-8", errors="strict").replace("\r\n", "\n")
+    if result.returncode:
+        raise QualificationError(f"PKSCHED4 native control probe failed: {output[-3000:]}")
+    controls = scheduler_smp.parse_native_control_output(output)
+    return {
+        "scope": "host_execution_of_native_smp_scheduler_not_privileged_guest_execution",
+        "exit_code": result.returncode, "lines": output.splitlines(),
+        "output_sha256": scheduler_smp.sha256_bytes(output.encode("utf-8")),
+        "executable_sha256": scheduler_smp.sha256_bytes(executable.read_bytes()),
+        "controls": controls, "verified_cases_total": sum(item["case_count"] for item in controls),
+        "sources": [scheduler_smp.file_binding(ROOT, path) for path in scheduler_smp.NATIVE_CONTROL_SOURCES],
     }
+
+
+def _source_audit() -> dict[str, Any]:
+    paths = {name: ROOT / path for name, path in scheduler_smp.SOURCE_AUDIT_PATHS.items()}
     texts = {name: path.read_text(encoding="utf-8") for name, path in paths.items()}
+    result = _audit_source_text(texts)
+    result["files"] = {name: {"path": path.relative_to(ROOT).as_posix(), "sha256": scheduler_smp.sha256_bytes(path.read_bytes())}
+                       for name, path in paths.items()}
+    return result
+
+
+def _scope(text: str, start: str, end: str) -> str:
+    if text.count(start) != 1:
+        raise QualificationError("PKSCHED4 source scope start is missing or ambiguous")
+    body = text.split(start, 1)[1]
+    if end not in body:
+        raise QualificationError("PKSCHED4 source scope end is missing")
+    return body.split(end, 1)[0]
+
+
+AP_ENTRIES = ("reschedule", "shootdown", "call_function", "diagnostic", "panic", "stop")
+AP_REGISTERS = ("rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15")
+LIFECYCLE_GUARDS = tuple(f"proof.lifecycle.{name}_mask != smp_ipi::TARGET_CPU_MASK"
+                         for name in ("online", "quiesced", "parked", "released")) + ("scheduler.after_park.online_mask != 1",)
+SCRUB_GUARDS = ("receipt.kind != ScrubKind::Release", "receipt.page_count != smp_runtime::RESOURCE_PAGE_COUNT",
+                "receipt.zeroed_bytes != expected_bytes", "receipt.verified_bytes != expected_bytes",
+                ".free_scrubbed_automatic(allocation, access)")
+
+
+def _audit_source_text(texts: dict[str, str]) -> dict[str, Any]:
     required_scheduler = (
         "pub const CPU_COUNT: usize = 4", "pub const TASK_CAPACITY: usize = 8",
         "pub struct TransferTicket", "pub struct RemoteAck", "pub struct SmpScheduler",
@@ -126,6 +180,8 @@ def _source_audit() -> dict[str, Any]:
         "pub fn stage_dispatch", "pub fn acknowledge", "pub fn timeout",
         "pub fn reject_stale_ack", "pub fn select_least_loaded", "pub fn offline_idle_cpu",
         "pub fn validate",
+        "fn dispatch_preflight_transaction_exhaustion_preserves_ownership()",
+        "fn dispatch_preflight_bypass_exhaustion_preserves_entire_queue()",
     )
     required_main = (
         "PKSCHED4_EARLY", "PKSCHED4_TOPOLOGY", "PKSCHED4_TRANSFER", "PKSCHED4_DISPATCH",
@@ -154,28 +210,78 @@ def _source_audit() -> dict[str, Any]:
         or '"development-scheduler-smp"' not in texts["pooleboot_qualifier"]
     ):
         raise QualificationError("PKSCHED4 selector isolation source audit failed")
-    if texts["scheduler"].count("#[test]") != 8:
+    if texts["scheduler"].count("#[test]") != 10:
         raise QualificationError("PKSCHED4 focused Rust test count changed")
-    if re.search(r"\b(?:Vec|Box|String|HashMap|dyn)\b", texts["scheduler"]):
+    if re.search(r"\b(?:Vec|Box|String|HashMap|dyn)\b|\bfn\s*\(", texts["scheduler"]):
         raise QualificationError("PKSCHED4 controller gained heap or dynamic storage")
+    arch = texts["arch"]
+    for name in AP_ENTRIES:
+        body = _scope(arch, f"poole_ap_ipi_{name}:\n", ".Lpoole_ap_ipi_common")
+        if body.strip().splitlines()[0].strip() != "push rax":
+            raise QualificationError("PKSCHED4 AP entry does not save RAX")
+    common = _scope(arch, ".Lpoole_ap_ipi_common:\n", ".Lpoole_ap_ipi_return:\n")
+    if [line.strip() for line in common.splitlines()[:13]] != ["push " + reg for reg in AP_REGISTERS]:
+        raise QualificationError("PKSCHED4 AP register save order changed")
+    restore = _scope(arch, ".Lpoole_ap_ipi_return:\n", ".Lpoole_ap_ipi_terminal_stop:")
+    if [line.strip() for line in restore.splitlines() if line.strip()] != [*("pop " + reg for reg in reversed(AP_REGISTERS)), "pop rax", "iretq"]:
+        raise QualificationError("PKSCHED4 AP register restore order changed")
+    if re.search(r"\b(?:rbp|ebp|bp|bpl)\b", common):
+        raise QualificationError("PKSCHED4 unsaved RBP is touched by the handler")
+    lifecycle = _scope(texts["main"], "let scheduler = proof.scheduler.unwrap_or_else(|| {", "logger.write_bytes(&PKSCHED4_TOPOLOGY);")
+    scrub = _scope(texts["main"], "fn smp_runtime_release_resources_with_live_mmio(", "\nfn ")
+    if not all(token in lifecycle for token in LIFECYCLE_GUARDS) or not all(token in scrub for token in SCRUB_GUARDS):
+        raise QualificationError("PKSCHED4 park/scrub/release source audit changed")
     return {
         "max_development_trap_scenario": int(maximum_match.group(1)),
-        "focused_rust_test_count": 8,
+        "focused_rust_test_count": 10,
         "fixed_cpu_count": 4,
         "fixed_task_capacity": 8,
         "allocation_free_controller": True,
         "arbitrary_callback_count": 0,
-        "ap_handler_saved_register_count": 15,
+        "ap_handler_preserved_register_count": 15,
         "live_marker_count": scheduler_smp.MARKER_COUNT,
-        "files": {
-            name: {"path": path.relative_to(ROOT).as_posix(), "sha256": scheduler_smp.sha256_bytes(path.read_bytes())}
-            for name, path in paths.items()
-        },
     }
 
 
+def _source_controls(texts: dict[str, str]) -> list[dict[str, Any]]:
+    _audit_source_text(texts)
+
+    def mutation(key: str, scope: str, old: str, new: str) -> Callable[[], Any]:
+        if scope.count(old) != 1 or texts[key].count(scope) != 1:
+            raise QualificationError("PKSCHED4 source mutation is not uniquely scoped")
+        changed = dict(texts)
+        changed[key] = texts[key].replace(scope, scope.replace(old, new, 1), 1)
+        return lambda: _audit_source_text(changed)
+
+    arch = texts["arch"]
+    operations = []
+    for name in AP_ENTRIES:
+        scope = _scope(arch, f"poole_ap_ipi_{name}:\n", ".Lpoole_ap_ipi_common")
+        # Include the entry label because several entry bodies otherwise match.
+        operations.append(mutation("arch", f"poole_ap_ipi_{name}:\n" + scope, "push rax", "nop"))
+    common = _scope(arch, ".Lpoole_ap_ipi_common:\n", ".Lpoole_ap_ipi_return:\n")
+    operations.extend(mutation("arch", common, "push " + reg + "\n", "nop\n") for reg in AP_REGISTERS)
+    restore = _scope(arch, ".Lpoole_ap_ipi_return:\n", ".Lpoole_ap_ipi_terminal_stop:")
+    operations.extend(mutation("arch", restore, "pop " + reg + "\n", "nop\n") for reg in (*AP_REGISTERS, "rax"))
+    operations.append(mutation("arch", restore, "iretq", "ret"))
+    operations.append(mutation("arch", common, "mov r15d, eax", "mov rbp, rax"))
+    ids = scheduler_smp.NEGATIVE_CONTROL_IDS
+    controls = [_require_rejections(ids[28], operations)]
+    lifecycle = _scope(texts["main"], "let scheduler = proof.scheduler.unwrap_or_else(|| {", "logger.write_bytes(&PKSCHED4_TOPOLOGY);")
+    scrub = _scope(texts["main"], "fn smp_runtime_release_resources_with_live_mmio(", "\nfn ")
+    operations = [mutation("main", lifecycle, token, "false") for token in LIFECYCLE_GUARDS]
+    operations.extend(mutation("main", scrub, token, "false") for token in SCRUB_GUARDS)
+    controls.append(_require_rejections(ids[29], operations))
+    operations = []
+    for token in ("Vec<u8>", "Box<u8>", "String", "HashMap<u8, u8>", "dyn Fn()", "fn(u64)"):
+        changed = dict(texts, scheduler=texts["scheduler"] + "\ntype Injected = " + token + ";\n")
+        operations.append(lambda changed=changed: _audit_source_text(changed))
+    controls.append(_require_rejections(ids[30], operations))
+    return controls
+
+
 def _negative_controls(
-    markers: list[str], probe_lines: list[str], source_audit: dict[str, Any]
+    markers: list[str], probe_lines: list[str], native_control_probe: dict[str, Any], audit_controls: dict[str, Any]
 ) -> list[dict[str, Any]]:
     scheduler_smp.validate_markers(markers)
     scheduler_smp.parse_probe_output("\n".join(probe_lines) + "\n")
@@ -201,13 +307,11 @@ def _negative_controls(
     controls.append(_require_rejections(ids[13], probe_fields))
     oracle_hostile = probe_lines.copy(); oracle_hostile[2] = _set_field(oracle_hostile[2], "ap_trace", "1:1,1:2,2:4,2:3,3:6,3:5")
     controls.append(_require_rejections(ids[14], [_probe_operation(oracle_hostile)]))
-    if source_audit["focused_rust_test_count"] != 8 or source_audit["ap_handler_saved_register_count"] != 15:
-        raise QualificationError("PKSCHED4 source controls lack passing evidence")
-    for control_id in ids[15:31]:
-        controls.append({"id": control_id, "status": "pass", "expected": "rejected", "case_count": 1})
+    controls.extend(scheduler_smp.parse_native_control_output("\n".join(native_control_probe["lines"]) + "\n"))
+    controls.extend(audit_controls["controls"])
     controls.append(_require_rejections(ids[31], [lambda: scheduler_smp.file_binding(ROOT, "../outside")]))
-    if [item["id"] for item in controls] != list(ids):
-        raise QualificationError("PKSCHED4 negative-control order diverged")
+    if controls != scheduler_smp.expected_controls():
+        raise QualificationError("PKSCHED4 per-control accounting diverged")
     case_count = sum(item["case_count"] for item in controls)
     if case_count != HOSTILE_CASE_COUNT:
         raise QualificationError(f"PKSCHED4 hostile-case count changed: {case_count}")
@@ -233,6 +337,7 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
     with tempfile.TemporaryDirectory(prefix="pksched4-qualification-", dir=temporary_parent) as temporary:
         temporary_root = Path(temporary)
         host_probe = _run_host_probe(toolchain_root, temporary_root / "host-probe")
+        native_control_probe = _run_native_control_probe(toolchain_root, temporary_root / "native-controls")
         default_boot, default_build = qualify_native_pooleboot._build_and_test(toolchain_root, temporary_root / "default-boot")
         scheduler_boot, scheduler_build = qualify_native_pooleboot._build_and_test(toolchain_root, temporary_root / "scheduler-smp-boot", development_feature=scheduler_smp.FEATURE)
         if b"POOLEBOOT/0.1 TRANSFER_ARM PASS" in default_boot or b"POOLEBOOT/0.1 STOP BEFORE TRANSFER" not in default_boot:
@@ -240,6 +345,11 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
         if scheduler_smp.sha256_bytes(default_boot) == scheduler_smp.sha256_bytes(scheduler_boot):
             raise QualificationError("default and PKSCHED4 PooleBoot binaries are not distinct")
         source_audit = _source_audit()
+        audit_controls = {
+            "scope": "mutated_register_cleanup_heap_callback_source_not_hardware_fault_injection",
+            "files": source_audit["files"],
+            "controls": _source_controls({name: (ROOT / path).read_text(encoding="utf-8") for name, path in scheduler_smp.SOURCE_AUDIT_PATHS.items()}),
+        }
         linked_invlpg_audit = qualify_native_kernel_smp_ipi._linked_invlpg_audit(toolchain_root, kernel, temporary_root / "linked-audit")
         media_one = native_kernel_load.build_media_bytes(scheduler_boot, config, manifest, kernel, artifact_files)
         media_two = native_kernel_load.build_media_bytes(scheduler_boot, config, manifest, kernel, artifact_files)
@@ -275,7 +385,7 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
             raise QualificationError("two PKSCHED4 runs produced different frames")
         if handoffs[0] != handoffs[1]:
             raise QualificationError("two PKSCHED4 runs produced different PBP1 bytes")
-    controls = _negative_controls(runs[0]["markers"], host_probe["lines"], source_audit)
+    controls = _negative_controls(runs[0]["markers"], host_probe["lines"], native_control_probe, audit_controls)
     observation = scheduler_smp.validate_markers(runs[0]["markers"])
     firmware = {item["role"]: item for item in lock["firmware"]["files"]}
     report = {
@@ -300,6 +410,8 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
             "default_stop_marker_present": True,
             "default_transfer_marker_absent": True,
             "host_probe": host_probe,
+            "native_control_probe": native_control_probe,
+            "audit_controls": audit_controls,
             "source_audit": source_audit,
             "linked_invlpg_audit": linked_invlpg_audit,
         },

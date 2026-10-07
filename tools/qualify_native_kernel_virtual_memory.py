@@ -404,33 +404,7 @@ def make_readiness(
         "negative_controls": controls,
         "claims": virtual_memory.expected_claims(),
         "non_claims": contract["non_claims"],
-        "summary": {
-            "qemu_run_count": 2,
-            "marker_count": virtual_memory.MARKER_COUNT,
-            "negative_controls_passed": len(controls),
-            "table_pages_materialized": observation["layout"]["table_pages"],
-            "direct_directory_tables": observation["layout"]["direct_directory_tables"],
-            "direct_page_tables": observation["layout"]["direct_page_tables"],
-            "direct_map_ranges": observation["candidate"]["direct_ranges"],
-            "mapped_owned_pages": observation["layout"]["mapped_pages"],
-            "direct_map_gap_pages": observation["candidate"]["gap_pages"],
-            "retained_excluded_pages": observation["candidate"]["retained_excluded_pages"],
-            "coverage_checksum": f"0x{observation['candidate']['coverage_checksum']:016X}",
-            "physical_table_writes": observation["result"]["physical_writes"],
-            "temporary_pte_writes": observation["result"]["temporary_pte_writes"],
-            "active_leaf_mutations": 3,
-            "active_invalidation_receipts": observation["invalidation"]["active_receipts"],
-            "retained_free_rejections": observation["invalidation"]["retained_free_rejections"],
-            "active_cr3_writes": observation["result"]["active_cr3_writes"],
-            "active_hardware_tlb_invalidations": observation["result"]["active_invlpg"],
-            "bootstrap_hardware_tlb_invalidations": observation["result"]["bootstrap_invlpg"],
-            "generation_retirement_receipts": observation["invalidation"]["generation_retirement_receipts"],
-            "remote_shootdowns_pending": observation["invalidation"]["remote_shootdowns_pending"],
-            "signature_verifications": 0,
-            "authority_grants": 0,
-            "actions_authorized": 0,
-            "production_claim_count": 0,
-        },
+        "summary": virtual_memory.virtual_memory_readiness_summary(observation),
         "open_items": [
             "Implement AP startup plus inter-processor TLB shootdown requests, acknowledgements, timeout/failure handling, and generation-safe deferred reclaim.",
             "Integrate the complete map with concurrent allocation and lifecycle-driven incremental map-generation replacement.",
@@ -459,6 +433,9 @@ def main(argv: list[str] | None = None) -> int:
         report = make_readiness(
             args.toolchain_root.resolve(), args.qemu_root.resolve(), args.status_date, args.timeout
         )
+        errors = virtual_memory.readiness_errors(report, ROOT)
+        if errors:
+            raise QualificationError("; ".join(errors))
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_bytes(native_pooleboot.canonical_json_bytes(report))
     except (

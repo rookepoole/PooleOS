@@ -3,7 +3,7 @@
 
 #![forbid(unsafe_code)]
 
-use super::{Handle, Limits, Owner, Pin, Pool};
+use super::{Handle, Limits, Owner, Pin, Pool, execution::Dispatch};
 use crate::physical_memory::{
     AllocationHandle, PhysicalMemoryError, PhysicalMemoryManager, PhysicalPageAccess,
     RetainedAllocation, ScrubReceipt,
@@ -455,16 +455,21 @@ impl<'a, T> TaskLifetimes<'a, T> {
         Ok(task)
     }
 
+    /// Acquire the execution pin before changing the queue or exposing a ticket.
     pub fn stage_dispatch(
         &mut self,
         cpu: CpuId,
         attempt: u64,
         sequence: u64,
-    ) -> Result<sched::TransferTicket, Error> {
+    ) -> Result<Dispatch<'a, T>, Error> {
         if self.draining {
             return Err(Error::Draining);
         }
-        Ok(self.scheduler.stage_dispatch(cpu, attempt, sequence)?)
+        let task = self.scheduler.peek_dispatch(cpu, attempt, sequence)?;
+        let binding = self.binding(task)?;
+        let reader = self.store.pool.pin(binding.handle)?;
+        let ticket = self.scheduler.stage_dispatch(cpu, attempt, sequence)?;
+        Ok(Dispatch::new(ticket, reader))
     }
 
     /// Carries the existing scheduler's exact receipt checks, not CPU proof.

@@ -69,6 +69,8 @@ def _probe_operation(lines: list[str]) -> Callable[[], Any]:
 
 
 def _require_rejections(control_id: str, operations: list[Callable[[], Any]]) -> dict[str, Any]:
+    if not operations:
+        raise QualificationError(f"PKSCHED3 hostile control has no cases: {control_id}")
     for operation in operations:
         try:
             operation()
@@ -120,17 +122,67 @@ def _run_host_probe(toolchain_root: Path, target_dir: Path) -> dict[str, Any]:
     return result
 
 
-def _source_audit() -> dict[str, Any]:
-    paths = {
-        "deferred": ROOT / "native/kernel/src/scheduler_deferred.rs",
-        "arch": ROOT / "native/kernel/src/arch/x86_64.rs",
-        "main": ROOT / "native/kernel/src/main.rs",
-        "boot_exit": ROOT / "native/boot/src/exit.rs",
-        "boot_manifest": ROOT / "native/boot/Cargo.toml",
-        "bootexit": ROOT / "native/bootexit/src/lib.rs",
-        "pooleboot_qualifier": ROOT / "tools/qualify_native_pooleboot.py",
+def _build_native_control_probe(toolchain_root: Path, target_dir: Path, source: Path | None = None) -> tuple[Path, dict[str, str]]:
+    _, rustc, env = qualify_native_kernel_entry._toolchain(toolchain_root)
+    target_dir.mkdir(parents=True, exist_ok=True)
+    executable = target_dir / "pksched3-controls.exe"
+    completed = subprocess.run(
+        [str(rustc), "--edition=2021", "--crate-name", "pksched3_controls",
+         str(source or ROOT / deferred.NATIVE_CONTROL_SOURCES[0]), "-o", str(executable)],
+        cwd=ROOT, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        check=False, timeout=120, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+    )
+    if completed.returncode != 0:
+        raise QualificationError(f"PKSCHED3 native control build failed: {completed.stdout.decode('utf-8', errors='replace')[-3000:]}")
+    return executable, env
+
+
+def _run_native_control_probe(toolchain_root: Path, target_dir: Path) -> dict[str, Any]:
+    executable, env = _build_native_control_probe(toolchain_root, target_dir)
+    completed = subprocess.run(
+        [str(executable)], cwd=ROOT, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        check=False, timeout=30, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+    )
+    output = completed.stdout.decode("utf-8", errors="strict").replace("\r\n", "\n")
+    if completed.returncode != 0:
+        raise QualificationError(f"PKSCHED3 native control probe failed: {output[-3000:]}")
+    controls = deferred.parse_native_control_output(output)
+    return {
+        "scope": "host_execution_of_native_deferred_module_not_privileged_guest_execution",
+        "exit_code": completed.returncode, "lines": output.splitlines(),
+        "output_sha256": deferred.sha256_bytes(output.encode("utf-8")),
+        "executable_sha256": deferred.sha256_bytes(executable.read_bytes()),
+        "controls": controls, "verified_cases_total": sum(item["case_count"] for item in controls),
+        "sources": [deferred.file_binding(ROOT, path) for path in deferred.NATIVE_CONTROL_SOURCES],
     }
+
+
+def _source_audit() -> dict[str, Any]:
+    paths = {name: ROOT / path for name, path in deferred.SOURCE_AUDIT_PATHS.items()}
     texts = {name: path.read_text(encoding="utf-8") for name, path in paths.items()}
+    result = _audit_source_text(texts)
+    result["files"] = {
+        name: {"path": path.relative_to(ROOT).as_posix(), "sha256": deferred.sha256_bytes(path.read_bytes())}
+        for name, path in paths.items()
+    }
+    return result
+
+
+STACK_GUARD_TOKENS = (
+    "worker_region_top > kernel_stack_top", "current_rsp < worker_region_top",
+    "current_rsp >= kernel_stack_top",
+    ".compare_exchange(0, kernel_stack_bottom, Ordering::AcqRel, Ordering::Acquire)",
+)
+
+
+def _worker_stack_scope(text: str) -> str:
+    try:
+        return text.split("pub fn prepare_scheduler_deferred_workers(", 1)[1].split("pub fn dispatch_scheduler_deferred_worker(", 1)[0]
+    except IndexError as error:
+        raise QualificationError("PKSCHED3 worker stack preparation scope is missing") from error
+
+
+def _audit_source_text(texts: dict[str, str]) -> dict[str, Any]:
     required_deferred = (
         "pub const WORK_CAPACITY: usize = 8",
         "pub const WORKER_COUNT: u8 = 2",
@@ -188,8 +240,10 @@ def _source_audit() -> dict[str, Any]:
         raise QualificationError("PKSCHED3 selector isolation source audit failed")
     if texts["deferred"].count("#[test]") != 7:
         raise QualificationError("PKSCHED3 focused Rust test count changed")
-    if re.search(r"\b(?:Vec|Box|String|HashMap|fn\s*\(|dyn\s+)\b", texts["deferred"]):
+    if re.search(r"\b(?:Vec|Box|String|HashMap)\b|\bfn\s*\(|\bdyn\s+", texts["deferred"]):
         raise QualificationError("PKSCHED3 controller gained heap or callback storage")
+    if not all(token in _worker_stack_scope(texts["arch"]) for token in STACK_GUARD_TOKENS):
+        raise QualificationError("PKSCHED3 retained worker stack ownership audit failed")
     return {
         "max_development_trap_scenario": int(maximum_match.group(1)),
         "focused_rust_test_count": 7,
@@ -199,18 +253,48 @@ def _source_audit() -> dict[str, Any]:
         "allocation_free_controller": True,
         "arbitrary_callback_count": 0,
         "live_marker_count": 37,
-        "files": {
-            name: {"path": path.relative_to(ROOT).as_posix(), "sha256": deferred.sha256_bytes(path.read_bytes())}
-            for name, path in paths.items()
-        },
+    }
+
+
+def _source_controls(texts: dict[str, str]) -> list[dict[str, Any]]:
+    _audit_source_text(texts)
+    groups: list[list[dict[str, str]]] = [[], []]
+    for addition in ("Vec<u8>", "Box<u8>", "String", "HashMap<u8,u8>", "fn ()", "&'static dyn Callback"):
+        groups[0].append(dict(texts, deferred=texts["deferred"] + f"\ntype InjectedStorage = {addition};\n"))
+    scope = _worker_stack_scope(texts["arch"])
+    for token in STACK_GUARD_TOKENS:
+        if scope.count(token) != 1:
+            raise QualificationError("PKSCHED3 stack mutation target is not unique")
+        groups[1].append(dict(texts, arch=texts["arch"].replace(scope, scope.replace(token, "false"), 1)))
+    controls = []
+    for control_id, candidates in zip(deferred.NEGATIVE_CONTROL_IDS[27:29], groups):
+        rejected = 0
+        for candidate in candidates:
+            try:
+                _audit_source_text(candidate)
+            except QualificationError:
+                rejected += 1
+            else:
+                raise QualificationError(f"PKSCHED3 source mutation was not rejected: {control_id}")
+        controls.append({"id": control_id, "status": "pass", "expected": "rejected", "case_count": rejected})
+    return controls
+
+
+def _run_audit_controls(source_audit: dict[str, Any]) -> dict[str, Any]:
+    if source_audit != _source_audit():
+        raise QualificationError("PKSCHED3 source audit changed before control execution")
+    texts = {name: (ROOT / path).read_text(encoding="utf-8") for name, path in deferred.SOURCE_AUDIT_PATHS.items()}
+    return {
+        "scope": "mutated_heap_callback_and_stack_guard_source_not_hardware_fault_injection",
+        "files": source_audit["files"], "controls": _source_controls(texts),
     }
 
 
 def _negative_controls(
     markers: list[str],
     probe_lines: list[str],
-    source_audit: dict[str, Any],
-    linked_audit: dict[str, Any],
+    native_control_probe: dict[str, Any],
+    audit_controls: dict[str, Any],
 ) -> list[dict[str, Any]]:
     deferred.validate_markers(markers)
     deferred.parse_probe_output("\n".join(probe_lines) + "\n")
@@ -240,13 +324,11 @@ def _negative_controls(
     oracle_hostile = probe_lines.copy()
     oracle_hostile[1] = _set_field(oracle_hostile[1], "slots", "0,2,4,5,1,6")
     controls.append(_require_rejections(ids[14], [_probe_operation(oracle_hostile)]))
-    if source_audit["focused_rust_test_count"] != 7 or linked_audit.get("status") != "pass":
-        raise QualificationError("PKSCHED3 source or linked controls lack passing evidence")
-    for control_id in ids[15:29]:
-        controls.append({"id": control_id, "status": "pass", "expected": "rejected", "case_count": 1})
+    controls.extend(deferred.parse_native_control_output("\n".join(native_control_probe["lines"]) + "\n"))
+    controls.extend(audit_controls["controls"])
     controls.append(_require_rejections(ids[29], [lambda: deferred.file_binding(ROOT, "../outside")]))
-    if [item["id"] for item in controls] != list(ids):
-        raise QualificationError("PKSCHED3 negative-control order diverged")
+    if controls != deferred.expected_controls():
+        raise QualificationError("PKSCHED3 executed-control accounting diverged")
     return controls
 
 
@@ -269,6 +351,7 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
     with tempfile.TemporaryDirectory(prefix="pksched3-qualification-", dir=ROOT / "tmp") as temporary:
         temporary_root = Path(temporary)
         host_probe = _run_host_probe(toolchain_root, temporary_root / "host-probe")
+        native_control_probe = _run_native_control_probe(toolchain_root, temporary_root / "native-controls")
         default_boot, default_build = qualify_native_pooleboot._build_and_test(toolchain_root, temporary_root / "default-boot")
         deferred_boot, deferred_build = qualify_native_pooleboot._build_and_test(toolchain_root, temporary_root / "deferred-boot", development_feature=deferred.FEATURE)
         if b"POOLEBOOT/0.1 TRANSFER_ARM PASS" in default_boot or b"POOLEBOOT/0.1 STOP BEFORE TRANSFER" not in default_boot:
@@ -276,6 +359,7 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
         if deferred.sha256_bytes(default_boot) == deferred.sha256_bytes(deferred_boot):
             raise QualificationError("default and PKSCHED3 PooleBoot binaries are not distinct")
         source_audit = _source_audit()
+        audit_controls = _run_audit_controls(source_audit)
         linked_audit = qualify_native_kernel_scheduler._linked_switch_audit(toolchain_root, kernel, temporary_root / "linked-audit")
         media_one = native_kernel_load.build_media_bytes(deferred_boot, config, manifest, kernel, artifacts)
         media_two = native_kernel_load.build_media_bytes(deferred_boot, config, manifest, kernel, artifacts)
@@ -323,7 +407,7 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
             raise QualificationError("two PKSCHED3 runs produced different frames")
         if handoffs[0] != handoffs[1]:
             raise QualificationError("two PKSCHED3 runs produced different PBP1 bytes")
-    controls = _negative_controls(runs[0]["markers"], host_probe["lines"], source_audit, linked_audit)
+    controls = _negative_controls(runs[0]["markers"], host_probe["lines"], native_control_probe, audit_controls)
     observation = deferred.validate_markers(runs[0]["markers"])
     firmware = {item["role"]: item for item in lock["firmware"]["files"]}
     report = {
@@ -347,6 +431,8 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
             "default_stop_marker_present": True,
             "default_transfer_marker_absent": True,
             "host_probe": host_probe,
+            "native_control_probe": native_control_probe,
+            "audit_controls": audit_controls,
             "source_audit": source_audit,
             "linked_switch_audit": linked_audit,
         },

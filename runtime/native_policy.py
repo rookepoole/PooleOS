@@ -203,6 +203,13 @@ READINESS_RELATIVE: Final = Path("runs/native_policy_readiness.json")
 READINESS_SCHEMA_RELATIVE: Final = Path("specs/native-policy-readiness.schema.json")
 
 IMPLEMENTATION_INPUTS: Final = (
+    "native/.cargo/config.toml",
+    "native/rust-toolchain.toml",
+    "specs/native-toolchain-lock.json",
+    "specs/native-host-msvc-profile.json",
+    "tools/native_host_toolchain.py",
+    "tools/qualify_native_toolchain.py",
+    "tests/test_native_boot_host_toolchain.py",
     "native/Cargo.toml",
     "native/Cargo.lock",
     "native/policy/Cargo.toml",
@@ -1318,6 +1325,16 @@ def readiness_errors(value: dict[str, Any], root: Path = ROOT) -> list[str]:
     errors = _schema_errors(value, root, READINESS_SCHEMA_RELATIVE)
     if errors:
         return errors
+    build = value.get("build", {})
+    host = build.get("host_toolchain") if isinstance(build, dict) else None
+    expected_host = {
+        "profile_id": "POOLEOS-HOST-MSVC-1",
+        "profile_sha256": hashlib.sha256((root / "specs/native-host-msvc-profile.json").read_bytes()).hexdigest().upper(),
+        "verified_before_build": True,
+        "scope": "host_linker_and_library_trees_not_complete_host_attestation",
+    }
+    if json.dumps(host, sort_keys=True) != json.dumps(expected_host, sort_keys=True):
+        errors.append("PPOL1 host-toolchain profile mismatch")
     try:
         errors.extend(contract_errors(read_json(root / CONTRACT_RELATIVE), root))
         errors.extend(golden_errors(read_json(root / GOLDEN_RELATIVE), root))

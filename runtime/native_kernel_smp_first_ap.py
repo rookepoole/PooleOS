@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from runtime import native_kernel_transfer
+from runtime import native_kernel_transfer, native_pooleboot
 from runtime.schema_validation import validate_json
 from runtime.native_kernel_profile_evidence import kernel_entry_errors
 
@@ -46,6 +46,7 @@ FNV_PRIME = 0x0000_0100_0000_01B3
 IMPLEMENTATION_INPUTS = (
     "runtime/native_kernel_profile_evidence.py",
     "tests/test_native_memory_entry_provenance.py",
+    "tests/test_native_cpu_entry_provenance.py",
     "runs/native_kernel_entry_readiness.json",
     "native/Cargo.lock",
     "native/boot/Cargo.toml",
@@ -258,14 +259,109 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
 
 
 def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
+    if not isinstance(readiness, dict):
+        return ["PKSMP1 readiness is not an object"]
     errors = list(validate_json(readiness, read_json(root / READINESS_SCHEMA_RELATIVE)))
     errors.extend(kernel_entry_errors(readiness.get("build"), root))
+    if errors:
+        return errors
     if readiness.get("inputs") != expected_inputs(root):
         errors.append("readiness input bindings are stale")
     controls = readiness.get("negative_controls", [])
-    ids = [item.get("id") for item in controls if isinstance(item, dict)]
+    ids = [item.get("id") for item in controls if isinstance(item, dict)] if isinstance(controls, list) else []
     if ids != list(NEGATIVE_CONTROL_IDS):
         errors.append("readiness negative-control order diverges")
+    errors.extend(recorded_first_ap_errors(readiness.get("execution"), readiness.get("summary"),
+                                          readiness["build"]["kernel_entry"]["host_tests"]))
+    return errors
+
+
+def first_ap_readiness_summary(observation: dict[str, Any], host_tests: dict[str, Any]) -> dict[str, int]:
+    return {
+        "kernel_host_tests_passed": host_tests["test_pass_count"],
+        "kernel_host_tests_total": host_tests["test_count"],
+        "qemu_runs_passed": 2, "qemu_runs_total": 2, "markers_per_run": MARKER_COUNT,
+        "negative_controls_passed": len(NEGATIVE_CONTROL_IDS),
+        "negative_controls_total": len(NEGATIVE_CONTROL_IDS),
+        "application_processors_started": observation["result"]["ap_started"],
+        "application_processors_online": observation["result"]["ap_online"],
+        "application_processors_quiesced": observation["result"]["ap_quiesced"],
+        "application_processors_parked": observation["result"]["ap_parked"],
+        "resource_pages_released": observation["release"]["resources_released"],
+        "zeroed_bytes": observation["release"]["zeroed_bytes"],
+        "verified_bytes": observation["release"]["verified_bytes"],
+        "production_claim_count": observation["result"]["production"],
+    }
+
+
+def recorded_first_ap_errors(execution: Any, summary: Any, host_tests: dict[str, Any]) -> list[str]:
+    """Check raw runs before permitting only validated TSC/checksum differences."""
+    if not isinstance(execution, dict):
+        return ["PKSMP1 recorded execution is not an object"]
+    errors: list[str] = []
+    if (any(type(execution.get(key)) is not int or execution[key] != 2
+            for key in ("run_count", "virtual_cpu_count"))
+            or any(execution.get(key) is not True for key in (
+                "static_markers_exact_match", "dynamic_tsc_and_checksum_fields_revalidated",
+                "exact_screenshot_match", "exact_pbp1_match"))):
+        errors.append("PKSMP1 recorded two-run metadata changed")
+    runs = execution.get("runs")
+    if (not isinstance(runs, list) or len(runs) != 2
+            or any(not isinstance(run, dict) for run in runs)
+            or [run.get("run_id") for run in runs] != ["smp-first-ap-run-1", "smp-first-ap-run-2"]):
+        return [*errors, "PKSMP1 recorded run coverage changed"]
+
+    def exact(left: Any, right: Any) -> bool:
+        return json.dumps(left, sort_keys=True, allow_nan=False) == json.dumps(right, sort_keys=True, allow_nan=False)
+
+    observations = []
+    normalized = []
+    for run in runs:
+        try:
+            _require(type(run.get("qemu_exit_code")) is int and run["qemu_exit_code"] == 0,
+                     "recorded emulator exit is missing, malformed or unsuccessful")
+            frame = run.get("screenshot")
+            _require(isinstance(frame, dict) and frame.get("nonblank") is True
+                     and isinstance(frame.get("sha256"), str)
+                     and re.fullmatch(r"[0-9A-F]{64}", frame["sha256"]) is not None,
+                     "recorded frame is missing or malformed")
+            markers = run.get("markers")
+            _require(isinstance(markers, list) and all(isinstance(item, str) for item in markers),
+                     "recorded markers are not a string list")
+            observation = validate_markers(markers)
+            _require(exact(run.get("marker_summary"), observation), "recorded summary differs from parsed markers or types")
+            _require(run.get("marker_sha256") == sha256_bytes(native_pooleboot.canonical_json_bytes(markers)),
+                     "recorded marker digest changed")
+            transcript = run.get("pbp1_transcript")
+            _require(isinstance(transcript, dict) and isinstance(transcript.get("core"), dict),
+                     "recorded handoff or core is malformed")
+            prefix = observation["transfer_prefix"]
+            binding = native_kernel_transfer.validate_transcript_binding(prefix, transcript)
+            _require(exact(run.get("transcript_binding"), binding), "recorded transfer binding changed")
+            oracle = run.get("independent_kernel_revalidation")
+            guest = prefix["kernel_revalidation"]
+            _require(isinstance(oracle, dict) and oracle.get("contract_id") == "PKREVAL1"
+                     and oracle.get("guest_host_exact_match") is True
+                     and exact({key: oracle.get(key) for key in guest}, guest),
+                     "recorded revalidation differs from guest markers")
+            _require(all(run.get(key) is True for key in
+                         ("serial_debugcon_exact_match", "pbp1_serial_debugcon_exact_match")),
+                     "recorded dual-channel agreement changed")
+            observations.append(observation)
+            normalized.append(normalize_dynamic_markers(markers))
+        except (KernelSmpFirstApError, native_kernel_transfer.KernelTransferError,
+                KeyError, TypeError, ValueError, AttributeError, OverflowError) as error:
+            errors.append(f"PKSMP1 {run['run_id']} invalid recorded evidence: {error}")
+    if errors:
+        return errors
+    try:
+        _require(exact(normalized[0], normalized[1]), "recorded static markers differ")
+        _require(all(exact(runs[0].get(key), runs[1].get(key)) for key in ("pbp1_transcript", "screenshot")),
+                 "recorded handoff/frame pair differs")
+        _require(exact(execution.get("observation"), observations[0]), "recorded aggregate observation changed")
+        _require(exact(summary, first_ap_readiness_summary(observations[0], host_tests)), "recorded readiness summary changed")
+    except (KernelSmpFirstApError, KeyError, TypeError, ValueError, AttributeError) as error:
+        errors.append(f"PKSMP1 recorded accounting is invalid: {error}")
     return errors
 
 

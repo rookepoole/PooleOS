@@ -1,12 +1,15 @@
+import copy
 import hashlib
 import json
 import os
+import re
 import struct
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,7 +23,7 @@ from runtime.native_binary import (  # noqa: E402
 )
 from runtime.schema_validation import validate_json  # noqa: E402
 from tools import pooleos_release_gate  # noqa: E402
-from tools.qualify_native_toolchain import QualificationError, run_checked, tree_binding  # noqa: E402
+from tools.qualify_native_toolchain import QualificationError, isolated_environment, run_checked, tree_binding  # noqa: E402
 
 
 def synthetic_pe32_plus() -> bytes:
@@ -44,6 +47,27 @@ def synthetic_elf64() -> bytes:
     ident = b"\x7fELF\x02\x01\x01" + b"\0" * 9
     header = struct.pack("<HHIQQQIHHHHHH", 2, 62, 1, 0x200000, 0, 0, 0, 64, 0, 0, 0, 0, 0)
     return ident + header
+
+
+def expected_reproduction_bytes(reference: dict, windows_version: tuple[int, int, int]) -> bytes:
+    """Only the independently observed Windows build may differ from the old run."""
+    if (len(windows_version) != 3 or any(type(v) is not int or v < 0 for v in windows_version)
+            or windows_version[2] == 0):
+        raise ValueError("invalid observed Windows version")
+    expected = copy.deepcopy(reference)
+    versions = expected["toolchain"]["versions"]
+    cargo = versions["cargo"]
+    matches = list(re.finditer(
+        r"(?m)^os: Windows (?P<major>[0-9]+)\.(?P<minor>[0-9]+)\.(?P<build>[0-9]+)"
+        r" \([^\r\n()]+\) \[64-bit\]$", cargo))
+    if len(matches) != 1 or sum(line.startswith("os:") for line in cargo.splitlines()) != 1:
+        raise ValueError("expected exactly one bounded Windows host observation")
+    match = matches[0]
+    if (int(match["major"]), int(match["minor"])) != windows_version[:2]:
+        raise ValueError("Windows major/minor change requires separate qualification")
+    start, end = match.span("build")
+    versions["cargo"] = cargo[:start] + str(windows_version[2]) + cargo[end:]
+    return (json.dumps(expected, indent=2, ensure_ascii=True) + "\n").encode("utf-8")
 
 
 class NativeToolchainQualificationTests(unittest.TestCase):
@@ -172,7 +196,7 @@ class NativeToolchainQualificationTests(unittest.TestCase):
                 timeout_seconds=1,
             )
 
-    def test_generator_reproduces_public_ledger_when_local_toolchain_is_available(self) -> None:
+    def test_generator_reproduces_fixtures_and_records_current_host_build(self) -> None:
         toolchain = ROOT / ".toolchains" / "rust-1.97.0"
         if not (toolchain / "cargo" / "bin" / "rustup.exe").is_file():
             self.skipTest("workspace-local qualification toolchain is not installed")
@@ -196,7 +220,61 @@ class NativeToolchainQualificationTests(unittest.TestCase):
                 timeout=60,
             )
             self.assertEqual(completed.returncode, 0, completed.stdout)
-            self.assertEqual(output.read_bytes(), self.report_path.read_bytes())
+            windows = sys.getwindowsversion()
+            expected = expected_reproduction_bytes(self.report, (windows.major, windows.minor, windows.build))
+            self.assertEqual(output.read_bytes(), expected)
+
+    def test_only_the_observed_windows_build_is_variable_in_reproduction(self) -> None:
+        original = copy.deepcopy(self.report)
+        expected = expected_reproduction_bytes(self.report, (10, 0, 26300))
+        self.assertEqual(self.report, original)
+        self.assertEqual(expected_reproduction_bytes(self.report, (10, 0, 26200)), self.report_path.read_bytes())
+        candidate = json.loads(expected)
+        self.assertIn("os: Windows 10.0.26300 (Windows 11 Core) [64-bit]", candidate["toolchain"]["versions"]["cargo"])
+        for path, value in (
+            (("toolchain", "versions", "cargo"), candidate["toolchain"]["versions"]["cargo"].replace("1.97.0", "1.98.0")),
+            (("toolchain", "versions", "cargo"), candidate["toolchain"]["versions"]["cargo"].replace("26300", "26301")),
+            (("toolchain", "versions", "cargo"), candidate["toolchain"]["versions"]["cargo"].replace("Windows 11 Core", "Windows 11 Pro")),
+            (("toolchain", "executables", 1, "sha256"), "0" * 64),
+            (("toolchain", "target_library_trees", 0, "tree_sha256"), "0" * 64),
+            (("builds", 0, "run_sha256", 0), "0" * 64),
+            (("builds", 0, "run_byte_count", 0), 0),
+            (("bindings", "build_inputs", 0, "sha256"), "0" * 64),
+            (("production_ready",), True), (("production_ready",), 0),
+        ):
+            with self.subTest(path=path, value=value):
+                changed = copy.deepcopy(candidate)
+                target = changed
+                for key in path[:-1]:
+                    target = target[key]
+                target[path[-1]] = value
+                encoded = (json.dumps(changed, indent=2, ensure_ascii=True) + "\n").encode("utf-8")
+                self.assertNotEqual(encoded, expected)
+
+    def test_reproduction_rejects_missing_duplicate_or_unsupported_host_observations(self) -> None:
+        cargo = self.report["toolchain"]["versions"]["cargo"]
+        for version in ((10, 0, True), (10, 0, 0), (11, 0, 26300), (10, 1, 26300)):
+            with self.subTest(version=version), self.assertRaises(ValueError):
+                expected_reproduction_bytes(self.report, version)
+        for text in (cargo.split("\nos:", 1)[0], cargo + "\nos: duplicate",
+                     cargo.replace("[64-bit]", "[32-bit]"), cargo.replace("Windows 10.0.26200", "Linux 6.1.0")):
+            changed = copy.deepcopy(self.report)
+            changed["toolchain"]["versions"]["cargo"] = text
+            with self.subTest(cargo=text), self.assertRaises(ValueError):
+                expected_reproduction_bytes(changed, (10, 0, 26300))
+
+    def test_ambient_linker_and_cargo_overrides_do_not_reach_fixture_builds(self) -> None:
+        keys = ("LINK", "_LINK_", "LIB", "LIBPATH", "CL", "_CL_", "INCLUDE",
+                "RUSTC_WORKSPACE_WRAPPER", "CARGO_BUILD_RUSTC_WRAPPER", "CARGO_BUILD_RUSTFLAGS",
+                "CARGO_PROFILE_RELEASE_OPT_LEVEL", "CARGO_TARGET_X86_64_UNKNOWN_UEFI_LINKER",
+                "CARGO_TARGET_X86_64_UNKNOWN_NONE_RUSTFLAGS", "CARGO_ENCODED_RUSTDOCFLAGS")
+        with mock.patch.dict(os.environ, dict.fromkeys(keys, "injected")):
+            before = dict(os.environ)
+            result = isolated_environment(ROOT / ".toolchains/rust-1.97.0", ROOT / "bin", ROOT / "bin/rustc.exe")
+            self.assertEqual(dict(os.environ), before)
+        for key in keys:
+            self.assertNotIn(key, result)
+        self.assertEqual(result["SOURCE_DATE_EPOCH"], "0")
 
     def test_release_gate_carries_bounded_native_toolchain_evidence(self) -> None:
         check = pooleos_release_gate.check_native_toolchain_qualification(self.report_path)

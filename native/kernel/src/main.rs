@@ -444,7 +444,7 @@ pkvm_fragment!(
 );
 pkvm_fragment!(
     PKVM_LAYOUT,
-    b"POOLEOS:KERNEL:VM-LAYOUT PASS contract=PKVM1 canonical_bits=48 null_guard_end=0x0000000000010000 user_end=0x0000800000000000 kernel_start=0xFFFF800000000000 direct_start=0xFFFF900000000000 direct_end=0xFFFFD00000000000 temp_start=0xFFFFFFFF801B9000 temp_end=0xFFFFFFFF801BA000 kernel_image_start=0xFFFFFFFF80000000 kernel_image_end=0xFFFFFFFFC0000000 window_start=0x0000000040000000 window_pages=512\n"
+    b"POOLEOS:KERNEL:VM-LAYOUT PASS contract=PKVM1 canonical_bits=48 null_guard_end=0x0000000000010000 user_end=0x0000800000000000 kernel_start=0xFFFF800000000000 direct_start=0xFFFF900000000000 direct_end=0xFFFFD00000000000 temp_start=0xFFFFFFFF801E6000 temp_end=0xFFFFFFFF801E7000 kernel_image_start=0xFFFFFFFF80000000 kernel_image_end=0xFFFFFFFFC0000000 window_start=0x0000000040000000 window_pages=512\n"
 );
 pkvm_fragment!(
     PKVM_TABLES,
@@ -1165,6 +1165,12 @@ pksmp5_fragment!(PKSMP5_INVALIDATIONS, b" invalidations=");
 pksmp5_fragment!(PKSMP5_BASELINE_CHECKSUM, b" baseline_checksum=");
 pksmp5_fragment!(PKSMP5_RUNTIME_CHECKSUM, b" runtime_checksum=");
 pksmp5_fragment!(PKSMP5_RESPONSE_CHECKSUM, b" response_checksum=");
+pksmp5_fragment!(
+    PKSMP5_MAILBOX_CONTEXT,
+    b" mailbox_evidence=PKMBX1 snapshot=quiesced context_words="
+);
+pksmp5_fragment!(PKSMP5_BASELINE_WORDS, b" baseline_words=");
+pksmp5_fragment!(PKSMP5_RUNTIME_WORDS, b" runtime_words=");
 pksmp5_fragment!(
     PKSMP5_AP_TAIL,
     b" tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1\n"
@@ -4419,6 +4425,7 @@ struct SmpIpiApResource {
 #[derive(Clone, Copy)]
 struct SmpIpiApOperationProof {
     mailbox: RuntimeMailboxSnapshot,
+    mailbox_context: [u64; 5],
     ipi: IpiSnapshot,
     init_asserts: u64,
     init_deasserts: u64,
@@ -5387,21 +5394,33 @@ fn scheduler_smp_preempt_tick(
     let cpu = scheduler_smp_cpu(request.cpu_value)?;
     let owner = controller.current(cpu)?;
     let frame = scheduler_smp_preempt_frame(cpu, owner, request.epoch, request.epoch);
-    let outcome = controller.handle_tick(&frame, request.attempt, request.sequence)?;
-    if let Some(ticket) = outcome.remote_ticket {
-        if controller.current(cpu)? != owner {
-            return Err(scheduler_smp_preempt::Error::Invariant.into());
+    let mut outcome = controller.handle_tick(&frame, request.attempt, request.sequence)?;
+    for _ in 0..=scheduler_smp_preempt::EVENT_CAPACITY_PER_CPU {
+        if let Some(ticket) = outcome.remote_ticket {
+            if controller.current(cpu)? != owner {
+                return Err(scheduler_smp_preempt::Error::Invariant.into());
+            }
+            scheduler_smp_preempt_deliver_ticket(
+                controller,
+                hardware,
+                access,
+                period_femtoseconds,
+                resources,
+                ticket,
+            )?;
         }
-        scheduler_smp_preempt_deliver_ticket(
-            controller,
-            hardware,
-            access,
-            period_femtoseconds,
-            resources,
-            ticket,
-        )?;
+        if !controller.tick_pending() {
+            return Ok(outcome);
+        }
+        let sequence = outcome
+            .remote_ticket
+            .ok_or(scheduler_smp_preempt::Error::Invariant)?
+            .request_sequence
+            .checked_add(1)
+            .ok_or(scheduler_smp_preempt::Error::Counter)?;
+        outcome = controller.resume_tick(request.attempt, sequence)?;
     }
-    Ok(outcome)
+    Err(scheduler_smp_preempt::Error::Invariant.into())
 }
 
 fn scheduler_smp_preempt_live_profile(
@@ -7340,6 +7359,7 @@ fn run_smp_ipi_internal(
     let mut parked_mask = 0u64;
     let mut retention = SmpIpiRetentionProof::default();
     let bsp_tsc_before = arch::x86_64::read_tsc_ordered();
+    let mut mailbox_context = [0u64; 5];
     let operation = (|| -> Result<SmpIpiExecutionReceipt, SmpIpiLiveError> {
         SMP_IPI_FAILURE_STAGE.store(3, Ordering::Relaxed);
         for (index, &target) in target_apic_ids.iter().enumerate() {
@@ -7620,6 +7640,13 @@ fn run_smp_ipi_internal(
             mailboxes[index] = Some(mailbox);
             ipis[index] = Some(ipi);
         }
+        mailbox_context = [
+            u64::from(bsp_leaf1_ecx),
+            u64::from(bsp_leaf1_edx),
+            bsp_tsc_before,
+            bsp_tsc_after,
+            arch::x86_64::read_tsc_ordered(),
+        ];
         lifecycle.quiesced(smp_ipi::TARGET_CPU_MASK)?;
 
         // Shared lock aliases need more than the one-page shootdown. Complete
@@ -7829,6 +7856,7 @@ fn run_smp_ipi_internal(
         let release = releases[index].ok_or(smp_ipi::Error::Rollback)?;
         operations[index] = Some(SmpIpiApOperationProof {
             mailbox: mailboxes[index],
+            mailbox_context,
             ipi: ipis[index],
             init_asserts: 1,
             init_deasserts: 1,
@@ -10736,6 +10764,34 @@ extern "C" fn poole_kernel_rust_entry(
             logger.write_hex_u64(mailbox.runtime_checksum);
             logger.write_bytes(&PKSMP5_RESPONSE_CHECKSUM);
             logger.write_hex_u64(ipi.response_checksum);
+            // Only saved quiesced state is read here; AP allocations are released.
+            logger.write_bytes(&PKSMP5_MAILBOX_CONTEXT);
+            for (word_index, word) in operation.mailbox_context.iter().enumerate() {
+                if word_index != 0 {
+                    logger.write_bytes(&PKSMP5_COMMA);
+                }
+                logger.write_hex_u64(*word);
+            }
+            logger.write_bytes(&PKSMP5_BASELINE_WORDS);
+            for (word_index, word) in smp_runtime::baseline_checksum_words(&mailbox)
+                .iter()
+                .enumerate()
+            {
+                if word_index != 0 {
+                    logger.write_bytes(&PKSMP5_COMMA);
+                }
+                logger.write_hex_u64(*word);
+            }
+            logger.write_bytes(&PKSMP5_RUNTIME_WORDS);
+            for (word_index, word) in smp_runtime::runtime_checksum_words(&mailbox)
+                .iter()
+                .enumerate()
+            {
+                if word_index != 0 {
+                    logger.write_bytes(&PKSMP5_COMMA);
+                }
+                logger.write_hex_u64(*word);
+            }
             logger.write_bytes(&PKSMP5_AP_TAIL);
 
             resource_pages += operation.resource_release_receipt.page_count;

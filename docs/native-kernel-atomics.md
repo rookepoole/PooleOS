@@ -80,6 +80,27 @@ The linked instruction review is deliberately narrow. It checks these exact exte
 
 This verifies the current pinned compiler's critical lowering for these shapes. It is not a universal promise about every inlined call site, future compiler, architecture, cache type, or device-memory operation. Tool, disassembly, symbol body, linked image, and canonical image hashes are stored in the readiness receipt.
 
+Cycle 223 replaces substring matching with parsed instruction lines. The pinned
+lowering check requires exact opcode bytes, operands, contiguous addresses,
+prologue/epilogue, adjacent LOCK prefix and memory RMW, and the CAS retry branch
+target and displacement. Comment text cannot supply missing instructions.
+Compiler changes require reviewed requalification of these narrow shapes.
+Receipts retain the seven instruction bodies. Their canonical JSON digest excludes
+the raw tool header, which contains a local path; `disassembly_scope` states this
+explicitly. Recomputed body hashes alone do not bypass instruction validation.
+
+Recorded admission reconstructs both runs, marker hashes, parsed observations,
+handoff agreement, probe output, source/tool/image bindings, boot-build metadata,
+and exact per-control counts and types. Missing or malformed objects fail closed.
+This checks internal consistency against current inputs, not cryptographic
+authentication or proof of a new execution. The separate fresh qualifier supplies
+new build and guest evidence; two runs on one host are not independent builders.
+
+`tests/test_native_atomics_admission.py` also compiles the actual native module
+at optimization levels 0 and 3. Its seven baseline unit tests must pass, while
+eight independently disabled guard variants must fail at both levels. Those
+sixteen mutant executions are host tests, not privileged guest fault injection.
+
 ## Live interrupt profile
 
 Selector 21 reuses the qualified one-BSP PKIRQ1 local-APIC/HPET setup. Before interrupts are enabled, process context release-publishes `0xC0DEC0DE` and clears the atomic count and mask. On each of eight timer deliveries, the handler:

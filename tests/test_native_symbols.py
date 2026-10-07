@@ -53,7 +53,7 @@ class NativeSymbolTests(unittest.TestCase):
         self.assertEqual(bundle.identity, psym1.canonical_identity())
         self.assertEqual(bundle.segments, psym1.canonical_segments())
         self.assertEqual(bundle.symbols, psym1.canonical_symbols())
-        self.assertEqual(bundle.image_bytes, 0x93000)
+        self.assertEqual(bundle.image_bytes, 0x95000)
         self.assertEqual(bundle.entry_offset, 0xA000)
 
     def test_readiness_binds_kernel_entry_evidence_and_validator(self) -> None:
@@ -75,6 +75,14 @@ class NativeSymbolTests(unittest.TestCase):
             ("linked_byte_count", 1),
             ("image_byte_count", 598016),
             ("entry_offset", 0x9000),
+            ("canonical_sha256", "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625"),
+            ("loaded_sha256", "940D941A32AAA3DC1E5F75295AFC47ECFB1FD07B75E359D9D4C5963A36E488BC"),
+            ("linked_sha256", "87B12B0278881804BDDA57132657950CF8CD8F515B7A0CC4BC9E2B6326FA1C0A"),
+            ("canonical_sha256", "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A"),
+            ("loaded_sha256", "8288BA39AD5B65499B1E59280D3ED9F088609A95760952D1E8489B42CA8391EE"),
+            ("linked_sha256", "6B168F59888CE36050918908E9D7DDB4EEA87F4B8A13FF90EB80E26E0C248BD5"),
+            ("linked_byte_count", 7_091_272),
+            ("image_byte_count", 606_208),
         ):
             with self.subTest(field=field):
                 def changed(path):
@@ -86,6 +94,18 @@ class NativeSymbolTests(unittest.TestCase):
                 with mock.patch.object(psym1, "read_json", side_effect=changed):
                     errors = psym1.readiness_errors(readiness)
                 self.assertIn(f"PSYM1 kernel entry identity changed: {field}", errors)
+
+        def old_build_id(path):
+            value = read_json(path)
+            if path == ROOT / native_kernel_entry.READINESS_RELATIVE:
+                value["product"]["manifest_fields"]["build_id"] = (
+                    "PKBUILD1-CYCLE168-N12-AP-OWN-V002-0000000001"
+                )
+            return value
+
+        with mock.patch.object(psym1, "read_json", side_effect=old_build_id):
+            errors = psym1.readiness_errors(readiness)
+        self.assertIn("PSYM1 kernel entry identity changed: build_id", errors)
 
     def test_lookup_handles_hits_gaps_slides_and_bounds(self) -> None:
         bundle = psym1.parse(psym1.canonical_bundle())

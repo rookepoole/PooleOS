@@ -512,7 +512,8 @@ fn fnv_u64(mut state: u64, value: u64) -> u64 {
     state
 }
 
-pub fn baseline_checksum(mailbox: &MailboxSnapshot) -> u64 {
+/// PKMBX1 wire order, also consumed by the existing little-endian FNV checksum.
+pub fn baseline_checksum_words(mailbox: &MailboxSnapshot) -> [u64; 15] {
     [
         mailbox.magic,
         u64::from(mailbox.version),
@@ -530,11 +531,10 @@ pub fn baseline_checksum(mailbox: &MailboxSnapshot) -> u64 {
         mailbox.tsc_online,
         mailbox.tsc_stop,
     ]
-    .into_iter()
-    .fold(FNV_OFFSET, fnv_u64)
 }
 
-pub fn runtime_checksum(mailbox: &MailboxSnapshot) -> u64 {
+/// PKMBX1 runtime words bind the complete baseline digest and saved AP state.
+pub fn runtime_checksum_words(mailbox: &MailboxSnapshot) -> [u64; 38] {
     [
         mailbox.baseline_checksum,
         mailbox.runtime_magic,
@@ -575,8 +575,18 @@ pub fn runtime_checksum(mailbox: &MailboxSnapshot) -> u64 {
         u64::from(mailbox.enabled_area_bytes),
         u64::from(mailbox.maximum_area_bytes),
     ]
-    .into_iter()
-    .fold(FNV_OFFSET, fnv_u64)
+}
+
+pub fn baseline_checksum(mailbox: &MailboxSnapshot) -> u64 {
+    baseline_checksum_words(mailbox)
+        .into_iter()
+        .fold(FNV_OFFSET, fnv_u64)
+}
+
+pub fn runtime_checksum(mailbox: &MailboxSnapshot) -> u64 {
+    runtime_checksum_words(mailbox)
+        .into_iter()
+        .fold(FNV_OFFSET, fnv_u64)
 }
 
 pub const fn owner_token(apic_id: u32) -> u32 {
@@ -990,6 +1000,77 @@ mod tests {
         assert_eq!(0x13000, layout.idt());
         assert_eq!(0x1e000, layout.xstate());
         assert_eq!(1, layout.sipi_vector());
+    }
+
+    #[test]
+    fn freezes_pkmbx1_complete_checksum_word_order() {
+        let layout = ResourceLayout::new(1, RESOURCE_PAGE_COUNT).unwrap();
+        let snapshot = valid_mailbox(layout);
+        assert_eq!(
+            baseline_checksum_words(&snapshot),
+            [
+                0x504b534d50324d42,
+                2,
+                3,
+                1,
+                1,
+                0,
+                1,
+                0x0c000000,
+                0x07000200,
+                0x80010023,
+                0x2000,
+                0x40620,
+                0xd00,
+                20,
+                30,
+            ]
+        );
+        assert_eq!(0x55e6550945aa7543, snapshot.baseline_checksum);
+        assert_eq!(
+            runtime_checksum_words(&snapshot),
+            [
+                0x55e6550945aa7543,
+                0x504b525450324355,
+                1,
+                5,
+                0x10000,
+                0x13000,
+                0x10040,
+                0xb000,
+                0x16000,
+                0x18000,
+                0x1a000,
+                0x1c000,
+                0x1e000,
+                4096,
+                0x50580001,
+                0x10000,
+                0x13000,
+                0xb000,
+                3,
+                0,
+                2,
+                39,
+                4095,
+                24,
+                8,
+                16,
+                27,
+                19,
+                0,
+                0x37f,
+                0x1f80,
+                0,
+                1,
+                1,
+                0,
+                3,
+                576,
+                576,
+            ]
+        );
+        assert_eq!(0x01b5e3a608866465, snapshot.runtime_checksum);
     }
 
     #[test]

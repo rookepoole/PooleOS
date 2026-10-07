@@ -1,0 +1,2261 @@
+{
+  "format": "POOLEOS-STATIC-EXECUTION-SOURCES-1",
+  "profiles": [
+    {
+      "profile": "physical_memory",
+      "receipt": {
+        "path": "runs/native-kernel-physical-memory-readiness.json",
+        "sha256": "E98BC4D2AAF7DF9E748E99EC6AA701867DACC78DEB948DEA5725DEDAF9B4B26F"
+      },
+      "sources": [
+        {
+          "path": "runtime/__init__.py",
+          "sha256": "65540DC2431716C99F67FF85EF9AEE0484EE1C6A900C59E4DF76E11729D0253A"
+        },
+        {
+          "path": "runtime/native_binary.py",
+          "sha256": "668F101989EBCE1C9C46B07C6419FEFBCFA3D298D4AB88444141EF5921517FE8"
+        },
+        {
+          "path": "runtime/native_boot_artifact.py",
+          "sha256": "518F0392D35DFDE8EB2A3971DA382E455822A7FD2344163FB65D0FCC95FC63ED"
+        },
+        {
+          "path": "runtime/native_boot_config.py",
+          "sha256": "F6915CAC71694F66AC74D2B48EE72DD63A6FD33A4E9530E835589AF434B4698E"
+        },
+        {
+          "path": "runtime/native_boot_exit.py",
+          "sha256": "902B30BD630474BF461FA24D03AD9C51C24905CE4E3ADA9EEEF3AD4FE7A6F9BC"
+        },
+        {
+          "path": "runtime/native_boot_handoff.py",
+          "sha256": "89071EAC531B6DD0E47930A3295B92570201C2EA60277C4CCF87A5E4E684CFE1"
+        },
+        {
+          "path": "runtime/native_boot_trust.py",
+          "sha256": "0E12DA5C48D9E3427D087B24151B498E1DD07536253E746512A8A8F0E7BBE8E0"
+        },
+        {
+          "path": "runtime/native_elf_loader.py",
+          "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+        },
+        {
+          "path": "runtime/native_firmware.py",
+          "sha256": "CA55F8DA2D3FE585FB35D9E10E576B5B7FC8F132A752EAE92CFDE0521A63EDFC"
+        },
+        {
+          "path": "runtime/native_initial_system.py",
+          "sha256": "C7213D00230A8A4BC4423CA63893663ADC637ACD5BC107C6C6A2E89D43387A7E"
+        },
+        {
+          "path": "runtime/native_inner_live.py",
+          "sha256": "ED98E5E46EC16F2762B9E0F440C2F8C27721C5F89933BB734E912A3B58FE5E35"
+        },
+        {
+          "path": "runtime/native_kernel_entry.py",
+          "sha256": "D6CD230A5EE6E17D9AD4270F97E08785DF7CBB4976AF99D65C2FC242C31C918A"
+        },
+        {
+          "path": "runtime/native_kernel_image.py",
+          "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
+        },
+        {
+          "path": "runtime/native_kernel_load.py",
+          "sha256": "701A030C521DD2CD01C46B08CAFF62C865084CA4D072CCF0A572DD36872C5FB6"
+        },
+        {
+          "path": "runtime/native_kernel_map.py",
+          "sha256": "C74E02ACD0D9DF1615088C6596E3B37B72A10841B7B6BB432391C0B569C732CA"
+        },
+        {
+          "path": "runtime/native_kernel_physical_memory.py",
+          "sha256": "54254773A23C9779B28B6715EAFD4C76BCD161DF3F5105F7AACAA143E7FF2E21"
+        },
+        {
+          "path": "runtime/native_kernel_profile_evidence.py",
+          "sha256": "E40689F34D4ACA0318E2981AA81928969FA2BEAD786380F69088AD8260E765BE"
+        },
+        {
+          "path": "runtime/native_kernel_revalidation.py",
+          "sha256": "7EFA4F49CA8218796C3B0A19266DC698F1F03F75D20651B430D18E6668673BFE"
+        },
+        {
+          "path": "runtime/native_kernel_transfer.py",
+          "sha256": "516A25590505C5E3C6850BE6DDA8F80673F2D3B2F1A7CC00C181B12C33C60AC7"
+        },
+        {
+          "path": "runtime/native_live_boot_handoff.py",
+          "sha256": "457662B2E11DCB68856D74B87AA088FC87F6B3ED9BFF6C4CE8C96F191D80839B"
+        },
+        {
+          "path": "runtime/native_microcode.py",
+          "sha256": "089AE566AA73BD23C9A9E648AE6F221406EB49EB9D44EF672BAE119F5D887772"
+        },
+        {
+          "path": "runtime/native_policy.py",
+          "sha256": "1301C4D02F3333F1CBB72D7F0CCC37FCDE7E7AB6A7B1388F0E39B97F6C2527C4"
+        },
+        {
+          "path": "runtime/native_pooleboot.py",
+          "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        },
+        {
+          "path": "runtime/native_recovery.py",
+          "sha256": "9FE923CB2A1DA1083858750FE324321ADB4CB56D9D69DC33B2DBA7D36625E95D"
+        },
+        {
+          "path": "runtime/native_symbols.py",
+          "sha256": "42CA4366A39843E2DAD04A57EA956A9E21E698D841CC0DE6BC42254E304ED685"
+        },
+        {
+          "path": "runtime/native_system_manifest.py",
+          "sha256": "D2B44375B5BA06783CD2147FF1877C07858C285F0B0E9628CE157F46D02C6785"
+        },
+        {
+          "path": "runtime/native_tier0.py",
+          "sha256": "87716D0D8127599A462A535E83FF779248AF9681CE11E8B6D53151B11DB79A39"
+        },
+        {
+          "path": "runtime/schema_validation.py",
+          "sha256": "D26293A1C35E22E521A9CEE0D59AAF7946B8C9B61C73169BD860F78B35DE7E03"
+        },
+        {
+          "path": "tools/native_host_toolchain.py",
+          "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+        },
+        {
+          "path": "tools/qualify_native_elf_loader.py",
+          "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
+        },
+        {
+          "path": "tools/qualify_native_kernel_entry.py",
+          "sha256": "8B03FFD23EC9C2F3C6F82ED98185A71668B7FE75F137E30A89184F28C7BDF36C"
+        },
+        {
+          "path": "tools/qualify_native_kernel_load.py",
+          "sha256": "236588D5A917D4791C625530F781B0D9687ADE185F88E0E6B6AE93754D57E7ED"
+        },
+        {
+          "path": "tools/qualify_native_kernel_physical_memory.py",
+          "sha256": "25C683FE5093C096D129DB9815E2B7953BD754A4100B3A29D8281224EA9E690C"
+        },
+        {
+          "path": "tools/qualify_native_pooleboot.py",
+          "sha256": "3A79880536517335113FBB2F65AD17B320D5041EC70E6F507B96A0A120309636"
+        },
+        {
+          "path": "tools/qualify_native_toolchain.py",
+          "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+        }
+      ],
+      "capture": {
+        "record_sha256": "600211D4E38AA6C79F768F10742CEA319266BD97A37A16B38A934CF489CBC4D4",
+        "log_sha256": "EA410E61CD615D15E6DB74C485B0DAF07CF2AED81BE8A07B46E2A9A628163FD0",
+        "source_snapshot_sha256": "97A248CCD408DFCEFC0DE3859655992C71C42E84EF7635B0FE47F047F57D4F58",
+        "return_code": 0,
+        "source_unchanged": true
+      }
+    },
+    {
+      "profile": "virtual_memory",
+      "receipt": {
+        "path": "runs/native-kernel-virtual-memory-readiness.json",
+        "sha256": "3E9B0A808CC67FB3E418502F33D940CEC2F226D0CE6F553EFF5B6FDBE71643C5"
+      },
+      "sources": [
+        {
+          "path": "runtime/__init__.py",
+          "sha256": "65540DC2431716C99F67FF85EF9AEE0484EE1C6A900C59E4DF76E11729D0253A"
+        },
+        {
+          "path": "runtime/native_binary.py",
+          "sha256": "668F101989EBCE1C9C46B07C6419FEFBCFA3D298D4AB88444141EF5921517FE8"
+        },
+        {
+          "path": "runtime/native_boot_artifact.py",
+          "sha256": "518F0392D35DFDE8EB2A3971DA382E455822A7FD2344163FB65D0FCC95FC63ED"
+        },
+        {
+          "path": "runtime/native_boot_config.py",
+          "sha256": "F6915CAC71694F66AC74D2B48EE72DD63A6FD33A4E9530E835589AF434B4698E"
+        },
+        {
+          "path": "runtime/native_boot_exit.py",
+          "sha256": "902B30BD630474BF461FA24D03AD9C51C24905CE4E3ADA9EEEF3AD4FE7A6F9BC"
+        },
+        {
+          "path": "runtime/native_boot_handoff.py",
+          "sha256": "89071EAC531B6DD0E47930A3295B92570201C2EA60277C4CCF87A5E4E684CFE1"
+        },
+        {
+          "path": "runtime/native_boot_trust.py",
+          "sha256": "0E12DA5C48D9E3427D087B24151B498E1DD07536253E746512A8A8F0E7BBE8E0"
+        },
+        {
+          "path": "runtime/native_elf_loader.py",
+          "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+        },
+        {
+          "path": "runtime/native_firmware.py",
+          "sha256": "CA55F8DA2D3FE585FB35D9E10E576B5B7FC8F132A752EAE92CFDE0521A63EDFC"
+        },
+        {
+          "path": "runtime/native_initial_system.py",
+          "sha256": "C7213D00230A8A4BC4423CA63893663ADC637ACD5BC107C6C6A2E89D43387A7E"
+        },
+        {
+          "path": "runtime/native_inner_live.py",
+          "sha256": "ED98E5E46EC16F2762B9E0F440C2F8C27721C5F89933BB734E912A3B58FE5E35"
+        },
+        {
+          "path": "runtime/native_kernel_entry.py",
+          "sha256": "D6CD230A5EE6E17D9AD4270F97E08785DF7CBB4976AF99D65C2FC242C31C918A"
+        },
+        {
+          "path": "runtime/native_kernel_image.py",
+          "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
+        },
+        {
+          "path": "runtime/native_kernel_load.py",
+          "sha256": "701A030C521DD2CD01C46B08CAFF62C865084CA4D072CCF0A572DD36872C5FB6"
+        },
+        {
+          "path": "runtime/native_kernel_map.py",
+          "sha256": "C74E02ACD0D9DF1615088C6596E3B37B72A10841B7B6BB432391C0B569C732CA"
+        },
+        {
+          "path": "runtime/native_kernel_physical_memory.py",
+          "sha256": "54254773A23C9779B28B6715EAFD4C76BCD161DF3F5105F7AACAA143E7FF2E21"
+        },
+        {
+          "path": "runtime/native_kernel_profile_evidence.py",
+          "sha256": "E40689F34D4ACA0318E2981AA81928969FA2BEAD786380F69088AD8260E765BE"
+        },
+        {
+          "path": "runtime/native_kernel_revalidation.py",
+          "sha256": "7EFA4F49CA8218796C3B0A19266DC698F1F03F75D20651B430D18E6668673BFE"
+        },
+        {
+          "path": "runtime/native_kernel_transfer.py",
+          "sha256": "516A25590505C5E3C6850BE6DDA8F80673F2D3B2F1A7CC00C181B12C33C60AC7"
+        },
+        {
+          "path": "runtime/native_kernel_virtual_memory.py",
+          "sha256": "84C3B9FDC440A85C98031414D924B52E8D8E27C855BBB51EC2214C7B22535D89"
+        },
+        {
+          "path": "runtime/native_live_boot_handoff.py",
+          "sha256": "457662B2E11DCB68856D74B87AA088FC87F6B3ED9BFF6C4CE8C96F191D80839B"
+        },
+        {
+          "path": "runtime/native_microcode.py",
+          "sha256": "089AE566AA73BD23C9A9E648AE6F221406EB49EB9D44EF672BAE119F5D887772"
+        },
+        {
+          "path": "runtime/native_policy.py",
+          "sha256": "1301C4D02F3333F1CBB72D7F0CCC37FCDE7E7AB6A7B1388F0E39B97F6C2527C4"
+        },
+        {
+          "path": "runtime/native_pooleboot.py",
+          "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        },
+        {
+          "path": "runtime/native_recovery.py",
+          "sha256": "9FE923CB2A1DA1083858750FE324321ADB4CB56D9D69DC33B2DBA7D36625E95D"
+        },
+        {
+          "path": "runtime/native_symbols.py",
+          "sha256": "42CA4366A39843E2DAD04A57EA956A9E21E698D841CC0DE6BC42254E304ED685"
+        },
+        {
+          "path": "runtime/native_system_manifest.py",
+          "sha256": "D2B44375B5BA06783CD2147FF1877C07858C285F0B0E9628CE157F46D02C6785"
+        },
+        {
+          "path": "runtime/native_tier0.py",
+          "sha256": "87716D0D8127599A462A535E83FF779248AF9681CE11E8B6D53151B11DB79A39"
+        },
+        {
+          "path": "runtime/schema_validation.py",
+          "sha256": "D26293A1C35E22E521A9CEE0D59AAF7946B8C9B61C73169BD860F78B35DE7E03"
+        },
+        {
+          "path": "tools/native_host_toolchain.py",
+          "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+        },
+        {
+          "path": "tools/qualify_native_elf_loader.py",
+          "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
+        },
+        {
+          "path": "tools/qualify_native_kernel_entry.py",
+          "sha256": "8B03FFD23EC9C2F3C6F82ED98185A71668B7FE75F137E30A89184F28C7BDF36C"
+        },
+        {
+          "path": "tools/qualify_native_kernel_load.py",
+          "sha256": "236588D5A917D4791C625530F781B0D9687ADE185F88E0E6B6AE93754D57E7ED"
+        },
+        {
+          "path": "tools/qualify_native_kernel_virtual_memory.py",
+          "sha256": "5CF4E08F7C7BCD0C0D45EE83ACD34D10F347124A70D32863C5F2FF3D20CD2B54"
+        },
+        {
+          "path": "tools/qualify_native_pooleboot.py",
+          "sha256": "3A79880536517335113FBB2F65AD17B320D5041EC70E6F507B96A0A120309636"
+        },
+        {
+          "path": "tools/qualify_native_toolchain.py",
+          "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+        }
+      ],
+      "capture": {
+        "record_sha256": "CFB13DA94C4CC80E30120A96B9B72EE0D3577574E54F0BAF526D13A26ABF377B",
+        "log_sha256": "7F53E79717F800849474CC2A625F03F7BB7C5A2356813C050DEE8D8C62D4ECF1",
+        "source_snapshot_sha256": "DFFDFEACDD6D084D0675A5D74C4CBCDDEEB381437DA5D782FDDBF5437EA3A6B8",
+        "return_code": 0,
+        "source_unchanged": true
+      }
+    },
+    {
+      "profile": "interrupt_time",
+      "receipt": {
+        "path": "runs/native-kernel-interrupt-time-readiness.json",
+        "sha256": "826D2CB6D18BE8BC7B1E6ADFEAB6D737DBE57375684B19F4DAAB96096304D7E1"
+      },
+      "sources": [
+        {
+          "path": "runtime/__init__.py",
+          "sha256": "65540DC2431716C99F67FF85EF9AEE0484EE1C6A900C59E4DF76E11729D0253A"
+        },
+        {
+          "path": "runtime/native_binary.py",
+          "sha256": "668F101989EBCE1C9C46B07C6419FEFBCFA3D298D4AB88444141EF5921517FE8"
+        },
+        {
+          "path": "runtime/native_boot_artifact.py",
+          "sha256": "518F0392D35DFDE8EB2A3971DA382E455822A7FD2344163FB65D0FCC95FC63ED"
+        },
+        {
+          "path": "runtime/native_boot_config.py",
+          "sha256": "F6915CAC71694F66AC74D2B48EE72DD63A6FD33A4E9530E835589AF434B4698E"
+        },
+        {
+          "path": "runtime/native_boot_exit.py",
+          "sha256": "902B30BD630474BF461FA24D03AD9C51C24905CE4E3ADA9EEEF3AD4FE7A6F9BC"
+        },
+        {
+          "path": "runtime/native_boot_handoff.py",
+          "sha256": "89071EAC531B6DD0E47930A3295B92570201C2EA60277C4CCF87A5E4E684CFE1"
+        },
+        {
+          "path": "runtime/native_boot_trust.py",
+          "sha256": "0E12DA5C48D9E3427D087B24151B498E1DD07536253E746512A8A8F0E7BBE8E0"
+        },
+        {
+          "path": "runtime/native_elf_loader.py",
+          "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+        },
+        {
+          "path": "runtime/native_firmware.py",
+          "sha256": "CA55F8DA2D3FE585FB35D9E10E576B5B7FC8F132A752EAE92CFDE0521A63EDFC"
+        },
+        {
+          "path": "runtime/native_initial_system.py",
+          "sha256": "C7213D00230A8A4BC4423CA63893663ADC637ACD5BC107C6C6A2E89D43387A7E"
+        },
+        {
+          "path": "runtime/native_inner_live.py",
+          "sha256": "ED98E5E46EC16F2762B9E0F440C2F8C27721C5F89933BB734E912A3B58FE5E35"
+        },
+        {
+          "path": "runtime/native_kernel_entry.py",
+          "sha256": "D6CD230A5EE6E17D9AD4270F97E08785DF7CBB4976AF99D65C2FC242C31C918A"
+        },
+        {
+          "path": "runtime/native_kernel_image.py",
+          "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
+        },
+        {
+          "path": "runtime/native_kernel_interrupt_time.py",
+          "sha256": "58593DBFAE87C3F3E16CD9C34622F3ABAE4FC04C73CB0D178485848EAF47006D"
+        },
+        {
+          "path": "runtime/native_kernel_load.py",
+          "sha256": "701A030C521DD2CD01C46B08CAFF62C865084CA4D072CCF0A572DD36872C5FB6"
+        },
+        {
+          "path": "runtime/native_kernel_map.py",
+          "sha256": "C74E02ACD0D9DF1615088C6596E3B37B72A10841B7B6BB432391C0B569C732CA"
+        },
+        {
+          "path": "runtime/native_kernel_profile_evidence.py",
+          "sha256": "E40689F34D4ACA0318E2981AA81928969FA2BEAD786380F69088AD8260E765BE"
+        },
+        {
+          "path": "runtime/native_kernel_revalidation.py",
+          "sha256": "7EFA4F49CA8218796C3B0A19266DC698F1F03F75D20651B430D18E6668673BFE"
+        },
+        {
+          "path": "runtime/native_kernel_transfer.py",
+          "sha256": "516A25590505C5E3C6850BE6DDA8F80673F2D3B2F1A7CC00C181B12C33C60AC7"
+        },
+        {
+          "path": "runtime/native_live_boot_handoff.py",
+          "sha256": "457662B2E11DCB68856D74B87AA088FC87F6B3ED9BFF6C4CE8C96F191D80839B"
+        },
+        {
+          "path": "runtime/native_microcode.py",
+          "sha256": "089AE566AA73BD23C9A9E648AE6F221406EB49EB9D44EF672BAE119F5D887772"
+        },
+        {
+          "path": "runtime/native_policy.py",
+          "sha256": "1301C4D02F3333F1CBB72D7F0CCC37FCDE7E7AB6A7B1388F0E39B97F6C2527C4"
+        },
+        {
+          "path": "runtime/native_pooleboot.py",
+          "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        },
+        {
+          "path": "runtime/native_recovery.py",
+          "sha256": "9FE923CB2A1DA1083858750FE324321ADB4CB56D9D69DC33B2DBA7D36625E95D"
+        },
+        {
+          "path": "runtime/native_symbols.py",
+          "sha256": "42CA4366A39843E2DAD04A57EA956A9E21E698D841CC0DE6BC42254E304ED685"
+        },
+        {
+          "path": "runtime/native_system_manifest.py",
+          "sha256": "D2B44375B5BA06783CD2147FF1877C07858C285F0B0E9628CE157F46D02C6785"
+        },
+        {
+          "path": "runtime/native_tier0.py",
+          "sha256": "87716D0D8127599A462A535E83FF779248AF9681CE11E8B6D53151B11DB79A39"
+        },
+        {
+          "path": "runtime/schema_validation.py",
+          "sha256": "D26293A1C35E22E521A9CEE0D59AAF7946B8C9B61C73169BD860F78B35DE7E03"
+        },
+        {
+          "path": "tools/native_host_toolchain.py",
+          "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+        },
+        {
+          "path": "tools/qualify_native_elf_loader.py",
+          "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
+        },
+        {
+          "path": "tools/qualify_native_kernel_entry.py",
+          "sha256": "8B03FFD23EC9C2F3C6F82ED98185A71668B7FE75F137E30A89184F28C7BDF36C"
+        },
+        {
+          "path": "tools/qualify_native_kernel_interrupt_time.py",
+          "sha256": "A5F861A273CBB736AD4A2E6AFBAA5762FA0B22F1B474F9945A94A14FD9F50BBF"
+        },
+        {
+          "path": "tools/qualify_native_kernel_load.py",
+          "sha256": "236588D5A917D4791C625530F781B0D9687ADE185F88E0E6B6AE93754D57E7ED"
+        },
+        {
+          "path": "tools/qualify_native_pooleboot.py",
+          "sha256": "3A79880536517335113FBB2F65AD17B320D5041EC70E6F507B96A0A120309636"
+        },
+        {
+          "path": "tools/qualify_native_toolchain.py",
+          "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+        }
+      ],
+      "capture": {
+        "record_sha256": "57A89B8DC0561F4E480FA986E9353C24FD132A39A6E5FAB2EFB33C00023871BB",
+        "log_sha256": "047FF2DF6EB68D3816503F9E81C83FA820E6D47828691C1D6F48D6B95C2F54B1",
+        "source_snapshot_sha256": "8BCED98A9528ED2E2469D76BE102AE0735965E90006237BCF82BC35EFA032A91",
+        "return_code": 0,
+        "source_unchanged": true
+      }
+    },
+    {
+      "profile": "smp_first_ap",
+      "receipt": {
+        "path": "runs/native-kernel-smp-first-ap-readiness.json",
+        "sha256": "8B866AA7606A8E1A586F6BF4C1D6EF7B24D615FC6DB4400ECFDFED93267576FC"
+      },
+      "sources": [
+        {
+          "path": "runtime/__init__.py",
+          "sha256": "65540DC2431716C99F67FF85EF9AEE0484EE1C6A900C59E4DF76E11729D0253A"
+        },
+        {
+          "path": "runtime/native_binary.py",
+          "sha256": "668F101989EBCE1C9C46B07C6419FEFBCFA3D298D4AB88444141EF5921517FE8"
+        },
+        {
+          "path": "runtime/native_boot_artifact.py",
+          "sha256": "518F0392D35DFDE8EB2A3971DA382E455822A7FD2344163FB65D0FCC95FC63ED"
+        },
+        {
+          "path": "runtime/native_boot_config.py",
+          "sha256": "F6915CAC71694F66AC74D2B48EE72DD63A6FD33A4E9530E835589AF434B4698E"
+        },
+        {
+          "path": "runtime/native_boot_exit.py",
+          "sha256": "902B30BD630474BF461FA24D03AD9C51C24905CE4E3ADA9EEEF3AD4FE7A6F9BC"
+        },
+        {
+          "path": "runtime/native_boot_handoff.py",
+          "sha256": "89071EAC531B6DD0E47930A3295B92570201C2EA60277C4CCF87A5E4E684CFE1"
+        },
+        {
+          "path": "runtime/native_boot_trust.py",
+          "sha256": "0E12DA5C48D9E3427D087B24151B498E1DD07536253E746512A8A8F0E7BBE8E0"
+        },
+        {
+          "path": "runtime/native_elf_loader.py",
+          "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+        },
+        {
+          "path": "runtime/native_firmware.py",
+          "sha256": "CA55F8DA2D3FE585FB35D9E10E576B5B7FC8F132A752EAE92CFDE0521A63EDFC"
+        },
+        {
+          "path": "runtime/native_initial_system.py",
+          "sha256": "C7213D00230A8A4BC4423CA63893663ADC637ACD5BC107C6C6A2E89D43387A7E"
+        },
+        {
+          "path": "runtime/native_inner_live.py",
+          "sha256": "ED98E5E46EC16F2762B9E0F440C2F8C27721C5F89933BB734E912A3B58FE5E35"
+        },
+        {
+          "path": "runtime/native_kernel_entry.py",
+          "sha256": "D6CD230A5EE6E17D9AD4270F97E08785DF7CBB4976AF99D65C2FC242C31C918A"
+        },
+        {
+          "path": "runtime/native_kernel_image.py",
+          "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
+        },
+        {
+          "path": "runtime/native_kernel_load.py",
+          "sha256": "701A030C521DD2CD01C46B08CAFF62C865084CA4D072CCF0A572DD36872C5FB6"
+        },
+        {
+          "path": "runtime/native_kernel_map.py",
+          "sha256": "C74E02ACD0D9DF1615088C6596E3B37B72A10841B7B6BB432391C0B569C732CA"
+        },
+        {
+          "path": "runtime/native_kernel_profile_evidence.py",
+          "sha256": "E40689F34D4ACA0318E2981AA81928969FA2BEAD786380F69088AD8260E765BE"
+        },
+        {
+          "path": "runtime/native_kernel_revalidation.py",
+          "sha256": "7EFA4F49CA8218796C3B0A19266DC698F1F03F75D20651B430D18E6668673BFE"
+        },
+        {
+          "path": "runtime/native_kernel_smp_first_ap.py",
+          "sha256": "06EEBF13A5514E611624514752264A5419D9E4DC1E98D21F956A5DB4F7DED863"
+        },
+        {
+          "path": "runtime/native_kernel_transfer.py",
+          "sha256": "516A25590505C5E3C6850BE6DDA8F80673F2D3B2F1A7CC00C181B12C33C60AC7"
+        },
+        {
+          "path": "runtime/native_live_boot_handoff.py",
+          "sha256": "457662B2E11DCB68856D74B87AA088FC87F6B3ED9BFF6C4CE8C96F191D80839B"
+        },
+        {
+          "path": "runtime/native_microcode.py",
+          "sha256": "089AE566AA73BD23C9A9E648AE6F221406EB49EB9D44EF672BAE119F5D887772"
+        },
+        {
+          "path": "runtime/native_policy.py",
+          "sha256": "1301C4D02F3333F1CBB72D7F0CCC37FCDE7E7AB6A7B1388F0E39B97F6C2527C4"
+        },
+        {
+          "path": "runtime/native_pooleboot.py",
+          "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        },
+        {
+          "path": "runtime/native_recovery.py",
+          "sha256": "9FE923CB2A1DA1083858750FE324321ADB4CB56D9D69DC33B2DBA7D36625E95D"
+        },
+        {
+          "path": "runtime/native_symbols.py",
+          "sha256": "42CA4366A39843E2DAD04A57EA956A9E21E698D841CC0DE6BC42254E304ED685"
+        },
+        {
+          "path": "runtime/native_system_manifest.py",
+          "sha256": "D2B44375B5BA06783CD2147FF1877C07858C285F0B0E9628CE157F46D02C6785"
+        },
+        {
+          "path": "runtime/native_tier0.py",
+          "sha256": "87716D0D8127599A462A535E83FF779248AF9681CE11E8B6D53151B11DB79A39"
+        },
+        {
+          "path": "runtime/schema_validation.py",
+          "sha256": "D26293A1C35E22E521A9CEE0D59AAF7946B8C9B61C73169BD860F78B35DE7E03"
+        },
+        {
+          "path": "tools/native_host_toolchain.py",
+          "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+        },
+        {
+          "path": "tools/qualify_native_elf_loader.py",
+          "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
+        },
+        {
+          "path": "tools/qualify_native_kernel_entry.py",
+          "sha256": "8B03FFD23EC9C2F3C6F82ED98185A71668B7FE75F137E30A89184F28C7BDF36C"
+        },
+        {
+          "path": "tools/qualify_native_kernel_load.py",
+          "sha256": "236588D5A917D4791C625530F781B0D9687ADE185F88E0E6B6AE93754D57E7ED"
+        },
+        {
+          "path": "tools/qualify_native_kernel_smp_first_ap.py",
+          "sha256": "8928F463747BD9E4E1D82CBEDBA78731C31E8FC82ED7F4933D677011354D7CB5"
+        },
+        {
+          "path": "tools/qualify_native_pooleboot.py",
+          "sha256": "3A79880536517335113FBB2F65AD17B320D5041EC70E6F507B96A0A120309636"
+        },
+        {
+          "path": "tools/qualify_native_toolchain.py",
+          "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+        }
+      ],
+      "capture": {
+        "record_sha256": "E9002E276AA891415C625BB1750C0B50F46F4540A342305FA5D0618CE6A228B0",
+        "log_sha256": "6A25DBB4AE5AC7A23E7328961F320F5551C3A189A91211F1B4C970530B8614E1",
+        "source_snapshot_sha256": "9A465897882FA5E49290C795874C75F4B64637D0CEAEEFFD457AE5759F9E25F3",
+        "return_code": 0,
+        "source_unchanged": true
+      }
+    },
+    {
+      "profile": "smp_percpu_runtime",
+      "receipt": {
+        "path": "runs/native-kernel-smp-percpu-runtime-readiness.json",
+        "sha256": "E9D4D23D90C4D1BE969F05C8D39D76BC9B380214339980E9FB6CEEC374BD1E1C"
+      },
+      "sources": [
+        {
+          "path": "runtime/__init__.py",
+          "sha256": "65540DC2431716C99F67FF85EF9AEE0484EE1C6A900C59E4DF76E11729D0253A"
+        },
+        {
+          "path": "runtime/native_binary.py",
+          "sha256": "668F101989EBCE1C9C46B07C6419FEFBCFA3D298D4AB88444141EF5921517FE8"
+        },
+        {
+          "path": "runtime/native_boot_artifact.py",
+          "sha256": "518F0392D35DFDE8EB2A3971DA382E455822A7FD2344163FB65D0FCC95FC63ED"
+        },
+        {
+          "path": "runtime/native_boot_config.py",
+          "sha256": "F6915CAC71694F66AC74D2B48EE72DD63A6FD33A4E9530E835589AF434B4698E"
+        },
+        {
+          "path": "runtime/native_boot_exit.py",
+          "sha256": "902B30BD630474BF461FA24D03AD9C51C24905CE4E3ADA9EEEF3AD4FE7A6F9BC"
+        },
+        {
+          "path": "runtime/native_boot_handoff.py",
+          "sha256": "89071EAC531B6DD0E47930A3295B92570201C2EA60277C4CCF87A5E4E684CFE1"
+        },
+        {
+          "path": "runtime/native_boot_trust.py",
+          "sha256": "0E12DA5C48D9E3427D087B24151B498E1DD07536253E746512A8A8F0E7BBE8E0"
+        },
+        {
+          "path": "runtime/native_elf_loader.py",
+          "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+        },
+        {
+          "path": "runtime/native_firmware.py",
+          "sha256": "CA55F8DA2D3FE585FB35D9E10E576B5B7FC8F132A752EAE92CFDE0521A63EDFC"
+        },
+        {
+          "path": "runtime/native_initial_system.py",
+          "sha256": "C7213D00230A8A4BC4423CA63893663ADC637ACD5BC107C6C6A2E89D43387A7E"
+        },
+        {
+          "path": "runtime/native_inner_live.py",
+          "sha256": "ED98E5E46EC16F2762B9E0F440C2F8C27721C5F89933BB734E912A3B58FE5E35"
+        },
+        {
+          "path": "runtime/native_kernel_entry.py",
+          "sha256": "D6CD230A5EE6E17D9AD4270F97E08785DF7CBB4976AF99D65C2FC242C31C918A"
+        },
+        {
+          "path": "runtime/native_kernel_image.py",
+          "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
+        },
+        {
+          "path": "runtime/native_kernel_load.py",
+          "sha256": "701A030C521DD2CD01C46B08CAFF62C865084CA4D072CCF0A572DD36872C5FB6"
+        },
+        {
+          "path": "runtime/native_kernel_map.py",
+          "sha256": "C74E02ACD0D9DF1615088C6596E3B37B72A10841B7B6BB432391C0B569C732CA"
+        },
+        {
+          "path": "runtime/native_kernel_profile_evidence.py",
+          "sha256": "E40689F34D4ACA0318E2981AA81928969FA2BEAD786380F69088AD8260E765BE"
+        },
+        {
+          "path": "runtime/native_kernel_revalidation.py",
+          "sha256": "7EFA4F49CA8218796C3B0A19266DC698F1F03F75D20651B430D18E6668673BFE"
+        },
+        {
+          "path": "runtime/native_kernel_smp_percpu_runtime.py",
+          "sha256": "3EDC8DB3B00E4A4655CB64FC0BC7F0371F9E7453727652E9122DB3C494AAC4B8"
+        },
+        {
+          "path": "runtime/native_kernel_transfer.py",
+          "sha256": "516A25590505C5E3C6850BE6DDA8F80673F2D3B2F1A7CC00C181B12C33C60AC7"
+        },
+        {
+          "path": "runtime/native_live_boot_handoff.py",
+          "sha256": "457662B2E11DCB68856D74B87AA088FC87F6B3ED9BFF6C4CE8C96F191D80839B"
+        },
+        {
+          "path": "runtime/native_microcode.py",
+          "sha256": "089AE566AA73BD23C9A9E648AE6F221406EB49EB9D44EF672BAE119F5D887772"
+        },
+        {
+          "path": "runtime/native_policy.py",
+          "sha256": "1301C4D02F3333F1CBB72D7F0CCC37FCDE7E7AB6A7B1388F0E39B97F6C2527C4"
+        },
+        {
+          "path": "runtime/native_pooleboot.py",
+          "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        },
+        {
+          "path": "runtime/native_recovery.py",
+          "sha256": "9FE923CB2A1DA1083858750FE324321ADB4CB56D9D69DC33B2DBA7D36625E95D"
+        },
+        {
+          "path": "runtime/native_symbols.py",
+          "sha256": "42CA4366A39843E2DAD04A57EA956A9E21E698D841CC0DE6BC42254E304ED685"
+        },
+        {
+          "path": "runtime/native_system_manifest.py",
+          "sha256": "D2B44375B5BA06783CD2147FF1877C07858C285F0B0E9628CE157F46D02C6785"
+        },
+        {
+          "path": "runtime/native_tier0.py",
+          "sha256": "87716D0D8127599A462A535E83FF779248AF9681CE11E8B6D53151B11DB79A39"
+        },
+        {
+          "path": "runtime/schema_validation.py",
+          "sha256": "D26293A1C35E22E521A9CEE0D59AAF7946B8C9B61C73169BD860F78B35DE7E03"
+        },
+        {
+          "path": "tools/native_host_toolchain.py",
+          "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+        },
+        {
+          "path": "tools/qualify_native_elf_loader.py",
+          "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
+        },
+        {
+          "path": "tools/qualify_native_kernel_entry.py",
+          "sha256": "8B03FFD23EC9C2F3C6F82ED98185A71668B7FE75F137E30A89184F28C7BDF36C"
+        },
+        {
+          "path": "tools/qualify_native_kernel_load.py",
+          "sha256": "236588D5A917D4791C625530F781B0D9687ADE185F88E0E6B6AE93754D57E7ED"
+        },
+        {
+          "path": "tools/qualify_native_kernel_smp_percpu_runtime.py",
+          "sha256": "BBC7790D49DFE0E41CB25334CB801033CF027DDBB023E351FE92D6851CF339B2"
+        },
+        {
+          "path": "tools/qualify_native_pooleboot.py",
+          "sha256": "3A79880536517335113FBB2F65AD17B320D5041EC70E6F507B96A0A120309636"
+        },
+        {
+          "path": "tools/qualify_native_toolchain.py",
+          "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+        }
+      ],
+      "capture": {
+        "record_sha256": "BCC9340F777F197B95A44BD5CE6709718356DC85D4B47B23F4608F104FCF9967",
+        "log_sha256": "BEDC73DE58B81C522F0C0F23D34D0E0573C50C2BA8A22ADF37436DC4F4E4C890",
+        "source_snapshot_sha256": "D7DACAFDC16D95199A9CDBECE72E58119908F5D94074A2270F4347B6B518BFF4",
+        "return_code": 0,
+        "source_unchanged": true
+      }
+    },
+    {
+      "profile": "smp_ipi",
+      "receipt": {
+        "path": "runs/native-kernel-smp-ipi-readiness.json",
+        "sha256": "91FEDCDF0435D8B0F4BC823E870AC8C4C33FAC4BCF3D48842269F76195FB014D"
+      },
+      "sources": [
+        {
+          "path": "runtime/__init__.py",
+          "sha256": "65540DC2431716C99F67FF85EF9AEE0484EE1C6A900C59E4DF76E11729D0253A"
+        },
+        {
+          "path": "runtime/native_binary.py",
+          "sha256": "668F101989EBCE1C9C46B07C6419FEFBCFA3D298D4AB88444141EF5921517FE8"
+        },
+        {
+          "path": "runtime/native_boot_artifact.py",
+          "sha256": "518F0392D35DFDE8EB2A3971DA382E455822A7FD2344163FB65D0FCC95FC63ED"
+        },
+        {
+          "path": "runtime/native_boot_config.py",
+          "sha256": "F6915CAC71694F66AC74D2B48EE72DD63A6FD33A4E9530E835589AF434B4698E"
+        },
+        {
+          "path": "runtime/native_boot_exit.py",
+          "sha256": "902B30BD630474BF461FA24D03AD9C51C24905CE4E3ADA9EEEF3AD4FE7A6F9BC"
+        },
+        {
+          "path": "runtime/native_boot_handoff.py",
+          "sha256": "89071EAC531B6DD0E47930A3295B92570201C2EA60277C4CCF87A5E4E684CFE1"
+        },
+        {
+          "path": "runtime/native_boot_trust.py",
+          "sha256": "0E12DA5C48D9E3427D087B24151B498E1DD07536253E746512A8A8F0E7BBE8E0"
+        },
+        {
+          "path": "runtime/native_elf_loader.py",
+          "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+        },
+        {
+          "path": "runtime/native_firmware.py",
+          "sha256": "CA55F8DA2D3FE585FB35D9E10E576B5B7FC8F132A752EAE92CFDE0521A63EDFC"
+        },
+        {
+          "path": "runtime/native_initial_system.py",
+          "sha256": "C7213D00230A8A4BC4423CA63893663ADC637ACD5BC107C6C6A2E89D43387A7E"
+        },
+        {
+          "path": "runtime/native_inner_live.py",
+          "sha256": "ED98E5E46EC16F2762B9E0F440C2F8C27721C5F89933BB734E912A3B58FE5E35"
+        },
+        {
+          "path": "runtime/native_kernel_entry.py",
+          "sha256": "D6CD230A5EE6E17D9AD4270F97E08785DF7CBB4976AF99D65C2FC242C31C918A"
+        },
+        {
+          "path": "runtime/native_kernel_image.py",
+          "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
+        },
+        {
+          "path": "runtime/native_kernel_load.py",
+          "sha256": "701A030C521DD2CD01C46B08CAFF62C865084CA4D072CCF0A572DD36872C5FB6"
+        },
+        {
+          "path": "runtime/native_kernel_map.py",
+          "sha256": "C74E02ACD0D9DF1615088C6596E3B37B72A10841B7B6BB432391C0B569C732CA"
+        },
+        {
+          "path": "runtime/native_kernel_profile_evidence.py",
+          "sha256": "E40689F34D4ACA0318E2981AA81928969FA2BEAD786380F69088AD8260E765BE"
+        },
+        {
+          "path": "runtime/native_kernel_revalidation.py",
+          "sha256": "7EFA4F49CA8218796C3B0A19266DC698F1F03F75D20651B430D18E6668673BFE"
+        },
+        {
+          "path": "runtime/native_kernel_smp_ipi.py",
+          "sha256": "B9FFC60BC11EB873BE5727EB6287DF886E64A831A9A0B5D59D5A37034C070B0E"
+        },
+        {
+          "path": "runtime/native_kernel_smp_mailbox.py",
+          "sha256": "9FE754D935AD900F62D274D326712FC73F3B8F072AE5A3B48D4ACFA457A27048"
+        },
+        {
+          "path": "runtime/native_kernel_transfer.py",
+          "sha256": "516A25590505C5E3C6850BE6DDA8F80673F2D3B2F1A7CC00C181B12C33C60AC7"
+        },
+        {
+          "path": "runtime/native_live_boot_handoff.py",
+          "sha256": "457662B2E11DCB68856D74B87AA088FC87F6B3ED9BFF6C4CE8C96F191D80839B"
+        },
+        {
+          "path": "runtime/native_microcode.py",
+          "sha256": "089AE566AA73BD23C9A9E648AE6F221406EB49EB9D44EF672BAE119F5D887772"
+        },
+        {
+          "path": "runtime/native_policy.py",
+          "sha256": "1301C4D02F3333F1CBB72D7F0CCC37FCDE7E7AB6A7B1388F0E39B97F6C2527C4"
+        },
+        {
+          "path": "runtime/native_pooleboot.py",
+          "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        },
+        {
+          "path": "runtime/native_recovery.py",
+          "sha256": "9FE923CB2A1DA1083858750FE324321ADB4CB56D9D69DC33B2DBA7D36625E95D"
+        },
+        {
+          "path": "runtime/native_symbols.py",
+          "sha256": "42CA4366A39843E2DAD04A57EA956A9E21E698D841CC0DE6BC42254E304ED685"
+        },
+        {
+          "path": "runtime/native_system_manifest.py",
+          "sha256": "D2B44375B5BA06783CD2147FF1877C07858C285F0B0E9628CE157F46D02C6785"
+        },
+        {
+          "path": "runtime/native_tier0.py",
+          "sha256": "87716D0D8127599A462A535E83FF779248AF9681CE11E8B6D53151B11DB79A39"
+        },
+        {
+          "path": "runtime/schema_validation.py",
+          "sha256": "D26293A1C35E22E521A9CEE0D59AAF7946B8C9B61C73169BD860F78B35DE7E03"
+        },
+        {
+          "path": "tools/native_host_toolchain.py",
+          "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+        },
+        {
+          "path": "tools/qualify_native_elf_loader.py",
+          "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
+        },
+        {
+          "path": "tools/qualify_native_kernel_entry.py",
+          "sha256": "8B03FFD23EC9C2F3C6F82ED98185A71668B7FE75F137E30A89184F28C7BDF36C"
+        },
+        {
+          "path": "tools/qualify_native_kernel_load.py",
+          "sha256": "236588D5A917D4791C625530F781B0D9687ADE185F88E0E6B6AE93754D57E7ED"
+        },
+        {
+          "path": "tools/qualify_native_kernel_smp_ipi.py",
+          "sha256": "DEA461867768B8A119B2EC7851906AC7956F136B7C07F6AB75D8EE09C2765A2B"
+        },
+        {
+          "path": "tools/qualify_native_pooleboot.py",
+          "sha256": "3A79880536517335113FBB2F65AD17B320D5041EC70E6F507B96A0A120309636"
+        },
+        {
+          "path": "tools/qualify_native_toolchain.py",
+          "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+        }
+      ],
+      "capture": {
+        "record_sha256": "6586244E939EA5CEB7C3CE0E64ECD5857087B14BD384F93D844DE62C175D4A46",
+        "log_sha256": "E46A29F6E4A8FB43FA259C668D5724BB902F195D05533526E8765E26830A54C1",
+        "source_snapshot_sha256": "B19B88EBFC1746D7DACCEFCBA9539273388FCF60A27FF21EAA9A302B1C9E90E0",
+        "return_code": 0,
+        "source_unchanged": true
+      }
+    },
+    {
+      "profile": "scheduler",
+      "receipt": {
+        "path": "runs/native-kernel-scheduler-readiness.json",
+        "sha256": "887A1EC3277DF219F990CF51FFEC4B394C358C08EA012C907B3713A92D5240DD"
+      },
+      "sources": [
+        {
+          "path": "runtime/__init__.py",
+          "sha256": "65540DC2431716C99F67FF85EF9AEE0484EE1C6A900C59E4DF76E11729D0253A"
+        },
+        {
+          "path": "runtime/native_binary.py",
+          "sha256": "668F101989EBCE1C9C46B07C6419FEFBCFA3D298D4AB88444141EF5921517FE8"
+        },
+        {
+          "path": "runtime/native_boot_artifact.py",
+          "sha256": "518F0392D35DFDE8EB2A3971DA382E455822A7FD2344163FB65D0FCC95FC63ED"
+        },
+        {
+          "path": "runtime/native_boot_config.py",
+          "sha256": "F6915CAC71694F66AC74D2B48EE72DD63A6FD33A4E9530E835589AF434B4698E"
+        },
+        {
+          "path": "runtime/native_boot_exit.py",
+          "sha256": "902B30BD630474BF461FA24D03AD9C51C24905CE4E3ADA9EEEF3AD4FE7A6F9BC"
+        },
+        {
+          "path": "runtime/native_boot_handoff.py",
+          "sha256": "89071EAC531B6DD0E47930A3295B92570201C2EA60277C4CCF87A5E4E684CFE1"
+        },
+        {
+          "path": "runtime/native_boot_trust.py",
+          "sha256": "0E12DA5C48D9E3427D087B24151B498E1DD07536253E746512A8A8F0E7BBE8E0"
+        },
+        {
+          "path": "runtime/native_elf_loader.py",
+          "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+        },
+        {
+          "path": "runtime/native_firmware.py",
+          "sha256": "CA55F8DA2D3FE585FB35D9E10E576B5B7FC8F132A752EAE92CFDE0521A63EDFC"
+        },
+        {
+          "path": "runtime/native_initial_system.py",
+          "sha256": "C7213D00230A8A4BC4423CA63893663ADC637ACD5BC107C6C6A2E89D43387A7E"
+        },
+        {
+          "path": "runtime/native_inner_live.py",
+          "sha256": "ED98E5E46EC16F2762B9E0F440C2F8C27721C5F89933BB734E912A3B58FE5E35"
+        },
+        {
+          "path": "runtime/native_kernel_entry.py",
+          "sha256": "D6CD230A5EE6E17D9AD4270F97E08785DF7CBB4976AF99D65C2FC242C31C918A"
+        },
+        {
+          "path": "runtime/native_kernel_image.py",
+          "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
+        },
+        {
+          "path": "runtime/native_kernel_load.py",
+          "sha256": "701A030C521DD2CD01C46B08CAFF62C865084CA4D072CCF0A572DD36872C5FB6"
+        },
+        {
+          "path": "runtime/native_kernel_map.py",
+          "sha256": "C74E02ACD0D9DF1615088C6596E3B37B72A10841B7B6BB432391C0B569C732CA"
+        },
+        {
+          "path": "runtime/native_kernel_profile_evidence.py",
+          "sha256": "E40689F34D4ACA0318E2981AA81928969FA2BEAD786380F69088AD8260E765BE"
+        },
+        {
+          "path": "runtime/native_kernel_revalidation.py",
+          "sha256": "7EFA4F49CA8218796C3B0A19266DC698F1F03F75D20651B430D18E6668673BFE"
+        },
+        {
+          "path": "runtime/native_kernel_scheduler.py",
+          "sha256": "5FAE21F0C2A2F6B63CA458D349974A323795F85BB3579DC0170B288FB7052103"
+        },
+        {
+          "path": "runtime/native_kernel_transfer.py",
+          "sha256": "516A25590505C5E3C6850BE6DDA8F80673F2D3B2F1A7CC00C181B12C33C60AC7"
+        },
+        {
+          "path": "runtime/native_live_boot_handoff.py",
+          "sha256": "457662B2E11DCB68856D74B87AA088FC87F6B3ED9BFF6C4CE8C96F191D80839B"
+        },
+        {
+          "path": "runtime/native_microcode.py",
+          "sha256": "089AE566AA73BD23C9A9E648AE6F221406EB49EB9D44EF672BAE119F5D887772"
+        },
+        {
+          "path": "runtime/native_policy.py",
+          "sha256": "1301C4D02F3333F1CBB72D7F0CCC37FCDE7E7AB6A7B1388F0E39B97F6C2527C4"
+        },
+        {
+          "path": "runtime/native_pooleboot.py",
+          "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        },
+        {
+          "path": "runtime/native_recovery.py",
+          "sha256": "9FE923CB2A1DA1083858750FE324321ADB4CB56D9D69DC33B2DBA7D36625E95D"
+        },
+        {
+          "path": "runtime/native_symbols.py",
+          "sha256": "42CA4366A39843E2DAD04A57EA956A9E21E698D841CC0DE6BC42254E304ED685"
+        },
+        {
+          "path": "runtime/native_system_manifest.py",
+          "sha256": "D2B44375B5BA06783CD2147FF1877C07858C285F0B0E9628CE157F46D02C6785"
+        },
+        {
+          "path": "runtime/native_tier0.py",
+          "sha256": "87716D0D8127599A462A535E83FF779248AF9681CE11E8B6D53151B11DB79A39"
+        },
+        {
+          "path": "runtime/schema_validation.py",
+          "sha256": "D26293A1C35E22E521A9CEE0D59AAF7946B8C9B61C73169BD860F78B35DE7E03"
+        },
+        {
+          "path": "tools/native_host_toolchain.py",
+          "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+        },
+        {
+          "path": "tools/qualify_native_elf_loader.py",
+          "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
+        },
+        {
+          "path": "tools/qualify_native_kernel_entry.py",
+          "sha256": "8B03FFD23EC9C2F3C6F82ED98185A71668B7FE75F137E30A89184F28C7BDF36C"
+        },
+        {
+          "path": "tools/qualify_native_kernel_load.py",
+          "sha256": "236588D5A917D4791C625530F781B0D9687ADE185F88E0E6B6AE93754D57E7ED"
+        },
+        {
+          "path": "tools/qualify_native_kernel_scheduler.py",
+          "sha256": "83FBF99766B373FFFDEBAE31030432B5C2105B091024962C22F654AA4FACD9CD"
+        },
+        {
+          "path": "tools/qualify_native_pooleboot.py",
+          "sha256": "3A79880536517335113FBB2F65AD17B320D5041EC70E6F507B96A0A120309636"
+        },
+        {
+          "path": "tools/qualify_native_toolchain.py",
+          "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+        }
+      ],
+      "capture": {
+        "record_sha256": "4522E53520714E4E86EBDE6B3CC99E32956BEFA135B4E8F5419425E2CFE2BD21",
+        "log_sha256": "B9D6770526A3B9FC67708492C692995ADBBB35F18916E6E3303D37263BA66A1F",
+        "source_snapshot_sha256": "8A575DB84F28A9EC34B65323F891ADCED524C0DDB3ABA59B35A345E31E059C09",
+        "return_code": 0,
+        "source_unchanged": true
+      }
+    },
+    {
+      "profile": "scheduler_preempt",
+      "receipt": {
+        "path": "runs/native-kernel-scheduler-preemption-readiness.json",
+        "sha256": "60C1F4D6A5BCAF5FCB46BF7AEDAE8C838F93F6030ADE23F276AA89064E33B7BB"
+      },
+      "sources": [
+        {
+          "path": "runtime/__init__.py",
+          "sha256": "65540DC2431716C99F67FF85EF9AEE0484EE1C6A900C59E4DF76E11729D0253A"
+        },
+        {
+          "path": "runtime/native_binary.py",
+          "sha256": "668F101989EBCE1C9C46B07C6419FEFBCFA3D298D4AB88444141EF5921517FE8"
+        },
+        {
+          "path": "runtime/native_boot_artifact.py",
+          "sha256": "518F0392D35DFDE8EB2A3971DA382E455822A7FD2344163FB65D0FCC95FC63ED"
+        },
+        {
+          "path": "runtime/native_boot_config.py",
+          "sha256": "F6915CAC71694F66AC74D2B48EE72DD63A6FD33A4E9530E835589AF434B4698E"
+        },
+        {
+          "path": "runtime/native_boot_exit.py",
+          "sha256": "902B30BD630474BF461FA24D03AD9C51C24905CE4E3ADA9EEEF3AD4FE7A6F9BC"
+        },
+        {
+          "path": "runtime/native_boot_handoff.py",
+          "sha256": "89071EAC531B6DD0E47930A3295B92570201C2EA60277C4CCF87A5E4E684CFE1"
+        },
+        {
+          "path": "runtime/native_boot_trust.py",
+          "sha256": "0E12DA5C48D9E3427D087B24151B498E1DD07536253E746512A8A8F0E7BBE8E0"
+        },
+        {
+          "path": "runtime/native_elf_loader.py",
+          "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+        },
+        {
+          "path": "runtime/native_firmware.py",
+          "sha256": "CA55F8DA2D3FE585FB35D9E10E576B5B7FC8F132A752EAE92CFDE0521A63EDFC"
+        },
+        {
+          "path": "runtime/native_initial_system.py",
+          "sha256": "C7213D00230A8A4BC4423CA63893663ADC637ACD5BC107C6C6A2E89D43387A7E"
+        },
+        {
+          "path": "runtime/native_inner_live.py",
+          "sha256": "ED98E5E46EC16F2762B9E0F440C2F8C27721C5F89933BB734E912A3B58FE5E35"
+        },
+        {
+          "path": "runtime/native_kernel_entry.py",
+          "sha256": "D6CD230A5EE6E17D9AD4270F97E08785DF7CBB4976AF99D65C2FC242C31C918A"
+        },
+        {
+          "path": "runtime/native_kernel_image.py",
+          "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
+        },
+        {
+          "path": "runtime/native_kernel_load.py",
+          "sha256": "701A030C521DD2CD01C46B08CAFF62C865084CA4D072CCF0A572DD36872C5FB6"
+        },
+        {
+          "path": "runtime/native_kernel_map.py",
+          "sha256": "C74E02ACD0D9DF1615088C6596E3B37B72A10841B7B6BB432391C0B569C732CA"
+        },
+        {
+          "path": "runtime/native_kernel_profile_evidence.py",
+          "sha256": "E40689F34D4ACA0318E2981AA81928969FA2BEAD786380F69088AD8260E765BE"
+        },
+        {
+          "path": "runtime/native_kernel_revalidation.py",
+          "sha256": "7EFA4F49CA8218796C3B0A19266DC698F1F03F75D20651B430D18E6668673BFE"
+        },
+        {
+          "path": "runtime/native_kernel_scheduler.py",
+          "sha256": "5FAE21F0C2A2F6B63CA458D349974A323795F85BB3579DC0170B288FB7052103"
+        },
+        {
+          "path": "runtime/native_kernel_scheduler_preempt.py",
+          "sha256": "52824FBEA71C219454773C177687DE84081E72ACCEA613BE86F300D8493D72C9"
+        },
+        {
+          "path": "runtime/native_kernel_transfer.py",
+          "sha256": "516A25590505C5E3C6850BE6DDA8F80673F2D3B2F1A7CC00C181B12C33C60AC7"
+        },
+        {
+          "path": "runtime/native_live_boot_handoff.py",
+          "sha256": "457662B2E11DCB68856D74B87AA088FC87F6B3ED9BFF6C4CE8C96F191D80839B"
+        },
+        {
+          "path": "runtime/native_microcode.py",
+          "sha256": "089AE566AA73BD23C9A9E648AE6F221406EB49EB9D44EF672BAE119F5D887772"
+        },
+        {
+          "path": "runtime/native_policy.py",
+          "sha256": "1301C4D02F3333F1CBB72D7F0CCC37FCDE7E7AB6A7B1388F0E39B97F6C2527C4"
+        },
+        {
+          "path": "runtime/native_pooleboot.py",
+          "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        },
+        {
+          "path": "runtime/native_recovery.py",
+          "sha256": "9FE923CB2A1DA1083858750FE324321ADB4CB56D9D69DC33B2DBA7D36625E95D"
+        },
+        {
+          "path": "runtime/native_symbols.py",
+          "sha256": "42CA4366A39843E2DAD04A57EA956A9E21E698D841CC0DE6BC42254E304ED685"
+        },
+        {
+          "path": "runtime/native_system_manifest.py",
+          "sha256": "D2B44375B5BA06783CD2147FF1877C07858C285F0B0E9628CE157F46D02C6785"
+        },
+        {
+          "path": "runtime/native_tier0.py",
+          "sha256": "87716D0D8127599A462A535E83FF779248AF9681CE11E8B6D53151B11DB79A39"
+        },
+        {
+          "path": "runtime/schema_validation.py",
+          "sha256": "D26293A1C35E22E521A9CEE0D59AAF7946B8C9B61C73169BD860F78B35DE7E03"
+        },
+        {
+          "path": "tools/native_host_toolchain.py",
+          "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+        },
+        {
+          "path": "tools/qualify_native_elf_loader.py",
+          "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
+        },
+        {
+          "path": "tools/qualify_native_kernel_entry.py",
+          "sha256": "8B03FFD23EC9C2F3C6F82ED98185A71668B7FE75F137E30A89184F28C7BDF36C"
+        },
+        {
+          "path": "tools/qualify_native_kernel_load.py",
+          "sha256": "236588D5A917D4791C625530F781B0D9687ADE185F88E0E6B6AE93754D57E7ED"
+        },
+        {
+          "path": "tools/qualify_native_kernel_scheduler.py",
+          "sha256": "83FBF99766B373FFFDEBAE31030432B5C2105B091024962C22F654AA4FACD9CD"
+        },
+        {
+          "path": "tools/qualify_native_kernel_scheduler_preempt.py",
+          "sha256": "75C83ADE9DBDC4725140E90FE3A55A744B54C5508302D2BDA2DE6424B37EDB96"
+        },
+        {
+          "path": "tools/qualify_native_pooleboot.py",
+          "sha256": "3A79880536517335113FBB2F65AD17B320D5041EC70E6F507B96A0A120309636"
+        },
+        {
+          "path": "tools/qualify_native_toolchain.py",
+          "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+        }
+      ],
+      "capture": {
+        "record_sha256": "8F5815512A0E4A5FD1B0FCF8B071584759F007A844CEE08958F0638AA770EC76",
+        "log_sha256": "C4CA732801FB906F7442652BE154022EA0C59C4E633C31145D785E2F4E5A52F5",
+        "source_snapshot_sha256": "1C83380EFC79984833AC676E2A9776C52004DAC2D303AF00B88561616B4204DA",
+        "return_code": 0,
+        "source_unchanged": true
+      }
+    },
+    {
+      "profile": "scheduler_deferred",
+      "receipt": {
+        "path": "runs/native-kernel-scheduler-deferred-readiness.json",
+        "sha256": "3F878D6690A507D4782E863840B811FB38E26F9726F30926CAF545DA2CF922CC"
+      },
+      "sources": [
+        {
+          "path": "runtime/__init__.py",
+          "sha256": "65540DC2431716C99F67FF85EF9AEE0484EE1C6A900C59E4DF76E11729D0253A"
+        },
+        {
+          "path": "runtime/native_binary.py",
+          "sha256": "668F101989EBCE1C9C46B07C6419FEFBCFA3D298D4AB88444141EF5921517FE8"
+        },
+        {
+          "path": "runtime/native_boot_artifact.py",
+          "sha256": "518F0392D35DFDE8EB2A3971DA382E455822A7FD2344163FB65D0FCC95FC63ED"
+        },
+        {
+          "path": "runtime/native_boot_config.py",
+          "sha256": "F6915CAC71694F66AC74D2B48EE72DD63A6FD33A4E9530E835589AF434B4698E"
+        },
+        {
+          "path": "runtime/native_boot_exit.py",
+          "sha256": "902B30BD630474BF461FA24D03AD9C51C24905CE4E3ADA9EEEF3AD4FE7A6F9BC"
+        },
+        {
+          "path": "runtime/native_boot_handoff.py",
+          "sha256": "89071EAC531B6DD0E47930A3295B92570201C2EA60277C4CCF87A5E4E684CFE1"
+        },
+        {
+          "path": "runtime/native_boot_trust.py",
+          "sha256": "0E12DA5C48D9E3427D087B24151B498E1DD07536253E746512A8A8F0E7BBE8E0"
+        },
+        {
+          "path": "runtime/native_elf_loader.py",
+          "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+        },
+        {
+          "path": "runtime/native_firmware.py",
+          "sha256": "CA55F8DA2D3FE585FB35D9E10E576B5B7FC8F132A752EAE92CFDE0521A63EDFC"
+        },
+        {
+          "path": "runtime/native_initial_system.py",
+          "sha256": "C7213D00230A8A4BC4423CA63893663ADC637ACD5BC107C6C6A2E89D43387A7E"
+        },
+        {
+          "path": "runtime/native_inner_live.py",
+          "sha256": "ED98E5E46EC16F2762B9E0F440C2F8C27721C5F89933BB734E912A3B58FE5E35"
+        },
+        {
+          "path": "runtime/native_kernel_entry.py",
+          "sha256": "D6CD230A5EE6E17D9AD4270F97E08785DF7CBB4976AF99D65C2FC242C31C918A"
+        },
+        {
+          "path": "runtime/native_kernel_image.py",
+          "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
+        },
+        {
+          "path": "runtime/native_kernel_load.py",
+          "sha256": "701A030C521DD2CD01C46B08CAFF62C865084CA4D072CCF0A572DD36872C5FB6"
+        },
+        {
+          "path": "runtime/native_kernel_map.py",
+          "sha256": "C74E02ACD0D9DF1615088C6596E3B37B72A10841B7B6BB432391C0B569C732CA"
+        },
+        {
+          "path": "runtime/native_kernel_profile_evidence.py",
+          "sha256": "E40689F34D4ACA0318E2981AA81928969FA2BEAD786380F69088AD8260E765BE"
+        },
+        {
+          "path": "runtime/native_kernel_revalidation.py",
+          "sha256": "7EFA4F49CA8218796C3B0A19266DC698F1F03F75D20651B430D18E6668673BFE"
+        },
+        {
+          "path": "runtime/native_kernel_scheduler.py",
+          "sha256": "5FAE21F0C2A2F6B63CA458D349974A323795F85BB3579DC0170B288FB7052103"
+        },
+        {
+          "path": "runtime/native_kernel_scheduler_deferred.py",
+          "sha256": "D4BA8C0A0FFCF8172DF0B53D92DB2781121C44DB54AEF391C93D475DE512B084"
+        },
+        {
+          "path": "runtime/native_kernel_transfer.py",
+          "sha256": "516A25590505C5E3C6850BE6DDA8F80673F2D3B2F1A7CC00C181B12C33C60AC7"
+        },
+        {
+          "path": "runtime/native_live_boot_handoff.py",
+          "sha256": "457662B2E11DCB68856D74B87AA088FC87F6B3ED9BFF6C4CE8C96F191D80839B"
+        },
+        {
+          "path": "runtime/native_microcode.py",
+          "sha256": "089AE566AA73BD23C9A9E648AE6F221406EB49EB9D44EF672BAE119F5D887772"
+        },
+        {
+          "path": "runtime/native_policy.py",
+          "sha256": "1301C4D02F3333F1CBB72D7F0CCC37FCDE7E7AB6A7B1388F0E39B97F6C2527C4"
+        },
+        {
+          "path": "runtime/native_pooleboot.py",
+          "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        },
+        {
+          "path": "runtime/native_recovery.py",
+          "sha256": "9FE923CB2A1DA1083858750FE324321ADB4CB56D9D69DC33B2DBA7D36625E95D"
+        },
+        {
+          "path": "runtime/native_symbols.py",
+          "sha256": "42CA4366A39843E2DAD04A57EA956A9E21E698D841CC0DE6BC42254E304ED685"
+        },
+        {
+          "path": "runtime/native_system_manifest.py",
+          "sha256": "D2B44375B5BA06783CD2147FF1877C07858C285F0B0E9628CE157F46D02C6785"
+        },
+        {
+          "path": "runtime/native_tier0.py",
+          "sha256": "87716D0D8127599A462A535E83FF779248AF9681CE11E8B6D53151B11DB79A39"
+        },
+        {
+          "path": "runtime/schema_validation.py",
+          "sha256": "D26293A1C35E22E521A9CEE0D59AAF7946B8C9B61C73169BD860F78B35DE7E03"
+        },
+        {
+          "path": "tools/native_host_toolchain.py",
+          "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+        },
+        {
+          "path": "tools/qualify_native_elf_loader.py",
+          "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
+        },
+        {
+          "path": "tools/qualify_native_kernel_entry.py",
+          "sha256": "8B03FFD23EC9C2F3C6F82ED98185A71668B7FE75F137E30A89184F28C7BDF36C"
+        },
+        {
+          "path": "tools/qualify_native_kernel_load.py",
+          "sha256": "236588D5A917D4791C625530F781B0D9687ADE185F88E0E6B6AE93754D57E7ED"
+        },
+        {
+          "path": "tools/qualify_native_kernel_scheduler.py",
+          "sha256": "83FBF99766B373FFFDEBAE31030432B5C2105B091024962C22F654AA4FACD9CD"
+        },
+        {
+          "path": "tools/qualify_native_kernel_scheduler_deferred.py",
+          "sha256": "411628099598B3490526F3F0D10E7947C2F1FD1249451D0636DCC76A75DAE9A4"
+        },
+        {
+          "path": "tools/qualify_native_pooleboot.py",
+          "sha256": "3A79880536517335113FBB2F65AD17B320D5041EC70E6F507B96A0A120309636"
+        },
+        {
+          "path": "tools/qualify_native_toolchain.py",
+          "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+        }
+      ],
+      "capture": {
+        "record_sha256": "697CB8BD970F4893EE6F4A30C64307505AF5F511CA155C9323AB191B5C70DF8A",
+        "log_sha256": "E12A45434566B849DD8DC27938DC5EE50E8BFA45D9F58DD3867479C1C06D291E",
+        "source_snapshot_sha256": "95A28C3E7462CDE2F98D88113C78B71B99B5DA764FC6E8B0D32AF9D7E6881596",
+        "return_code": 0,
+        "source_unchanged": true
+      }
+    },
+    {
+      "profile": "scheduler_smp",
+      "receipt": {
+        "path": "runs/native-kernel-scheduler-smp-readiness.json",
+        "sha256": "EF7E7BA350D5B0853F4528C61CD2DA9436FA800AA194B1C2AA933D5188CF5D4E"
+      },
+      "sources": [
+        {
+          "path": "runtime/__init__.py",
+          "sha256": "65540DC2431716C99F67FF85EF9AEE0484EE1C6A900C59E4DF76E11729D0253A"
+        },
+        {
+          "path": "runtime/native_binary.py",
+          "sha256": "668F101989EBCE1C9C46B07C6419FEFBCFA3D298D4AB88444141EF5921517FE8"
+        },
+        {
+          "path": "runtime/native_boot_artifact.py",
+          "sha256": "518F0392D35DFDE8EB2A3971DA382E455822A7FD2344163FB65D0FCC95FC63ED"
+        },
+        {
+          "path": "runtime/native_boot_config.py",
+          "sha256": "F6915CAC71694F66AC74D2B48EE72DD63A6FD33A4E9530E835589AF434B4698E"
+        },
+        {
+          "path": "runtime/native_boot_exit.py",
+          "sha256": "902B30BD630474BF461FA24D03AD9C51C24905CE4E3ADA9EEEF3AD4FE7A6F9BC"
+        },
+        {
+          "path": "runtime/native_boot_handoff.py",
+          "sha256": "89071EAC531B6DD0E47930A3295B92570201C2EA60277C4CCF87A5E4E684CFE1"
+        },
+        {
+          "path": "runtime/native_boot_trust.py",
+          "sha256": "0E12DA5C48D9E3427D087B24151B498E1DD07536253E746512A8A8F0E7BBE8E0"
+        },
+        {
+          "path": "runtime/native_elf_loader.py",
+          "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+        },
+        {
+          "path": "runtime/native_firmware.py",
+          "sha256": "CA55F8DA2D3FE585FB35D9E10E576B5B7FC8F132A752EAE92CFDE0521A63EDFC"
+        },
+        {
+          "path": "runtime/native_initial_system.py",
+          "sha256": "C7213D00230A8A4BC4423CA63893663ADC637ACD5BC107C6C6A2E89D43387A7E"
+        },
+        {
+          "path": "runtime/native_inner_live.py",
+          "sha256": "ED98E5E46EC16F2762B9E0F440C2F8C27721C5F89933BB734E912A3B58FE5E35"
+        },
+        {
+          "path": "runtime/native_kernel_entry.py",
+          "sha256": "D6CD230A5EE6E17D9AD4270F97E08785DF7CBB4976AF99D65C2FC242C31C918A"
+        },
+        {
+          "path": "runtime/native_kernel_image.py",
+          "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
+        },
+        {
+          "path": "runtime/native_kernel_load.py",
+          "sha256": "701A030C521DD2CD01C46B08CAFF62C865084CA4D072CCF0A572DD36872C5FB6"
+        },
+        {
+          "path": "runtime/native_kernel_map.py",
+          "sha256": "C74E02ACD0D9DF1615088C6596E3B37B72A10841B7B6BB432391C0B569C732CA"
+        },
+        {
+          "path": "runtime/native_kernel_profile_evidence.py",
+          "sha256": "E40689F34D4ACA0318E2981AA81928969FA2BEAD786380F69088AD8260E765BE"
+        },
+        {
+          "path": "runtime/native_kernel_revalidation.py",
+          "sha256": "7EFA4F49CA8218796C3B0A19266DC698F1F03F75D20651B430D18E6668673BFE"
+        },
+        {
+          "path": "runtime/native_kernel_scheduler_smp.py",
+          "sha256": "11D7E4DB837503B703FCFB419C67248EE1C6A79AD8ADB1FD3BD55CCA24398E43"
+        },
+        {
+          "path": "runtime/native_kernel_smp_ipi.py",
+          "sha256": "B9FFC60BC11EB873BE5727EB6287DF886E64A831A9A0B5D59D5A37034C070B0E"
+        },
+        {
+          "path": "runtime/native_kernel_smp_mailbox.py",
+          "sha256": "9FE754D935AD900F62D274D326712FC73F3B8F072AE5A3B48D4ACFA457A27048"
+        },
+        {
+          "path": "runtime/native_kernel_transfer.py",
+          "sha256": "516A25590505C5E3C6850BE6DDA8F80673F2D3B2F1A7CC00C181B12C33C60AC7"
+        },
+        {
+          "path": "runtime/native_live_boot_handoff.py",
+          "sha256": "457662B2E11DCB68856D74B87AA088FC87F6B3ED9BFF6C4CE8C96F191D80839B"
+        },
+        {
+          "path": "runtime/native_microcode.py",
+          "sha256": "089AE566AA73BD23C9A9E648AE6F221406EB49EB9D44EF672BAE119F5D887772"
+        },
+        {
+          "path": "runtime/native_policy.py",
+          "sha256": "1301C4D02F3333F1CBB72D7F0CCC37FCDE7E7AB6A7B1388F0E39B97F6C2527C4"
+        },
+        {
+          "path": "runtime/native_pooleboot.py",
+          "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        },
+        {
+          "path": "runtime/native_recovery.py",
+          "sha256": "9FE923CB2A1DA1083858750FE324321ADB4CB56D9D69DC33B2DBA7D36625E95D"
+        },
+        {
+          "path": "runtime/native_symbols.py",
+          "sha256": "42CA4366A39843E2DAD04A57EA956A9E21E698D841CC0DE6BC42254E304ED685"
+        },
+        {
+          "path": "runtime/native_system_manifest.py",
+          "sha256": "D2B44375B5BA06783CD2147FF1877C07858C285F0B0E9628CE157F46D02C6785"
+        },
+        {
+          "path": "runtime/native_tier0.py",
+          "sha256": "87716D0D8127599A462A535E83FF779248AF9681CE11E8B6D53151B11DB79A39"
+        },
+        {
+          "path": "runtime/schema_validation.py",
+          "sha256": "D26293A1C35E22E521A9CEE0D59AAF7946B8C9B61C73169BD860F78B35DE7E03"
+        },
+        {
+          "path": "tools/native_host_toolchain.py",
+          "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+        },
+        {
+          "path": "tools/qualify_native_elf_loader.py",
+          "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
+        },
+        {
+          "path": "tools/qualify_native_kernel_entry.py",
+          "sha256": "8B03FFD23EC9C2F3C6F82ED98185A71668B7FE75F137E30A89184F28C7BDF36C"
+        },
+        {
+          "path": "tools/qualify_native_kernel_load.py",
+          "sha256": "236588D5A917D4791C625530F781B0D9687ADE185F88E0E6B6AE93754D57E7ED"
+        },
+        {
+          "path": "tools/qualify_native_kernel_scheduler_smp.py",
+          "sha256": "FA261F0C816817D5BE54C9891EFCCF7FED123B26C30FEC627D73C4FC044EA18A"
+        },
+        {
+          "path": "tools/qualify_native_kernel_smp_ipi.py",
+          "sha256": "DEA461867768B8A119B2EC7851906AC7956F136B7C07F6AB75D8EE09C2765A2B"
+        },
+        {
+          "path": "tools/qualify_native_pooleboot.py",
+          "sha256": "3A79880536517335113FBB2F65AD17B320D5041EC70E6F507B96A0A120309636"
+        },
+        {
+          "path": "tools/qualify_native_toolchain.py",
+          "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+        }
+      ],
+      "capture": {
+        "record_sha256": "299E0E24EFA29E3342C3734772A493E6E20B346E7A197A111457CC6EF3D2AD8D",
+        "log_sha256": "B4AFCEDC4E0B5203EA8C7434E85C6ABD1BFF4D8CFEFFE76250C1A9A84BB46958",
+        "source_snapshot_sha256": "1579B06EC5451E7B7279C907DD21BADB501719F028980FDEE2492F6D630951D9",
+        "return_code": 0,
+        "source_unchanged": true
+      }
+    },
+    {
+      "profile": "scheduler_ap_workers",
+      "receipt": {
+        "path": "runs/native-kernel-scheduler-ap-workers-readiness.json",
+        "sha256": "BF96F20CEF9D51E75E836B9780A902EF90D8C39D64CC7C881E0694E3884E1A16"
+      },
+      "sources": [
+        {
+          "path": "runtime/__init__.py",
+          "sha256": "65540DC2431716C99F67FF85EF9AEE0484EE1C6A900C59E4DF76E11729D0253A"
+        },
+        {
+          "path": "runtime/native_binary.py",
+          "sha256": "668F101989EBCE1C9C46B07C6419FEFBCFA3D298D4AB88444141EF5921517FE8"
+        },
+        {
+          "path": "runtime/native_boot_artifact.py",
+          "sha256": "518F0392D35DFDE8EB2A3971DA382E455822A7FD2344163FB65D0FCC95FC63ED"
+        },
+        {
+          "path": "runtime/native_boot_config.py",
+          "sha256": "F6915CAC71694F66AC74D2B48EE72DD63A6FD33A4E9530E835589AF434B4698E"
+        },
+        {
+          "path": "runtime/native_boot_exit.py",
+          "sha256": "902B30BD630474BF461FA24D03AD9C51C24905CE4E3ADA9EEEF3AD4FE7A6F9BC"
+        },
+        {
+          "path": "runtime/native_boot_handoff.py",
+          "sha256": "89071EAC531B6DD0E47930A3295B92570201C2EA60277C4CCF87A5E4E684CFE1"
+        },
+        {
+          "path": "runtime/native_boot_trust.py",
+          "sha256": "0E12DA5C48D9E3427D087B24151B498E1DD07536253E746512A8A8F0E7BBE8E0"
+        },
+        {
+          "path": "runtime/native_elf_loader.py",
+          "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+        },
+        {
+          "path": "runtime/native_firmware.py",
+          "sha256": "CA55F8DA2D3FE585FB35D9E10E576B5B7FC8F132A752EAE92CFDE0521A63EDFC"
+        },
+        {
+          "path": "runtime/native_initial_system.py",
+          "sha256": "C7213D00230A8A4BC4423CA63893663ADC637ACD5BC107C6C6A2E89D43387A7E"
+        },
+        {
+          "path": "runtime/native_inner_live.py",
+          "sha256": "ED98E5E46EC16F2762B9E0F440C2F8C27721C5F89933BB734E912A3B58FE5E35"
+        },
+        {
+          "path": "runtime/native_kernel_entry.py",
+          "sha256": "D6CD230A5EE6E17D9AD4270F97E08785DF7CBB4976AF99D65C2FC242C31C918A"
+        },
+        {
+          "path": "runtime/native_kernel_image.py",
+          "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
+        },
+        {
+          "path": "runtime/native_kernel_load.py",
+          "sha256": "701A030C521DD2CD01C46B08CAFF62C865084CA4D072CCF0A572DD36872C5FB6"
+        },
+        {
+          "path": "runtime/native_kernel_map.py",
+          "sha256": "C74E02ACD0D9DF1615088C6596E3B37B72A10841B7B6BB432391C0B569C732CA"
+        },
+        {
+          "path": "runtime/native_kernel_profile_evidence.py",
+          "sha256": "E40689F34D4ACA0318E2981AA81928969FA2BEAD786380F69088AD8260E765BE"
+        },
+        {
+          "path": "runtime/native_kernel_revalidation.py",
+          "sha256": "7EFA4F49CA8218796C3B0A19266DC698F1F03F75D20651B430D18E6668673BFE"
+        },
+        {
+          "path": "runtime/native_kernel_scheduler_ap_workers.py",
+          "sha256": "AE12A4D26AFB6D50F51294945AD55E52ED25ABE5870E2B01C40D50737C392F80"
+        },
+        {
+          "path": "runtime/native_kernel_smp_ipi.py",
+          "sha256": "B9FFC60BC11EB873BE5727EB6287DF886E64A831A9A0B5D59D5A37034C070B0E"
+        },
+        {
+          "path": "runtime/native_kernel_smp_mailbox.py",
+          "sha256": "9FE754D935AD900F62D274D326712FC73F3B8F072AE5A3B48D4ACFA457A27048"
+        },
+        {
+          "path": "runtime/native_kernel_transfer.py",
+          "sha256": "516A25590505C5E3C6850BE6DDA8F80673F2D3B2F1A7CC00C181B12C33C60AC7"
+        },
+        {
+          "path": "runtime/native_live_boot_handoff.py",
+          "sha256": "457662B2E11DCB68856D74B87AA088FC87F6B3ED9BFF6C4CE8C96F191D80839B"
+        },
+        {
+          "path": "runtime/native_microcode.py",
+          "sha256": "089AE566AA73BD23C9A9E648AE6F221406EB49EB9D44EF672BAE119F5D887772"
+        },
+        {
+          "path": "runtime/native_policy.py",
+          "sha256": "1301C4D02F3333F1CBB72D7F0CCC37FCDE7E7AB6A7B1388F0E39B97F6C2527C4"
+        },
+        {
+          "path": "runtime/native_pooleboot.py",
+          "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        },
+        {
+          "path": "runtime/native_recovery.py",
+          "sha256": "9FE923CB2A1DA1083858750FE324321ADB4CB56D9D69DC33B2DBA7D36625E95D"
+        },
+        {
+          "path": "runtime/native_symbols.py",
+          "sha256": "42CA4366A39843E2DAD04A57EA956A9E21E698D841CC0DE6BC42254E304ED685"
+        },
+        {
+          "path": "runtime/native_system_manifest.py",
+          "sha256": "D2B44375B5BA06783CD2147FF1877C07858C285F0B0E9628CE157F46D02C6785"
+        },
+        {
+          "path": "runtime/native_tier0.py",
+          "sha256": "87716D0D8127599A462A535E83FF779248AF9681CE11E8B6D53151B11DB79A39"
+        },
+        {
+          "path": "runtime/schema_validation.py",
+          "sha256": "D26293A1C35E22E521A9CEE0D59AAF7946B8C9B61C73169BD860F78B35DE7E03"
+        },
+        {
+          "path": "tools/native_host_toolchain.py",
+          "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+        },
+        {
+          "path": "tools/qualify_native_elf_loader.py",
+          "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
+        },
+        {
+          "path": "tools/qualify_native_kernel_entry.py",
+          "sha256": "8B03FFD23EC9C2F3C6F82ED98185A71668B7FE75F137E30A89184F28C7BDF36C"
+        },
+        {
+          "path": "tools/qualify_native_kernel_load.py",
+          "sha256": "236588D5A917D4791C625530F781B0D9687ADE185F88E0E6B6AE93754D57E7ED"
+        },
+        {
+          "path": "tools/qualify_native_kernel_scheduler_ap_workers.py",
+          "sha256": "5CCC21A44F85856CF733460BCFBA61B917F13BB0B2B3FAE3A8A1A7D9B478A2D6"
+        },
+        {
+          "path": "tools/qualify_native_kernel_smp_ipi.py",
+          "sha256": "DEA461867768B8A119B2EC7851906AC7956F136B7C07F6AB75D8EE09C2765A2B"
+        },
+        {
+          "path": "tools/qualify_native_pooleboot.py",
+          "sha256": "3A79880536517335113FBB2F65AD17B320D5041EC70E6F507B96A0A120309636"
+        },
+        {
+          "path": "tools/qualify_native_toolchain.py",
+          "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+        }
+      ],
+      "capture": {
+        "record_sha256": "6F4AA4177099BD9778B51A1ACFDC1CCDC3425770EC3FABB43A4DCAB58AFF7C45",
+        "log_sha256": "B06620B801239E6381B91722D9B146A38F8E0EDC3B2CA346918A635BF2F030DA",
+        "source_snapshot_sha256": "2F46E1E5F7FECF06D672EB700DA67BB9E8DC1D981A1581E5B6EA67FA496485DB",
+        "return_code": 0,
+        "source_unchanged": true
+      }
+    },
+    {
+      "profile": "scheduler_smp_preempt",
+      "receipt": {
+        "path": "runs/native-kernel-scheduler-smp-preempt-readiness.json",
+        "sha256": "6BA9A37CF1C6E067085858399302364376B07F5918D12D88439EB3E060E6E4D3"
+      },
+      "sources": [
+        {
+          "path": "runtime/__init__.py",
+          "sha256": "65540DC2431716C99F67FF85EF9AEE0484EE1C6A900C59E4DF76E11729D0253A"
+        },
+        {
+          "path": "runtime/native_binary.py",
+          "sha256": "668F101989EBCE1C9C46B07C6419FEFBCFA3D298D4AB88444141EF5921517FE8"
+        },
+        {
+          "path": "runtime/native_boot_artifact.py",
+          "sha256": "518F0392D35DFDE8EB2A3971DA382E455822A7FD2344163FB65D0FCC95FC63ED"
+        },
+        {
+          "path": "runtime/native_boot_config.py",
+          "sha256": "F6915CAC71694F66AC74D2B48EE72DD63A6FD33A4E9530E835589AF434B4698E"
+        },
+        {
+          "path": "runtime/native_boot_exit.py",
+          "sha256": "902B30BD630474BF461FA24D03AD9C51C24905CE4E3ADA9EEEF3AD4FE7A6F9BC"
+        },
+        {
+          "path": "runtime/native_boot_handoff.py",
+          "sha256": "89071EAC531B6DD0E47930A3295B92570201C2EA60277C4CCF87A5E4E684CFE1"
+        },
+        {
+          "path": "runtime/native_boot_trust.py",
+          "sha256": "0E12DA5C48D9E3427D087B24151B498E1DD07536253E746512A8A8F0E7BBE8E0"
+        },
+        {
+          "path": "runtime/native_elf_loader.py",
+          "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+        },
+        {
+          "path": "runtime/native_firmware.py",
+          "sha256": "CA55F8DA2D3FE585FB35D9E10E576B5B7FC8F132A752EAE92CFDE0521A63EDFC"
+        },
+        {
+          "path": "runtime/native_initial_system.py",
+          "sha256": "C7213D00230A8A4BC4423CA63893663ADC637ACD5BC107C6C6A2E89D43387A7E"
+        },
+        {
+          "path": "runtime/native_inner_live.py",
+          "sha256": "ED98E5E46EC16F2762B9E0F440C2F8C27721C5F89933BB734E912A3B58FE5E35"
+        },
+        {
+          "path": "runtime/native_kernel_entry.py",
+          "sha256": "D6CD230A5EE6E17D9AD4270F97E08785DF7CBB4976AF99D65C2FC242C31C918A"
+        },
+        {
+          "path": "runtime/native_kernel_image.py",
+          "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
+        },
+        {
+          "path": "runtime/native_kernel_load.py",
+          "sha256": "701A030C521DD2CD01C46B08CAFF62C865084CA4D072CCF0A572DD36872C5FB6"
+        },
+        {
+          "path": "runtime/native_kernel_map.py",
+          "sha256": "C74E02ACD0D9DF1615088C6596E3B37B72A10841B7B6BB432391C0B569C732CA"
+        },
+        {
+          "path": "runtime/native_kernel_profile_evidence.py",
+          "sha256": "E40689F34D4ACA0318E2981AA81928969FA2BEAD786380F69088AD8260E765BE"
+        },
+        {
+          "path": "runtime/native_kernel_revalidation.py",
+          "sha256": "7EFA4F49CA8218796C3B0A19266DC698F1F03F75D20651B430D18E6668673BFE"
+        },
+        {
+          "path": "runtime/native_kernel_scheduler_smp_preempt.py",
+          "sha256": "05E06AC6F3B28D08A488B1DD6B7331E20CA7B8A081CBEF1E49DE74B2E15F2E5A"
+        },
+        {
+          "path": "runtime/native_kernel_smp_ipi.py",
+          "sha256": "B9FFC60BC11EB873BE5727EB6287DF886E64A831A9A0B5D59D5A37034C070B0E"
+        },
+        {
+          "path": "runtime/native_kernel_smp_mailbox.py",
+          "sha256": "9FE754D935AD900F62D274D326712FC73F3B8F072AE5A3B48D4ACFA457A27048"
+        },
+        {
+          "path": "runtime/native_kernel_transfer.py",
+          "sha256": "516A25590505C5E3C6850BE6DDA8F80673F2D3B2F1A7CC00C181B12C33C60AC7"
+        },
+        {
+          "path": "runtime/native_live_boot_handoff.py",
+          "sha256": "457662B2E11DCB68856D74B87AA088FC87F6B3ED9BFF6C4CE8C96F191D80839B"
+        },
+        {
+          "path": "runtime/native_microcode.py",
+          "sha256": "089AE566AA73BD23C9A9E648AE6F221406EB49EB9D44EF672BAE119F5D887772"
+        },
+        {
+          "path": "runtime/native_policy.py",
+          "sha256": "1301C4D02F3333F1CBB72D7F0CCC37FCDE7E7AB6A7B1388F0E39B97F6C2527C4"
+        },
+        {
+          "path": "runtime/native_pooleboot.py",
+          "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        },
+        {
+          "path": "runtime/native_recovery.py",
+          "sha256": "9FE923CB2A1DA1083858750FE324321ADB4CB56D9D69DC33B2DBA7D36625E95D"
+        },
+        {
+          "path": "runtime/native_symbols.py",
+          "sha256": "42CA4366A39843E2DAD04A57EA956A9E21E698D841CC0DE6BC42254E304ED685"
+        },
+        {
+          "path": "runtime/native_system_manifest.py",
+          "sha256": "D2B44375B5BA06783CD2147FF1877C07858C285F0B0E9628CE157F46D02C6785"
+        },
+        {
+          "path": "runtime/native_tier0.py",
+          "sha256": "87716D0D8127599A462A535E83FF779248AF9681CE11E8B6D53151B11DB79A39"
+        },
+        {
+          "path": "runtime/schema_validation.py",
+          "sha256": "D26293A1C35E22E521A9CEE0D59AAF7946B8C9B61C73169BD860F78B35DE7E03"
+        },
+        {
+          "path": "tools/native_host_toolchain.py",
+          "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+        },
+        {
+          "path": "tools/qualify_native_elf_loader.py",
+          "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
+        },
+        {
+          "path": "tools/qualify_native_kernel_entry.py",
+          "sha256": "8B03FFD23EC9C2F3C6F82ED98185A71668B7FE75F137E30A89184F28C7BDF36C"
+        },
+        {
+          "path": "tools/qualify_native_kernel_load.py",
+          "sha256": "236588D5A917D4791C625530F781B0D9687ADE185F88E0E6B6AE93754D57E7ED"
+        },
+        {
+          "path": "tools/qualify_native_kernel_scheduler_smp_preempt.py",
+          "sha256": "B4577A716FAB9F86963354131EE0EBDD10C1B478AD4A6DB3168E993569A91FA4"
+        },
+        {
+          "path": "tools/qualify_native_kernel_smp_ipi.py",
+          "sha256": "DEA461867768B8A119B2EC7851906AC7956F136B7C07F6AB75D8EE09C2765A2B"
+        },
+        {
+          "path": "tools/qualify_native_pooleboot.py",
+          "sha256": "3A79880536517335113FBB2F65AD17B320D5041EC70E6F507B96A0A120309636"
+        },
+        {
+          "path": "tools/qualify_native_toolchain.py",
+          "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+        }
+      ],
+      "capture": {
+        "record_sha256": "F92EC99FA3EC7D150F2FB17C610ED4842E6766BF73BF99BC09ED64D101C62EEC",
+        "log_sha256": "32DC2A4F71B6B64BD879B86B7BF320B6707E712CE2B501643C06AF9AFB08F0EA",
+        "source_snapshot_sha256": "680B4C19589CFFA5891589EB3178E7A6FD290BF1C43E97D92DEDDF957FD0BC54",
+        "return_code": 0,
+        "source_unchanged": true
+      }
+    },
+    {
+      "profile": "atomics",
+      "receipt": {
+        "path": "runs/native-kernel-atomics-readiness.json",
+        "sha256": "1E684D59C800F1C08BD05C1BEAB940654FD1CC8550779217FFE5AA4162DAB3CC"
+      },
+      "sources": [
+        {
+          "path": "runtime/__init__.py",
+          "sha256": "65540DC2431716C99F67FF85EF9AEE0484EE1C6A900C59E4DF76E11729D0253A"
+        },
+        {
+          "path": "runtime/native_binary.py",
+          "sha256": "668F101989EBCE1C9C46B07C6419FEFBCFA3D298D4AB88444141EF5921517FE8"
+        },
+        {
+          "path": "runtime/native_boot_artifact.py",
+          "sha256": "518F0392D35DFDE8EB2A3971DA382E455822A7FD2344163FB65D0FCC95FC63ED"
+        },
+        {
+          "path": "runtime/native_boot_config.py",
+          "sha256": "F6915CAC71694F66AC74D2B48EE72DD63A6FD33A4E9530E835589AF434B4698E"
+        },
+        {
+          "path": "runtime/native_boot_exit.py",
+          "sha256": "902B30BD630474BF461FA24D03AD9C51C24905CE4E3ADA9EEEF3AD4FE7A6F9BC"
+        },
+        {
+          "path": "runtime/native_boot_handoff.py",
+          "sha256": "89071EAC531B6DD0E47930A3295B92570201C2EA60277C4CCF87A5E4E684CFE1"
+        },
+        {
+          "path": "runtime/native_boot_trust.py",
+          "sha256": "0E12DA5C48D9E3427D087B24151B498E1DD07536253E746512A8A8F0E7BBE8E0"
+        },
+        {
+          "path": "runtime/native_elf_loader.py",
+          "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+        },
+        {
+          "path": "runtime/native_firmware.py",
+          "sha256": "CA55F8DA2D3FE585FB35D9E10E576B5B7FC8F132A752EAE92CFDE0521A63EDFC"
+        },
+        {
+          "path": "runtime/native_initial_system.py",
+          "sha256": "C7213D00230A8A4BC4423CA63893663ADC637ACD5BC107C6C6A2E89D43387A7E"
+        },
+        {
+          "path": "runtime/native_inner_live.py",
+          "sha256": "ED98E5E46EC16F2762B9E0F440C2F8C27721C5F89933BB734E912A3B58FE5E35"
+        },
+        {
+          "path": "runtime/native_kernel_atomics.py",
+          "sha256": "F56D763D458905E135C87DD0924EBB10CA1FCA07826BB9D56F6FBD16530D5CC9"
+        },
+        {
+          "path": "runtime/native_kernel_entry.py",
+          "sha256": "D6CD230A5EE6E17D9AD4270F97E08785DF7CBB4976AF99D65C2FC242C31C918A"
+        },
+        {
+          "path": "runtime/native_kernel_image.py",
+          "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
+        },
+        {
+          "path": "runtime/native_kernel_interrupt_time.py",
+          "sha256": "58593DBFAE87C3F3E16CD9C34622F3ABAE4FC04C73CB0D178485848EAF47006D"
+        },
+        {
+          "path": "runtime/native_kernel_load.py",
+          "sha256": "701A030C521DD2CD01C46B08CAFF62C865084CA4D072CCF0A572DD36872C5FB6"
+        },
+        {
+          "path": "runtime/native_kernel_map.py",
+          "sha256": "C74E02ACD0D9DF1615088C6596E3B37B72A10841B7B6BB432391C0B569C732CA"
+        },
+        {
+          "path": "runtime/native_kernel_profile_evidence.py",
+          "sha256": "E40689F34D4ACA0318E2981AA81928969FA2BEAD786380F69088AD8260E765BE"
+        },
+        {
+          "path": "runtime/native_kernel_revalidation.py",
+          "sha256": "7EFA4F49CA8218796C3B0A19266DC698F1F03F75D20651B430D18E6668673BFE"
+        },
+        {
+          "path": "runtime/native_kernel_transfer.py",
+          "sha256": "516A25590505C5E3C6850BE6DDA8F80673F2D3B2F1A7CC00C181B12C33C60AC7"
+        },
+        {
+          "path": "runtime/native_live_boot_handoff.py",
+          "sha256": "457662B2E11DCB68856D74B87AA088FC87F6B3ED9BFF6C4CE8C96F191D80839B"
+        },
+        {
+          "path": "runtime/native_microcode.py",
+          "sha256": "089AE566AA73BD23C9A9E648AE6F221406EB49EB9D44EF672BAE119F5D887772"
+        },
+        {
+          "path": "runtime/native_policy.py",
+          "sha256": "1301C4D02F3333F1CBB72D7F0CCC37FCDE7E7AB6A7B1388F0E39B97F6C2527C4"
+        },
+        {
+          "path": "runtime/native_pooleboot.py",
+          "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        },
+        {
+          "path": "runtime/native_recovery.py",
+          "sha256": "9FE923CB2A1DA1083858750FE324321ADB4CB56D9D69DC33B2DBA7D36625E95D"
+        },
+        {
+          "path": "runtime/native_symbols.py",
+          "sha256": "42CA4366A39843E2DAD04A57EA956A9E21E698D841CC0DE6BC42254E304ED685"
+        },
+        {
+          "path": "runtime/native_system_manifest.py",
+          "sha256": "D2B44375B5BA06783CD2147FF1877C07858C285F0B0E9628CE157F46D02C6785"
+        },
+        {
+          "path": "runtime/native_tier0.py",
+          "sha256": "87716D0D8127599A462A535E83FF779248AF9681CE11E8B6D53151B11DB79A39"
+        },
+        {
+          "path": "runtime/schema_validation.py",
+          "sha256": "D26293A1C35E22E521A9CEE0D59AAF7946B8C9B61C73169BD860F78B35DE7E03"
+        },
+        {
+          "path": "tools/native_host_toolchain.py",
+          "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+        },
+        {
+          "path": "tools/qualify_native_elf_loader.py",
+          "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
+        },
+        {
+          "path": "tools/qualify_native_kernel_atomics.py",
+          "sha256": "4818F85414E90512BB28B23A0432B764C99E664901592EE4B15A6B9293454E35"
+        },
+        {
+          "path": "tools/qualify_native_kernel_entry.py",
+          "sha256": "8B03FFD23EC9C2F3C6F82ED98185A71668B7FE75F137E30A89184F28C7BDF36C"
+        },
+        {
+          "path": "tools/qualify_native_kernel_load.py",
+          "sha256": "236588D5A917D4791C625530F781B0D9687ADE185F88E0E6B6AE93754D57E7ED"
+        },
+        {
+          "path": "tools/qualify_native_pooleboot.py",
+          "sha256": "3A79880536517335113FBB2F65AD17B320D5041EC70E6F507B96A0A120309636"
+        },
+        {
+          "path": "tools/qualify_native_toolchain.py",
+          "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+        }
+      ],
+      "capture": {
+        "record_sha256": "4015261ED211084B5F9A9AC0B246B32406DB1F37267E072B686311B3F219184C",
+        "log_sha256": "0BF036FC79C939C9EB6CDB0C580AB2D279EE05C4D7B64A29D07B34995FCC76BD",
+        "source_snapshot_sha256": "D25AB0BE4E7AE2612F65255C47FEEA9D0D349541034E09467CF24F0E31F0BE3B",
+        "return_code": 0,
+        "source_unchanged": true
+      }
+    },
+    {
+      "profile": "locks",
+      "receipt": {
+        "path": "runs/native-kernel-locks-readiness.json",
+        "sha256": "40EC2B1A2A79A6EE2388CBF695CDF95752C672529B5803D979AE994382641BA0"
+      },
+      "sources": [
+        {
+          "path": "runtime/__init__.py",
+          "sha256": "65540DC2431716C99F67FF85EF9AEE0484EE1C6A900C59E4DF76E11729D0253A"
+        },
+        {
+          "path": "runtime/native_binary.py",
+          "sha256": "668F101989EBCE1C9C46B07C6419FEFBCFA3D298D4AB88444141EF5921517FE8"
+        },
+        {
+          "path": "runtime/native_boot_artifact.py",
+          "sha256": "518F0392D35DFDE8EB2A3971DA382E455822A7FD2344163FB65D0FCC95FC63ED"
+        },
+        {
+          "path": "runtime/native_boot_config.py",
+          "sha256": "F6915CAC71694F66AC74D2B48EE72DD63A6FD33A4E9530E835589AF434B4698E"
+        },
+        {
+          "path": "runtime/native_boot_exit.py",
+          "sha256": "902B30BD630474BF461FA24D03AD9C51C24905CE4E3ADA9EEEF3AD4FE7A6F9BC"
+        },
+        {
+          "path": "runtime/native_boot_handoff.py",
+          "sha256": "89071EAC531B6DD0E47930A3295B92570201C2EA60277C4CCF87A5E4E684CFE1"
+        },
+        {
+          "path": "runtime/native_boot_trust.py",
+          "sha256": "0E12DA5C48D9E3427D087B24151B498E1DD07536253E746512A8A8F0E7BBE8E0"
+        },
+        {
+          "path": "runtime/native_elf_loader.py",
+          "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+        },
+        {
+          "path": "runtime/native_firmware.py",
+          "sha256": "CA55F8DA2D3FE585FB35D9E10E576B5B7FC8F132A752EAE92CFDE0521A63EDFC"
+        },
+        {
+          "path": "runtime/native_initial_system.py",
+          "sha256": "C7213D00230A8A4BC4423CA63893663ADC637ACD5BC107C6C6A2E89D43387A7E"
+        },
+        {
+          "path": "runtime/native_inner_live.py",
+          "sha256": "ED98E5E46EC16F2762B9E0F440C2F8C27721C5F89933BB734E912A3B58FE5E35"
+        },
+        {
+          "path": "runtime/native_kernel_entry.py",
+          "sha256": "D6CD230A5EE6E17D9AD4270F97E08785DF7CBB4976AF99D65C2FC242C31C918A"
+        },
+        {
+          "path": "runtime/native_kernel_image.py",
+          "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
+        },
+        {
+          "path": "runtime/native_kernel_load.py",
+          "sha256": "701A030C521DD2CD01C46B08CAFF62C865084CA4D072CCF0A572DD36872C5FB6"
+        },
+        {
+          "path": "runtime/native_kernel_locks.py",
+          "sha256": "5A4861A9288E10E7E675A37F1C6A0DA13AA920BB18620DFCD4E4AE801E80B1C0"
+        },
+        {
+          "path": "runtime/native_kernel_map.py",
+          "sha256": "C74E02ACD0D9DF1615088C6596E3B37B72A10841B7B6BB432391C0B569C732CA"
+        },
+        {
+          "path": "runtime/native_kernel_profile_evidence.py",
+          "sha256": "E40689F34D4ACA0318E2981AA81928969FA2BEAD786380F69088AD8260E765BE"
+        },
+        {
+          "path": "runtime/native_kernel_revalidation.py",
+          "sha256": "7EFA4F49CA8218796C3B0A19266DC698F1F03F75D20651B430D18E6668673BFE"
+        },
+        {
+          "path": "runtime/native_kernel_transfer.py",
+          "sha256": "516A25590505C5E3C6850BE6DDA8F80673F2D3B2F1A7CC00C181B12C33C60AC7"
+        },
+        {
+          "path": "runtime/native_live_boot_handoff.py",
+          "sha256": "457662B2E11DCB68856D74B87AA088FC87F6B3ED9BFF6C4CE8C96F191D80839B"
+        },
+        {
+          "path": "runtime/native_microcode.py",
+          "sha256": "089AE566AA73BD23C9A9E648AE6F221406EB49EB9D44EF672BAE119F5D887772"
+        },
+        {
+          "path": "runtime/native_policy.py",
+          "sha256": "1301C4D02F3333F1CBB72D7F0CCC37FCDE7E7AB6A7B1388F0E39B97F6C2527C4"
+        },
+        {
+          "path": "runtime/native_pooleboot.py",
+          "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        },
+        {
+          "path": "runtime/native_recovery.py",
+          "sha256": "9FE923CB2A1DA1083858750FE324321ADB4CB56D9D69DC33B2DBA7D36625E95D"
+        },
+        {
+          "path": "runtime/native_symbols.py",
+          "sha256": "42CA4366A39843E2DAD04A57EA956A9E21E698D841CC0DE6BC42254E304ED685"
+        },
+        {
+          "path": "runtime/native_system_manifest.py",
+          "sha256": "D2B44375B5BA06783CD2147FF1877C07858C285F0B0E9628CE157F46D02C6785"
+        },
+        {
+          "path": "runtime/native_tier0.py",
+          "sha256": "87716D0D8127599A462A535E83FF779248AF9681CE11E8B6D53151B11DB79A39"
+        },
+        {
+          "path": "runtime/schema_validation.py",
+          "sha256": "D26293A1C35E22E521A9CEE0D59AAF7946B8C9B61C73169BD860F78B35DE7E03"
+        },
+        {
+          "path": "tools/native_host_toolchain.py",
+          "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+        },
+        {
+          "path": "tools/qualify_native_elf_loader.py",
+          "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
+        },
+        {
+          "path": "tools/qualify_native_kernel_entry.py",
+          "sha256": "8B03FFD23EC9C2F3C6F82ED98185A71668B7FE75F137E30A89184F28C7BDF36C"
+        },
+        {
+          "path": "tools/qualify_native_kernel_load.py",
+          "sha256": "236588D5A917D4791C625530F781B0D9687ADE185F88E0E6B6AE93754D57E7ED"
+        },
+        {
+          "path": "tools/qualify_native_kernel_locks.py",
+          "sha256": "8B4CAFE6495F75B784F67FA1E198268A7A71FCD135F37720EAD9082DB6FD1D13"
+        },
+        {
+          "path": "tools/qualify_native_pooleboot.py",
+          "sha256": "3A79880536517335113FBB2F65AD17B320D5041EC70E6F507B96A0A120309636"
+        },
+        {
+          "path": "tools/qualify_native_toolchain.py",
+          "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+        }
+      ],
+      "capture": {
+        "record_sha256": "2F0EE60530B6ED58612A45DEB0AD56DA57B1DD06EFB016E2B43A00968A5A2AD4",
+        "log_sha256": "F544F181B3FA3E96D07A5941BB9A85282A9B1F8B2F870BAEF946585B3154046B",
+        "source_snapshot_sha256": "6D0767C12E9BC11B43F7302743F3F2B806E5F2BD45E0708E9B2369A55D0375D7",
+        "return_code": 0,
+        "source_unchanged": true
+      }
+    }
+  ],
+  "boundaries": {
+    "static_python_sources_only": true,
+    "fresh_guest_execution": false,
+    "authentication": false,
+    "independent_builder": false,
+    "dynamic_data_and_tool_closure": false,
+    "production_ready": false
+  }
+}

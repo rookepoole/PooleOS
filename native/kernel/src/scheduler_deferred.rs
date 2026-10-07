@@ -248,6 +248,24 @@ impl DeferredWorkController {
         context: &TopHalfContext,
         fault: FaultPoint,
     ) -> Result<WorkId, Error> {
+        // Publish only accepted work or the documented diagnostic transitions.
+        let mut next = *self;
+        let result = next.enqueue_inner(request, context, fault);
+        if matches!(
+            result,
+            Ok(_) | Err(Error::Duplicate) | Err(Error::FaultInjected)
+        ) {
+            *self = next;
+        }
+        result
+    }
+
+    fn enqueue_inner(
+        &mut self,
+        request: WorkRequest,
+        context: &TopHalfContext,
+        fault: FaultPoint,
+    ) -> Result<WorkId, Error> {
         if context.worker_context || self.active_worker != u8::MAX {
             return Err(Error::Recursion);
         }
@@ -337,6 +355,20 @@ impl DeferredWorkController {
         permit: DispatchPermit,
         fault: FaultPoint,
     ) -> Result<WorkId, Error> {
+        let mut next = *self;
+        let result = next.claim_inner(worker, permit, fault);
+        if matches!(result, Ok(_) | Err(Error::FaultInjected)) {
+            *self = next;
+        }
+        result
+    }
+
+    fn claim_inner(
+        &mut self,
+        worker: u8,
+        permit: DispatchPermit,
+        fault: FaultPoint,
+    ) -> Result<WorkId, Error> {
         if worker >= WORKER_COUNT {
             return Err(Error::InvalidWorker);
         }
@@ -346,11 +378,16 @@ impl DeferredWorkController {
         if self.active_worker != u8::MAX {
             return Err(Error::WorkerOwnership);
         }
-        let index = self.select_next().ok_or(Error::Empty)?;
-        if fault == FaultPoint::BeforeExecute {
+        if fault == FaultPoint::BeforeExecute
+            && self
+                .slots
+                .iter()
+                .any(|slot| slot.state == WorkState::Queued)
+        {
             self.rollback_count = increment(self.rollback_count)?;
             return Err(Error::FaultInjected);
         }
+        let index = self.select_next().ok_or(Error::Empty)?;
         self.slots[index].state = WorkState::Running;
         self.slots[index].owner = worker;
         self.active_worker = worker;
@@ -360,6 +397,20 @@ impl DeferredWorkController {
     }
 
     pub fn finish_claimed(
+        &mut self,
+        worker: u8,
+        id: WorkId,
+        fault: FaultPoint,
+    ) -> Result<Receipt, Error> {
+        let mut next = *self;
+        let result = next.finish_inner(worker, id, fault);
+        if matches!(result, Ok(_) | Err(Error::FaultInjected)) {
+            *self = next;
+        }
+        result
+    }
+
+    fn finish_inner(
         &mut self,
         worker: u8,
         id: WorkId,
@@ -413,11 +464,21 @@ impl DeferredWorkController {
     }
 
     pub fn dispatch_one(&mut self, worker: u8, permit: DispatchPermit) -> Result<Receipt, Error> {
-        let id = self.claim_one(worker, permit, FaultPoint::None)?;
-        self.finish_claimed(worker, id, FaultPoint::None)
+        let mut next = *self;
+        let id = next.claim_inner(worker, permit, FaultPoint::None)?;
+        let receipt = next.finish_inner(worker, id, FaultPoint::None)?;
+        *self = next;
+        Ok(receipt)
     }
 
     pub fn cancel(&mut self, id: WorkId) -> Result<(), Error> {
+        let mut next = *self;
+        next.cancel_inner(id)?;
+        *self = next;
+        Ok(())
+    }
+
+    fn cancel_inner(&mut self, id: WorkId) -> Result<(), Error> {
         let index = self.resolve(id)?;
         match self.slots[index].state {
             WorkState::Queued => {
@@ -441,6 +502,15 @@ impl DeferredWorkController {
     }
 
     pub fn retire(&mut self, id: WorkId, fault: FaultPoint) -> Result<(), Error> {
+        let mut next = *self;
+        let result = next.retire_inner(id, fault);
+        if matches!(result, Ok(()) | Err(Error::FaultInjected)) {
+            *self = next;
+        }
+        result
+    }
+
+    fn retire_inner(&mut self, id: WorkId, fault: FaultPoint) -> Result<(), Error> {
         let index = self.resolve(id)?;
         if !matches!(
             self.slots[index].state,
@@ -462,6 +532,13 @@ impl DeferredWorkController {
     }
 
     pub fn retire_all_terminal(&mut self) -> Result<u8, Error> {
+        let mut next = *self;
+        let retired = next.retire_all_terminal_inner()?;
+        *self = next;
+        Ok(retired)
+    }
+
+    fn retire_all_terminal_inner(&mut self) -> Result<u8, Error> {
         let mut retired = 0u8;
         for index in 0..WORK_CAPACITY {
             if matches!(
@@ -469,7 +546,7 @@ impl DeferredWorkController {
                 WorkState::Completed | WorkState::Cancelled
             ) {
                 let id = self.slots[index].id(index);
-                self.retire(id, FaultPoint::None)?;
+                self.retire_inner(id, FaultPoint::None)?;
                 retired = retired.checked_add(1).ok_or(Error::Counter)?;
             }
         }
@@ -477,6 +554,13 @@ impl DeferredWorkController {
     }
 
     pub fn begin_shutdown(&mut self) -> Result<u8, Error> {
+        let mut next = *self;
+        let cancelled = next.begin_shutdown_inner()?;
+        *self = next;
+        Ok(cancelled)
+    }
+
+    fn begin_shutdown_inner(&mut self) -> Result<u8, Error> {
         self.intake_open = false;
         let mut cancelled = 0u8;
         for index in 0..WORK_CAPACITY {
@@ -497,7 +581,15 @@ impl DeferredWorkController {
     }
 
     pub fn finish_shutdown(&mut self) -> Result<u8, Error> {
-        if self.active_worker != u8::MAX
+        let mut next = *self;
+        let retired = next.finish_shutdown_inner()?;
+        *self = next;
+        Ok(retired)
+    }
+
+    fn finish_shutdown_inner(&mut self) -> Result<u8, Error> {
+        if self.intake_open
+            || self.active_worker != u8::MAX
             || self.slots.iter().any(|slot| {
                 matches!(
                     slot.state,
@@ -507,7 +599,7 @@ impl DeferredWorkController {
         {
             return Err(Error::ShutdownPending);
         }
-        let retired = self.retire_all_terminal()?;
+        let retired = self.retire_all_terminal_inner()?;
         self.shutdown_complete = true;
         self.validate()?;
         Ok(retired)

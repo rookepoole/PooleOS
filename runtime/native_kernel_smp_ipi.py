@@ -8,7 +8,8 @@ import re
 from pathlib import Path
 from typing import Any
 
-from runtime import native_inner_live, native_kernel_load, native_kernel_transfer
+from runtime import native_inner_live, native_kernel_load, native_kernel_transfer, native_pooleboot
+from runtime import native_kernel_smp_mailbox as mailbox_evidence
 from runtime.schema_validation import validate_json
 from runtime.native_kernel_profile_evidence import kernel_entry_errors
 
@@ -59,6 +60,8 @@ SHOOTDOWN_RESPONSE_CHECKSUM_SEED = 0x5348_4F4F_5452_5350
 AGGREGATE_FNV_OFFSET = 0xCBF2_9CE4_8422_2325
 AGGREGATE_FNV_PRIME = 0x0000_0100_0000_01B3
 AGGREGATE_ROOT_DOMAIN = 0x524F_4F54_0000_0001
+AGGREGATE_OLD_FRAME_DOMAIN = 0x4F4C_4446_0000_0001
+AGGREGATE_NEW_FRAME_DOMAIN = 0x4E45_5746_0000_0001
 RETIRED_GENERATION = 1
 ACTIVE_GENERATION = 2
 PROBE_VIRTUAL_ADDRESS = 0x001F_F000
@@ -77,6 +80,7 @@ OPERATIONS = {
 IMPLEMENTATION_INPUTS = (
     "runtime/native_kernel_profile_evidence.py",
     "tests/test_native_memory_entry_provenance.py",
+    "tests/test_native_cpu_entry_provenance.py",
     "runs/native_kernel_entry_readiness.json",
     "native/Cargo.lock",
     "native/boot/Cargo.toml",
@@ -102,6 +106,8 @@ IMPLEMENTATION_INPUTS = (
     "native/kernel/src/xstate.rs",
     "native/kmap/src/lib.rs",
     "runtime/native_kernel_smp_ipi.py",
+    "runtime/native_kernel_smp_mailbox.py",
+    "tests/test_native_kernel_smp_mailbox.py",
     "runtime/native_kernel_transfer.py",
     "runtime/native_kernel_load.py",
     "runtime/native_inner_live.py",
@@ -146,13 +152,16 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N8-PKSMP5-DUPLICATE-ACK-MODEL",
     "NEG-N8-PKSMP5-AGGREGATE-ACK-MODEL",
     "NEG-N8-PKSMP5-RELEASE-ACCOUNTING-MODEL",
+    "NEG-N8-PKMBX1-AP0-ORACLE",
+    "NEG-N8-PKMBX1-AP1-ORACLE",
+    "NEG-N8-PKMBX1-AP2-ORACLE",
 )
 
 EARLY = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-EARLY PASS contract=(?P<contract>PKSMP5) selector=(?P<selector>[0-9]+) bsp=(?P<bsp>[0-9]+) if=(?P<iflag>[0-9]+) stack=validated_by_wrapper serial=initialized$")
 TOPOLOGY = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-TOPOLOGY PASS contract=(?P<contract>PKSMP5) processors=(?P<processors>[0-9]+) enabled=(?P<enabled>[0-9]+) bsp_apic_id=(?P<bsp>[0-9]+) target_apic_ids=(?P<targets>[0-9,]+) target_mask=0x(?P<mask>[0-9A-F]{16}) apic_physical=0x(?P<apic>[0-9A-F]{16}) selection=(?P<selection>[a-z_]+)$")
 PARTIAL = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-PARTIAL-ROLLBACK PASS contract=(?P<contract>PKSMP5) started_mask=0x(?P<started>[0-9A-F]{16}) timeout_apic_id=(?P<timeout_apic>[0-9]+) timeout_mask=0x(?P<timeout_mask>[0-9A-F]{16}) timeout_count=(?P<timeouts>[0-9]+) parked_mask=0x(?P<parked>[0-9A-F]{16}) released_mask=0x(?P<released>[0-9A-F]{16}) resource_pages=(?P<resource_pages>[0-9]+) frame_pages=(?P<frame_pages>[0-9]+) zeroed_bytes=(?P<zeroed>[0-9]+) verified_bytes=(?P<verified>[0-9]+) retained_free_rejections=(?P<retained>[0-9]+) owner_release_rejections=(?P<owner>[0-9]+) fresh_allocation_required=(?P<fresh>[0-9]+)$")
 RETRY = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-RETRY PASS contract=(?P<contract>PKSMP5) retry_count=(?P<retry>[0-9]+) partial_rollback_count=(?P<rollbacks>[0-9]+) started_mask=0x(?P<started>[0-9A-F]{16}) online_mask=0x(?P<online>[0-9A-F]{16}) simultaneous_online=(?P<simultaneous>[0-9]+)$")
-AP = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=(?P<contract>PKSMP5) ap_index=(?P<index>[0-9]+) apic_id=(?P<apic_id>[0-9]+) physical_start=0x(?P<start>[0-9A-F]{16}) pages=(?P<pages>[0-9]+) sipi_vector=(?P<vector>[0-9]+) trampoline_bytes=(?P<trampoline>[0-9]+) allocation_sequence=(?P<allocation>[0-9]+) frame_allocation_sequences=(?P<frame_allocations>[0-9,]+) frame_release_sequences=(?P<frame_releases>[0-9,]+) resource_release_sequence=(?P<resource_release>[0-9]+) service_state=(?P<service>[0-9]+) mailbox_state=(?P<mailbox>[0-9]+) runtime_state=(?P<runtime>[0-9]+) deliveries=(?P<deliveries>[0-9]+) accepted=(?P<accepted>[0-9]+) denied=(?P<denied>[0-9]+) eois=(?P<eois>[0-9]+) diagnostic=(?P<diagnostic>[0-9]+) shootdown=(?P<shootdown>[0-9]+) stop=(?P<stop>[0-9]+) timeout_count=(?P<timeouts>[0-9]+) init_asserts=(?P<asserts>[0-9]+) init_deasserts=(?P<deasserts>[0-9]+) sipis=(?P<sipis>[0-9]+) target_mask=0x(?P<target>[0-9A-F]{16}) ack_mask=0x(?P<ack>[0-9A-F]{16}) invalidations=(?P<invalidations>[0-9]+) baseline_checksum=0x(?P<baseline>[0-9A-F]{16}) runtime_checksum=0x(?P<runtime_checksum>[0-9A-F]{16}) response_checksum=0x(?P<response>[0-9A-F]{16}) tss_busy=(?P<tss>[0-9]+) idt_verified=(?P<idt>[0-9]+) xstate_verified=(?P<xstate>[0-9]+) apic_table_verified=(?P<apic_table>[0-9]+) parked=(?P<parked>[0-9]+)$")
+AP = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=(?P<contract>PKSMP5) ap_index=(?P<index>[0-9]+) apic_id=(?P<apic_id>[0-9]+) physical_start=0x(?P<start>[0-9A-F]{16}) pages=(?P<pages>[0-9]+) sipi_vector=(?P<vector>[0-9]+) trampoline_bytes=(?P<trampoline>[0-9]+) allocation_sequence=(?P<allocation>[0-9]+) frame_allocation_sequences=(?P<frame_allocations>[0-9,]+) frame_release_sequences=(?P<frame_releases>[0-9,]+) resource_release_sequence=(?P<resource_release>[0-9]+) service_state=(?P<service>[0-9]+) mailbox_state=(?P<mailbox>[0-9]+) runtime_state=(?P<runtime>[0-9]+) deliveries=(?P<deliveries>[0-9]+) accepted=(?P<accepted>[0-9]+) denied=(?P<denied>[0-9]+) eois=(?P<eois>[0-9]+) diagnostic=(?P<diagnostic>[0-9]+) shootdown=(?P<shootdown>[0-9]+) stop=(?P<stop>[0-9]+) timeout_count=(?P<timeouts>[0-9]+) init_asserts=(?P<asserts>[0-9]+) init_deasserts=(?P<deasserts>[0-9]+) sipis=(?P<sipis>[0-9]+) target_mask=0x(?P<target>[0-9A-F]{16}) ack_mask=0x(?P<ack>[0-9A-F]{16}) invalidations=(?P<invalidations>[0-9]+) baseline_checksum=0x(?P<baseline>[0-9A-F]{16}) runtime_checksum=0x(?P<runtime_checksum>[0-9A-F]{16}) response_checksum=0x(?P<response>[0-9A-F]{16}) mailbox_evidence=(?P<mailbox_evidence>PKMBX1) snapshot=(?P<snapshot>quiesced) context_words=(?P<context_words>0x[0-9A-F]{16}(?:,0x[0-9A-F]{16}){4}) baseline_words=(?P<baseline_words>0x[0-9A-F]{16}(?:,0x[0-9A-F]{16}){14}) runtime_words=(?P<runtime_words>0x[0-9A-F]{16}(?:,0x[0-9A-F]{16}){37}) tss_busy=(?P<tss>[0-9]+) idt_verified=(?P<idt>[0-9]+) xstate_verified=(?P<xstate>[0-9]+) apic_table_verified=(?P<apic_table>[0-9]+) parked=(?P<parked>[0-9]+)$")
 SHOOTDOWN = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-SHOOTDOWN PASS contract=(?P<contract>PKSMP5) target_mask=0x(?P<target>[0-9A-F]{16}) ack_mask=0x(?P<ack>[0-9A-F]{16}) retired_generation=(?P<retired>[0-9]+) active_generation=(?P<active>[0-9]+) invalidations=(?P<invalidations>[0-9]+) root_checksum=0x(?P<roots>[0-9A-F]{16}) old_frame_checksum=0x(?P<old>[0-9A-F]{16}) new_frame_checksum=0x(?P<new>[0-9A-F]{16}) premature_reclaim_rejections=(?P<premature>[0-9]+) retained_free_rejections=(?P<retained>[0-9]+) owner_release_rejections=(?P<owner>[0-9]+) reclaim_state=(?P<state>[a-z_]+)$")
 LIFECYCLE = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-LIFECYCLE PASS contract=(?P<contract>PKSMP5) started_mask=0x(?P<started>[0-9A-F]{16}) online_mask=0x(?P<online>[0-9A-F]{16}) quiesced_mask=0x(?P<quiesced>[0-9A-F]{16}) parked_mask=0x(?P<parked>[0-9A-F]{16}) validated_mask=0x(?P<validated>[0-9A-F]{16}) released_mask=0x(?P<released>[0-9A-F]{16}) timeout_count=(?P<timeouts>[0-9]+) retry_count=(?P<retry>[0-9]+) partial_rollback_count=(?P<rollbacks>[0-9]+) exact_accounting=(?P<exact>[0-9]+)$")
 RELEASE = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-RELEASE PASS contract=(?P<contract>PKSMP5) resource_pages=(?P<resource_pages>[0-9]+) frame_pages=(?P<frame_pages>[0-9]+) resource_zeroed_bytes=(?P<resource_zeroed>[0-9]+) resource_verified_bytes=(?P<resource_verified>[0-9]+) frame_zeroed_bytes=(?P<frame_zeroed>[0-9]+) frame_verified_bytes=(?P<frame_verified>[0-9]+) total_pages=(?P<total>[0-9]+) capability_revoked=(?P<capability>[0-9]+) runtime_revoked=(?P<runtime>[0-9]+) mmio_revoked=(?P<mmio>[0-9]+) pic_restored=(?P<pic>[0-9]+) hpet_restored=(?P<hpet>[0-9]+) apic_base_restored=(?P<apic>[a-z_]+)$")
@@ -161,6 +170,10 @@ RESULT = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-RESULT PASS contract=(?P<contrac
 
 class KernelSmpIpiError(RuntimeError):
     """Raised when PKSMP5 data or evidence violates the frozen contract."""
+
+
+NEGATIVE_CONTROL_CASE_COUNTS = (1, 1, 1, 2, 8, 14, 6, 36, 36, 36, 13, 11, 14, 22,
+                                3, 2, 2, 2, 2, 2, 8, 8, 2, 2, 2, 4, 3, 1, 2, 3, 120, 120, 120)
 
 
 def _require(condition: bool, message: str) -> None:
@@ -234,6 +247,8 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
     errors = [f"schema {issue.path}: {issue.message}" for issue in issues]
     if contract.get("required_negative_controls") != list(NEGATIVE_CONTROL_IDS):
         errors.append("required negative controls diverge")
+    if json.dumps(contract.get("mailbox_evidence"), sort_keys=True) != json.dumps(mailbox_evidence.CONTRACT, sort_keys=True):
+        errors.append("PKMBX1 mailbox evidence contract diverges")
     return errors
 
 
@@ -249,6 +264,9 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     ids = [item.get("id") for item in controls if isinstance(item, dict)]
     if ids != list(NEGATIVE_CONTROL_IDS):
         errors.append("readiness negative-control order diverges")
+    elif any(type(item.get("case_count")) is not int or item["case_count"] != expected
+             for item, expected in zip(controls, NEGATIVE_CONTROL_CASE_COUNTS, strict=True)):
+        errors.append("PKSMP5 per-control case counts diverge")
     try:
         if readiness.get("inputs") != expected_inputs(root):
             errors.append("readiness input bindings are stale")
@@ -266,6 +284,103 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
             raise KernelSmpIpiError("PKSMP5 aggregate observation disagrees with its first run")
     except (OSError, KeyError, TypeError, ValueError, IndexError, KernelSmpIpiError) as error:
         errors.append(f"recorded execution invalid: {error}")
+    errors.extend(recorded_ipi_errors(readiness.get("execution"), readiness.get("summary")))
+    return errors
+
+
+def ipi_readiness_summary(observation: dict[str, Any]) -> dict[str, int]:
+    count = len(observation["aps"])
+    return {
+        "application_processors_online": observation["result"]["application_processors_online"],
+        "operation_classes_installed_per_ap": len(OPERATIONS),
+        "accepted_deliveries": count * 3, "denied_deliveries": count, "eois": count * 4,
+        "offline_timeouts": observation["partial_rollback"]["timeout_count"],
+        "partial_start_rollbacks": 1, "fresh_retries": observation["retry"]["retry_count"],
+        "remote_tlb_invalidations": observation["shootdown"]["invalidation_count"],
+        "retired_generations": ACTIVE_GENERATION - RETIRED_GENERATION,
+        "premature_reclaim_rejections": observation["shootdown"]["premature_reclaim_rejections"],
+        "resource_pages_released": observation["release"]["resource_pages"],
+        "frame_pages_released": observation["release"]["frame_pages"],
+        "verified_bytes": observation["release"]["verified_bytes"],
+        "negative_controls_total": len(NEGATIVE_CONTROL_IDS),
+        "hostile_cases_total": sum(NEGATIVE_CONTROL_CASE_COUNTS),
+        "production_claim_count": observation["result"]["production"],
+    }
+
+
+def recorded_ipi_errors(execution: Any, summary: Any) -> list[str]:
+    """Check raw execution and independently validated PKMBX1 mailbox snapshots."""
+    if not isinstance(execution, dict):
+        return ["PKSMP5 recorded execution is not an object"]
+    errors: list[str] = []
+    if (any(type(execution.get(key)) is not int or execution[key] != count
+            for key, count in (("run_count", 2), ("virtual_cpu_count", 4), ("application_processor_count", 3)))
+            or any(execution.get(key) is not True for key in (
+                "static_markers_exact_match", "dynamic_fields_revalidated",
+                "exact_screenshot_match", "exact_pbp1_match"))):
+        errors.append("PKSMP5 recorded two-run metadata changed")
+    profile = {"profile_id": "sandybridge-x87-sse-four-vcpu-three-ap", "machine": "pc-q35-11.0",
+               "cpu_model": "SandyBridge,-avx", "acceleration": "tcg_multi_thread"}
+    if (any(execution.get(key) != value for key, value in profile.items())
+            or execution.get("deterministic_instruction_clock") is not False):
+        errors.append("PKSMP5 recorded execution profile changed")
+    runs = execution.get("runs")
+    if (not isinstance(runs, list) or len(runs) != 2
+            or any(not isinstance(run, dict) for run in runs)
+            or [run.get("run_id") for run in runs] != ["smp-multi-run-1", "smp-multi-run-2"]):
+        return [*errors, "PKSMP5 recorded run coverage changed"]
+
+    def exact(left: Any, right: Any) -> bool:
+        return json.dumps(left, sort_keys=True, allow_nan=False) == json.dumps(right, sort_keys=True, allow_nan=False)
+
+    observations = []
+    normalized = []
+    for run in runs:
+        try:
+            _require(type(run.get("qemu_exit_code")) is int and run["qemu_exit_code"] == 0,
+                     "recorded emulator exit is missing, malformed or unsuccessful")
+            frame = run.get("screenshot")
+            _require(isinstance(frame, dict) and frame.get("nonblank") is True
+                     and isinstance(frame.get("sha256"), str)
+                     and re.fullmatch(r"[0-9A-F]{64}", frame["sha256"]) is not None,
+                     "recorded frame is missing or malformed")
+            markers = run.get("markers")
+            _require(isinstance(markers, list) and all(isinstance(item, str) for item in markers),
+                     "recorded markers are not a string list")
+            observation = validate_markers(markers)
+            _require(exact(run.get("marker_summary"), observation), "recorded summary differs from parsed markers or types")
+            _require(run.get("marker_sha256") == sha256_bytes(native_pooleboot.canonical_json_bytes(markers)),
+                     "recorded marker digest changed")
+            transcript = run.get("pbp1_transcript")
+            _require(isinstance(transcript, dict) and isinstance(transcript.get("core"), dict),
+                     "recorded handoff or core is malformed")
+            prefix = observation["transfer_prefix"]
+            binding = native_kernel_transfer.validate_transcript_binding(prefix, transcript)
+            _require(exact(run.get("transcript_binding"), binding), "recorded transfer binding changed")
+            oracle = run.get("independent_kernel_revalidation")
+            guest = prefix["kernel_revalidation"]
+            _require(isinstance(oracle, dict) and oracle.get("contract_id") == "PKREVAL1"
+                     and oracle.get("guest_host_exact_match") is True
+                     and exact({key: oracle.get(key) for key in guest}, guest),
+                     "recorded revalidation differs from guest markers")
+            _require(all(run.get(key) is True for key in
+                         ("serial_debugcon_exact_match", "pbp1_serial_debugcon_exact_match")),
+                     "recorded dual-channel agreement changed")
+            observations.append(observation)
+            normalized.append(normalize_dynamic_markers(markers))
+        except (KernelSmpIpiError, native_kernel_transfer.KernelTransferError,
+                KeyError, TypeError, ValueError, AttributeError, OverflowError) as error:
+            errors.append(f"PKSMP5 {run['run_id']} invalid recorded evidence: {error}")
+    if errors:
+        return errors
+    try:
+        _require(exact(normalized[0], normalized[1]), "recorded static markers differ")
+        _require(all(exact(runs[0].get(key), runs[1].get(key)) for key in ("pbp1_transcript", "screenshot")),
+                 "recorded handoff/frame pair differs")
+        _require(exact(execution.get("observation"), observations[0]), "recorded aggregate observation changed")
+        _require(exact(summary, ipi_readiness_summary(observations[0])), "recorded readiness summary changed")
+    except (KernelSmpIpiError, KeyError, TypeError, ValueError, AttributeError) as error:
+        errors.append(f"PKSMP5 recorded accounting is invalid: {error}")
     return errors
 
 
@@ -504,6 +619,16 @@ def validate_receipt_sequences(aps: list[dict[str, Any]]) -> None:
     _require(max(allocations) < min(releases), "PKSMP5 release preceded complete retry allocation")
 
 
+def validate_release_accounting(resource_pages: int, frame_pages: int, verified_bytes: int) -> None:
+    expected_resources = AP_COUNT * RESOURCE_PAGE_COUNT
+    expected_frames = AP_COUNT * 2
+    _require(all(type(value) is int for value in (resource_pages, frame_pages, verified_bytes)),
+             "PKSMP5 release accounting must use integer counts")
+    _require((resource_pages, frame_pages, verified_bytes) ==
+             (expected_resources, expected_frames, (expected_resources + expected_frames) * PAGE_BYTES),
+             "PKSMP5 release accounting does not cover every AP resource and frame")
+
+
 def validate_markers(markers: list[str]) -> dict[str, Any]:
     _require(len(markers) == MARKER_COUNT, f"expected {MARKER_COUNT} PKSMP5 markers")
     arm = native_kernel_transfer.TRANSFER_ARM.fullmatch(markers[23])
@@ -552,11 +677,20 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         _require((_hex(match, "target"), _hex(match, "ack"), _dec(match, "invalidations")) == (local_mask, local_mask, 1), "PKSMP5 AP acknowledgement changed")
         _require(tuple(_dec(match, name) for name in ("tss", "idt", "xstate", "apic_table", "parked")) == (1, 1, 1, 1, 1), "PKSMP5 AP validation receipt changed")
         _require(_hex(match, "baseline") != 0 and _hex(match, "runtime_checksum") != 0 and _hex(match, "baseline") != _hex(match, "runtime_checksum"), "PKSMP5 AP runtime checksums are invalid")
+        try:
+            mailbox = mailbox_evidence.validate(
+                match.group("context_words"), match.group("baseline_words"), match.group("runtime_words"),
+                _hex(match, "baseline"), _hex(match, "runtime_checksum"), EXPECTED_APIC_IDS[index], layout["start"])
+        except mailbox_evidence.MailboxEvidenceError as error:
+            raise KernelSmpIpiError(str(error)) from error
+        if aps:
+            _require(mailbox["context"] == aps[0]["mailbox_evidence"]["context"], "PKMBX1 BSP context differs between APs")
         _require(_hex(match, "response") == response_expected, "PKSMP5 AP response checksum changed")
         frame_allocations = _csv_numbers(match.group("frame_allocations"))
         frame_releases = _csv_numbers(match.group("frame_releases"))
         layouts.append(layout)
         aps.append({"index": index, "apic_id": EXPECTED_APIC_IDS[index], "layout": layout, "allocation_sequence": _dec(match, "allocation"), "frame_allocation_sequences": list(frame_allocations), "frame_release_sequences": list(frame_releases), "resource_release_sequence": _dec(match, "resource_release"), "trampoline_bytes": _dec(match, "trampoline"), "response_checksum": response_expected})
+        aps[-1]["mailbox_evidence"] = mailbox
     validate_receipt_sequences(aps)
     _require([item["start"] for item in layouts] == [0x1000, 0x23000, 0x45000], "PKSMP5 private resource placement changed")
     _require(len({item["pml4"] for item in layouts}) == AP_COUNT, "PKSMP5 private roots alias")
@@ -583,7 +717,12 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         AGGREGATE_ROOT_DOMAIN,
     )
     _require(_hex(shootdown, "roots") == expected_root_checksum, "PKSMP5 aggregate root checksum changed")
-    _require(_hex(shootdown, "old") != 0 and _hex(shootdown, "new") != 0 and _hex(shootdown, "old") != _hex(shootdown, "new"), "PKSMP5 aggregate frame checksums are invalid")
+    for field, offset, domain in (("old", 0, AGGREGATE_OLD_FRAME_DOMAIN),
+                                   ("new", PAGE_BYTES, AGGREGATE_NEW_FRAME_DOMAIN)):
+        expected = aggregate_address_checksum(
+            [(local_target_mask(EXPECTED_APIC_IDS[index]), layout["end"] + offset)
+             for index, layout in enumerate(layouts)], domain)
+        _require(_hex(shootdown, field) == expected, "PKSMP5 aggregate frame checksum changed")
 
     lifecycle_model.complete(_hex(lifecycle, "quiesced"), _hex(lifecycle, "parked"), _hex(lifecycle, "validated"), _hex(lifecycle, "released"))
     _require((_hex(lifecycle, "started"), _hex(lifecycle, "online")) == (TARGET_CPU_MASK, TARGET_CPU_MASK), "PKSMP5 lifecycle start changed")
@@ -591,6 +730,8 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
 
     _require(tuple(_dec(release, name) for name in ("resource_pages", "frame_pages", "resource_zeroed", "resource_verified", "frame_zeroed", "frame_verified", "total", "capability", "runtime", "mmio", "pic", "hpet")) == (96, 6, 393216, 393216, 24576, 24576, 102, 1, 1, 1, 1, 1), "PKSMP5 release accounting changed")
     _require(release.group("apic") == "unchanged", "PKSMP5 APIC base changed")
+    validate_release_accounting(_dec(release, "resource_pages"), _dec(release, "frame_pages"),
+                                _dec(release, "resource_verified") + _dec(release, "frame_verified"))
     _require(tuple(_dec(result, name) for name in ("aps", "simultaneous", "partial_timeout", "rollback", "retry", "invalidations", "no_reuse", "quiesced", "parked", "released", "scheduler", "broadcast", "target_hardware", "signatures", "authority", "actions", "production")) == (3, 1, 1, 1, 1, 3, 1, 3, 3, 102, 0, 0, 0, 0, 0, 0, 0), "PKSMP5 claim boundary changed")
     _require((_hex(result, "target"), _hex(result, "ack")) == (TARGET_CPU_MASK, TARGET_CPU_MASK), "PKSMP5 result mask changed")
     _require(result.group("terminal") == "halt", "PKSMP5 terminal changed")
@@ -614,9 +755,17 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
 
 
 def normalize_dynamic_markers(markers: list[str]) -> list[str]:
-    validate_markers(markers)
+    observation = validate_markers(markers)
     normalized = markers.copy()
     for index in range(33, 36):
         for field in ("baseline_checksum", "runtime_checksum"):
             normalized[index] = re.sub(rf"{field}=0x[0-9A-F]{{16}}", f"{field}=<validated-dynamic>", normalized[index], count=1)
+        mailbox = observation["aps"][index - 33]["mailbox_evidence"]
+        for field, section, dynamic in (
+            ("context_words", "context", mailbox_evidence.CONTEXT_FIELDS[2:]),
+            ("baseline_words", "baseline", ("tsc_online", "tsc_stop")),
+            ("runtime_words", "runtime", ("baseline_checksum",)),
+        ):
+            words = mailbox_evidence.normalized_words(mailbox[section], dynamic)
+            normalized[index] = re.sub(rf"{field}=[^ ]+", f"{field}={words}", normalized[index], count=1)
     return normalized

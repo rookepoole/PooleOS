@@ -84,23 +84,20 @@ def test_probe_parser_rejects_trace_cancel_and_cleanup_drift() -> None:
             ap_workers.parse_probe_output("\n".join(hostile) + "\n")
 
 
-def test_live_serial_transcript_matches_independent_oracle_when_present() -> None:
-    path = ROOT / "tmp/pksched5-debug-run-2/pooleos.serial.log"
-    if not path.is_file():
-        _skip("local QEMU transcript is not a repository input")
-    markers = ap_workers.extract_markers(path.read_bytes())
-    try:
+def test_recorded_markers_match_independent_oracle_without_optional_local_log() -> None:
+    receipt = ap_workers.read_json(ROOT / ap_workers.READINESS_RELATIVE)
+    assert len(receipt["execution"]["runs"]) == 2
+    for run in receipt["execution"]["runs"]:
+        markers = run["markers"]
         summary = ap_workers.validate_markers(markers)
-    except ap_workers.KernelSchedulerApWorkersError:
-        _skip("local QEMU transcript predates the current retained-map profile")
-    assert len(markers) == 37
-    assert summary["flush"] == {
-        "completed": 11,
-        "cancelled": 2,
-        "reclaimed": 13,
-        "driver_sum": 177,
-        "service_generation": 4,
-    }
+        assert len(markers) == 37
+        assert summary["flush"] == {
+            "completed": 11,
+            "cancelled": 2,
+            "reclaimed": 13,
+            "driver_sum": 177,
+            "service_generation": 4,
+        }
 
 
 def test_input_binding_rejects_escape_and_is_complete() -> None:

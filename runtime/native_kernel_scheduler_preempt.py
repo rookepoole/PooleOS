@@ -11,7 +11,7 @@ from typing import Any
 
 from runtime import native_kernel_transfer
 from runtime.schema_validation import validate_json
-from runtime.native_kernel_profile_evidence import kernel_entry_errors
+from runtime.native_kernel_profile_evidence import kernel_entry_errors, recorded_pair_errors
 
 
 CONTRACT_ID = "PKSCHED2"
@@ -49,12 +49,17 @@ IMPLEMENTATION_INPUTS = (
     "native/kmap/src/lib.rs",
     "runtime/native_kernel_map.py",
     "runtime/native_kernel_scheduler_preempt.py",
+    "runtime/native_kernel_scheduler.py",
     "specs/native-kernel-scheduler-preemption-contract.json",
     "specs/native-kernel-scheduler-preemption-contract.schema.json",
     "specs/native-kernel-scheduler-preemption-readiness.schema.json",
     "tools/qualify_native_pooleboot.py",
     "tools/qualify_native_kernel_scheduler_preempt.py",
+    "tools/qualify_native_kernel_scheduler.py",
     "tests/test_native_kernel_scheduler_preempt.py",
+    "tests/test_native_kernel_scheduler.py",
+    "tests/fixtures/pksched2_control_probe.rs",
+    "tests/test_native_preemption_controls.py",
     "docs/native-kernel-scheduler-preemption.md",
 )
 
@@ -85,6 +90,24 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N12-PKSCHED2-RETAINED-STACK-PARTITION",
     "NEG-N12-PKSCHED2-INPUT-BINDING",
 )
+
+NATIVE_CONTROL_CASE_COUNTS = (17, 15, 2, 3, 4, 3, 6)
+NEGATIVE_CONTROL_CASE_COUNTS = (
+    35, 34, 35, 1, 12, 9, 10, 13, 10, 3, 2, 1, 1, 1, 1,
+    *NATIVE_CONTROL_CASE_COUNTS, 3, 4, 1,
+)
+
+
+def parse_native_control_output(output: str) -> list[dict[str, Any]]:
+    """Parse the seven executed native groups; unrelated output is not evidence."""
+    lines = output.splitlines()
+    _require(len(lines) == 7, "PKSCHED2 native control receipt count changed")
+    controls = []
+    for line, control_id, count in zip(lines, NEGATIVE_CONTROL_IDS[15:22], NATIVE_CONTROL_CASE_COUNTS):
+        expected = f"PKSCHED2:CONTROL PASS id={control_id} attempted={count} rejected={count}"
+        _require(line == expected, "PKSCHED2 native control evidence changed")
+        controls.append({"id": control_id, "status": "pass", "expected": "rejected", "case_count": count})
+    return controls
 
 EARLY = re.compile(
     r"^POOLEOS:KERNEL:SCHED-PREEMPT-EARLY PASS contract=PKSCHED2 selector=(?P<selector>[0-9]+) "
@@ -225,6 +248,8 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
 
 
 def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
+    if not isinstance(readiness, dict):
+        return ["PKSCHED2 readiness is not an object"]
     issues = validate_json(readiness, read_json(root / READINESS_SCHEMA_RELATIVE))
     errors = [f"schema {issue.path}: {issue.message}" for issue in issues]
     errors.extend(kernel_entry_errors(readiness.get("build"), root))
@@ -238,14 +263,114 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
             raise ValueError("noncanonical date")
     except ValueError:
         errors.append("readiness status_date is not a canonical calendar date")
+    if errors:
+        return errors
     if readiness.get("inputs") != expected_inputs(root):
         errors.append("readiness input bindings are stale")
     ids = [item.get("id") for item in readiness.get("negative_controls", []) if isinstance(item, dict)]
     if ids != list(NEGATIVE_CONTROL_IDS):
         errors.append("readiness negative-control order diverges")
+    controls = readiness["negative_controls"]
+    if any(type(item.get("case_count")) is not int or item["case_count"] != count
+           for item, count in zip(controls, NEGATIVE_CONTROL_CASE_COUNTS)):
+        errors.append("PKSCHED2 per-control rejection counts changed")
     if readiness.get("claims") != expected_claims():
         errors.append("readiness claim boundary diverges")
+    errors.extend(recorded_preemption_errors(readiness.get("execution"), readiness.get("summary"), readiness["build"], root))
     return errors
+
+
+def _typed_equal(actual: Any, expected: Any, label: str) -> None:
+    _require(json.dumps(actual, sort_keys=True, allow_nan=False) == json.dumps(expected, sort_keys=True, allow_nan=False),
+             f"recorded {label} differs from parsed evidence or exact types")
+
+
+def preemption_readiness_summary(observation: dict[str, Any], host_tests: dict[str, Any], probe: dict[str, Any]) -> dict[str, int]:
+    return {
+        "preemption_tests": 7, "kernel_host_tests": host_tests["test_count"],
+        "host_probe_receipts": len(probe["lines"]), "timer_ticks": observation["trace"]["ticks"],
+        "timer_eois": observation["frames"]["eois"], "live_tasks": len(observation["frames"]["task_entries"]),
+        "interrupt_frame_switches": observation["trace"]["switches"],
+        "stack_bytes_cleared": observation["cleanup"]["stack_bytes_cleared"],
+        "negative_controls_total": len(NEGATIVE_CONTROL_IDS), "hostile_cases_total": sum(NEGATIVE_CONTROL_CASE_COUNTS),
+        "production_claim_count": observation["result"]["production"],
+    }
+
+
+def recorded_preemption_errors(execution: Any, summary: Any, build: Any, root: Path = ROOT) -> list[str]:
+    """Validate recorded consistency, not authentication or independent execution."""
+    if not isinstance(execution, dict):
+        return ["PKSCHED2 recorded execution is not an object"]
+
+    def parsed(markers: list[str]) -> dict[str, Any]:
+        try:
+            return validate_markers(markers)
+        except KernelSchedulerPreemptError as error:
+            raise ValueError(str(error)) from error
+
+    pair = dict(execution, exact_marker_match=execution.get("static_markers_exact_match"))
+    try:
+        errors = recorded_pair_errors(pair, "scheduler-preempt-run", parsed, CONTRACT_ID)
+    except (native_kernel_transfer.KernelTransferError, KeyError, TypeError, ValueError, AttributeError) as error:
+        return [f"PKSCHED2 recorded run evidence is invalid: {error}"]
+    if errors:
+        return errors
+    try:
+        _require(all(type(execution.get(key)) is int and execution[key] == 1
+                     for key in ("host_environment_count", "virtual_cpu_count")), "recorded host/CPU count changed")
+        _require(all(execution.get(key) is True for key in
+                     ("bsp_only", "dynamic_fields_revalidated", "deterministic_instruction_clock")),
+                 "recorded preemption execution mode changed")
+        _require(execution.get("cpu_model") == "qemu64" and execution.get("acceleration") == "tcg_single_thread"
+                 and execution.get("profile_id") == "POOLEOS-TIER0-Q35-1" and execution.get("machine") == "pc-q35-11.0",
+                 "recorded preemption CPU profile changed")
+        observation = parsed(execution["runs"][0]["markers"])
+        host = build["host_probe"]
+        lines = host["lines"]
+        _require(isinstance(lines, list) and len(lines) == 3 and all(isinstance(line, str) for line in lines),
+                 "recorded host probe lines are malformed")
+        output = "\n".join(lines) + "\n"
+        probe = parse_probe_output(output)
+        _typed_equal(host, dict(probe, output_sha256=sha256_bytes(output.encode("utf-8")),
+                               receipt_count=3, rust_python_exact_agreement=True), "host probe")
+        _typed_equal(execution.get("observation"), observation, "observation")
+        _typed_equal(summary, preemption_readiness_summary(observation, build["kernel_entry"]["host_tests"], probe), "summary")
+        native = build["native_control_probe"]
+        lines = native["lines"]
+        _require(isinstance(lines, list) and all(isinstance(line, str) for line in lines), "native control lines are malformed")
+        output = "\n".join(lines) + "\n"
+        native_controls = parse_native_control_output(output)
+        _require(isinstance(native["executable_sha256"], str) and re.fullmatch(r"[0-9A-F]{64}", native["executable_sha256"]) is not None,
+                 "native control executable digest is malformed")
+        _typed_equal(native, {
+            "scope": "host_execution_of_native_scheduler_modules_not_privileged_guest_execution",
+            "exit_code": 0, "lines": lines, "output_sha256": sha256_bytes(output.encode("utf-8")),
+            "executable_sha256": native["executable_sha256"], "controls": native_controls,
+            "hostile_cases_total": sum(NATIVE_CONTROL_CASE_COUNTS),
+            "sources": [file_binding(root, path) for path in (
+                "tests/fixtures/pksched2_control_probe.rs", "native/kernel/src/scheduler.rs", "native/kernel/src/scheduler_preempt.rs")],
+        }, "native control probe")
+        source, linked, audit = build["source_audit"], build["linked_switch_audit"], build["audit_controls"]
+        _require(all(isinstance(item, dict) for item in (source, linked, audit)), "source/linked audit is malformed")
+        for key, value in (("focused_rust_test_count", 7), ("fixed_deferred_capacity", 8),
+                           ("task_stack_count", 4), ("task_stack_bytes_each", 16384), ("allocation_free_controller", True)):
+            _typed_equal(source.get(key), value, "source audit " + key)
+        for key, value in (("instruction_count", 18), ("scope_byte_count", 36),
+                           ("forbidden_instruction_count", 0), ("status", "pass")):
+            _typed_equal(linked.get(key), value, "linked audit " + key)
+        for key in ("disassembly_sha256", "symbol_table_sha256"):
+            _require(isinstance(audit.get(key), str) and re.fullmatch(r"[0-9A-F]{64}", audit[key]) is not None,
+                     "audit control input digest is malformed")
+        _typed_equal(audit, {
+            "scope": "mutated_linked_disassembly_and_stack_guard_source_audit_not_hardware_fault_injection",
+            "linked_sha256": linked["linked_sha256"], "disassembly_sha256": audit["disassembly_sha256"],
+            "symbol_table_sha256": audit["symbol_table_sha256"],
+            "controls": [{"id": control_id, "status": "pass", "expected": "rejected", "case_count": count}
+                         for control_id, count in zip(NEGATIVE_CONTROL_IDS[22:24], (3, 4))],
+        }, "audit controls")
+    except (KernelSchedulerPreemptError, KeyError, TypeError, ValueError, AttributeError) as error:
+        return [f"PKSCHED2 recorded accounting is invalid: {error}"]
+    return []
 
 
 def trace_oracle() -> dict[str, Any]:

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from runtime import native_kernel_transfer, native_pooleboot
-from runtime.native_kernel_profile_evidence import kernel_entry_errors
+from runtime.native_kernel_profile_evidence import kernel_entry_errors, recorded_control_errors, recorded_pair_errors
 from runtime.schema_validation import validate_json
 
 
@@ -261,7 +261,7 @@ def recorded_execution_errors(execution: Any) -> list[str]:
     """Check recorded consistency; fresh execution and authentication remain separate."""
     if not isinstance(execution, dict):
         return ["PKCPU1 recorded execution is not an object"]
-    errors: list[str] = []
+    errors = recorded_pair_errors(execution, "cpu-policy-run", validate_markers, "PKCPU1")
     if (
         type(execution.get("run_count")) is not int
         or execution.get("run_count") != 2
@@ -329,9 +329,11 @@ def recorded_execution_errors(execution: Any) -> list[str]:
     return errors
 
 
-def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
+def readiness_errors(readiness: Any, root: Path = ROOT) -> list[str]:
     schema = read_json(root / SCHEMA_RELATIVE)
     errors = [f"schema {item.path}: {item.message}" for item in validate_json(readiness, schema)]
+    if not isinstance(readiness, dict):
+        return errors
     errors.extend(kernel_entry_errors(readiness.get("build"), root))
     contract = read_json(root / CONTRACT_RELATIVE)
     errors.extend(contract_errors(contract))
@@ -340,13 +342,7 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     execution = readiness.get("execution", {})
     execution_errors = recorded_execution_errors(execution)
     errors.extend(execution_errors)
-    controls = readiness.get("negative_controls", [])
-    if (
-        not isinstance(controls, list)
-        or [item.get("id") for item in controls if isinstance(item, dict)] != list(NEGATIVE_CONTROL_IDS)
-        or any(not isinstance(item, dict) or item.get("status") != "pass" for item in controls)
-    ):
-        errors.append("PKCPU1 hostile-control evidence changed")
+    errors.extend(recorded_control_errors(readiness.get("negative_controls"), NEGATIVE_CONTROL_IDS, CONTRACT_ID))
     summary = readiness.get("summary", {})
     if not isinstance(summary, dict) or tuple(
         summary.get(key)

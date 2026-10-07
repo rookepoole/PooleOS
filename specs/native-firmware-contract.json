@@ -171,6 +171,41 @@
   ],
   "implementation_bindings": [
     {
+      "path": "native/.cargo/config.toml",
+      "bytes": 539,
+      "sha256": "7983881C5CAD2B909CCA64BFA7F5895EC56377B0E52967444CB2818A69FA4FE1"
+    },
+    {
+      "path": "native/rust-toolchain.toml",
+      "bytes": 131,
+      "sha256": "06C4E0BD63FE84DCB26A0FAE52D96F23C38979DBE6F154D58EAB1547F81FA26B"
+    },
+    {
+      "path": "specs/native-toolchain-lock.json",
+      "bytes": 4017,
+      "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E"
+    },
+    {
+      "path": "specs/native-host-msvc-profile.json",
+      "bytes": 2092,
+      "sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182"
+    },
+    {
+      "path": "tools/native_host_toolchain.py",
+      "bytes": 5317,
+      "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+    },
+    {
+      "path": "tools/qualify_native_toolchain.py",
+      "bytes": 22364,
+      "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+    },
+    {
+      "path": "tests/test_native_boot_host_toolchain.py",
+      "bytes": 8247,
+      "sha256": "39514B13649D45BB60C2C0471F80F45D4B176C018ED7C7B9B430BC4D8DE63C02"
+    },
+    {
       "path": "native/Cargo.toml",
       "bytes": 601,
       "sha256": "210BCDAF2778606B42C688E7BACD950FC0EEF3045081E884CF7846B9A7D78DF4"
@@ -197,8 +232,8 @@
     },
     {
       "path": "runtime/native_firmware.py",
-      "bytes": 51184,
-      "sha256": "9787C5D73D8EA045E2F3CF088CFF39FABC453FC779DCD2D71FCD11393DC37808"
+      "bytes": 52263,
+      "sha256": "CA55F8DA2D3FE585FB35D9E10E576B5B7FC8F132A752EAE92CFDE0521A63EDFC"
     },
     {
       "path": "tools/generate_native_firmware_vectors.py",
@@ -207,8 +242,8 @@
     },
     {
       "path": "tools/qualify_native_firmware.py",
-      "bytes": 32432,
-      "sha256": "606CB491092892C92DB8ADFB5E23365C230742BA581D012755C9EA231B3A9DB9"
+      "bytes": 31868,
+      "sha256": "C230B4CA63B655AD2CC6D1281249750C3D95DEF3FD4BB3EBC94AE98B82FB5EC8"
     },
     {
       "path": "tests/test_native_firmware.py",

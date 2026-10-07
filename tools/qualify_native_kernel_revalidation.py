@@ -20,7 +20,8 @@ sys.path.insert(0, str(ROOT))
 
 from runtime import native_boot_handoff as pbp1  # noqa: E402
 from runtime import native_kernel_revalidation as revalidation  # noqa: E402
-from runtime.schema_validation import validate_json  # noqa: E402
+from tools.native_host_toolchain import profile_receipt, verified_environment  # noqa: E402
+from tools.qualify_native_toolchain import QualificationError as HostToolchainError, isolated_environment  # noqa: E402
 
 
 NATIVE_ROOT = ROOT / "native"
@@ -68,38 +69,11 @@ def _toolchain(toolchain_root: Path) -> tuple[Path, Path, dict[str, str]]:
     rustc = installed / "bin" / "rustc.exe"
     if not cargo.is_file() or not rustc.is_file():
         raise QualificationError("workspace-local Rust toolchain is missing")
-    env = dict(os.environ)
-    for key in (
-        "CARGO_BUILD_RUSTC",
-        "CARGO_ENCODED_RUSTFLAGS",
-        "CARGO_HOME",
-        "CARGO_INCREMENTAL",
-        "CARGO_TARGET_DIR",
-        "RUSTC",
-        "RUSTC_BOOTSTRAP",
-        "RUSTC_WRAPPER",
-        "RUSTDOCFLAGS",
-        "RUSTFLAGS",
-        "RUSTUP_HOME",
-        "RUSTUP_TOOLCHAIN",
-    ):
-        env.pop(key, None)
-    system_root = Path(env.get("SystemRoot", r"C:\Windows"))
-    env.update(
-        {
-            "CARGO_HOME": str(toolchain_root / "cargo"),
-            "CARGO_INCREMENTAL": "0",
-            "LANG": "C",
-            "LC_ALL": "C",
-            "PATH": os.pathsep.join(
-                [str(installed / "bin"), str(toolchain_root / "cargo" / "bin"), str(system_root / "System32")]
-            ),
-            "RUSTC": str(rustc),
-            "RUSTUP_HOME": str(toolchain_root / "rustup"),
-            "SOURCE_DATE_EPOCH": "0",
-            "TZ": "UTC",
-        }
-    )
+    env = isolated_environment(toolchain_root, installed / "bin", rustc)
+    try:
+        env = verified_environment(env, ROOT)
+    except HostToolchainError as exc:
+        raise QualificationError(str(exc)) from exc
     remap = f"--remap-path-prefix={NATIVE_ROOT.resolve()}=/pooleos/native"
     for target in ("X86_64_UNKNOWN_NONE", "X86_64_UNKNOWN_UEFI"):
         env[f"CARGO_TARGET_{target}_RUSTFLAGS"] = " ".join(
@@ -149,8 +123,8 @@ def _build(toolchain_root: Path, temporary: Path) -> tuple[Path, dict[str, Any],
         env=env,
     )
     match = re.search(r"test result: ok\. ([0-9]+) passed; 0 failed", test_output)
-    if match is None or int(match.group(1)) != 243:
-        raise QualificationError("expected exactly 243 PooleKernel Rust host tests")
+    if match is None or int(match.group(1)) != 246:
+        raise QualificationError("expected exactly 246 PooleKernel Rust host tests")
     _run(
         _cargo(
             cargo,
@@ -210,8 +184,9 @@ def _build(toolchain_root: Path, temporary: Path) -> tuple[Path, dict[str, Any],
     if not probe.is_file():
         raise QualificationError("PKREVAL1 host probe is missing")
     return probe, {
+        "host_toolchain": profile_receipt(ROOT),
         "rustc": rustc.name,
-        "host_test_count": 243,
+        "host_test_count": int(match.group(1)),
         "format_check": "pass" if not fmt_output.strip() else "pass_with_output",
         "host_probe_sha256": hashlib.sha256(probe.read_bytes()).hexdigest().upper(),
         "targets": target_results,
@@ -371,7 +346,6 @@ def _controls(
 
 def make_readiness(toolchain_root: Path, status_date: str) -> dict[str, object]:
     contract = revalidation.read_json(ROOT / revalidation.CONTRACT_RELATIVE)
-    schema = revalidation.read_json(ROOT / revalidation.SCHEMA_RELATIVE)
     if contract.get("contract_id") != revalidation.CONTRACT_ID:
         raise QualificationError("PKREVAL1 contract ID changed")
     with tempfile.TemporaryDirectory(prefix="pooleos-pkreval1-") as temporary_value:
@@ -445,9 +419,9 @@ def make_readiness(toolchain_root: Path, status_date: str) -> dict[str, object]:
             "Qualify target firmware, physical hardware, a second builder, signed ISO, installer, and recovery flows."
         ],
     }
-    errors = list(validate_json(readiness, schema))
+    errors = revalidation.readiness_errors(readiness, ROOT)
     if errors:
-        raise QualificationError("PKREVAL1 readiness schema failed: " + "; ".join(errors[:8]))
+        raise QualificationError("PKREVAL1 generated readiness failed: " + "; ".join(errors[:8]))
     return readiness
 
 
@@ -458,6 +432,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--status-date", default="2026-07-18")
     args = parser.parse_args(argv)
     readiness = make_readiness(args.toolchain_root.resolve(), args.status_date)
+    errors = revalidation.readiness_errors(readiness, ROOT)
+    if errors:
+        raise QualificationError("PKREVAL1 generated readiness failed: " + "; ".join(errors[:8]))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(readiness, indent=2) + "\n", encoding="utf-8", newline="\n")
     print(

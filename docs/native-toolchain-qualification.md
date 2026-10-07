@@ -6,6 +6,14 @@ Owner: Rooke Poole
 
 ## Scope
 
+Cycle 228 reproduction clarification: the retained ledger describes its original
+Windows host (build 26200). The reproduction test independently reads the current
+Windows build and compares the fresh report with a copy of that ledger in which
+only that observation changes. All other report bytes, including compiler and
+target-library hashes, inputs, artifact bytes, edition and typed claims, remain
+exact. The historical ledger is not overwritten. The observed host build is now
+26300; this is not independent-builder or production qualification.
+
 `N3-TOOLCHAIN-001` freezes and exercises the smallest dependency-free compiler/linker path needed to emit an empty UEFI PE32+ fixture and an empty freestanding ELF64 fixture. It does not implement or boot PooleBoot or PooleKernel.
 
 The pinned host is `x86_64-pc-windows-msvc`. The toolchain is Rust 1.97.0 with Cargo 1.97.0, rustup 1.29.0, LLVM/LLD 22.1.6, `x86_64-unknown-uefi`, and `x86_64-unknown-none`. Exact distribution URLs and hashes are in `specs/native-toolchain-lock.json`; target ABI and binary requirements are in `specs/native-target-contract.json`.

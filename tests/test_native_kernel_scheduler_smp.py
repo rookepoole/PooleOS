@@ -4,9 +4,10 @@ import json
 from pathlib import Path
 
 import unittest
+from unittest import mock
 
 from runtime import native_kernel_scheduler_smp as scheduler_smp
-from tools import pooleos_release_gate
+from tools import pooleos_release_gate, qualify_native_kernel_scheduler_smp as qualifier
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -43,6 +44,21 @@ def test_contract_matches_schema_controls_and_claims() -> None:
     assert scheduler_smp.contract_errors(contract, ROOT) == []
     assert len(contract["required_negative_controls"]) == 32
     assert contract["claims"] == scheduler_smp.expected_claims()
+    assert qualifier._source_audit()["focused_rust_test_count"] == 10
+    source = ROOT / "native/kernel/src/scheduler_smp.rs"
+    original = Path.read_text
+    raw = source.read_text(encoding="utf-8")
+    candidates = [raw.replace("#[test]", "", count) for count in (1, 2)]
+    for name in (
+        "dispatch_preflight_transaction_exhaustion_preserves_ownership",
+        "dispatch_preflight_bypass_exhaustion_preserves_entire_queue",
+    ):
+        candidates.append(raw.replace("fn " + name + "()", "fn missing_" + name + "()", 1))
+    for candidate in candidates:
+        def read(path, *args, **kwargs):
+            return candidate if path == source else original(path, *args, **kwargs)
+        with mock.patch.object(Path, "read_text", new=read), _raises(qualifier.QualificationError):
+            qualifier._source_audit()
 
 
 def test_independent_oracle_has_exact_bounded_trace() -> None:

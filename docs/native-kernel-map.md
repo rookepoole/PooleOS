@@ -24,24 +24,26 @@ ranges must be aligned, nonoverlapping, complete, and W^X-safe.
 Retained physical ranges must also be aligned, nonzero, representable, and
 pairwise disjoint:
 
-- the current 143-page PooleKernel allocation across the first retained leaf table;
+- the current 148-page PooleKernel allocation within a 192-page reservation;
 - a second retained leaf table so the guarded stack, handoff, PMM metadata, alternate ledgers, and IRQ MMIO reservation can extend beyond the first 2 MiB window without packing unrelated roles into one table;
 - five private page-table pages;
 - 36 writable, non-executable stack pages;
 - 256 handoff pages, covering one MiB.
 
 The virtual layout uses global retained leaf indices across two page tables.
-Index 143 is the low guard, indices 144-179 hold the stack, index 180 is the
-high guard, and indices 181-436 hold the handoff. Both guards remain
+Index 192 is the low guard, indices 193-228 hold the stack, index 229 is the
+high guard, and indices 230-485 hold the handoff. Both guards remain
 non-present. The handoff is supervisor read-only and NX. `ADD-MEM-001`
 requires boot, entry, trap, and PMM consumers to derive these bounds from one
-contract. The bootstrap temporary alias is index 437.
-PKPMM7 retains index 438 as the stable-manager low guard, indices 439-443 for
-its five-page supervisor RW/NX manager, and index 444 as its high guard. It
-reserves guarded 32-page ledger windows at indices 445-478 and 479-512. All of
+contract. Unused kernel reservation pages remain absent. The handoff must fit
+inside the first leaf table; the second table is not a handoff overflow path.
+The bootstrap temporary alias is index 486.
+PKPMM7 retains index 487 as the stable-manager low guard, indices 488-492 for
+its five-page supervisor RW/NX manager, and index 493 as its high guard. It
+reserves guarded 32-page ledger windows at indices 494-527 and 528-561. All of
 these leaves are absent in the PKMAP2 construction receipt. Selector 8 installs
 only the manager plus the pages owned by one active ledger generation.
-PKIRQ1 reserves indices 513-517 as low guard, local APIC, middle guard, HPET,
+PKIRQ1 reserves indices 562-566 as low guard, local APIC, middle guard, HPET,
 and high guard. PKMAP2 leaves all five reserved leaves absent; selector 11 may install only the
 two supervisor RW/NX PWT/PCD device leaves and must revoke them before halt.
 
@@ -93,9 +95,12 @@ guard drift, marker drift, or guest/oracle disagreement rejects the receipt.
 
 ## Qualification Boundary
 
-The current receipt passes 14/14 `poole-kmap` tests, the Rust/Python probe
-comparison, two exact OVMF boots, and all PKMAP2 integration controls. It proves
-retention through successful `ExitBootServices` and a firmware-free halt.
+Cycle 210 reproduces the 148-page kernel colliding with the former page-147
+guard, then passes 15 native tests in debug and optimized builds with the
+192-page reservation. The growth regression accepts 148 and 192 pages, leaves
+unused/guard leaves absent, and rejects 193 pages before modifying any table.
+Current-image guest qualification is recorded separately in the readiness
+receipts; older boot receipts must not be inherited after a layout change.
 
 It does not prove final CR3 activation, stack switching, a transferable signed
 PBP1 profile, kernel entry, SMP/TLB policy, runtime-region policy, target

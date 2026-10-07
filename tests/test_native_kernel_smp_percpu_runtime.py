@@ -1,10 +1,66 @@
 import copy
+import contextlib
+import io
+import json
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
 from runtime import native_kernel_smp_percpu_runtime as smp_runtime
 from runtime import native_tier0
+from tests.test_native_cpu_entry_provenance import pair_mutations
 from tools import qualify_native_kernel_smp_percpu_runtime as qualify
 from tools import pooleos_release_gate
+
+
+def recorded_receipt_mutations(baseline):
+    for family in ("exit", "coverage", "evidence"):
+        for label, pair in pair_mutations(baseline["execution"], family):
+            if label == "exact_marker_match":
+                pair["static_markers_exact_match"] = pair.pop("exact_marker_match")
+            candidate = copy.deepcopy(baseline)
+            candidate["execution"] = pair
+            yield family, label, candidate
+
+    def changed(path, value):
+        candidate = copy.deepcopy(baseline)
+        target = candidate
+        for key in path[:-1]:
+            target = target[key]
+        target[path[-1]] = value
+        return candidate
+
+    for path in (("execution",), ("execution", "observation"), ("summary",)):
+        yield "shape", str(path), changed(path, None)
+    for key, value in (("virtual_cpu_count", 2.0), ("dynamic_fields_revalidated", 1),
+                       ("cpu_model", "qemu64"), ("acceleration", "tcg_single_thread"),
+                       ("deterministic_instruction_clock", 0), ("machine", "wrong"), ("profile_id", "wrong")):
+        yield "dynamic-policy", key, changed(("execution", key), value)
+    for section, fields in baseline["execution"]["observation"].items():
+        yield "observation", section, changed(("execution", "observation", section), None)
+        if section == "transfer_prefix":
+            continue
+        for key, value in fields.items():
+            substitute = int(value) if type(value) is bool else float(value) if type(value) is int else "invalid"
+            for label, replacement in (("null", None), ("type-or-value", substitute)):
+                path = ("execution", "observation", section, key)
+                yield "observation", str(path) + label, changed(path, replacement)
+    for key, value in baseline["summary"].items():
+        for label, replacement in (("null", None), ("type", float(value))):
+            yield "summary", key + label, changed(("summary", key), replacement)
+    for field in ("baseline_checksum", "runtime_checksum", "parked"):
+        candidate = copy.deepcopy(baseline)
+        for run in candidate["execution"]["runs"]:
+            run["markers"][39] = qualify._set_field(run["markers"][39], field, "0" if field == "parked" else "0x0000000000000000")
+        yield "raw-stop", field, candidate
+    for index, control in enumerate(baseline["negative_controls"]):
+        for value in (control["case_count"] + 1, float(control["case_count"])):
+            yield "controls", str((index, value)), changed(("negative_controls", index, "case_count"), value)
+    candidate = copy.deepcopy(baseline)
+    candidate["negative_controls"][0]["case_count"] += 1
+    candidate["negative_controls"][3]["case_count"] -= 1
+    yield "controls", "redistribution-same-total", candidate
 
 
 class NativeKernelSmpPerCpuRuntimeTests(unittest.TestCase):
@@ -78,6 +134,69 @@ class NativeKernelSmpPerCpuRuntimeTests(unittest.TestCase):
         self.assertTrue(check["ok"], check["detail"])
         self.assertIn("gates=27/27", check["detail"])
         self.assertIn("n8_exit=false", check["detail"])
+
+    def test_recorded_runtime_rejects_inconsistent_payloads(self) -> None:
+        # This payload check alone never establishes current-source qualification.
+        baseline = smp_runtime.read_json(smp_runtime.ROOT / smp_runtime.READINESS_RELATIVE)
+        host = baseline["build"]["kernel_entry"]["host_tests"]
+        self.assertEqual([], smp_runtime.recorded_percpu_runtime_errors(baseline["execution"], baseline["summary"], host))
+        for family, label, candidate in recorded_receipt_mutations(baseline):
+            if family == "controls":
+                continue
+            with self.subTest(family=family, case=label):
+                self.assertTrue(smp_runtime.recorded_percpu_runtime_errors(candidate["execution"], candidate["summary"], host))
+
+    def test_runtime_and_real_gate_reject_corrupted_records(self) -> None:
+        baseline = smp_runtime.read_json(smp_runtime.ROOT / smp_runtime.READINESS_RELATIVE)
+        self.assertEqual([], smp_runtime.readiness_errors(baseline))
+        self.assertTrue(pooleos_release_gate.check_native_kernel_smp_percpu_runtime_readiness()["ok"])
+        candidates = list(recorded_receipt_mutations(baseline))
+        for value in (None, [], "invalid"):
+            candidates.append(("root-shape", repr(value), value))
+            candidate = copy.deepcopy(baseline)
+            candidate["negative_controls"] = value
+            candidates.append(("control-shape", repr(value), candidate))
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "candidate.json"
+            for family, label, candidate in candidates:
+                with self.subTest(family=family, case=label):
+                    self.assertTrue(smp_runtime.readiness_errors(candidate))
+                    path.write_text(json.dumps(candidate, allow_nan=False), encoding="utf-8")
+                    self.assertFalse(pooleos_release_gate.check_native_kernel_smp_percpu_runtime_readiness(path)["ok"])
+
+    def test_dynamic_comparison_checks_raw_clocks_and_both_checksums(self) -> None:
+        baseline = smp_runtime.read_json(smp_runtime.ROOT / smp_runtime.READINESS_RELATIVE)
+        pair = baseline["execution"]
+        host = baseline["build"]["kernel_entry"]["host_tests"]
+        self.assertEqual([], smp_runtime.recorded_percpu_runtime_errors(pair, baseline["summary"], host))
+        normalized = [smp_runtime.normalize_dynamic_markers(run["markers"]) for run in pair["runs"]]
+        self.assertEqual(normalized[0], normalized[1])
+        for field in ("tsc_online", "tsc_stop", "baseline_checksum", "runtime_checksum"):
+            markers = pair["runs"][1]["markers"].copy()
+            markers[39] = qualify._set_field(markers[39], field, "0x0000000000000000")
+            with self.subTest(field=field):
+                with self.assertRaises(smp_runtime.KernelSmpPerCpuRuntimeError):
+                    smp_runtime.normalize_dynamic_markers(markers)
+        different_frame = copy.deepcopy(pair)
+        different_frame["runs"][1]["screenshot"]["sha256"] = "0" * 64
+        self.assertTrue(smp_runtime.recorded_percpu_runtime_errors(different_frame, baseline["summary"], host))
+
+    def test_qualifier_rejects_invalid_result_before_writing(self) -> None:
+        baseline = smp_runtime.read_json(smp_runtime.ROOT / smp_runtime.READINESS_RELATIVE)
+        self.assertEqual([], smp_runtime.readiness_errors(baseline))
+        baseline["execution"]["runs"][0]["qemu_exit_code"] = False
+        with tempfile.TemporaryDirectory() as folder:
+            for exists in (False, True):
+                path = Path(folder) / ("existing.json" if exists else "absent/result.json")
+                if exists:
+                    path.write_bytes(b"preserve-existing-output")
+                with mock.patch.object(qualify, "make_readiness", return_value=baseline):
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        self.assertEqual(1, qualify.main(["--out", str(path)]))
+                if exists:
+                    self.assertEqual(b"preserve-existing-output", path.read_bytes())
+                else:
+                    self.assertFalse(path.parent.exists())
 
 
 if __name__ == "__main__":

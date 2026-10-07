@@ -36,14 +36,18 @@ class NativeMemoryReleaseGateTests(unittest.TestCase):
         receipt = virtual_memory.read_json(virtual_memory.ROOT / virtual_memory.READINESS_RELATIVE)
         positive = gate.check_native_kernel_virtual_memory_readiness()
         self.assertTrue(positive["ok"], positive["detail"])
-        fields = ("bootstrap_hardware_tlb_invalidations", "direct_map_gap_pages",
-                  "mapped_owned_pages", "physical_table_writes", "temporary_pte_writes",
-                  "coverage_checksum")
-        for field in fields:
+        prior = {"bootstrap_hardware_tlb_invalidations": 950706, "direct_map_gap_pages": 12947,
+                 "mapped_owned_pages": 117818, "physical_table_writes": 367405,
+                 "temporary_pte_writes": 950706, "coverage_checksum": "0x3EA83610CCC8AD5F"}
+        previous_image = {"bootstrap_hardware_tlb_invalidations": 950714, "direct_map_gap_pages": 12948,
+                          "mapped_owned_pages": 117817, "physical_table_writes": 367404,
+                          "temporary_pte_writes": 950714, "coverage_checksum": "0x656180DA21378063"}
+        for field, stale in prior.items():
             value = receipt["summary"][field]
             wrong_values = ("0x0000000000000000",) if isinstance(value, str) else (value - 1, value + 1)
-            for wrong in wrong_values:
+            for wrong in dict.fromkeys((*wrong_values, stale, previous_image[field])):
                 with self.subTest(field=field, wrong=wrong):
+                    self.assertNotEqual(value, wrong)
                     candidate = copy.deepcopy(receipt)
                     candidate["summary"][field] = wrong
                     with patch.object(gate, "_load_schema_artifact", return_value=(candidate, [])):

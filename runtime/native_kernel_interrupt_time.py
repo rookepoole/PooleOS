@@ -12,7 +12,7 @@ from typing import Any
 
 from runtime import native_kernel_transfer
 from runtime.schema_validation import validate_json
-from runtime.native_kernel_profile_evidence import kernel_entry_errors
+from runtime.native_kernel_profile_evidence import kernel_entry_errors, recorded_pair_errors
 
 
 CONTRACT_ID = "PKIRQ1"
@@ -45,6 +45,7 @@ EXPECTED_DELIVERIES = 8
 IMPLEMENTATION_INPUTS = (
     "runtime/native_kernel_profile_evidence.py",
     "tests/test_native_memory_entry_provenance.py",
+    "tests/test_native_cpu_entry_provenance.py",
     "runs/native_kernel_entry_readiness.json",
     "native/Cargo.lock",
     "native/boot/Cargo.toml",
@@ -230,14 +231,60 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
 
 
 def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
+    if not isinstance(readiness, dict):
+        return ["PKIRQ1 readiness is not an object"]
     schema = read_json(root / READINESS_SCHEMA_RELATIVE)
     errors = list(validate_json(readiness, schema))
     errors.extend(kernel_entry_errors(readiness.get("build"), root))
+    if errors:
+        return errors
     if readiness.get("inputs") != expected_inputs(root):
         errors.append("readiness input bindings are stale")
     controls = readiness.get("negative_controls", [])
-    if [item.get("id") for item in controls if isinstance(item, dict)] != list(NEGATIVE_CONTROL_IDS):
+    if not isinstance(controls, list) or [item.get("id") for item in controls if isinstance(item, dict)] != list(NEGATIVE_CONTROL_IDS):
         errors.append("readiness negative-control order diverges")
+    errors.extend(recorded_interrupt_time_errors(
+        readiness.get("execution"), readiness.get("summary"),
+        readiness["build"]["kernel_entry"]["host_tests"]))
+    return errors
+
+
+def interrupt_time_readiness_summary(observation: dict[str, Any], host_tests: dict[str, Any]) -> dict[str, int]:
+    return {
+        "kernel_host_tests_passed": host_tests["test_pass_count"],
+        "kernel_host_tests_total": host_tests["test_count"],
+        "qemu_runs_passed": 2,
+        "qemu_runs_total": 2,
+        "markers_per_run": MARKER_COUNT,
+        "negative_controls_passed": len(NEGATIVE_CONTROL_IDS),
+        "negative_controls_total": len(NEGATIVE_CONTROL_IDS),
+        "timer_interrupts_delivered": observation["delivery"]["timer_deliveries"],
+        "timer_eois": observation["delivery"]["eois"],
+        "application_processors_started": observation["result"]["ap_start"],
+        "production_claim_count": observation["result"]["production"],
+    }
+
+
+def recorded_interrupt_time_errors(execution: Any, summary: Any, host_tests: dict[str, Any]) -> list[str]:
+    def parsed(markers: list[str]) -> dict[str, Any]:
+        try:
+            return validate_markers(markers)
+        except KernelInterruptTimeError as error:
+            raise ValueError(str(error)) from error
+
+    errors = recorded_pair_errors(execution, "interrupt-time-run", parsed, CONTRACT_ID)
+    if errors:
+        return errors
+    try:
+        observation = parsed(execution["runs"][0]["markers"])
+        for label, actual, expected in (
+            ("observation", execution.get("observation"), observation),
+            ("summary", summary, interrupt_time_readiness_summary(observation, host_tests)),
+        ):
+            if json.dumps(actual, sort_keys=True, allow_nan=False) != json.dumps(expected, sort_keys=True, allow_nan=False):
+                errors.append(f"PKIRQ1 recorded {label} differs from parsed evidence or exact types")
+    except (KeyError, TypeError, ValueError, AttributeError) as error:
+        errors.append(f"PKIRQ1 recorded accounting is invalid: {error}")
     return errors
 
 
@@ -513,8 +560,9 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
     }
     _require(clock["source"] == "hpet" and clock["counter_bits"] == 64, "PKIRQ1 clock source changed")
     _require(clock["period_fs"] == 10_000_000, "PKIRQ1 HPET period changed")
+    calibration = calibrate_apic_timer(clock["apic_ticks"], 0, clock["sample_ticks"], clock["period_fs"])
     _require(clock["sample_ticks"] * clock["period_fs"] // 1_000_000 == clock["sample_ns"], "PKIRQ1 HPET arithmetic diverges")
-    _require(clock["apic_ticks"] * 1_000_000_000 // clock["sample_ns"] == clock["apic_hz"], "PKIRQ1 APIC calibration diverges")
+    _require(calibration["apic_ticks_per_second"] == clock["apic_hz"], "PKIRQ1 APIC calibration diverges")
     _require(timer_initial_count(clock["apic_hz"], 10_000_000) == clock["one_shot_initial"], "PKIRQ1 one-shot count diverges")
     _require(80_000_000 <= clock["monotonic_ns"] <= 100_000_000 and clock["monotonic_ns"] % 10 == 0, "PKIRQ1 monotonic sample is out of bounds")
     _require((clock["overflow"], clock["wrap"]) == ("checked", "bounded"), "PKIRQ1 overflow policy changed")

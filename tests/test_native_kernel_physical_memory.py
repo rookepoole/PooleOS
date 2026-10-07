@@ -1,10 +1,104 @@
 from __future__ import annotations
 
 import copy
+import contextlib
+import io
+import json
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
 from runtime import native_kernel_physical_memory as physical_memory
 from tools import pooleos_release_gate, qualify_native_kernel_physical_memory
+
+
+def recorded_receipt_mutations(baseline):
+    def changed(path, value, remove=False):
+        candidate = copy.deepcopy(baseline)
+        target = candidate
+        for key in path[:-1]:
+            target = target[key]
+        if remove:
+            target.pop(path[-1])
+        else:
+            target[path[-1]] = copy.deepcopy(value)
+        return candidate
+
+    pair = baseline["execution"]
+    for index in range(2):
+        for label, value in (("failure", 1), ("negative", -1), ("boolean", False),
+                             ("float", 0.0), ("string", "0"), ("null", None), ("missing", None)):
+            yield "exit", f"{index}-{label}", changed(
+                ("execution", "runs", index, "qemu_exit_code"), value, label == "missing")
+    for label, key, value in (
+        ("missing-count", "run_count", None), ("null-count", "run_count", None),
+        ("float-count", "run_count", 2.0), ("boolean-count", "run_count", True),
+        *((key, key, 1) for key in ("exact_marker_match", "exact_screenshot_match", "exact_pbp1_match")),
+        ("missing-runs", "runs", None), ("null-runs", "runs", None),
+        ("object-runs", "runs", {}), ("empty-runs", "runs", []),
+        ("one-run", "runs", pair["runs"][:1]),
+        ("three-runs", "runs", [*pair["runs"], pair["runs"][0]]),
+        ("duplicate-runs", "runs", [pair["runs"][0], pair["runs"][0]]),
+        ("reversed-runs", "runs", list(reversed(pair["runs"]))),
+        ("null-run", "runs", [pair["runs"][0], None]),
+    ):
+        yield "coverage", label, changed(("execution", key), value, label.startswith("missing-"))
+    for path, value in (
+        (("markers",), None), (("markers",), []), (("markers",), [None]),
+        (("markers",), ["invalid"]), (("marker_sha256",), "0" * 64),
+        (("marker_summary",), None), (("marker_summary", "map", "entries"), 98.0),
+        (("marker_summary", "transfer_prefix", "ordered_contract_match"), 1),
+        (("pbp1_transcript",), None), (("pbp1_transcript", "core"), None),
+        (("pbp1_transcript", "core"), {}), (("transcript_binding",), None),
+        (("transcript_binding", "exact_transfer_fields_bound"), 1),
+        (("independent_kernel_revalidation",), None),
+        (("independent_kernel_revalidation", "contract_id"), "invalid"),
+        (("independent_kernel_revalidation", "guest_host_exact_match"), 1),
+        (("independent_kernel_revalidation", "parser_count"), 6.0),
+        (("serial_debugcon_exact_match",), 1), (("pbp1_serial_debugcon_exact_match",), 1),
+        (("screenshot",), None), (("screenshot", "nonblank"), 1),
+        (("screenshot", "sha256"), None), (("screenshot", "sha256"), "invalid"),
+        (("independent_physical_memory",), None),
+        (("independent_physical_memory",), {}),
+        (("independent_physical_memory", "entry_count"), 98.0),
+        (("independent_physical_memory", "acpi_reclaim", "page_count"), 0),
+        (("pbp1_transcript", "memory_entries", 0, "source_type"), 1),
+        (("pbp1_transcript", "firmware_tables", 0, "physical"), False),
+    ):
+        # Identical corruption in both runs must not be accepted as corroboration.
+        candidate = copy.deepcopy(baseline)
+        for run in candidate["execution"]["runs"]:
+            target = run
+            for key in path[:-1]:
+                target = target[key]
+            target[path[-1]] = copy.deepcopy(value)
+        yield "evidence", str(path) + "=" + repr(value), candidate
+    for path, value in (
+        (("execution", "observation"), None),
+        (("execution", "observation", "result", "managed_pages"), 0),
+        (("execution", "observation", "acpi_snapshot", "snapshot_pages"), True),
+        (("execution", "independent_memory_summary"), None),
+        (("execution", "independent_memory_summary", "entry_count"), 0),
+        (("execution", "independent_memory_summary", "entry_count"), 98.0),
+        (("summary",), None),
+    ):
+        yield "accounting", str(path), changed(path, value)
+
+    def leaves(value, path):
+        if isinstance(value, dict):
+            for key, child in value.items():
+                yield from leaves(child, (*path, key))
+        elif isinstance(value, list):
+            for key, child in enumerate(value):
+                yield from leaves(child, (*path, key))
+        else:
+            yield path, value
+
+    for path, value in leaves(baseline["summary"], ("summary",)):
+        substitute = int(value) if isinstance(value, bool) else float(value) if isinstance(value, int) else "invalid"
+        for label, replacement in (("null", None), ("type-or-value", substitute)):
+            yield "summary", str(path) + label, changed(path, replacement)
 
 
 class NativeKernelPhysicalMemoryTests(unittest.TestCase):
@@ -168,6 +262,21 @@ class NativeKernelPhysicalMemoryTests(unittest.TestCase):
         self.assertTrue(audit["final_temporary_alias_revocation_required"])
         self.assertTrue(audit["final_guarded_metadata_mapping_retention_required"])
 
+    def test_hostile_controls_detect_disabled_parser_and_memory_oracle(self) -> None:
+        transcript = self.run_evidence["pbp1_transcript"]
+        observation = physical_memory.validate_markers(self.markers)
+        with mock.patch.object(physical_memory, "validate_markers", wraps=physical_memory.validate_markers) as parser:
+            controls = qualify_native_kernel_physical_memory._negative_controls(self.markers, transcript)
+        self.assertEqual(len(controls), 191)
+        self.assertEqual(parser.call_count, 189)
+        self.assertEqual([item["id"] for item in controls], list(physical_memory.NEGATIVE_CONTROL_IDS))
+        with mock.patch.object(physical_memory, "validate_markers", return_value=observation):
+            with self.assertRaisesRegex(qualify_native_kernel_physical_memory.QualificationError, "did not reject"):
+                qualify_native_kernel_physical_memory._negative_controls(self.markers, transcript)
+        with mock.patch.object(physical_memory, "validate_observation_binding", return_value={}):
+            with self.assertRaisesRegex(qualify_native_kernel_physical_memory.QualificationError, "did not reject"):
+                qualify_native_kernel_physical_memory._negative_controls(self.markers, transcript)
+
     def test_source_audit_rejects_missing_multi_ap_boundary(self) -> None:
         source = (physical_memory.ROOT / "native/kernel/src/main.rs").read_text(
             encoding="utf-8"
@@ -190,6 +299,45 @@ class NativeKernelPhysicalMemoryTests(unittest.TestCase):
         self.assertIn("boot_reclaim=11250", check["detail"])
         self.assertIn("alias_revoked=1", check["detail"])
         self.assertIn("n9_exit=false", check["detail"])
+
+    def test_recorded_memory_rejects_inconsistent_payloads(self) -> None:
+        # Historical payload consistency is not a current-source qualification.
+        self.assertEqual([], physical_memory.recorded_memory_errors(
+            self.readiness["execution"], self.readiness["summary"]))
+        for family, label, candidate in recorded_receipt_mutations(self.readiness):
+            with self.subTest(family=family, case=label):
+                self.assertTrue(physical_memory.recorded_memory_errors(
+                    candidate["execution"], candidate["summary"]))
+
+    def test_runtime_and_real_gate_reject_corrupted_records(self) -> None:
+        self.assertEqual([], physical_memory.readiness_errors(self.readiness))
+        self.assertTrue(pooleos_release_gate.check_native_kernel_physical_memory_readiness()["ok"])
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "candidate.json"
+            for family, label, candidate in recorded_receipt_mutations(self.readiness):
+                with self.subTest(family=family, case=label):
+                    errors = physical_memory.readiness_errors(candidate)
+                    self.assertTrue(any("recorded" in error for error in errors), errors)
+                    path.write_text(json.dumps(candidate, allow_nan=False), encoding="utf-8")
+                    check = pooleos_release_gate.check_native_kernel_physical_memory_readiness(path)
+                    self.assertFalse(check["ok"], check)
+
+    def test_qualifier_rejects_invalid_result_before_writing(self) -> None:
+        self.assertEqual([], physical_memory.readiness_errors(self.readiness))
+        candidate = copy.deepcopy(self.readiness)
+        candidate["execution"]["runs"][0]["qemu_exit_code"] = False
+        with tempfile.TemporaryDirectory() as folder:
+            for exists in (False, True):
+                path = Path(folder) / ("existing.json" if exists else "absent/result.json")
+                if exists:
+                    path.write_bytes(b"preserve-existing-output")
+                with mock.patch.object(qualify_native_kernel_physical_memory, "make_readiness", return_value=candidate):
+                    with contextlib.redirect_stderr(io.StringIO()):
+                        self.assertEqual(1, qualify_native_kernel_physical_memory.main(["--out", str(path)]))
+                if exists:
+                    self.assertEqual(b"preserve-existing-output", path.read_bytes())
+                else:
+                    self.assertFalse(path.parent.exists())
 
 
 if __name__ == "__main__":

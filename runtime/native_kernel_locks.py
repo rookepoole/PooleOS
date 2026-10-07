@@ -5,12 +5,13 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from datetime import date
 from pathlib import Path
 from typing import Any
 
-from runtime import native_kernel_transfer
+from runtime import native_kernel_load, native_kernel_transfer, native_pooleboot
 from runtime.schema_validation import validate_json
-from runtime.native_kernel_profile_evidence import kernel_entry_errors
+from runtime.native_kernel_profile_evidence import kernel_entry_errors, recorded_pair_errors
 
 
 CONTRACT_ID = "PKLOCK1"
@@ -29,6 +30,14 @@ COMMON_KERNEL_MARKER_COUNT = 4
 COMPLETION_MARKER = b"POOLEOS:KERNEL:LOCKS-RESULT PASS contract=PKLOCK1"
 
 IMPLEMENTATION_INPUTS = (
+    "runtime/native_kernel_load.py",
+    "runtime/native_kernel_transfer.py",
+    "runtime/native_pooleboot.py",
+    "runtime/schema_validation.py",
+    "runs/native_pooleboot_readiness.json",
+    "specs/native-tier0-lock.json",
+    "tests/test_native_locks_admission.py",
+    "tests/test_native_cpu_entry_provenance.py",
     "runtime/native_kernel_profile_evidence.py",
     "tests/test_native_memory_entry_provenance.py",
     "runs/native_kernel_entry_readiness.json",
@@ -249,18 +258,129 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
     return errors
 
 
-def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
+def _typed_equal(actual: Any, expected: Any, label: str) -> None:
+    _require(json.dumps(actual, sort_keys=True, allow_nan=False) ==
+             json.dumps(expected, sort_keys=True, allow_nan=False), f"PKLOCK1 {label} changed")
+
+
+def expected_controls() -> list[dict[str, Any]]:
+    counts = (1, 1, 1, 1, 8, 11, 12, 6, 16, 1, 1, 9, 1, 2, 2, 2, 1, 2, 2, 2, 1, 1, 2, 1, 2, 1, 6, 1, 1, 5)
+    return [dict(id=name, status="pass", expected="rejected", case_count=count)
+            for name, count in zip(NEGATIVE_CONTROL_IDS, counts, strict=True)]
+
+
+def readiness_errors(readiness: Any, root: Path = ROOT) -> list[str]:
+    if not isinstance(readiness, dict):
+        return ["PKLOCK1 readiness is not an object"]
     issues = validate_json(readiness, read_json(root / READINESS_SCHEMA_RELATIVE))
     errors = [f"schema {issue.path}: {issue.message}" for issue in issues]
     errors.extend(kernel_entry_errors(readiness.get("build"), root))
-    if readiness.get("inputs") != expected_inputs(root):
-        errors.append("readiness input bindings are stale")
-    ids = [item.get("id") for item in readiness.get("negative_controls", []) if isinstance(item, dict)]
-    if ids != list(NEGATIVE_CONTROL_IDS):
-        errors.append("readiness negative-control order diverges")
-    if readiness.get("claims") != expected_claims():
-        errors.append("readiness claim boundary diverges")
-    return errors
+    if errors:
+        return errors
+    try:
+        status_date = readiness["status_date"]
+        _require(len(status_date) == 10 and date.fromisoformat(status_date).isoformat() == status_date,
+                 "PKLOCK1 date is not canonical")
+        _typed_equal(readiness["inputs"], expected_inputs(root), "input bindings")
+        _typed_equal(readiness["negative_controls"], expected_controls(), "control accounting")
+        _typed_equal(readiness["claims"], expected_claims(), "claim boundary")
+        _typed_equal(readiness["nonclaims"], read_json(root / CONTRACT_RELATIVE)["nonclaims"], "nonclaims")
+        for key, value in (("production_ready", False), ("production_promotion_allowed", False),
+                           ("n12_exit_gate_satisfied", False), ("flag_n12_concurrency_locks_001_closed", True),
+                           ("phase_status", {"N12": "partial", "N12.2": "complete"})):
+            _typed_equal(readiness[key], value, key)
+    except (KernelLocksError, KeyError, TypeError, ValueError, OSError) as error:
+        return [f"PKLOCK1 recorded contract is invalid: {error}"]
+    return recorded_locks_errors(readiness, root)
+
+
+def recorded_locks_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
+    """Reconstruct recorded consistency, not freshness or authentication."""
+    def parsed(markers):
+        try:
+            return validate_markers(markers)
+        except KernelLocksError as error:
+            raise ValueError(str(error)) from error
+
+    try:
+        execution = readiness["execution"]
+        errors = recorded_pair_errors(execution, "locks-run", parsed, CONTRACT_ID)
+        if errors:
+            return errors
+        lock = read_json(root / "specs/native-tier0-lock.json")
+        firmware = {item["role"]: item for item in lock["firmware"]["files"]}
+        for key, value in {
+            "host_environment_count": 1, "run_count": 2,
+            "profile_id": "sandybridge-x87-sse-four-vcpu-ticket-contention",
+            "machine": "pc-q35-11.0", "cpu_model": "SandyBridge,-avx",
+            "virtual_cpu_count": 4, "application_processor_count": 3,
+            "acceleration": "tcg_multi_thread", "deterministic_instruction_clock": False,
+            "qemu_sha256": lock["windows_runner"]["qemu_system_x86_64"]["sha256"],
+            "firmware_code_sha256": firmware["debug_code_read_only"]["sha256"],
+            "vars_template_sha256": firmware["vars_template_copy_only"]["sha256"],
+            "fresh_vars_each_run": True, "media_read_only": True,
+            "guest_network": False, "host_acceleration": False, "markers_per_run": MARKER_COUNT,
+        }.items():
+            _typed_equal(execution.get(key), value, "execution " + key)
+        command = execution["normalized_command"]
+        _require(isinstance(command, list) and all(isinstance(arg, str) for arg in command), "invalid command")
+        _typed_equal(execution["normalized_command_sha256"],
+                     sha256_bytes(native_pooleboot.canonical_json_bytes(command)), "command digest")
+        for option, value in (("-cpu", "SandyBridge,-avx"), ("-accel", "tcg,thread=multi"),
+                              ("-smp", "4,sockets=1,dies=1,clusters=1,cores=4,threads=1,maxcpus=4"),
+                              ("-nic", "none")):
+            _require(command.count(option) == 1 and command[command.index(option) + 1] == value,
+                     "command profile changed")
+        _require("-icount" not in command, "lock profile must not use deterministic instruction clock")
+        _typed_equal(readiness["observation"], parsed(execution["runs"][0]["markers"]), "observation")
+        build = readiness["build"]
+        probe = build["host_probe"]
+        lines = probe["lines"]
+        _require(isinstance(lines, list) and len(lines) == 9 and all(isinstance(s, str) for s in lines), "invalid probe lines")
+        output = "\n".join(lines) + "\n"
+        _typed_equal(probe, dict(parse_probe_output(output), output_sha256=sha256_bytes(output.encode("utf-8")),
+                                 target="x86_64-pc-windows-msvc", thread_count=4), "host probe")
+        paths = {"core": "native/kernel/src/locks.rs", "main": "native/kernel/src/main.rs",
+                 "arch": "native/kernel/src/arch/x86_64.rs", "scheduler": "native/kernel/src/scheduler.rs",
+                 "smp": "native/kernel/src/smp_ipi.rs", "boot_exit": "native/boot/src/exit.rs",
+                 "boot_manifest": "native/boot/Cargo.toml", "bootexit": "native/bootexit/src/lib.rs"}
+        files = {name: {k: v for k, v in file_binding(root, path).items() if k != "byte_count"}
+                 for name, path in paths.items()}
+        _typed_equal(build["source_audit"], dict(heap_api_token_count=0, lock_primitive_count=6,
+            rank_class_count=5, focused_unit_test_count=10, live_locked_instruction_class_count=5,
+            result="pass_allocation_free_bounded_lock_source_audit", files=files), "source audit")
+        for key in ("all_profile_binaries_distinct", "default_stop_marker_present", "default_transfer_marker_absent"):
+            _typed_equal(build[key], True, key)
+        default = read_json(root / "runs/native_pooleboot_readiness.json")
+        _require(not native_pooleboot.readiness_contract_errors(default, root), "invalid default PooleBoot dependency")
+        _typed_equal(build["default_pooleboot"], default["build"], "default PooleBoot")
+        media = readiness["media"]
+        inspection = media["inspection"]
+        boot = build["locks_pooleboot"]
+        _typed_equal(boot, dict(default["build"], development_transfer_feature=True, selected_development_feature=FEATURE,
+            inspection=inspection["embedded_efi"], sha256=inspection["embedded_efi"]["sha256"],
+            byte_count=inspection["embedded_efi"]["byte_count"]), "locks PooleBoot")
+        _require(boot["sha256"] != default["build"]["sha256"], "default and locks binaries identical")
+        _typed_equal(media, dict(inspection=inspection, clean_generation_count=2, exact_clean_generation_match=True,
+            sha256=inspection["image"]["sha256"], byte_count=inspection["image"]["byte_count"],
+            ordinary_workspace_file_only=True, physical_media_write_performed=False), "media")
+        _require(re.fullmatch(r"[0-9A-F]{64}", media["sha256"]) is not None, "invalid media digest")
+        for key, value in (("byte_count", 67108864), ("sector_count", 131072), ("sector_bytes", 512),
+                           ("protective_mbr_valid", True)):
+            _typed_equal(inspection["image"][key], value, "media image " + key)
+        kernel_files = [item for item in inspection["files"] if item["path"] == "EFI/POOLEOS/KERNEL.ELF"]
+        _require(len(kernel_files) == 1, "media kernel coverage changed")
+        product = build["kernel_entry"]["product"]
+        for key, field in (("sha256", "canonical_sha256"), ("byte_count", "canonical_byte_count")):
+            _typed_equal(kernel_files[0][key], product[field], "media kernel " + key)
+        _typed_equal(inspection["kernel"]["loaded_sha256"], product["loaded_sha256"], "loaded kernel")
+        for run in execution["runs"]:
+            native_kernel_load.validate_oracle_binding(parsed(run["markers"])["transfer_prefix"]["boot_prefix"],
+                                                       inspection, run["pbp1_transcript"])
+    except (KernelLocksError, native_kernel_load.KernelLoadError, native_kernel_transfer.KernelTransferError,
+            KeyError, IndexError, TypeError, ValueError, AttributeError, OSError) as error:
+        return [f"PKLOCK1 recorded evidence is invalid: {error}"]
+    return []
 
 
 def parse_probe_output(output: str) -> dict[str, Any]:

@@ -68,6 +68,8 @@ def _invalid_value(marker: str, field: str) -> str:
 
 
 def _require_rejections(control_id: str, operations: list[Callable[[], Any]]) -> dict[str, Any]:
+    if not operations:
+        raise QualificationError(f"PKATOM1 hostile control has no executed cases: {control_id}")
     for operation in operations:
         try:
             operation()
@@ -121,6 +123,7 @@ def _run_host_probe(toolchain_root: Path, target_dir: Path) -> dict[str, Any]:
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         check=False,
+        timeout=180,
         creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
     )
     output = completed.stdout.decode("utf-8", errors="replace").replace("\r\n", "\n")
@@ -261,42 +264,10 @@ def _symbol_bodies(disassembly: str) -> dict[str, str]:
 
 
 def _validate_disassembly(disassembly: str) -> dict[str, Any]:
-    rules = {
-        "poole_atomic_audit_load_acquire": (("movq", "retq"), ("lock", "xchg", "cmpxchg")),
-        "poole_atomic_audit_store_release": (("movq", "retq"), ("lock", "xchg", "cmpxchg")),
-        "poole_atomic_audit_exchange_seqcst": (("xchgq", "retq"), ("call",)),
-        "poole_atomic_audit_compare_exchange_acqrel": (("lock", "cmpxchgq", "retq"), ("call",)),
-        "poole_atomic_audit_fetch_add_relaxed": (("lock", "xaddq", "retq"), ("call",)),
-        "poole_atomic_audit_fetch_or_acqrel": (("orq", "lock", "cmpxchgq", "jne", "retq"), ("call",)),
-        "poole_atomic_audit_fence_seqcst": (("lock", "orl", "retq"), ("call",)),
-    }
-    bodies = _symbol_bodies(disassembly)
-    observations: list[dict[str, Any]] = []
-    for symbol, (required, forbidden) in rules.items():
-        body = bodies.get(symbol)
-        if body is None:
-            raise QualificationError(f"PKATOM1 linked audit symbol is missing: {symbol}")
-        lowered = body.lower()
-        missing = [token for token in required if token not in lowered]
-        present = [token for token in forbidden if token in lowered]
-        if missing or present:
-            raise QualificationError(
-                f"PKATOM1 instruction class changed for {symbol}: missing={missing}; forbidden={present}"
-            )
-        observations.append(
-            {
-                "symbol": symbol,
-                "required_instruction_classes": list(required),
-                "forbidden_instruction_classes": list(forbidden),
-                "body_sha256": atomics.sha256_bytes(body.encode("utf-8")),
-            }
-        )
-    return {
-        "target": PRODUCT_TARGET,
-        "symbol_count": len(observations),
-        "symbols": observations,
-        "all_instruction_rules_passed": True,
-    }
+    try:
+        return atomics.audit_instruction_bodies(_symbol_bodies(disassembly))
+    except atomics.KernelAtomicsError as error:
+        raise QualificationError(str(error)) from error
 
 
 def _linked_instruction_audit(toolchain_root: Path, target_dir: Path, expected_kernel: bytes) -> tuple[dict[str, Any], str]:
@@ -314,6 +285,7 @@ def _linked_instruction_audit(toolchain_root: Path, target_dir: Path, expected_k
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         check=False,
+        timeout=30,
         creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
     )
     output = completed.stdout.decode("utf-8", errors="replace").replace("\r\n", "\n")
@@ -331,7 +303,8 @@ def _linked_instruction_audit(toolchain_root: Path, target_dir: Path, expected_k
             "linked_byte_count": len(linked),
             "canonical_byte_count": len(canonical),
             "image_byte_count": plan.image_byte_count,
-            "disassembly_sha256": atomics.sha256_bytes(output.encode("utf-8")),
+            "disassembly_scope": "canonical_symbol_bodies_not_raw_tool_header",
+            "disassembly_sha256": atomics.sha256_bytes(atomics.canonical_disassembly_bytes(result["symbols"])),
         }
     )
     return result, output
@@ -654,6 +627,7 @@ def main(argv: list[str] | None = None) -> int:
             raise QualificationError("; ".join(errors))
     except (
         OSError,
+        subprocess.TimeoutExpired,
         ValueError,
         KeyError,
         json.JSONDecodeError,

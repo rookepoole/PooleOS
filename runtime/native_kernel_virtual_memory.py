@@ -10,7 +10,7 @@ from typing import Any
 
 from runtime import native_kernel_physical_memory, native_kernel_transfer
 from runtime.schema_validation import validate_json
-from runtime.native_kernel_profile_evidence import kernel_entry_errors
+from runtime.native_kernel_profile_evidence import kernel_entry_errors, recorded_pair_errors
 
 
 CONTRACT_ID = "PKVM3"
@@ -256,43 +256,78 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
     return errors
 
 
+def recorded_virtual_memory_errors(execution: Any, summary: Any) -> list[str]:
+    """Validate saved VM consistency, not execution freshness or authentication."""
+    errors = recorded_pair_errors(execution, "active-virtual-memory-run", validate_markers, CONTRACT_ID)
+    if errors:
+        return errors
+
+    def exact(left: Any, right: Any) -> bool:
+        return json.dumps(left, sort_keys=True, allow_nan=False) == json.dumps(right, sort_keys=True, allow_nan=False)
+
+    for run in execution["runs"]:
+        try:
+            observation = validate_markers(run["markers"])
+            derived = validate_observation_binding(observation, run["pbp1_transcript"])
+            if not exact(run.get("independent_virtual_memory"), derived):
+                raise ValueError("independent virtual-memory accounting changed")
+            if not exact(execution.get("independent_memory_summary"), derived):
+                raise ValueError("independent memory summary changed")
+            expected_observation = {key: observation[key] for key in (
+                "layout", "candidate", "activation", "invalidation", "result",
+            )}
+            if not exact(execution.get("observation"), expected_observation):
+                raise ValueError("aggregate observation differs from parsed markers")
+            if not exact(summary, virtual_memory_readiness_summary(observation)):
+                raise ValueError("readiness summary differs from recorded virtual-memory evidence")
+        except (KeyError, TypeError, ValueError, AttributeError, IndexError, OverflowError) as error:
+            errors.append(f"PKVM3 {run['run_id']} invalid recorded VM evidence: {error}")
+    return errors
+
+
+def virtual_memory_readiness_summary(observation: dict[str, Any]) -> dict[str, Any]:
+    layout, candidate, invalidation, result = (observation[key] for key in (
+        "layout", "candidate", "invalidation", "result",
+    ))
+    return {
+        "qemu_run_count": 2,
+        "marker_count": MARKER_COUNT,
+        "negative_controls_passed": len(NEGATIVE_CONTROL_IDS),
+        "table_pages_materialized": layout["table_pages"],
+        "direct_directory_tables": layout["direct_directory_tables"],
+        "direct_page_tables": layout["direct_page_tables"],
+        "direct_map_ranges": candidate["direct_ranges"],
+        "mapped_owned_pages": layout["mapped_pages"],
+        "direct_map_gap_pages": candidate["gap_pages"],
+        "retained_excluded_pages": candidate["retained_excluded_pages"],
+        "coverage_checksum": f"0x{candidate['coverage_checksum']:016X}",
+        "physical_table_writes": result["physical_writes"],
+        "temporary_pte_writes": result["temporary_pte_writes"],
+        "active_leaf_mutations": 3,
+        "active_invalidation_receipts": invalidation["active_receipts"],
+        "retained_free_rejections": invalidation["retained_free_rejections"],
+        "active_cr3_writes": result["active_cr3_writes"],
+        "active_hardware_tlb_invalidations": result["active_invlpg"],
+        "bootstrap_hardware_tlb_invalidations": result["bootstrap_invlpg"],
+        "generation_retirement_receipts": invalidation["generation_retirement_receipts"],
+        "remote_shootdowns_pending": invalidation["remote_shootdowns_pending"],
+        "signature_verifications": 0,
+        "authority_grants": 0,
+        "actions_authorized": 0,
+        "production_claim_count": 0,
+    }
+
+
 def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
+    if not isinstance(readiness, dict):
+        return ["PKVM3 readiness is not an object"]
     schema = read_json(root / SCHEMA_RELATIVE)
     errors = [f"schema {item.path}: {item.message}" for item in validate_json(readiness, schema)]
     errors.extend(kernel_entry_errors(readiness.get("build"), root))
     errors.extend(contract_errors(read_json(root / CONTRACT_RELATIVE), root))
     if readiness.get("inputs") != expected_inputs(root):
         errors.append("PKVM3 readiness input bindings are stale")
-    execution = readiness.get("execution", {})
-    if not isinstance(execution, dict) or tuple(
-        execution.get(key)
-        for key in ("run_count", "exact_marker_match", "exact_screenshot_match", "exact_pbp1_match")
-    ) != (2, True, True, True):
-        errors.append("PKVM3 exact two-run evidence changed")
-    runs = execution.get("runs") if isinstance(execution, dict) else None
-    observations = []
-    if not isinstance(runs, list) or len(runs) != 2:
-        errors.append("PKVM3 requires two recorded runs for active retention")
-    else:
-        for index, run in enumerate(runs):
-            try:
-                if not isinstance(run, dict):
-                    raise KernelVirtualMemoryError("recorded run is not an object")
-                observation = validate_markers(run["markers"])
-                validate_observation_binding(observation, run["pbp1_transcript"])
-                observations.append({key: observation[key] for key in (
-                    "layout", "candidate", "activation", "invalidation", "result"
-                )})
-            except (KeyError, TypeError, ValueError, IndexError, AttributeError) as error:
-                errors.append(f"PKVM3 recorded run {index} rejected: {error}")
-        if len(observations) == 2 and (
-            observations[0] != observations[1]
-            or execution.get("observation") != observations[0]
-        ):
-            errors.append("PKVM3 recorded observation differs from both live runs")
-    summary = readiness.get("summary")
-    if not isinstance(summary, dict) or summary.get("retained_free_rejections") != 6:
-        errors.append("PKVM3 retained-free summary changed")
+    errors.extend(recorded_virtual_memory_errors(readiness.get("execution"), readiness.get("summary")))
     controls = readiness.get("negative_controls", [])
     if (
         not isinstance(controls, list)

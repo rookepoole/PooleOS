@@ -10,7 +10,7 @@ from typing import Any
 
 from runtime import native_kernel_map, native_kernel_transfer
 from runtime.schema_validation import validate_json
-from runtime.native_kernel_profile_evidence import kernel_entry_errors
+from runtime.native_kernel_profile_evidence import kernel_entry_errors, recorded_pair_errors
 
 
 CONTRACT_ID = "PKPMM7"
@@ -593,18 +593,113 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
     return errors
 
 
+def recorded_memory_errors(execution: Any, summary: Any) -> list[str]:
+    """Reconcile saved PMM evidence; this does not authenticate a new execution."""
+    errors = recorded_pair_errors(execution, "physical-memory-run", validate_markers, CONTRACT_ID)
+    if errors:
+        return errors
+
+    def exact(left: Any, right: Any) -> bool:
+        return json.dumps(left, sort_keys=True, allow_nan=False) == json.dumps(right, sort_keys=True, allow_nan=False)
+
+    for run in execution["runs"]:
+        try:
+            observation = validate_markers(run["markers"])
+            derived = validate_observation_binding(observation, run["pbp1_transcript"])
+            if not exact(run.get("independent_physical_memory"), derived):
+                raise ValueError("independent physical-memory accounting changed")
+            if not exact(execution.get("independent_memory_summary"), derived):
+                raise ValueError("independent memory summary changed")
+            expected_observation = {key: observation[key] for key in (
+                "map", "zones", "ownership", "metadata", "growth", "reclaim",
+                "acpi_snapshot", "acpi_reclaim", "scrub", "result",
+            )}
+            if not exact(execution.get("observation"), expected_observation):
+                raise ValueError("aggregate observation differs from parsed markers")
+            if not exact(summary, memory_readiness_summary(observation, derived)):
+                raise ValueError("readiness summary differs from recorded memory evidence")
+        except (KeyError, TypeError, ValueError, AttributeError, IndexError, OverflowError) as error:
+            errors.append(f"PKPMM7 {run['run_id']} invalid recorded memory evidence: {error}")
+    return errors
+
+
+def memory_readiness_summary(observation: dict[str, Any], derived: dict[str, Any]) -> dict[str, Any]:
+    reclaim, acpi = observation["reclaim"], observation["acpi_snapshot"]
+    metadata, scrub, result = (observation[key] for key in ("metadata", "scrub", "result"))
+    return {
+        "qemu_run_count": 2,
+        "marker_count": MARKER_COUNT,
+        "negative_controls_passed": len(NEGATIVE_CONTROL_IDS),
+        "memory_entry_count": derived["entry_count"],
+        "source_usable_pages": derived["kind_pages"][1],
+        "managed_pages": sum(derived["managed_pages"]) + derived["boot_reclaim"]["page_count"] + derived["acpi_reclaim"]["page_count"],
+        "boot_reclaimable_pages_reclaimed": derived["boot_reclaim"]["page_count"],
+        "boot_reclaim_source_records": reclaim["source_records"],
+        "boot_reclaim_ranges": reclaim["ranges"],
+        "boot_reclaim_pages_by_zone": [reclaim[key] for key in ("dma_pages", "dma32_pages", "normal_pages")],
+        "boot_reclaim_receipts": 1,
+        "boot_reclaim_idempotent": reclaim["idempotent"] == 1,
+        "acpi_reclaimable_pages_held_before_release": reclaim["acpi_held_pages"],
+        "acpi_early_reclaim_rejected": reclaim["acpi_early_rejected"] == 1,
+        "acpi_snapshot_pages_retained": acpi["snapshot_pages"],
+        "acpi_snapshot_bytes": acpi["snapshot_bytes"],
+        "acpi_snapshot_copied_bytes": acpi["copied_bytes"],
+        "acpi_reclaimable_pages_reclaimed": observation["acpi_reclaim"]["pages"],
+        "acpi_reclaim_receipts": 1,
+        "acpi_reclaim_idempotent": observation["acpi_reclaim"]["idempotent"] == 1,
+        "loader_reserved_pages_protected": derived["kind_pages"][10],
+        "allocator_operations": scrub["allocations"] + scrub["frees"],
+        "scrub_receipts": observation["growth"]["scrub_capacity"],
+        "sample_scrub_receipts": scrub["allocation_receipts"] + scrub["release_receipts"],
+        "metadata_scrub_receipts": 1,
+        "scrub_page_count": scrub["scrub_pages"],
+        "scrubbed_bytes": scrub["scrub_bytes"],
+        "verified_bytes": scrub["verified_bytes"],
+        "physical_word_writes": result["physical_writes"],
+        "physical_word_reads": result["physical_reads"],
+        "bootstrap_temporary_pte_writes": result["temporary_pte_writes"],
+        "bootstrap_invalidations": result["bootstrap_invlpg"],
+        "final_temporary_alias_revoked": result["alias_revoked"] == 1,
+        "metadata_arena_pages": metadata["pages"],
+        "metadata_guard_pages": metadata["guard_pages"],
+        "metadata_manager_bytes": metadata["manager_bytes"],
+        "metadata_source_records": metadata["source_records"],
+        "metadata_free_extents": metadata["free_extents"],
+        "metadata_allocation_records_at_handoff": metadata["allocation_records"],
+        "metadata_receipt_records_at_handoff": metadata["receipt_records"],
+        "metadata_pte_writes": metadata["pte_writes"],
+        "metadata_mapping_retained": result["metadata_retained"] == 1,
+        "metadata_release_excluded": metadata["release_excluded"] == 1,
+        "metadata_integrity_verified": metadata["integrity"] == 1,
+        "ledger_generation_growth": {key: observation["growth"][key] for key in (
+            "initial_generation", "final_generation", "initial_pages", "final_pages",
+            "free_capacity", "allocation_capacity", "source_capacity", "scrub_capacity",
+            "reclaim_capacity", "retired_generation", "retired_pages", "mapped_pages",
+            "pte_writes", "guard_pages", "mapping_events", "revoked", "integrity", "atomic",
+            "rollbacks", "retirement_failures", "retirement_retry", "pressure_checks",
+            "pressure_triggers", "automatic_growths", "pressure_cycles", "soft_fallbacks",
+            "hard_rejections", "growth_headroom_allocation", "growth_headroom_scrub",
+            "window_capacity", "next_pages", "pre_effect",
+        )},
+        "complete_address_space_mapping_operations": 0,
+        "reclaim_operations": 2,
+        "signature_verifications": 0,
+        "authority_grants": 0,
+        "actions_authorized": 0,
+        "production_claim_count": 0,
+    }
+
+
 def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
+    if not isinstance(readiness, dict):
+        return ["PKPMM7 readiness is not an object"]
     schema = read_json(root / SCHEMA_RELATIVE)
     errors = [f"schema {item.path}: {item.message}" for item in validate_json(readiness, schema)]
     errors.extend(kernel_entry_errors(readiness.get("build"), root))
     errors.extend(contract_errors(read_json(root / CONTRACT_RELATIVE), root))
     if readiness.get("inputs") != expected_inputs(root):
         errors.append("PKPMM6 readiness input bindings are stale")
-    execution = readiness.get("execution", {})
-    if not isinstance(execution, dict) or tuple(
-        execution.get(key) for key in ("run_count", "exact_marker_match", "exact_screenshot_match", "exact_pbp1_match")
-    ) != (2, True, True, True):
-        errors.append("PKPMM6 exact two-run evidence changed")
+    errors.extend(recorded_memory_errors(readiness.get("execution"), readiness.get("summary")))
     controls = readiness.get("negative_controls", [])
     if (
         not isinstance(controls, list)

@@ -18,10 +18,20 @@ PKSMP2 advances the single-AP PKSMP1 bootstrap into one processor-local runtime 
 
 The canonical readiness receipt requires two clean media generations and two live boots with 42 markers each. Static markers, framebuffer capture, and PBP1 handoff bytes must match exactly. Timestamps and both checksums are dynamic and are independently revalidated on each run. Nineteen hostile-control categories execute 159 rejection cases covering every PKSMP2 marker field, source invariants, layout failures, and unsupported topology models.
 
-The Cycle 157 replay candidate is the unchanged retention-capable Cycle 153
+The historical Cycle 157 replay candidate was the retention-capable Cycle 153
 kernel, with 214 host tests, 517,784 canonical bytes and a 144-page image,
 SHA-256 `BDEECCB27B1B91406911F91169B9BF5F9DF0439BB39FA0E1882C07E1AF3B81EF`.
 Acceptance requires fresh exact-input runs; it does not inherit historical
 AP-runtime qualification or prove general concurrent lifetime integration.
+
+Cycle 190 strengthens saved-receipt admission. Both raw runs must independently
+validate marker grammar, CPU profile, lifecycle, timestamps and both dependent
+checksums before dynamic normalization. Exact typed summaries, raw digests,
+handoff/revalidation bindings, channel agreement, successful integer exits and
+frame identity are checked. Aggregate observations and all summary fields are
+rederived from parsed evidence and current validated entry-test counts.
+Each hostile-control category has a fixed case count; equal grand totals cannot
+hide redistributed coverage. Invalid output is rejected before file creation.
+These are recorded-consistency checks, not proof of freshness or authentication.
 
 PKSMP2 does not implement general SMP, an IPI delivery service, TLB shootdown, scheduler CPU ownership, migration, multiple APs, x2APIC, NUMA, hotplug, physical-target qualification, the N8 exit gate, or production readiness. The next native dependency is capability-gated IPI delivery with acknowledgement and timeout semantics, followed by remote TLB-generation retirement.

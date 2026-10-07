@@ -21,13 +21,45 @@ python tools/qualify_native_kernel_entry.py --artifact-out outputs/PooleKernel.p
 ```
 
 The qualifier uses the workspace-local pinned Rust toolchain, executes the exact
-243-test kernel suite, checks formatting and Clippy, and performs two clean
+246-test kernel suite, checks formatting and Clippy, and performs two clean
 offline builds in separate target directories. It compares linked and canonical
 bytes, requires the contract build ID once in PKMID1 and once in the live
 diagnostic literal, runs hostile ELF controls, scans for host leakage, and
 compares loaded bytes from independent Python and Rust PKELF1 implementations.
 Its public receipt is `runs/native_kernel_entry_readiness.json`; the receipt's
 source bindings must be current before its image identity may be accepted.
+
+Cycle 209's measured AP-worker transaction candidate has canonical SHA-256
+`72C37783A5729229E6A259E38DC8DF55034FD467B77839FFFC4AA62B66E33EBF`,
+534,168 bytes, 606,208 image bytes and 1,323 relocations. Its build ID is
+`PKBUILD1-CYCLE209-N12-APW-TXN-V1-00000000001`. The linked ELF is 7,091,272
+bytes, SHA-256 `B29916B90D42010CCDBDCC8927E10F8FCEEF14020CA037051367CCB4CC29F841`.
+Entry stays `0xA000`; text ends at `0x74000`, RELRO at `0x82000`, and the
+image at `0x94000`. Each changed boundary grew by one measured necessary page;
+page alignment and write/execute separation are preserved. Qualification binds
+76 inputs including all 39 kernel Rust sources. Measurement alone does not
+qualify the product; current acceptance requires the freshly executed receipt.
+
+Historical Cycle 178 requalifies the Cycle 177 execution-hold kernel: canonical SHA-256
+`563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA`,
+530,072 bytes, 602,112 loaded-image bytes and 1,325 relocations. The linked
+ELF is 7,032,744 bytes with SHA-256
+`50084E1DFDD64A7EBDC884EB041533B50F0F354997E3D9C9BC0CF5B6277C1E11`.
+The receipt binds 55 implementation inputs including all 39 kernel Rust sources.
+No Rust, manifest, contract or kernel byte changes occur in this replay.
+
+The entry regression and release gate pin those measured identities. The gate
+also requires exact integer summary fields and exact-typed product values;
+numerically equal floats/booleans and null summary/product objects reject.
+Twelve independent gate controls retain the positive baseline while checking
+old image identities and malformed representations. They are isolated release-
+gate checks, not a claim that every component's schema is fully type-hardened.
+
+The deterministic qualifier retains its established status-date field; actual
+execution timestamps are retained separately in the cycle execution records.
+Two builds on this one host are not two independent builders. Fresh entry
+evidence must precede N5 symbols/load/boot/revalidation/transfer and downstream
+CPU/memory/SMP qualification. It does not refresh their older nested receipts.
 
 Cycle 172's full audit found that task-lifetime changes altered the linked ELF
 while leaving canonical PKELF1 bytes unchanged. The previous manually selected
@@ -44,7 +76,7 @@ reproduction remain separate checks; an unchanged boot image cannot substitute
 for current debug/symbol provenance. Regenerated PKENTRY1 evidence must be
 followed by dependency validation before previously nested receipts are reused.
 
-The Cycle 167 candidate has a measured 530,072-byte canonical file and
+The historical Cycle 167 candidate had a measured 530,072-byte canonical file and
 602,112-byte, 147-page image: entry `0xA000`, text end `0x73000`, RELRO end
 and writable-data start `0x81000`, image end `0x93000`. PKMAP2 reservations
 move by one page with the image guard. The exact SHA-256 and relocation count

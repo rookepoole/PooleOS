@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from runtime import native_elf_loader as elf
 from runtime.schema_validation import validate_json
 
 
@@ -48,7 +49,20 @@ IMPLEMENTATION_INPUTS = (
     Path("runtime/native_kernel_entry.py"),
     Path("tools/qualify_native_kernel_entry.py"),
     Path("tests/test_native_kernel_entry.py"),
+    Path("tests/test_native_smp_transactions.py"),
+    Path("tests/fixtures/pksched4_transaction_probe.rs"),
+    Path("tests/test_native_ap_worker_transactions.py"),
+    Path("tests/fixtures/pksched5_transaction_probe.rs"),
+    Path("tests/test_native_smp_preempt_transactions.py"),
+    Path("tests/fixtures/pksched6_transaction_probe.rs"),
+    Path("tests/fixtures/pksched6_event_progress_probe.rs"),
     Path("docs/native-kernel-entry.md"),
+    Path("native/.cargo/config.toml"),
+    Path("specs/native-host-msvc-profile.json"),
+    Path("tools/native_host_toolchain.py"),
+    Path("tools/qualify_native_toolchain.py"),
+    Path("tools/qualify_native_elf_loader.py"),
+    Path("tests/test_native_host_toolchain.py"),
 )
 
 
@@ -118,15 +132,15 @@ def contract_errors(contract: Any) -> list[str]:
         "format_contract": "PKELF1",
         "handoff_contract": "PBP1",
         "entry_offset": 0xA000,
-        "image_memory_bytes": 0x93000,
-        "canonical_file_bytes": 530_072,
+        "image_memory_bytes": 0x95000,
+        "canonical_file_bytes": 538_264,
         "maximum_relocations": 4096,
         "segment_boundaries": {
             "read_only_end": 0xA000,
             "text_start": 0xA000,
-            "text_end": 0x73000,
-            "relro_end": 0x81000,
-            "image_end": 0x93000,
+            "text_end": 0x75000,
+            "relro_end": 0x83000,
+            "image_end": 0x95000,
         },
     }
     for key, value in expected_product.items():
@@ -143,7 +157,7 @@ def implementation_input_paths(root: Path = ROOT) -> tuple[Path, ...]:
         (path.relative_to(root) for path in (root / "native/kernel/src").rglob("*.rs") if path.is_file()),
         key=lambda path: path.as_posix(),
     )
-    return tuple(dict.fromkeys((*IMPLEMENTATION_INPUTS, *crate_sources)))
+    return tuple(dict.fromkeys((*IMPLEMENTATION_INPUTS, *elf.IMPLEMENTATION_INPUTS, *crate_sources)))
 
 
 def expected_bindings(root: Path = ROOT) -> dict[str, Any]:
@@ -166,6 +180,17 @@ def readiness_errors(readiness: Any, root: Path = ROOT) -> list[str]:
     errors.extend(f"contract {item}" for item in contract_errors(read_json(root / CONTRACT_RELATIVE)))
     if readiness.get("bindings") != expected_bindings(root):
         errors.append("readiness input bindings are stale")
+    expected_host = {
+        "profile_id": "POOLEOS-HOST-MSVC-1",
+        "profile_sha256": sha256_bytes((root / "specs/native-host-msvc-profile.json").read_bytes()),
+        "verified_before_build": True,
+        "scope": "host_linker_and_library_trees_not_complete_host_attestation",
+    }
+    toolchain = readiness.get("toolchain")
+    probe = toolchain.get("pkelf1_probe_qualification") if isinstance(toolchain, dict) else None
+    host = probe.get("host_toolchain") if isinstance(probe, dict) else None
+    if json.dumps(host, sort_keys=True) != json.dumps(expected_host, sort_keys=True):
+        errors.append("readiness host-toolchain profile mismatch")
     if readiness.get("claims") != expected_claims():
         errors.append("readiness claim boundary mismatch")
     if readiness.get("production_ready") is not False:
@@ -183,7 +208,7 @@ def readiness_errors(readiness: Any, root: Path = ROOT) -> list[str]:
     ):
         if not isinstance(summary.get(total), int) or summary.get(passed) != summary.get(total):
             errors.append(f"readiness summary mismatch: {passed}")
-    if summary.get("rust_host_tests_total") != 243:
+    if summary.get("rust_host_tests_total") != 246:
         errors.append("readiness host-test count mismatch")
     if summary.get("clean_builds_total") != 2:
         errors.append("readiness clean-build count mismatch")

@@ -33,6 +33,7 @@ ALLOWED_RUNS = {
     "runs/native_boot_handoff_readiness.json",
     "runs/native_boot_trust_readiness.json",
     "runs/native_elf_loader_readiness.json",
+    "runs/native_execution_sources.json",
     "runs/native_firmware_readiness.json",
     "runs/native_initial_system_readiness.json",
     "runs/native_kernel_entry_readiness.json",

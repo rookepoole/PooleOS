@@ -146,6 +146,20 @@ class NativeKernelTrapTests(unittest.TestCase):
             native_kernel_trap.readiness_errors(changed_readiness, ROOT),
         )
 
+    def test_hostile_controls_execute_and_detect_disabled_marker_validator(self) -> None:
+        from unittest.mock import patch
+        from tools import qualify_native_kernel_trap as qualifier
+
+        markers = {name: item["runs"][0]["markers"] for name, item in self.scenarios.items()}
+        with patch.object(native_kernel_trap, "validate_markers", wraps=native_kernel_trap.validate_markers) as validator:
+            controls = qualifier._negative_controls(markers)
+        self.assertEqual(validator.call_count, 51)
+        self.assertEqual([control["id"] for control in controls], list(native_kernel_trap.NEGATIVE_CONTROL_IDS))
+        self.assertTrue(all(control["observed"] == "rejected" for control in controls))
+        with patch.object(native_kernel_trap, "validate_markers", return_value={}):
+            with self.assertRaisesRegex(qualifier.QualificationError, "hostile control did not reject"):
+                qualifier._negative_controls(markers)
+
 
 if __name__ == "__main__":
     unittest.main()

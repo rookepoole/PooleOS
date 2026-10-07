@@ -35,11 +35,33 @@
     "n12_exit_gate_satisfied": {"const": false},
     "phase_status": {"type": "object"},
     "inputs": {"type": "object"},
-    "build": {"type": "object"},
+    "build": {
+      "type": "object",
+      "required": ["kernel_entry", "host_probe", "native_control_probe", "audit_controls", "source_audit", "linked_switch_audit"],
+      "properties": {
+        "kernel_entry": {"type": "object"},
+        "host_probe": {"type": "object"},
+        "native_control_probe": {"type": "object"},
+        "audit_controls": {"type": "object"},
+        "source_audit": {"type": "object"},
+        "linked_switch_audit": {"type": "object"}
+      }
+    },
     "media": {"type": "object"},
     "execution": {"type": "object"},
     "observation": {"type": "object"},
-    "negative_controls": {"type": "array", "minItems": 30, "maxItems": 30, "items": {"type": "object"}},
+    "negative_controls": {
+      "type": "array", "minItems": 30, "maxItems": 30,
+      "items": {
+        "type": "object", "required": ["id", "status", "expected", "case_count"],
+        "properties": {
+          "id": {"type": "string"}, "status": {"const": "pass"},
+          "expected": {"enum": ["rejected", "boundary_verified"]},
+          "case_count": {"type": "integer", "minimum": 1}
+        },
+        "additionalProperties": false
+      }
+    },
     "claims": {"type": "object"},
     "nonclaims": {"type": "array", "minItems": 1, "items": {"type": "string"}}
   },

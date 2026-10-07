@@ -27,23 +27,19 @@ class NativeMemoryEntryProvenanceTests(unittest.TestCase):
         cls.entry = entry.read_json(ROOT / entry.READINESS_RELATIVE)
 
     def candidate(self, profile):
-        # Synthetic provenance input, never a substituted execution receipt.
-        report = json.loads((ROOT / profile.READINESS_RELATIVE).read_text(encoding="utf-8"))
-        report["inputs"] = profile.expected_inputs(ROOT)
-        section, field = entry_location(profile)
-        report[section][field] = copy.deepcopy(self.entry)
-        return report
+        return json.loads((ROOT / profile.READINESS_RELATIVE).read_text(encoding="utf-8"))
 
     def test_current_entry_passes_the_provenance_check(self) -> None:
         self.assertEqual(entry.readiness_errors(self.entry, ROOT), [])
         for profile in PROFILES:
             with self.subTest(profile=profile.CONTRACT_ID):
                 errors = profile.readiness_errors(self.candidate(profile), ROOT)
-                self.assertFalse(any("embedded kernel entry" in str(error) for error in errors), errors)
+                self.assertEqual(errors, [])
 
     def test_stale_malformed_and_type_substituted_embedded_entry_rejects(self) -> None:
         for profile in PROFILES:
             baseline = self.candidate(profile)
+            self.assertEqual(profile.readiness_errors(baseline, ROOT), [])
             section, field = entry_location(profile)
             cases = []
             for value in (None, [], "invalid", {}):
@@ -80,9 +76,11 @@ class NativeMemoryEntryProvenanceTests(unittest.TestCase):
         stale = copy.deepcopy(self.entry)
         stale["bindings"]["implementation_inputs"] = []
         for profile in PROFILES:
+            baseline = self.candidate(profile)
+            self.assertEqual(profile.readiness_errors(baseline, ROOT), [])
             for invalid in (None, [], {"summary": None}, stale):
                 with self.subTest(profile=profile.CONTRACT_ID, dependency=invalid):
-                    candidate = self.candidate(profile)
+                    candidate = copy.deepcopy(baseline)
 
                     def read(path):
                         return invalid if path == ROOT / entry.READINESS_RELATIVE else original(path)
