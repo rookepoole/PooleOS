@@ -16,11 +16,13 @@ class NativeExecutionSourcesTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
-        for name in ("runtime", "tools", "runs", "outputs"):
+        for name in ("runtime", "tools", "runs", "outputs", "specs"):
             (self.root / name).mkdir()
         self.write("runtime/__init__.py", "")
         self.write("runtime/helper.py", "from . import leaf\n")
         self.write("runtime/leaf.py", "VALUE = 1\n")
+        for path in {p for paths in sources.REVIEWED_DATA_INPUTS.values() for p in paths}:
+            self.write(path, '{"synthetic_data": "original"}')
         self.captures = {}
         for profile in sources.PROFILES:
             receipt, roots = sources.profile_paths(profile)
@@ -32,6 +34,7 @@ class NativeExecutionSourcesTests(unittest.TestCase):
             capture_path = self.root / f"outputs/{profile}-capture.json"
             capture_path.with_suffix(".log").write_text("synthetic execution\n")
             snapshot = {b["path"]: b["sha256"] for b in sources.source_closure(self.root, roots)}
+            snapshot.update({b["path"]: b["sha256"] for b in sources.reviewed_data_bindings(self.root, profile)})
             record = {"command": ["python", "-B", roots[1], "--out", output],
                       "return_code": 0, "source_unchanged": True, "changed_paths": [],
                       "source_before": snapshot,
@@ -181,6 +184,92 @@ class NativeExecutionSourcesTests(unittest.TestCase):
         for path in ("../outside.py", "/outside.py", "C:/outside.py", "runtime\\leaf.py", "runtime//leaf.py"):
             with self.subTest(path=path), self.assertRaises(sources.SourceEvidenceError):
                 sources.safe_path(self.root, path)
+
+    def test_changed_reviewed_data_rejects_both_gates_and_cannot_rebind_original_capture(self):
+        for path in sorted({p for paths in sources.REVIEWED_DATA_INPUTS.values() for p in paths}):
+            with self.subTest(path=path):
+                file = self.root / path
+                original = file.read_bytes()
+                file.write_bytes(original + b"\n")
+                self.assertTrue(sources.evidence_errors(self.receipt, self.root))
+                candidate = self.root / sources.RECEIPT
+                candidate.write_text(json.dumps(self.receipt))
+                with mock.patch.object(gate, "ROOT", self.root):
+                    self.assertFalse(gate.check_native_execution_sources(candidate)["ok"])
+                for profile, paths in sources.REVIEWED_DATA_INPUTS.items():
+                    if path in paths:
+                        with self.assertRaisesRegex(sources.SourceEvidenceError, "snapshot"):
+                            sources.captured_profile(profile, self.captures[profile], self.root)
+                file.write_bytes(original)
+        self.assertEqual(sources.evidence_errors(self.receipt, self.root), [])
+
+    def test_reviewed_data_is_exact_ordered_typed_and_not_optional(self):
+        index = sources.PROFILES.index("policy")
+        mutations = (
+            lambda v: v["profiles"][index].pop("reviewed_data"),
+            lambda v: v["profiles"][index].update(reviewed_data=[]),
+            lambda v: v["profiles"][index].update(reviewed_data=None),
+            lambda v: v["profiles"][index]["reviewed_data"].reverse(),
+            lambda v: v["profiles"][index]["reviewed_data"].pop(),
+            lambda v: v["profiles"][index]["reviewed_data"].append(v["profiles"][index]["reviewed_data"][0]),
+            lambda v: v["profiles"][index]["reviewed_data"][0].update(sha256="0" * 64),
+            lambda v: v["profiles"][index]["reviewed_data"][0].update(sha256=False),
+            lambda v: v["profiles"][index]["reviewed_data"][0].update(path="../outside.json"),
+            lambda v: v["profiles"][index]["reviewed_data"][0].update(extra=True),
+            lambda v: v["boundaries"].update(reviewed_admission_data_bound=1),
+            lambda v: v["boundaries"].update(dynamic_data_and_tool_closure=True),
+            lambda v: v.update(format="POOLEOS-STATIC-EXECUTION-SOURCES-1"),
+        )
+        path = self.root / sources.RECEIPT
+        for number, mutate in enumerate(mutations):
+            with self.subTest(case=number):
+                value = copy.deepcopy(self.receipt)
+                mutate(value)
+                self.assertTrue(sources.evidence_errors(value, self.root))
+                path.write_text(json.dumps(value))
+                with mock.patch.object(gate, "ROOT", self.root):
+                    self.assertFalse(gate.check_native_execution_sources(path)["ok"])
+
+    def test_missing_or_rehashed_reviewed_data_cannot_be_laundered_as_original(self):
+        profile = "load"
+        relative = sources.REVIEWED_DATA_INPUTS[profile][0]
+        path = self.root / relative
+        original = path.read_bytes()
+        path.unlink()
+        self.assertTrue(sources.evidence_errors(self.receipt, self.root))
+        with self.assertRaises(OSError):
+            sources.captured_profile(profile, self.captures[profile], self.root)
+        path.write_bytes(original + b"\n")
+        candidate = copy.deepcopy(self.receipt)
+        candidate["profiles"][sources.PROFILES.index(profile)]["reviewed_data"] = sources.reviewed_data_bindings(self.root, profile)
+        # Recorded consistency alone is not authentication; generation must also check the original snapshot.
+        self.assertEqual(sources.evidence_errors(candidate, self.root), [])
+        with self.assertRaisesRegex(sources.SourceEvidenceError, "snapshot"):
+            qualifier.qualify(self.captures, self.root)
+
+    def test_original_capture_requires_every_reviewed_data_hash(self):
+        profile = "policy"
+        path = self.captures[profile]
+        original = path.read_bytes()
+        for relative in sources.REVIEWED_DATA_INPUTS[profile]:
+            value = json.loads(original)
+            del value["source_before"][relative]
+            path.write_text(json.dumps(value))
+            with self.subTest(path=relative), self.assertRaisesRegex(sources.SourceEvidenceError, "snapshot"):
+                sources.captured_profile(profile, path, self.root)
+        path.write_bytes(original)
+        with self.assertRaises(sources.SourceEvidenceError):
+            sources.reviewed_data_bindings(self.root, "unknown")
+
+    def test_current_record_preserves_original_source_and_capture_fields(self):
+        old = json.loads((ROOT / "tests/fixtures/cycle228-execution-sources.json").read_bytes())
+        new = json.loads((ROOT / sources.RECEIPT).read_bytes())
+        self.assertEqual(len(new["profiles"]), len(old["profiles"]))
+        for before, after in zip(old["profiles"], new["profiles"], strict=True):
+            self.assertEqual(before, {k: v for k, v in after.items() if k != "reviewed_data"})
+        self.assertEqual(sum(len(r["reviewed_data"]) for r in new["profiles"]), 18)
+        self.assertEqual(len({b["path"] for r in new["profiles"] for b in r["reviewed_data"]}), 13)
+        self.assertTrue(sources.evidence_errors(old, ROOT))
 
     def test_missing_and_malformed_aggregate_artifact_fail(self):
         path = self.root / "missing.json"

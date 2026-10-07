@@ -11,7 +11,17 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 228 repairs the reproduced toolchain
+**Current development checkpoint:** Cycle 229 binds the remaining 18 observed
+data dependencies, covering 13 specification files, to their original successful
+execution snapshots. All 19 focused guard tests pass; the original 27 native
+receipts and execution/source fields are preserved. The scoped data, media and
+tool review is complete for a development merge, not production qualification.
+[Cycle 229 evidence](docs/checkpoints/cycle229-reviewed-execution-inputs.md).
+The preceding exact commit `293383d` passed 106/106 canonical and 708/708 Doctor
+checks. The new candidate must pass its own full gates before PR #78 is merged.
+Native kernel and demo ISO are unchanged; this remains pre-production.
+
+**Historical development checkpoint:** Cycle 228 repairs the reproduced toolchain
 test failure caused by the Windows host build changing from 26200 to 26300.
 The test independently measures that build and still compares every other report
 byte exactly. The original qualification ledger is preserved. Doctor and the

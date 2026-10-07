@@ -1,13 +1,44 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-07
-Plan version: 2.131.0-reproducible-host-observation
-Roadmap cycle: PooleOS Cycle 228
+Plan version: 2.132.0-reviewed-execution-inputs
+Roadmap cycle: PooleOS Cycle 229
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 229: Reviewed Execution Inputs
+
+N36.1 / `N36-RECEIPT-COVERAGE-001`, existing requirement and flag remain open
+for broader production qualification. The specific development dependency-review
+hold is resolved; full exact-candidate and GitHub/review gates still control merge.
+The preceding commit `293383d` passed 106/106 canonical and 708/708 Doctor checks
+in 1,079.750s with runtime, bundle and replay inputs and unchanged source/owner
+snapshots. This historical pass does not qualify this cycle's changed candidate.
+
+The execution-input guard now binds 18 previously unrepresented data observations
+across 13 specification files. Current contents must match their recorded hashes;
+projection must also match the original successful capture snapshots. All original
+profile identities, receipt hashes, Python source closures and capture hashes are
+unchanged. The original guard artifact is retained as a historical fixture. All
+19 focused tests pass, including changed, missing, reordered, duplicate, malformed,
+overclaimed and rehashed inputs. Recorded consistency is not authentication.
+
+The bounded review accounts for 312 observations through existing hash-matching
+receipt references plus these 18 bindings. Media review matches 438 logical pairs
+to regenerated payloads or retained exact kernel bytes and 24 to original clean
+boot-build records. It does not rebuild those boot binaries or replay guests.
+Existing Rust executable/library, QEMU/firmware, MSVC/SDK and disassembly-tool pins
+match. Complete dynamic subprocess/OS/compiler dependency closure remains a
+production supply-chain requirement, not an implied result of this review.
+
+Next: qualify the exact committed candidate, scan publication boundaries, recheck
+GitHub protections and reviews, and merge PR #78 only if those gates pass. Preserve
+the full result externally against that commit to avoid self-referential hash
+updates. No native, ISO, phase, flag or production completion is asserted.
+[Cycle 229 evidence](checkpoints/cycle229-reviewed-execution-inputs.md).
 
 ## Cycle 228: Reproducible Host Observation
 

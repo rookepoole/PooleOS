@@ -16,7 +16,7 @@ from runtime import native_execution_sources as sources
 def qualify(captures: dict[str, Path], root: Path = ROOT) -> dict:
     if set(captures) != set(sources.PROFILES):
         raise sources.SourceEvidenceError("exact selected-profile capture set required")
-    result = {"format": "POOLEOS-STATIC-EXECUTION-SOURCES-1",
+    result = {"format": sources.FORMAT,
               "profiles": [sources.captured_profile(p, captures[p], root) for p in sources.PROFILES],
               "boundaries": dict(sources.BOUNDARIES)}
     errors = sources.evidence_errors(result, root)

@@ -24,6 +24,9 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle229-reviewed-execution-inputs.md",
+    "tests/fixtures/cycle228-execution-sources.json",
+    "specs/native-boot-exit-contract.schema.json",
     "docs/checkpoints/cycle228-toolchain-host-observation.md",
     "tools/pooleos_doctor.py",
     "tests/test_pooleos_doctor.py",

@@ -154,8 +154,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 228)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1201)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 229)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1207)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -195,8 +195,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "all_selected_profiles_current_shared_binding_review_and_full_gate_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 228)
+        self.assertEqual(current["qualification_status"], "selected_profiles_source_and_reviewed_data_current_full_candidate_gate_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 229)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -1009,11 +1009,11 @@ class PdcProductionRoadmapTests(unittest.TestCase):
                 check = getattr(pooleos_release_gate, "check_native_kernel_" + name + "_readiness")()
                 self.assert_current_gate_projection(check)
         audit = current["current_control_execution_audit"]
-        self.assertEqual((audit["cycle"], audit["status"]), (228, "open"))
-        self.assertTrue(audit["blocks_merge_qualification"])
+        self.assertEqual((audit["cycle"], audit["status"]), (229, "open"))
+        self.assertFalse(audit["blocks_merge_qualification"])
         self.assertFalse(audit["production_ready"])
         self.assertEqual(audit["requirement_id"], "ADD-N36-RECEIPT-COVERAGE-001")
-        self.assertEqual(audit["next_profile"], "non_Python_data_and_tool_dependencies")
+        self.assertEqual(audit["next_profile"], "full_exact_candidate_qualification")
         self.assertEqual(len(audit["source_control_gaps"]), 0)
         self.assertEqual(sum(g["reported_case_count"] for g in audit["source_control_gaps"]), 0)
         for gap in audit["source_control_gaps"]:
@@ -3307,10 +3307,11 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), record["receipt_sha256"])
         self.assertTrue(sources.evidence_errors(json.loads(raw)))
         current = json.loads((ROOT / sources.RECEIPT).read_bytes())
-        self.assertEqual(current["profiles"][13:], json.loads(raw)["profiles"])
+        self.assertEqual([{k: v for k, v in row.items() if k != "reviewed_data"}
+                          for row in current["profiles"][13:]], json.loads(raw)["profiles"])
         self.assertEqual((record["profiles"], record["unique_python_sources"], record["fresh_qemu_runs"]), (14, 62, 0))
         self.assertEqual(gate["current_dependency_qualification"], gate["historical_cycle224_dependency_qualification"])
-        self.assertTrue(gate["current_control_execution_audit"]["blocks_merge_qualification"])
+        self.assertTrue(gate["historical_cycle225_control_execution_audit"]["blocks_merge_qualification"])
         self.assertFalse(record["authentication_or_complete_dependency_closure"])
         self.assertFalse(record["production_ready"])
 
@@ -3328,7 +3329,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual((diagnostic["case_count"], diagnostic["invalid_accepted_per_path"],
                           diagnostic["exceptions_per_path"]), (8, 6, 2))
         self.assertFalse(diagnostic["repaired"])
-        self.assertTrue(gate["current_control_execution_audit"]["blocks_merge_qualification"])
+        self.assertTrue(gate["historical_cycle226_control_execution_audit"]["blocks_merge_qualification"])
         self.assertFalse(record["authentication_or_complete_dependency_closure"])
         self.assertFalse(gate["current_closeout_regression"]["merge_qualified"])
 
@@ -3343,7 +3344,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         old = json.loads((ROOT / "tests/fixtures/cycle226-execution-sources.json").read_bytes())
         for before, after in zip(old["profiles"], json.loads(raw)["profiles"], strict=True):
             if before["profile"] != "errata_policy":
-                self.assertEqual(before, after)
+                self.assertEqual(before, {k: v for k, v in after.items() if k != "reviewed_data"})
         errata = record["errata_host_qualification"]
         self.assertTrue(errata["recorded_admission_repaired"])
         self.assertEqual(errata["target_denial_reasons"], 6)
@@ -3354,7 +3355,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(audit["after"]["invalid_accepted_per_path"], 0)
         self.assertEqual(audit["after"]["exceptions_per_path"], 0)
         self.assertTrue(audit["repaired"])
-        self.assertTrue(gate["current_control_execution_audit"]["blocks_merge_qualification"])
+        self.assertTrue(gate["historical_cycle227_control_execution_audit"]["blocks_merge_qualification"])
         self.assertFalse(gate["current_closeout_regression"]["canonical_full_replay_performed"])
 
         attempt = gate["historical_cycle227_candidate_audit"]["latest_completed_attempt"]
@@ -3387,7 +3388,35 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(repair["production_ready"])
         self.assertEqual(gate["current_closeout_regression"]["tests_passed"], 19)
         self.assertFalse(gate["current_closeout_regression"]["canonical_full_replay_performed"])
-        self.assertTrue(gate["current_control_execution_audit"]["blocks_merge_qualification"])
+        self.assertTrue(gate["historical_cycle228_control_execution_audit"]["blocks_merge_qualification"])
+
+    def test_cycle229_reviewed_inputs_clear_only_the_bounded_development_hold(self) -> None:
+        from runtime import native_execution_sources as sources
+        gate = self.roadmap["baseline"]["native_consistency_release_gate"]
+        review = gate["current_data_dependency_review"]
+        record = gate["current_execution_source_qualification"]
+        raw = (ROOT / sources.RECEIPT).read_bytes()
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), record["receipt_sha256"])
+        self.assertEqual(sources.evidence_errors(json.loads(raw)), [])
+        self.assertEqual((review["reviewed_data_bindings"], review["unique_data_paths"]), (18, 13))
+        self.assertEqual(review["original_profile_core_fields_preserved"], 27)
+        self.assertEqual(review["remaining_observed_data_reads_unbound"], 0)
+        self.assertEqual(review["after"]["changed_data_files_rejected"], 13)
+        self.assertFalse(review["after"]["recorded_consistency_is_authentication"])
+        self.assertEqual(review["media_review"]["logical_pairs"], 462)
+        self.assertEqual(review["media_review"]["generated_or_retained_byte_pairs"], 438)
+        self.assertEqual(review["media_review"]["historical_boot_build_record_pairs"], 24)
+        self.assertFalse(review["complete_dynamic_subprocess_or_host_closure"])
+        self.assertFalse(review["production_supply_chain_gate_closed"])
+        self.assertFalse(gate["current_control_execution_audit"]["blocks_merge_qualification"])
+        self.assertEqual(gate["current_control_execution_audit"]["status"], "open")
+        attempt = gate["current_candidate_audit"]["latest_completed_attempt"]
+        self.assertEqual(attempt["commit"], "293383d9cdf47240bcf32ef3373da49bac1006dc")
+        self.assertEqual((attempt["status"], attempt["checks_passed"], attempt["checks_total"]), ("pass", 106, 106))
+        self.assertFalse(attempt["applies_to_later_metadata_edits"])
+        self.assertFalse(gate["current_candidate_audit"]["aggregate_suite_passed"])
+        self.assertFalse(gate["current_closeout_regression"]["merge_qualified"])
+        self.assertFalse(self.roadmap["production_ready"])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]

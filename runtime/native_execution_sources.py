@@ -1,4 +1,4 @@
-"""Invalidate retained profile evidence when its static Python inputs change."""
+"""Invalidate retained evidence when static code or reviewed data inputs change."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 RECEIPT = "runs/native_execution_sources.json"
+FORMAT = "POOLEOS-REVIEWED-EXECUTION-INPUTS-2"
 PROFILES = (
     "entry", "symbols", "policy", "load", "pooleboot", "revalidation", "transfer",
     "trap", "cpu_policy", "errata_policy", "xstate_policy", "xstate_exception",
@@ -20,8 +21,31 @@ PROFILES = (
     "scheduler_deferred", "scheduler_smp", "scheduler_ap_workers",
     "scheduler_smp_preempt", "atomics", "locks",
 )
+# Additional data reads found outside the profiles' transitive receipt bindings.
+# This bounded list is not a claim of complete dynamic or subprocess coverage.
+REVIEWED_DATA_INPUTS = {
+    "policy": (
+        "specs/native-policy-contract.schema.json",
+        "specs/native-policy-golden-vectors.schema.json",
+        "specs/native-policy-readiness.schema.json",
+        "specs/native-release-architecture-policy.json",
+    ),
+    "load": ("specs/native-boot-exit-contract.schema.json", "specs/native-release-architecture-policy.json"),
+    "revalidation": ("specs/native-kernel-revalidation-readiness.schema.json",),
+    "transfer": ("specs/native-kernel-transfer-readiness.schema.json",),
+    "trap": ("specs/native-kernel-trap-readiness.schema.json",),
+    "cpu_policy": ("specs/native-kernel-cpu-policy-readiness.schema.json",),
+    "privilege_msr_policy": ("specs/native-kernel-privilege-msr-policy-readiness.schema.json",),
+    "physical_memory": ("specs/native-kernel-physical-memory-readiness.schema.json",),
+    "virtual_memory": ("specs/native-kernel-virtual-memory-readiness.schema.json",),
+    "smp_ipi": ("specs/native-kernel-transfer-readiness.schema.json", "specs/native-release-architecture-policy.json"),
+    "scheduler_smp": ("specs/native-tier0-lock.json",),
+    "scheduler_ap_workers": ("specs/native-tier0-lock.json",),
+    "scheduler_smp_preempt": ("specs/native-tier0-lock.json",),
+}
 BOUNDARIES = {
-    "static_python_sources_only": True,
+    "static_python_sources_only": False,
+    "reviewed_admission_data_bound": True,
     "fresh_guest_execution": False,
     "authentication": False,
     "independent_builder": False,
@@ -55,6 +79,12 @@ def safe_path(root: Path, relative: str) -> Path:
 
 def binding(root: Path, relative: str) -> dict[str, str]:
     return {"path": relative, "sha256": digest(safe_path(root, relative).read_bytes())}
+
+
+def reviewed_data_bindings(root: Path, profile: str) -> list[dict[str, str]]:
+    if profile not in PROFILES:
+        raise SourceEvidenceError("unknown execution profile")
+    return [binding(root, path) for path in REVIEWED_DATA_INPUTS.get(profile, ())]
 
 
 def profile_paths(profile: str) -> tuple[str, tuple[str, str]]:
@@ -141,13 +171,13 @@ def _hash(value: Any) -> None:
 def evidence_errors(value: Any, root: Path = ROOT) -> list[str]:
     try:
         _exact_keys(value, {"format", "profiles", "boundaries"}, "source evidence")
-        if value["format"] != "POOLEOS-STATIC-EXECUTION-SOURCES-1" or canonical(value["boundaries"]) != canonical(BOUNDARIES):
+        if value["format"] != FORMAT or canonical(value["boundaries"]) != canonical(BOUNDARIES):
             raise SourceEvidenceError("source evidence contract changed")
         records = value["profiles"]
         if not isinstance(records, list) or len(records) != len(PROFILES):
             raise SourceEvidenceError("profile coverage changed")
         for profile, record in zip(PROFILES, records, strict=True):
-            _exact_keys(record, {"profile", "receipt", "sources", "capture"}, "profile")
+            _exact_keys(record, {"profile", "receipt", "sources", "reviewed_data", "capture"}, "profile")
             if record["profile"] != profile:
                 raise SourceEvidenceError("profile order/identity changed")
             receipt, roots = profile_paths(profile)
@@ -155,6 +185,8 @@ def evidence_errors(value: Any, root: Path = ROOT) -> list[str]:
                 raise SourceEvidenceError(profile + " receipt changed")
             if canonical(record["sources"]) != canonical(source_closure(root, roots)):
                 raise SourceEvidenceError(profile + " static dependency closure changed")
+            if canonical(record["reviewed_data"]) != canonical(reviewed_data_bindings(root, profile)):
+                raise SourceEvidenceError(profile + " reviewed data inputs changed")
             capture = record["capture"]
             _exact_keys(capture, {"record_sha256", "log_sha256", "source_snapshot_sha256",
                                  "return_code", "source_unchanged"}, "capture")
@@ -190,10 +222,11 @@ def captured_profile(profile: str, capture_path: Path, root: Path = ROOT) -> dic
     if digest(capture_path.with_suffix(".log").read_bytes()) != capture["log_sha256"]:
         raise SourceEvidenceError("capture log changed")
     sources = source_closure(root, roots)
+    data = reviewed_data_bindings(root, profile)
     snapshot = capture["source_before"]
-    if not isinstance(snapshot, dict) or any(snapshot.get(b["path"]) != b["sha256"] for b in sources):
+    if not isinstance(snapshot, dict) or any(snapshot.get(b["path"]) != b["sha256"] for b in [*sources, *data]):
         raise SourceEvidenceError("missing or changed dependency in original execution snapshot")
-    return {"profile": profile, "receipt": binding(root, receipt_path), "sources": sources,
+    return {"profile": profile, "receipt": binding(root, receipt_path), "sources": sources, "reviewed_data": data,
             "capture": {"record_sha256": digest(raw), "log_sha256": capture["log_sha256"],
                         "source_snapshot_sha256": digest(canonical(snapshot)),
                         "return_code": 0, "source_unchanged": True}}

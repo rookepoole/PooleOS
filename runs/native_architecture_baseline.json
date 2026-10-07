@@ -358,6 +358,24 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle229-reviewed-execution-inputs.md",
+      "sha256": "6075313DFFF0885EE658DDA98AD6819D48D30A3DF03F0FE6B0DF493816EBFEA8",
+      "byte_count": 7046,
+      "line_count": 117
+    },
+    {
+      "path": "tests/fixtures/cycle228-execution-sources.json",
+      "sha256": "6DF3A8CBD4F56CC4CB3A3D7FB232C0B7C8EEBE0D647AFB7F2587358DC319D409",
+      "byte_count": 151688,
+      "line_count": 3805
+    },
+    {
+      "path": "specs/native-boot-exit-contract.schema.json",
+      "sha256": "542A9FAC7E5216C7A4FFA614E2C89565BEBF0BBDED375966C2A8354C1DC4D125",
+      "byte_count": 2833,
+      "line_count": 64
+    },
+    {
       "path": "docs/checkpoints/cycle228-toolchain-host-observation.md",
       "sha256": "198CFBF9E4E9F32F38C9A6E20FE6DDD06A850FD5CF00CEFE91238C1D0C102E87",
       "byte_count": 4933,
@@ -419,27 +437,27 @@
     },
     {
       "path": "runtime/native_execution_sources.py",
-      "sha256": "82A7541078A9411F359F5DDD73911749E5B9C75F2447C5442635D839C658CC6E",
-      "byte_count": 9873,
-      "line_count": 199
+      "sha256": "225A27949062715CBF8ACD184F16B269E56430A63DCEDA92EEA5C35C76CFB48E",
+      "byte_count": 11890,
+      "line_count": 232
     },
     {
       "path": "tools/qualify_native_execution_sources.py",
-      "sha256": "029A02793C9E30993188492F72969FB0FB0652BA5EDF0B1A433ABC9CA6EE076D",
-      "byte_count": 1970,
+      "sha256": "42C58153EB73EF05A91028EBD862E82E369CBE2CAD89241BB860C734987EBA76",
+      "byte_count": 1948,
       "line_count": 52
     },
     {
       "path": "tests/test_native_execution_sources.py",
-      "sha256": "390580EFA1FBAE2BF458219A7C2FD4CB1A4FD4FA1DDE6E9C87A3BD56E2E0B666",
-      "byte_count": 10163,
-      "line_count": 193
+      "sha256": "F39DF64750C67A4304F0BC8CF182585109ABA2A1A672DF7B232BD2AC890CF5EB",
+      "byte_count": 15745,
+      "line_count": 282
     },
     {
       "path": "runs/native_execution_sources.json",
-      "sha256": "6DF3A8CBD4F56CC4CB3A3D7FB232C0B7C8EEBE0D647AFB7F2587358DC319D409",
-      "byte_count": 151688,
-      "line_count": 3805
+      "sha256": "9C64EC020BD4D98182DAB38EF65EA7ABBFC15EC3EFD98BA188D6E005C2AE5295",
+      "byte_count": 155696,
+      "line_count": 3918
     },
     {
       "path": "docs/checkpoints/cycle224-locks-admission-and-current-kernel-replay.md",
@@ -1055,9 +1073,9 @@
     },
     {
       "path": "tools/pooleos_release_gate.py",
-      "sha256": "462EF890E7F6C459995DA20B936DC541B296E7922B9A59029E74126A4C2C8873",
-      "byte_count": 384626,
-      "line_count": 7597
+      "sha256": "D07D1224660AC998075C3E43A94FF212BA27967B3C96C44D594110D99AE00DF0",
+      "byte_count": 385400,
+      "line_count": 7608
     },
     {
       "path": "docs/checkpoints/cycle184-boot-host-provenance.md",
@@ -1583,15 +1601,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "933D3561440C757237A2E763E81A99A969D46A7380E5FC3151D6792CD9BA2076",
-      "byte_count": 128873,
-      "line_count": 1736
+      "sha256": "40605D3AF655E2CCA519F56159348CE0D5F2046565ED84BB3B6613F6CB58FFDA",
+      "byte_count": 129431,
+      "line_count": 1744
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "667E53D23BB3F4408116565110F2E7F74712B0771F93E64148851ED0B9250190",
-      "byte_count": 504716,
-      "line_count": 4546
+      "sha256": "DEFBFEE25B86737260445AB4374CFA85DB4E635423D5F642A81E7EB20D85CEFE",
+      "byte_count": 506760,
+      "line_count": 4577
     },
     {
       "path": "docs/publication-boundary.md",

@@ -629,6 +629,17 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 229 binds18 reviewed data dependencies across13 specification files to original successful "
+    "capture snapshots and preserves all27 native receipt/source/capture core records. Nineteen focused "
+    "tests pass. The bounded development data/media/tool review is complete; its specific merge hold "
+    "is removed, not N36 or production supply-chain requirements. Exact parent293383d passed106/106 "
+    "canonical and708/708 Doctor checks; this does not qualify later edits. Run full new-candidate "
+    "runtime/bundle/replay, publication and GitHub/review gates before main merge. No native/ISO byte "
+    "or production status changes. Earlier review holds below are historical. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -3657,7 +3668,7 @@ def check_native_execution_sources(path: Path = ROOT / native_execution_sources.
     except (OSError, ValueError) as error:
         errors = [str(error)]
     return {"name": "native_execution_sources", "ok": not errors,
-            "detail": "static source closure for 27 selected profiles; not fresh execution or authentication",
+            "detail": "27 static source closures and 18 reviewed data bindings; not fresh execution, complete tool closure or authentication",
             "errors": errors}
 
 
