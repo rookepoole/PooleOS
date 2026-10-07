@@ -1,13 +1,34 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-07
-Plan version: 2.135.0-corrected-media-boot-cpu-replay
-Roadmap cycle: PooleOS Cycle 232
+Plan version: 2.136.0-corrected-media-downstream-replay
+Roadmap cycle: PooleOS Cycle 233
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 233: Corrected Media Downstream Replay
+
+N5.1/N5.8 / `N5-FAT32-PARENT-001` and existing addition/flag, with dependent
+N8/N9/N12 replay. All fourteen remaining memory, interrupt, SMP, scheduler,
+atomic and lock qualifications pass: 28 fresh guest runs, 663 control groups
+and 2,863 hostile cases. All 27 component checks and 27 source profiles pass.
+The aggregate uses 27 original captures, preserving four unaffected rows and
+refreshing 23 affected profiles across Cycles 231-233. The old aggregate remains
+a hash-pinned negative fixture. Native kernel/EFI products and old ISO are unchanged.
+
+The initial focused regression is 272 passed, one failed, zero skipped across
+273 tests. Its stale historical-capture assertion is retained as a failure and
+reconciled against frozen history, with separate current-ledger checks. The first
+81-test metadata run has five stale expectation/schema failures, also preserved.
+The corrected combined run passes 354/354 tests with zero failures/skips.
+Full exact-committed-candidate runtime/bundle/replay, publication
+and GitHub/review gates remain before PR #80 merge. Branch backup does not imply
+main qualification. See [evidence](checkpoints/cycle233-corrected-media-downstream-replay.md).
+Checklist, additions, phase/flag statuses, PooleGlyph Phase 65 and production
+non-claims are conserved. No new implementation requirement is introduced.
 
 ## Cycle 232: Corrected Media Boot And CPU Replay
 

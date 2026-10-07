@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_kernel_scheduler_deferred_readiness",
-  "status_date": "2026-10-04",
+  "status_date": "2026-10-07",
   "status": "pass_single_host_two_run_qemu64_bsp_interrupt_deferred_workers_non_promoting",
   "contract_id": "PKSCHED3",
   "selected_move_id": "N12-SCHED-DEFERRED-001",
@@ -1317,7 +1317,7 @@
         "PKSCHED3:CONTROL PASS id=NEG-N12-PKSCHED3-SHUTDOWN-ORDER cases=5 verified=5"
       ],
       "output_sha256": "A9A2CFF9AAB5E15251BC5D1994D27BFD58D812BC792586D38B4D404354B03EB6",
-      "executable_sha256": "5A541DB01798EA106AC0EC597F73333A141788F474C52A0959C59FB1EDD9AAA3",
+      "executable_sha256": "592C0F9E8D71FC066BC89DBD562A948938D6BA9C6B7B7AC329AFB5B8D2B388DC",
       "controls": [
         {
           "id": "NEG-N12-PKSCHED3-FIXED-CAPACITY",
@@ -1534,11 +1534,11 @@
   "media": {
     "clean_generation_count": 2,
     "exact_clean_generation_match": true,
-    "sha256": "DA35FB8B98517DAFE691CB90B7B23A6D0427D8A1AB9866A1BABBED1CD57872FD",
+    "sha256": "942FD3D7EC77436C50C09C5AC7C6C07A568D4440FC939EB9D8C6BEA7139F902C",
     "byte_count": 67108864,
     "inspection": {
       "image": {
-        "sha256": "DA35FB8B98517DAFE691CB90B7B23A6D0427D8A1AB9866A1BABBED1CD57872FD",
+        "sha256": "942FD3D7EC77436C50C09C5AC7C6C07A568D4440FC939EB9D8C6BEA7139F902C",
         "byte_count": 67108864,
         "sector_bytes": 512,
         "sector_count": 131072,

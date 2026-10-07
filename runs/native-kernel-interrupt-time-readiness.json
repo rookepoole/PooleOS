@@ -4584,7 +4584,7 @@
         "protective_mbr_valid": true,
         "sector_bytes": 512,
         "sector_count": 131072,
-        "sha256": "52948E3750F3B6BFD6F7B9A1BA06BE0DD521CDD10D0AA02FA041A4B2E2728247"
+        "sha256": "F1C5CC55CFBA1BB86B9F00C868BAA476B777DED4C0571DAEA54FEA3D52155575"
       },
       "initial_system": {
         "activation_allowed": false,
@@ -4999,7 +4999,7 @@
     },
     "ordinary_workspace_file_only": true,
     "physical_media_write_performed": false,
-    "sha256": "52948E3750F3B6BFD6F7B9A1BA06BE0DD521CDD10D0AA02FA041A4B2E2728247"
+    "sha256": "F1C5CC55CFBA1BB86B9F00C868BAA476B777DED4C0571DAEA54FEA3D52155575"
   },
   "n8_exit_gate_satisfied": false,
   "negative_controls": [
@@ -5324,7 +5324,7 @@
   "schema_version": "1.0",
   "selected_move_id": "N8-IRQ-001",
   "status": "pass_single_host_two_run_qemu64_one_bsp_local_apic_hpet_non_promoting",
-  "status_date": "2026-10-04",
+  "status_date": "2026-10-07",
   "summary": {
     "application_processors_started": 0,
     "kernel_host_tests_passed": 246,

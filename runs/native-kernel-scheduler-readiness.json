@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_kernel_scheduler_readiness",
-  "status_date": "2026-10-04",
+  "status_date": "2026-10-07",
   "status": "pass_single_host_two_run_qemu64_bsp_cooperative_scheduler_foundation_non_promoting",
   "contract_id": "PKSCHED1",
   "selected_move_id": "N12-SCHED-001",
@@ -1377,11 +1377,11 @@
   "media": {
     "clean_generation_count": 2,
     "exact_clean_generation_match": true,
-    "sha256": "EA6E44C7267B4E5901519A767B641834F4D699AD0BBFC7BB39A44EDBBDDA75C1",
+    "sha256": "A8C93041237E3E3779F4FF3F35FFCFBF37C1728A12032A24EADF3F72557BEC75",
     "byte_count": 67108864,
     "inspection": {
       "image": {
-        "sha256": "EA6E44C7267B4E5901519A767B641834F4D699AD0BBFC7BB39A44EDBBDDA75C1",
+        "sha256": "A8C93041237E3E3779F4FF3F35FFCFBF37C1728A12032A24EADF3F72557BEC75",
         "byte_count": 67108864,
         "sector_bytes": 512,
         "sector_count": 131072,

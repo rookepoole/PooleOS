@@ -11,7 +11,16 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. All 63 source-branch commits remain cloud-backed; they are not pending
 main merges. This is a development baseline, not a production release.
 
-**Current development checkpoint:** Cycle 232 replays kernel revalidation,
+**Current development checkpoint:** Cycle 233 completes all fourteen remaining
+corrected-media profile replays: 28 fresh guest runs, 663 control groups and
+2,863 hostile cases pass. All 27 component and source checks are current, with
+the aggregate reconstructed from original captures. All 354 combined regression
+tests pass with zero skips after historical-assertion and schema reconciliation;
+the failed attempts remain recorded. Exact-candidate gates still precede PR #80 merge.
+The kernel and retained demo ISO are unchanged; this is not a production release.
+[Evidence](docs/checkpoints/cycle233-corrected-media-downstream-replay.md).
+
+**Historical development checkpoint:** Cycle 232 replays kernel revalidation,
 boot-to-kernel transfer and five CPU profiles on the corrected FAT32 media.
 All 16 fresh guest runs, 319 control groups and 77 focused regression tests pass.
 Source-current coverage is 13/27 profiles; 14 memory, interrupt, SMP, scheduling,

@@ -4516,7 +4516,7 @@
       {
         "byte_count": 180141,
         "path": "runs/native-kernel-transfer-readiness.json",
-        "sha256": "B0B3AE877F3EE222FB19E50CD2891A955B8C9B1E3A3E42267FE0A15092D9D1B2"
+        "sha256": "C7D5317A580F02373D29E9CCFEB7914BE2F296B929E4F7A0A08C3BC1DC8B5528"
       }
     ],
     "tier0_lock": {
@@ -4887,7 +4887,7 @@
         "protective_mbr_valid": true,
         "sector_bytes": 512,
         "sector_count": 131072,
-        "sha256": "354EC0958BEE9F4E96941FEACC27FD2297FCE433F0754E50261DD680C23235A2"
+        "sha256": "38F5099F72F3110B8AF0B13423E9736298456F3E52DB4A6B3F54CC35CE87694B"
       },
       "initial_system": {
         "activation_allowed": false,
@@ -5302,7 +5302,7 @@
     },
     "ordinary_workspace_file_only": true,
     "physical_media_write_performed": false,
-    "sha256": "354EC0958BEE9F4E96941FEACC27FD2297FCE433F0754E50261DD680C23235A2"
+    "sha256": "38F5099F72F3110B8AF0B13423E9736298456F3E52DB4A6B3F54CC35CE87694B"
   },
   "n9_exit_gate_satisfied": false,
   "negative_controls": [
@@ -5573,7 +5573,7 @@
   "schema_version": "1.0",
   "selected_move_id": "N9-VM-DIRECT-MAP-001",
   "status": "pass_single_host_two_run_qemu64_complete_profile_sparse_direct_map_exact_restore_non_promoting",
-  "status_date": "2026-10-04",
+  "status_date": "2026-10-07",
   "summary": {
     "actions_authorized": 0,
     "active_cr3_writes": 2,

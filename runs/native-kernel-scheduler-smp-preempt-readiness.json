@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_kernel_scheduler_smp_preempt_readiness",
-  "status_date": "2026-10-04",
+  "status_date": "2026-10-07",
   "status": "pass_single_host_two_run_sandybridge_four_vcpu_ack_gated_preemption_non_promoting",
   "contract_id": "PKSCHED6",
   "selected_move_id": "N12-SCHED-SMP-PREEMPT-001",
@@ -1336,7 +1336,7 @@
         "PKSCHED6:CONTROL PASS group=DUPLICATE-RUNNABLE verified=4"
       ],
       "output_sha256": "016A0CF6D75D6506FB5B8DF29EC84ABA17C53A96A2D8D6394CBB963520B73CC2",
-      "executable_sha256": "DD92E99F41FD8C394E92E0CF60770D4D5166A654F8D418AE3B4B9FEDF6102FA3",
+      "executable_sha256": "818977E9103076089D0BEC4F9F50ED9BC2543B4D0552F3B04F09525CB96A6EDD",
       "controls": [
         {
           "id": "NEG-N12-PKSCHED6-FRAME-CPU",
@@ -1566,11 +1566,11 @@
   "media": {
     "clean_generation_count": 2,
     "exact_clean_generation_match": true,
-    "sha256": "BB69E7A5A8294A172E48DD438CA80BEB3C4090A2D493CFD5D5AD96E1A69676CA",
+    "sha256": "EABC9C09B0B007D707280C23E6E07D5C123270A764B742DB1568FD712FAE0C36",
     "byte_count": 67108864,
     "inspection": {
       "image": {
-        "sha256": "BB69E7A5A8294A172E48DD438CA80BEB3C4090A2D493CFD5D5AD96E1A69676CA",
+        "sha256": "EABC9C09B0B007D707280C23E6E07D5C123270A764B742DB1568FD712FAE0C36",
         "byte_count": 67108864,
         "sector_bytes": 512,
         "sector_count": 131072,

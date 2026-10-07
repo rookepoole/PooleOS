@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_kernel_scheduler_preemption_readiness",
-  "status_date": "2026-10-04",
+  "status_date": "2026-10-07",
   "status": "pass_single_host_two_run_qemu64_bsp_timer_and_wakeup_preemption_non_promoting",
   "contract_id": "PKSCHED2",
   "selected_move_id": "N12-SCHED-PREEMPT-001",
@@ -1336,7 +1336,7 @@
         "PKSCHED2:CONTROL PASS id=NEG-N12-PKSCHED2-TRANSACTIONAL-ROLLBACK attempted=6 rejected=6"
       ],
       "output_sha256": "E6C6EBB49B517721E6F7D5FBE8C26B9E093DFEEF4F2FFBEBC0DA785B70F40BD8",
-      "executable_sha256": "9D1AAC1F668D6702C7D6946B10BED2ED97FF8C81AC5B491C9F9B8ED10556C5A0",
+      "executable_sha256": "36C0FFC8138ABEDADE581E1C97412413A8208986FEDA39D6EF3844680F0A3B7A",
       "controls": [
         {
           "id": "NEG-N12-PKSCHED2-INTERRUPT-FRAME-CONTRACT",
@@ -1403,8 +1403,8 @@
     "audit_controls": {
       "scope": "mutated_linked_disassembly_and_stack_guard_source_audit_not_hardware_fault_injection",
       "linked_sha256": "5E40AB31AFB4BCE79BEDB32D7B66D64D957B42CA915B2B70D2F15049F90B7D91",
-      "disassembly_sha256": "E4A245DA5E57F6C35D675E52D78C2A5C149CBD4B4EB5FC2BE2DB041C8485C05D",
-      "symbol_table_sha256": "9943AAA338C65F240E37D07ACD39391CEBA55254FE9A1D7B7AA94801AE64206E",
+      "disassembly_sha256": "4751D232D7C752F3DB8D11B0792577EC7C837DD8AFDFE26902C72C47AD9C54C3",
+      "symbol_table_sha256": "6766BE6D9740170DAE5C30117A80D5856600F3909BDCFFACACAF9289B0BA4E95",
       "controls": [
         {
           "id": "NEG-N12-PKSCHED2-LINKED-SWITCH-SCOPE",
@@ -1505,11 +1505,11 @@
   "media": {
     "clean_generation_count": 2,
     "exact_clean_generation_match": true,
-    "sha256": "63695AF1BD9C781A36CC156B7D2032A5F636376B8326D9D65ED3E97EE6A6DC0F",
+    "sha256": "4EF9B40338525033FD54007BB9C79A0B447A6F79385C8F22F0F045A5FC4C8CD2",
     "byte_count": 67108864,
     "inspection": {
       "image": {
-        "sha256": "63695AF1BD9C781A36CC156B7D2032A5F636376B8326D9D65ED3E97EE6A6DC0F",
+        "sha256": "4EF9B40338525033FD54007BB9C79A0B447A6F79385C8F22F0F045A5FC4C8CD2",
         "byte_count": 67108864,
         "sector_bytes": 512,
         "sector_count": 131072,

@@ -677,6 +677,17 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle233 completes all14 remaining corrected-media replays:28 fresh guest runs,663 control groups "
+    "and2863 hostile cases pass. All27 component checks and source profiles are current, projected "
+    "from27 original captures with four unchanged records. All354 combined regression tests pass; "
+    "initial focused and metadata failures remain retained. Full exact-candidate runtime/bundle/replay, "
+    "publication and GitHub/review gates remain before PR80 merge. The native executables and old demo "
+    "are unchanged; no production or phase/flag closure. Earlier stale-source counts are historical. "
+    + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
