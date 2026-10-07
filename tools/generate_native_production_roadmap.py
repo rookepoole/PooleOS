@@ -10188,7 +10188,108 @@ def apply_cycle225(roadmap: dict, test_count: int) -> dict:
     )
     phase = next(p for p in roadmap["phases"] if p["id"] == "N36")
     phase["current_evidence"].insert(0, evidence)
-    phase["current_evidence"].insert(0, f"Cycle 225 source inventory: {test_count} tests discovered; full execution pending")
+    phase["current_evidence"].insert(0, "Cycle 225 source inventory: 1176 tests discovered; full execution pending")
+    phase["current_gaps"].insert(0, gap)
+    next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N36-RECEIPT-COVERAGE-001")["evidence"].insert(0, checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle226(roadmap, test_count)
+
+
+def apply_cycle226(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle226-selected-profile-source-coverage.md"
+    move = "N36-RECEIPT-COVERAGE-001"
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for key, value in list(gate.items()):
+        if key.startswith("current_") and isinstance(value, dict):
+            suffix = "source_projection" if key == "current_focused_source_projection" else key.removeprefix("current_")
+            gate["historical_cycle225_" + suffix] = copy.deepcopy(value)
+    roadmap["baseline"]["pooleos_cycle"] = 226
+    roadmap["execution_protocol"].update(last_updated_cycle=226, selected_move_id=move,
+                                         owner_independent_next_move_id=move)
+    roadmap["execution_protocol"]["required_records"].insert(0, checkpoint)
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=226)
+    gate["current_focused_source_projection"] = dict(gate["current_focused_source_projection"], cycle=226,
+        focused_python_tests_passed=22,
+        run_count_scope="26_retained_profile_receipts_one_fresh_errata_host_qualification_zero_new_guest_boots",
+        required_next_gate="errata_recorded_admission_then_non_Python_review_and_full_exact_candidate")
+    audit = copy.deepcopy(gate["current_control_execution_audit"])
+    audit.update(cycle=226, next_profile="errata_policy_recorded_admission")
+    audit["errata_recorded_admission"] = {
+        "status": "counterexamples_demonstrated", "case_count": 8,
+        "invalid_accepted_per_path": 6, "exceptions_per_path": 2,
+        "paths": ["component", "aggregate_gate"], "genuine_receipt_accepted": True,
+        "cases": ["missing_build_evidence", "missing_vector_evidence", "missing_registry_evidence",
+                  "source_audit_claims_writes", "synthetic_grants_authority", "current_grants_authority",
+                  "null_control", "null_decision"],
+        "report_sha256": "2D1ED4EB32DC184CB60CFABA54C2B2409E7A1DA2AB7ACDB6DAA79661D63A4F67",
+        "script_sha256": "0C4DBA3F5BF1628DEB25745DC0E2AC061A86156F864369001126E5135039CDFC",
+        "repaired": False, "production_ready": False,
+    }
+    audit["shared_helper_static_inventory"]["next_action"] = "repair_errata_admission_then_review_non_Python_dependencies_and_full_exact_candidate"
+    gate["current_control_execution_audit"] = audit
+    gate["current_execution_source_qualification"] = {
+        "cycle": 226, "status": "pass_static_sources_only", "move_id": move,
+        "receipt_path": "runs/native_execution_sources.json",
+        "receipt_sha256": "B67E6FEB381D0799182F88378A455B31C4718E8404B5B12B12CF9D1AA06AF7DD",
+        "profiles": 27, "unique_python_sources": 78, "closure_size_range": [4, 38],
+        "fresh_qemu_runs": 0, "retained_profile_receipts": 26,
+        "original_fourteen_records_unchanged": True,
+        "historical_source_record_path": "tests/fixtures/cycle225-execution-sources.json",
+        "historical_source_record_sha256": "5C3F114B99CDE45A8EF6796CE7C16976040EFA3EDCD3436D93BE7D439BABEBB5",
+        "malformed_records_rejected_by_component_and_gate": 33,
+        "shared_leaf_mutation_invalidates_profile_captures": 27,
+        "upstream_missing_substituted_and_changed_source_controls": 13,
+        "errata_host_qualification": {
+            "status": "pass_policy_denies_current_target", "host_tests": 6, "no_std_builds": 2,
+            "cross_language_vectors": 128, "negative_controls": 24, "target_denial_reasons": 6,
+            "privileged_reads": 0, "firmware_writes": 0,
+            "elapsed_seconds": 11.656,
+            "receipt_sha256": "9C25E26A8C53AF2A908DE41F51887E15AC7571C7C79EDF1318BAC13539F489B0",
+            "previous_receipt_sha256": "BB1507BBD36A75B3DD8F44128C4B81CD0B8497A93853DEC2150C95D395E1DAC7",
+            "changed_receipt_fields": ["status_date"],
+            "log_sha256": "8DC57B55A31EC23061832E2377C460920D370AF0A1F1A7F90F0840FBCAD8C0E5",
+            "recorded_admission_repaired": False,
+        },
+        "authentication_or_complete_dependency_closure": False, "production_ready": False,
+    }
+    gate["current_closeout_regression"] = {
+        "cycle": 226, "status": "pass", "scope": "source_guard_and_existing_errata_tests_not_full_canonical",
+        "tests_run": 22, "tests_passed": 22, "tests_failed": 0, "tests_skipped": 0,
+        "elapsed_seconds": 32.144, "runner_elapsed_seconds": 33.000,
+        "log_sha256": "80D956A3E5D1BDCC9F55B87433353F5C80F5344C9A3AC70075D654CBCBEDA58A",
+        "source_unchanged_during_execution": True, "owner_report_unchanged": True,
+        "combined_regression": {
+            "tests_run": 113, "tests_passed": 113, "tests_failed": 0, "tests_skipped": 0,
+            "elapsed_seconds": 201.038, "runner_elapsed_seconds": 202.000,
+            "log_sha256": "FF5A68E2612D9BDB1DD358F66A6565203F1E3AC6D7605693DB7C01239A24A6B8",
+            "source_unchanged_during_execution": True, "owner_report_unchanged": True,
+            "scope": "source_guard_errata_provenance_locks_publication_and_73_metadata_not_full_canonical",
+            "counts_overlap_focused": True,
+        },
+        "conservation": {"status": "pass", "architecture_bindings": 389, "test_inventory": 1179,
+            "archived_records": 29, "native_receipt_and_checkpoint_files_unchanged": 801,
+            "initial_failures": ["obsolete_schema_cycle_constant", "helper_archive_replacement_order",
+                                 "helper_count_substitution_altered_pinned_manifest_literal"],
+            "owner_data_actually_changed": False},
+        "canonical_full_replay_performed": False, "merge_qualified": False, "production_ready": False,
+    }
+    evidence = (
+        "Cycle 226: " + checkpoint + " extends the static source guard to all 27 selected profiles and "
+        "78 distinct Python files. Twenty-six profile receipts and the original fourteen source records "
+        "are unchanged. Fresh errata host qualification passes six Rust tests, two no_std builds, 128 "
+        "vectors and 24 controls while retaining six target-denial reasons. Twenty-two focused tests pass. "
+        "No new guest boot or native/ISO change."
+    )
+    gap = (
+        "Next " + move + ": repair errata recorded admission; eight counterexamples produce six invalid "
+        "acceptances and two exceptions in each validator. Keep this explicit merge blocker, then review "
+        "non-Python data/tool coverage and run exact-candidate canonical/Doctor/release/publication/GitHub/review "
+        "gates. Static input closure does not repair semantic admission or authenticate execution. N36 remains open."
+    )
+    phase = next(p for p in roadmap["phases"] if p["id"] == "N36")
+    phase["current_evidence"].insert(0, evidence)
+    phase["current_evidence"].insert(0, f"Cycle 226 source inventory: {test_count} tests discovered; full execution pending")
     phase["current_gaps"].insert(0, gap)
     next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N36-RECEIPT-COVERAGE-001")["evidence"].insert(0, checkpoint)
     roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
@@ -10199,7 +10300,7 @@ def apply_cycle225(roadmap: dict, test_count: int) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1176)
+    parser.add_argument("--test-count", type=int, default=1179)
     parser.add_argument("--status-date", default="2026-10-07")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

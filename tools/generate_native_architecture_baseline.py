@@ -24,6 +24,8 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle226-selected-profile-source-coverage.md",
+    "tests/fixtures/cycle225-execution-sources.json",
     "docs/checkpoints/cycle225-retained-execution-source-closure.md",
     "runtime/native_execution_sources.py",
     "tools/qualify_native_execution_sources.py",

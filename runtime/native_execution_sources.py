@@ -12,6 +12,9 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 RECEIPT = "runs/native_execution_sources.json"
 PROFILES = (
+    "entry", "symbols", "policy", "load", "pooleboot", "revalidation", "transfer",
+    "trap", "cpu_policy", "errata_policy", "xstate_policy", "xstate_exception",
+    "privilege_msr_policy",
     "physical_memory", "virtual_memory", "interrupt_time", "smp_first_ap",
     "smp_percpu_runtime", "smp_ipi", "scheduler", "scheduler_preempt",
     "scheduler_deferred", "scheduler_smp", "scheduler_ap_workers",
@@ -57,6 +60,17 @@ def binding(root: Path, relative: str) -> dict[str, str]:
 def profile_paths(profile: str) -> tuple[str, tuple[str, str]]:
     if profile not in PROFILES:
         raise SourceEvidenceError("unknown execution profile")
+    upstream = {
+        "entry": ("kernel_entry", "kernel_entry"),
+        "symbols": ("symbols", "symbol"),
+        "policy": ("policy", "policy"),
+        "load": ("kernel_load", "kernel_load"),
+        "pooleboot": ("pooleboot", "pooleboot"),
+    }
+    if profile in upstream:
+        module, receipt = upstream[profile]
+        return (f"runs/native_{receipt}_readiness.json",
+                (f"runtime/native_{module}.py", f"tools/qualify_native_{module}.py"))
     suffix = "scheduler-preemption" if profile == "scheduler_preempt" else profile.replace("_", "-")
     return (f"runs/native-kernel-{suffix}-readiness.json",
             (f"runtime/native_kernel_{profile}.py", f"tools/qualify_native_kernel_{profile}.py"))

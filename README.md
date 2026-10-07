@@ -11,7 +11,19 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 225 adds a release-gate check for the
+**Current development checkpoint:** Cycle 226 expands the source guard to all
+27 selected profiles and 78 Python files; **22/22 focused tests** pass. A fresh
+errata host run passes while retaining the hardware denial. Its receipt validator
+has a demonstrated defect: six corrupted records are accepted and two malformed
+records raise exceptions in both validation paths. This blocks the main merge.
+[Cycle 226 evidence](docs/checkpoints/cycle226-selected-profile-source-coverage.md).
+Next: repair errata admission, finish data/tool dependency review, then exact
+canonical qualification. Checkpoints are backed up on the integration branch;
+cloud backup does not require a main merge. Native kernel and demo ISO unchanged.
+Combined regression passes **113/113**, zero skips. This is scoped testing, not
+full canonical qualification or evidence that the known errata defect is repaired.
+
+**Historical development checkpoint:** Cycle 225 adds a release-gate check for the
 static Python source dependencies of 14 retained execution profiles. It binds 62
 distinct files to their original run snapshots; changed helpers invalidate the
 record. All 12 focused tests pass. No boot receipt was rewritten or relabeled fresh.

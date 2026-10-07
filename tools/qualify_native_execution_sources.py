@@ -15,7 +15,7 @@ from runtime import native_execution_sources as sources
 
 def qualify(captures: dict[str, Path], root: Path = ROOT) -> dict:
     if set(captures) != set(sources.PROFILES):
-        raise sources.SourceEvidenceError("exact fourteen-profile capture set required")
+        raise sources.SourceEvidenceError("exact selected-profile capture set required")
     result = {"format": "POOLEOS-STATIC-EXECUTION-SOURCES-1",
               "profiles": [sources.captured_profile(p, captures[p], root) for p in sources.PROFILES],
               "boundaries": dict(sources.BOUNDARIES)}
@@ -41,7 +41,7 @@ def main() -> int:
         with args.out.open("x", encoding="utf-8", newline="\n") as stream:
             json.dump(result, stream, indent=2)
             stream.write("\n")
-        print("EXECUTION_SOURCE_CLOSURE PASS profiles=14 fresh_boots=0 production_ready=false")
+        print(f"EXECUTION_SOURCE_CLOSURE PASS profiles={len(sources.PROFILES)} fresh_boots=0 production_ready=false")
         return 0
     except (OSError, ValueError, KeyError, IndexError, TypeError) as error:
         print(f"EXECUTION_SOURCE_CLOSURE FAIL {error}")

@@ -356,7 +356,7 @@
     "status": "pass_pure_policy_no_cpu_or_firmware_io"
   },
   "status": "pass_policy_denies_current_target",
-  "status_date": "2026-07-21",
+  "status_date": "2026-10-07",
   "summary": {
     "actions_authorized_count": 0,
     "applicable_source_count": 5,

@@ -1,13 +1,41 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-07
-Plan version: 2.128.0-retained-execution-source-closure
-Roadmap cycle: PooleOS Cycle 225
+Plan version: 2.129.0-selected-profile-source-coverage
+Roadmap cycle: PooleOS Cycle 226
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 226: Selected Profile Source Coverage
+
+N36.1, `N36-RECEIPT-COVERAGE-001`, existing `ADD-N36-RECEIPT-COVERAGE-001`.
+The static Python guard now covers all 27 selected profiles, 78 distinct files
+and 4-38 inputs per profile. Twenty-six original profile receipts remain unchanged;
+one fresh bounded errata host run changes only its receipt's status date. Six Rust
+tests, two no_std builds, 128 cross-language vectors and 24 negative controls pass,
+with all six hardware-denial reasons retained. No new QEMU boot or native change.
+The original fourteen source records are preserved byte-exactly in a historical
+fixture and remain identical within the new record. Focused regression: 22/22,
+zero skips. This is not a full canonical pass.
+
+Eight targeted errata receipt counterexamples expose six invalid acceptances and
+two unhandled exceptions through both component and aggregate validators. Missing
+build/vector/registry evidence and false write/authority claims must reject.
+This is an explicit merge blocker, not a hardware failure or an owner-action gate.
+
+Next: repair exact typed errata recorded admission and malformed-input handling;
+add adversarial regressions, freshly requalify changed bound inputs and refresh
+only affected source records. Then finish non-Python data/tool dependency review
+and exact-candidate canonical/Doctor/release/publication/GitHub/review gates.
+Do not repeat unaffected boots by default. No phase, flag, target, ISO, production
+or normative charter condition closes. Parent progress records remain historical.
+[Cycle 226 evidence](checkpoints/cycle226-selected-profile-source-coverage.md).
+Combined regression passes113/113 without skips. Conservation verifies389 source
+bindings,29 unchanged archived parent records and801 retained files;1179 tests
+are discovered, not claimed executed. The errata admission blocker remains open.
 
 ## Cycle 225: Retained Execution Source Closure
 

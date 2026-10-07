@@ -57,7 +57,7 @@ class NativeExecutionSourcesTests(unittest.TestCase):
     def test_retained_capture_projection_is_deterministic(self):
         self.assertEqual(self.receipt, qualifier.qualify(self.captures, self.root))
         self.assertEqual(sources.evidence_errors(self.receipt, self.root), [])
-        self.assertEqual(len(self.receipt["profiles"]), 14)
+        self.assertEqual(len(self.receipt["profiles"]), 27)
         self.assertFalse(self.receipt["boundaries"]["fresh_guest_execution"])
 
     def test_relative_transitive_and_package_initializers_are_bound(self):
@@ -146,6 +146,30 @@ class NativeExecutionSourcesTests(unittest.TestCase):
         self.captures.pop("locks")
         with self.assertRaises(sources.SourceEvidenceError):
             qualifier.qualify(self.captures, self.root)
+
+    def test_every_upstream_profile_is_required_and_bound(self):
+        for index, profile in enumerate(sources.PROFILES[:13]):
+            with self.subTest(profile=profile):
+                captures = dict(self.captures)
+                captures.pop(profile)
+                with self.assertRaises(sources.SourceEvidenceError):
+                    qualifier.qualify(captures, self.root)
+                candidate = copy.deepcopy(self.receipt)
+                candidate["profiles"][index] = candidate["profiles"][-1]
+                self.assertTrue(sources.evidence_errors(candidate, self.root))
+                path = self.root / sources.profile_paths(profile)[1][0]
+                original = path.read_bytes()
+                path.write_bytes(original + b"CHANGED = True\n")
+                self.assertTrue(sources.evidence_errors(self.receipt, self.root))
+                with self.assertRaisesRegex(sources.SourceEvidenceError, "snapshot"):
+                    sources.captured_profile(profile, self.captures[profile], self.root)
+                path.write_bytes(original)
+
+    def test_historical_fourteen_profile_coverage_is_not_current(self):
+        candidate = copy.deepcopy(self.receipt)
+        candidate["profiles"] = candidate["profiles"][13:]
+        self.assertEqual(len(candidate["profiles"]), 14)
+        self.assertTrue(sources.evidence_errors(candidate, self.root))
 
     def test_windows_command_paths_preserve_original_capture_hash(self):
         self.mutate_capture(lambda v: v["command"].__setitem__(2, v["command"][2].replace("/", "\\")))

@@ -154,8 +154,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 225)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1176)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 226)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1179)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -196,7 +196,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
         self.assertEqual(current["qualification_status"], "all_selected_profiles_current_shared_binding_review_and_full_gate_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 225)
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 226)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -1009,11 +1009,11 @@ class PdcProductionRoadmapTests(unittest.TestCase):
                 check = getattr(pooleos_release_gate, "check_native_kernel_" + name + "_readiness")()
                 self.assert_current_gate_projection(check)
         audit = current["current_control_execution_audit"]
-        self.assertEqual((audit["cycle"], audit["status"]), (225, "open"))
+        self.assertEqual((audit["cycle"], audit["status"]), (226, "open"))
         self.assertTrue(audit["blocks_merge_qualification"])
         self.assertFalse(audit["production_ready"])
         self.assertEqual(audit["requirement_id"], "ADD-N36-RECEIPT-COVERAGE-001")
-        self.assertEqual(audit["next_profile"], "upstream_and_non_Python_dependencies")
+        self.assertEqual(audit["next_profile"], "errata_policy_recorded_admission")
         self.assertEqual(len(audit["source_control_gaps"]), 0)
         self.assertEqual(sum(g["reported_case_count"] for g in audit["source_control_gaps"]), 0)
         for gap in audit["source_control_gaps"]:
@@ -3302,16 +3302,36 @@ class PdcProductionRoadmapTests(unittest.TestCase):
     def test_cycle225_static_sources_preserve_original_execution_receipts(self) -> None:
         from runtime import native_execution_sources as sources
         gate = self.roadmap["baseline"]["native_consistency_release_gate"]
-        record = gate["current_execution_source_qualification"]
-        raw = (ROOT / record["receipt_path"]).read_bytes()
+        record = gate["historical_cycle225_execution_source_qualification"]
+        raw = (ROOT / "tests/fixtures/cycle225-execution-sources.json").read_bytes()
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), record["receipt_sha256"])
-        self.assertEqual(sources.evidence_errors(json.loads(raw)), [])
-        self.assertTrue(pooleos_release_gate.check_native_execution_sources()["ok"])
+        self.assertTrue(sources.evidence_errors(json.loads(raw)))
+        current = json.loads((ROOT / sources.RECEIPT).read_bytes())
+        self.assertEqual(current["profiles"][13:], json.loads(raw)["profiles"])
         self.assertEqual((record["profiles"], record["unique_python_sources"], record["fresh_qemu_runs"]), (14, 62, 0))
         self.assertEqual(gate["current_dependency_qualification"], gate["historical_cycle224_dependency_qualification"])
         self.assertTrue(gate["current_control_execution_audit"]["blocks_merge_qualification"])
         self.assertFalse(record["authentication_or_complete_dependency_closure"])
         self.assertFalse(record["production_ready"])
+
+    def test_cycle226_source_coverage_does_not_hide_errata_admission_gap(self) -> None:
+        from runtime import native_execution_sources as sources
+        gate = self.roadmap["baseline"]["native_consistency_release_gate"]
+        record = gate["current_execution_source_qualification"]
+        raw = (ROOT / record["receipt_path"]).read_bytes()
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), record["receipt_sha256"])
+        self.assertEqual(sources.evidence_errors(json.loads(raw)), [])
+        self.assertTrue(pooleos_release_gate.check_native_execution_sources()["ok"])
+        self.assertEqual((record["profiles"], record["unique_python_sources"], record["fresh_qemu_runs"]), (27, 78, 0))
+        self.assertEqual(record["errata_host_qualification"]["receipt_sha256"],
+                         hashlib.sha256((ROOT / "runs/native-kernel-errata-policy-readiness.json").read_bytes()).hexdigest().upper())
+        diagnostic = gate["current_control_execution_audit"]["errata_recorded_admission"]
+        self.assertEqual((diagnostic["case_count"], diagnostic["invalid_accepted_per_path"],
+                          diagnostic["exceptions_per_path"]), (8, 6, 2))
+        self.assertFalse(diagnostic["repaired"])
+        self.assertTrue(gate["current_control_execution_audit"]["blocks_merge_qualification"])
+        self.assertFalse(record["authentication_or_complete_dependency_closure"])
+        self.assertFalse(gate["current_closeout_regression"]["merge_qualified"])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]

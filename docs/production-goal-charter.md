@@ -7,9 +7,19 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 225
+Last roadmap reconciliation: PooleOS Cycle 226
 
-Cycle 225 enforces a separate static-source evidence record for 14 retained
+Cycle 226 extends static-source coverage to all27 selected profiles and78 Python
+files;22 focused tests pass. One fresh errata host qualification retains the exact
+target denial, with no guest execution. Eight diagnostic corruptions reveal six
+invalid acceptances and two exceptions in each errata admission path. Repair this
+merge blocker, review non-Python dependencies, then run full exact-candidate gates.
+Native source, demo ISO and normative completion conditions are unchanged.
+[Cycle 226 evidence](checkpoints/cycle226-selected-profile-source-coverage.md).
+Combined regression passes113/113 without skips; this does not repair the errata
+admission defect or establish full canonical qualification. Normative gates stand.
+
+Historical Cycle 225 enforces a separate static-source evidence record for 14 retained
 memory-through-lock profiles and 62 distinct Python inputs. Twelve focused tests
 pass, including 33 malformed records through component and aggregate checks.
 Original boot receipts, native code, ISO and normative charter remain unchanged.

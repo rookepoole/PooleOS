@@ -594,6 +594,11 @@ DEFAULT_GAPS[4] = (
 
 
 DEFAULT_GAPS[4] = (
+    "Cycle 226 extends static-source coverage to all27 selected profiles and78 Python files. One fresh "
+    "errata host qualification retains the exact target denial;22 focused tests pass and no guest boot "
+    "occurs. Errata receipt admission remains defective: six invalid records pass and two malformed "
+    "records raise exceptions in each path. Repair this explicit merge blocker under N36 coverage work, "
+    "then finish data/tool dependency review and exact-candidate qualification. No production change. "
     "Cycle 225 adds a static Python execution-source guard for fourteen retained profiles and 62 distinct "
     "files. The original receipts are unchanged and no new boot is claimed. Upstream and non-Python "
     "dependency review and full exact-candidate qualification remain required before main merge. "
@@ -3629,7 +3634,7 @@ def check_native_execution_sources(path: Path = ROOT / native_execution_sources.
     except (OSError, ValueError) as error:
         errors = [str(error)]
     return {"name": "native_execution_sources", "ok": not errors,
-            "detail": "static source closure for fourteen retained profiles; not fresh execution or authentication",
+            "detail": "static source closure for 27 selected profiles; not fresh execution or authentication",
             "errors": errors}
 
 
