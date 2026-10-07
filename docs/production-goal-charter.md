@@ -16,7 +16,12 @@ kernel, demo ISO and normative completion conditions are unchanged. Next: data/t
 dependency review and full exact-candidate qualification before main merge.
 [Cycle 227 evidence](checkpoints/cycle227-errata-recorded-admission.md).
 Combined regression passes 126/126 without skips. Explicit data bindings match;
-complete read/tool coverage and full canonical qualification remain pending.
+complete read/tool coverage and a passing full qualification remain pending.
+Late exact-committed qualification of79adf4a fails:105/106 canonical checks and
+707/708 Doctor checks pass, but pooleos:unittest exits1. The outer report loses
+individual failure names. Next: retain complete unittest diagnostics and repair
+the failure before finishing review and requalifying. Main remains unchanged;
+the development branch is cloud-backed. This changes no normative requirement.
 
 Historical Cycle 226 extends static-source coverage to all27 selected profiles and78 Python
 files;22 focused tests pass. One fresh errata host qualification retains the exact

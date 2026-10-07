@@ -1,6 +1,35 @@
 # Cycle 227: Errata Recorded Admission
 
 Date: 2026-10-07. N36.1 / `N36-RECEIPT-COVERAGE-001`.
+
+## Late Full Qualification Failure
+
+The exact committed precloseout candidate `79adf4aa452daf36f52e24b99c176c49b2523935`,
+tree `d63edf6d0fd4a1490dba0497a0cfe2379d692df2`, ran the canonical gate with runtime,
+bundle and replay inputs. It completed in 1,089.266s with exit 1: 105/106 canonical
+checks and 707/708 Doctor checks passed. The failing Doctor check is
+`pooleos:unittest` (exit 1). This is not a timeout. The outer report drops the
+individual test failure details; their count and cause remain undiagnosed.
+All 1,632 tracked source files and the owner's PooleGlyph report were unchanged.
+Log SHA-256 `7DFDB6EFFAF983852F69D9A2FCE89E16FC6800455D4DCE1299F4CEC7953D3F21`;
+report SHA-256 `E65E0CCEEEF63D7C8E8C6E0F6F2BD0E65807D88DF14E76F253664261C8A75FE4`.
+Later progress-only edits are not covered by that exact-source execution.
+
+Immediate next move: retain full unittest diagnostics, repair the failure, finish
+the dependency review and rerun the exact-candidate gates. Do not merge this draft
+while the full suite fails. The development checkpoint is already backed up on
+GitHub; this failure does not invalidate the separately recorded scoped passes.
+
+Additional admission-side observation covers 2,287 non-Python reads across 320
+repository paths with zero drift from original execution snapshots. The 330 reads
+without direct explicit pairs need transitive interpretation, not a missing-file
+claim. Existing pins for four Rust executables, two target-library trees, all
+3,368 QEMU runtime files and firmware, and four MSVC/SDK trees match. No subprocess
+was launched by this pin check. These checks do not prove complete compiler/host
+closure or reconstruct historical tool snapshots. Report digests are retained in
+the machine roadmap. No native bytes, phase status or production claim changed.
+
+## Scoped Repair
 Existing `ADD-N36-RECEIPT-COVERAGE-001`.
 Parent: `14513f4d247a61fe184675c523f0e2b5d05f4cbb`.
 Previous cycle: progress, not an owner-action impasse. The full native goal stays
@@ -112,8 +141,9 @@ remain intact. No signing, keys, tags, releases or production promotion occurred
 N0 custody, N5 authentication, complete native task state, hardware qualification,
 independent builders and the signed production ISO remain open.
 
-Exact next move: continue `N36-RECEIPT-COVERAGE-001` by reviewing non-Python data and
-tool dependencies, then run full exact-candidate canonical/Doctor/release/
+Exact next move: continue `N36-RECEIPT-COVERAGE-001` by retaining complete unittest
+failure diagnostics and repairing the failed suite. Finish the non-Python data and
+tool review, then run full exact-candidate canonical/Doctor/release/
 publication/GitHub/review gates before main merge. Do not repeat unaffected boots
 by default. Recorded consistency is not authentication, fresh native hardware
 measurement or production qualification. No new owner authorization is needed.

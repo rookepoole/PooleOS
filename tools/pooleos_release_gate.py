@@ -595,6 +595,8 @@ DEFAULT_GAPS[4] = (
 
 DEFAULT_GAPS[4] = (
     "Cycle 227 repairs errata recorded admission: both paths reject1742 corruptions without exceptions; "
+    "late full qualification of exact79adf4a fails at105/106 canonical and707/708 Doctor checks because "
+    "pooleos:unittest exits1. Retain complete failure diagnostics and repair that suite before merge. "
     "34 focused tests and fresh host qualification pass while retaining six target-denial reasons. "
     "Twenty-six other profiles and native/ISO bytes are unchanged. Non-Python dependency review and "
     "full exact-candidate canonical qualification still precede main merge. No phase or production "

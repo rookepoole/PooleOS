@@ -10310,10 +10310,24 @@ def apply_cycle227(roadmap: dict, test_count: int) -> dict:
                                          owner_independent_next_move_id=move)
     roadmap["execution_protocol"]["required_records"].insert(0, checkpoint)
     gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=227)
+    gate["current_candidate_audit"]["latest_completed_attempt"] = {
+        "status": "fail", "scope": "exact_committed_precloseout_with_runtime_bundle_and_replay",
+        "commit": "79adf4aa452daf36f52e24b99c176c49b2523935",
+        "tree": "d63edf6d0fd4a1490dba0497a0cfe2379d692df2",
+        "checks_passed": 105, "checks_total": 106,
+        "doctor_checks_passed": 707, "doctor_checks_total": 708,
+        "failed_check": "pooleos_doctor", "failed_doctor_check": "pooleos:unittest",
+        "unittest_return_code": 1, "failed_test_names_retained": False,
+        "elapsed_seconds": 1089.266, "tracked_files": 1632,
+        "source_unchanged": True, "owner_report_unchanged": True,
+        "log_sha256": "7DFDB6EFFAF983852F69D9A2FCE89E16FC6800455D4DCE1299F4CEC7953D3F21",
+        "report_sha256": "E65E0CCEEEF63D7C8E8C6E0F6F2BD0E65807D88DF14E76F253664261C8A75FE4",
+        "applies_to_later_metadata_edits": False, "merge_qualified": False, "production_ready": False,
+    }
     gate["current_focused_source_projection"] = dict(gate["current_focused_source_projection"], cycle=227,
         focused_python_tests_passed=34, recorded_evidence_rejection_cases=1742,
         run_count_scope="26_retained_profiles_one_fresh_errata_host_qualification_zero_new_guest_boots",
-        required_next_gate="non_Python_dependency_review_then_full_exact_candidate")
+        required_next_gate="retain_full_unittest_failure_details_and_repair_then_complete_review_and_full_gates")
     audit = copy.deepcopy(gate["current_control_execution_audit"])
     audit.update(cycle=227, next_profile="non_Python_data_and_tool_dependencies")
     audit["errata_recorded_admission"] = {
@@ -10348,6 +10362,20 @@ def apply_cycle227(roadmap: dict, test_count: int) -> dict:
         "next_action": "audit_actual_file_reads_and_tool_invocations_not_covered_by_explicit_pairs",
     }
     gate["current_control_execution_audit"] = audit
+    audit["admission_read_observation"] = {
+        "profiles": 27, "checks_passed": 27, "repository_reads": 2287,
+        "unique_paths": 320, "without_direct_explicit_binding": 330,
+        "original_snapshot_mismatches": 0, "qualifier_subprocess_reads_observed": False,
+        "report_sha256": "41C58AA33E4019DD6F552C6CBAD017E3188D974DD388513E74AB533D14682F5F",
+        "complete_dependency_proof": False,
+    }
+    audit["existing_tool_pin_recheck"] = {
+        "status": "pass", "rust_executables": 4, "rust_target_library_trees": 2,
+        "qemu_runtime_files": 3368, "qemu_and_firmware_locks_match": True,
+        "msvc_sdk_trees": 4, "subprocesses_launched": 0,
+        "report_sha256": "3E29117836AA2FEFEEDF399E104545584134DA0CA493F175D548AF7EBDDD193F",
+        "complete_compiler_or_host_closure": False,
+    }
     record = copy.deepcopy(gate["current_execution_source_qualification"])
     record.update(cycle=227, receipt_sha256="6DF3A8CBD4F56CC4CB3A3D7FB232C0B7C8EEBE0D647AFB7F2587358DC319D409",
         unchanged_parent_profile_records=26,
@@ -10384,14 +10412,17 @@ def apply_cycle227(roadmap: dict, test_count: int) -> dict:
         "receipts/source records and native/ISO bytes remain unchanged; no guest boot occurred."
     )
     gap = (
-        "Next " + move + ": review non-Python data/tool dependency coverage, then full exact-candidate "
+        "Next " + move + ": retain full unittest failure details and repair the failing suite. "
+        "The exact precloseout79adf4a attempt fails at105/106 canonical and707/708 Doctor checks; "
+        "the unittest command exits1 and individual test failures are not retained by the outer report. "
+        "Then finish non-Python data/tool review and full exact-candidate "
         "canonical/Doctor/release/publication/GitHub/review gates before main merge. The demonstrated errata "
         "admission defect is repaired, not authenticated or physically qualified. N36 and all broader "
         "N0 custody, N5 authentication, native task-state, hardware and independent-builder gaps remain open."
     )
     phase = next(p for p in roadmap["phases"] if p["id"] == "N36")
     phase["current_evidence"].insert(0, evidence)
-    phase["current_evidence"].insert(0, f"Cycle 227 source inventory: {test_count} tests discovered; full execution pending")
+    phase["current_evidence"].insert(0, f"Cycle 227 source inventory: {test_count} tests discovered; precloseout canonical attempt fails in unittest, not merge-qualified")
     phase["current_gaps"].insert(0, gap)
     next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N36-RECEIPT-COVERAGE-001")["evidence"].insert(0, checkpoint)
     roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]

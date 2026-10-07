@@ -3357,6 +3357,16 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(gate["current_control_execution_audit"]["blocks_merge_qualification"])
         self.assertFalse(gate["current_closeout_regression"]["canonical_full_replay_performed"])
 
+        attempt = gate["current_candidate_audit"]["latest_completed_attempt"]
+        self.assertEqual(attempt["status"], "fail")
+        self.assertEqual(attempt["commit"], "79adf4aa452daf36f52e24b99c176c49b2523935")
+        self.assertEqual((attempt["checks_passed"], attempt["checks_total"]), (105, 106))
+        self.assertEqual((attempt["doctor_checks_passed"], attempt["doctor_checks_total"]), (707, 708))
+        self.assertEqual(attempt["failed_doctor_check"], "pooleos:unittest")
+        self.assertFalse(attempt["failed_test_names_retained"])
+        self.assertFalse(attempt["applies_to_later_metadata_edits"])
+        self.assertFalse(attempt["merge_qualified"])
+
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]
         charter_text = (ROOT / charter["path"]).read_text(encoding="utf-8")

@@ -17,11 +17,14 @@ accept the genuinely requalified receipt. All **34 focused tests** pass. The
 hardware policy still denies the target for the same six reasons; no kernel or
 demo ISO bytes changed. Twenty-six other source records remain untouched.
 [Cycle 227 evidence](docs/checkpoints/cycle227-errata-recorded-admission.md).
-Next: data/tool dependency review and full exact-candidate qualification before
-merging PR #78. Development checkpoints remain cloud-backed; pre-production.
+Late full qualification of `79adf4a` **failed**: 105/106 canonical checks and
+707/708 Doctor checks pass, but the Python regression command exits 1. The outer
+report does not retain the individual failing test names. Next: capture that
+failure in full and repair it, finish dependency review, then qualify the exact
+candidate before merging PR #78. The checkpoints are cloud-backed; pre-production.
 Combined regression passes **126/126**, zero skips. The explicit data-binding
 inventory is consistent; coverage of all actual file reads and tool inputs remains
-to be reviewed before full canonical qualification.
+to be reviewed before a successful full canonical qualification.
 
 **Historical development checkpoint:** Cycle 226 expands the source guard to all
 27 selected profiles and 78 Python files; **22/22 focused tests** pass. A fresh

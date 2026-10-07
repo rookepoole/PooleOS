@@ -11,6 +11,15 @@ Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
 ## Cycle 227: Errata Recorded Admission
 
+Late precloseout qualification of exact commit `79adf4a` fails after 1,089.266s:
+105/106 canonical checks and 707/708 Doctor checks pass; `pooleos:unittest` exits 1.
+Source and owner snapshots stay unchanged. The outer report does not preserve
+individual failing test names, so no individual failure count or root cause is
+claimed. Immediate next move: retain complete unittest diagnostics and repair
+the failure, then finish dependency review and requalify before any main merge.
+This is not a timeout, a passing full suite, or a failure of the scoped 126-test run.
+The development branch is backed up on GitHub; `main` remains unchanged.
+
 N36.1, `N36-RECEIPT-COVERAGE-001`, existing `ADD-N36-RECEIPT-COVERAGE-001`.
 Exact JSON-typed reconstruction replaces shallow errata receipt checks. Build and
 source evidence, all sixteen registry records, both decisions, vector outcomes,

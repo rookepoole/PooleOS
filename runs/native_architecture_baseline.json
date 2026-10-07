@@ -359,9 +359,9 @@
   "bound_sources": [
     {
       "path": "docs/checkpoints/cycle227-errata-recorded-admission.md",
-      "sha256": "5571705FCD40D1804DC89AAE5590EBAB02AE7D9C9C762A23ED2472B0764C8030",
-      "byte_count": 7318,
-      "line_count": 119
+      "sha256": "989C10D96D7EADEBE755F9B55652F0E3971B72FEB3080CF33C6ABBD41DD94254",
+      "byte_count": 9217,
+      "line_count": 149
     },
     {
       "path": "tests/test_native_errata_admission.py",
@@ -1037,9 +1037,9 @@
     },
     {
       "path": "tools/pooleos_release_gate.py",
-      "sha256": "3D91EDFC1083D85909F88435D80E92019A651145F29D679129E2339693ACBEE5",
-      "byte_count": 383850,
-      "line_count": 7585
+      "sha256": "84A1EC486A8DFFDA03F2D0B71D25B4C0CF4E6D7889AECBF677C753C9280C4EA1",
+      "byte_count": 384060,
+      "line_count": 7587
     },
     {
       "path": "docs/checkpoints/cycle184-boot-host-provenance.md",
@@ -1565,15 +1565,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "83D0BB165AD01DA906946F31346CE890C6858709AB89715B95BCEC56EF617B92",
-      "byte_count": 127901,
-      "line_count": 1723
+      "sha256": "D709388E87F47C490D032D4743446AFE32A989F95075594D01ABA298D12D2708",
+      "byte_count": 128298,
+      "line_count": 1728
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "DE2FE03D412C23E1AD0E989F173EDA663A4C5684FF87B1D508ED89B68BBF2E79",
-      "byte_count": 502291,
-      "line_count": 4510
+      "sha256": "EA086AB626254C02119C6EEBB655E12D5A8B5FBE471D81CA44A68B9F3ECD6440",
+      "byte_count": 502932,
+      "line_count": 4519
     },
     {
       "path": "docs/publication-boundary.md",
