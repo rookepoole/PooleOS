@@ -664,6 +664,19 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle232 replays revalidation, transfer and five CPU profiles on corrected FAT32 media:16 fresh "
+    "guest runs,319 control groups,32768 differential cases and77 focused tests pass. Two WHPX "
+    "exception boots are separate from one expected TCG limitation probe. Component checks pass22/27 "
+    "but only13/27 source profiles are current;14 memory/IRQ/SMP/scheduler/atomic/lock profiles need "
+    "real replay beginning with physical_memory then virtual_memory. Historical dependency/ownership "
+    "groups no longer claim source currency. The original aggregate remains stale; full gates and "
+    "historical receipt-assertion reconciliation precede PR80 merge. Native executables and retained "
+    "demo ISO are unchanged; no phase or flag closes. Earlier projection counts are historical. "
+    + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:

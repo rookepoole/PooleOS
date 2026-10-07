@@ -3855,9 +3855,9 @@
         "sha256": "516A25590505C5E3C6850BE6DDA8F80673F2D3B2F1A7CC00C181B12C33C60AC7"
       },
       {
-        "byte_count": 65869,
+        "byte_count": 66467,
         "path": "runtime/native_pooleboot.py",
-        "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        "sha256": "90AC0DF5286FBFC9BE463C56928518BF3E4D85679DE37F82592CD5A81E56C9D3"
       },
       {
         "byte_count": 21493,
@@ -3882,12 +3882,12 @@
       {
         "byte_count": 17997,
         "path": "runs/native-kernel-revalidation-readiness.json",
-        "sha256": "8D35EAC9C8B39857ADC6A2B9596F698D628219996FF4C531176252930A8EC88E"
+        "sha256": "5DB8426D14B81635427FECB0EE49B8D163C3EC3152808146D47EEA73784B7AF9"
       },
       {
         "byte_count": 190245,
         "path": "runs/native_kernel_load_readiness.json",
-        "sha256": "CD0F9CFBA4472AE5F6BB98EE20D244447A4E50C276C39E9D81581132989C4B68"
+        "sha256": "D8285B4D2395D6F7A84E955752C2AEDA1FE705CF6EF4AB72BBAE6B2C7BB59A9F"
       }
     ],
     "tier0_lock": {
@@ -4258,7 +4258,7 @@
         "protective_mbr_valid": true,
         "sector_bytes": 512,
         "sector_count": 131072,
-        "sha256": "A08C73BCED8E5E0BAF375696F975385CB8EC657C07DA260C64C53A9E9CA4FFDA"
+        "sha256": "2DE22C3BE256E35DAA7DCE7567D2E4556D94D66423ABC330FFBE0D9CC52DAF95"
       },
       "initial_system": {
         "activation_allowed": false,
@@ -4673,7 +4673,7 @@
     },
     "ordinary_workspace_file_only": true,
     "physical_media_write_performed": false,
-    "sha256": "A08C73BCED8E5E0BAF375696F975385CB8EC657C07DA260C64C53A9E9CA4FFDA"
+    "sha256": "2DE22C3BE256E35DAA7DCE7567D2E4556D94D66423ABC330FFBE0D9CC52DAF95"
   },
   "n7_exit_gate_satisfied": false,
   "negative_controls": [
@@ -4910,7 +4910,7 @@
   "schema_version": "1.0",
   "selected_move_id": "N7-CPU-POLICY-001",
   "status": "pass_single_host_two_run_qemu64_read_only_non_promoting",
-  "status_date": "2026-10-04",
+  "status_date": "2026-10-07",
   "summary": {
     "actions_authorized": 0,
     "authority_grants": 0,

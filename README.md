@@ -11,7 +11,16 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. All 63 source-branch commits remain cloud-backed; they are not pending
 main merges. This is a development baseline, not a production release.
 
-**Current development checkpoint:** Cycle 231 repairs the generated EFI FAT32
+**Current development checkpoint:** Cycle 232 replays kernel revalidation,
+boot-to-kernel transfer and five CPU profiles on the corrected FAT32 media.
+All 16 fresh guest runs, 319 control groups and 77 focused regression tests pass.
+Source-current coverage is 13/27 profiles; 14 memory, interrupt, SMP, scheduling,
+atomic and lock profiles still require replay. Component checks pass 22/27;
+the aggregate source guard correctly remains blocked. Next: physical memory,
+then virtual memory and the remaining dependencies. Native executable bytes and
+the retained demo ISO are unchanged. [Evidence](docs/checkpoints/cycle232-corrected-media-boot-and-cpu-replay.md).
+
+**Historical development checkpoint:** Cycle 231 repairs the generated EFI FAT32
 root-parent link and validates directory dot entries. All 26 focused tests and
 four fresh loader/PooleBoot QEMU runs pass. Twenty-one dependent profiles still
 need replay: the aggregate source guard correctly rejects the stale evidence.

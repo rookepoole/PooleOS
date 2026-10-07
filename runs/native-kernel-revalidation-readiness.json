@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_kernel_revalidation_readiness",
-  "status_date": "2026-10-04",
+  "status_date": "2026-10-07",
   "status": "pass_single_host_fail_closed_non_promoting",
   "contract_id": "PKREVAL1",
   "selected_move_id": "N5-INNER-KERNEL-REVALIDATE-001",
@@ -176,7 +176,7 @@
     "rustc": "rustc.exe",
     "host_test_count": 246,
     "format_check": "pass",
-    "host_probe_sha256": "E17A5D5E29F7F0AF14F1E20A9CDA788EBAFE75AF7D387C13299340EE5D3F9A8F",
+    "host_probe_sha256": "C66F672BAAD85B8F6727857B38A6894ECA7663A240AABC014A7D4AB8A80134B7",
     "targets": {
       "x86_64-unknown-none": {
         "package": "poolekernel",

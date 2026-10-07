@@ -10751,7 +10751,7 @@ def apply_cycle231(roadmap: dict, test_count: int) -> dict:
         "status": "writer_and_bare_inspector_repaired_dependent_replay_partial",
         "blocks_merge_qualification": True, "root_parent_cluster": 0,
         "dot_entries_checked": 4, "field_mutations_rejected": 17, "slot_mutations_rejected": 4,
-        "new_tests": 5, "source_test_inventory": test_count,
+        "new_tests": 5, "source_test_inventory": 1233,
         "expected_red_failures": 24,
         "red_log_sha256": "07D130745A0EF68A8465C85846450E45772B2549D870ED220657DD18F4017861",
         "initial_qualification_failure": "new_loop_name_shadowed_ESP_label_JSON_bytes_TypeError",
@@ -10801,13 +10801,158 @@ def apply_cycle231(roadmap: dict, test_count: int) -> dict:
     next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N5-FAT32-PARENT-001")["evidence"].insert(0, checkpoint)
     roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle232(roadmap, test_count)
+
+
+def apply_cycle232(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle232-corrected-media-boot-and-cpu-replay.md"
+    move = "N5-FAT32-PARENT-001"
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for key in ("current_candidate_audit", "current_focused_source_projection",
+                "current_execution_source_qualification", "current_closeout_regression",
+                "current_boot_chain_qualification", "current_cpu_qualification",
+                "current_dependency_qualification", "current_ownership_qualification"):
+        suffix = "source_projection" if key == "current_focused_source_projection" else key.removeprefix("current_")
+        gate["historical_cycle231_" + suffix] = copy.deepcopy(gate[key])
+    roadmap["baseline"]["pooleos_cycle"] = 232
+    roadmap["execution_protocol"].update(last_updated_cycle=232, selected_move_id=move,
+                                         owner_independent_next_move_id=move)
+    roadmap["execution_protocol"]["required_records"].insert(0, checkpoint)
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=232)
+    gate["qualification_status"] = "corrected_media_boot_CPU_current_fourteen_source_replays_pending"
+    rows = (
+        ("revalidation", "5DB8426D14B81635427FECB0EE49B8D163C3EC3152808146D47EEA73784B7AF9", 0, 36, 25.938,
+         "A241574365E43C16D05D7D059E5D2DF662F24D5D5A58A65536FB8528DE34177D", "887DD74F576EAE8E3F7245A29D5AE907FB55F9077434344822D184F8E4081578"),
+        ("transfer", "C7D5317A580F02373D29E9CCFEB7914BE2F296B929E4F7A0A08C3BC1DC8B5528", 2, 58, 73.906,
+         "2768BD9CAC9B6A51E7707A696EFA9CA5EF53E4E9E04033EABF9EBA626E7DC6DC", "F5710D58539A57BC530B7FA42E6E642F9230589F778DB0D960F62FCA9FBA1B47"),
+        ("trap", "1E50D5BF5314BE0ED6126440B845E1E6BA2C1691959EA393C158AB87E6F7DF69", 6, 51, 105.407,
+         "A7D909C2B3CCFF4B54B6D332F6507A8FAC16CD007F7A832C3C16D328A4486BB4", "D1E6B35D8ED35D3B3C3AB4FC8BD587CF13A6BDC7FBC6127A1EECBB54290E4A91"),
+        ("cpu_policy", "33D84A43ABAB2632A2B95EDF8A5B5BE9C92159BD96316A1E6EEC8FDCC5994C5B", 2, 41, 66.657,
+         "CFA41675A79CE67949D1FDB8D08F791EB2FD1115237010D33465135306D1CE23", "9A60000F6EA568FDD57F4C4F946F88A6DE2CD1AE4507778C29CE6A71209EDA86"),
+        ("xstate_policy", "788E6512D38C85FE664695F62EBBE8F89FFF81C273B2C18C1FE5532EBFF7DF6D", 2, 43, 76.031,
+         "4260145CE808D54618100843E5797A22DAFA156F94093C1D222D6D99730A162A", "CAEE401863D2F80062902BB629A009268FFA1C3A2E9433E8A144BB78B1C33C1F"),
+        ("xstate_exception", "C4A2D365C751964656BD13E867DCACC81E68AE2B848F1917CE7E29D893AD8A92", 2, 43, 79.187,
+         "F3ED8801D7E59F458EBE9E20B63EED505D5DEF7034E3E58654DA297E074BF60D", "CD3FB7D187FF204E3C9C80D51B8D770C9802C7ABF60E7C3DB4558B2862671A4A"),
+        ("privilege_msr_policy", "3A2ABCC61F7F2A5B8EC6DAEC130F17656021DE45A10583D92A6C693494282694", 2, 47, 76.844,
+         "9B9A31059D4151F9B9A62622272025F3EDB8EEF33A8C29EEA6267DBE5A72AE32", "00315B9691A0FD0DDD6BD9207696FC23703CBB53659C5236D8125ADA93F348FB"),
+    )
+    bindings = [dict(profile=p, path="runs/native-kernel-" + p.replace("_", "-") + "-readiness.json",
+        sha256=digest, fresh_runs=runs, negative_controls=controls, elapsed_seconds=elapsed,
+        execution_log_sha256=log, original_capture_sha256=capture, kernel_host_tests=246)
+        for p, digest, runs, controls, elapsed, log, capture in rows]
+    pending = gate["current_execution_source_qualification"]["pending_source_profiles"][7:]
+    assert pending[0] == "physical_memory" and len(pending) == 14
+    failed = ["native_kernel_physical_memory_readiness", "native_kernel_virtual_memory_readiness",
+              "native_kernel_smp_ipi_readiness", "native_kernel_atomics_readiness", "native_kernel_locks_readiness"]
+    all_names = gate["historical_cycle230_focused_source_projection"]["passing_profiles"]
+    projection = gate["current_focused_source_projection"]
+    projection.update(cycle=232, passed_checks=22, pending_downstream_native_checks=5,
+        passing_profiles=[name for name in all_names if name not in failed], failed_profiles=failed,
+        source_current_profiles=13, pending_source_profiles=pending,
+        final_receipt_fresh_qemu_runs=16, kernel_entry_runs=16,
+        run_count_scope="Cycle232_sixteen_passing_guest_runs_plus_one_separate_expected_TCG_limitation_probe",
+        focused_python_tests_passed=77,
+        recorded_evidence_rejection_cases=371,
+        required_next_gate="physical_memory_then_virtual_memory_IRQ_SMP_scheduler_atomics_locks_real_replays")
+    source = gate["current_execution_source_qualification"]
+    source.update(cycle=232, source_current_profiles=13, pending_source_profiles=pending,
+        fresh_profile_captures_available=["load", "pooleboot"] + [r[0] for r in rows],
+        fresh_qemu_runs=16, next_profile="physical_memory",
+        aggregate_source_guard_passed=False, newly_captured_profiles=7,
+        capture_count_scope="nine_available_original_captures_across_Cycles231_232_four_unaffected_profiles",
+        old_profile_group_claims_require_current_source_guard=True)
+    boot = gate["current_boot_chain_qualification"]
+    refresh = {"kernel_" + b["profile"]: dict(b, profile="kernel_" + b["profile"]) for b in bindings[:2]}
+    for profile, key in (("kernel_load", "load"), ("pooleboot", "pooleboot")):
+        row = gate["current_fat_directory_repair"][key]
+        refresh[profile] = dict(profile=profile,
+            path="runs/native_kernel_load_readiness.json" if key == "load" else "runs/native_pooleboot_readiness.json",
+            sha256=row["receipt_sha256"], fresh_runs=2, negative_controls=155,
+            execution_log_sha256=row["log_sha256"], original_capture_sha256=row["capture_sha256"],
+            elapsed_seconds=row["elapsed_seconds"], execution_cycle=231)
+    boot.update(cycle=232, source_validation_cycle=232, fresh_profiles=["kernel_revalidation", "kernel_transfer"],
+        fresh_qemu_runs=2, kernel_entry_runs=2,
+        retained_component_profiles=["symbol", "policy", "kernel_load", "pooleboot"],
+        retained_component_execution_cycles={"symbol": 217, "policy": 217, "kernel_load": 231, "pooleboot": 231},
+        run_count_scope="two_fresh_transfer_runs_Cycle232_prior_loader_boot_runs_not_recounted",
+        previous_focused_regression_record="historical_cycle231_closeout_regression")
+    boot.pop("retained_component_execution_cycle", None)
+    boot["receipt_bindings"] = [refresh.get(b["profile"], b) for b in boot["receipt_bindings"]]
+    cpu = gate["current_cpu_qualification"]
+    cpu.update(cycle=232, source_validation_cycle=232, receipt_bindings=bindings[2:],
+        scope="five_N7_profiles_on_corrected_FAT_media_unchanged_Cycle216_kernel",
+        focused_python_tests=77, focused_python_scope="boot_CPU_provenance_terminal_capture_FAT",
+        superseded_initial_runs=0)
+    dependency = gate["current_dependency_qualification"]
+    dependency.update(cycle=232, source_validation_cycle=232,
+        status="retained_historical_execution_fourteen_corrected_media_replays_pending",
+        scope="historical_behavior_does_not_establish_current_source_or_media_execution",
+        applies_to_current_source=False, all_fourteen_profiles_current=False,
+        qualified_profiles=[], newly_qualified_profiles=[], readiness_replay_required_profiles=pending,
+        fresh_qemu_runs=0, run_count_scope="no_downstream_fresh_runs_in_Cycle232",
+        retained_metrics_record="historical_cycle231_dependency_qualification")
+    ownership = gate["current_ownership_qualification"]
+    ownership.update(cycle=232, fresh_current_cycle_qemu_runs=0,
+        live_receipt_source_current=False, virtual_memory_live_receipt_source_current=False,
+        current_boot_artifact_set_replay_pending=True, active_root_current_image_replay_complete=False,
+        source_current_scope="core216_retained_but_VM_IPI_corrected_media_replay_pending",
+        historical_record="historical_cycle231_ownership_qualification")
+    gate["current_closeout_regression"] = dict(cycle=232, status="pass",
+        scope="boot_CPU_provenance_terminal_capture_FAT_not_full_canonical",
+        tests_run=77, tests_passed=77, tests_failed=0, tests_skipped=0,
+        elapsed_seconds=176.173, runner_elapsed_seconds=177.078,
+        log_sha256="E57E6A9702BEC9A59D0D790BB1ABFAFCA2B284EE638650979160E45C24389A87",
+        source_unchanged_during_execution=True, owner_report_unchanged=True,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_corrected_media_replay"] = dict(cycle=232, requirement_id="ADD-N5-FAT32-PARENT-001",
+        status="seven_profiles_replayed_fourteen_pending", receipt_bindings=bindings,
+        fresh_successful_guest_runs=16, negative_control_groups=319,
+        revalidation_differential_cases=32768, whpx_exception_runs=2, expected_tcg_limitation_probes=1,
+        original_source_snapshots_required=True, original_aggregate_source_record_unchanged=True,
+        blocks_merge_qualification=True, native_kernel_changed=False, native_EFI_products_changed=False,
+        retained_demo_changed=False, production_ready=False,
+        broad_regression=dict(status="fail_pending_replay_and_historical_assertion_reconciliation",
+            tests_run=71, tests_failed=17, tests_skipped=0,
+            elapsed_seconds=23.766, runner_elapsed_seconds=24.578,
+            log_sha256="3E4D7FE6CC49B192EFB7B04B08C43C2F9309BED438BB11F9E542C5D9423D3165",
+            scope="architecture_and_all_roadmap_tests_not_full_canonical",
+            guards_relaxed=False, source_unchanged=True, owner_report_unchanged=True),
+        conservation_repair=dict(initial_failure="current_fat_directory_repair_source_test_inventory_changed",
+            historical_cycle231_inventory=1233, current_cycle232_inventory=1234,
+            historical_inventory_frozen=True),
+        receipt_delta_diagnostic=dict(initial_failure="assumed_identical_xstate_exception_execution_fields",
+            changed_TCG_diagnostic_hash_retained=True, changed_host_probe_hash_retained=True,
+            changed_disassembly_text_hashes_retained=True, all_control_records_unchanged=True,
+            deterministic_log_equality_is_fresh_execution_proof=False))
+    evidence = (
+        "Cycle 232: " + checkpoint + " replays revalidation, transfer and five CPU profiles on corrected "
+        "FAT media. Sixteen fresh guest runs and319 control groups pass;32768 revalidation differential "
+        "cases agree. Seventy-seven focused tests pass with original source and owner snapshots preserved. "
+        "Two WHPX exception boots pass; the separate expected TCG limitation probe is not a successful "
+        "exception-delivery run. Native kernel/EFI products and the retained demo remain unchanged."
+    )
+    gap = (
+        "Measured component checks pass22/27, while13/27 source profiles are current. Fourteen memory, "
+        "IRQ, SMP, scheduler, atomic and lock profiles require real replay beginning with physical_memory "
+        "then virtual_memory. Historical dependency/ownership groups are explicitly not current. The "
+        "original aggregate source record remains stale and blocks qualification. Reconcile historical "
+        "receipt assertions and run all exact-candidate/publication/GitHub gates before main merge; "
+        "no phase, flag, signed ISO or production gate closes."
+    )
+    for phase_id in ("N5", "N7"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N5-FAT32-PARENT-001")["evidence"].insert(0, checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1233)
+    parser.add_argument("--test-count", type=int, default=1234)
     parser.add_argument("--status-date", default="2026-10-07")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

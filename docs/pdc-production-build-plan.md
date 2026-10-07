@@ -1,15 +1,56 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-07
-Plan version: 2.134.0-fat32-directory-links
-Roadmap cycle: PooleOS Cycle 231
+Plan version: 2.135.0-corrected-media-boot-cpu-replay
+Roadmap cycle: PooleOS Cycle 232
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 231: FAT32 Directory Links
+## Cycle 232: Corrected Media Boot And CPU Replay
+
+N5.1/N5.8 / `N5-FAT32-PARENT-001`, existing `ADD-N5-FAT32-PARENT-001`
+and open flag, with dependent N7.1/N7.3/N7.4/N7.5/N7.6 replay. Seven fresh
+qualifications pass: host revalidation, boot-to-kernel transfer, traps, CPU
+policy, x87/SSE state ownership, floating-point exceptions and privilege/MSR
+observation. Sixteen guest runs and 319 control groups pass. Revalidation also
+agrees across 32,768 Rust/Python differential cases. The 77-test focused suite
+passes, including malformed recorded evidence, source identity, terminal-capture
+failures and FAT directory regressions. All source/owner snapshots are preserved.
+
+The broader architecture/roadmap run has 17 failures among 71 tests, from stale
+downstream/source bindings and historical assertions awaiting reconciliation.
+Its failed log is preserved. A separate conservation failure exposed historical
+test-count drift; Cycle 231's inventory is now frozen at 1,233 while Cycle 232
+discovers 1,234. No runtime gate is relaxed. Branch backup does not require merge.
+
+The two WHPX exception runs demonstrate bounded recovery and terminal test-only
+rejection. The separate expected TCG limitation probe is not counted as successful
+exception delivery. An additional receipt-delta diagnostic initially assumed all
+execution fields would be identical; the changed TCG diagnostic hash disproved
+that assumption. Host-probe and disassembly text hash changes are also retained.
+Native kernel and EFI product identities match their predecessors; deterministic
+summary logs alone are not used as freshness evidence.
+
+Measured component checks pass 22/27. Source-current coverage is 13/27, with
+14 pending profiles: physical/virtual memory, interrupt/time, first AP, per-CPU
+runtime, SMP IPI, scheduler, preemption, deferred work, SMP scheduler, AP workers,
+SMP preemption, atomics and locks. Current dependency/ownership progress explicitly
+marks their old execution evidence as historical, not source-current. The original
+aggregate capture remains unchanged and rejects stale evidence. Its reconstruction
+must use actual successful captures after all affected profiles have replayed.
+
+Next: physical memory, then virtual memory, IRQ/SMP and scheduler dependencies.
+Reconcile historical receipt assertions and run exact-candidate canonical,
+publication and GitHub/review gates before merging PR #80. No full-candidate pass
+is claimed. Main remains qualified through Cycle 230. Native executable bytes,
+retained demo ISO, all 8,996 requirements/59 additions, 96 flags/41 open and the
+normative charter are preserved. No phase or flag closes.
+[Evidence](checkpoints/cycle232-corrected-media-boot-and-cpu-replay.md).
+
+## Cycle 231: FAT32 Directory Links (Historical)
 
 N5 / `N5-FAT32-PARENT-001`, existing `ADD-N5-FAT32-PARENT-001` and open
 `FLAG-N5-FAT32-PARENT-001`: repair the writer's EFI parent entry from cluster 2

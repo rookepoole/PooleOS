@@ -1104,7 +1104,7 @@
       "canonical_sha256": "FD6C2A0C709957B9EDFFC0647D534E060ED68215C075F07D70AB2AEBCA6C81D1",
       "disassembler": "LLVM version 22.1.6-rust-1.97.0-stable",
       "disassembly_byte_count": 4857967,
-      "disassembly_sha256": "AC753701CB377AC2621E6AA96FCFBC87A151E77D499552C02FD03FEA7A3ED63B",
+      "disassembly_sha256": "75BBB213994D34ED05EE7AB048E0727F39C8AF0E3EC9F4191E6884D41127240A",
       "extended_vector_instruction_count": 0,
       "handler_recovery_instruction_counts": {
         "fninit": 1,
@@ -4270,7 +4270,7 @@
       "cpu_model": "EPYC-Rome-v4,-avx,-avx2,-fma,-f16c,-pku",
       "cr4_osxmmexcpt_set": true,
       "debugcon_byte_count": 145356,
-      "debugcon_sha256": "FB4FC357850A9B4B04E46804ABAC78D72DC11A9FDB6BB0D9E597581716B7CE8B",
+      "debugcon_sha256": "6DC6A3B376200239478EAE3A16FF3949ECF429F4AEAEF1AD6A553CA72C34CE85",
       "mxcsr_after_undelivered_divss": 7937,
       "mxcsr_invalid_mask_clear": true,
       "mxcsr_invalid_status_set": true,
@@ -4836,7 +4836,7 @@
         "protective_mbr_valid": true,
         "sector_bytes": 512,
         "sector_count": 131072,
-        "sha256": "F3E774F233132E8103E26F9838FC1E69CAECDBCDA6DFA9F6C8969E71E6E366E8"
+        "sha256": "4FA356895B9F74E4867322A0FEC2E585FA5B38B989F3CB21F99EB8560E3D7E22"
       },
       "initial_system": {
         "activation_allowed": false,
@@ -5251,7 +5251,7 @@
     },
     "ordinary_workspace_file_only": true,
     "physical_media_write_performed": false,
-    "sha256": "F3E774F233132E8103E26F9838FC1E69CAECDBCDA6DFA9F6C8969E71E6E366E8"
+    "sha256": "4FA356895B9F74E4867322A0FEC2E585FA5B38B989F3CB21F99EB8560E3D7E22"
   },
   "n7_exit_gate_satisfied": false,
   "negative_controls": [
@@ -5496,7 +5496,7 @@
   "schema_version": "1.0",
   "selected_move_id": "N7-XSTATE-EXCEPTION-001",
   "status": "pass_single_host_two_run_bsp_x87_simd_exception_non_promoting",
-  "status_date": "2026-10-04",
+  "status_date": "2026-10-07",
   "summary": {
     "actions_authorized": 0,
     "authority_grants": 0,

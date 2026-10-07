@@ -7,9 +7,16 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 231
+Last roadmap reconciliation: PooleOS Cycle 232
 
-Cycle 231 repairs the FAT32 media writer and bare directory inspector, with 26
+Cycle 232 replays revalidation, transfer and five CPU profiles on corrected FAT32
+media: 16 fresh guest runs, 319 control groups and 77 focused tests pass. Source
+coverage is 13/27 current, with 14 downstream profiles pending; the aggregate
+source guard remains stale. Native executable bytes, the retained demo ISO and
+normative production requirements are unchanged. No phase or flag closes.
+[Cycle 232 evidence](checkpoints/cycle232-corrected-media-boot-and-cpu-replay.md).
+
+Historical Cycle 231 repairs the FAT32 media writer and bare directory inspector, with 26
 focused tests and four fresh loader/PooleBoot QEMU runs passing. Twenty-one source
 profiles still require replay; the original aggregate source guard remains stale
 and blocks qualification. Cycle 230 is merged via PR #79 after exact 106/106

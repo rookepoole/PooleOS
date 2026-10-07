@@ -3652,12 +3652,12 @@
       {
         "byte_count": 17997,
         "path": "runs/native-kernel-revalidation-readiness.json",
-        "sha256": "8D35EAC9C8B39857ADC6A2B9596F698D628219996FF4C531176252930A8EC88E"
+        "sha256": "5DB8426D14B81635427FECB0EE49B8D163C3EC3152808146D47EEA73784B7AF9"
       },
       {
         "byte_count": 190245,
         "path": "runs/native_kernel_load_readiness.json",
-        "sha256": "CD0F9CFBA4472AE5F6BB98EE20D244447A4E50C276C39E9D81581132989C4B68"
+        "sha256": "D8285B4D2395D6F7A84E955752C2AEDA1FE705CF6EF4AB72BBAE6B2C7BB59A9F"
       }
     ],
     "tier0_lock": {
@@ -4028,7 +4028,7 @@
         "protective_mbr_valid": true,
         "sector_bytes": 512,
         "sector_count": 131072,
-        "sha256": "BDC5E1EBE1BC2FBF61B6A12061364BF85349924E8B789E44279DFF137B7A151A"
+        "sha256": "BCAEECDF5342E34A92480AD2069668D95E4456E353F3ADE782D5886F7BAC3286"
       },
       "initial_system": {
         "activation_allowed": false,
@@ -4443,7 +4443,7 @@
     },
     "ordinary_workspace_file_only": true,
     "physical_media_write_performed": false,
-    "sha256": "BDC5E1EBE1BC2FBF61B6A12061364BF85349924E8B789E44279DFF137B7A151A"
+    "sha256": "BCAEECDF5342E34A92480AD2069668D95E4456E353F3ADE782D5886F7BAC3286"
   },
   "n5_exit_gate_satisfied": false,
   "negative_controls": [
@@ -4884,7 +4884,7 @@
   "schema_version": "1.0",
   "selected_move_id": "N5-KERNEL-TRANSFER-001",
   "status": "pass_single_host_two_run_qemu_only_unsigned_terminal_non_promoting",
-  "status_date": "2026-10-04",
+  "status_date": "2026-10-07",
   "summary": {
     "actions_authorized": 0,
     "authority_grants": 0,

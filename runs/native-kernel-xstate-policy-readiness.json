@@ -4455,7 +4455,7 @@
         "protective_mbr_valid": true,
         "sector_bytes": 512,
         "sector_count": 131072,
-        "sha256": "417AEB0E23B16E23779944EFC82F894989D99003C3F610FF9A2C24B515A3F7CB"
+        "sha256": "F0356B61FBA9017A05C800D84DC8D48A9D65D0C28527A9417B7B9BB7CE337BD7"
       },
       "initial_system": {
         "activation_allowed": false,
@@ -4870,7 +4870,7 @@
     },
     "ordinary_workspace_file_only": true,
     "physical_media_write_performed": false,
-    "sha256": "417AEB0E23B16E23779944EFC82F894989D99003C3F610FF9A2C24B515A3F7CB"
+    "sha256": "F0356B61FBA9017A05C800D84DC8D48A9D65D0C28527A9417B7B9BB7CE337BD7"
   },
   "n7_exit_gate_satisfied": false,
   "negative_controls": [
@@ -5118,7 +5118,7 @@
   "schema_version": "1.0",
   "selected_move_id": "N7-XSTATE-POLICY-001",
   "status": "pass_single_host_two_run_bsp_x87_sse_non_promoting",
-  "status_date": "2026-10-04",
+  "status_date": "2026-10-07",
   "summary": {
     "actions_authorized": 0,
     "authority_grants": 0,
