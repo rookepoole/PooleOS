@@ -1,15 +1,27 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-10-04
+Status date: 2026-10-07
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 223
+Last roadmap reconciliation: PooleOS Cycle 224
 
-Cycle 223 repairs atomics admission and comment-spoofable instruction auditing.
+Cycle 224 repairs lock evidence admission and qualifies two final four-vCPU
+boots on unchanged kernel216. All27 selected native checks and21 focused tests
+pass; both gates reject631 corrupted records. Three disabled validators are
+detected. Diagnostic invalid admissions and exceptions remain preserved.
+Next N36 shared-helper binding review and full exact-candidate gates before
+main merge. No normative requirement, phase/flag, native byte, ISO or production
+change. [Cycle 224 evidence](checkpoints/cycle224-locks-admission-and-current-kernel-replay.md).
+Final timeout-cleanup regression passes 137/137 and conservation passes. All 14
+static helper closures match preserved execution snapshots; runtime enforcement
+and broader dependency review remain pending. Initial metadata failures remain
+recorded; normative completion conditions are unchanged.
+
+Historical Cycle 223 repairs atomics admission and comment-spoofable instruction auditing.
 Two final one-BSP boots and22 focused tests pass;356 corrupted receipts reject.
 Eight disabled native guards are detected at optimization0 and3. Original
 defects and an invalid no-op test mutation remain preserved. Readiness26/27

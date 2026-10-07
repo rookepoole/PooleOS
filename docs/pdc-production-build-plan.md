@@ -1,15 +1,46 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-10-04
-Plan version: 2.126.0-atomics-admission-and-instruction-audit
-Roadmap cycle: PooleOS Cycle 223
+Status date: 2026-10-07
+Plan version: 2.127.0-locks-admission-and-current-kernel-replay
+Roadmap cycle: PooleOS Cycle 224
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 223: Atomics Admission and Instruction Audit
+## Cycle 224: Locks Admission and Current-Kernel Replay
+
+`N12-CONCURRENCY-LOCKS-001`, N12.2/N36, advances existing
+`ADD-N12-CONCURRENCY-LOCKS-001` and `ADD-N36-RECEIPT-COVERAGE-001`.
+Recorded admission now reconstructs both runs, typed controls, host probes,
+source/tool identities and boot/media/kernel consistency. Malformed records
+reject without exceptions; empty controls reject and host probes are bounded.
+Two final four-vCPU boots pass 30 groups/103 cases and 246 kernel tests.
+The 21-test focused suite passes without skips, including all-profile entry
+provenance; 631 corrupted records reject through both admission paths and
+three disabled validators are detected. Final timeout-cleanup regression passes
+137/137 without skips. All 14 static helper closures match the preserved successful
+producer snapshots; runtime enforcement and broader dependency review remain
+pending. Original failures are retained.
+[Cycle 224 evidence](checkpoints/cycle224-locks-admission-and-current-kernel-replay.md).
+
+All **27/27 selected native checks** pass. Next **N36-RECEIPT-COVERAGE-001**:
+shared-helper transitive-binding review, then full exact-candidate canonical,
+Doctor, release, publication and GitHub/review gates before main merge.
+This does not close N36 or any phase/flag. All27 parent progress records and
+the exact historical lock receipt are preserved. Inventory1163 tests and382
+source bindings. Native code, demo ISO, checklist and PooleGlyph boundaries
+are unchanged. N0 custody, N5 authentication, full task state, general retirement,
+hardware, independent builders and signed production media remain open.
+The corrected combined regression passes **137/137**, zero skips, including71
+metadata tests. Three initial stale metadata assertions remain recorded as failed.
+Conservation passes. A preliminary14-profile import inventory identifies20-27
+missing explicit helper bindings per profile with no stale recorded hashes.
+Reconcile existing execution snapshots and dependency receipts before deciding
+replay scope; this inventory alone does not prove the executions used wrong code.
+
+## Historical Cycle 223: Atomics Admission and Instruction Audit
 
 `N12-CONCURRENCY-ATOMICS-001`, N12.1/N36, advances
 `ADD-N12-CONCURRENCY-ATOMICS-001` and `ADD-N36-RECEIPT-COVERAGE-001`.

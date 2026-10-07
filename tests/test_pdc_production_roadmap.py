@@ -154,8 +154,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 223)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1157)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 224)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1163)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -195,8 +195,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "atomics_admission_and_instruction_audit_repaired_locks_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 223)
+        self.assertEqual(current["qualification_status"], "all_selected_profiles_current_shared_binding_review_and_full_gate_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 224)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -712,8 +712,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertEqual(json.dumps(embedded_entry, sort_keys=True, allow_nan=False),
                              json.dumps(receipt, sort_keys=True, allow_nan=False))
         self.assertNotEqual(record["entry_receipt_sha256"], current["historical_cycle208_entry_provenance_qualification"]["entry_receipt_sha256"])
-        # Lock evidence still belongs to the older kernel.
-        embedded_entry = json.loads((ROOT / "runs/native-kernel-locks-readiness.json").read_text(encoding="utf-8"))["build"]["kernel_entry"]
+        current_lock_entry = json.loads((ROOT / "runs/native-kernel-locks-readiness.json").read_bytes())["build"]["kernel_entry"]
+        self.assertEqual(json.dumps(current_lock_entry, sort_keys=True), json.dumps(receipt, sort_keys=True))
+        # Retain the exact old entry instead of repurposing current evidence as history.
+        embedded_entry = json.loads((ROOT / "tests/fixtures/cycle181-locks-readiness.json").read_bytes())["build"]["kernel_entry"]
         self.assertIn("readiness input bindings are stale", entry.readiness_errors(embedded_entry, ROOT))
         self.assertNotEqual(json.dumps(embedded_entry, sort_keys=True, allow_nan=False), json.dumps(receipt, sort_keys=True, allow_nan=False))
         retained = (json.dumps(embedded_entry, indent=2, sort_keys=True) + "\n").encode()
@@ -730,7 +732,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(record["applies_to_current_source"])
         self.assertEqual(record["source_binding_count"], len(inputs))
         self.assertTrue(record["exact_receipt_and_product_reproduction_passed"])
-        self.assertEqual(record["latest_reproduction_cycle"], 223)
+        self.assertEqual(record["latest_reproduction_cycle"], 224)
         repaired = current["historical_cycle185_closeout_regression"]
         self.assertEqual((repaired["tests_run"], repaired["tests_passed"], repaired["tests_failed"]), (50, 50, 0))
         self.assertEqual(repaired["initial_combined_closeout"]["tests_failed"], 2)
@@ -807,7 +809,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(current["historical_cycle174_source_projection"]["passed_checks"], 24)
         self.assertEqual(current["historical_cycle180_source_projection"]["passed_checks"], 13)
         self.assertEqual(current["historical_cycle192_source_projection"]["passed_checks"], 9)
-        self.assertEqual(current["current_focused_source_projection"]["passed_checks"], 26)
+        self.assertEqual(current["current_focused_source_projection"]["passed_checks"], 27)
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
 
     def test_task_stack_qualification_is_host_only_and_source_bound(self) -> None:
@@ -903,7 +905,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual((qualification["memory_gate_rejection_cases"], qualification["host_identity_gate_rejection_cases"]), (20, 38))
         encoded = json.dumps(qualification, sort_keys=True, separators=(",", ":")).encode()
         self.assertEqual(hashlib.sha256(encoded).hexdigest().upper(), "EE9761DF55364B20C4AB55877816B41E54C11AC460D01348A4C22CC7101173DB")
-        self.assertFalse(current["current_dependency_qualification"]["all_fourteen_profiles_current"])
+        self.assertTrue(current["current_dependency_qualification"]["all_fourteen_profiles_current"])
         qualification = current["historical_cycle181_dependency_qualification"]
         self.assertEqual((qualification["cycle"], qualification["source_validation_cycle"]), (181, 181))
         self.assertEqual(qualification["status"], "live_replay_pass_control_execution_incomplete")
@@ -982,10 +984,13 @@ class PdcProductionRoadmapTests(unittest.TestCase):
                     self.assertEqual(module.readiness_errors(json.loads(raw), ROOT), [])
                     self.assert_current_gate_projection(pooleos_release_gate.check_native_kernel_atomics_readiness())
                     continue
+                self.assertEqual(profile, "locks")
+                self.assertNotEqual(hashlib.sha256(raw).hexdigest().upper(), binding["sha256"])
+                self.assertEqual(module.readiness_errors(json.loads(raw), ROOT), [])
+                raw = (ROOT / "tests/fixtures/cycle181-locks-readiness.json").read_bytes()
                 self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), binding["sha256"])
                 receipt = json.loads(raw)
-                issues = module.readiness_errors(receipt, ROOT)
-                self.assertTrue(issues)
+                self.assertTrue(module.readiness_errors(receipt, ROOT))
                 entry = receipt["kernel_summary"]["entry_readiness"] if profile == "atomics" else receipt["build"]["kernel_entry"]
                 current_entry = json.loads((ROOT / "runs/native_kernel_entry_readiness.json").read_text(encoding="utf-8"))
                 self.assertNotEqual(json.dumps(entry, sort_keys=True, allow_nan=False), json.dumps(current_entry, sort_keys=True, allow_nan=False))
@@ -1002,13 +1007,13 @@ class PdcProductionRoadmapTests(unittest.TestCase):
                 self.assertEqual(sum(c.get("case_count", 1) for c in receipt["negative_controls"]), binding["negative_cases"])
                 name = "scheduler_preemption" if profile == "scheduler_preempt" else profile
                 check = getattr(pooleos_release_gate, "check_native_kernel_" + name + "_readiness")()
-                self.assertFalse(check["ok"], check["detail"])
+                self.assert_current_gate_projection(check)
         audit = current["current_control_execution_audit"]
-        self.assertEqual((audit["cycle"], audit["status"]), (223, "open"))
+        self.assertEqual((audit["cycle"], audit["status"]), (224, "open"))
         self.assertTrue(audit["blocks_merge_qualification"])
         self.assertFalse(audit["production_ready"])
         self.assertEqual(audit["requirement_id"], "ADD-N36-RECEIPT-COVERAGE-001")
-        self.assertEqual(audit["next_profile"], "locks")
+        self.assertEqual(audit["next_profile"], "shared_helper_transitive_bindings")
         self.assertEqual(len(audit["source_control_gaps"]), 0)
         self.assertEqual(sum(g["reported_case_count"] for g in audit["source_control_gaps"]), 0)
         for gap in audit["source_control_gaps"]:
@@ -1482,16 +1487,16 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         contract = ipi.read_json(ROOT / ipi.CONTRACT_RELATIVE)
         self.assertEqual(contract["mailbox_evidence"], mailbox.CONTRACT)
         gap = current["current_ipi_mailbox_oracle_gap"]
-        self.assertEqual(gap["status"], "bounded_oracle_verified_affected_dependency_replay_pending")
+        self.assertEqual(gap["status"], "bounded_oracle_verified_affected_dependency_replay_complete")
         self.assertTrue(gap["export_complete"])
         self.assertTrue(gap["host_independently_recomputes_checksums"])
         self.assertEqual((gap["context_word_count"], gap["baseline_word_count"], gap["runtime_word_count"]),
                          (len(mailbox.CONTEXT_FIELDS), len(mailbox.BASELINE_FIELDS), len(mailbox.RUNTIME_FIELDS)))
         self.assertTrue(gap["disabled_oracle_detected"])
-        self.assertTrue(gap["blocks_merge_qualification"])
+        self.assertFalse(gap["blocks_merge_qualification"])
         self.assertFalse(gap["authentication_proved"])
         self.assertFalse(gap["all_coherent_forgeries_excluded"])
-        self.assertEqual(gap["remaining_affected_profiles"], 1)
+        self.assertEqual(gap["remaining_affected_profiles"], 0)
         ownership = current["historical_cycle193_ownership_qualification"]
         self.assertEqual((ownership["cycle"], ownership["host_qualification_cycle"], ownership["live_replay_cycle"]), (192, 192, 192))
         self.assertEqual(ownership["smp_receipt_sha256"], binding["sha256"])
@@ -1519,7 +1524,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertEqual(getattr(pooleos_release_gate, "check_" + profile)()["ok"],
                              profile in current["current_focused_source_projection"]["passing_profiles"], profile)
         pending = current["current_dependency_qualification"]["readiness_replay_required_profiles"]
-        self.assertEqual(pending, ["locks"])
+        self.assertEqual(pending, [])
         for profile in pending:
             name = "scheduler_preemption" if profile == "scheduler_preempt" else profile
             self.assertFalse(getattr(pooleos_release_gate, "check_native_kernel_" + name + "_readiness")()["ok"], profile)
@@ -1543,7 +1548,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(historical["expected_tcg_limitation_probes"], 1)
         self.assertFalse(historical["production_ready"])
         self.assertFalse(current["current_cycle_full_canonical_audit_performed"])
-        self.assertEqual(current["current_focused_source_projection"]["pending_downstream_native_checks"], 1)
+        self.assertEqual(current["current_focused_source_projection"]["pending_downstream_native_checks"], 0)
         qualification = current["historical_cycle175_cpu_qualification"]
         encoded = json.dumps(qualification, sort_keys=True, separators=(",", ":")).encode()
         self.assertEqual(hashlib.sha256(encoded).hexdigest().upper(), "7636441DA8B930B2AC164056A6AE31E21BBB707074360FEDAF3885DB295D6B4C")
@@ -1712,7 +1717,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         historical = current["historical_cycle197_source_projection"]
         self.assertEqual((historical["passed_checks"], historical["pending_downstream_native_checks"]), (3, 24))
         projection = current["current_focused_source_projection"]
-        self.assertEqual((projection["passed_checks"], projection["pending_downstream_native_checks"]), (26, 1))
+        self.assertEqual((projection["passed_checks"], projection["pending_downstream_native_checks"]), (27, 0))
         previous = current["historical_cycle196_source_projection"]
         self.assertEqual((previous["passed_checks"], previous["pending_downstream_native_checks"]), (21, 6))
         names = previous["passing_profiles"] + ["native_kernel_" + p + "_readiness" for p in
@@ -3232,9 +3237,9 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         from runtime import native_kernel_atomics as profile
         from tests.test_native_atomics_admission import recorded_atomics_mutations
         gate = self.roadmap["baseline"]["native_consistency_release_gate"]
-        record = gate["current_dependency_qualification"]
+        record = gate["historical_cycle223_dependency_qualification"]
         old = gate["historical_cycle222_dependency_qualification"]
-        projection = gate["current_focused_source_projection"]
+        projection = gate["historical_cycle223_source_projection"]
         self.assertEqual((record["cycle"], projection["passed_checks"], projection["pending_downstream_native_checks"]), (223, 26, 1))
         self.assertEqual(record["receipt_bindings"][:-1], old["receipt_bindings"])
         self.assertEqual(record["qualified_profiles"], old["qualified_profiles"] + ["atomics"])
@@ -3260,6 +3265,40 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(projection["next_dependency_move_id"], "N12-CONCURRENCY-LOCKS-001")
         self.assertFalse(record["production_ready"])
 
+    def test_cycle224_lock_replay_preserves_history_and_closes_profile_replay(self) -> None:
+        from runtime import native_kernel_locks as profile
+        from tests.test_native_locks_admission import corrupted_records
+        gate = self.roadmap["baseline"]["native_consistency_release_gate"]
+        record = gate["current_dependency_qualification"]
+        prior = gate["historical_cycle223_dependency_qualification"]
+        projection = gate["current_focused_source_projection"]
+        self.assertEqual((record["cycle"], projection["passed_checks"], projection["pending_downstream_native_checks"]), (224, 27, 0))
+        self.assertEqual(record["receipt_bindings"][:-1], prior["receipt_bindings"])
+        self.assertEqual(record["qualified_profiles"], prior["qualified_profiles"] + ["locks"])
+        self.assertEqual(record["readiness_replay_required_profiles"], [])
+        self.assertTrue(record["all_fourteen_profiles_current"])
+        self.assertFalse(record["embedded_entry_provenance_replay_pending"])
+        binding = record["receipt_bindings"][-1]
+        raw = (ROOT / binding["path"]).read_bytes()
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), binding["sha256"])
+        receipt = json.loads(raw)
+        self.assertEqual(profile.readiness_errors(receipt), [])
+        self.assertTrue(pooleos_release_gate.check_native_kernel_locks_readiness()["ok"])
+        self.assertEqual(receipt["negative_controls"], profile.expected_controls())
+        self.assertEqual((binding["fresh_runs"], binding["negative_controls"], binding["hostile_cases"]), (2, 30, 103))
+        self.assertEqual(len(list(corrupted_records(receipt))), record["recorded_evidence_case_total"])
+        self.assertEqual(record["recorded_evidence_case_total"], 631)
+        audit = gate["current_locks_admission_qualification"]
+        self.assertEqual((audit["diagnostic_baseline"]["runtime_corruptions_accepted"], audit["diagnostic_baseline"]["gate_corruptions_accepted"]), (53, 32))
+        self.assertEqual((audit["diagnostic_baseline"]["runtime_exceptions"], audit["diagnostic_baseline"]["gate_exceptions"]), (6, 64))
+        self.assertEqual(hashlib.sha256((ROOT / audit["historical_fixture_path"]).read_bytes()).hexdigest().upper(), audit["historical_fixture_sha256"])
+        self.assertEqual(audit["disabled_validator_variants_detected"], 3)
+        self.assertFalse(audit["native_kernel_changed"])
+        self.assertFalse(audit["positive_receipt_rebound_in_tests"])
+        self.assertFalse(gate["current_closeout_regression"]["merge_qualified"])
+        self.assertEqual(projection["next_dependency_move_id"], "N36-RECEIPT-COVERAGE-001")
+        self.assertFalse(record["production_ready"])
+
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]
         charter_text = (ROOT / charter["path"]).read_text(encoding="utf-8")
@@ -3276,7 +3315,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N12-CONCURRENCY-ATOMICS-001")
+        self.assertEqual(protocol["selected_move_id"], "N12-CONCURRENCY-LOCKS-001")
+        self.assertIn("docs/checkpoints/cycle224-locks-admission-and-current-kernel-replay.md", protocol["required_records"])
         self.assertIn("docs/checkpoints/cycle223-atomics-admission-and-instruction-audit.md", protocol["required_records"])
         self.assertIn("docs/checkpoints/cycle221-current-kernel-smp-and-ap-worker-replay.md", protocol["required_records"])
         self.assertIn("docs/checkpoints/cycle220-current-kernel-scheduler-replay.md", protocol["required_records"])
@@ -3335,7 +3375,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertIn("docs/checkpoints/cycle172-task-stack-ownership.md", protocol["required_records"])
         self.assertEqual(
             protocol["owner_independent_next_move_id"],
-            "N12-CONCURRENCY-LOCKS-001",
+            "N36-RECEIPT-COVERAGE-001",
         )
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])

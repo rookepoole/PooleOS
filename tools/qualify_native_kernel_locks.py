@@ -67,6 +67,8 @@ def _invalid_value(marker: str, field: str) -> str:
 
 
 def _require_rejections(control_id: str, operations: list[Callable[[], Any]]) -> dict[str, Any]:
+    if not operations:
+        raise QualificationError(f"PKLOCK1 hostile control has no cases: {control_id}")
     for operation in operations:
         try:
             operation()
@@ -104,8 +106,7 @@ def _field_matrix(
 
 def _run_host_probe(toolchain_root: Path, target_dir: Path) -> dict[str, Any]:
     cargo, _, env = qualify_native_kernel_entry._toolchain(toolchain_root)
-    completed = subprocess.run(
-        [
+    command = [
             str(cargo),
             "run",
             "--locked",
@@ -121,16 +122,32 @@ def _run_host_probe(toolchain_root: Path, target_dir: Path) -> dict[str, Any]:
             HOST_TARGET,
             "--target-dir",
             str(target_dir),
-        ],
-        cwd=ROOT,
-        env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        check=False,
-        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-    )
-    output = completed.stdout.decode("utf-8", errors="replace").replace("\r\n", "\n")
-    if completed.returncode != 0:
+        ]
+    # File capture cannot wait forever on a pipe inherited by a stuck child.
+    with tempfile.TemporaryFile() as capture:
+        process = subprocess.Popen(
+            command, cwd=ROOT, env=env, stdout=capture, stderr=subprocess.STDOUT,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        try:
+            process.wait(timeout=180)
+        except subprocess.TimeoutExpired as error:
+            if sys.platform == "win32":
+                taskkill = Path(env.get("SystemRoot", "C:/Windows")) / "System32/taskkill.exe"
+                cleanup = subprocess.run(
+                    [str(taskkill), "/PID", str(process.pid), "/T", "/F"],
+                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False, timeout=10,
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                )
+                if cleanup.returncode != 0:
+                    raise QualificationError("PKLOCK1 host timeout; process-tree cleanup unconfirmed") from error
+            else:
+                process.kill()
+            process.wait(timeout=10)
+            raise QualificationError("PKLOCK1 host probe exceeded 180 seconds") from error
+        capture.seek(0)
+        output = capture.read().decode("utf-8", errors="replace").replace("\r\n", "\n")
+    if process.returncode != 0:
         raise QualificationError(f"PKLOCK1 host probe failed: {output[-3000:]}")
     result = locks.parse_probe_output(output)
     result.update(
@@ -715,6 +732,7 @@ def main(argv: list[str] | None = None) -> int:
         native_kernel_load.KernelLoadError,
         native_kernel_transfer.KernelTransferError,
         native_tier0.Tier0Error,
+        subprocess.TimeoutExpired,
     ) as error:
         print(f"NATIVE_KERNEL_LOCKS_QUALIFICATION FAIL {type(error).__name__}: {error}")
         return 1

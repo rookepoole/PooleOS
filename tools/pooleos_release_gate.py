@@ -592,6 +592,16 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 224 repairs lock recorded admission and qualifies two final four-vCPU boots on unchanged "
+    "kernel216. All27 selected native checks and21 focused tests pass; both gates reject631 corrupted "
+    "records and detect three disabled validators. Earlier diagnostic invalid admissions/exceptions "
+    "are preserved. Next N36-RECEIPT-COVERAGE-001 shared-helper transitive-binding review, then full "
+    "exact-candidate canonical/Doctor/release/publication/GitHub/review gates before main merge. No "
+    "phase/flag/native-byte/ISO/production change. Prior qualification below is historical. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -3625,6 +3635,8 @@ def check_native_kernel_locks_readiness(
             "; ".join(errors) or "native kernel locks readiness is not an object",
         )
     errors.extend(native_kernel_locks.readiness_errors(artifact, ROOT))
+    if errors:
+        return readiness.make_check("native_kernel_locks_readiness", False, "; ".join(errors[:8]))
     build = artifact.get("build", {})
     entry = build.get("kernel_entry", {})
     host_tests = entry.get("host_tests", {})

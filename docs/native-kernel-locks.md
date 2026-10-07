@@ -2,6 +2,14 @@
 
 ## Status
 
+Cycle 224 adds fail-closed recorded-evidence admission. It reconstructs both
+run summaries and digests, exit codes, frame/handoff agreement, host probes,
+control accounting, tool/source identities, and boot/media/kernel consistency.
+Malformed records reject rather than raising exceptions. These checks establish
+recorded consistency, not authentication, independent execution or hardware
+qualification. The qualifier bounds the host subprocess and rejects empty
+negative-control groups. Native lock algorithms and kernel bytes are unchanged.
+
 PKLOCK1 is the bounded N12.2 lock family for the native x86-64 PooleKernel. It
 is pre-production evidence. Cycle 153 reopens N12.2 and
 `FLAG-N12-CONCURRENCY-LOCKS-001` after the host contention probe returned
@@ -96,7 +104,7 @@ No wait-free, reclamation, hotplug, or general-topology guarantee exists.
 
 The PKLOCK1 qualifier establishes the following on one Windows host:
 
-1. The canonical PKENTRY1 build, formatting, Clippy, and all 214 PooleKernel
+1. The canonical PKENTRY1 build, formatting, Clippy, and all 246 PooleKernel
    host tests pass under the pinned workspace-local Rust toolchain.
 2. Four host threads complete 8,192 FIFO ticket acquisitions with no protected
    update loss or ticket-order mismatch under forced contention.

@@ -11,7 +11,20 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 223 repairs atomics evidence admission
+**Current development checkpoint:** Cycle 224 repairs lock evidence admission.
+Two final four-CPU virtual boots and **21/21 focused tests** pass; both validators
+reject 631 corrupted records. All **27/27 selected native checks** now pass.
+[Cycle 224 evidence](docs/checkpoints/cycle224-locks-admission-and-current-kernel-replay.md).
+Next: shared-dependency binding review and full exact-candidate qualification
+before merging [PR #78](https://github.com/rookepoole/PooleOS/pull/78) into main.
+Checkpoints remain cloud-backed on the development branch. Kernel and demo ISO
+bytes are unchanged. Pre-production; no phase or production gate closes.
+The final timeout-cleanup regression passes **137/137**, zero skips, including 71
+metadata tests. All 14 static helper closures match their original execution
+snapshots; guard integration and broader dependency review remain pending.
+Conservation verifies 382 source bindings and preserves all 27 parent records.
+
+**Historical development checkpoint:** Cycle 223 repairs atomics evidence admission
 and linked instruction auditing. Two final virtual boots and **22/22 focused
 tests** pass; 356 corrupted receipts reject, and eight disabled native guards
 are detected at optimization levels 0 and 3. Readiness is **26/27**, with locks
