@@ -1,15 +1,48 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-07
-Plan version: 2.132.0-reviewed-execution-inputs
-Roadmap cycle: PooleOS Cycle 229
+Plan version: 2.133.0-native-iso-inspection
+Roadmap cycle: PooleOS Cycle 230
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 229: Reviewed Execution Inputs
+## Cycle 230: Actual ISO Inspection
+
+N0.8 / `N0-ISO-INSPECTION-001`: new `ADD-N0-ISO-INSPECTION-001` and open
+`FLAG-N0-ISO-INSPECTION-001`. Inspect the actual ISO9660 and embedded EFI FAT32
+namespaces, including hidden files, fragmented content, aliases and allocation
+metadata. Reject unsupported layouts and malformed structures. The existing
+native architecture policy is unchanged; required objects must be in the EFI tree.
+The release gate's explicit `--native-iso` input adds an actual-byte check; omitting
+it does not assert ISO conformance or satisfy N39. No filesystem is mounted.
+
+Nineteen new tests pass; combined architecture testing has 27 passes and one
+expected Windows symlink-permission skip. The unchanged demo inventories 17 files;
+12 native payload hashes match its original manifest. It is rejected for a FAT
+root-parent dotdot entry encoded as cluster 2 instead of zero, and four missing
+production objects. A memory-only correction isolates the first defect without
+changing payload hashes; the production-object failures remain. The media writer
+is not repaired yet. The initial fragmentation test incorrectly truncated a
+three-cluster chain; the fixture was corrected and the failed run retained.
+
+New N5 work: `ADD-N5-FAT32-PARENT-001` / `FLAG-N5-FAT32-PARENT-001`, open.
+Repair the writer, independently inspect generated media, determine affected
+source dependencies, and replay affected native boot/media evidence. Do not rehash
+historical receipts into current claims. Broader layouts, long directory aliases,
+authenticated manifests, independent builders and physical boots remain open.
+
+Main now includes checkpoints through Cycle 229: exact source `31099c6` passed
+106/106 canonical and 708/708 Doctor checks and merged as `08d4dbe` via PR #78;
+the trees are identical. That pass does not qualify Cycle 230 edits. Full new
+candidate, publication, GitHub and review gates still precede any new main merge.
+Coverage preserves all 8,996 original requirements and now records 59 additions.
+There are 96 flags, 41 open; no phase or existing flag closes. Native kernel and
+retained demo bytes are unchanged. [Evidence](checkpoints/cycle230-native-iso-inspection.md).
+
+## Cycle 229: Reviewed Execution Inputs (Historical)
 
 N36.1 / `N36-RECEIPT-COVERAGE-001`, existing requirement and flag remain open
 for broader production qualification. The specific development dependency-review

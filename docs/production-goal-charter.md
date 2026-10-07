@@ -7,9 +7,17 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 229
+Last roadmap reconciliation: PooleOS Cycle 230
 
-Cycle 229 adds original-capture bindings for 18 observed data dependencies in
+Cycle 230 adds bounded inspection of actual ISO/EFI filesystem bytes, with 19 new
+tests passing. The retained demo is rejected for one FAT parent-entry defect and
+four absent production objects; the writer repair and broader ISO qualification
+are newly flagged. Cycle 229 is merged through PR #78 after exact 106/106 canonical
+and 708/708 Doctor checks; its pass does not qualify later edits. No native/ISO
+bytes or normative completion conditions changed. All outputs remain pre-production.
+[Cycle 230 evidence](checkpoints/cycle230-native-iso-inspection.md).
+
+Historical Cycle 229 adds original-capture bindings for 18 observed data dependencies in
 13 specification files. Nineteen focused tests pass. The bounded development
 dependency review is complete; full new-candidate, publication and GitHub/review
 gates still precede main merge. The preceding exact293383d passes106/106 canonical

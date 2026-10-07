@@ -4,14 +4,23 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
-**Qualified baseline:** checkpoints through Cycle 175 were merged into `main`
-at `ac15d1d` via [PR #77](https://github.com/rookepoole/PooleOS/pull/77)
-during Cycle 176.
-The exact merged tree passed all 105 runtime-inclusive canonical gates and
-708 Doctor checks, with both bundle and replay inputs. The original checkpoint
-branches remain available as history; they are not pending main merges.
+**Qualified baseline:** checkpoints through Cycle 229 are merged into `main`
+at `08d4dbe` via [PR #78](https://github.com/rookepoole/PooleOS/pull/78).
+The exact candidate passed 106/106 runtime-inclusive canonical gates and 708/708
+Doctor checks, including bundle and replay inputs. The merged tree matches that
+candidate. All 63 source-branch commits remain cloud-backed; they are not pending
+main merges. This is a development baseline, not a production release.
 
-**Current development checkpoint:** Cycle 229 binds the remaining 18 observed
+**Current development checkpoint:** Cycle 230 adds inspection of actual ISO and
+embedded EFI FAT32 bytes. All 19 new tests pass; the combined architecture suite
+has 27 passes and one expected Windows symlink-permission skip. The unchanged demo
+has 17 inventoried files but fails production architecture policy: a FAT root-parent
+entry is incorrectly encoded, and four required production objects are absent.
+[Cycle 230 evidence](docs/checkpoints/cycle230-native-iso-inspection.md).
+Next: qualify this exact candidate before main merge, then repair the native media
+writer and replay affected evidence. Native kernel and retained demo are unchanged.
+
+**Historical development checkpoint:** Cycle 229 binds the remaining 18 observed
 data dependencies, covering 13 specification files, to their original successful
 execution snapshots. All 19 focused guard tests pass; the original 27 native
 receipts and execution/source fields are preserved. The scoped data, media and

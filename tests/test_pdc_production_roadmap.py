@@ -139,7 +139,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(checklist["section_count"], 171)
         self.assertEqual(checklist["coverage_status"], "pass")
         self.assertEqual(checklist["coverage_sha256"], hashlib.sha256(self.coverage_path.read_bytes()).hexdigest().upper())
-        self.assertEqual(checklist["added_requirement_count"], 57)
+        self.assertEqual(checklist["added_requirement_count"], 59)
 
     def test_phase_checklist_mapping_matches_coverage(self) -> None:
         coverage_by_phase = {item["phase_id"]: item for item in self.coverage["phase_coverage"]}
@@ -154,8 +154,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 229)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1207)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 230)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1227)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -195,8 +195,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "selected_profiles_source_and_reviewed_data_current_full_candidate_gate_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 229)
+        self.assertEqual(current["qualification_status"], "cycle229_merged_cycle230_scoped_iso_inspection_full_candidate_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 230)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -1735,7 +1735,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(ownership["live_receipt_source_current"])
         self.assertFalse(ownership["ap_runtime_live_integration_verified"])
         self.assertFalse(ownership["active_root_current_image_replay_complete"])
-        self.assertEqual(sum(f["status"] == "open" for f in self.roadmap["implementation_flags"]), 39)
+        self.assertEqual(sum(f["status"] == "open" for f in self.roadmap["implementation_flags"]), 41)
         closeout = current["historical_cycle197_closeout_regression"]
         initial = closeout["initial_metadata_regression"]
         self.assertEqual((initial["tests_run"], initial["tests_passed"], initial["tests_failed"]), (36, 31, 5))
@@ -3410,13 +3410,35 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(review["production_supply_chain_gate_closed"])
         self.assertFalse(gate["current_control_execution_audit"]["blocks_merge_qualification"])
         self.assertEqual(gate["current_control_execution_audit"]["status"], "open")
-        attempt = gate["current_candidate_audit"]["latest_completed_attempt"]
+        attempt = gate["historical_cycle229_candidate_audit"]["latest_completed_attempt"]
         self.assertEqual(attempt["commit"], "293383d9cdf47240bcf32ef3373da49bac1006dc")
         self.assertEqual((attempt["status"], attempt["checks_passed"], attempt["checks_total"]), ("pass", 106, 106))
         self.assertFalse(attempt["applies_to_later_metadata_edits"])
         self.assertFalse(gate["current_candidate_audit"]["aggregate_suite_passed"])
         self.assertFalse(gate["current_closeout_regression"]["merge_qualified"])
         self.assertFalse(self.roadmap["production_ready"])
+
+    def test_cycle230_iso_inspection_preserves_historical_merge_and_demo_rejection(self) -> None:
+        gate = self.roadmap["baseline"]["native_consistency_release_gate"]
+        merged = gate["current_main_merge"]
+        self.assertEqual(merged["main_commit"], "08d4dbe707e546ffb33e0db102ff76dbf8f6daeb")
+        self.assertEqual((merged["checks_passed"], merged["doctor_checks_passed"]), (106, 708))
+        self.assertTrue(merged["tree_equality_verified"])
+        self.assertFalse(merged["applies_to_later_metadata_edits"])
+        record = gate["current_iso_inspection"]
+        self.assertEqual((record["new_tests_passed"], record["combined_tests_passed"], record["combined_tests_skipped"]), (19, 27, 1))
+        self.assertEqual((record["inventory_files"], record["inner_payload_hashes_match_original_manifest"]), (17, 12))
+        self.assertEqual((record["structural_violations"], record["missing_production_objects"]), (1, 4))
+        self.assertFalse(record["demo_architecture_conformance_passed"])
+        self.assertFalse(record["writer_repaired"])
+        self.assertTrue(record["original_iso_unchanged"])
+        self.assertEqual(record["fresh_guest_boots"], 0)
+        self.assertFalse(record["production_ready"])
+        flags = {f["id"]: f for f in self.roadmap["implementation_flags"]}
+        for flag in ("FLAG-N0-ISO-INSPECTION-001", "FLAG-N5-FAT32-PARENT-001"):
+            self.assertEqual(flags[flag]["status"], "open")
+        self.assertEqual(gate["current_candidate_audit"]["status"], "not_run")
+        self.assertFalse(gate["current_candidate_audit"]["aggregate_suite_passed"])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]
@@ -3434,7 +3456,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N36-RECEIPT-COVERAGE-001")
+        self.assertEqual(protocol["selected_move_id"], "N0-ISO-INSPECTION-001")
         self.assertIn("docs/checkpoints/cycle225-retained-execution-source-closure.md", protocol["required_records"])
         self.assertIn("docs/checkpoints/cycle224-locks-admission-and-current-kernel-replay.md", protocol["required_records"])
         self.assertIn("docs/checkpoints/cycle223-atomics-admission-and-instruction-audit.md", protocol["required_records"])
@@ -3495,7 +3517,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertIn("docs/checkpoints/cycle172-task-stack-ownership.md", protocol["required_records"])
         self.assertEqual(
             protocol["owner_independent_next_move_id"],
-            "N36-RECEIPT-COVERAGE-001",
+            "N5-FAT32-PARENT-001",
         )
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])
@@ -3559,8 +3581,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
     def test_flags_and_gaps_are_native_and_traceable(self) -> None:
         phase_ids = {phase["id"] for phase in self.roadmap["phases"]}
         flags = self.roadmap["implementation_flags"]
-        self.assertEqual(len(flags), 94)
-        self.assertEqual(len({flag["id"] for flag in flags}), 94)
+        self.assertEqual(len(flags), 96)
+        self.assertEqual(len({flag["id"] for flag in flags}), 96)
         receipt_flag = next(flag for flag in flags if flag["id"] == "FLAG-N36-RECEIPT-COVERAGE-001")
         self.assertEqual(receipt_flag["phase_id"], "N36")
         self.assertEqual(receipt_flag["status"], "open")

@@ -80,8 +80,8 @@ class NativeChecklistCoverageTests(unittest.TestCase):
         self.assertEqual(sum(phase["source_line_count"] for phase in phases) + 16, 10512)
         self.assertEqual(sum(phase["source_checkbox_count"] for phase in phases) + 10, 8996)
         additions = self.artifact["added_requirements"]
-        self.assertEqual(len(additions), 57)
-        self.assertEqual(len({item["id"] for item in additions}), 57)
+        self.assertEqual(len(additions), 59)
+        self.assertEqual(len({item["id"] for item in additions}), 59)
         receipt_coverage = next(
             item for item in additions if item["id"] == "ADD-N36-RECEIPT-COVERAGE-001"
         )
