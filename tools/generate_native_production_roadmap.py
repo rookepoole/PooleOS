@@ -10679,13 +10679,135 @@ def apply_cycle230(roadmap: dict, test_count: int) -> dict:
             "closure_condition": condition, "evidence": [checkpoint, "docs/native-iso-inspection.md"]})
     roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle231(roadmap, test_count)
+
+
+def apply_cycle231(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle231-fat32-directory-links.md"
+    move = "N5-FAT32-PARENT-001"
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for key in ("current_candidate_audit", "current_main_merge", "current_focused_source_projection",
+                "current_execution_source_qualification", "current_closeout_regression"):
+        gate["historical_cycle230_" + key.removeprefix("current_")] = copy.deepcopy(gate[key])
+    roadmap["baseline"]["pooleos_cycle"] = 231
+    roadmap["execution_protocol"].update(last_updated_cycle=231, selected_move_id=move,
+                                         owner_independent_next_move_id=move)
+    roadmap["execution_protocol"]["required_records"].insert(0, checkpoint)
+    merge = {
+        "cycle": 230, "qualification_cycle": 231, "status": "merged", "pull_request": 79,
+        "url": "https://github.com/rookepoole/PooleOS/pull/79",
+        "source_commit": "ea61a79e2ded5b00710f33334522868af0650736",
+        "main_commit": "bb5e43c3e655db5b8c5676572135471bfd843880",
+        "tree": "0334a2a845c40868c88a6025b0f7ed0023d9aa02",
+        "merged_at": "2026-10-07T22:09:25Z", "tree_equality_verified": True,
+        "checks_passed": 106, "checks_total": 106,
+        "doctor_checks_passed": 708, "doctor_checks_total": 708,
+        "unittest_return_code": 0, "individual_test_counts_retained": False,
+        "elapsed_seconds": 1099.250, "tracked_files": 1641,
+        "source_unchanged": True, "owner_report_unchanged": True,
+        "report_sha256": "03BBCC4E3712D025A199CC09D49E60EDAD893016C36C7294A551D7FAFD94AAA3",
+        "log_sha256": "D762E6D322E8E84451ACD0140C51C80AB1A3E7EDBBBC6FDF580216121D0AC7DC",
+        "publication_violations": 0, "applies_to_later_metadata_edits": False,
+        "production_ready": False,
+    }
+    gate["current_main_merge"] = merge
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=231,
+        latest_completed_attempt=dict(merge, status="pass", commit=merge["source_commit"],
+            scope="exact_cycle230_committed_candidate_with_runtime_bundle_and_replay"))
+    gate["qualification_status"] = "cycle230_merged_cycle231_fat_repair_partial_replay_source_guard_stale"
+    pending = ["revalidation", "transfer", "trap", "cpu_policy", "xstate_policy", "xstate_exception",
+        "privilege_msr_policy", "physical_memory", "virtual_memory", "interrupt_time", "smp_first_ap",
+        "smp_percpu_runtime", "smp_ipi", "scheduler", "scheduler_preempt", "scheduler_deferred",
+        "scheduler_smp", "scheduler_ap_workers", "scheduler_smp_preempt", "atomics", "locks"]
+    failed = ["native_kernel_transfer_readiness", "native_kernel_trap_readiness",
+        "native_kernel_cpu_policy_readiness", "native_kernel_privilege_msr_policy_readiness",
+        "native_kernel_smp_ipi_readiness", "native_kernel_atomics_readiness", "native_kernel_locks_readiness"]
+    projection = gate["current_focused_source_projection"]
+    projection.update(cycle=231, scope="27_component_checks_not_aggregate_source_guard_or_full_canonical",
+        passed_checks=20, total_checks=27, pending_downstream_native_checks=7,
+        passing_profiles=[name for name in projection["passing_profiles"] if name not in failed],
+        failed_profiles=failed, source_current_profiles=6, source_profiles_total=27,
+        pending_source_profiles=pending, final_receipt_fresh_qemu_runs=4, kernel_entry_runs=0,
+        run_count_scope="two_loader_and_two_pooleboot_runs_failed_attempt_not_counted",
+        next_dependency_move_id=move, required_next_gate="revalidation_then_transfer_and_remaining_source_replays",
+        focused_python_tests_passed=26, focused_python_tests_skipped=0,
+        recorded_evidence_rejection_cases=21)
+    record = gate["current_execution_source_qualification"]
+    record.update(cycle=231, status="stale_preserved_aggregate_pending_real_replays", move_id=move,
+        aggregate_source_guard_passed=False, source_current_profiles=6,
+        pending_source_profiles=pending, fresh_profile_captures_available=["load", "pooleboot"],
+        fresh_qemu_runs=4, next_profile="revalidation",
+        historical_fields_scope="unchanged_cycle229_capture_record_not_current_execution_claims")
+    gate["current_closeout_regression"] = {
+        "cycle": 231, "status": "pass", "scope": "fat_directory_and_iso_tests_not_full_candidate",
+        "tests_run": 26, "tests_passed": 26, "tests_failed": 0, "tests_skipped": 0,
+        "elapsed_seconds": 9.453, "runner_elapsed_seconds": 10.375,
+        "log_sha256": "B9A905ADDABEA6E77B350704D752D13809CA8BDB48A648475DD7AF39257ADF66",
+        "source_unchanged_during_execution": True, "owner_report_unchanged": True,
+        "canonical_full_replay_performed": False, "merge_qualified": False, "production_ready": False,
+    }
+    gate["current_fat_directory_repair"] = {
+        "cycle": 231, "requirement_id": "ADD-N5-FAT32-PARENT-001",
+        "status": "writer_and_bare_inspector_repaired_dependent_replay_partial",
+        "blocks_merge_qualification": True, "root_parent_cluster": 0,
+        "dot_entries_checked": 4, "field_mutations_rejected": 17, "slot_mutations_rejected": 4,
+        "new_tests": 5, "source_test_inventory": test_count,
+        "expected_red_failures": 24,
+        "red_log_sha256": "07D130745A0EF68A8465C85846450E45772B2549D870ED220657DD18F4017861",
+        "initial_qualification_failure": "new_loop_name_shadowed_ESP_label_JSON_bytes_TypeError",
+        "failed_log_sha256": "CA338C10FCEC488B06953A091C84BF5C35C7E758B7D9637732D194E10104759E",
+        "label_and_serialization_regression_added": True,
+        "broad_regression": {"status": "fail_pending_dependent_replay", "tests_run": 94,
+            "failing_assertions_or_subtests": 17, "tests_skipped": 0,
+            "elapsed_seconds": 27.971, "runner_elapsed_seconds": 28.906,
+            "log_sha256": "03FB3E5408DBE8A2A60E0DCA34FC71172E78C86E88FA0D16DBD0C552A6EFE8B0",
+            "scope": "fat_iso_architecture_and_all_roadmap_tests_not_full_canonical",
+            "failure_reason": "stale_dependency_validation_aggregate_capture_and_prior_receipt_bindings",
+            "guards_relaxed": False, "source_unchanged": True, "owner_report_unchanged": True},
+        "fixture_only_delta": {"changed_bytes": 1, "offset": 2082362, "old": 2, "new": 0},
+        "load": {"host_tests_passed": 332, "guest_runs": 2, "negative_controls_passed": 155,
+            "elapsed_seconds": 101.610,
+            "receipt_sha256": "D8285B4D2395D6F7A84E955752C2AEDA1FE705CF6EF4AB72BBAE6B2C7BB59A9F",
+            "log_sha256": "CC1FBEAB3FC5A0A5A76A3484B496A2DE75EABE264CBA137E4D02C21421E34E9B",
+            "capture_sha256": "0DD8C995911733AF63D46674728A8AE242AEFE3F4ACDF61ACEB1634FD04FF8CF"},
+        "pooleboot": {"host_tests_passed": 8, "guest_runs": 2, "negative_controls_passed": 155,
+            "elapsed_seconds": 96.797,
+            "receipt_sha256": "6EF67ABC56F0E71E69E8796DB8D12781CDA24CF3B097D5E4F1097AC0E659AB0A",
+            "log_sha256": "56338F6E2175B97E50BB1E2377476252F07B88CAAEAF64E220040A84FE086C65",
+            "capture_sha256": "A463E02C843CBE916CE2266A8219742CC8478DF413BCDD7030A3F2279E4AA986"},
+        "media_sha256": "C45A2136EA999C11FCB94651278E4BCF0A6B276F69BEB2DD683852940A1FAFC2",
+        "native_payload_records_unchanged": True, "native_efi_bytes_unchanged": True,
+        "native_kernel_changed": False, "retained_demo_changed": False,
+        "transfer_performed": False, "n5_exit": False, "production_ready": False,
+    }
+    evidence = (
+        "Cycle 231: " + checkpoint + " repairs generated EFI FAT32 root-parent dotdot to zero and "
+        "checks all four physical dot entries. Final26/26 focused tests pass; loader332/332 and "
+        "PooleBoot8/8 host tests,155/155 controls per profile and four fresh QEMU runs pass. "
+        "The first qualifier attempt failed on a new ESP-label shadowing error, now repaired with "
+        "a serialization regression; its failed log is retained. Cycle230 exactea61a79 passed106/106 "
+        "canonical and708/708 Doctor checks and merged via PR79 asbb5e43c with identical tree."
+    )
+    gap = (
+        "Current component checks pass20/27 but only6/27 execution profiles are source-current. "
+        "Twenty-one require real replay, beginning with revalidation then transfer. The original "
+        "aggregate execution-source receipt is preserved and correctly fails; no historical capture "
+        "is rebound. Full gates are required before merging the N5 repair. Native EFI/payload/kernel "
+        "bytes and the retained demo ISO are unchanged. No phase, flag or production gate closes."
+    )
+    phase = next(p for p in roadmap["phases"] if p["id"] == "N5")
+    phase["current_evidence"].insert(0, evidence)
+    phase["current_gaps"].insert(0, gap)
+    next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N5-FAT32-PARENT-001")["evidence"].insert(0, checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1227)
+    parser.add_argument("--test-count", type=int, default=1233)
     parser.add_argument("--status-date", default="2026-10-07")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

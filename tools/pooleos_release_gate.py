@@ -652,6 +652,18 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle230 exactea61a79 passed106/106 canonical and708/708 Doctor checks, merged through PR79 "
+    "asbb5e43c with identical tree. Cycle231 repairs generated FAT32 root-parent/dot entries:26 "
+    "focused tests and four fresh loader/PooleBoot QEMU runs pass. Initial label-shadowing failure "
+    "was repaired and retained. Component checks pass20/27 but only6/27 source profiles are current; "
+    "21 need replay beginning with revalidation then transfer. The unchanged aggregate source "
+    "record correctly fails. N5-FAT32-PARENT-001 and main merge remain gated on all replays and "
+    "full exact-candidate qualification. Native executables and retained demo ISO are unchanged. "
+    "No phase or flag closes; earlier merge/writer holds below are historical. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:

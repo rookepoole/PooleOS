@@ -1,15 +1,53 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-07
-Plan version: 2.133.0-native-iso-inspection
-Roadmap cycle: PooleOS Cycle 230
+Plan version: 2.134.0-fat32-directory-links
+Roadmap cycle: PooleOS Cycle 231
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 230: Actual ISO Inspection
+## Cycle 231: FAT32 Directory Links
+
+N5 / `N5-FAT32-PARENT-001`, existing `ADD-N5-FAT32-PARENT-001` and open
+`FLAG-N5-FAT32-PARENT-001`: repair the writer's EFI parent entry from cluster 2
+to the required zero encoding. Validate the first two physical directory slots,
+directory attributes, zero sizes and self/parent clusters in the bare inspector.
+The extended loader inspector already reconstructs media exactly and inherits
+the repair. This is host-side native boot-media tooling, not new kernel behavior.
+
+Five new tests cover valid media, deterministic independent inspection, 17 bad
+field cases, four slot mutations and the extended loader path. Final focused
+tests pass 26/26. An initial qualifier attempt exposed a new loop-variable
+shadowing error in the ESP label; it was corrected and JSON/label assertions
+added. Both the red test log and failed qualifier log are retained.
+
+Fresh loader qualification passes 332 host tests; PooleBoot passes eight report
+host tests. Each passes 155 controls and two QEMU runs, four successful fresh
+boots total. Their new receipts are admitted from source-stable terminal runs.
+All 12 payload file records and native EFI bytes match their predecessors.
+No kernel transfer is claimed by these two profiles. The retained demo ISO has
+not been rebuilt and still has its previously recorded defects.
+
+Current component checks pass 20/27, but only 6/27 execution profiles are source
+current. The 21 pending profiles are explicitly listed in the roadmap. The old
+aggregate capture is preserved and fails correctly; do not substitute new hashes
+for execution. Next: revalidation, transfer, then dependent profiles in order;
+rebuild the aggregate from real captures and run all exact-candidate gates before
+main merge. Draft branch backup does not imply qualification.
+The broader 94-test regression still has 17 failed assertions/subtests from stale
+dependencies and receipt bindings; its log is retained, not reported as passing.
+
+Cycle 230 exact `ea61a79` passed 106/106 canonical and 708/708 Doctor checks,
+including runtime, bundle and replay; PR #79 merged as `bb5e43c` with the same
+tree. That pass does not qualify this repair. Coverage remains 8,996 original
+requirements plus 59 additions, 96 flags with 41 open, 40 phases/301 subphases.
+No phase or flag closes; native kernel, owner PooleGlyph report and normative
+charter remain unchanged. [Evidence](checkpoints/cycle231-fat32-directory-links.md).
+
+## Cycle 230: Actual ISO Inspection (Historical)
 
 N0.8 / `N0-ISO-INSPECTION-001`: new `ADD-N0-ISO-INSPECTION-001` and open
 `FLAG-N0-ISO-INSPECTION-001`. Inspect the actual ISO9660 and embedded EFI FAT32

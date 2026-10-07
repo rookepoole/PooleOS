@@ -55,3 +55,22 @@ non-executable placeholders and are not OS images.
 Nineteen new tests pass. The combined architecture suite passes 27 tests with one
 expected Windows symlink-permission skip. Full candidate qualification and broader
 format coverage remain separate. See [checkpoint](checkpoints/cycle230-native-iso-inspection.md).
+
+## Cycle 231 Writer Repair
+
+The host-side writer now encodes a root-parent dotdot cluster as zero, consistent
+with Microsoft FAT specification sections 6.5/6.6. The bare inspector additionally
+requires dot and dotdot in the first physical slots, directory attributes, zero
+sizes and exact self/parent cluster values. Extended load-media inspection retains
+its exact reconstructed-media comparison. Five new tests cover 17 field mutations,
+four physical-slot mutations, deterministic independent inventory and extended
+loader media. A new label-shadowing serialization error found during qualification
+was repaired and covered by regression assertions.
+
+Final focused testing passes 26/26. Two fresh loader and two fresh PooleBoot QEMU
+runs pass, with unchanged native executable/payload records and newly generated
+media hashes. Twenty-one dependent execution profiles still require replay;
+aggregate source qualification fails correctly, and the N5 flag remains open.
+The historical demo ISO is unchanged, not a corrected image. Broader format,
+authentication, independent-builder and hardware claims remain unproved.
+See [checkpoint](checkpoints/cycle231-fat32-directory-links.md).

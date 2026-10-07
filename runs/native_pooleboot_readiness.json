@@ -433,9 +433,9 @@
         "sha256": "457662B2E11DCB68856D74B87AA088FC87F6B3ED9BFF6C4CE8C96F191D80839B"
       },
       {
-        "byte_count": 65869,
+        "byte_count": 66467,
         "path": "runtime/native_pooleboot.py",
-        "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        "sha256": "90AC0DF5286FBFC9BE463C56928518BF3E4D85679DE37F82592CD5A81E56C9D3"
       },
       {
         "byte_count": 31153,
@@ -956,7 +956,7 @@
     "kernel_load_readiness": {
       "byte_count": 190245,
       "path": "runs/native_kernel_load_readiness.json",
-      "sha256": "CD0F9CFBA4472AE5F6BB98EE20D244447A4E50C276C39E9D81581132989C4B68"
+      "sha256": "D8285B4D2395D6F7A84E955752C2AEDA1FE705CF6EF4AB72BBAE6B2C7BB59A9F"
     },
     "microcode_contract": {
       "byte_count": 5083,
@@ -3867,7 +3867,7 @@
         "protective_mbr_valid": true,
         "sector_bytes": 512,
         "sector_count": 131072,
-        "sha256": "6E98838D9AACCD230FD1EA85BEAEAC8482404D6D2D2617D7FA26D667932BCD1D"
+        "sha256": "C45A2136EA999C11FCB94651278E4BCF0A6B276F69BEB2DD683852940A1FAFC2"
       },
       "initial_system": {
         "activation_allowed": false,
@@ -5255,7 +5255,7 @@
   "schema_version": "1.0",
   "selected_move_id": "N5-INNER-TRUST-STATE-001",
   "status": "pass_single_host_two_run_unsigned_live_profile_artifacts_pbtrust1_denied_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting",
-  "status_date": "2026-10-04",
+  "status_date": "2026-10-07",
   "summary": {
     "clean_builds_exact": 2,
     "clean_media_generations_exact": 2,
