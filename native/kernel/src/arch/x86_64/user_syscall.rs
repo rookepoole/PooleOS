@@ -292,6 +292,25 @@ pub(super) fn dispatch_owned(
             ),
             None => (Status::Denied, 0),
         },
+        Ok(Request::Message {
+            handle,
+            address,
+            bytes,
+            operation,
+        }) => match caller {
+            Some(caller) => super::user_ipc::message(
+                caller,
+                handle,
+                address,
+                bytes,
+                operation,
+                &mut Access {
+                    root: t.root,
+                    smap: unsafe { read_cr4() } & (1 << 21) != 0,
+                },
+            ),
+            None => (Status::Denied, 0),
+        },
         Ok(Request::Wait { handle, readiness }) => match caller {
             Some(caller) => match super::user_ipc::prepare_wait(caller, handle, readiness) {
                 Ok(poolekernel::capability_ipc::wait::Admission::Ready) => (Status::Ok, 0),

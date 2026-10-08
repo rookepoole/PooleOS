@@ -72,6 +72,20 @@ pub(crate) fn run(
         }
         run_round(&mut peers, round, baseline, manager, serial, debugcon);
     }
+    for (index, p) in peers.iter_mut().enumerate() {
+        checked!(p.restart(
+            20 + index,
+            [6, 0, 0, 0, 0, 0],
+            handoff,
+            core,
+            bits,
+            manager,
+            topology,
+            hpet,
+            timer_driver::Probe::None
+        ));
+    }
+    super::ipc_reply::run(&mut peers, baseline, manager, serial, debugcon);
 }
 
 #[inline(never)]

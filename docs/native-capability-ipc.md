@@ -1,6 +1,6 @@
 # Native Capability IPC
 
-Cycle252 / PKIPC1 (native lifecycle probe PKIPC2) is an original, bounded PooleKernel mechanism, not a complete
+Cycle253 / PKIPC1 (native lifecycle PKIPC2 and reply probe PKIPC3) is an original, bounded PooleKernel mechanism, not a complete
 N13/N14 implementation. It advances USI-2 toward the native user-space ISO.
 
 ## Authority And Lifetime
@@ -54,6 +54,61 @@ Successful receive clears its slot and advances FIFO state once. Full/empty,
 invalid handle and short-buffer results do not touch user memory. The exclusive
 mutable owner spans authorization, copy and commit. Exact nested copy faults use
 the existing recovery record without borrowing the suspended IPC owner.
+
+## Sender And One-Use Replies
+
+Calls6-9 extend the development ABI, not its production freeze. Version remains1,
+RSI is a task-local handle, RDX a buffer and R10 a length/capacity; R9 remains zero.
+
+| Call | Authority And Input | Successful Result |
+| --- | --- | --- |
+|6 Request|SEND endpoint in RSI; owned RECEIVE reply endpoint in R8;1-64 input bytes|Queued payload length; no synchronous wait|
+|7 Metadata receive|RECEIVE endpoint;1-96 capacity;R8=0|32-byte header plus payload; total bytes|
+|8 Reply|One-use reply token;1-64 input bytes;R8=0|Queued reply length; token consumed|
+|9 Discard|One-use reply token;RDX/R10/R8=0|Zero; token consumed without sending|
+
+Header: four little-endian u64 values at offsets0/8/16/24: sender task slot,
+sender task generation, reply token, payload length. Payload begins at32. Sender
+comes from the authenticated kernel Caller at enqueue, never from payload fields.
+It is historical identity data, not proof of current liveness, a task capability,
+badge, scheduling donation or user-selected credential. Roots are never disclosed.
+Ordinary sends and replies return token0. A queued request whose return route has
+been revoked remains readable with its historical sender and token0.
+
+Each task has four separate reply slots. Tokens encode a non-wrapping32-bit slot
+generation, type tag2 and one-based slot. They cannot be delegated or used as SEND,
+RECEIVE, endpoint-destroy or readiness authority. Successful metadata receive
+commits a token bound to the requester/root/root-generation, exact return handle/
+object generation and original request endpoint. No permanent SEND grant is added.
+The requester's reply endpoint must be owned by that requester. Tokens survive
+closure of the server's receive handle, but not destruction of the request object.
+
+Metadata receive checks output size and reply-slot quota before touching memory.
+Short/full results do not dequeue. A copy-out fault reports its exact prefix but
+does not mint a token or consume the message, even if token bytes were already
+written. Only complete copy-out commits authority. Call4 denies queued requests
+instead of silently dropping their reply route; call7 handles both message kinds.
+Reply checks route and destination capacity before input access; input faults and
+full mailboxes retain the token. Successful enqueue consumes it exactly once.
+Discard recovers reply-slot capacity without sending. Close/destroy/detach prune
+invalid reply slots while retaining high-water marks; task retirement clears its
+own reply authority before image reuse. Queued historical sender data grants none.
+
+Thirteen new host tests exhaust64 request/reply input-fault offsets and96 envelope
+output-fault offsets, short output, spoofed callers, wrong types/tasks/generations,
+replay, full reply queues, reply-slot exhaustion/discard/reuse, counter exhaustion,
+return-route revocation, dead requesters/servers and ABI errors. PKIPC3 reuses the
+same native slots at generation6. Real CPL3 tasks validate sender IDs, deny a wrong
+return endpoint, recover an8-byte output prefix with an unminted-token denial,
+retry a faulting reply input, consume/reject replay of a reply, then reuse and
+discard its slot. The client checks transformed bytes. No permanent server SEND
+capability exists. [Exact evidence](checkpoints/cycle253-native-ipc-reply-authority.md).
+
+These are asynchronous primitives, not complete RPC: no per-request correlation
+ID, deadline, synchronous Call, automatic cancellation result or guaranteed reply
+capacity. Discard and service death do not yet notify a client waiting on its own
+reply endpoint. Services must not be admitted assuming those guarantees. Add
+kernel-owned request/deadline/cancellation accounting before general service use.
 
 ## Wait Ownership
 
@@ -127,8 +182,8 @@ scrubs12 data pages. [Exact evidence](checkpoints/cycle252-native-ipc-pressure-l
 
 ## Next Required Work
 
-1. Add authenticated sender identity, one-use reply ownership, deadlines and
-   cancellation races. Two ordinary queues are not authenticated RPC reply tokens.
+1. Add request/deadline/cancellation ownership and dead-service notification. The
+   new one-use replies are asynchronous; no synchronous call or delivery guarantee.
 2. Extend beyond the five fixed native lifetimes: arbitrary close/destroy/wake/kill
    interleavings, quota recovery, generation exhaustion, persistent quarantine and
    sustained pressure. Never reset authority counters to make a case pass.
@@ -147,7 +202,8 @@ stack, exception, clock, hardware and product-contract qualification remain open
 The official [seL4 capability tutorial](https://docs.sel4.systems/Tutorials/capabilities.html)
 was reviewed 2026-10-08 for the distinction between an object, a rights-bearing
 capability and caller-local lookup. The [IPC tutorial](https://docs.sel4.systems/Tutorials/ipc.html)
-was available on this review. They are reference material only: PooleKernel imports
+was reviewed again for one-time replies on2026-10-08 at its [current page](https://docs.sel4.systems/Tutorials/ipc).
+They are reference material only: PooleKernel imports
 no seL4 implementation, ABI or verification claim. PKIPC1's bounded queues and
 advisory readiness development protocol are PooleOS-specific. A kernel command shell,
 foreign microkernel or scripted screen is not an alternative acceptance route.

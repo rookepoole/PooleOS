@@ -45,6 +45,12 @@ pub enum Status {
 pub enum Request {
     Version,
     Exit(u32),
+    Message {
+        handle: u64,
+        address: u64,
+        bytes: usize,
+        operation: crate::capability_ipc::reply::Operation,
+    },
     Wait {
         handle: u64,
         readiness: crate::capability_ipc::wait::Readiness,
@@ -74,7 +80,7 @@ pub fn request(
     if version != VERSION {
         return Err(Status::Version);
     }
-    if flags != 0 || reserved != 0 {
+    if (number != 6 && flags != 0) || reserved != 0 {
         return Err(Status::Arguments);
     }
     match number {
@@ -128,6 +134,40 @@ pub fn request(
             },
         }),
         5 => Err(Status::Arguments),
+        6..=8 => {
+            use crate::capability_ipc::reply::{Operation, RECEIVE_BYTES};
+            let max = if number == 7 {
+                RECEIVE_BYTES
+            } else {
+                crate::capability_ipc::MAX_BYTES
+            };
+            if bytes == 0
+                || bytes > max as u64
+                || destination < USER_WINDOW_START
+                || destination
+                    .checked_add(bytes)
+                    .is_none_or(|end| end > USER_WINDOW_END_EXCLUSIVE)
+            {
+                return Err(Status::Arguments);
+            }
+            Ok(Request::Message {
+                handle: source,
+                address: destination,
+                bytes: bytes as usize,
+                operation: match number {
+                    6 => Operation::Request { reply_to: flags },
+                    7 => Operation::Receive,
+                    _ => Operation::Reply,
+                },
+            })
+        }
+        9 if destination == 0 && bytes == 0 => Ok(Request::Message {
+            handle: source,
+            address: 0,
+            bytes: 0,
+            operation: crate::capability_ipc::reply::Operation::Discard,
+        }),
+        9 => Err(Status::Arguments),
         _ => Err(Status::Unknown),
     }
 }

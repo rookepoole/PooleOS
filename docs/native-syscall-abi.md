@@ -1,6 +1,13 @@
 # PSABI1 Development Syscall Profile
 
-Current extension, Cycle252 (wire layout unchanged since251): calls3/4 send/receive through granted endpoint handles;
+Current extension, Cycle253: calls6-9 add asynchronous request, metadata receive,
+one-use reply and discard. Call6 uses R8 for an owned reply endpoint; the other
+calls still require R8=0. Metadata receive returns a32-byte LE header plus payload,
+with kernel-authenticated sender identity and a task-local reply token. Existing
+calls0-5 retain their layouts; raw receive4 denies requests requiring metadata.
+This is not a frozen production ABI or synchronous Call protocol.
+
+Cycle251 baseline: calls3/4 send/receive through granted endpoint handles;
 call5 waits for readable/writable readiness with scheduler suspension and checked
 resumption. Statuses5-9 add Denied, Again, TooSmall, Cancelled and Revoked. See the
 [current IPC contract](native-capability-ipc.md) for the exact register layout,

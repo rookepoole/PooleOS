@@ -11,7 +11,16 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle252 proves native IPC queue pressure,
+**Current development checkpoint:** Cycle253 adds kernel-authenticated sender
+identity and task-local one-use replies. Real user tasks exchange requests,
+recover copy faults, consume/discard reply tokens and reject replay without
+granting the server permanent send authority. Two fresh native boots and416 kernel
+tests pass. Next: request deadlines/cancellation, dead-service notification and
+service admission, then init, console, shell, files, applications and the usable
+ISO. Full microkernel development continues afterward; no interactive ISO yet.
+[Evidence](docs/checkpoints/cycle253-native-ipc-reply-authority.md).
+
+**Historical development checkpoint:** Cycle252 proves native IPC queue pressure,
 partial-copy recovery and peer survival after fault, cancellation, blocked-wait
 termination and cleanup quarantine. Five lifetimes reuse the same owned task slots
 without resetting authority generations. Two fresh native boots and403 kernel tests

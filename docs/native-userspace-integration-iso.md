@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 252, 2026-10-08. No new ISO exists yet.
+Status: implementation started, Cycle 253, 2026-10-08. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -44,7 +44,7 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | Stage | Build Plan Binding | Exit Criterion | Current State |
 | --- | --- | --- | --- |
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
-| USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Cycle252: real waits, queue saturation, partial output retry, stale generations, enrolled-owner fault/cancel/quarantine revocation and surviving peers. Sender/reply authority, deadlines and general admission remain |
+| USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Cycle253: kernel-stamped sender identity and task-local one-use replies, with actual CPL3 fault retry, consume/discard and replay denial. Prior pressure/death cases preserved. Deadlines, dead-service notification and general admission remain |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Not started |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
@@ -86,12 +86,15 @@ Cycle252 evidence is [here](checkpoints/cycle252-native-ipc-pressure-lifecycle.m
 [IPC invariants and gaps](native-capability-ipc.md). The native controls listed above
 now have five persistent-slot lifetimes, four enrolled-owner death/recovery paths,
 queue-full/writable-wait and four-byte output-fault retry evidence. Pending-wait
-termination is implemented. Next in step3: sender identity, one-use reply ownership
-and deadlines; then transactional admission and sustained budgets for services.
+termination is implemented. Cycle253 adds sender identity and one-use reply ownership
+with a sixth persistent-slot lifetime: [evidence](checkpoints/cycle253-native-ipc-reply-authority.md).
+Next in step3: request/deadline/cancellation ownership and dead-service notification;
+then transactional admission and sustained budgets for services. The asynchronous
+reply primitive does not yet wake a caller when a service dies or discards a reply.
 General quotas, arbitrary revocation races and supervision remain unfinished.
 Cycle249 evidence is [here](checkpoints/cycle249-unknown-runtime-recovery.md).
 Its sample-loss injection is not a real hardware-clock failure. Keep that limit,
-general stack bounds, persistent audit/quarantine and the current188-page product
+general stack bounds, persistent audit/quarantine and the current191-page product
 contract migration visible under FLAG-N13-USERSPACE-ISO-001.
 
 ### USI-1 Substeps

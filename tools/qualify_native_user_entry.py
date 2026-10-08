@@ -34,6 +34,9 @@ def source_bindings() -> dict[str, str]:
     paths.update({
         "native/kernel/src/capability_ipc.rs", "native/kernel/src/capability_ipc/tests.rs",
         "native/kernel/src/capability_ipc/wait.rs",
+        "native/kernel/src/capability_ipc/reply.rs", "native/kernel/src/capability_ipc/tests/replies.rs",
+        "native/kernel/src/arch/x86_64/user_ipc/reply.rs",
+        "native/kernel/src/user_root_probe/peer_driver/ipc_reply.rs",
         "native/kernel/src/arch/x86_64/user_ipc/pressure.rs",
         "native/kernel/src/user_root_probe/peer_driver/ipc_pressure.rs",
         "native/kernel/src/arch/x86_64/user_ipc.rs", "native/kernel/src/user_root_probe/peer_driver/ipc.rs",
@@ -79,8 +82,8 @@ def main() -> int:
     owner_report = Path("C:/Users/rookp/PooleGlyph/tests/reports/conformance_report.json")
     owner_before = digest(owner_report) if owner_report.is_file() else None
     report: dict = {
-        "contract_id": "PKIPC2", "cycle": 252,
-        "scope": "host_and_optional_native_IPC_pressure_enrolled_owner_death_and_persistent_generation_guest",
+        "contract_id": "PKIPC3", "cycle": 253,
+        "scope": "host_and_optional_native_authenticated_sender_and_one_use_reply_authority_guest",
         "status": "fail", "source_bindings": before, "checks": [],
         "guest_runs": 0, "ring3_executed": False, "iso_built": False,
         "n13_exit_passed": False, "production_ready": False,
@@ -91,11 +94,11 @@ def main() -> int:
     commands = [
         ("format", [str(cargo), "fmt", *common, "--", "--check"], None),
         ("kernel_host_debug", [str(cargo), "test", *common, "--lib", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 403),
+            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 416),
         ("user_entry_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
             "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 130),
         ("ipc_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "capability_ipc::", "--", "--test-threads=1"], 17),
+            "x86_64-pc-windows-msvc", *bounded, "capability_ipc::", "--", "--test-threads=1"], 30),
         ("vm_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
             "x86_64-pc-windows-msvc", *bounded, "virtual_memory::", "--", "--test-threads=1"], None),
         ("freestanding_library", [str(cargo), "check", *common, "--lib", "--target",
@@ -167,6 +170,7 @@ def main() -> int:
                 report["unknown_runtime_recovery"] = all(g["marker_summary"]["unknown_runtime_recovery"] for g in live["guest_runs"])
                 report["bounded_capability_ipc"] = all(g["marker_summary"]["bounded_capability_ipc"] for g in live["guest_runs"])
                 report["native_ipc_pressure_lifecycle"] = all(g["marker_summary"]["ipc_persistent_generations"] == 5 and g["marker_summary"]["ipc_native_dead_owner_cases"] == 4 for g in live["guest_runs"])
+                report["native_ipc_reply_authority"] = all(g["marker_summary"]["ipc_authenticated_sender"] and g["marker_summary"]["ipc_one_use_replies"] for g in live["guest_runs"])
         report["source_unchanged"] = before == source_bindings()
         report["owner_report_unchanged"] = owner_before == (digest(owner_report) if owner_report.is_file() else None)
         if (len(report["checks"]) == len(commands) and all(c["passed"] for c in report["checks"])
@@ -178,7 +182,7 @@ def main() -> int:
     (work / "receipt.json").write_text(serialized, encoding="utf-8", newline="\n")
     if report["status"] == "pass":
         args.out.write_text(serialized, encoding="utf-8", newline="\n")
-    print(f"PKIPC2 {report['status'].upper()}; guest_runs={report['guest_runs']}; ring3={report['ring3_executed']}; production_ready=false", flush=True)
+    print(f"PKIPC3 {report['status'].upper()}; guest_runs={report['guest_runs']}; ring3={report['ring3_executed']}; production_ready=false", flush=True)
     return 0 if report["status"] == "pass" else 1
 
 

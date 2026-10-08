@@ -7,9 +7,17 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 252
+Last roadmap reconciliation: PooleOS Cycle 253
 
-Cycle252 adds guarded blocked-wait termination and explicit user startup arguments.
+Cycle253 adds kernel-stamped sender identity and one-use reply/discard authority.
+Two fresh native boots prove real requests, copy-fault retry and replay denial
+without permanent server SEND authority, while preserving earlier containment.
+Next: request deadlines/cancellation and dead-service notification, transactional
+admission and sustained budgets, then init/console/shell/apps and the usable ISO.
+All full N0-N39, PooleGlyph/PDC and PooleGlass obligations remain unchanged.
+[Cycle253 evidence](checkpoints/cycle253-native-ipc-reply-authority.md).
+
+Historical Cycle252 adds guarded blocked-wait termination and explicit user startup arguments.
 Two fresh native boots prove queue pressure, partial-copy retry, persistent task
 generations and surviving-peer progress through four enrolled-owner death/recovery
 paths. Next: sender/reply authority and service admission, then init/console/shell/

@@ -12,6 +12,8 @@ use poolekernel::{
 static mut IPC: Space = Space::new();
 mod pressure;
 pub(super) use pressure::payload as pressure_payload;
+mod reply;
+pub(super) use reply::payload as reply_payload;
 
 fn idle() -> Result<(), Error> {
     if super::user::active() || super::read_rflags() & ((1 << 9) | (1 << 10) | (1 << 18)) != 0 {
@@ -82,6 +84,17 @@ pub(super) fn transfer(
 ) -> (Status, u64) {
     // The trap adapter authenticates root, CPL3, depth, IF0 and saved Run identity.
     unsafe { &mut *(&raw mut IPC) }.transfer(caller, handle, address, bytes, send, memory)
+}
+
+pub(super) fn message(
+    caller: Caller,
+    handle: u64,
+    address: u64,
+    bytes: usize,
+    operation: poolekernel::capability_ipc::reply::Operation,
+    memory: &mut impl Memory,
+) -> (Status, u64) {
+    unsafe { &mut *(&raw mut IPC) }.message(caller, handle, address, bytes, operation, memory)
 }
 
 unsafe extern "C" {

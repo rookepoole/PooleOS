@@ -17,6 +17,7 @@ pub const ENDPOINTS: usize = 4;
 pub const DEPTH: usize = 4;
 pub const MAX_BYTES: usize = 64;
 const ENDPOINT_TAG: u64 = 1 << 16;
+pub mod reply;
 pub mod wait;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -84,6 +85,7 @@ struct Table {
     caps: [CapSlot; CAPS],
     wait_generation: u64,
     wait: Option<wait::Wait>,
+    replies: [reply::Slot; CAPS],
 }
 impl Table {
     const EMPTY: Self = Self {
@@ -92,17 +94,22 @@ impl Table {
         caps: [CapSlot::EMPTY; CAPS],
         wait_generation: 0,
         wait: None,
+        replies: [reply::Slot::EMPTY; CAPS],
     };
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 struct Message {
     bytes: [u8; MAX_BYTES],
     len: usize,
+    sender: Option<Caller>,
+    reply: Option<reply::Route>,
 }
 impl Message {
     const EMPTY: Self = Self {
         bytes: [0; MAX_BYTES],
         len: 0,
+        sender: None,
+        reply: None,
     };
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -272,6 +279,7 @@ impl Space {
         let t = self.table(owner)?;
         self.resolve(t, handle, Rights(0))?;
         self.tables[t].caps[(handle & 0xffff) as usize - 1].value = None;
+        self.prune_replies();
         Ok(())
     }
     fn remove_object(&mut self, object: Object) {
@@ -292,6 +300,7 @@ impl Space {
         let t = self.table(owner)?;
         let object = self.resolve(t, handle, Rights::DESTROY)?.object;
         self.remove_object(object);
+        self.prune_replies();
         Ok(())
     }
     /// Called after task execution is stopped, before its root or identity is reused.
@@ -310,6 +319,10 @@ impl Space {
         }
         self.tables[t].caller = None;
         self.tables[t].wait = None;
+        for r in &mut self.tables[t].replies {
+            r.value = None;
+        }
+        self.prune_replies();
         Ok(())
     }
     /// Retirement hook: absence is idempotent, a different live generation is not.
@@ -325,7 +338,10 @@ impl Space {
     }
     pub fn is_empty(&self) -> bool {
         self.tables.iter().all(|t| {
-            t.caller.is_none() && t.wait.is_none() && t.caps.iter().all(|c| c.value.is_none())
+            t.caller.is_none()
+                && t.wait.is_none()
+                && t.caps.iter().all(|c| c.value.is_none())
+                && t.replies.iter().all(|r| r.value.is_none())
         }) && self.objects.iter().all(|o| o.value.is_none())
     }
     /// Failed copy-in publishes nothing. Failed copy-out keeps the entire message
@@ -369,6 +385,7 @@ impl Space {
             }
             let mut message = Message::EMPTY;
             message.len = bytes;
+            message.sender = Some(caller);
             for (i, byte) in message.bytes[..bytes].iter_mut().enumerate() {
                 let Ok(value) = memory.read(address + i as u64) else {
                     return (Status::Fault, 0);
@@ -383,6 +400,9 @@ impl Space {
                 return (Status::Again, 0);
             }
             let message = e.queue[e.head];
+            if message.reply.is_some() {
+                return (Status::Denied, 0);
+            }
             if bytes < message.len {
                 return (Status::TooSmall, message.len as u64);
             }

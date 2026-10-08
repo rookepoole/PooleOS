@@ -1,15 +1,39 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.155.0-native-ipc-pressure-lifecycle
-Roadmap cycle: PooleOS Cycle 252
+Plan version: 2.156.0-native-ipc-reply-authority
+Roadmap cycle: PooleOS Cycle 253
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 252: Native IPC Pressure And Peer Lifetime
+## Cycle 253: Native Sender And One-Use Reply Authority
+
+USI-2 now carries kernel-authenticated sender identity and task-local one-use
+reply authority. Real CPL3 tasks exchange requests without giving the server a
+permanent SEND grant. Metadata copy-out commits a reply token only after success;
+reply input/queue failure retains it, successful enqueue or discard consumes it,
+and replay denies. Fixed native generation6 demonstrates partial output retry,
+unminted-token rejection, transformed reply and token reuse/discard. Two fresh
+68-marker boots preserve17 containment cases and five prior pressure/death rounds;
+835 altered-evidence controls per guest and ordinary unsigned denial pass.
+416 kernel tests,618 Rust executions and48 oracle tests pass.
+[Evidence](checkpoints/cycle253-native-ipc-reply-authority.md).
+
+Next N13-CAPABILITY-IPC-001: request/deadline/cancellation ownership and dead-service
+notification, then transactional admission and sustained budgets. The current
+asynchronous reply primitive does not notify a waiting caller of discard/service
+death. Keep that gap explicit before init/console, shell/files/two apps and ISO
+acceptance. Image191 pages leaves one page within the192-page bootstrap cap;
+further growth needs layout/capacity qualification. No stack/run bound weakened.
+No phase/flag closes;40 phases,301 subphases,8996 requirements,59 additions,
+97 flags/42 open,20 gaps. USI-1/2 remain partial;3-5 not started. Full N0-N39,
+PooleGlyph/PDC and PooleGlass work continues. No interactive ISO, full canonical
+pass, main merge, release or production promotion.
+
+## Historical Cycle 252: Native IPC Pressure And Peer Lifetime
 
 USI-2 now qualifies five native IPC lifetimes on persistent owned slots. Real CPL3
 programs fill a FIFO, block for write readiness, recover a four-byte partial output
