@@ -58,6 +58,8 @@ const ENTRY_WRITABLE: u64 = 1 << 1;
 const ENTRY_USER: u64 = 1 << 2;
 const ENTRY_PWT: u64 = 1 << 3;
 const ENTRY_PCD: u64 = 1 << 4;
+const ENTRY_ACCESSED: u64 = 1 << 5;
+const ENTRY_DIRTY: u64 = 1 << 6;
 const ENTRY_LARGE_OR_PAT: u64 = 1 << 7;
 const ENTRY_NO_EXECUTE: u64 = 1 << 63;
 const PHYSICAL_MASK_52: u64 = 0x000f_ffff_ffff_f000;
@@ -381,6 +383,27 @@ fn decode_leaf(value: u64, virtual_address: u64) -> Result<Translation, Error> {
     })
 }
 
+// The inactive owner may regain a root after hardware used it. Accept only
+// hardware bookkeeping; retain the exact observed word for transactional rollback.
+fn observed_leaf<M: TableMemory>(
+    memory: &mut M,
+    table: u64,
+    index: usize,
+    expected: u64,
+) -> Result<u64, Error> {
+    let observed = memory.read_entry(table, index)?;
+    let hardware = ENTRY_ACCESSED
+        | if expected & ENTRY_WRITABLE != 0 {
+            ENTRY_DIRTY
+        } else {
+            0
+        };
+    if observed & !hardware != expected {
+        return Err(Error::TransactionRejected);
+    }
+    Ok(observed)
+}
+
 fn replace_entry<M: TableMemory>(
     memory: &mut M,
     table: u64,
@@ -609,6 +632,12 @@ impl AddressSpace {
         let mut mapping = self.mappings[index].ok_or(Error::MappingMissing)?;
         let previous = leaf_entry(mapping.frame, mapping.permissions, mapping.cache)?;
         let replacement = leaf_entry(mapping.frame, permissions, mapping.cache)?;
+        let previous = observed_leaf(
+            memory,
+            self.tables[3],
+            table_indices(virtual_address)[3],
+            previous,
+        )?;
         replace_entry(
             memory,
             self.tables[3],
@@ -631,12 +660,17 @@ impl AddressSpace {
         let indices = table_indices(virtual_address);
         for (level, table) in self.tables[..3].iter().enumerate() {
             let expected = self.tables[level + 1] | PARENT_FLAGS;
-            if memory.read_entry(*table, indices[level])? != expected {
+            if memory.read_entry(*table, indices[level])? & !ENTRY_ACCESSED != expected {
                 return Err(Error::ParentEntry);
             }
         }
+        let index = self
+            .mapping_index(virtual_address & !(PAGE_BYTES - 1))
+            .ok_or(Error::MappingMissing)?;
+        let mapping = self.mappings[index].ok_or(Error::MappingMissing)?;
+        let expected = leaf_entry(mapping.frame, mapping.permissions, mapping.cache)?;
         decode_leaf(
-            memory.read_entry(self.tables[3], indices[3])?,
+            observed_leaf(memory, self.tables[3], indices[3], expected)?,
             virtual_address,
         )
     }
@@ -659,6 +693,12 @@ impl AddressSpace {
         let frame_index = self.frame_index(mapping.frame).ok_or(Error::Ownership)?;
         let mut binding = self.frames[frame_index].ok_or(Error::Ownership)?;
         let previous = leaf_entry(mapping.frame, mapping.permissions, mapping.cache)?;
+        let previous = observed_leaf(
+            memory,
+            self.tables[3],
+            table_indices(virtual_address)[3],
+            previous,
+        )?;
         replace_entry(
             memory,
             self.tables[3],
@@ -995,6 +1035,153 @@ mod tests {
         let data = manager.allocate(Zone::Dma32, 1, DATA_OWNER).unwrap();
         let memory = Memory::new(physical_address(tables).unwrap());
         (manager, tables, data, memory)
+    }
+
+    #[test]
+    fn hardware_accessed_dirty_walk_protect_and_retire_are_supported() {
+        let (mut manager, tables, data, mut memory) = fixture();
+        let mut space = AddressSpace::initialize(&manager, tables, &mut memory).unwrap();
+        space
+            .map(
+                &manager,
+                &mut memory,
+                USER_WINDOW_START,
+                data,
+                Permissions::USER_RW,
+                CachePolicy::WriteBack,
+            )
+            .unwrap();
+        let indices = table_indices(USER_WINDOW_START);
+        for level in 0..3 {
+            memory.entries[level][indices[level]] |= ENTRY_ACCESSED;
+        }
+        memory.entries[3][indices[3]] |= ENTRY_ACCESSED | ENTRY_DIRTY;
+        assert_eq!(
+            space
+                .translate(&mut memory, USER_WINDOW_START + 7)
+                .unwrap()
+                .physical_address,
+            physical_address(data).unwrap() + 7
+        );
+        space
+            .protect(&mut memory, USER_WINDOW_START, Permissions::USER_RX)
+            .unwrap();
+        assert_eq!(
+            memory.entries[3][indices[3]],
+            leaf_entry(data, Permissions::USER_RX, CachePolicy::WriteBack).unwrap()
+        );
+        memory.entries[3][indices[3]] |= ENTRY_ACCESSED;
+        let token = space.begin_unmap(&mut memory, USER_WINDOW_START).unwrap();
+        assert_eq!(
+            space.complete_unmap(&mut manager, token),
+            Err(Error::InvalidationRequired)
+        );
+        space.acknowledge_inactive(token).unwrap();
+        assert!(space.complete_unmap(&mut manager, token).unwrap());
+        space.release(&mut manager, &mut memory).unwrap();
+        assert_eq!(manager.summary().allocated_pages, 0);
+    }
+
+    #[test]
+    fn hardware_bits_survive_failed_protect_and_unmap_rollback() {
+        let (manager, tables, data, mut memory) = fixture();
+        let mut space = AddressSpace::initialize(&manager, tables, &mut memory).unwrap();
+        space
+            .map(
+                &manager,
+                &mut memory,
+                USER_WINDOW_START,
+                data,
+                Permissions::USER_RW,
+                CachePolicy::WriteBack,
+            )
+            .unwrap();
+        memory.entries[3][0] |= ENTRY_ACCESSED | ENTRY_DIRTY;
+        let original = memory.entries[3][0];
+        let summary = space.summary();
+        memory.reject_next_write = true;
+        assert_eq!(
+            space.protect(&mut memory, USER_WINDOW_START, Permissions::USER_RX),
+            Err(Error::TransactionRejected)
+        );
+        assert_eq!(memory.entries[3][0], original);
+        memory.reject_next_write = true;
+        assert_eq!(
+            space.begin_unmap(&mut memory, USER_WINDOW_START),
+            Err(Error::TransactionRejected)
+        );
+        assert_eq!(memory.entries[3][0], original);
+        assert_eq!(space.summary(), summary);
+    }
+
+    #[test]
+    fn non_bookkeeping_leaf_bits_still_reject_without_writes() {
+        for permissions in [Permissions::USER_RX, Permissions::USER_RW] {
+            let (manager, tables, data, mut memory) = fixture();
+            let mut space = AddressSpace::initialize(&manager, tables, &mut memory).unwrap();
+            space
+                .map(
+                    &manager,
+                    &mut memory,
+                    USER_WINDOW_START,
+                    data,
+                    permissions,
+                    CachePolicy::WriteBack,
+                )
+                .unwrap();
+            let original = memory.entries[3][0];
+            let summary = space.summary();
+            for bit in 0..64 {
+                if bit == 5 || (bit == 6 && permissions.write) {
+                    continue;
+                }
+                memory.entries[3][0] = original ^ (1 << bit);
+                let writes = memory.writes;
+                assert!(space.translate(&mut memory, USER_WINDOW_START).is_err());
+                assert_eq!(
+                    space.protect(&mut memory, USER_WINDOW_START, permissions),
+                    Err(Error::TransactionRejected)
+                );
+                assert_eq!(
+                    space.begin_unmap(&mut memory, USER_WINDOW_START),
+                    Err(Error::TransactionRejected)
+                );
+                assert_eq!(memory.writes, writes);
+                assert_eq!(space.summary(), summary);
+            }
+        }
+    }
+
+    #[test]
+    fn parent_walk_accepts_only_accessed_bit_changes() {
+        let (manager, tables, data, mut memory) = fixture();
+        let mut space = AddressSpace::initialize(&manager, tables, &mut memory).unwrap();
+        space
+            .map(
+                &manager,
+                &mut memory,
+                USER_WINDOW_START,
+                data,
+                Permissions::USER_RW,
+                CachePolicy::WriteBack,
+            )
+            .unwrap();
+        let indices = table_indices(USER_WINDOW_START);
+        for level in 0..3 {
+            let original = memory.entries[level][indices[level]];
+            for bit in 0..64 {
+                if bit == 5 {
+                    continue;
+                }
+                memory.entries[level][indices[level]] = original ^ (1 << bit);
+                assert_eq!(
+                    space.translate(&mut memory, USER_WINDOW_START),
+                    Err(Error::ParentEntry)
+                );
+            }
+            memory.entries[level][indices[level]] = original | ENTRY_ACCESSED;
+        }
+        assert!(space.translate(&mut memory, USER_WINDOW_START).is_ok());
     }
 
     #[test]

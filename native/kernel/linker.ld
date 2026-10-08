@@ -26,11 +26,11 @@ SECTIONS
     KEEP(*(.poole.manifest))
     *(.rodata .rodata.*)
     FILL(0)
-    . = 0xA000;
+    . = 0xB000;
   } :ro
   __poole_ro_end = .;
 
-  . = 0xA000;
+  . = 0xB000;
   __poole_text_start = .;
   .text :
   {
@@ -53,17 +53,17 @@ SECTIONS
   .relro.pad :
   {
     FILL(0)
-    . = 0x8E000;
+    . = 0x90000;
   } :data :relro
   __poole_relro_end = .;
 
-  . = 0x8E000;
+  . = 0x90000;
   .data : { *(.data .data.*) } :data
   .bss (NOLOAD) :
   {
     *(.bss .bss.*)
     *(COMMON)
-    . = 0xA0000;
+    . = 0xA4000;
   } :data
   __poole_image_end = .;
 
@@ -85,3 +85,4 @@ ASSERT((__poole_relro_end & 0xfff) == 0, "RELRO must end on a page")
 ASSERT((__poole_image_end & 0xfff) == 0, "image must end on a page")
 ASSERT(__poole_ro_end == __poole_text_start, "read-only and text loads must be contiguous")
 ASSERT(__poole_text_end == __poole_data_start, "text and data loads must be contiguous")
+ASSERT(__poole_image_end <= 0xC0000, "image must fit the existing 192-page bootstrap kernel capacity")

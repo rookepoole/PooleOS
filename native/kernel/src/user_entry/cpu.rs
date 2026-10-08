@@ -4,6 +4,7 @@
 //! passing mock proves the state machine, not execution or hardware retirement.
 
 use super::{CoreRecord, DetachedImage, PhysicalMemoryManager, PreparedImage, TableMemory};
+use crate::user_entry::privilege;
 use crate::user_entry::timer;
 
 pub const CONTRACT_ID: &str = "PKUSER3";
@@ -50,6 +51,7 @@ pub enum Error {
     Root,
     Hardware,
     Timer(timer::Error),
+    User(privilege::Error),
 }
 
 /// Implementations must truthfully observe this CPU and serialize all CR3,
@@ -96,6 +98,7 @@ pub struct CpuImage<H: Cpu> {
     context: Option<Snapshot>,
     state: State,
     timer_quiescent: bool,
+    user_quiescent: bool,
 }
 
 impl<H: Cpu> CpuImage<H> {
@@ -107,6 +110,7 @@ impl<H: Cpu> CpuImage<H> {
             context: None,
             state: State::Inactive,
             timer_quiescent: true,
+            user_quiescent: true,
         }
     }
 
@@ -135,7 +139,7 @@ impl<H: Cpu> CpuImage<H> {
         driver: &mut T,
     ) -> Result<timer::Observation, Error> {
         let mappings = self.timer_context()?;
-        if !self.timer_quiescent {
+        if !self.timer_quiescent || !self.user_quiescent {
             return Err(Error::Timer(timer::Error::State));
         }
         self.timer_quiescent = false;
@@ -162,6 +166,50 @@ impl<H: Cpu> CpuImage<H> {
             .map_err(Error::Timer)?;
         self.timer_context()?;
         self.timer_quiescent = true;
+        Ok(())
+    }
+
+    fn user_context(&mut self) -> Result<crate::user_entry::ImageAdmission, Error> {
+        if self.state != State::Active {
+            return Err(Error::State);
+        }
+        let context = self.context.ok_or(Error::State)?;
+        let current = self.hardware.snapshot()?;
+        let image = self.prepared.admission().ok_or(Error::State)?;
+        if !current.same_context(context) || current.cr3 != image.root_physical {
+            return Err(Error::Context);
+        }
+        Ok(image)
+    }
+
+    pub fn exercise_user<D: privilege::Driver>(
+        &mut self,
+        driver: &mut D,
+    ) -> Result<privilege::Observation, Error> {
+        let image = self.user_context()?;
+        if !self.timer_quiescent || !self.user_quiescent {
+            return Err(Error::State);
+        }
+        self.user_quiescent = false;
+        let result = driver.execute(image);
+        self.quiesce_user(driver)?;
+        let observation = result.map_err(Error::User)?;
+        if observation.root != image.root_physical
+            || observation.traps != privilege::TRAP_COUNT
+            || observation.cpl != 3
+            || !observation.restored
+        {
+            return Err(Error::User(privilege::Error::Hardware));
+        }
+        Ok(observation)
+    }
+
+    pub fn quiesce_user<D: privilege::Driver>(&mut self, driver: &mut D) -> Result<(), Error> {
+        let image = self.user_context()?;
+        self.user_quiescent = false;
+        driver.quiesce(image.root_physical).map_err(Error::User)?;
+        self.user_context()?;
+        self.user_quiescent = true;
         Ok(())
     }
 
@@ -216,6 +264,9 @@ impl<H: Cpu> CpuImage<H> {
         manager: &mut PhysicalMemoryManager,
         memory: &mut M,
     ) -> Result<DetachedImage, (Error, Self)> {
+        if !self.user_quiescent {
+            return Err((Error::User(privilege::Error::State), self));
+        }
         if !self.timer_quiescent {
             return Err((Error::Timer(timer::Error::State), self));
         }

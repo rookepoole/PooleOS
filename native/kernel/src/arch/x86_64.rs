@@ -48,6 +48,8 @@ const DOUBLE_FAULT_IST_INDEX: u8 = 2;
 const INTERRUPT_GATE_PRESENT_RING0: u8 = 0x8e;
 const TSS_AVAILABLE_PRESENT_RING0: u64 = 0x89;
 
+pub mod user;
+
 #[derive(Clone, Copy)]
 #[repr(C, packed)]
 struct DescriptorPointer {

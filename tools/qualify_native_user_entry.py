@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run bounded host and freestanding checks for the PKUSER4 root/timer lifecycle."""
+"""Run bounded host, freestanding and optional PKUSER5 user-entry guest checks."""
 
 from __future__ import annotations
 
@@ -37,6 +37,7 @@ def source_bindings() -> dict[str, str]:
         "native/kernel/src/user_entry/cpu.rs", "native/kernel/src/user_entry/cpu_tests.rs",
         "native/kernel/src/user_entry/bootstrap.rs", "native/kernel/src/user_root_probe.rs",
         "native/kernel/src/user_entry/timer.rs", "native/kernel/src/user_root_probe/timer_driver.rs",
+        "native/kernel/src/user_entry/privilege.rs", "native/kernel/src/arch/x86_64/user.rs",
         "tools/qualify_native_user_root.py", "runtime/native_user_root.py",
         "tools/qualify_native_pooleboot.py", "tools/qualify_native_kernel_entry.py",
         "tools/qualify_native_user_entry.py", "tools/qualify_native_elf_loader.py",
@@ -60,8 +61,8 @@ def main() -> int:
     owner_report = Path("C:/Users/rookp/PooleGlyph/tests/reports/conformance_report.json")
     owner_before = digest(owner_report) if owner_report.is_file() else None
     report: dict = {
-        "contract_id": "PKUSER4", "cycle": 238,
-        "scope": "host_and_optional_bounded_CPL0_guest_no_ring3",
+        "contract_id": "PKUSER5", "cycle": 239,
+        "scope": "host_and_optional_bounded_user_entry_fault_guest",
         "status": "fail", "source_bindings": before, "checks": [],
         "guest_runs": 0, "ring3_executed": False, "iso_built": False,
         "n13_exit_passed": False, "production_ready": False,
@@ -72,9 +73,11 @@ def main() -> int:
     commands = [
         ("format", [str(cargo), "fmt", *common, "--", "--check"], None),
         ("kernel_host_debug", [str(cargo), "test", *common, "--lib", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 300),
+            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 315),
         ("user_entry_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 54),
+            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 65),
+        ("vm_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
+            "x86_64-pc-windows-msvc", *bounded, "virtual_memory::", "--", "--test-threads=1"], None),
         ("freestanding_library", [str(cargo), "check", *common, "--lib", "--target",
             "x86_64-unknown-none", *bounded], None),
         ("freestanding_kernel_adapter", [str(cargo), "check", *common, "--bin",
@@ -128,6 +131,7 @@ def main() -> int:
                 report["guest_runs"] = 3
                 report["user_root_guest_runs"] = 2
                 report["ordinary_denial_guest_runs"] = 1
+                report["ring3_executed"] = all(g["marker_summary"]["ring3_executed"] for g in live["guest_runs"])
         report["source_unchanged"] = before == source_bindings()
         report["owner_report_unchanged"] = owner_before == (digest(owner_report) if owner_report.is_file() else None)
         if (len(report["checks"]) == len(commands) and all(c["passed"] for c in report["checks"])
@@ -139,7 +143,7 @@ def main() -> int:
     (work / "receipt.json").write_text(serialized, encoding="utf-8", newline="\n")
     if report["status"] == "pass":
         args.out.write_text(serialized, encoding="utf-8", newline="\n")
-    print(f"PKUSER4 {report['status'].upper()}; guest_runs={report['guest_runs']}; ring3=false; production_ready=false", flush=True)
+    print(f"PKUSER5 {report['status'].upper()}; guest_runs={report['guest_runs']}; ring3={report['ring3_executed']}; production_ready=false", flush=True)
     return 0 if report["status"] == "pass" else 1
 
 

@@ -1,4 +1,4 @@
-//! Development-only, single-BSP owned user-root CR3 probe. No user execution.
+//! Development-only, single-BSP owned-root and bounded CPL3 fault-recovery probe.
 
 use super::*;
 use poole_handoff::{CoreRecord, Handoff, PAGE_BYTES};
@@ -203,13 +203,22 @@ pub fn run(
     for h in [code, stack, entry_stack] {
         checked!(10, memory.zero(h));
     }
-    // Static UD2 at the future entry; deliberately not executed by this profile.
-    checked!(
-        11,
-        memory.write_entry(code.start_page * PAGE_BYTES, 2, 0x0b0f)
-    );
-    if checked!(11, memory.read_entry(code.start_page * PAGE_BYTES, 2)) != 0x0b0f {
-        stop(11, serial, debugcon);
+    let payload = checked!(11, arch::x86_64::user::payload());
+    for (index, bytes) in payload.chunks(8).enumerate() {
+        let mut word = [0; 8];
+        word[..bytes.len()].copy_from_slice(bytes);
+        let value = u64::from_le_bytes(word);
+        checked!(
+            11,
+            memory.write_entry(code.start_page * PAGE_BYTES, index + 2, value)
+        );
+        if checked!(
+            11,
+            memory.read_entry(code.start_page * PAGE_BYTES, index + 2)
+        ) != value
+        {
+            stop(11, serial, debugcon);
+        }
     }
     let mut space = checked!(12, AddressSpace::initialize(&manager, tables, &mut memory));
     let image = InitialImage {
@@ -280,6 +289,11 @@ pub fn run(
     // SAFETY: PKUSER2 audited the preserved supervisor code/data/boot stack and
     // descriptor statics. All local operands live there; no physical adapter is
     // used while the candidate is active. This one-BSP no-DMA profile owns both roots.
+    // SAFETY: exclusive BSP boot profile, no FP/debug/segment owner or AP/DMA.
+    // Configure the supported user baseline BEFORE CpuImage freezes its controls.
+    let mut user = checked!(40, unsafe {
+        arch::x86_64::user::Entry::prepare(core.initial_stack_top_virtual)
+    });
     let mut hardware =
         unsafe { arch::x86_64::UserRootCpu::new(core.page_table_root_physical, candidate) };
     let before = checked!(18, hardware.snapshot());
@@ -299,6 +313,7 @@ pub fn run(
             CpuError::Root => "root",
             CpuError::Hardware => "hardware",
             CpuError::Timer(_) => "timer",
+            CpuError::User(_) => "user",
         });
         for (label, value) in [
             (" cr0=", before.cr0),
@@ -315,8 +330,10 @@ pub fn run(
     if owner.state() != State::Active {
         stop(19, serial, debugcon);
     }
+    // Keep the sentinel below the bounded fault handler's stack usage. Hardware
+    // owns the top words once CPL3 faults begin using TSS.RSP0.
     // SAFETY: owned four-page supervisor RW/NX entry stack was fully audited.
-    let probe = (prepared::STACK_TOP - 8) as *mut u64;
+    let probe = prepared::STACK_BOTTOM as *mut u64;
     let expected = candidate ^ tables.generation ^ 0x504b_5553_4552_3300;
     let (observed_root, observed_probe) = unsafe {
         write_volatile(probe, expected);
@@ -352,10 +369,21 @@ pub fn run(
         log.write_decimal_u64(u64::from(irq.eois));
         log.write_str(" mmio_pages=2 quiesced=1 if=0 ring3=0\n");
     }
+    let entry = checked!(41, owner.exercise_user(&mut user));
+    {
+        let mut log = EarlyLogger::new(BootSink {
+            serial,
+            debugcon,
+            ring: &EARLY_RING,
+        });
+        log.write_str("POOLEOS:KERNEL:USER-ENTRY PASS contract=PKUSER5 cr3=");
+        log.write_hex_u64(entry.root);
+        log.write_str(" cpl=3 traps=7 private_rsp0=1 gpr_zero=15 fp_cleared=1 cli_denied=1 io_denied=1 syscall_denied=1 supervisor_fault=1 nx_fault=1 kernel_return=1 descriptors_detached=1 if=0 production=0\n");
+    }
     let mut parts = checked!(21, owner.retire(&mut manager, &mut memory));
     if checked!(
         22,
-        memory.read_entry((entry_stack.start_page + 3) * PAGE_BYTES, 511)
+        memory.read_entry(entry_stack.start_page * PAGE_BYTES, 0)
     ) != expected
     {
         stop(22, serial, debugcon);
@@ -392,6 +420,6 @@ pub fn run(
     log.write_decimal_u64(manager.summary().allocated_pages);
     log.write_str(" retained_acpi_pages=");
     log.write_decimal_u64(acpi.snapshot_page_count);
-    log.write_str(" released_pages=13 scrubbed_data_pages=6 ring3=0 production=0 terminal=halt\n");
+    log.write_str(" released_pages=13 scrubbed_data_pages=6 ring3=1 production=0 terminal=halt\n");
     halt_forever()
 }

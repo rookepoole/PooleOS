@@ -1,15 +1,42 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.141.0-owned-root-timer
-Roadmap cycle: PooleOS Cycle 238
+Plan version: 2.142.0-bounded-user-entry
+Roadmap cycle: PooleOS Cycle 239
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 238: Timer Recovery Under The Owned Root
+## Cycle 239: Actual User Entry And Fault Containment
+
+USI-1 / N7/N9/N12/N13.3, `N13-USER-ENTRY-LIVE-001`: PKUSER5 enters one fixed
+payload at CPL3 using sanitized integer/legacy FP/segment/debug state and a
+private TSS.RSP0 stack. Two fresh QEMU boots each contain seven ordered faults,
+deny CLI/port I/O/disabled SYSCALL/kernel reads/NX-stack execution, return to
+CPL0, detach descriptors, restore the boot root and release all13 task pages.
+Ordinary unsigned boot denial remains intact. [Evidence](checkpoints/cycle239-bounded-user-entry.md).
+
+Live cleanup exposed a real VM bug: CPU-set accessed bits caused unmap rejection.
+The repair accepts only valid hardware A/D bookkeeping, preserves exact rollback
+and rejects all other single-bit address/permission corruption.315 debug kernel,
+65 user-release,24 VM-release,5 compile-fail,10 boot-exit and18 Python oracle
+tests pass. Linker boundaries grow to164pages within the existing192-page cap;
+old0xA000 product contracts remain stale after the entry moves to0xB000.
+
+Next subphase: timer preemption and bounded supervisor recovery from CPL3,
+including a spinning payload. Then versioned syscall/user-copy mechanisms,
+capability IPC, isolated services, an interactive shell/two apps, and optical ISO
+qualification. The current fixed sequence has no armed user-mode timer and is
+not an arbitrary-program admission path. General XSAVE/state switching, SMP,
+guest-injected cleanup failure, physical support and production remain open.
+All8,996 requirements/59 additions remain; no flag or phase closes.25 native
+admissions and22 retained Python source closures require fresh replay, along
+with boot-trust/ELF and full exact-candidate gates. The complete robust native
+microkernel remains the goal after preview acceptance.
+
+## Historical Cycle 238: Timer Recovery Under The Owned Root
 
 USI-1 / N9/N12/N13.3, `N13-USER-ENTRY-LIVE-001`: PKUSER4 supplies two guarded
 supervisor-only UC/NX APIC/HPET leaves. Validated ACPI/APIC identity, PAT, PMM and

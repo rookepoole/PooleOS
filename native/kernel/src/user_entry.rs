@@ -14,6 +14,7 @@ use crate::virtual_memory::{
 
 pub mod bootstrap;
 pub mod prepared;
+pub mod privilege;
 pub mod timer;
 
 pub const CONTRACT_ID: &str = "PKUSER1";

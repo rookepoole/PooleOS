@@ -11,7 +11,17 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle 238 delivers and acknowledges three
+**Current development checkpoint:** Cycle 239 executes a real, bounded ring-3
+payload in two fresh native QEMU boots. Private-stack fault handling denies
+privileged operations, kernel reads and stack execution; controlled return,
+descriptor cleanup and all 13 task-page releases pass. Live testing also fixed
+VM cleanup of CPU-accessed page entries. There are 315 passing debug kernel
+tests, 89 repeated optimized tests and preserved ordinary-boot denial.
+Next: user-mode timer preemption, then IPC, services, shell/apps and optical ISO.
+This is not yet an interactive OS or a new ISO. Full microkernel development
+continues after that preview. [Evidence](docs/checkpoints/cycle239-bounded-user-entry.md).
+
+**Historical development checkpoint:** Cycle 238 delivers and acknowledges three
 timer interrupts under the owned task root in each of two fresh native QEMU
 boots. Guarded supervisor-only uncached MMIO mappings and verified timer shutdown
 protect restoration and task-memory release. All 300 kernel host tests, 54

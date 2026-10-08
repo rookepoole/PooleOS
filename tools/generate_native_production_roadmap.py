@@ -11352,7 +11352,7 @@ def apply_cycle237(roadmap: dict, test_count: int) -> dict:
 
 def apply_cycle238(roadmap: dict, test_count: int) -> dict:
     checkpoint = "docs/checkpoints/cycle238-owned-root-timer.md"
-    receipt_path = "runs/native-user-entry-readiness.json"
+    receipt_path = "tests/fixtures/cycle238-user-entry-readiness.json"
     raw = (ROOT / receipt_path).read_bytes()
     receipt = json.loads(raw)
     baseline = roadmap["baseline"]
@@ -11400,13 +11400,69 @@ def apply_cycle238(roadmap: dict, test_count: int) -> dict:
     next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")["evidence"].append(checkpoint)
     roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle239(roadmap, test_count)
+
+
+def apply_cycle239(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle239-bounded-user-entry.md"
+    receipt_path = "runs/native-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle238_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle238_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=239, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=239)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path]
+    gate["current_candidate_audit"]["cycle"] = 239
+    gate["current_focused_source_projection"]["cycle"] = 239
+    gate["qualification_status"] = "bounded_cpl3_fault_return_cleanup_pass_user_preemption_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=239, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="315_debug_kernel_plus65_repeated_user_release_plus24_repeated_VM_release_plus5_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=18, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=239, status="pass", tests_run=105,
+        tests_passed=105, tests_failed=0, tests_skipped=0,
+        elapsed_seconds=48.597, runner_elapsed_seconds=49.406,
+        log_sha256="8B84D6C8793446D5212E84F37C440524D684D77852671281766E5069650AC7FC",
+        initial_attempts=[dict(tests_run=105, failures=1, errors=0,
+            log_sha256="B351D09B82DFD8F99FD24600AC9B2FE149076325A005B6A4ACD2029FE0B02D07",
+            cause="prior_CPL0_qualification_status_assertion_not_updated")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=239, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_CPL3_fault_return_cleanup_probes_plus_default_denial",
+        ring3_executed=True, user_faults_per_probe=7, private_tss_rsp0_executed=True,
+        user_timer_preemption=False, architectural_state_profile="single_BSP_legacy_x87_SSE_no_enabled_XSAVE",
+        general_user_program_admission=False, syscall_abi=False, iso_built=False)
+    lane["stages"]["USI-1"] = "partial_live_cpl3_fault_return_cleanup_no_user_preemption"
+    roadmap["immediate_next_move"]["title"] = "Prove bounded timer preemption and supervisor recovery from CPL3, including spinning-task containment, before a versioned syscall ABI and capability IPC"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", receipt_path, checkpoint,
+        "native/kernel/src/arch/x86_64/user.rs", "native/kernel/src/user_entry/privilege.rs",
+        "native/kernel/src/user_root_probe/timer_driver.rs", "native/kernel/src/virtual_memory.rs"]
+    evidence = "Cycle 239: PKUSER5 enters one fixed CPL3 payload with cleared GPR/legacy FP state, private TSS.RSP0 and exact ordered fault validation. Two fresh QEMU probes each contain seven faults, return to CPL0, detach descriptors, flush/restore the boot root and release13 task pages. Real execution exposed and repaired VM A/D-bit cleanup rejection.315 debug,65 user-release,24 VM-release,5 compile-fail,10 boot-exit and18 Python oracle tests pass; ordinary boot denies unsigned execution. " + checkpoint
+    gap = "No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion."
+    for phase_id in ("N7", "N9", "N13"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")["evidence"].append(checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1256)
+    parser.add_argument("--test-count", type=int, default=1260)
     parser.add_argument("--status-date", default="2026-10-08")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

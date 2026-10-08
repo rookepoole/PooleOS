@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 238, 2026-10-08. No new ISO exists yet.
+Status: implementation started, Cycle 239, 2026-10-08. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -43,7 +43,7 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 
 | Stage | Build Plan Binding | Exit Criterion | Current State |
 | --- | --- | --- | --- |
-| USI-1 User entry and containment | N7, N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle 238: two actual CPL0 root/timer/quiescence/restore/release probes pass; ordinary denial preserved; no ring-3 execution yet |
+| USI-1 User entry and containment | N7, N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle239: two actual CPL3 fault/return/cleanup probes pass; ordinary denial preserved; user timer preemption and arbitrary-program admission pending |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Not started |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Not started |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
@@ -68,6 +68,11 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
    segment/base, debug, and supported extended state without leaking kernel data.
 4. Enter one static user task in a separately gated development profile and
    prove the actual CPL, kernel return, and denied privileged operations in QEMU.
+   Cycle239 completes this bounded probe and substep3 for legacy x87/SSE only:
+   seven ordered faults on the private RSP0 stack, sanitized state, denied
+   privileged operations, kernel return, descriptor detach and complete release.
+   No timer is armed during this fixed payload; substeps6-7 must establish
+   preemption/spinning-task recovery before arbitrary program admission.
 5. Add a narrow versioned syscall ABI and hardened user copying with recoverable
    faults, bounded lengths, checked arithmetic and stable ownership. Do not use
    raw user pointers or numeric addresses as authority.
@@ -127,7 +132,15 @@ Qualification command:
 python -B tools/qualify_native_user_entry.py --work-dir outputs/a-new-user-entry-run
 ```
 
-## Cycle 238 Live Integration
+## Cycle239 Live Integration
+
+[Bounded User Entry Evidence](checkpoints/cycle239-bounded-user-entry.md) records
+two real CPL3 fault/return/cleanup probes. This also fixes shared VM retirement
+of CPU-accessed page entries. Next is bounded timer recovery from CPL3, then a
+versioned syscall/user-copy ABI and capability IPC. No interactive session or
+optical ISO is claimed. The full robust microkernel remains the production goal.
+
+## Historical Cycle 238 Live Integration
 
 [Owned Root Timer Evidence](checkpoints/cycle238-owned-root-timer.md) records two
 fresh native CPL0 root/timer probes and ordinary denial. Each probe receives

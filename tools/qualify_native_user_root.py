@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build exact development media and run two PKUSER4 probes plus ordinary denial."""
+"""Build exact development media and run two PKUSER5 probes plus ordinary denial."""
 from __future__ import annotations
 
 import argparse
@@ -22,7 +22,7 @@ def main() -> int:
     work = args.work_dir.resolve()
     if not work.is_relative_to(ROOT): p.error("work directory must be inside repository")
     work.mkdir(parents=True, exist_ok=False)
-    report = {"cycle": 238, "contract_id": "PKUSER4", "status": "fail", "guest_runs": [],
+    report = {"cycle": 239, "contract_id": "PKUSER5", "status": "fail", "guest_runs": [],
               "ring3_executed": False, "iso_built": False, "production_ready": False}
     try:
         lock, profile = tier0.validate_contracts(ROOT)
@@ -55,7 +55,7 @@ def main() -> int:
         for i in (1, 2):
             run_dir = work / f"guest-{i}"
             run_dir.mkdir()
-            print(f"PKUSER4 guest {i}/2, 45-second bound", flush=True)
+            print(f"PKUSER5 guest {i}/2, 45-second bound", flush=True)
             run, _, handoff = boot._execute_once(f"user-root-{i}", lock, profile, qemu,
                 media_path, run_dir, 45, marker_validator=probe.validate_markers,
                 marker_extractor=transfer.extract_markers, completion_marker=probe.COMPLETION)
@@ -77,12 +77,13 @@ def main() -> int:
             raise ValueError("ordinary boot entered kernel development path")
         load.validate_oracle_binding(run["marker_summary"], load.inspect_media_bytes(default_media), run["pbp1_transcript"])
         report["ordinary_denial"] = run
+        report["ring3_executed"] = True
         report["status"] = "pass"
     except Exception as e:
         report["failure"] = f"{type(e).__name__}: {e}"
         print(report["failure"], flush=True)
     (work / "receipt.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
-    print(f"PKUSER4 live {report['status']}; ring3=0 production=0", flush=True)
+    print(f"PKUSER5 live {report['status']}; ring3={report['ring3_executed']} production=0", flush=True)
     return 0 if report["status"] == "pass" else 1
 
 

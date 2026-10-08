@@ -1,5 +1,6 @@
 use super::*;
 use crate::user_entry::prepared::cpu::{Cpu, CpuImage, Error as CpuError, Snapshot, State};
+use crate::user_entry::privilege;
 use std::{cell::RefCell, rc::Rc};
 
 struct Machine {
@@ -492,4 +493,132 @@ fn timer_requires_active_mapped_owner_without_touching_driver() {
         }
         assert!(driver.calls.is_empty());
     }
+}
+
+struct UserDriver {
+    machine: Rc<RefCell<Machine>>,
+    fail_execute: bool,
+    fail_detach: bool,
+    drift: bool,
+    malformed: u8,
+    calls: std::vec::Vec<&'static str>,
+}
+impl UserDriver {
+    fn new(s: &Setup) -> Self {
+        Self {
+            machine: Rc::clone(&s.machine),
+            fail_execute: false,
+            fail_detach: false,
+            drift: false,
+            malformed: 0,
+            calls: std::vec::Vec::new(),
+        }
+    }
+}
+impl privilege::Driver for UserDriver {
+    fn execute(
+        &mut self,
+        image: ImageAdmission,
+    ) -> Result<privilege::Observation, privilege::Error> {
+        self.calls.push("enter");
+        assert_eq!(self.machine.borrow().snapshot.cr3, image.root_physical);
+        if self.fail_execute {
+            return Err(privilege::Error::Hardware);
+        }
+        Ok(privilege::Observation {
+            root: image.root_physical + u64::from(self.malformed == 1),
+            traps: if self.malformed == 2 { 6 } else { 7 },
+            cpl: if self.malformed == 3 { 0 } else { 3 },
+            restored: self.malformed != 4,
+        })
+    }
+    fn quiesce(&mut self, root: u64) -> Result<(), privilege::Error> {
+        self.calls.push("detach");
+        assert_eq!(self.machine.borrow().snapshot.cr3, root);
+        if self.drift {
+            self.machine.borrow_mut().snapshot.cpu_id += 1;
+        }
+        if self.fail_detach {
+            Err(privilege::Error::Hardware)
+        } else {
+            Ok(())
+        }
+    }
+}
+
+#[test]
+fn user_entry_success_or_error_always_detaches_before_retirement() {
+    for error in [false, true] {
+        let mut s = setup();
+        let mut d = UserDriver::new(&s);
+        d.fail_execute = error;
+        s.owner.activate(&s.manager, &mut s.memory).unwrap();
+        assert_eq!(s.owner.exercise_user(&mut d).is_err(), error);
+        assert_eq!(d.calls, ["enter", "detach"]);
+        retained(&mut s.manager, &s.handles);
+        assert!(s.owner.retire(&mut s.manager, &mut s.memory).is_ok());
+        assert_eq!(s.machine.borrow().writes, [s.candidate, s.original]);
+    }
+}
+
+#[test]
+fn failed_user_detach_keeps_stack_retained_blocks_timer_and_retries() {
+    let mut s = setup_with_timer(true);
+    let mut d = UserDriver::new(&s);
+    d.fail_detach = true;
+    let mut timer = TimerDriver::new(&s);
+    s.owner.activate(&s.manager, &mut s.memory).unwrap();
+    assert!(s.owner.exercise_user(&mut d).is_err());
+    assert!(s.owner.exercise_timer(&mut timer).is_err());
+    assert!(timer.calls.is_empty());
+    let writes = s.memory.writes;
+    let (error, mut owner) = s.owner.retire(&mut s.manager, &mut s.memory).err().unwrap();
+    assert_eq!(error, CpuError::User(privilege::Error::State));
+    assert_eq!(s.memory.writes, writes);
+    assert_eq!(s.machine.borrow().writes, [s.candidate]);
+    retained(&mut s.manager, &s.handles);
+    assert!(owner.exercise_user(&mut d).is_err());
+    assert_eq!(d.calls, ["enter", "detach"]);
+    d.fail_detach = false;
+    owner.quiesce_user(&mut d).unwrap();
+    assert!(owner.retire(&mut s.manager, &mut s.memory).is_ok());
+}
+
+#[test]
+fn user_driver_context_drift_never_releases_private_entry_stack() {
+    let mut s = setup();
+    let mut d = UserDriver::new(&s);
+    d.drift = true;
+    s.owner.activate(&s.manager, &mut s.memory).unwrap();
+    assert_eq!(s.owner.exercise_user(&mut d), Err(CpuError::Context));
+    assert!(s.owner.retire(&mut s.manager, &mut s.memory).is_err());
+    retained(&mut s.manager, &s.handles);
+}
+
+#[test]
+fn user_observations_cannot_claim_wrong_root_cpl_or_incomplete_return() {
+    for malformed in 1..=4 {
+        let mut s = setup();
+        let mut d = UserDriver::new(&s);
+        d.malformed = malformed;
+        s.owner.activate(&s.manager, &mut s.memory).unwrap();
+        assert_eq!(
+            s.owner.exercise_user(&mut d),
+            Err(CpuError::User(privilege::Error::Hardware))
+        );
+        assert!(s.owner.retire(&mut s.manager, &mut s.memory).is_ok());
+    }
+}
+
+#[test]
+fn pending_timer_shutdown_or_inactive_owner_cannot_enter_user() {
+    let mut s = setup_with_timer(true);
+    let mut d = UserDriver::new(&s);
+    assert!(s.owner.exercise_user(&mut d).is_err());
+    s.owner.activate(&s.manager, &mut s.memory).unwrap();
+    let mut timer = TimerDriver::new(&s);
+    timer.stop_error = true;
+    assert!(s.owner.exercise_timer(&mut timer).is_err());
+    assert!(s.owner.exercise_user(&mut d).is_err());
+    assert!(d.calls.is_empty());
 }
