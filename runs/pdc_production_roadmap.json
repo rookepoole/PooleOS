@@ -43,13 +43,16 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 241,
+    "last_updated_cycle": 242,
     "selected_move_id": "N13-USER-ENTRY-LIVE-001",
     "immediate_next_move_id": "N13-USER-ENTRY-LIVE-001",
     "owner_independent_next_move_id": "N13-USER-ENTRY-LIVE-001",
     "required_records": [
-      "docs/checkpoints/cycle241-native-syscall-usercopy.md",
+      "docs/checkpoints/cycle242-user-task-termination.md",
       "runs/native-user-entry-readiness.json",
+      "docs/native-task-lifecycle.md",
+      "docs/checkpoints/cycle241-native-syscall-usercopy.md",
+      "tests/fixtures/cycle241-user-entry-readiness.json",
       "docs/native-syscall-abi.md",
       "docs/checkpoints/cycle240-user-timer-preemption.md",
       "tests/fixtures/cycle240-user-entry-readiness.json",
@@ -217,9 +220,9 @@
     "added_requirement_count": 59
   },
   "baseline": {
-    "pooleos_cycle": 241,
+    "pooleos_cycle": 242,
     "entry_cycle": 79,
-    "pooleos_test_count": 1267,
+    "pooleos_test_count": 1271,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -235,13 +238,13 @@
       "explicit_gap_count": 20,
       "production_ready": false,
       "native_promotion_role": "partially_qualified_development_candidate_non_promoting",
-      "qualification_status": "bounded_development_syscall_copy_pass_task_lifecycle_and_full_candidate_pending",
+      "qualification_status": "bounded_task_termination_pass_peer_scheduling_and_full_candidate_pending",
       "passed_check_count_scope": "historical_cycle176_exact_final_canonical_audit",
       "current_cycle_full_canonical_audit_performed": false,
       "last_fully_qualified_cycle": 176,
       "last_fully_qualified_passed_checks": 105,
       "current_candidate_audit": {
-        "cycle": 241,
+        "cycle": 242,
         "status": "not_run",
         "applies_to_current_source": false,
         "aggregate_suite_passed": false,
@@ -360,7 +363,7 @@
         "production_ready": false
       },
       "current_focused_source_projection": {
-        "cycle": 241,
+        "cycle": 242,
         "passed_checks": 2,
         "total_checks": 27,
         "passing_profiles": [
@@ -3481,20 +3484,28 @@
         "production_ready": false
       },
       "current_closeout_regression": {
-        "cycle": 241,
+        "cycle": 242,
         "status": "focused_native_and_guest_pass_not_full_canonical",
-        "tests_run": 441,
-        "tests_passed": 441,
+        "tests_run": 463,
+        "tests_passed": 463,
         "tests_failed": 0,
         "tests_skipped": 0,
-        "scope": "326_debug_kernel_plus76_repeated_user_release_plus24_repeated_VM_release_plus5_compile_fail_plus10_boot_exit",
-        "additional_python_oracle_tests": 23,
+        "scope": "336_debug_kernel_plus86_repeated_user_release_plus24_repeated_VM_release_plus7_compile_fail_plus10_boot_exit",
+        "additional_python_oracle_tests": 26,
         "rejected_incompatible_feature_builds": 2,
         "guest_runs": 3,
         "user_root_guest_runs": 2,
         "ordinary_denial_guest_runs": 1,
         "receipt_path": "runs/native-user-entry-readiness.json",
-        "receipt_sha256": "A1D8F9AF64D05DEBC88757CA1C8D8C84BC6B292F97E07B7FEF14889614416FE5",
+        "receipt_sha256": "DC81C8D1361A0E1460E8154B688C28F3BB06DB7B259FB7EF63F99A703A26C2C3",
+        "initial_attempts": [
+          {
+            "status": "link_failed_before_guest",
+            "elapsed_seconds": 92.109,
+            "reason": "text_exceeded_reserved_0x80000_boundary_by_0x1B0E",
+            "log_sha256": "57B247E22DC1FEEEFE2727984310F6E4AF306628DBD959E58D63D13974D6F092"
+          }
+        ],
         "canonical_full_replay_performed": false,
         "merge_qualified": false,
         "production_ready": false
@@ -51919,25 +51930,15 @@
         "inherited_shared_loader_input_count": 19
       },
       "current_user_entry_metadata": {
-        "cycle": 241,
+        "cycle": 242,
         "status": "pass",
-        "tests_run": 112,
-        "tests_passed": 112,
+        "tests_run": 116,
+        "tests_passed": 116,
         "tests_failed": 0,
         "tests_skipped": 0,
-        "elapsed_seconds": 48.713,
-        "runner_elapsed_seconds": 49.532,
-        "log_sha256": "F589BFF9A9BB03377AD855AC8CB9A3427ABFA61A2E1ADB580C2E1D28D3D2DE2F",
-        "initial_attempts": [
-          {
-            "tests_run": 112,
-            "failures": 1,
-            "errors": 0,
-            "elapsed_seconds": 48.808,
-            "reason": "old_qualification_status_expectation_not_updated",
-            "log_sha256": "42E223E12DF2FDA32DF014F1446B9F903CAF123836AB53AB77CFF178C30CDB73"
-          }
-        ],
+        "elapsed_seconds": 50.335,
+        "runner_elapsed_seconds": 51.188,
+        "log_sha256": "58E42335CAC463E8531CEDA5AF91950373EB0212F91E52789291E0DCDD647733",
         "historical_integrity_is_not_new_execution": true,
         "production_ready": false
       },
@@ -52318,6 +52319,48 @@
         "log_sha256": "D1D822194CD96CE7390C901C5B43BA106B209A295128DC3786B63198C2D20743",
         "historical_integrity_is_not_new_execution": true,
         "production_ready": false
+      },
+      "historical_cycle241_closeout_regression": {
+        "cycle": 241,
+        "status": "focused_native_and_guest_pass_not_full_canonical",
+        "tests_run": 441,
+        "tests_passed": 441,
+        "tests_failed": 0,
+        "tests_skipped": 0,
+        "scope": "326_debug_kernel_plus76_repeated_user_release_plus24_repeated_VM_release_plus5_compile_fail_plus10_boot_exit",
+        "additional_python_oracle_tests": 23,
+        "rejected_incompatible_feature_builds": 2,
+        "guest_runs": 3,
+        "user_root_guest_runs": 2,
+        "ordinary_denial_guest_runs": 1,
+        "receipt_path": "tests/fixtures/cycle241-user-entry-readiness.json",
+        "receipt_sha256": "A1D8F9AF64D05DEBC88757CA1C8D8C84BC6B292F97E07B7FEF14889614416FE5",
+        "canonical_full_replay_performed": false,
+        "merge_qualified": false,
+        "production_ready": false
+      },
+      "historical_cycle241_user_entry_metadata": {
+        "cycle": 241,
+        "status": "pass",
+        "tests_run": 112,
+        "tests_passed": 112,
+        "tests_failed": 0,
+        "tests_skipped": 0,
+        "elapsed_seconds": 48.713,
+        "runner_elapsed_seconds": 49.532,
+        "log_sha256": "F589BFF9A9BB03377AD855AC8CB9A3427ABFA61A2E1ADB580C2E1D28D3D2DE2F",
+        "initial_attempts": [
+          {
+            "tests_run": 112,
+            "failures": 1,
+            "errors": 0,
+            "elapsed_seconds": 48.808,
+            "reason": "old_qualification_status_expectation_not_updated",
+            "log_sha256": "42E223E12DF2FDA32DF014F1446B9F903CAF123836AB53AB77CFF178C30CDB73"
+          }
+        ],
+        "historical_integrity_is_not_new_execution": true,
+        "production_ready": false
       }
     },
     "native": {
@@ -52447,7 +52490,7 @@
       "blocked": true
     },
     "user_space_integration": {
-      "cycle": 241,
+      "cycle": 242,
       "status": "implementation_started",
       "plan_path": "docs/native-userspace-integration-iso.md",
       "selected_stage": "USI-1",
@@ -52459,7 +52502,7 @@
       "iso_built": false,
       "production_ready": false,
       "stages": {
-        "USI-1": "partial_live_cpl3_syscall_copy_timer_no_task_exit_or_peer_scheduling",
+        "USI-1": "partial_live_owned_task_exit_fault_reap_no_peer_scheduling",
         "USI-2": "not_started",
         "USI-3": "not_started",
         "USI-4": "not_started",
@@ -52471,7 +52514,7 @@
       "owned_inactive_supervisor_attachment": true,
       "entry_stack_bytes": 16384,
       "live_adapter_wired": true,
-      "privileged_adapter_verification": "two_fresh_qemu_CPL3_syscall_copy_fault_timer_cleanup_probes_plus_default_denial",
+      "privileged_adapter_verification": "two_fresh_qemu_CPL3_owned_exit_fault_reap_probes_plus_default_denial",
       "cpu_exposure_lifecycle_implemented": true,
       "actual_cr3_switch_executed": true,
       "user_root_guest_runs": 2,
@@ -52503,7 +52546,17 @@
       "syscall_msrs_cleared_before_retirement": true,
       "general_smap_qualification": false,
       "concurrent_user_copy_pinning": false,
-      "task_exit_and_reaping": false
+      "task_exit_and_reaping": true,
+      "task_termination_contract": "PKUSER8",
+      "sequential_task_lifetimes_per_probe": 4,
+      "normal_task_exits_per_probe": 1,
+      "fatal_user_faults_per_probe": 3,
+      "task_identity_scope": "persistent_slot_local_generation_not_capability",
+      "released_pages_per_probe": 65,
+      "scrubbed_data_pages_per_probe": 30,
+      "actual_root_writes_per_probe": 10,
+      "failed_cleanup_retains_memory": true,
+      "complete_spawn_allocation_rollback": false
     },
     "historical_cycle234_user_space_integration": {
       "cycle": 234,
@@ -52736,6 +52789,65 @@
       "timer_shutdown_precedes_descriptor_detachment": true,
       "independent_missing_interrupt_watchdog": false,
       "multi_application_scheduling": false
+    },
+    "historical_cycle241_user_space_integration": {
+      "cycle": 241,
+      "status": "implementation_started",
+      "plan_path": "docs/native-userspace-integration-iso.md",
+      "selected_stage": "USI-1",
+      "selected_requirement": "N13-USER-ENTRY-LIVE-001",
+      "receipt_path": "tests/fixtures/cycle241-user-entry-readiness.json",
+      "host_status": "pass",
+      "guest_runs": 3,
+      "ring3_executed": true,
+      "iso_built": false,
+      "production_ready": false,
+      "stages": {
+        "USI-1": "partial_live_cpl3_syscall_copy_timer_no_task_exit_or_peer_scheduling",
+        "USI-2": "not_started",
+        "USI-3": "not_started",
+        "USI-4": "not_started",
+        "USI-5": "not_started"
+      },
+      "continue_full_microkernel_after_iso": true,
+      "required_next": "N13-USER-ENTRY-LIVE-001",
+      "live_adapter_implemented": true,
+      "owned_inactive_supervisor_attachment": true,
+      "entry_stack_bytes": 16384,
+      "live_adapter_wired": true,
+      "privileged_adapter_verification": "two_fresh_qemu_CPL3_syscall_copy_fault_timer_cleanup_probes_plus_default_denial",
+      "cpu_exposure_lifecycle_implemented": true,
+      "actual_cr3_switch_executed": true,
+      "user_root_guest_runs": 2,
+      "ordinary_denial_guest_runs": 1,
+      "timer_under_candidate_root_executed": true,
+      "verified_timer_shutdown_before_retirement": true,
+      "interrupts_per_probe": 3,
+      "mmio_pages": 2,
+      "retained_acpi_snapshot_pages": 1,
+      "user_faults_per_probe": 7,
+      "private_tss_rsp0_executed": true,
+      "user_timer_preemption": true,
+      "architectural_state_profile": "single_BSP_legacy_x87_SSE_no_enabled_XSAVE",
+      "general_user_program_admission": false,
+      "syscall_abi": true,
+      "user_timer_interrupts_per_probe": 3,
+      "user_resumes_per_probe": 2,
+      "timer_shutdown_precedes_descriptor_detachment": true,
+      "independent_missing_interrupt_watchdog": false,
+      "multi_application_scheduling": false,
+      "development_syscall_abi": "PSABI1",
+      "production_syscall_abi_frozen": false,
+      "bounded_user_copy": true,
+      "maximum_user_copy_bytes": 256,
+      "user_calls_per_probe": 12,
+      "copy_faults_per_probe": 3,
+      "copy_input_failure_atomic": true,
+      "copy_output_failure_reports_prefix": true,
+      "syscall_msrs_cleared_before_retirement": true,
+      "general_smap_qualification": false,
+      "concurrent_user_copy_pinning": false,
+      "task_exit_and_reaping": false
     }
   },
   "source_set": [
@@ -53515,6 +53627,7 @@
         "ADD-N7-XSTATE-001"
       ],
       "current_evidence": [
+        "Cycle 242: PKUSER8 owns four sequential task lifetimes, records Exit42 and user UD/GP/PF termination, rejects stale generations and restart/reap repetition, and quiesces entry before root restoration and memory release. Two fresh40-marker guests/157 evidence controls each and ordinary denial pass.336 debug,86 user-release,24 VM-release,7 compile-fail,10 boot-exit and26 Python oracle tests pass. docs/checkpoints/cycle242-user-task-termination.md",
         "Cycle 241: PKUSER7 executes12 real CPL3 SYSCALLs with checked IRETQ, version/errors, bounded snapshot user copying, one exact input PF and two exact output PF fixups, then disables/clears entry MSRs before timer recovery and13-page retirement. Two fresh36-marker guests/89 controls each and ordinary denial pass;326 debug,76 user-release,24 VM-release,5 compile-fail,10 boot-exit and23 Python oracle tests pass. docs/checkpoints/cycle241-native-syscall-usercopy.md",
         "Cycle 240: PKUSER6 interrupts a fixed spinning CPL3 payload three times on its private RSP0 stack, resumes twice with14 GPRs and legacy FP state preserved, then forces kernel recovery. Timer shutdown precedes descriptor detachment/root restoration/13-page release. Two fresh guests and ordinary denial pass;320 debug,70 user-release,24 VM-release,5 compile-fail,10 boot-exit and21 Python oracle tests pass. docs/checkpoints/cycle240-user-timer-preemption.md",
         "Cycle 239: PKUSER5 enters one fixed CPL3 payload with cleared GPR/legacy FP state, private TSS.RSP0 and exact ordered fault validation. Two fresh QEMU probes each contain seven faults, return to CPL0, detach descriptors, flush/restore the boot root and release13 task pages. Real execution exposed and repaired VM A/D-bit cleanup rejection.315 debug,65 user-release,24 VM-release,5 compile-fail,10 boot-exit and18 Python oracle tests pass; ordinary boot denies unsigned execution. docs/checkpoints/cycle239-bounded-user-entry.md",
@@ -53553,6 +53666,7 @@
         "runs/native-kernel-privilege-msr-policy-readiness.json: two exact fresh-vars TCG QEMU/OVMF runs, 35 markers, 47/47 hostile controls, 11 support-gated MSR reads, ten observed MCA banks, zero bank reads, zero runtime writes, and an exact linked-image audit of 43 RDMSR and three WRMSR sites that isolates PKSMP1, PKSMP2, PKSMP5/PKSCHED4, PKSCHED1, PKSCHED2, PKSCHED3, and PKIRQ1 accesses from the read-only PKMSR1 profile, with zero authority and explicit emulator/target/production nonclaims"
       ],
       "current_gaps": [
+        "No peer scheduling or arbitrary-program admission: fixed task payloads have no armed timer, strict initial syscall RSP and a64-call budget still fail fatally, and construction allocation failures are not fully rolled back. Task IDs are slot-local, not capabilities. SMAP/concurrent copy, async/SMP entry, full XSAVE, missing-IRQ watchdog, IPC/services/shell/apps/optical ISO and hardware remain open. Image168pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "PSABI1 is a development subset, not a complete frozen production ABI. General SMAP/concurrent pinning, async/SMP entry, arbitrary programs, task exit/reaping/accounting, fault termination and peer scheduling remain open. Syscalls are tested before the timer is armed, not concurrently with it. No native independent missing-IRQ watchdog, IPC/services/shell/apps/optical ISO or hardware qualification.25 native admissions/22 Python closures and full candidate gates remain stale or pending; no merge, phase exit or production promotion.",
         "This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion.",
@@ -53736,6 +53850,7 @@
         "ADD-MEM-002"
       ],
       "current_evidence": [
+        "Cycle 242: PKUSER8 owns four sequential task lifetimes, records Exit42 and user UD/GP/PF termination, rejects stale generations and restart/reap repetition, and quiesces entry before root restoration and memory release. Two fresh40-marker guests/157 evidence controls each and ordinary denial pass.336 debug,86 user-release,24 VM-release,7 compile-fail,10 boot-exit and26 Python oracle tests pass. docs/checkpoints/cycle242-user-task-termination.md",
         "Cycle 241: PKUSER7 executes12 real CPL3 SYSCALLs with checked IRETQ, version/errors, bounded snapshot user copying, one exact input PF and two exact output PF fixups, then disables/clears entry MSRs before timer recovery and13-page retirement. Two fresh36-marker guests/89 controls each and ordinary denial pass;326 debug,76 user-release,24 VM-release,5 compile-fail,10 boot-exit and23 Python oracle tests pass. docs/checkpoints/cycle241-native-syscall-usercopy.md",
         "Cycle 240: PKUSER6 interrupts a fixed spinning CPL3 payload three times on its private RSP0 stack, resumes twice with14 GPRs and legacy FP state preserved, then forces kernel recovery. Timer shutdown precedes descriptor detachment/root restoration/13-page release. Two fresh guests and ordinary denial pass;320 debug,70 user-release,24 VM-release,5 compile-fail,10 boot-exit and21 Python oracle tests pass. docs/checkpoints/cycle240-user-timer-preemption.md",
         "Cycle 239: PKUSER5 enters one fixed CPL3 payload with cleared GPR/legacy FP state, private TSS.RSP0 and exact ordered fault validation. Two fresh QEMU probes each contain seven faults, return to CPL0, detach descriptors, flush/restore the boot root and release13 task pages. Real execution exposed and repaired VM A/D-bit cleanup rejection.315 debug,65 user-release,24 VM-release,5 compile-fail,10 boot-exit and18 Python oracle tests pass; ordinary boot denies unsigned execution. docs/checkpoints/cycle239-bounded-user-entry.md",
@@ -53774,6 +53889,7 @@
         "ADD-MEM-002: replace the bounded nine-page PKVM2 mapping with one complete generation-owned sparse physical direct map that excludes holes and forbidden ranges, prevents incompatible cache aliases, preserves retained bootstrap and ACPI snapshot exclusions, switches transactionally, records local invalidation and future SMP-shootdown dependencies, and defers reclamation until exact generation receipts permit it"
       ],
       "current_gaps": [
+        "No peer scheduling or arbitrary-program admission: fixed task payloads have no armed timer, strict initial syscall RSP and a64-call budget still fail fatally, and construction allocation failures are not fully rolled back. Task IDs are slot-local, not capabilities. SMAP/concurrent copy, async/SMP entry, full XSAVE, missing-IRQ watchdog, IPC/services/shell/apps/optical ISO and hardware remain open. Image168pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "PSABI1 is a development subset, not a complete frozen production ABI. General SMAP/concurrent pinning, async/SMP entry, arbitrary programs, task exit/reaping/accounting, fault termination and peer scheduling remain open. Syscalls are tested before the timer is armed, not concurrently with it. No native independent missing-IRQ watchdog, IPC/services/shell/apps/optical ISO or hardware qualification.25 native admissions/22 Python closures and full candidate gates remain stale or pending; no merge, phase exit or production promotion.",
         "This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion.",
@@ -53985,6 +54101,7 @@
         "ADD-N12-CONCURRENCY-RECLAMATION-001"
       ],
       "current_evidence": [
+        "Cycle 242: PKUSER8 owns four sequential task lifetimes, records Exit42 and user UD/GP/PF termination, rejects stale generations and restart/reap repetition, and quiesces entry before root restoration and memory release. Two fresh40-marker guests/157 evidence controls each and ordinary denial pass.336 debug,86 user-release,24 VM-release,7 compile-fail,10 boot-exit and26 Python oracle tests pass. docs/checkpoints/cycle242-user-task-termination.md",
         "Cycle 241: PKUSER7 executes12 real CPL3 SYSCALLs with checked IRETQ, version/errors, bounded snapshot user copying, one exact input PF and two exact output PF fixups, then disables/clears entry MSRs before timer recovery and13-page retirement. Two fresh36-marker guests/89 controls each and ordinary denial pass;326 debug,76 user-release,24 VM-release,5 compile-fail,10 boot-exit and23 Python oracle tests pass. docs/checkpoints/cycle241-native-syscall-usercopy.md",
         "Cycle 240: PKUSER6 interrupts a fixed spinning CPL3 payload three times on its private RSP0 stack, resumes twice with14 GPRs and legacy FP state preserved, then forces kernel recovery. Timer shutdown precedes descriptor detachment/root restoration/13-page release. Two fresh guests and ordinary denial pass;320 debug,70 user-release,24 VM-release,5 compile-fail,10 boot-exit and21 Python oracle tests pass. docs/checkpoints/cycle240-user-timer-preemption.md",
         "Cycle 233: docs/checkpoints/cycle233-corrected-media-downstream-replay.md replays all fourteen remaining memory, IRQ, SMP, scheduler, atomic and lock profiles on corrected FAT media:28 fresh guest runs,663 control groups and2863 hostile cases pass. All27 component checks and source profiles are current. The aggregate is reconstructed from27 original captures; four unaffected rows are identical and23 affected profiles were replayed across Cycles231-233. Original kernel and native EFI products are unchanged.",
@@ -54066,6 +54183,7 @@
         "ADD-N12-CONCURRENCY-RECLAMATION-001: Cycle 162 qualifies mandatory active PKVM3 table/data ownership. Replay changed-image N5-through-N12 prerequisites, then implement execution-stack ownership, acknowledged cross-CPU quiescence, live timeout/offline/death/pressure/shutdown rollback, an independent oracle and exact-topology live evidence before closing N12.3"
       ],
       "current_gaps": [
+        "No peer scheduling or arbitrary-program admission: fixed task payloads have no armed timer, strict initial syscall RSP and a64-call budget still fail fatally, and construction allocation failures are not fully rolled back. Task IDs are slot-local, not capabilities. SMAP/concurrent copy, async/SMP entry, full XSAVE, missing-IRQ watchdog, IPC/services/shell/apps/optical ISO and hardware remain open. Image168pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "PSABI1 is a development subset, not a complete frozen production ABI. General SMAP/concurrent pinning, async/SMP entry, arbitrary programs, task exit/reaping/accounting, fault termination and peer scheduling remain open. Syscalls are tested before the timer is armed, not concurrently with it. No native independent missing-IRQ watchdog, IPC/services/shell/apps/optical ISO or hardware qualification.25 native admissions/22 Python closures and full candidate gates remain stale or pending; no merge, phase exit or production promotion.",
         "This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "The corrected354-test regression passes with zero failures/skips; initial273-test and81-test failures remain preserved. Historical assertions use frozen evidence and current validators. Qualify the exact committed candidate with runtime, bundle, replay, publication and GitHub/review gates before PR80 merge. No phase, flag, authentication, independent-builder, signed-ISO, hardware or production gate closes; the old demo is not rebuilt or promoted.",
@@ -54117,12 +54235,12 @@
       "subphases": [
         {
           "id": "N13.1",
-          "status": "not_started",
+          "status": "partial",
           "description": "Define process/thread/task identity, ownership, lifecycle, address space, scheduling, accounting, audit, and generation-safe identifier behavior."
         },
         {
           "id": "N13.2",
-          "status": "not_started",
+          "status": "partial",
           "description": "Implement spawn, thread create, executable replacement, exit, wait/reap, process-death cleanup, and failure at every allocation step."
         },
         {
@@ -54142,7 +54260,7 @@
         },
         {
           "id": "N13.6",
-          "status": "not_started",
+          "status": "partial",
           "description": "Define user exception, cancellation, process event, notification, and debugger delivery without Unix signals becoming the native authority model."
         },
         {
@@ -54165,6 +54283,7 @@
         "ADD-CAP-001"
       ],
       "current_evidence": [
+        "Cycle 242: PKUSER8 owns four sequential task lifetimes, records Exit42 and user UD/GP/PF termination, rejects stale generations and restart/reap repetition, and quiesces entry before root restoration and memory release. Two fresh40-marker guests/157 evidence controls each and ordinary denial pass.336 debug,86 user-release,24 VM-release,7 compile-fail,10 boot-exit and26 Python oracle tests pass. docs/checkpoints/cycle242-user-task-termination.md",
         "Cycle 241: PKUSER7 executes12 real CPL3 SYSCALLs with checked IRETQ, version/errors, bounded snapshot user copying, one exact input PF and two exact output PF fixups, then disables/clears entry MSRs before timer recovery and13-page retirement. Two fresh36-marker guests/89 controls each and ordinary denial pass;326 debug,76 user-release,24 VM-release,5 compile-fail,10 boot-exit and23 Python oracle tests pass. docs/checkpoints/cycle241-native-syscall-usercopy.md",
         "Cycle 240: PKUSER6 interrupts a fixed spinning CPL3 payload three times on its private RSP0 stack, resumes twice with14 GPRs and legacy FP state preserved, then forces kernel recovery. Timer shutdown precedes descriptor detachment/root restoration/13-page release. Two fresh guests and ordinary denial pass;320 debug,70 user-release,24 VM-release,5 compile-fail,10 boot-exit and21 Python oracle tests pass. docs/checkpoints/cycle240-user-timer-preemption.md",
         "Cycle 239: PKUSER5 enters one fixed CPL3 payload with cleared GPR/legacy FP state, private TSS.RSP0 and exact ordered fault validation. Two fresh QEMU probes each contain seven faults, return to CPL0, detach descriptors, flush/restore the boot root and release13 task pages. Real execution exposed and repaired VM A/D-bit cleanup rejection.315 debug,65 user-release,24 VM-release,5 compile-fail,10 boot-exit and18 Python oracle tests pass; ordinary boot denies unsigned execution. docs/checkpoints/cycle239-bounded-user-entry.md",
@@ -54175,6 +54294,7 @@
         "Cycle 234: PKUSER1 inactive user-image admission passes260 kernel host tests,14 optimized focused tests and freestanding-library check; no live user execution or ISO. docs/checkpoints/cycle234-user-entry-foundation.md"
       ],
       "current_gaps": [
+        "No peer scheduling or arbitrary-program admission: fixed task payloads have no armed timer, strict initial syscall RSP and a64-call budget still fail fatally, and construction allocation failures are not fully rolled back. Task IDs are slot-local, not capabilities. SMAP/concurrent copy, async/SMP entry, full XSAVE, missing-IRQ watchdog, IPC/services/shell/apps/optical ISO and hardware remain open. Image168pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "PSABI1 is a development subset, not a complete frozen production ABI. General SMAP/concurrent pinning, async/SMP entry, arbitrary programs, task exit/reaping/accounting, fault termination and peer scheduling remain open. Syscalls are tested before the timer is armed, not concurrently with it. No native independent missing-IRQ watchdog, IPC/services/shell/apps/optical ISO or hardware qualification.25 native admissions/22 Python closures and full candidate gates remain stale or pending; no merge, phase exit or production promotion.",
         "This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion.",
@@ -60363,7 +60483,8 @@
         "docs/checkpoints/cycle238-owned-root-timer.md",
         "docs/checkpoints/cycle239-bounded-user-entry.md",
         "docs/checkpoints/cycle240-user-timer-preemption.md",
-        "docs/checkpoints/cycle241-native-syscall-usercopy.md"
+        "docs/checkpoints/cycle241-native-syscall-usercopy.md",
+        "docs/checkpoints/cycle242-user-task-termination.md"
       ]
     }
   ],
@@ -60378,7 +60499,7 @@
       "PKERR1 freezes a pure exact-target CPU/errata rejection policy, PKXSTATE1 proves bounded x87/SSE standard-XSAVE ownership, PKXEXC1 proves deliberate #MF/#XM recovery plus terminal test-only #NM rejection with a linked scope audit under WHPX, and PKMSR1 proves only a read-only qemu64 BSP system-linkage/global-MCA/unsupported-PMU observation. PKPMM7 supplies bounded physical ownership, scrubbed lifecycle transactions, a stable guarded five-page manager, external generation-owned active ledgers, checked automatic growth with retirement, bounded-window fallback and pre-effect rejection, streamed lifecycle-gated Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation and retained copy/readback; PKVM1 supplies inactive page-table transactions; PKVM3 proves one-BSP activation/restoration of a complete-profile PMM-owned sparse direct map; PKIRQ1 proves one bounded local timer transaction; PKSMP1 proves one first-AP start/quiesce/park lifecycle; PKSMP2 proves one AP-local GDT/TSS/IDT, guarded-stack, x87/SSE-owner, and interrupt-vector runtime transaction; and PKSMP5 proves three simultaneous AP-local runtimes, partial-start rollback with fresh retry, six fixed IPI classes per AP, three AP-side one-page INVLPG operations, aggregate acknowledgement, and one deferred generation retirement. No target-qualified complete native CPU policy, applicable Model 40h-4Fh errata authority, direct numeric client microcode floor or ratified replacement, target-specific privileged-MSR semantics, syscall/MCE/PMU activation, AVX/extended state, user-task exception delivery, scheduler or migration integration, general interrupt routing/time services, production capability authority, general topology or SMP shootdown, AML or complete ACPI resource-graph execution, complete kernel/user address spaces, heap, MMIO/PAT/MTRR qualification, interrupt-context or concurrent allocator, general pressure, or OOM implementation exists",
       "The exact Tier 1 identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records are captured with zero public raw registers, but seven required channels remain non-complete in total, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification also remain open",
       "No native DMA/IOMMU/interrupt-remapping confinement",
-      "PSABI1 is a development subset, not a complete frozen production ABI. General SMAP/concurrent pinning, async/SMP entry, arbitrary programs, task exit/reaping/accounting, fault termination and peer scheduling remain open. Syscalls are tested before the timer is armed, not concurrently with it. No native independent missing-IRQ watchdog, IPC/services/shell/apps/optical ISO or hardware qualification.25 native admissions/22 Python closures and full candidate gates remain stale or pending; no merge, phase exit or production promotion. This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion. Timer delivery is CPL0 on the existing kernel IST, not ring3 or use of the private entry stack as RSP0. User GDT/TSS/IRETQ, GPR/segment/base/debug/extended-state initialization and contained user faults/preemption remain next. Hardware error shutdown is host fault-tested, not guest fault-injected. Capability IPC, services, shell/apps and optical ISO qualification follow; all production and exact-candidate merge gates remain open. CPL0 switching is not user-mode execution. Owned timer/MMIO recovery, user GDT/TSS/IRETQ, architectural-state initialization and contained fault/preemption remain before ring3. Capability IPC, services, shell/apps and optical ISO qualification follow. Full production and exact-candidate merge gates remain open. The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open. Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion. User-space integration still needs owned kernel-half mappings/stacks, live ring3/return/fault containment, capabilities/IPC, services, shell/apps and ISO qualification. Production microkernel completion remains N0-N39. PKPMM7 supplies bounded one-BSP physical-page ownership, scrub-before-allocation and scrub-before-reuse with full readback and fault rollback, a stable guarded five-page manager, external generation-owned guarded ledgers, checked automatic repeated growth, verified retirement, bounded-window fallback and pre-effect rejection, exact post-ExitBootServices Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation plus retained snapshot copy/readback. PKVM1 supplies inactive four-level 4 KiB transactions, PKVM3 supplies a complete-profile PMM-owned sparse direct map, cache-alias rejection, exact CR3 restoration, three local invalidation receipts, and generation-retirement gating, and PKSMP5 proves exactly three AP-side INVLPG operations and deferred reclaim for three AP-owned roots, one page per root, one generation, and aggregate target/ack mask 0xE. General topology, address-space-wide shootdown, multiple concurrent generations, production capability authority, incremental concurrent map replacement, huge pages, PCID, COW, user faults, pager IPC, cache/MMIO qualification, heaps/object caches, interrupt-context allocation, concurrent allocation, general pressure and OOM policy, scheduler, task, syscall, capability, IPC, isolation, and asynchronous I/O remain open",
+      "No peer scheduling or arbitrary-program admission: fixed task payloads have no armed timer, strict initial syscall RSP and a64-call budget still fail fatally, and construction allocation failures are not fully rolled back. Task IDs are slot-local, not capabilities. SMAP/concurrent copy, async/SMP entry, full XSAVE, missing-IRQ watchdog, IPC/services/shell/apps/optical ISO and hardware remain open. Image168pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. PSABI1 is a development subset, not a complete frozen production ABI. General SMAP/concurrent pinning, async/SMP entry, arbitrary programs, task exit/reaping/accounting, fault termination and peer scheduling remain open. Syscalls are tested before the timer is armed, not concurrently with it. No native independent missing-IRQ watchdog, IPC/services/shell/apps/optical ISO or hardware qualification.25 native admissions/22 Python closures and full candidate gates remain stale or pending; no merge, phase exit or production promotion. This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion. Timer delivery is CPL0 on the existing kernel IST, not ring3 or use of the private entry stack as RSP0. User GDT/TSS/IRETQ, GPR/segment/base/debug/extended-state initialization and contained user faults/preemption remain next. Hardware error shutdown is host fault-tested, not guest fault-injected. Capability IPC, services, shell/apps and optical ISO qualification follow; all production and exact-candidate merge gates remain open. CPL0 switching is not user-mode execution. Owned timer/MMIO recovery, user GDT/TSS/IRETQ, architectural-state initialization and contained fault/preemption remain before ring3. Capability IPC, services, shell/apps and optical ISO qualification follow. Full production and exact-candidate merge gates remain open. The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open. Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion. User-space integration still needs owned kernel-half mappings/stacks, live ring3/return/fault containment, capabilities/IPC, services, shell/apps and ISO qualification. Production microkernel completion remains N0-N39. PKPMM7 supplies bounded one-BSP physical-page ownership, scrub-before-allocation and scrub-before-reuse with full readback and fault rollback, a stable guarded five-page manager, external generation-owned guarded ledgers, checked automatic repeated growth, verified retirement, bounded-window fallback and pre-effect rejection, exact post-ExitBootServices Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation plus retained snapshot copy/readback. PKVM1 supplies inactive four-level 4 KiB transactions, PKVM3 supplies a complete-profile PMM-owned sparse direct map, cache-alias rejection, exact CR3 restoration, three local invalidation receipts, and generation-retirement gating, and PKSMP5 proves exactly three AP-side INVLPG operations and deferred reclaim for three AP-owned roots, one page per root, one generation, and aggregate target/ack mask 0xE. General topology, address-space-wide shootdown, multiple concurrent generations, production capability authority, incremental concurrent map replacement, huge pages, PCID, COW, user faults, pager IPC, cache/MMIO qualification, heaps/object caches, interrupt-context allocation, concurrent allocation, general pressure and OOM policy, scheduler, task, syscall, capability, IPC, isolation, and asynchronous I/O remain open",
       "No native security/crypto/TPM/secrets/MAC/privacy implementation or external review",
       "No isolated native driver domains or virtio reference drivers",
       "No native block/NVMe/USB/input/VFS/PooleFS persistent path",
@@ -60402,26 +60523,27 @@
       "N12",
       "N13"
     ],
-    "title": "Implement owned user-task exit and fault termination with accounting, then peer scheduling across private roots before capability IPC",
+    "title": "Connect preemptive peer execution across two private roots; prove one task's exit or fault cannot stop its peer before capability IPC",
     "entry_evidence": [
       "docs/native-userspace-integration-iso.md",
-      "docs/native-syscall-abi.md",
+      "docs/native-task-lifecycle.md",
       "runs/native-user-entry-readiness.json",
-      "docs/checkpoints/cycle241-native-syscall-usercopy.md",
-      "native/kernel/src/user_entry/syscall.rs",
-      "native/kernel/src/arch/x86_64/user_syscall.rs",
+      "docs/checkpoints/cycle242-user-task-termination.md",
+      "native/kernel/src/user_entry/task.rs",
+      "native/kernel/src/arch/x86_64/user_task.rs",
       "native/kernel/src/user_entry/preemption.rs",
       "native/kernel/src/user_entry/cpu.rs"
     ],
     "exit_evidence": [
-      "generation-safe owned task termination and exit status with no resume after retirement",
-      "faulting or exiting user task releases only after CPU, timer and syscall authority are revoked",
-      "negative allocation, stale identity, repeated exit and retained-on-cleanup-failure cases",
-      "fresh guest task termination evidence; preserve existing fault, copy, timer and ordinary-denial controls"
+      "two real runnable CPL3 tasks with distinct owned roots and timer-driven state-preserving switches",
+      "surviving peer progresses after normal exit, user fault, and bounded forced termination",
+      "task lifetime, timer, syscall, descriptor and root ownership survive switching and cleanup failures",
+      "resolve fixed syscall stack and call-budget limits before arbitrary application admission; preserve existing controls"
     ],
     "blocked": false
   },
   "claim_boundaries": [
+    "Cycle 242: PKUSER8 owns four sequential task lifetimes, records Exit42 and user UD/GP/PF termination, rejects stale generations and restart/reap repetition, and quiesces entry before root restoration and memory release. Two fresh40-marker guests/157 evidence controls each and ordinary denial pass.336 debug,86 user-release,24 VM-release,7 compile-fail,10 boot-exit and26 Python oracle tests pass. docs/checkpoints/cycle242-user-task-termination.md No peer scheduling or arbitrary-program admission: fixed task payloads have no armed timer, strict initial syscall RSP and a64-call budget still fail fatally, and construction allocation failures are not fully rolled back. Task IDs are slot-local, not capabilities. SMAP/concurrent copy, async/SMP entry, full XSAVE, missing-IRQ watchdog, IPC/services/shell/apps/optical ISO and hardware remain open. Image168pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
     "Cycle 241: PKUSER7 executes12 real CPL3 SYSCALLs with checked IRETQ, version/errors, bounded snapshot user copying, one exact input PF and two exact output PF fixups, then disables/clears entry MSRs before timer recovery and13-page retirement. Two fresh36-marker guests/89 controls each and ordinary denial pass;326 debug,76 user-release,24 VM-release,5 compile-fail,10 boot-exit and23 Python oracle tests pass. docs/checkpoints/cycle241-native-syscall-usercopy.md PSABI1 is a development subset, not a complete frozen production ABI. General SMAP/concurrent pinning, async/SMP entry, arbitrary programs, task exit/reaping/accounting, fault termination and peer scheduling remain open. Syscalls are tested before the timer is armed, not concurrently with it. No native independent missing-IRQ watchdog, IPC/services/shell/apps/optical ISO or hardware qualification.25 native admissions/22 Python closures and full candidate gates remain stale or pending; no merge, phase exit or production promotion.",
     "Cycle 240: PKUSER6 interrupts a fixed spinning CPL3 payload three times on its private RSP0 stack, resumes twice with14 GPRs and legacy FP state preserved, then forces kernel recovery. Timer shutdown precedes descriptor detachment/root restoration/13-page release. Two fresh guests and ordinary denial pass;320 debug,70 user-release,24 VM-release,5 compile-fail,10 boot-exit and21 Python oracle tests pass. docs/checkpoints/cycle240-user-timer-preemption.md This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
     "Cycle 239: PKUSER5 enters one fixed CPL3 payload with cleared GPR/legacy FP state, private TSS.RSP0 and exact ordered fault validation. Two fresh QEMU probes each contain seven faults, return to CPL0, detach descriptors, flush/restore the boot root and release13 task pages. Real execution exposed and repaired VM A/D-bit cleanup rejection.315 debug,65 user-release,24 VM-release,5 compile-fail,10 boot-exit and18 Python oracle tests pass; ordinary boot denies unsigned execution. docs/checkpoints/cycle239-bounded-user-entry.md No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion.",

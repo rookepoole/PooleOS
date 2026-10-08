@@ -16,6 +16,189 @@ struct Machine {
 
 struct Hardware(Rc<RefCell<Machine>>);
 
+use crate::scheduler_smp::TaskId;
+use crate::user_entry::task::{self, Outcome, Reason, Slot};
+#[derive(Default)]
+struct StopControl {
+    fail_execute: bool,
+    fail_quiesce: bool,
+    corrupt: u8,
+    entries: u32,
+    shutdowns: u32,
+}
+struct StopDriver(Rc<RefCell<StopControl>>);
+impl task::Driver for StopDriver {
+    fn execute(&mut self, image: ImageAdmission, id: TaskId) -> Result<Outcome, privilege::Error> {
+        let mut c = self.0.borrow_mut();
+        c.entries += 1;
+        if c.fail_execute {
+            return Err(privilege::Error::Hardware);
+        }
+        let mut o = Outcome {
+            id,
+            root: image.root_physical,
+            reason: Reason::Exit(42),
+            syscalls: 2,
+        };
+        match c.corrupt {
+            1 => o.id.generation += 1,
+            2 => o.root += 4096,
+            3 => o.syscalls = 0,
+            4 => o.syscalls = 65,
+            _ => {}
+        }
+        Ok(o)
+    }
+    fn quiesce(&mut self, _: u64) -> Result<(), privilege::Error> {
+        let mut c = self.0.borrow_mut();
+        c.shutdowns += 1;
+        if c.fail_quiesce {
+            Err(privilege::Error::Hardware)
+        } else {
+            Ok(())
+        }
+    }
+}
+fn task_slot(
+    owner: CpuImage<Hardware>,
+) -> (Slot<Hardware, StopDriver>, Rc<RefCell<StopControl>>, TaskId) {
+    let mut slot = Slot::new(0).unwrap();
+    let control = Rc::new(RefCell::new(StopControl::default()));
+    let id = slot
+        .insert(owner, StopDriver(Rc::clone(&control)))
+        .unwrap_or_else(|(e, _, _)| panic!("insert {e:?}"));
+    (slot, control, id)
+}
+
+#[test]
+fn task_exit_quiesces_then_reaps_and_reused_slot_rejects_old_identity() {
+    let mut s = setup();
+    let (mut slot, control, id) = task_slot(s.owner);
+    assert!(slot.outcome(id).is_err());
+    assert!(slot.reap(id, &mut s.manager, &mut s.memory).is_err());
+    slot.activate(id, &s.manager, &mut s.memory).unwrap();
+    let o = slot.run(id).unwrap();
+    assert_eq!(o.reason, Reason::Exit(42));
+    assert_eq!(control.borrow().shutdowns, 1);
+    retained(&mut s.manager, &s.handles);
+    assert_eq!(slot.run(id), Err(task::Error::State));
+    let (_, reaped) = slot.reap(id, &mut s.manager, &mut s.memory).unwrap();
+    assert_eq!(reaped, o);
+    assert_eq!(s.machine.borrow().writes, [s.candidate, s.original]);
+    assert_eq!(slot.state(id), Err(task::Error::Missing));
+    assert!(slot.reap(id, &mut s.manager, &mut s.memory).is_err());
+    let mut next = setup();
+    let next_control = Rc::new(RefCell::new(StopControl::default()));
+    let new = slot
+        .insert(next.owner, StopDriver(Rc::clone(&next_control)))
+        .unwrap_or_else(|(e, _, _)| panic!("{e:?}"));
+    assert_eq!(new.generation, id.generation + 1);
+    assert_eq!(new.slot, id.slot);
+    assert_eq!(slot.run(id), Err(task::Error::Identity));
+    assert!(next.machine.borrow().writes.is_empty());
+    assert_eq!(next_control.borrow().entries, 0);
+    slot.abandon(new, &mut next.manager, &mut next.memory)
+        .unwrap();
+}
+
+#[test]
+fn task_cleanup_failure_keeps_exact_driver_and_memory_quarantined() {
+    for execute_failure in [false, true] {
+        let mut s = setup();
+        let (mut slot, control, id) = task_slot(s.owner);
+        control.borrow_mut().fail_execute = execute_failure;
+        control.borrow_mut().fail_quiesce = true;
+        slot.activate(id, &s.manager, &mut s.memory).unwrap();
+        assert!(slot.run(id).is_err());
+        assert_eq!(slot.state(id), Ok(task::State::Quarantined));
+        assert!(slot.outcome(id).is_err());
+        assert!(slot.reap(id, &mut s.manager, &mut s.memory).is_err());
+        assert!(slot.abandon(id, &mut s.manager, &mut s.memory).is_err());
+        assert_eq!(s.machine.borrow().writes, [s.candidate]);
+        retained(&mut s.manager, &s.handles);
+        control.borrow_mut().fail_quiesce = false;
+        slot.abandon(id, &mut s.manager, &mut s.memory).unwrap();
+        assert_eq!(s.machine.borrow().writes, [s.candidate, s.original]);
+        assert_eq!(control.borrow().entries, 1);
+        assert_eq!(slot.state(id), Err(task::Error::Missing));
+    }
+}
+
+#[test]
+fn task_wrong_outcomes_never_publish_exit_status_or_resume() {
+    for corrupt in 1..=4 {
+        let mut s = setup();
+        let (mut slot, c, id) = task_slot(s.owner);
+        c.borrow_mut().corrupt = corrupt;
+        slot.activate(id, &s.manager, &mut s.memory).unwrap();
+        assert!(slot.run(id).is_err());
+        assert!(slot.outcome(id).is_err());
+        assert_eq!(slot.run(id), Err(task::Error::State));
+        retained(&mut s.manager, &s.handles);
+        slot.abandon(id, &mut s.manager, &mut s.memory).unwrap();
+        assert_eq!(c.borrow().entries, 1);
+        assert_eq!(c.borrow().shutdowns, 1);
+    }
+}
+
+#[test]
+fn task_activation_or_retirement_write_failures_retain_owner_for_retry() {
+    for activation_failure in [true, false] {
+        let mut s = setup();
+        let (mut slot, c, id) = task_slot(s.owner);
+        if activation_failure {
+            s.machine.borrow_mut().write_error = true;
+            assert!(slot.activate(id, &s.manager, &mut s.memory).is_err());
+            assert!(slot.abandon(id, &mut s.manager, &mut s.memory).is_err());
+            retained(&mut s.manager, &s.handles);
+            s.machine.borrow_mut().write_error = false;
+            slot.abandon(id, &mut s.manager, &mut s.memory).unwrap();
+            assert_eq!(c.borrow().entries, 0);
+        } else {
+            slot.activate(id, &s.manager, &mut s.memory).unwrap();
+            slot.run(id).unwrap();
+            s.machine.borrow_mut().write_error = true;
+            assert!(slot.reap(id, &mut s.manager, &mut s.memory).is_err());
+            assert_eq!(slot.run(id), Err(task::Error::State));
+            retained(&mut s.manager, &s.handles);
+            s.machine.borrow_mut().write_error = false;
+            slot.reap(id, &mut s.manager, &mut s.memory).unwrap();
+            assert_eq!(c.borrow().entries, 1);
+        }
+        assert_eq!(slot.state(id), Err(task::Error::Missing));
+    }
+}
+
+#[test]
+fn occupied_task_slot_returns_unmodified_new_owner_and_drop_never_frees() {
+    let mut s = setup();
+    let (mut slot, _, id) = task_slot(s.owner);
+    let mut next = setup();
+    let c = Rc::new(RefCell::new(StopControl::default()));
+    let (e, owner, _) = slot.insert(next.owner, StopDriver(c)).err().unwrap();
+    assert_eq!(e, task::Error::Occupied);
+    retained(&mut next.manager, &next.handles);
+    assert_eq!(slot.state(id), Ok(task::State::Prepared));
+    drop(owner);
+    drop(slot);
+    retained(&mut s.manager, &s.handles);
+    retained(&mut next.manager, &next.handles);
+    assert!(s.machine.borrow().writes.is_empty());
+    assert!(next.machine.borrow().writes.is_empty());
+}
+
+#[test]
+fn prepared_task_cancel_has_no_cpu_or_driver_effect() {
+    let mut s = setup();
+    let (mut slot, c, id) = task_slot(s.owner);
+    assert_eq!(slot.run(id), Err(task::Error::State));
+    slot.abandon(id, &mut s.manager, &mut s.memory).unwrap();
+    assert!(s.machine.borrow().writes.is_empty());
+    assert_eq!(c.borrow().entries, 0);
+    assert_eq!(c.borrow().shutdowns, 0);
+    assert_eq!(slot.state(id), Err(task::Error::Missing));
+}
+
 impl Cpu for Hardware {
     fn snapshot(&mut self) -> Result<Snapshot, CpuError> {
         let mut machine = self.0.borrow_mut();

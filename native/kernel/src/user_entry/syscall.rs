@@ -39,6 +39,7 @@ pub enum Status {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Request {
     Version,
+    Exit(u32),
     Copy {
         source: u64,
         destination: u64,
@@ -82,6 +83,10 @@ pub fn request(
                 bytes: bytes as usize,
             })
         }
+        2 if source <= u32::MAX as u64 && destination == 0 && bytes == 0 => {
+            Ok(Request::Exit(source as u32))
+        }
+        2 => Err(Status::Arguments),
         _ => Err(Status::Unknown),
     }
 }
@@ -220,6 +225,28 @@ mod tests {
         ] {
             assert_eq!(request(0, 1, s, d, n, f, r), Err(Status::Arguments));
         }
+    }
+    #[test]
+    fn exit_accepts_only_versioned_u32_status_and_no_pointer_or_length() {
+        for code in [0, 42, u32::MAX as u64] {
+            assert_eq!(
+                request(2, 1, code, 0, 0, 0, 0),
+                Ok(Request::Exit(code as u32))
+            );
+        }
+        for (code, dest, len, flags, reserved) in [
+            (1u64 << 32, 0, 0, 0, 0),
+            (42, 1, 0, 0, 0),
+            (42, 0, 1, 0, 0),
+            (42, 0, 0, 1, 0),
+            (42, 0, 0, 0, 1),
+        ] {
+            assert_eq!(
+                request(2, 1, code, dest, len, flags, reserved),
+                Err(Status::Arguments)
+            );
+        }
+        assert_eq!(request(2, 0, 42, 0, 0, 0, 0), Err(Status::Version));
     }
     #[test]
     fn copy_bounds_include_zero_unaligned_edges_but_not_wrap_or_kernel() {

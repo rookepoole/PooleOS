@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run bounded host, freestanding and optional PKUSER7 syscall/usercopy guests."""
+"""Run bounded host, freestanding and optional PKUSER8 task-termination guests."""
 
 from __future__ import annotations
 
@@ -40,6 +40,8 @@ def source_bindings() -> dict[str, str]:
         "native/kernel/src/user_entry/privilege.rs", "native/kernel/src/arch/x86_64/user.rs",
         "native/kernel/src/user_entry/preemption.rs", "native/kernel/src/arch/x86_64/user_preempt.rs",
         "native/kernel/src/user_entry/syscall.rs", "native/kernel/src/arch/x86_64/user_syscall.rs",
+        "native/kernel/src/user_entry/task.rs", "native/kernel/src/arch/x86_64/user_task.rs",
+        "native/kernel/src/user_root_probe/task_driver.rs",
         "tools/qualify_native_user_root.py", "runtime/native_user_root.py",
         "tools/qualify_native_pooleboot.py", "tools/qualify_native_kernel_entry.py",
         "tools/qualify_native_user_entry.py", "tools/qualify_native_elf_loader.py",
@@ -63,8 +65,8 @@ def main() -> int:
     owner_report = Path("C:/Users/rookp/PooleGlyph/tests/reports/conformance_report.json")
     owner_before = digest(owner_report) if owner_report.is_file() else None
     report: dict = {
-        "contract_id": "PKUSER7", "cycle": 241,
-        "scope": "host_and_optional_bounded_user_syscall_copy_guest",
+        "contract_id": "PKUSER8", "cycle": 242,
+        "scope": "host_and_optional_bounded_user_task_termination_guest",
         "status": "fail", "source_bindings": before, "checks": [],
         "guest_runs": 0, "ring3_executed": False, "iso_built": False,
         "n13_exit_passed": False, "production_ready": False,
@@ -75,9 +77,9 @@ def main() -> int:
     commands = [
         ("format", [str(cargo), "fmt", *common, "--", "--check"], None),
         ("kernel_host_debug", [str(cargo), "test", *common, "--lib", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 326),
+            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 336),
         ("user_entry_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 76),
+            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 86),
         ("vm_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
             "x86_64-pc-windows-msvc", *bounded, "virtual_memory::", "--", "--test-threads=1"], None),
         ("freestanding_library", [str(cargo), "check", *common, "--lib", "--target",
@@ -86,6 +88,8 @@ def main() -> int:
             "PooleKernelLinked", "--target", "x86_64-unknown-none", *bounded], None),
         ("prepared_ownership_compile_fail", [str(cargo), "test", *common, "--doc", "--target",
             "x86_64-pc-windows-msvc", *bounded, "user_entry::prepared", "--", "--test-threads=1"], 5),
+        ("task_ownership_compile_fail", [str(cargo), "test", *common, "--doc", "--target",
+            "x86_64-pc-windows-msvc", *bounded, "user_entry::task", "--", "--test-threads=1"], 2),
         ("boot_exit_host", [str(cargo), "test", "--manifest-path", str(ROOT / "native/Cargo.toml"),
             "--package", "poole-boot-exit", "--lib", "--target", "x86_64-pc-windows-msvc",
             *bounded, "--", "--test-threads=1"], None),
@@ -136,6 +140,7 @@ def main() -> int:
                 report["ring3_executed"] = all(g["marker_summary"]["ring3_executed"] for g in live["guest_runs"])
                 report["user_timer_preemption"] = all(g["marker_summary"]["user_timer_preemption"] for g in live["guest_runs"])
                 report["development_syscall_abi"] = all(g["marker_summary"]["syscall_abi"] == "PSABI1_development" for g in live["guest_runs"])
+                report["user_task_termination"] = all(g["marker_summary"]["normal_exits"] == 1 and g["marker_summary"]["fault_terminations"] == 3 for g in live["guest_runs"])
         report["source_unchanged"] = before == source_bindings()
         report["owner_report_unchanged"] = owner_before == (digest(owner_report) if owner_report.is_file() else None)
         if (len(report["checks"]) == len(commands) and all(c["passed"] for c in report["checks"])
@@ -147,7 +152,7 @@ def main() -> int:
     (work / "receipt.json").write_text(serialized, encoding="utf-8", newline="\n")
     if report["status"] == "pass":
         args.out.write_text(serialized, encoding="utf-8", newline="\n")
-    print(f"PKUSER7 {report['status'].upper()}; guest_runs={report['guest_runs']}; ring3={report['ring3_executed']}; production_ready=false", flush=True)
+    print(f"PKUSER8 {report['status'].upper()}; guest_runs={report['guest_runs']}; ring3={report['ring3_executed']}; production_ready=false", flush=True)
     return 0 if report["status"] == "pass" else 1
 
 

@@ -1,6 +1,6 @@
 # PSABI1 Development Syscall Profile
 
-Cycle 241, PKUSER7. N13.3/N13.4 partial implementation; not the complete frozen
+Cycle 242, PKUSER7/PKUSER8. N13.3/N13.4 partial implementation; not the complete frozen
 production ABI, N13 exit, application runtime, or integration ISO qualification.
 This original PooleKernel implementation grants no capability or object authority.
 
@@ -16,6 +16,7 @@ DF/RF, requires IF and reserved bit 1, and rejects unsupported flag bits.
 | --- | --- | --- |
 | 0 | Version; source/destination/count zero | OK, version 1 |
 | 1 | Copy within caller's admitted user window; 0..256 bytes | OK, copied bytes |
+| 2 | Exit; RSI=u32 status, destination/count zero | Valid exit never returns |
 
 Status numbers: OK=0, VERSION=1, UNKNOWN=2, ARGUMENTS=3, FAULT=4. Validation order
 is version, flags/reserved, number, then per-call arguments. Unsupported versions
@@ -59,9 +60,16 @@ four entry MSRs before the existing three-interrupt user preemption experiment.
 These fixed counts are qualification assertions, not application ABI restrictions.
 The profile still has a bounded development dispatch budget of 64 calls.
 
+Cycle242 separately exercises valid non-returning Exit42 after a version query,
+plus owned #UD/#GP/#PF termination. See [task lifecycle](native-task-lifecycle.md).
+The strict initial user RSP and dispatch-budget violations are still fatal
+development invariants, not acceptable general application containment. They
+must be replaced before arbitrary programs are admitted. Exit does not change
+the existing copy semantics or grant capabilities.
+
 Timer shutdown precedes descriptor detachment, root restoration and frame release.
 No user pointer or entry MSR may survive task cleanup. Syscalls while a user timer
-is armed, arbitrary programs, task exit, fault termination, peer scheduling and
+is armed, arbitrary programs, peer scheduling and
 full FP/XSAVE isolation remain unqualified. The missing-interrupt watchdog remains
 an external emulator timeout, not a native independent watchdog.
 

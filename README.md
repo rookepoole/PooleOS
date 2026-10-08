@@ -11,7 +11,17 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle241 adds real native user-space system
+**Current development checkpoint:** Cycle242 adds owned user-task exit and fatal
+fault termination. Two fresh native guests each run four sequential tasks, reject
+stale IDs and restart/reap repetition, and fully reclaim their memory.336 debug
+kernel tests,110 repeated optimized tests, seven compile-fail checks, ten boot-exit
+tests and26 Python oracle tests pass. Existing copy-fault and timer controls pass.
+Next: preemptive peer scheduling, then IPC, confined services, shell/apps and the
+user-space integration ISO. No interactive session or new ISO yet; full robust
+microkernel development continues after the preview.
+[Evidence](docs/checkpoints/cycle242-user-task-termination.md).
+
+**Historical development checkpoint:** Cycle241 adds real native user-space system
 calls and bounded, recoverable memory copying. Two fresh QEMU guests each pass
 12 calls, three deliberate copy faults, entry-MSR cleanup, timer recovery and
 all13 task-page releases.326 debug kernel tests,100 repeated optimized tests,

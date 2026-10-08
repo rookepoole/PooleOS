@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 241, 2026-10-08. No new ISO exists yet.
+Status: implementation started, Cycle 242, 2026-10-08. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -43,7 +43,7 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 
 | Stage | Build Plan Binding | Exit Criterion | Current State |
 | --- | --- | --- | --- |
-| USI-1 User entry and containment | N7, N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle241: actual CPL3 syscall/user-copy faults, timer recovery and cleanup pass; task exit, peer scheduling and arbitrary-program admission pending |
+| USI-1 User entry and containment | N7, N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle242: owned sequential exit/fault termination and cleanup pass, alongside syscall/copy/timer controls; peer scheduling and arbitrary-program admission pending |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Not started |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Not started |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
@@ -84,11 +84,18 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
    mapping, asynchronous entry and syscall/timer concurrency remain open.
 6. Connect private address spaces to scheduler execution/lifetime holds. Support
    preemption, exit, cleanup and accounting for the declared single-CPU profile.
+   Cycle242 implements owned sequential exit/fault termination, scoped-generation
+   task identity, status/syscall accounting, retained-on-failure cleanup and reap.
+   This is not a scheduler connection. Full spawn rollback, nonfatal dispatch
+   budget handling and general syscall stack admission remain necessary.
 7. Contain user #PF/#GP/#UD while treating kernel faults as kernel faults; prove
    that a faulty or spinning task cannot prevent supervisor recovery or peers.
    Cycle240 proves healthy-timer recovery for one fixed task only. Failed timer
    delivery is externally guest-bounded, not covered by a native independent
    watchdog; general fault/peer progress and device-failure recovery remain open.
+   Cycle242 separately terminates fixed #UD/#GP/#PF tasks without resuming their
+   frames, then restores the root and frees memory. The new fixed tasks have no
+   armed timer, and surviving-peer progress is not established.
 
 No unsafe user execution is permitted just because an admission function passes.
 NX/write protection, kernel stack ownership, correct interrupt return, privilege
@@ -116,7 +123,17 @@ requirements, not items deferred until after the demo.
    products. Preserve the older demo separately; its receipts cannot qualify this
    image. Test the ISO itself, not only a disk image or host library.
 
-## Cycle 241 Live System Calls
+## Cycle 242 Owned Task Termination
+
+[Checkpoint](checkpoints/cycle242-user-task-termination.md) and
+[task lifecycle](native-task-lifecycle.md) bind four sequential task generations,
+Exit42, fatal user faults, restart/stale-ID denial and actual memory reclamation.
+Two fresh40-marker guests plus ordinary unsigned-boot denial pass. Across the
+original experiment and four new tasks, each guest makes ten actual root writes,
+releases65 pages and scrubs30 data pages. No actual user-space session or ISO is
+claimed. Next: preemptive private-root peers with failure containment.
+
+## Historical Cycle 241 Live System Calls
 
 [Checkpoint](checkpoints/cycle241-native-syscall-usercopy.md) and
 [PSABI1 development subset](native-syscall-abi.md) bind the actual instructions,

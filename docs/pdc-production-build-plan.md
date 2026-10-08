@@ -1,15 +1,41 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.144.0-native-syscall-usercopy
-Roadmap cycle: PooleOS Cycle 241
+Plan version: 2.145.0-user-task-termination
+Roadmap cycle: PooleOS Cycle 242
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 241: Native System Calls And Recoverable User Copy
+## Cycle 242: Owned Task Exit And Fatal Fault Termination
+
+USI-1 / N13.1,N13.2,N13.6: PKUSER8 owns task identity, CPU image and cleanup
+driver, records exit/fault status and syscall accounting, rejects stale IDs and
+restart/reap repetition, and retains memory on failed cleanup. Two fresh native
+guests each run four sequential CPL3 tasks (Exit42, #UD, #GP, #PF), restore roots
+and release all resources. Existing fault/copy/timer controls and ordinary boot
+denial pass.463 Rust test executions and26 Python oracle tests pass.
+[Evidence](checkpoints/cycle242-user-task-termination.md),
+[lifecycle and remaining limits](native-task-lifecycle.md).
+
+N13.1/2/6 advance to partial, not complete; no phase or flag closes. Strict initial
+syscall RSP and64-call development limits remain kernel-fatal; complete spawn
+allocation rollback and arbitrary-program liveness are not yet implemented.
+The four new fixed payloads do not arm a timer. Those limits must be addressed
+before general application admission, under the existing N13 integration flag.
+The optimized link exposed text growth; reservations were extended four pages
+and all gates rerun. The kernel is168pages, below the unchanged192-page cap.
+
+Next: preemptive peer execution across two private roots and surviving-peer
+progress after exit/fault; then capability IPC, confined services, shell/apps
+and the actual optical integration ISO. All8996 requirements,59 additions,
+97 flags/42 open and20 gaps remain. No new ISO, production promotion or merge;
+full-candidate and stale-product requalification remain required. Full robust
+N0-N39 microkernel development continues after the preview.
+
+## Historical Cycle 241: Native System Calls And Recoverable User Copy
 
 USI-1 / N13.3-N13.4, `N13-USER-ENTRY-LIVE-001`: PKUSER7 adds actual SYSCALL
 entry and checked IRETQ, explicit version/error results, 256-byte bounded
@@ -3969,11 +3995,13 @@ Exit gate: deterministic and randomized SMP schedule tests show no lost wakeup, 
 Inherited sections: `035-038`. Added: `ADD-CAP-001`.  
 Goal: enter user mode with an unforgeable authority model rather than Unix ambient privilege.
 
-Cycle241 has live fixed-task ring-3 entry, private-stack faults, timer recovery,
-and a development SYSCALL/IRETQ ABI with bounded recoverable user copying.
-N13.3 and N13.4 are partial. Task lifecycle, general exception delivery,
-capabilities, peer scheduling and the phase exit remain unestablished.
-See `docs/native-userspace-integration-iso.md` and `docs/native-syscall-abi.md`.
+Cycle242 adds owned sequential task exit/fault termination and cleanup to live
+ring-3 entry, private-stack faults, timer recovery and bounded user copying.
+N13.1/2/3/4/6 are partial. General spawn rollback, unrestricted syscall stacks,
+nonfatal dispatch-budget handling, exception delivery, capabilities, peer
+scheduling and the phase exit remain unestablished.
+See `docs/native-userspace-integration-iso.md`, `docs/native-syscall-abi.md`
+and `docs/native-task-lifecycle.md`.
 
 Subphases:
 

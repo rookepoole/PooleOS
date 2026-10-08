@@ -220,7 +220,7 @@ impl Memory for Access {
     }
 }
 
-pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) -> Result<(), Error> {
+pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) -> Result<Option<u32>, Error> {
     let s = unsafe { (&mut *(&raw mut SESSION)).as_mut() }.ok_or(Error::State)?;
     if !s.active
         || s.sealed
@@ -234,6 +234,10 @@ pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) -> Result<(), Error> {
         frame.rax, frame.rdi, frame.rsi, frame.rdx, frame.r10, frame.r8, frame.r9,
     ) {
         Ok(Request::Version) => (Status::Ok, syscall::VERSION),
+        Ok(Request::Exit(code)) => {
+            s.counts[Status::Ok as usize] += 1;
+            return Ok(Some(code));
+        }
         Ok(Request::Copy {
             source,
             destination,
@@ -253,7 +257,7 @@ pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) -> Result<(), Error> {
     frame.rax = result.0 as u64;
     frame.rdx = result.1;
     frame.rflags = t.flags & !((1 << 10) | (1 << 16));
-    Ok(())
+    Ok(None)
 }
 
 pub(super) fn recover(t: &Trap) -> Option<u64> {

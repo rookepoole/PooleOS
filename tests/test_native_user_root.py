@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class UserRootTests(unittest.TestCase):
     def setUp(self):
         self.markers = json.loads((ROOT / "tests/fixtures/cycle237-user-root-markers.json").read_bytes())["markers"]
-        # Synthetic PKUSER7 parser case built on an immutable historical prefix.
+        # Synthetic PKUSER8 parser case built on an immutable historical prefix.
         # Only the qualifier's fresh guest logs are native execution evidence.
         root = probe.ACTIVE.fullmatch(self.markers[30])[1]
         self.markers.insert(31, f"POOLEOS:KERNEL:USER-ROOT-TIMER PASS contract=PKUSER4 cr3={root} "
@@ -30,6 +30,13 @@ class UserRootTests(unittest.TestCase):
         self.markers.insert(34, f"POOLEOS:KERNEL:USER-CALL PASS contract=PKUSER7 abi=PSABI1 profile=development version=1 cr3={root} "
             "calls=12 ok=3 version_denied=1 unknown=1 arguments=4 faults=3 read_faults=1 write_faults=2 "
             "cpl=3 entry=syscall return=iretq max_copy=256 input_atomic=1 output_prefix=1 completion_traps=1 msrs_cleared=1 if=0 production=0")
+        self.markers[35] = self.markers[35].replace("cr3_writes=2", "cr3_writes=10").replace(
+            "released_pages=13 scrubbed_data_pages=6", "released_pages=65 scrubbed_data_pages=30")
+        for index,(kind,value,calls) in enumerate((("exit",42,2),("fault",6,0),("fault",13,0),("fault",14,0))):
+            self.markers.insert(35+index, f"POOLEOS:KERNEL:USER-TASK PASS contract=PKUSER8 slot=0 generation={index+1} "
+                f"root={root} reason={kind} value={value} syscalls={calls} cpl=3 stale_denials={int(index>0)} "
+                "restart_denied=1 repeat_reap_denied=1 retained_free_denials=5 entry_quiesced=1 root_restored=1 "
+                "released_pages=13 scrubbed_data_pages=6 production=0")
         self.summary = probe.validate_markers(self.markers)
 
     def reject(self, index, field, value):
@@ -41,7 +48,7 @@ class UserRootTests(unittest.TestCase):
 
     def test_synthetic_trace_has_only_bounded_user_entry_claims(self):
         self.assertEqual((self.summary["root_probe_cpl"], self.summary["cpl"]), (0, 3))
-        self.assertEqual(self.summary["cr3_writes"], 2)
+        self.assertEqual(self.summary["cr3_writes"], 10)
         self.assertTrue(self.summary["ring3_executed"])
         self.assertTrue(self.summary["user_timer_preemption"])
         self.assertFalse(self.summary["production_ready"])
@@ -69,7 +76,7 @@ class UserRootTests(unittest.TestCase):
         self.reject(30, "cr3", f"0x{self.summary['original_root']:016X}")
 
     def test_restoration_must_match_original(self):
-        self.reject(35, "restored", f"0x{self.summary['candidate_root']:016X}")
+        self.reject(39, "restored", f"0x{self.summary['candidate_root']:016X}")
 
     def test_sentinel_binds_candidate_and_generation(self):
         self.reject(30, "stack_probe", f"0x{self.summary['stack_probe'] ^ 1:016X}")
@@ -82,9 +89,9 @@ class UserRootTests(unittest.TestCase):
     def test_numeric_claims_cannot_be_promoted(self):
         for index, field, value in ((29, "pages", "14"), (29, "temporary_aliases", "1"),
                 (30, "cpl", "3"), (30, "if", "1"), (30, "ring3", "1"),
-                (35, "cr3_writes", "1"), (35, "allocated_pages", "0"),
-                (35, "released_pages", "12"), (35, "scrubbed_data_pages", "5"),
-                (35, "production", "1")):
+                (39, "cr3_writes", "1"), (39, "allocated_pages", "0"),
+                (39, "released_pages", "12"), (39, "scrubbed_data_pages", "5"),
+                (39, "production", "1")):
             self.reject(index, field, value)
 
     def test_timer_root_delivery_eoi_quiescence_and_mmio_claims_cannot_change(self):
@@ -95,7 +102,7 @@ class UserRootTests(unittest.TestCase):
 
     def test_retained_acpi_accounting_has_nonzero_bounded_equality(self):
         for value in ("0", "2", "20", str(1 << 64)):
-            self.reject(35, "retained_acpi_pages", value)
+            self.reject(39, "retained_acpi_pages", value)
 
     def test_user_entry_cpl_traps_state_cleanup_and_return_cannot_change(self):
         for field,value in (("cpl","0"),("traps","6"),("private_rsp0","0"),("gpr_zero","14"),
@@ -108,7 +115,7 @@ class UserRootTests(unittest.TestCase):
         self.reject(32,"cr3",f"0x{self.summary['original_root']:016X}")
 
     def test_missing_user_entry_and_old_cpl0_final_cannot_claim_execution(self):
-        self.reject(35,"ring3","0")
+        self.reject(39,"ring3","0")
         changed=self.markers[:32]+self.markers[33:]
         with self.assertRaises(ValueError): probe.validate_markers(changed)
 
@@ -158,6 +165,29 @@ class UserRootTests(unittest.TestCase):
     def test_old_preemption_trace_cannot_claim_syscall_execution(self):
         with self.assertRaises(ValueError):
             probe.validate_markers(self.markers[:34]+self.markers[35:])
+
+    def test_task_identity_generations_and_roots_cannot_be_replayed(self):
+        for index in range(35,39):
+            for field,value in (("generation","0"),("generation","5"),("slot","1"),("root","0x0000000000000000"),
+                                ("root","0x0000000000000001"),("root","0x0000000100000000")):
+                self.reject(index,field,value)
+        changed=self.markers.copy();changed[36]=changed[35]
+        with self.assertRaises(ValueError):probe.validate_markers(changed)
+
+    def test_task_termination_cleanup_and_accounting_cannot_be_promoted(self):
+        self.assertEqual((self.summary["normal_exits"],self.summary["fault_terminations"]),(1,3))
+        self.assertFalse(self.summary["peer_scheduling"])
+        for index in range(35,39):
+            for field,value in (("syscalls","3"),("value","99"),("cpl","0"),("restart_denied","0"),
+                    ("repeat_reap_denied","0"),("retained_free_denials","4"),("entry_quiesced","0"),
+                    ("root_restored","0"),("released_pages","12"),("scrubbed_data_pages","5"),("production","1")):
+                self.reject(index,field,value)
+        self.reject(35,"reason","fault");self.reject(36,"reason","exit")
+
+    def test_missing_reordered_or_old_syscall_trace_cannot_claim_task_termination(self):
+        for changed in (self.markers[:35]+self.markers[39:],self.markers[:36]+self.markers[37:],
+                self.markers[:36]+[self.markers[37],self.markers[36]]+self.markers[38:]):
+            with self.assertRaises(ValueError):probe.validate_markers(changed)
 
 
 if __name__ == "__main__":

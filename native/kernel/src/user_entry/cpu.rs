@@ -213,6 +213,39 @@ impl<H: Cpu> CpuImage<H> {
         Ok(())
     }
 
+    pub(crate) fn exercise_task<D: crate::user_entry::task::Driver>(
+        &mut self,
+        id: crate::scheduler_smp::TaskId,
+        driver: &mut D,
+    ) -> Result<crate::user_entry::task::Outcome, Error> {
+        let image = self.user_context()?;
+        if !self.timer_quiescent || !self.user_quiescent {
+            return Err(Error::State);
+        }
+        self.user_quiescent = false;
+        let result = driver.execute(image, id);
+        self.quiesce_task(driver)?;
+        let outcome = result.map_err(Error::User)?;
+        outcome
+            .validate(id, image.root_physical)
+            .map_err(Error::User)?;
+        Ok(outcome)
+    }
+
+    pub(crate) fn quiesce_task<D: crate::user_entry::task::Driver>(
+        &mut self,
+        driver: &mut D,
+    ) -> Result<(), Error> {
+        if self.user_quiescent {
+            return Ok(());
+        }
+        let image = self.user_context()?;
+        driver.quiesce(image.root_physical).map_err(Error::User)?;
+        self.user_context()?;
+        self.user_quiescent = true;
+        Ok(())
+    }
+
     /// Re-audit ownership and all mappings immediately before the first write.
     /// The adapter must also prove the executing code, stack, data and exception
     /// paths survive both roots. This operation does not initialize user state.

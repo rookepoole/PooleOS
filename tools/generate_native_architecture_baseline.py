@@ -24,6 +24,12 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle242-user-task-termination.md",
+    "docs/native-task-lifecycle.md",
+    "native/kernel/src/user_entry/task.rs",
+    "native/kernel/src/arch/x86_64/user_task.rs",
+    "native/kernel/src/user_root_probe/task_driver.rs",
+    "tests/fixtures/cycle241-user-entry-readiness.json",
     "docs/checkpoints/cycle241-native-syscall-usercopy.md",
     "docs/native-syscall-abi.md",
     "native/kernel/src/user_entry/syscall.rs",

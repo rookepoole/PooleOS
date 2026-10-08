@@ -1,4 +1,4 @@
-"""Independent marker checks for the bounded PKUSER7 syscall/user-copy probe."""
+"""Independent marker checks for the bounded PKUSER8 task termination probe."""
 from __future__ import annotations
 
 import re
@@ -12,15 +12,16 @@ ACTIVE = re.compile(r"POOLEOS:KERNEL:USER-ROOT-ACTIVE PASS cr3=(0x[0-9A-F]{16}) 
 TIMER = re.compile(r"POOLEOS:KERNEL:USER-ROOT-TIMER PASS contract=PKUSER4 cr3=(0x[0-9A-F]{16}) deliveries=3 eois=3 mmio_pages=2 quiesced=1 if=0 ring3=0")
 ENTRY = re.compile(r"POOLEOS:KERNEL:USER-ENTRY PASS contract=PKUSER5 cr3=(0x[0-9A-F]{16}) cpl=3 traps=7 private_rsp0=1 gpr_zero=15 fp_cleared=1 cli_denied=1 io_denied=1 syscall_denied=1 supervisor_fault=1 nx_fault=1 kernel_return=1 descriptors_detached=1 if=0 production=0")
 PREEMPT = re.compile(r"POOLEOS:KERNEL:USER-PREEMPT PASS contract=PKUSER6 cr3=(0x[0-9A-F]{16}) cpl=3 deliveries=3 eois=3 resumes=2 first_progress=([0-9]+) last_progress=([0-9]+) private_rsp0=1 gpr_preserved=14 fp_preserved=1 timer_quiesced=1 forced_return=1 if=0 production=0")
-RESULT = re.compile(r"POOLEOS:KERNEL:USER-ROOT-RESULT PASS restored=(0x[0-9A-F]{16}) cr3_writes=2 allocated_pages=([0-9]+) retained_acpi_pages=([0-9]+) released_pages=13 scrubbed_data_pages=6 ring3=1 production=0 terminal=halt")
+RESULT = re.compile(r"POOLEOS:KERNEL:USER-ROOT-RESULT PASS restored=(0x[0-9A-F]{16}) cr3_writes=10 allocated_pages=([0-9]+) retained_acpi_pages=([0-9]+) released_pages=65 scrubbed_data_pages=30 ring3=1 production=0 terminal=halt")
 
 
 CALL = re.compile(r"POOLEOS:KERNEL:USER-CALL PASS contract=PKUSER7 abi=PSABI1 profile=development version=1 cr3=(0x[0-9A-F]{16}) calls=12 ok=3 version_denied=1 unknown=1 arguments=4 faults=3 read_faults=1 write_faults=2 cpl=3 entry=syscall return=iretq max_copy=256 input_atomic=1 output_prefix=1 completion_traps=1 msrs_cleared=1 if=0 production=0")
+TASK = re.compile(r"POOLEOS:KERNEL:USER-TASK PASS contract=PKUSER8 slot=0 generation=([0-9]+) root=(0x[0-9A-F]{16}) reason=(exit|fault) value=([0-9]+) syscalls=([0-9]+) cpl=3 stale_denials=([01]) restart_denied=1 repeat_reap_denied=1 retained_free_denials=5 entry_quiesced=1 root_restored=1 released_pages=13 scrubbed_data_pages=6 production=0")
 
 
 def validate_markers(markers: list[str]) -> dict:
-    if len(markers) != 36:
-        raise ValueError("PKUSER7 requires exactly 36 markers")
+    if len(markers) != 40:
+        raise ValueError("PKUSER8 requires exactly 40 markers")
     arm = transfer.TRANSFER_ARM.fullmatch(markers[23])
     if arm is None or int(arm.group(10)) != SELECTOR:
         raise ValueError("PKUSER3 wrong development selector")
@@ -33,7 +34,7 @@ def validate_markers(markers: list[str]) -> dict:
     common.pop("kernel_terminal", None)
     common["synthetic_unsigned_terminal_used_for_prefix_parser_only"] = True
     prepared, active, timer, entry, preempt, call, result = [pattern.fullmatch(marker) for pattern, marker in
-                                zip((PREPARED, ACTIVE, TIMER, ENTRY, PREEMPT, CALL, RESULT), markers[29:])]
+                                zip((PREPARED, ACTIVE, TIMER, ENTRY, PREEMPT, CALL, RESULT), [*markers[29:35],markers[39]])]
     if any(m is None for m in (prepared, active, timer, entry, preempt, call, result)):
         raise ValueError("PKUSER7 marker layout or bounded claims changed")
     original, candidate = (int(prepared[i], 16) for i in (1, 2))
@@ -49,15 +50,28 @@ def validate_markers(markers: list[str]) -> dict:
             or not (0 < int(result[2]) == int(result[3]) <= 19)
             or probe != candidate ^ generation ^ 0x504B555345523300):
         raise ValueError("PKUSER3 live root/probe/restoration binding changed")
+    tasks = []
+    for index,(reason,value,calls) in enumerate((("exit",42,2),("fault",6,0),("fault",13,0),("fault",14,0))):
+        row = TASK.fullmatch(markers[35+index])
+        if row is None:
+            raise ValueError("PKUSER8 missing or malformed termination marker")
+        gen,root = int(row[1]),int(row[2],16)
+        if (gen != index+1 or root==0 or root&4095 or root>=1<<32 or root==original
+                or row[3]!=reason or int(row[4])!=value or int(row[5])!=calls or int(row[6])!=int(index>0)):
+            raise ValueError("PKUSER8 task identity, termination, or lifecycle binding changed")
+        tasks.append(dict(slot=0,generation=gen,root=root,reason=reason,value=value,syscalls=calls))
     return {"transfer_prefix": common, "original_root": original, "candidate_root": candidate,
             "generation": generation, "stack_probe": probe, "root_probe_cpl": 0, "cpl": 3,
-            "cr3_writes": 2, "timer_deliveries": 3, "timer_eois": 3,
+            "cr3_writes": 10, "timer_deliveries": 3, "timer_eois": 3,
             "timer_quiesced": True, "retained_acpi_pages": int(result[3]),
             "ring3_executed": True, "user_traps": 7, "private_rsp0": True,
             "user_timer_preemption": True, "user_timer_deliveries": 3, "user_timer_eois": 3,
             "user_resumes": 2, "first_progress": int(preempt[2]), "last_progress": int(preempt[3]),
             "syscall_abi": "PSABI1_development", "user_calls": 12, "copy_faults": 3,
             "copy_read_faults": 1, "copy_write_faults": 2, "syscall_msrs_cleared": True,
+            "terminated_tasks": tasks, "normal_exits": 1, "fault_terminations": 3,
+            "task_stale_denials": 3, "released_pages": 65, "scrubbed_data_pages": 30,
+            "peer_scheduling": False,
             "production_ready": False}
 
 
@@ -69,7 +83,7 @@ def negative_controls(markers: list[str]) -> int:
     wrong = markers.copy()
     wrong[23] = wrong[23].replace("trap_scenario=23", "trap_scenario=0")
     candidates.append(wrong)
-    for i in range(29, 36):
+    for i in range(29, 40):
         for match in re.finditer(r"\b[a-zA-Z_0-9]+=[^ ]+", markers[i]):
             changed = markers.copy()
             changed[i] = markers[i][:match.start()] + "invalid=invalid" + markers[i][match.end():]

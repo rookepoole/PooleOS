@@ -36,7 +36,7 @@ earlier test, not a contradiction of later explicitly enabled calls.
 
 ## Fresh Evidence
 
-- Receipt: `runs/native-user-entry-readiness.json`, SHA256
+- Receipt: `tests/fixtures/cycle241-user-entry-readiness.json`, SHA256
   `A1D8F9AF64D05DEBC88757CA1C8D8C84BC6B292F97E07B7FEF14889614416FE5`.
 - 742 exact native/build/oracle source bindings unchanged during capture.
 - 326 debug kernel +76 repeated user-release +24 repeated VM-release

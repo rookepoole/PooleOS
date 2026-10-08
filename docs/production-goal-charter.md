@@ -7,9 +7,17 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 241
+Last roadmap reconciliation: PooleOS Cycle 242
 
-Cycle241 proves12 real user SYSCALLs, checked IRETQ, bounded user copying and
+Cycle242 proves four sequential owned task lifetimes per fresh guest: normal
+exit and #UD/#GP/#PF termination, stale-ID/restart rejection, quiescence before
+root restoration and full memory release. N13.1/2/6 are partial. Next: preemptive
+peer execution, then IPC/services and the usable integration ISO. Arbitrary
+programs, full spawn rollback and nonfatal syscall-budget handling remain open.
+No phase closure, production promotion or normative requirement change occurs.
+[Cycle242 evidence](checkpoints/cycle242-user-task-termination.md).
+
+Historical Cycle241 proves12 real user SYSCALLs, checked IRETQ, bounded user copying and
 three exact copy-fault recoveries per fresh guest, followed by syscall MSR
 cleanup, timer recovery and task-page release. Next: owned task exit/fault
 termination, accounting and peer scheduling, then IPC/services and the usable

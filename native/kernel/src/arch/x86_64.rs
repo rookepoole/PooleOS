@@ -3864,6 +3864,11 @@ pub struct UserRootCpu {
     _local: core::marker::PhantomData<*mut ()>,
 }
 
+static USER_ROOT_WRITES: core::sync::atomic::AtomicU64 = core::sync::atomic::AtomicU64::new(0);
+pub fn user_root_write_count() -> u64 {
+    USER_ROOT_WRITES.load(Ordering::Acquire)
+}
+
 #[allow(dead_code)]
 impl UserRootCpu {
     /// # Safety
@@ -3926,6 +3931,7 @@ impl poolekernel::user_entry::prepared::cpu::Cpu for UserRootCpu {
         // SAFETY: the constructor and owning PKUSER3 lifecycle preserve both
         // mappings and the serialized PCIDE/PGE-disabled flushing context.
         unsafe { write_cr3(root) };
+        USER_ROOT_WRITES.fetch_add(1, Ordering::AcqRel);
         Ok(())
     }
 }

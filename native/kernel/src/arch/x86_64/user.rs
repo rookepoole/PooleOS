@@ -4,10 +4,14 @@ use super::*;
 use poolekernel::user_entry::preemption;
 use poolekernel::user_entry::prepared::{STACK_BOTTOM, STACK_TOP};
 use poolekernel::user_entry::syscall;
+use poolekernel::user_entry::task;
+#[path = "user_task.rs"]
+mod tasks;
 use poolekernel::user_entry::{
     self, ImageAdmission, InitialReturnFrame,
     privilege::{self, Action, Controls, Driver, Error, Layout, Observation, Sequence, Trap},
 };
+pub use tasks::payload as task_payload;
 
 #[repr(C, align(16))]
 struct UserGdt([u64; 7]);
@@ -15,6 +19,7 @@ static mut USER_GDT: UserGdt = UserGdt([0; 7]);
 static mut INITIAL_FX: FxsaveArea = FxsaveArea([0; 512]);
 static mut OBSERVED_FX: FxsaveArea = FxsaveArea([0; 512]);
 static mut LIVE: Option<Sequence> = None;
+static mut TASK: Option<task::Run> = None;
 static mut PREEMPT: Option<super::user_preempt::Session> = None;
 static ACTIVE_ROOT: core::sync::atomic::AtomicU64 = core::sync::atomic::AtomicU64::new(0);
 static RETURN_STACK_TOP: core::sync::atomic::AtomicU64 = core::sync::atomic::AtomicU64::new(0);
@@ -361,6 +366,7 @@ impl Driver for Entry {
         unsafe {
             initialize_fx()?;
             write_volatile(&raw mut LIVE, None);
+            write_volatile(&raw mut TASK, None);
             write_volatile(&raw mut PREEMPT, None);
             write_volatile(&raw mut poole_user_saved_rsp, 0);
         }
@@ -442,14 +448,24 @@ pub fn dispatch(frame: &mut TrapFrame, depth: u32) {
     if !active() || root != ACTIVE_ROOT.load(Ordering::Acquire) || read_rflags() & (1 << 9) != 0 {
         reject();
     }
+    let t = snapshot(frame, depth);
+    if unsafe { (&*(&raw const TASK)).is_some() } {
+        tasks::dispatch(&t, frame);
+        crate::TRAP_DEPTH.store(0, Ordering::Release);
+        return;
+    }
     // SAFETY: entry serialized one BSP, IF0; no reference to LIVE survives IRETQ.
     let sequence = unsafe { (&mut *(&raw mut LIVE)).as_mut() }.unwrap_or_else(|| reject());
-    let t = snapshot(frame, depth);
     if t.vector == syscall::VECTOR {
         if sequence.completed() != privilege::TRAP_COUNT {
             reject()
         }
-        super::user_syscall::dispatch(&t, frame).unwrap_or_else(|e| denied(4, e, &t));
+        if super::user_syscall::dispatch(&t, frame)
+            .unwrap_or_else(|e| denied(4, e, &t))
+            .is_some()
+        {
+            denied(4, Error::State, &t);
+        }
         crate::TRAP_DEPTH.store(0, Ordering::Release);
         return;
     }
