@@ -10,12 +10,21 @@ use poolekernel::{
 };
 
 static mut IPC: Space = Space::new();
+/// SAFETY: the clock adapter authenticates the exclusive BSP/root/IF0 before
+/// borrowing this owner, including during a suspended authenticated syscall.
+pub unsafe fn with_clock<T>(
+    f: impl FnOnce(&mut Space) -> Result<T, poolekernel::user_entry::timer::Error>,
+) -> Result<T, poolekernel::user_entry::timer::Error> {
+    f(unsafe { &mut *(&raw mut IPC) })
+}
 mod pressure;
 pub(super) use pressure::payload as pressure_payload;
 mod reply;
 pub(super) use reply::payload as reply_payload;
 mod request;
 pub(super) use request::payload as request_payload;
+mod deadline;
+pub(super) use deadline::payload as deadline_payload;
 
 fn idle() -> Result<(), Error> {
     if super::user::active() || super::read_rflags() & ((1 << 9) | (1 << 10) | (1 << 18)) != 0 {

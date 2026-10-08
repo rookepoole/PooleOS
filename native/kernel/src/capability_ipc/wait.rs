@@ -67,6 +67,8 @@ fn reason(status: Status) -> Result<WakeReason, Error> {
         Status::Ok => Ok(WakeReason::Signalled),
         Status::Cancelled => Ok(WakeReason::Cancelled),
         Status::Revoked => Ok(WakeReason::OwnerGone),
+        Status::TimedOut => Ok(WakeReason::TimedOut),
+        Status::ClockUnavailable => Ok(WakeReason::OwnerGone),
         _ => Err(Error::Denied),
     }
 }

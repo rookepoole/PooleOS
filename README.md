@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle255 adds a continuous owned service clock
+**Current development checkpoint:** Cycle256 implements epoch-bound request deadlines
+and wakes a client even when all tasks are blocked. Two fresh native boots prove
+queued/claimed expiry, late-reply denial and retained timeout completion;443 kernel
+tests pass. Next: transactional service admission, sustained budgets and efficient
+idle, then init/console, shell/files/apps and the usable ISO. Full robust microkernel
+development continues afterward. No interactive ISO yet; canonical gates still
+block main. [Evidence](docs/checkpoints/cycle256-native-request-deadlines.md).
+
+**Historical development checkpoint:** Cycle255 adds a continuous owned service clock
 across real user task dispatches and idle periods, with verified mapping teardown.
 Two fresh native boots and434 kernel tests pass. Next: request deadline expiry,
 service admission and sustained budgets, then init/console, shell/files/apps and

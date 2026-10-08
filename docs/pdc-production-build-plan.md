@@ -1,15 +1,42 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.158.0-continuous-service-clock
-Roadmap cycle: PooleOS Cycle 255
+Plan version: 2.159.0-native-request-deadlines
+Roadmap cycle: PooleOS Cycle 256
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 255: Continuous Service Clock
+## Cycle 256: Native Request Deadlines
+
+PKIPC5 moves continuous clock ownership into the persistent IPC Space. Syscall14
+admits bounded epoch-bound deadlines. First-terminal-wins expiry invalidates late
+reply authority, preserves completion quota until Take, and wakes the right task
+generation exactly once. Clock uncertainty, regression, configuration changes,
+failed release and expiry-count overflow close timed admission without losing the
+lease. Host failure tests cover recovery; native unexpected clock failure still
+halts with retained ownership and must not be described as native recovery.
+
+Two fresh76-marker native boots each reject1033 altered-evidence controls. Queued
+and claimed requests expire with both tasks parked; clients obtain TimedOut,
+servers attempt denied late replies while completions remain retained, and both
+tasks exit normally. Original clock configuration and all mappings are restored.
+443 kernel tests,688 Rust executions,76 Python oracle tests and ordinary denial
+pass. [Evidence and retained failures](checkpoints/cycle256-native-request-deadlines.md).
+
+Next N13-CAPABILITY-IPC-001: transactional service admission, sustained budgets and
+interrupt-driven idle; then USI-3 init/confined console/input, USI-4 shell/files/two
+applications and USI-5 actual optical ISO qualification. Idle currently uses
+bounded HPET polling, not power-efficient sleep. The198-page image fits208 pages
+with the36-page guarded stack unchanged; three product-readiness failures and
+full exact-candidate canonical replay still block main. No usable ISO yet.
+No phase/flag closes:40 phases,301 subphases,8996 requirements,59 additions,
+97 flags/42 open,20 gaps. USI-1/2 partial,3-5 not started. Full robust microkernel,
+PooleGlyph/PDC and accessible PooleGlass remain the production goal.
+
+## Historical Cycle 255: Continuous Service Clock
 
 PKCLOCK1 provides a non-copyable continuous64-bit HPET owner across twelve actual
 task dispatches and four idle intervals. Counter samples are independent of task

@@ -11,6 +11,7 @@ use poolekernel::{
 use timer_driver::{PeerRun, Timer};
 
 pub(super) mod ipc;
+mod ipc_deadline;
 pub(super) mod ipc_pressure;
 mod ipc_reply;
 mod ipc_request;

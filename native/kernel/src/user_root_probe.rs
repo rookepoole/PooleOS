@@ -13,7 +13,7 @@ use poolekernel::user_entry::{
 };
 use virtual_memory::{AddressSpace, CachePolicy, Error, Permissions, USER_WINDOW_START};
 
-mod clock_driver;
+pub(crate) mod clock_driver;
 mod peer_driver;
 mod spawn_driver;
 mod task_driver;
@@ -508,7 +508,7 @@ pub fn run(
     log.write_str(" retained_acpi_pages=");
     log.write_decimal_u64(acpi.snapshot_page_count);
     log.write_str(
-        " released_pages=876 scrubbed_data_pages=403 ring3=1 production=0 terminal=halt\n",
+        " released_pages=928 scrubbed_data_pages=427 ring3=1 production=0 terminal=halt\n",
     );
     halt_forever()
 }

@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 255, 2026-10-08. No new ISO exists yet.
+Status: implementation started, Cycle 256, 2026-10-08. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -44,19 +44,20 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | Stage | Build Plan Binding | Exit Criterion | Current State |
 | --- | --- | --- | --- |
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
-| USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Cycle255: continuous owned clock across actual request lifetimes and idle; prior completion/cancel/wait/take and service death preserved. Request deadline expiry, transactional admission and sustained budgets remain |
+| USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Cycle256: epoch-bound queued/claimed expiry while both tasks block, retained completion and late-reply denial. Transactional admission, sustained budgets and efficient idle remain |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Not started |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
 ### Immediate Next Move
 
-Current: [Cycle255 continuous clock evidence](checkpoints/cycle255-continuous-service-clock.md).
-The owned HPET epoch now spans actual dispatches and idle, with verified teardown.
-Bind request deadlines to it, including expiry while all tasks block and poisoned
-epoch handling; then transactional admission and sustained service budgets.
+Current: [Cycle256 deadline evidence](checkpoints/cycle256-native-request-deadlines.md).
+The IPC Space owns the HPET epoch and request deadlines. Both-blocked expiry,
+retained completion and late-reply denial now execute natively. Next: transactional
+admission, sustained service budgets and interrupt-driven idle. Native clock
+failure recovery remains open; current idle is bounded polling.
 Per-dispatch CPU ticks remain distinct from the service clock.
-The197-page kernel has208 reserved pages;36-page guarded stack remains unchanged.
+The198-page kernel has208 reserved pages;36-page guarded stack remains unchanged.
 Migrate old product receipts and replay exact-candidate canonical gates before main.
 Then USI-3 init/confined console/input, USI-4 shell/files/two apps, USI-5 optical ISO.
 The completed substeps below are retained as history, not the current next action.
@@ -100,12 +101,12 @@ termination is implemented. Cycle253 adds sender identity and one-use reply owne
 with a sixth persistent-slot lifetime: [evidence](checkpoints/cycle253-native-ipc-reply-authority.md).
 Cycle254 completes bounded request/cancellation ownership and caller notification
 on service death or explicit discard. Cycle255 supplies the continuous clock.
-Next in step3: epoch-bound request expiry, then transactional admission and
-sustained budgets for services.
+Cycle256 supplies epoch-bound request expiry, including all-blocked idle wakeup.
+Next in step3: transactional admission, sustained budgets and efficient idle for services.
 General quotas, arbitrary revocation races and supervision remain unfinished.
 Cycle249 evidence is [here](checkpoints/cycle249-unknown-runtime-recovery.md).
 Its sample-loss injection is not a real hardware-clock failure. Keep that limit,
-general stack bounds, persistent audit/quarantine and the current197-page product
+general stack bounds, persistent audit/quarantine and the current198-page product
 contract migration visible under FLAG-N13-USERSPACE-ISO-001.
 
 ### USI-1 Substeps

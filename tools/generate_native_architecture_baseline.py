@@ -24,6 +24,13 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle256-native-request-deadlines.md",
+    "docs/native-request-deadlines.md",
+    "tests/fixtures/cycle255-user-entry-readiness.json",
+    "native/kernel/src/capability_ipc/deadline.rs",
+    "native/kernel/src/capability_ipc/tests/replies/requests/deadlines.rs",
+    "native/kernel/src/arch/x86_64/user_ipc/deadline.rs",
+    "native/kernel/src/user_root_probe/peer_driver/ipc_deadline.rs",
     "docs/checkpoints/cycle255-continuous-service-clock.md",
     "docs/native-continuous-clock.md",
     "tests/fixtures/cycle254-user-entry-readiness.json",

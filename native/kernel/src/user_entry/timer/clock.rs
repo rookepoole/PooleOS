@@ -23,6 +23,7 @@ enum State {
 /// use poolekernel::user_entry::timer::clock::Lease;
 /// fn duplicate(owner: &Lease) -> Lease { owner.clone() }
 /// ```
+#[derive(Debug, Eq, PartialEq)]
 pub struct Lease {
     capabilities: u64,
     original_config: u64,

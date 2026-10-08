@@ -6,6 +6,7 @@ const TAG: u64 = 3 << 16;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Operation {
     Begin,
+    BeginTimed { timeout_ns: u64 },
     Take,
     Cancel,
 }
@@ -21,6 +22,7 @@ struct Request {
     endpoint: Object,
     receiver: Option<Caller>,
     completion: Option<(Status, Message)>,
+    deadline: Option<(u64, u64)>,
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) struct Slot {
@@ -38,6 +40,40 @@ impl Slot {
 }
 
 impl Space {
+    pub(super) fn pending_deadlines(&self) -> bool {
+        self.tables.iter().any(|t| {
+            t.requests.iter().any(|s| {
+                s.value
+                    .is_some_and(|r| r.completion.is_none() && r.deadline.is_some())
+            })
+        })
+    }
+    pub(super) fn expire_requests(&mut self, epoch: u64, now: Option<u64>) -> u32 {
+        let mut expired = 0;
+        for table in &mut self.tables {
+            for slot in &mut table.requests {
+                let Some(r) = slot.value.as_mut() else {
+                    continue;
+                };
+                let Some((bound_epoch, deadline)) = r.deadline else {
+                    continue;
+                };
+                if r.completion.is_none()
+                    && (bound_epoch != epoch || now.is_none_or(|n| n >= deadline))
+                {
+                    let status = if bound_epoch == epoch && now.is_some() {
+                        expired += 1;
+                        Status::TimedOut
+                    } else {
+                        Status::ClockUnavailable
+                    };
+                    r.completion = Some((status, Message::EMPTY));
+                }
+            }
+        }
+        self.prune_replies();
+        expired
+    }
     fn request_key(&self, caller: Caller, handle: u64) -> Result<Key, Status> {
         let t = self.table(caller.id).map_err(|_| Status::Denied)?;
         let slot = (handle & 0xffff) as usize;
@@ -135,7 +171,7 @@ impl Space {
                 return (Status::Arguments, 0);
             }
         } else {
-            let max = if operation == Operation::Begin {
+            let max = if matches!(operation, Operation::Begin | Operation::BeginTimed { .. }) {
                 MAX_BYTES
             } else {
                 reply::RECEIVE_BYTES
@@ -156,9 +192,17 @@ impl Space {
         if self.tables[t].caller != Some(caller) {
             return (Status::Denied, 0);
         }
-        if operation == Operation::Begin {
+        if matches!(operation, Operation::Begin | Operation::BeginTimed { .. }) {
             let Ok(cap) = self.resolve(t, handle, Rights::SEND) else {
                 return (Status::Denied, 0);
+            };
+            let deadline = if let Operation::BeginTimed { timeout_ns } = operation {
+                match self.deadline_after(timeout_ns) {
+                    Ok(d) => Some(d),
+                    Err(e) => return (e, 0),
+                }
+            } else {
+                None
             };
             let Some((slot, generation)) =
                 self.tables[t]
@@ -190,6 +234,7 @@ impl Space {
                     endpoint: cap.object,
                     receiver: None,
                     completion: None,
+                    deadline,
                 }),
             };
             let e = self.objects[cap.object.slot].value.as_mut().unwrap();

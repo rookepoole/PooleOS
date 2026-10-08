@@ -111,7 +111,11 @@ impl task::SliceDriver for PeerEntry {
             || active()
             || !matches!(
                 status,
-                syscall::Status::Ok | syscall::Status::Cancelled | syscall::Status::Revoked
+                syscall::Status::Ok
+                    | syscall::Status::Cancelled
+                    | syscall::Status::Revoked
+                    | syscall::Status::TimedOut
+                    | syscall::Status::ClockUnavailable
             )
         {
             return Err(Error::State);
@@ -338,6 +342,9 @@ unsafe extern "C" {
     static poole_peer_stack_fault_end: u8;
 }
 pub fn peer_payload(kind: usize) -> Result<&'static [u8], Error> {
+    if kind == 24 || kind == 25 {
+        return super::super::user_ipc::deadline_payload(kind == 25);
+    }
     if kind == 22 || kind == 23 {
         return super::super::user_ipc::request_payload(kind == 23);
     }

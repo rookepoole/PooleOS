@@ -1,8 +1,6 @@
 //! One-BSP continuous clock epoch shared by serialized dispatch timer children.
 use super::*;
-use poolekernel::user_entry::timer::{
-    self, Error as ClockError, Mappings, clock::Lease, watchdog::Hardware,
-};
+use poolekernel::user_entry::timer::{self, Error as ClockError, Mappings, watchdog::Hardware};
 
 struct Adapter(LiveInterruptHardware);
 impl Hardware for Adapter {
@@ -16,7 +14,6 @@ impl Hardware for Adapter {
     }
 }
 struct Owner {
-    lease: Lease,
     mappings: Mappings,
     kernel_root: u64,
     pat: u64,
@@ -88,7 +85,7 @@ pub(super) fn enter(root: u64, mappings: Mappings) -> Result<(), ClockError> {
         return Err(ClockError::State);
     }
     o.child = Some(root);
-    o.lease.sample(&hardware(true))?;
+    unsafe { arch::x86_64::user_ipc::with_clock(|s| s.sample_clock(&hardware(true))) }?;
     o.enters = o.enters.checked_add(1).ok_or(ClockError::State)?;
     Ok(())
 }
@@ -102,9 +99,22 @@ pub(super) fn leave(root: u64, mappings: Mappings) -> Result<(), ClockError> {
     if o.child != Some(root) || mappings != o.mappings || arch::x86_64::user_watchdog::owned() {
         return Err(ClockError::State);
     }
-    o.lease.sample(&hardware(true))?;
+    unsafe { arch::x86_64::user_ipc::with_clock(|s| s.sample_clock(&hardware(true))) }?;
     o.leaves = o.leaves.checked_add(1).ok_or(ClockError::State)?;
     o.child = None;
+    Ok(())
+}
+
+/// Called only after the syscall adapter has authenticated the complete frame.
+pub(crate) fn syscall_sample(root: u64) -> Result<(), ClockError> {
+    let Some(o) = (unsafe { (&*(&raw const OWNER)).as_ref() }) else {
+        return Ok(());
+    };
+    context(root, o.pat)?;
+    if o.child != Some(root) || root == o.kernel_root {
+        return Err(ClockError::Context);
+    }
+    unsafe { arch::x86_64::user_ipc::with_clock(|s| s.sample_clock(&hardware(true))) }?;
     Ok(())
 }
 
@@ -144,14 +154,12 @@ impl Session {
             .install_uncached_mmio(apic, hpet)
             .map_err(|_| ClockError::Hardware)?;
         let mut h = hardware(false);
-        let lease = Lease::prepare(&h)?;
         // Publish before effects. A failed start retains OWNER and its MMIO mapping;
         // this diagnostic halts rather than releasing potentially active hardware.
         unsafe {
             write_volatile(
                 &raw mut OWNER,
                 Some(Owner {
-                    lease,
                     mappings,
                     kernel_root: core.page_table_root_physical,
                     pat,
@@ -161,10 +169,12 @@ impl Session {
                 }),
             );
         }
-        unsafe { (&mut *(&raw mut OWNER)).as_mut() }
-            .ok_or(ClockError::State)?
-            .lease
-            .start(&mut h)?;
+        unsafe {
+            arch::x86_64::user_ipc::with_clock(|s| {
+                s.prepare_clock(&h)?;
+                s.start_clock(&mut h)
+            })
+        }?;
         // Task construction/revalidation admits the original boot supervisor map.
         // Keep the clock running, but revoke these aliases before either boundary.
         unmap_kernel(&mut memory)?;
@@ -198,7 +208,7 @@ impl Session {
         {
             return Err(ClockError::State);
         }
-        o.lease.sample(&hardware(false))
+        unsafe { arch::x86_64::user_ipc::with_clock(|s| s.sample_clock(&hardware(false))) }
     }
     pub(super) fn idle_interval(&mut self) -> Result<(), ClockError> {
         self.map_kernel()?;
@@ -219,6 +229,41 @@ impl Session {
         Err(ClockError::Hardware)
     }
     pub(super) fn finish(&mut self, serial: &mut Com1, debugcon: &mut DebugCon) -> Result<(), u64> {
+        self.finish_mode(false, serial, debugcon)
+    }
+    /// All tasks are parked; bounded polling is diagnostic idle, not power-efficient sleep.
+    pub(super) fn expire_idle(&mut self) -> Result<u64, ClockError> {
+        self.map_kernel()?;
+        let before = unsafe { arch::x86_64::user_ipc::with_clock(|s| s.clock_observation()) }?
+            .0
+            .expired;
+        for _ in 0..2_000_000 {
+            let now = self.sample()?;
+            let count = unsafe { arch::x86_64::user_ipc::with_clock(|s| s.clock_observation()) }?
+                .0
+                .expired;
+            if count > before {
+                unmap_kernel(&mut self.memory)?;
+                self.intervals += 1;
+                return Ok(now);
+            }
+            core::hint::spin_loop();
+        }
+        Err(ClockError::Hardware)
+    }
+    pub(super) fn finish_deadlines(
+        &mut self,
+        serial: &mut Com1,
+        debugcon: &mut DebugCon,
+    ) -> Result<(), u64> {
+        self.finish_mode(true, serial, debugcon)
+    }
+    fn finish_mode(
+        &mut self,
+        deadlines: bool,
+        serial: &mut Com1,
+        debugcon: &mut DebugCon,
+    ) -> Result<(), u64> {
         self.map_kernel().map_err(|_| 1u64)?;
         let elapsed = self.sample().map_err(|_| 2u64)?;
         if IRQ_APIC_VIRTUAL.load(Ordering::Acquire) != 0
@@ -228,12 +273,18 @@ impl Session {
             return Err(3);
         }
         let o = unsafe { (&mut *(&raw mut OWNER)).as_mut() }.ok_or(4u64)?;
-        let (origin, last, period, samples) = o.lease.observation();
-        if o.enters != 12
-            || o.leaves != 12
-            || self.intervals != 4
+        let (observation, (origin, last, period, samples)) =
+            unsafe { arch::x86_64::user_ipc::with_clock(|s| s.clock_observation()) }
+                .map_err(|_| 4u64)?;
+        let expected = if deadlines { 10 } else { 12 };
+        if o.enters != expected
+            || o.leaves != expected
+            || self.intervals != if deadlines { 2 } else { 4 }
             || elapsed < self.idle_ns
-            || self.idle_ns < 4_000_000
+            || (!deadlines && self.idle_ns < 4_000_000)
+            || observation.failed
+            || observation.epoch != if deadlines { 2 } else { 1 }
+            || observation.expired != if deadlines { 2 } else { 0 }
         {
             let mut log = EarlyLogger::new(BootSink {
                 serial,
@@ -263,14 +314,15 @@ impl Session {
                 }
             }
         }
-        o.lease.release(&mut h).map_err(|_| 8u64)?;
+        unsafe { arch::x86_64::user_ipc::with_clock(|s| s.release_clock(&mut h)) }
+            .map_err(|_| 8u64)?;
         unmap_kernel(&mut self.memory).map_err(|_| 9u64)?;
         // TableMemory::finish requires a live temporary RAM alias to revoke.
         // This MMIO-only owner created none: replay the complete empty-region
         // constructor instead, including the temporary, metadata and ledger slots.
         let _ = BootstrapTableMemory::new(self.root, self.memory.physical_address_bits)
             .map_err(|_| 10u64)?;
-        if self.memory.mmio_pte_writes != 24 {
+        if self.memory.mmio_pte_writes != if deadlines { 16 } else { 24 } {
             return Err(11);
         }
         unsafe { write_volatile(&raw mut OWNER, None) };
@@ -279,7 +331,11 @@ impl Session {
             debugcon,
             ring: &EARLY_RING,
         });
-        log.write_str("POOLEOS:KERNEL:USER-CLOCK PASS contract=PKCLOCK1");
+        log.write_str(if deadlines {
+            "POOLEOS:KERNEL:USER-DEADLINE-CLOCK PASS contract=PKIPC5"
+        } else {
+            "POOLEOS:KERNEL:USER-CLOCK PASS contract=PKCLOCK1"
+        });
         for (label, value) in [
             (" origin=", origin),
             (" last=", last),
@@ -291,7 +347,11 @@ impl Session {
             log.write_str(label);
             log.write_decimal_u64(value);
         }
-        log.write_str(" enters=12 leaves=12 idle_intervals=4 config_restored=1 counter_reset=0 mmio_writes=24 mapping_windows=6 mapping_revoked=6 guards=3 clock=hpet64 scope=one_bsp timed_ipc=0 production=0\n");
+        log.write_str(if deadlines {
+            " enters=10 leaves=10 idle_expiries=2 epoch=2 expired=2 config_restored=1 counter_reset=0 mmio_writes=16 mapping_windows=4 mapping_revoked=4 guards=3 clock=hpet64 scope=one_bsp timed_ipc=1 production=0\n"
+        } else {
+            " enters=12 leaves=12 idle_intervals=4 config_restored=1 counter_reset=0 mmio_writes=24 mapping_windows=6 mapping_revoked=6 guards=3 clock=hpet64 scope=one_bsp timed_ipc=0 production=0\n"
+        });
         Ok(())
     }
 }

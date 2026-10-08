@@ -39,6 +39,8 @@ pub enum Status {
     TooSmall = 7,
     Cancelled = 8,
     Revoked = 9,
+    TimedOut = 10,
+    ClockUnavailable = 11,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -87,7 +89,7 @@ pub fn request(
     if version != VERSION {
         return Err(Status::Version);
     }
-    if (number != 6 && flags != 0) || reserved != 0 {
+    if (!matches!(number, 6 | 14) && flags != 0) || reserved != 0 {
         return Err(Status::Arguments);
     }
     match number {
@@ -175,8 +177,13 @@ pub fn request(
             operation: crate::capability_ipc::reply::Operation::Discard,
         }),
         9 => Err(Status::Arguments),
-        10 | 11 => {
-            let max = if number == 10 {
+        10 | 11 | 14 => {
+            if number == 14
+                && (flags == 0 || flags > crate::capability_ipc::deadline::MAX_TIMEOUT_NS)
+            {
+                return Err(Status::Arguments);
+            }
+            let max = if number != 11 {
                 crate::capability_ipc::MAX_BYTES
             } else {
                 crate::capability_ipc::reply::RECEIVE_BYTES
@@ -194,7 +201,9 @@ pub fn request(
                 handle: source,
                 address: destination,
                 bytes: bytes as usize,
-                operation: if number == 10 {
+                operation: if number == 14 {
+                    crate::capability_ipc::request::Operation::BeginTimed { timeout_ns: flags }
+                } else if number == 10 {
                     crate::capability_ipc::request::Operation::Begin
                 } else {
                     crate::capability_ipc::request::Operation::Take

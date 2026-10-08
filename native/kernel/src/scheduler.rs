@@ -489,7 +489,10 @@ impl Scheduler {
         self.require_online(cpu)?;
         if !matches!(
             reason,
-            WakeReason::Signalled | WakeReason::Cancelled | WakeReason::OwnerGone
+            WakeReason::Signalled
+                | WakeReason::Cancelled
+                | WakeReason::OwnerGone
+                | WakeReason::TimedOut
         ) {
             return Err(Error::State);
         }
@@ -511,7 +514,10 @@ impl Scheduler {
             || self.tasks[id.index()].wake_reason != reason
             || !matches!(
                 reason,
-                WakeReason::Signalled | WakeReason::Cancelled | WakeReason::OwnerGone
+                WakeReason::Signalled
+                    | WakeReason::Cancelled
+                    | WakeReason::OwnerGone
+                    | WakeReason::TimedOut
             )
         {
             return Err(Error::State);

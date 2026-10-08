@@ -18,7 +18,7 @@ static mut poole_syscall_user_rsp: u64 = 0;
 #[derive(Clone, Copy)]
 pub struct Observation {
     pub calls: u32,
-    pub statuses: [u32; 10],
+    pub statuses: [u32; 12],
     pub read_faults: u32,
     pub write_faults: u32,
 }
@@ -26,7 +26,7 @@ struct Session {
     image: ImageAdmission,
     active: bool,
     sealed: bool,
-    counts: [u32; 10],
+    counts: [u32; 12],
 }
 unsafe extern "C" {
     fn poole_user_syscall_entry();
@@ -52,7 +52,7 @@ pub(super) fn prepare(image: ImageAdmission) -> Result<(), Error> {
                 image,
                 active: false,
                 sealed: false,
-                counts: [0; 10],
+                counts: [0; 12],
             }),
         );
     }
@@ -145,7 +145,7 @@ pub(super) fn observe() -> Result<Observation, Error> {
 pub(super) fn finish(root: u64) -> Result<(), Error> {
     let o = observe()?;
     if o.calls != 12
-        || o.statuses != [3, 1, 1, 4, 3, 0, 0, 0, 0, 0]
+        || o.statuses != [3, 1, 1, 4, 3, 0, 0, 0, 0, 0, 0, 0]
         || o.read_faults != 1
         || o.write_faults != 2
     {
@@ -252,6 +252,7 @@ pub(super) fn dispatch_owned(
         return Err(Error::State);
     }
     syscall::frame(s.image, t)?;
+    crate::user_root_probe::clock_driver::syscall_sample(t.root).map_err(|_| Error::Hardware)?;
     let result = match syscall::request(
         frame.rax, frame.rdi, frame.rsi, frame.rdx, frame.r10, frame.r8, frame.r9,
     ) {

@@ -1,5 +1,6 @@
 use super::*;
 use crate::capability_ipc::request::Operation as Control;
+mod deadlines;
 
 fn begin(s: &mut Space, send: u64, m: &mut Wire) -> u64 {
     let (status, handle) = s.request_operation(caller(0), send, BASE, MAX_BYTES, Control::Begin, m);

@@ -9,6 +9,7 @@ still uses a reply mailbox and does not acquire these guarantees implicitly.
 | 11 Take | Request handle, output address,1..96 bytes | Pending: Again; success:32-byte sender header plus payload; terminal error: status and zero bytes |
 | 12 Cancel | Request handle; all other arguments zero | Pending becomes Cancelled; already terminal denies |
 | 13 Wait | Request handle; all other arguments zero | Return terminal status or block on an identity-bound scheduler ticket |
+| 14 Timed Begin | SEND endpoint, source address,1..64 bytes,R8=1..1000000000ns,R9=0 | Ok and epoch-bound request handle; Cycle256/PKIPC5 |
 
 PSABI1 still uses RAX call,RDI version1,RSI handle,RDX address,R10 length;
 R8/R9 must be zero for10-13. RAX is status,RDX the returned handle/byte count.
@@ -37,12 +38,13 @@ This is not synchronous Call, scheduling donation, exactly-once service executio
 rollback, delivery assurance or a deadline. Cancellation controls the terminal
 result, not side effects already performed by a service. Dead unclaimed delegated
 receivers cannot be inferred from a live shared endpoint. A malicious live service
-can still ignore a request until a future clock-backed deadline mechanism exists.
+can still ignore an untimed request; call10 never acquires an implicit deadline.
 Current execution is serialized on one BSP; SMP/interleaving qualification remains.
 
 Cycle255 qualifies the [continuous service clock](native-continuous-clock.md) as
-a prerequisite. Request deadline expiry and the all-blocked wake path are still
-unimplemented; callers do not acquire timeout guarantees from the clock alone.
+a prerequisite. Cycle256 adds [timed request expiry](native-request-deadlines.md)
+and the all-blocked wake path through call14. The first terminal result wins;
+timeout invalidates late replies but cannot undo a service's previous side effects.
 
 Native generations7-10 prove success, discard, queued service death and claimed
 service death. Each client first cancels/consumes a separate request, later waits

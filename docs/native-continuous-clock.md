@@ -1,8 +1,14 @@
 # Continuous Service Clock
 
-Cycle255 / PKCLOCK1. This is a prerequisite for request deadlines, not a timed IPC
+Historical Cycle255 / PKCLOCK1. This was a prerequisite for request deadlines, not a timed IPC
 implementation or a user clock ABI. Qualification is recorded separately in the
 Cycle255 checkpoint. Existing request calls10-13 remain unchanged.
+
+Cycle256 moves the non-copyable Lease into the persistent IPC Space and implements
+[epoch-bound request deadlines](native-request-deadlines.md), syscall14 and real
+all-blocked expiry. The adapter keeps mapping/root/PAT authority. The original
+clock-only exercise remains as regression coverage; native unexpected clock
+failure recovery and interrupt-driven idle remain open.
 
 ## Ownership
 

@@ -17,6 +17,7 @@ pub const ENDPOINTS: usize = 4;
 pub const DEPTH: usize = 4;
 pub const MAX_BYTES: usize = 64;
 const ENDPOINT_TAG: u64 = 1 << 16;
+pub mod deadline;
 pub mod reply;
 pub mod request;
 pub mod wait;
@@ -140,6 +141,7 @@ impl ObjectSlot {
 pub struct Space {
     tables: [Table; TASKS],
     objects: [ObjectSlot; ENDPOINTS],
+    clock: deadline::Clock,
 }
 impl Default for Space {
     fn default() -> Self {
@@ -151,6 +153,7 @@ impl Space {
         Self {
             tables: [Table::EMPTY; TASKS],
             objects: [ObjectSlot::EMPTY; ENDPOINTS],
+            clock: deadline::Clock::EMPTY,
         }
     }
     pub fn attach(&mut self, id: TaskId, image: ImageAdmission) -> Result<(), Error> {

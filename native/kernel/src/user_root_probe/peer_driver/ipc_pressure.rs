@@ -111,6 +111,30 @@ pub(crate) fn run(
     if let Err(stage) = clock.finish(serial, debugcon) {
         stop(5000 + stage, serial, debugcon);
     }
+    let mut clock = checked!(clock_driver::Session::start(
+        handoff, core, bits, manager, topology, hpet
+    ));
+    for round in 0..2u32 {
+        for (index, p) in peers.iter_mut().enumerate() {
+            checked!(p.restart(
+                24 + index,
+                [u64::from(round + 11), u64::from(round), 0, 0, 0, 0],
+                handoff,
+                core,
+                bits,
+                manager,
+                topology,
+                hpet,
+                timer_driver::Probe::None
+            ));
+        }
+        super::ipc_deadline::run(
+            &mut peers, round, baseline, &mut clock, manager, serial, debugcon,
+        );
+    }
+    if let Err(stage) = clock.finish_deadlines(serial, debugcon) {
+        stop(7000 + stage, serial, debugcon);
+    }
 }
 
 #[inline(never)]
