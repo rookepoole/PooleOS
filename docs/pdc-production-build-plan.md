@@ -1,15 +1,43 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.142.0-bounded-user-entry
-Roadmap cycle: PooleOS Cycle 239
+Plan version: 2.143.0-user-timer-preemption
+Roadmap cycle: PooleOS Cycle 240
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 239: Actual User Entry And Fault Containment
+## Cycle 240: Timer Preemption From User Space
+
+USI-1 / N7/N9/N12/N13.3, `N13-USER-ENTRY-LIVE-001`: PKUSER6 interrupts a fixed
+spinning CPL3 task three times on its private RSP0 stack, resumes it twice with
+14 non-counter GPRs and legacy FP state preserved, then forces kernel recovery.
+Timer shutdown is part of the user-exposure lifetime and precedes descriptor
+detachment, CR3 restoration and release of all13 task pages. Two fresh QEMU
+guests, ordinary unsigned-boot denial,320 debug kernel tests,70 user-release,
+24 VM-release,5 compile-fail,10 boot-exit and21 Python oracle tests pass.
+[Evidence](checkpoints/cycle240-user-timer-preemption.md).
+
+Live execution found that the timer frame carried RF. Only that resume bit is
+accepted beyond the exact flags, and controlled resumes clear it; exhaustive
+single-bit flag tests reject all other differences. No timing/progress check
+was weakened. The native elapsed-time check runs when an interrupt arrives:
+a missing APIC interrupt still relies on the45-second external guest timeout,
+not an independent native watchdog. This limitation remains in the open USI-1
+containment work; healthy-timer recovery is not full scheduler qualification.
+
+Next: a versioned bounded syscall and recoverable user-copy boundary, then task
+exit/accounting and peer scheduling. Capability IPC, confined services,
+interactive shell/two apps and optical ISO qualification follow. Keep general
+XSAVE/state ownership, guest-injected device/cleanup failure, physical hardware
+and all N0-N39 production gates open. All8,996 requirements/59 additions and97
+flags (42 open) remain; no production phase closes.25 native admissions/22
+retained Python closures, boot-trust/ELF prerequisites and full exact-candidate
+qualification remain stale or pending. No merge or production promotion.
+
+## Historical Cycle 239: Actual User Entry And Fault Containment
 
 USI-1 / N7/N9/N12/N13.3, `N13-USER-ENTRY-LIVE-001`: PKUSER5 enters one fixed
 payload at CPL3 using sanitized integer/legacy FP/segment/debug state and a

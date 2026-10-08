@@ -1,5 +1,6 @@
 //! Development-only single-BSP user entry, with private-stack fault recovery.
 use super::*;
+use poolekernel::user_entry::preemption;
 use poolekernel::user_entry::prepared::{STACK_BOTTOM, STACK_TOP};
 use poolekernel::user_entry::{
     self, ImageAdmission, InitialReturnFrame,
@@ -12,6 +13,7 @@ static mut USER_GDT: UserGdt = UserGdt([0; 7]);
 static mut INITIAL_FX: FxsaveArea = FxsaveArea([0; 512]);
 static mut OBSERVED_FX: FxsaveArea = FxsaveArea([0; 512]);
 static mut LIVE: Option<Sequence> = None;
+static mut PREEMPT: Option<super::user_preempt::Session> = None;
 static ACTIVE_ROOT: core::sync::atomic::AtomicU64 = core::sync::atomic::AtomicU64::new(0);
 static RETURN_STACK_TOP: core::sync::atomic::AtomicU64 = core::sync::atomic::AtomicU64::new(0);
 
@@ -29,6 +31,9 @@ unsafe extern "C" {
     static poole_user_nx_resume: u8;
     static poole_user_done: u8;
     static poole_user_payload_end: u8;
+    static poole_user_spin: u8;
+    static poole_user_spin_pause: u8;
+    static poole_user_spin_jump: u8;
 }
 
 fn layout() -> Result<Layout, Error> {
@@ -139,6 +144,7 @@ pub struct Entry {
     original_rsp0: u64,
     sep: bool,
     installed: bool,
+    budget: Option<preemption::Budget>,
 }
 
 impl Entry {
@@ -180,7 +186,23 @@ impl Entry {
             original_rsp0,
             sep,
             installed: false,
+            budget: None,
         })
+    }
+
+    pub fn set_timer_budget(&mut self, budget: preemption::Budget) -> Result<(), Error> {
+        if self.installed || active() {
+            return Err(Error::State);
+        }
+        self.budget = Some(budget.validate()?);
+        Ok(())
+    }
+
+    pub fn preemption_observation(&self) -> Result<preemption::Observation, Error> {
+        // SAFETY: exclusive owner, IF clear after the assembly returns.
+        unsafe { (&*(&raw const PREEMPT)).as_ref() }
+            .ok_or(Error::State)?
+            .observation()
     }
 
     fn context(&self, root: u64) -> Result<(), Error> {
@@ -222,6 +244,10 @@ unsafe fn install() -> Result<(), Error> {
         (6, poole_trap_invalid_opcode as *const () as u64),
         (13, poole_trap_general_protection as *const () as u64),
         (14, poole_trap_page_fault as *const () as u64),
+        (
+            usize::from(crate::TIMER_VECTOR),
+            poole_interrupt_timer as *const () as u64,
+        ),
     ] {
         unsafe {
             write_volatile(
@@ -258,17 +284,35 @@ impl Driver for Entry {
             return Err(Error::State);
         }
         let sequence = Sequence::new(image, layout()?)?;
+        let preempt = if let Some(budget) = self.budget {
+            let start = (&raw const poole_user_payload) as u64;
+            let offset = |p: *const u8| (p as u64).checked_sub(start).ok_or(Error::Layout);
+            Some(super::user_preempt::Session::new(
+                image,
+                preemption::Layout {
+                    increment: offset(&raw const poole_user_spin)?,
+                    pause: offset(&raw const poole_user_spin_pause)?,
+                    jump: offset(&raw const poole_user_spin_jump)?,
+                    end: layout()?.end,
+                },
+                budget,
+            )?)
+        } else {
+            None
+        };
         self.installed = true;
         // SAFETY: lifetime marked before descriptor writes, exclusive CPU/root retained by CpuImage.
         unsafe {
             install()?;
             initialize_fx()?;
             write_volatile(&raw mut LIVE, Some(sequence));
+            write_volatile(&raw mut PREEMPT, preempt);
         }
         ACTIVE_ROOT.store(image.root_physical, Ordering::Release);
         RETURN_STACK_TOP.store(self.original_rsp0, Ordering::Release);
         // SAFETY: exact user frame/mappings, full cleared CPU state, private TSS entry stack,
-        // known bounded assembly payload, no armed timer or other interrupt producer.
+        // fixed fault payload followed only by the optional timer-controlled spin;
+        // that timer remains masked until its private-stack fault handoff.
         unsafe {
             poole_user_enter(&image.initial_frame);
         }
@@ -276,7 +320,10 @@ impl Driver for Entry {
         let count = unsafe { (&*(&raw const LIVE)).as_ref() }
             .ok_or(Error::State)?
             .completed();
-        if count != privilege::TRAP_COUNT {
+        if count != privilege::TRAP_COUNT
+            || (self.budget.is_some()
+                && self.preemption_observation()?.deliveries != preemption::DELIVERIES)
+        {
             return Err(Error::State);
         }
         Ok(Observation {
@@ -292,6 +339,9 @@ impl Driver for Entry {
         if !self.installed {
             return Ok(());
         }
+        if unsafe { (&*(&raw const PREEMPT)).as_ref() }.is_some_and(|s| !s.shutdown_verified()) {
+            return Err(Error::Hardware);
+        }
         // SAFETY: CPL0/IF0 after bounded return. Detach all private-stack descriptor references.
         let state = unsafe { install_interrupt_descriptor_tables(self.original_rsp0) };
         poolekernel::validate_interrupt_descriptor_state(&state).map_err(|_| Error::Context)?;
@@ -301,6 +351,7 @@ impl Driver for Entry {
         unsafe {
             initialize_fx()?;
             write_volatile(&raw mut LIVE, None);
+            write_volatile(&raw mut PREEMPT, None);
             write_volatile(&raw mut poole_user_saved_rsp, 0);
         }
         ACTIVE_ROOT.store(0, Ordering::Release);
@@ -312,6 +363,33 @@ impl Driver for Entry {
 
 pub fn active() -> bool {
     ACTIVE_ROOT.load(Ordering::Acquire) != 0
+}
+
+fn denied(stage: u64, error: Error, t: &Trap) -> ! {
+    // Failure-only, bounded early output. Never return to a rejected user frame.
+    let mut serial = unsafe { Com1::initialize() };
+    let mut debugcon = DebugCon::new();
+    let mut log = crate::EarlyLogger::new(crate::BootSink {
+        serial: &mut serial,
+        debugcon: &mut debugcon,
+        ring: &crate::EARLY_RING,
+    });
+    log.write_str("POOLEOS:KERNEL:USER-ENTRY DENIED stage=");
+    log.write_decimal_u64(stage);
+    log.write_str(" error=");
+    log.write_decimal_u64(error as u64);
+    for (name, value) in [
+        (" vector=", t.vector),
+        (" rip=", t.rip),
+        (" flags=", t.flags),
+        (" stack=", t.handler_stack),
+        (" progress=", t.registers[0]),
+    ] {
+        log.write_str(name);
+        log.write_hex_u64(value);
+    }
+    log.write_str("\n");
+    crate::poole_kernel_emergency_panic(poolekernel::PanicCode::UserRoot as u32)
 }
 
 pub fn dispatch(frame: &mut TrapFrame, depth: u32) {
@@ -340,6 +418,19 @@ pub fn dispatch(frame: &mut TrapFrame, depth: u32) {
             frame.rsi, frame.rdi, frame.rbp, frame.rdx, frame.rcx, frame.rbx, frame.rax,
         ],
     };
+    if frame.vector == u64::from(crate::TIMER_VECTOR) {
+        let session = unsafe { (&mut *(&raw mut PREEMPT)).as_mut() }.unwrap_or_else(|| reject());
+        if sequence.completed() != privilege::TRAP_COUNT {
+            reject();
+        }
+        if session.interrupt(&t).unwrap_or_else(|e| denied(1, e, &t)) {
+            return_kernel(frame);
+        } else {
+            frame.rflags = user_entry::INITIAL_RFLAGS;
+        }
+        crate::TRAP_DEPTH.store(0, Ordering::Release);
+        return;
+    }
     if sequence.completed() == 0 {
         let (ds, es, fs, gs): (u16, u16, u16, u16);
         unsafe {
@@ -355,7 +446,7 @@ pub fn dispatch(frame: &mut TrapFrame, depth: u32) {
             reject();
         }
     }
-    let action = sequence.accept(&t).unwrap_or_else(|_| reject());
+    let action = sequence.accept(&t).unwrap_or_else(|e| denied(2, e, &t));
     frame.rflags = user_entry::INITIAL_RFLAGS;
     match action {
         Action::Resume(rip) => frame.rip = rip,
@@ -364,24 +455,32 @@ pub fn dispatch(frame: &mut TrapFrame, depth: u32) {
             if (0..16).any(|i| unsafe { p.add(160 + i).read_volatile() } != 0xff) {
                 reject();
             }
-            let saved = unsafe { read_volatile(&raw const poole_user_saved_rsp) };
-            let top = RETURN_STACK_TOP.load(Ordering::Acquire);
-            if top < poolekernel::virtual_memory::KERNEL_IMAGE_START
-                || saved < top - poolekernel::BOOTSTRAP_STACK_PAGE_COUNT * 4096
-                || saved >= top
-                || saved & 7 != 0
-                || (STACK_BOTTOM..STACK_TOP).contains(&saved)
-            {
-                reject();
+            if let Some(session) = unsafe { (&mut *(&raw mut PREEMPT)).as_mut() } {
+                frame.rip = session.start(&t).unwrap_or_else(|e| denied(3, e, &t));
+            } else {
+                return_kernel(frame);
             }
-            frame.rip = poole_user_return as *const () as u64;
-            frame.code_selector = u64::from(KERNEL_CODE_SELECTOR);
-            frame.data_selector = u64::from(KERNEL_DATA_SELECTOR);
-            frame.rsp = saved;
-            frame.rflags = 2;
         }
     }
     crate::TRAP_DEPTH.store(0, Ordering::Release);
+}
+
+fn return_kernel(frame: &mut TrapFrame) {
+    let saved = unsafe { read_volatile(&raw const poole_user_saved_rsp) };
+    let top = RETURN_STACK_TOP.load(Ordering::Acquire);
+    if top < poolekernel::virtual_memory::KERNEL_IMAGE_START
+        || saved < top - poolekernel::BOOTSTRAP_STACK_PAGE_COUNT * 4096
+        || saved >= top
+        || saved & 7 != 0
+        || (STACK_BOTTOM..STACK_TOP).contains(&saved)
+    {
+        crate::poole_kernel_emergency_panic(poolekernel::PanicCode::UserRoot as u32);
+    }
+    frame.rip = poole_user_return as *const () as u64;
+    frame.code_selector = u64::from(KERNEL_CODE_SELECTOR);
+    frame.data_selector = u64::from(KERNEL_DATA_SELECTOR);
+    frame.rsp = saved;
+    frame.rflags = 2;
 }
 
 core::arch::global_asm!(
@@ -464,6 +563,15 @@ poole_user_nx_resume:
     .global poole_user_done
 poole_user_done:
     ud2
+    .global poole_user_spin
+poole_user_spin:
+    lea r15, [r15 + 1]
+    .global poole_user_spin_pause
+poole_user_spin_pause:
+    pause
+    .global poole_user_spin_jump
+poole_user_spin_jump:
+    jmp poole_user_spin
     .global poole_user_payload_end
 poole_user_payload_end:
 "#

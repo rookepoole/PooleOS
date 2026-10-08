@@ -11405,7 +11405,7 @@ def apply_cycle238(roadmap: dict, test_count: int) -> dict:
 
 def apply_cycle239(roadmap: dict, test_count: int) -> dict:
     checkpoint = "docs/checkpoints/cycle239-bounded-user-entry.md"
-    receipt_path = "runs/native-user-entry-readiness.json"
+    receipt_path = "tests/fixtures/cycle239-user-entry-readiness.json"
     raw = (ROOT / receipt_path).read_bytes()
     receipt = json.loads(raw)
     baseline = roadmap["baseline"]
@@ -11456,13 +11456,67 @@ def apply_cycle239(roadmap: dict, test_count: int) -> dict:
     next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")["evidence"].append(checkpoint)
     roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle240(roadmap, test_count)
+
+
+def apply_cycle240(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle240-user-timer-preemption.md"
+    receipt_path = "runs/native-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle239_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle239_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=240, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=240)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path]
+    gate["current_candidate_audit"]["cycle"] = 240
+    gate["current_focused_source_projection"]["cycle"] = 240
+    gate["qualification_status"] = "bounded_cpl3_timer_preemption_pass_syscall_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=240, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="320_debug_kernel_plus70_repeated_user_release_plus24_repeated_VM_release_plus5_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=21, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=240, status="pass",
+        tests_run=109, tests_passed=109, tests_failed=0, tests_skipped=0,
+        elapsed_seconds=48.775, runner_elapsed_seconds=49.625,
+        log_sha256="D1D822194CD96CE7390C901C5B43BA106B209A295128DC3786B63198C2D20743",
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=240, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_CPL3_fault_timer_recovery_cleanup_probes_plus_default_denial",
+        user_timer_preemption=True, user_timer_interrupts_per_probe=3, user_resumes_per_probe=2,
+        timer_shutdown_precedes_descriptor_detachment=True,
+        independent_missing_interrupt_watchdog=False, multi_application_scheduling=False,
+        general_user_program_admission=False, syscall_abi=False, iso_built=False)
+    lane["stages"]["USI-1"] = "partial_live_cpl3_timer_recovery_no_syscall_or_peer_scheduling"
+    roadmap["immediate_next_move"]["title"] = "Implement a versioned bounded syscall and recoverable user-copy boundary, then connect task exit and peer scheduling before capability IPC"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", receipt_path, checkpoint,
+        "native/kernel/src/user_entry/preemption.rs", "native/kernel/src/arch/x86_64/user_preempt.rs",
+        "native/kernel/src/arch/x86_64/user.rs", "native/kernel/src/user_root_probe/timer_driver.rs"]
+    evidence = "Cycle 240: PKUSER6 interrupts a fixed spinning CPL3 payload three times on its private RSP0 stack, resumes twice with14 GPRs and legacy FP state preserved, then forces kernel recovery. Timer shutdown precedes descriptor detachment/root restoration/13-page release. Two fresh guests and ordinary denial pass;320 debug,70 user-release,24 VM-release,5 compile-fail,10 boot-exit and21 Python oracle tests pass. " + checkpoint
+    gap = "This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion."
+    for phase_id in ("N7", "N9", "N12", "N13"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")["evidence"].append(checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1260)
+    parser.add_argument("--test-count", type=int, default=1264)
     parser.add_argument("--status-date", default="2026-10-08")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

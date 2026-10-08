@@ -369,7 +369,13 @@ pub fn run(
         log.write_decimal_u64(u64::from(irq.eois));
         log.write_str(" mmio_pages=2 quiesced=1 if=0 ring3=0\n");
     }
-    let entry = checked!(41, owner.exercise_user(&mut user));
+    let mut run = timer_driver::UserRun {
+        entry: &mut user,
+        timer: &mut timer,
+        result: None,
+    };
+    let entry = checked!(41, owner.exercise_user(&mut run));
+    let preempt = checked!(42, run.result.ok_or(()));
     {
         let mut log = EarlyLogger::new(BootSink {
             serial,
@@ -379,6 +385,17 @@ pub fn run(
         log.write_str("POOLEOS:KERNEL:USER-ENTRY PASS contract=PKUSER5 cr3=");
         log.write_hex_u64(entry.root);
         log.write_str(" cpl=3 traps=7 private_rsp0=1 gpr_zero=15 fp_cleared=1 cli_denied=1 io_denied=1 syscall_denied=1 supervisor_fault=1 nx_fault=1 kernel_return=1 descriptors_detached=1 if=0 production=0\n");
+        log.write_str("POOLEOS:KERNEL:USER-PREEMPT PASS contract=PKUSER6 cr3=");
+        log.write_hex_u64(entry.root);
+        log.write_str(" cpl=3 deliveries=");
+        log.write_decimal_u64(u64::from(preempt.deliveries));
+        log.write_str(" eois=3 resumes=");
+        log.write_decimal_u64(u64::from(preempt.resumes));
+        log.write_str(" first_progress=");
+        log.write_decimal_u64(preempt.first_progress);
+        log.write_str(" last_progress=");
+        log.write_decimal_u64(preempt.last_progress);
+        log.write_str(" private_rsp0=1 gpr_preserved=14 fp_preserved=1 timer_quiesced=1 forced_return=1 if=0 production=0\n");
     }
     let mut parts = checked!(21, owner.retire(&mut manager, &mut memory));
     if checked!(

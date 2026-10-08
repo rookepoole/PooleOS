@@ -7,9 +7,17 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 239
+Last roadmap reconciliation: PooleOS Cycle 240
 
-Cycle239 proves bounded CPL3 entry, seven contained faults, private TSS.RSP0,
+Cycle240 proves three timer preemptions of a fixed CPL3 spinning task, two
+state-preserving resumes, forced kernel recovery and timer-before-descriptor
+cleanup in two fresh guests. Ordinary unsigned boot still denies execution.
+The next dependency is bounded syscall/user copying, followed by task lifecycle,
+peer scheduling and capability IPC. No interactive ISO, independent missing-IRQ
+watchdog, production promotion or normative requirement change is claimed.
+[Cycle240 evidence](checkpoints/cycle240-user-timer-preemption.md).
+
+Historical Cycle239 proves bounded CPL3 entry, seven contained faults, private TSS.RSP0,
 controlled kernel return and complete task-memory release in two fresh QEMU
 guests. Live execution also exposed and repaired VM accessed-bit cleanup.
 User-mode timer preemption, syscall/IPC, services, shell/apps and optical ISO

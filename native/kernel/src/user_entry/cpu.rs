@@ -1,4 +1,4 @@
-//! Serialized single-BSP CR3 lifecycle. This does not enter user mode.
+//! Serialized single-BSP CR3 lifecycle with quarantined timer/user adapters.
 //!
 //! The hardware adapter is a trusted boundary, like PKVM3 ActiveHardware. A
 //! passing mock proves the state machine, not execution or hardware retirement.

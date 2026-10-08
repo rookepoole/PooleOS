@@ -11,7 +11,17 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle 239 executes a real, bounded ring-3
+**Current development checkpoint:** Cycle 240 proves timer preemption of a spinning
+ring-3 task in two fresh native QEMU boots. Each run resumes the task twice with
+preserved integer/legacy FP state, then forces kernel recovery on the third
+interrupt. Timer shutdown, descriptor detachment, root restoration and all13
+task-page releases pass.320 debug kernel tests,94 repeated optimized tests and
+ordinary unsigned-boot denial pass. Next: bounded syscall/user-copy mechanisms,
+task lifecycle and peer scheduling, then IPC, services, shell/apps and optical ISO.
+There is no interactive session or new ISO yet; full robust microkernel work
+continues after that preview. [Evidence](docs/checkpoints/cycle240-user-timer-preemption.md).
+
+**Historical development checkpoint:** Cycle 239 executes a real, bounded ring-3
 payload in two fresh native QEMU boots. Private-stack fault handling denies
 privileged operations, kernel reads and stack execution; controlled return,
 descriptor cleanup and all 13 task-page releases pass. Live testing also fixed

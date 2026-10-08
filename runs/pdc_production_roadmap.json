@@ -43,13 +43,15 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 239,
+    "last_updated_cycle": 240,
     "selected_move_id": "N13-USER-ENTRY-LIVE-001",
     "immediate_next_move_id": "N13-USER-ENTRY-LIVE-001",
     "owner_independent_next_move_id": "N13-USER-ENTRY-LIVE-001",
     "required_records": [
-      "docs/checkpoints/cycle239-bounded-user-entry.md",
+      "docs/checkpoints/cycle240-user-timer-preemption.md",
       "runs/native-user-entry-readiness.json",
+      "docs/checkpoints/cycle239-bounded-user-entry.md",
+      "tests/fixtures/cycle239-user-entry-readiness.json",
       "docs/checkpoints/cycle238-owned-root-timer.md",
       "tests/fixtures/cycle238-user-entry-readiness.json",
       "docs/checkpoints/cycle237-live-user-root.md",
@@ -212,9 +214,9 @@
     "added_requirement_count": 59
   },
   "baseline": {
-    "pooleos_cycle": 239,
+    "pooleos_cycle": 240,
     "entry_cycle": 79,
-    "pooleos_test_count": 1260,
+    "pooleos_test_count": 1264,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -230,13 +232,13 @@
       "explicit_gap_count": 20,
       "production_ready": false,
       "native_promotion_role": "partially_qualified_development_candidate_non_promoting",
-      "qualification_status": "bounded_cpl3_fault_return_cleanup_pass_user_preemption_and_full_candidate_pending",
+      "qualification_status": "bounded_cpl3_timer_preemption_pass_syscall_and_full_candidate_pending",
       "passed_check_count_scope": "historical_cycle176_exact_final_canonical_audit",
       "current_cycle_full_canonical_audit_performed": false,
       "last_fully_qualified_cycle": 176,
       "last_fully_qualified_passed_checks": 105,
       "current_candidate_audit": {
-        "cycle": 239,
+        "cycle": 240,
         "status": "not_run",
         "applies_to_current_source": false,
         "aggregate_suite_passed": false,
@@ -355,7 +357,7 @@
         "production_ready": false
       },
       "current_focused_source_projection": {
-        "cycle": 239,
+        "cycle": 240,
         "passed_checks": 2,
         "total_checks": 27,
         "passing_profiles": [
@@ -3476,20 +3478,20 @@
         "production_ready": false
       },
       "current_closeout_regression": {
-        "cycle": 239,
+        "cycle": 240,
         "status": "focused_native_and_guest_pass_not_full_canonical",
-        "tests_run": 419,
-        "tests_passed": 419,
+        "tests_run": 429,
+        "tests_passed": 429,
         "tests_failed": 0,
         "tests_skipped": 0,
-        "scope": "315_debug_kernel_plus65_repeated_user_release_plus24_repeated_VM_release_plus5_compile_fail_plus10_boot_exit",
-        "additional_python_oracle_tests": 18,
+        "scope": "320_debug_kernel_plus70_repeated_user_release_plus24_repeated_VM_release_plus5_compile_fail_plus10_boot_exit",
+        "additional_python_oracle_tests": 21,
         "rejected_incompatible_feature_builds": 2,
         "guest_runs": 3,
         "user_root_guest_runs": 2,
         "ordinary_denial_guest_runs": 1,
         "receipt_path": "runs/native-user-entry-readiness.json",
-        "receipt_sha256": "7E55C1665BA04CD484B7F2E652F3014B168EF750FA5A244BD9CD535FB03D0616",
+        "receipt_sha256": "719E8C31F62451FC9CA485B7D7975BA4CF9388294B5B535CAA1B7775C3A1C097",
         "canonical_full_replay_performed": false,
         "merge_qualified": false,
         "production_ready": false
@@ -51914,24 +51916,15 @@
         "inherited_shared_loader_input_count": 19
       },
       "current_user_entry_metadata": {
-        "cycle": 239,
+        "cycle": 240,
         "status": "pass",
-        "tests_run": 105,
-        "tests_passed": 105,
+        "tests_run": 109,
+        "tests_passed": 109,
         "tests_failed": 0,
         "tests_skipped": 0,
-        "elapsed_seconds": 48.597,
-        "runner_elapsed_seconds": 49.406,
-        "log_sha256": "8B84D6C8793446D5212E84F37C440524D684D77852671281766E5069650AC7FC",
-        "initial_attempts": [
-          {
-            "tests_run": 105,
-            "failures": 1,
-            "errors": 0,
-            "log_sha256": "B351D09B82DFD8F99FD24600AC9B2FE149076325A005B6A4ACD2029FE0B02D07",
-            "cause": "prior_CPL0_qualification_status_assertion_not_updated"
-          }
-        ],
+        "elapsed_seconds": 48.775,
+        "runner_elapsed_seconds": 49.625,
+        "log_sha256": "D1D822194CD96CE7390C901C5B43BA106B209A295128DC3786B63198C2D20743",
         "historical_integrity_is_not_new_execution": true,
         "production_ready": false
       },
@@ -52239,6 +52232,47 @@
         ],
         "historical_integrity_is_not_new_execution": true,
         "production_ready": false
+      },
+      "historical_cycle239_closeout_regression": {
+        "cycle": 239,
+        "status": "focused_native_and_guest_pass_not_full_canonical",
+        "tests_run": 419,
+        "tests_passed": 419,
+        "tests_failed": 0,
+        "tests_skipped": 0,
+        "scope": "315_debug_kernel_plus65_repeated_user_release_plus24_repeated_VM_release_plus5_compile_fail_plus10_boot_exit",
+        "additional_python_oracle_tests": 18,
+        "rejected_incompatible_feature_builds": 2,
+        "guest_runs": 3,
+        "user_root_guest_runs": 2,
+        "ordinary_denial_guest_runs": 1,
+        "receipt_path": "tests/fixtures/cycle239-user-entry-readiness.json",
+        "receipt_sha256": "7E55C1665BA04CD484B7F2E652F3014B168EF750FA5A244BD9CD535FB03D0616",
+        "canonical_full_replay_performed": false,
+        "merge_qualified": false,
+        "production_ready": false
+      },
+      "historical_cycle239_user_entry_metadata": {
+        "cycle": 239,
+        "status": "pass",
+        "tests_run": 105,
+        "tests_passed": 105,
+        "tests_failed": 0,
+        "tests_skipped": 0,
+        "elapsed_seconds": 48.597,
+        "runner_elapsed_seconds": 49.406,
+        "log_sha256": "8B84D6C8793446D5212E84F37C440524D684D77852671281766E5069650AC7FC",
+        "initial_attempts": [
+          {
+            "tests_run": 105,
+            "failures": 1,
+            "errors": 0,
+            "log_sha256": "B351D09B82DFD8F99FD24600AC9B2FE149076325A005B6A4ACD2029FE0B02D07",
+            "cause": "prior_CPL0_qualification_status_assertion_not_updated"
+          }
+        ],
+        "historical_integrity_is_not_new_execution": true,
+        "production_ready": false
       }
     },
     "native": {
@@ -52368,7 +52402,7 @@
       "blocked": true
     },
     "user_space_integration": {
-      "cycle": 239,
+      "cycle": 240,
       "status": "implementation_started",
       "plan_path": "docs/native-userspace-integration-iso.md",
       "selected_stage": "USI-1",
@@ -52380,7 +52414,7 @@
       "iso_built": false,
       "production_ready": false,
       "stages": {
-        "USI-1": "partial_live_cpl3_fault_return_cleanup_no_user_preemption",
+        "USI-1": "partial_live_cpl3_timer_recovery_no_syscall_or_peer_scheduling",
         "USI-2": "not_started",
         "USI-3": "not_started",
         "USI-4": "not_started",
@@ -52392,7 +52426,7 @@
       "owned_inactive_supervisor_attachment": true,
       "entry_stack_bytes": 16384,
       "live_adapter_wired": true,
-      "privileged_adapter_verification": "two_fresh_qemu_CPL3_fault_return_cleanup_probes_plus_default_denial",
+      "privileged_adapter_verification": "two_fresh_qemu_CPL3_fault_timer_recovery_cleanup_probes_plus_default_denial",
       "cpu_exposure_lifecycle_implemented": true,
       "actual_cr3_switch_executed": true,
       "user_root_guest_runs": 2,
@@ -52404,10 +52438,15 @@
       "retained_acpi_snapshot_pages": 1,
       "user_faults_per_probe": 7,
       "private_tss_rsp0_executed": true,
-      "user_timer_preemption": false,
+      "user_timer_preemption": true,
       "architectural_state_profile": "single_BSP_legacy_x87_SSE_no_enabled_XSAVE",
       "general_user_program_admission": false,
-      "syscall_abi": false
+      "syscall_abi": false,
+      "user_timer_interrupts_per_probe": 3,
+      "user_resumes_per_probe": 2,
+      "timer_shutdown_precedes_descriptor_detachment": true,
+      "independent_missing_interrupt_watchdog": false,
+      "multi_application_scheduling": false
     },
     "historical_cycle234_user_space_integration": {
       "cycle": 234,
@@ -52551,6 +52590,48 @@
       "interrupts_per_probe": 3,
       "mmio_pages": 2,
       "retained_acpi_snapshot_pages": 1
+    },
+    "historical_cycle239_user_space_integration": {
+      "cycle": 239,
+      "status": "implementation_started",
+      "plan_path": "docs/native-userspace-integration-iso.md",
+      "selected_stage": "USI-1",
+      "selected_requirement": "N13-USER-ENTRY-LIVE-001",
+      "receipt_path": "tests/fixtures/cycle239-user-entry-readiness.json",
+      "host_status": "pass",
+      "guest_runs": 3,
+      "ring3_executed": true,
+      "iso_built": false,
+      "production_ready": false,
+      "stages": {
+        "USI-1": "partial_live_cpl3_fault_return_cleanup_no_user_preemption",
+        "USI-2": "not_started",
+        "USI-3": "not_started",
+        "USI-4": "not_started",
+        "USI-5": "not_started"
+      },
+      "continue_full_microkernel_after_iso": true,
+      "required_next": "N13-USER-ENTRY-LIVE-001",
+      "live_adapter_implemented": true,
+      "owned_inactive_supervisor_attachment": true,
+      "entry_stack_bytes": 16384,
+      "live_adapter_wired": true,
+      "privileged_adapter_verification": "two_fresh_qemu_CPL3_fault_return_cleanup_probes_plus_default_denial",
+      "cpu_exposure_lifecycle_implemented": true,
+      "actual_cr3_switch_executed": true,
+      "user_root_guest_runs": 2,
+      "ordinary_denial_guest_runs": 1,
+      "timer_under_candidate_root_executed": true,
+      "verified_timer_shutdown_before_retirement": true,
+      "interrupts_per_probe": 3,
+      "mmio_pages": 2,
+      "retained_acpi_snapshot_pages": 1,
+      "user_faults_per_probe": 7,
+      "private_tss_rsp0_executed": true,
+      "user_timer_preemption": false,
+      "architectural_state_profile": "single_BSP_legacy_x87_SSE_no_enabled_XSAVE",
+      "general_user_program_admission": false,
+      "syscall_abi": false
     }
   },
   "source_set": [
@@ -53330,6 +53411,7 @@
         "ADD-N7-XSTATE-001"
       ],
       "current_evidence": [
+        "Cycle 240: PKUSER6 interrupts a fixed spinning CPL3 payload three times on its private RSP0 stack, resumes twice with14 GPRs and legacy FP state preserved, then forces kernel recovery. Timer shutdown precedes descriptor detachment/root restoration/13-page release. Two fresh guests and ordinary denial pass;320 debug,70 user-release,24 VM-release,5 compile-fail,10 boot-exit and21 Python oracle tests pass. docs/checkpoints/cycle240-user-timer-preemption.md",
         "Cycle 239: PKUSER5 enters one fixed CPL3 payload with cleared GPR/legacy FP state, private TSS.RSP0 and exact ordered fault validation. Two fresh QEMU probes each contain seven faults, return to CPL0, detach descriptors, flush/restore the boot root and release13 task pages. Real execution exposed and repaired VM A/D-bit cleanup rejection.315 debug,65 user-release,24 VM-release,5 compile-fail,10 boot-exit and18 Python oracle tests pass; ordinary boot denies unsigned execution. docs/checkpoints/cycle239-bounded-user-entry.md",
         "Cycle 232: docs/checkpoints/cycle232-corrected-media-boot-and-cpu-replay.md replays revalidation, transfer and five CPU profiles on corrected FAT media. Sixteen fresh guest runs and319 control groups pass;32768 revalidation differential cases agree. Seventy-seven focused tests pass with original source and owner snapshots preserved. Two WHPX exception boots pass; the separate expected TCG limitation probe is not a successful exception-delivery run. Native kernel/EFI products and the retained demo remain unchanged.",
         "Cycle 218: docs/checkpoints/cycle218-terminal-capture-and-cpu-replay.md repairs an early QMP screenshot race without changing native bytes. Nine capture tests expose four old failures and all pass after terminal-stage capture. Twenty final virtual boots pass: six boot and fourteen CPU runs with 225 CPU controls and one separate TCG limitation probe. All 64 focused tests pass, including 3398 control-record corruptions, 371 paired run-evidence corruptions, 33 independent identity/promotion cases and 80 malformed nested-build cases. Two failed initial trap runs and six diagnostic pre-repair runs remain separate. Original differing frames were not retained; their exact pixel cause is unproven. Current trap pins are measured.",
@@ -53366,6 +53448,7 @@
         "runs/native-kernel-privilege-msr-policy-readiness.json: two exact fresh-vars TCG QEMU/OVMF runs, 35 markers, 47/47 hostile controls, 11 support-gated MSR reads, ten observed MCA banks, zero bank reads, zero runtime writes, and an exact linked-image audit of 43 RDMSR and three WRMSR sites that isolates PKSMP1, PKSMP2, PKSMP5/PKSCHED4, PKSCHED1, PKSCHED2, PKSCHED3, and PKIRQ1 accesses from the read-only PKMSR1 profile, with zero authority and explicit emulator/target/production nonclaims"
       ],
       "current_gaps": [
+        "This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion.",
         "Measured component checks pass22/27, while13/27 source profiles are current. Fourteen memory, IRQ, SMP, scheduler, atomic and lock profiles require real replay beginning with physical_memory then virtual_memory. Historical dependency/ownership groups are explicitly not current. The original aggregate source record remains stale and blocks qualification. Reconcile historical receipt assertions and run all exact-candidate/publication/GitHub gates before main merge; no phase, flag, signed ISO or production gate closes.",
         "Readiness is 13/27; fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles remain from N9-PMM-ACPI-CONSUMER-001, plus seventeen SMP-preemption control groups and recorded admission. The broader shared-helper transitive-binding audit remains within ADD-N36-RECEIPT-COVERAGE-001. No phase or flag closes. Full canonical/Doctor/release/GitHub/review gates precede main merge; cloud branch backup is separate. N0 custody, N5 authentication, independent builders, physical hardware and production remain open. No ISO, signing, firmware or media change.",
@@ -53547,6 +53630,7 @@
         "ADD-MEM-002"
       ],
       "current_evidence": [
+        "Cycle 240: PKUSER6 interrupts a fixed spinning CPL3 payload three times on its private RSP0 stack, resumes twice with14 GPRs and legacy FP state preserved, then forces kernel recovery. Timer shutdown precedes descriptor detachment/root restoration/13-page release. Two fresh guests and ordinary denial pass;320 debug,70 user-release,24 VM-release,5 compile-fail,10 boot-exit and21 Python oracle tests pass. docs/checkpoints/cycle240-user-timer-preemption.md",
         "Cycle 239: PKUSER5 enters one fixed CPL3 payload with cleared GPR/legacy FP state, private TSS.RSP0 and exact ordered fault validation. Two fresh QEMU probes each contain seven faults, return to CPL0, detach descriptors, flush/restore the boot root and release13 task pages. Real execution exposed and repaired VM A/D-bit cleanup rejection.315 debug,65 user-release,24 VM-release,5 compile-fail,10 boot-exit and18 Python oracle tests pass; ordinary boot denies unsigned execution. docs/checkpoints/cycle239-bounded-user-entry.md",
         "Cycle 233: docs/checkpoints/cycle233-corrected-media-downstream-replay.md replays all fourteen remaining memory, IRQ, SMP, scheduler, atomic and lock profiles on corrected FAT media:28 fresh guest runs,663 control groups and2863 hostile cases pass. All27 component checks and source profiles are current. The aggregate is reconstructed from27 original captures; four unaffected rows are identical and23 affected profiles were replayed across Cycles231-233. Original kernel and native EFI products are unchanged.",
         "Cycle 219: docs/checkpoints/cycle219-current-kernel-memory-replay.md qualifies six memory/IRQ/SMP profiles on unchanged kernel216. Twelve virtual boots, 421 control groups covering 1137 cases and 93 focused tests pass, including 1896 corrupted receipts, 360 raw-mailbox cases, nine isolated IPI identity cases and 29 memory summary cases. Three PMM, six VM and one IPI obsolete pins are reconciled after independent current-image validation. Initial failed admissions remain recorded; identical candidates then pass.",
@@ -53583,6 +53667,7 @@
         "ADD-MEM-002: replace the bounded nine-page PKVM2 mapping with one complete generation-owned sparse physical direct map that excludes holes and forbidden ranges, prevents incompatible cache aliases, preserves retained bootstrap and ACPI snapshot exclusions, switches transactionally, records local invalidation and future SMP-shootdown dependencies, and defers reclamation until exact generation receipts permit it"
       ],
       "current_gaps": [
+        "This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion.",
         "The corrected354-test regression passes with zero failures/skips; initial273-test and81-test failures remain preserved. Historical assertions use frozen evidence and current validators. Qualify the exact committed candidate with runtime, bundle, replay, publication and GitHub/review gates before PR80 merge. No phase, flag, authentication, independent-builder, signed-ISO, hardware or production gate closes; the old demo is not rebuilt or promoted.",
         "Readiness is 19/27; eight scheduler/atomic/lock profiles remain from N12-SCHED-001, plus seventeen SMP-preemption control groups and recorded admission. Shared-helper transitive-binding review remains within N36. No phase, flag, native byte, ISO or production status changes. Full exact-candidate canonical/Doctor/release/publication and configured GitHub/review gates precede main merge; cloud branch backup is separate. N0 custody, N5 authentication, general retirement, independent builders and physical hardware remain open.",
@@ -53792,6 +53877,7 @@
         "ADD-N12-CONCURRENCY-RECLAMATION-001"
       ],
       "current_evidence": [
+        "Cycle 240: PKUSER6 interrupts a fixed spinning CPL3 payload three times on its private RSP0 stack, resumes twice with14 GPRs and legacy FP state preserved, then forces kernel recovery. Timer shutdown precedes descriptor detachment/root restoration/13-page release. Two fresh guests and ordinary denial pass;320 debug,70 user-release,24 VM-release,5 compile-fail,10 boot-exit and21 Python oracle tests pass. docs/checkpoints/cycle240-user-timer-preemption.md",
         "Cycle 233: docs/checkpoints/cycle233-corrected-media-downstream-replay.md replays all fourteen remaining memory, IRQ, SMP, scheduler, atomic and lock profiles on corrected FAT media:28 fresh guest runs,663 control groups and2863 hostile cases pass. All27 component checks and source profiles are current. The aggregate is reconstructed from27 original captures; four unaffected rows are identical and23 affected profiles were replayed across Cycles231-233. Original kernel and native EFI products are unchanged.",
         "Cycle 224: docs/checkpoints/cycle224-locks-admission-and-current-kernel-replay.md repairs lock recorded admission and replays two final four-vCPU boots on unchanged kernel216. 246 kernel tests, 30 groups/103 cases and 21 focused tests pass, including all-profile entry provenance. Both gates reject 631 corrupted records; three disabled validators are detected. Final combined regression passes 137/137 without skips; all 14 static helper closures match preserved successful producer snapshots. Diagnostic invalid admissions and exceptions remain preserved, not accepted as final.",
         "Cycle 223: docs/checkpoints/cycle223-atomics-admission-and-instruction-audit.md repairs atomics recorded admission and comment-spoofable instruction checks. Two final one-BSP boots pass 29 groups/78 cases; 22 focused tests pass. Both gates reject 356 corruptions; eight independent image/count cases, seven rehashed bodies, fourteen disassembly attacks and eight disabled native guards at two optimization levels are detected. Diagnostic defects and one invalid test mutation remain recorded; no native kernel bytes changed.",
@@ -53871,6 +53957,7 @@
         "ADD-N12-CONCURRENCY-RECLAMATION-001: Cycle 162 qualifies mandatory active PKVM3 table/data ownership. Replay changed-image N5-through-N12 prerequisites, then implement execution-stack ownership, acknowledged cross-CPU quiescence, live timeout/offline/death/pressure/shutdown rollback, an independent oracle and exact-topology live evidence before closing N12.3"
       ],
       "current_gaps": [
+        "This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "The corrected354-test regression passes with zero failures/skips; initial273-test and81-test failures remain preserved. Historical assertions use frozen evidence and current validators. Qualify the exact committed candidate with runtime, bundle, replay, publication and GitHub/review gates before PR80 merge. No phase, flag, authentication, independent-builder, signed-ISO, hardware or production gate closes; the old demo is not rebuilt or promoted.",
         "All 27 selected native checks pass. Next N36-RECEIPT-COVERAGE-001: audit shared-helper transitive source bindings, then full exact-candidate canonical/Doctor/release/publication/GitHub/review gates before main merge. This is not N36 closure. No phase/flag/native-byte/ISO/production change. N0 custody, N5 authentication, complete task state, general retirement, hardware and independent builders remain open.",
         "Readiness is 26/27. Next N12-CONCURRENCY-LOCKS-001, then N36 shared-helper transitive binding review and full exact-candidate canonical/Doctor/release/publication/GitHub/review gates before main merge. All prior checkpoint records remain historical. No phase/flag/ISO/production change. N0 custody, N5 authentication, full architectural task state, general retirement, hardware and independent builders remain open.",
@@ -53968,6 +54055,7 @@
         "ADD-CAP-001"
       ],
       "current_evidence": [
+        "Cycle 240: PKUSER6 interrupts a fixed spinning CPL3 payload three times on its private RSP0 stack, resumes twice with14 GPRs and legacy FP state preserved, then forces kernel recovery. Timer shutdown precedes descriptor detachment/root restoration/13-page release. Two fresh guests and ordinary denial pass;320 debug,70 user-release,24 VM-release,5 compile-fail,10 boot-exit and21 Python oracle tests pass. docs/checkpoints/cycle240-user-timer-preemption.md",
         "Cycle 239: PKUSER5 enters one fixed CPL3 payload with cleared GPR/legacy FP state, private TSS.RSP0 and exact ordered fault validation. Two fresh QEMU probes each contain seven faults, return to CPL0, detach descriptors, flush/restore the boot root and release13 task pages. Real execution exposed and repaired VM A/D-bit cleanup rejection.315 debug,65 user-release,24 VM-release,5 compile-fail,10 boot-exit and18 Python oracle tests pass; ordinary boot denies unsigned execution. docs/checkpoints/cycle239-bounded-user-entry.md",
         "Cycle 238: PKUSER4 adds two guarded supervisor UC MMIO leaves and failure-quarantined timer shutdown. Two fresh QEMU probes each deliver/EOI three interrupts under the candidate root, verify quiescence, restore the original root and release13 task pages while retaining one ACPI snapshot page.300 debug,54 optimized,5 compile-fail,10 boot-exit and15 Python oracle tests pass; ordinary boot still denies unsigned execution. docs/checkpoints/cycle238-owned-root-timer.md",
         "Cycle 237: PKUSER3 executes actual owned CR3 activation, guarded supervisor-stack access, flushing restoration and full13-page release in two fresh QEMU guests; ordinary boot still denies execution.288 debug,42 optimized,5 compile-fail,10 boot-exit tests,13 Python oracle tests and two rejected feature builds pass. docs/checkpoints/cycle237-live-user-root.md",
@@ -53976,6 +54064,7 @@
         "Cycle 234: PKUSER1 inactive user-image admission passes260 kernel host tests,14 optimized focused tests and freestanding-library check; no live user execution or ISO. docs/checkpoints/cycle234-user-entry-foundation.md"
       ],
       "current_gaps": [
+        "This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion.",
         "Timer delivery is CPL0 on the existing kernel IST, not ring3 or use of the private entry stack as RSP0. User GDT/TSS/IRETQ, GPR/segment/base/debug/extended-state initialization and contained user faults/preemption remain next. Hardware error shutdown is host fault-tested, not guest fault-injected. Capability IPC, services, shell/apps and optical ISO qualification follow; all production and exact-candidate merge gates remain open.",
         "No ring-3 task, syscall, or capability object implementation exists"
@@ -60160,7 +60249,8 @@
         "docs/checkpoints/cycle236-user-root-cpu-lifecycle.md",
         "docs/checkpoints/cycle237-live-user-root.md",
         "docs/checkpoints/cycle238-owned-root-timer.md",
-        "docs/checkpoints/cycle239-bounded-user-entry.md"
+        "docs/checkpoints/cycle239-bounded-user-entry.md",
+        "docs/checkpoints/cycle240-user-timer-preemption.md"
       ]
     }
   ],
@@ -60175,7 +60265,7 @@
       "PKERR1 freezes a pure exact-target CPU/errata rejection policy, PKXSTATE1 proves bounded x87/SSE standard-XSAVE ownership, PKXEXC1 proves deliberate #MF/#XM recovery plus terminal test-only #NM rejection with a linked scope audit under WHPX, and PKMSR1 proves only a read-only qemu64 BSP system-linkage/global-MCA/unsupported-PMU observation. PKPMM7 supplies bounded physical ownership, scrubbed lifecycle transactions, a stable guarded five-page manager, external generation-owned active ledgers, checked automatic growth with retirement, bounded-window fallback and pre-effect rejection, streamed lifecycle-gated Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation and retained copy/readback; PKVM1 supplies inactive page-table transactions; PKVM3 proves one-BSP activation/restoration of a complete-profile PMM-owned sparse direct map; PKIRQ1 proves one bounded local timer transaction; PKSMP1 proves one first-AP start/quiesce/park lifecycle; PKSMP2 proves one AP-local GDT/TSS/IDT, guarded-stack, x87/SSE-owner, and interrupt-vector runtime transaction; and PKSMP5 proves three simultaneous AP-local runtimes, partial-start rollback with fresh retry, six fixed IPI classes per AP, three AP-side one-page INVLPG operations, aggregate acknowledgement, and one deferred generation retirement. No target-qualified complete native CPU policy, applicable Model 40h-4Fh errata authority, direct numeric client microcode floor or ratified replacement, target-specific privileged-MSR semantics, syscall/MCE/PMU activation, AVX/extended state, user-task exception delivery, scheduler or migration integration, general interrupt routing/time services, production capability authority, general topology or SMP shootdown, AML or complete ACPI resource-graph execution, complete kernel/user address spaces, heap, MMIO/PAT/MTRR qualification, interrupt-context or concurrent allocator, general pressure, or OOM implementation exists",
       "The exact Tier 1 identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records are captured with zero public raw registers, but seven required channels remain non-complete in total, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification also remain open",
       "No native DMA/IOMMU/interrupt-remapping confinement",
-      "No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion. Timer delivery is CPL0 on the existing kernel IST, not ring3 or use of the private entry stack as RSP0. User GDT/TSS/IRETQ, GPR/segment/base/debug/extended-state initialization and contained user faults/preemption remain next. Hardware error shutdown is host fault-tested, not guest fault-injected. Capability IPC, services, shell/apps and optical ISO qualification follow; all production and exact-candidate merge gates remain open. CPL0 switching is not user-mode execution. Owned timer/MMIO recovery, user GDT/TSS/IRETQ, architectural-state initialization and contained fault/preemption remain before ring3. Capability IPC, services, shell/apps and optical ISO qualification follow. Full production and exact-candidate merge gates remain open. The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open. Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion. User-space integration still needs owned kernel-half mappings/stacks, live ring3/return/fault containment, capabilities/IPC, services, shell/apps and ISO qualification. Production microkernel completion remains N0-N39. PKPMM7 supplies bounded one-BSP physical-page ownership, scrub-before-allocation and scrub-before-reuse with full readback and fault rollback, a stable guarded five-page manager, external generation-owned guarded ledgers, checked automatic repeated growth, verified retirement, bounded-window fallback and pre-effect rejection, exact post-ExitBootServices Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation plus retained snapshot copy/readback. PKVM1 supplies inactive four-level 4 KiB transactions, PKVM3 supplies a complete-profile PMM-owned sparse direct map, cache-alias rejection, exact CR3 restoration, three local invalidation receipts, and generation-retirement gating, and PKSMP5 proves exactly three AP-side INVLPG operations and deferred reclaim for three AP-owned roots, one page per root, one generation, and aggregate target/ack mask 0xE. General topology, address-space-wide shootdown, multiple concurrent generations, production capability authority, incremental concurrent map replacement, huge pages, PCID, COW, user faults, pager IPC, cache/MMIO qualification, heaps/object caches, interrupt-context allocation, concurrent allocation, general pressure and OOM policy, scheduler, task, syscall, capability, IPC, isolation, and asynchronous I/O remain open",
+      "This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion. Timer delivery is CPL0 on the existing kernel IST, not ring3 or use of the private entry stack as RSP0. User GDT/TSS/IRETQ, GPR/segment/base/debug/extended-state initialization and contained user faults/preemption remain next. Hardware error shutdown is host fault-tested, not guest fault-injected. Capability IPC, services, shell/apps and optical ISO qualification follow; all production and exact-candidate merge gates remain open. CPL0 switching is not user-mode execution. Owned timer/MMIO recovery, user GDT/TSS/IRETQ, architectural-state initialization and contained fault/preemption remain before ring3. Capability IPC, services, shell/apps and optical ISO qualification follow. Full production and exact-candidate merge gates remain open. The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open. Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion. User-space integration still needs owned kernel-half mappings/stacks, live ring3/return/fault containment, capabilities/IPC, services, shell/apps and ISO qualification. Production microkernel completion remains N0-N39. PKPMM7 supplies bounded one-BSP physical-page ownership, scrub-before-allocation and scrub-before-reuse with full readback and fault rollback, a stable guarded five-page manager, external generation-owned guarded ledgers, checked automatic repeated growth, verified retirement, bounded-window fallback and pre-effect rejection, exact post-ExitBootServices Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation plus retained snapshot copy/readback. PKVM1 supplies inactive four-level 4 KiB transactions, PKVM3 supplies a complete-profile PMM-owned sparse direct map, cache-alias rejection, exact CR3 restoration, three local invalidation receipts, and generation-retirement gating, and PKSMP5 proves exactly three AP-side INVLPG operations and deferred reclaim for three AP-owned roots, one page per root, one generation, and aggregate target/ack mask 0xE. General topology, address-space-wide shootdown, multiple concurrent generations, production capability authority, incremental concurrent map replacement, huge pages, PCID, COW, user faults, pager IPC, cache/MMIO qualification, heaps/object caches, interrupt-context allocation, concurrent allocation, general pressure and OOM policy, scheduler, task, syscall, capability, IPC, isolation, and asynchronous I/O remain open",
       "No native security/crypto/TPM/secrets/MAC/privacy implementation or external review",
       "No isolated native driver domains or virtio reference drivers",
       "No native block/NVMe/USB/input/VFS/PooleFS persistent path",
@@ -60199,15 +60289,15 @@
       "N12",
       "N13"
     ],
-    "title": "Prove bounded timer preemption and supervisor recovery from CPL3, including spinning-task containment, before a versioned syscall ABI and capability IPC",
+    "title": "Implement a versioned bounded syscall and recoverable user-copy boundary, then connect task exit and peer scheduling before capability IPC",
     "entry_evidence": [
       "docs/native-userspace-integration-iso.md",
       "runs/native-user-entry-readiness.json",
-      "docs/checkpoints/cycle239-bounded-user-entry.md",
+      "docs/checkpoints/cycle240-user-timer-preemption.md",
+      "native/kernel/src/user_entry/preemption.rs",
+      "native/kernel/src/arch/x86_64/user_preempt.rs",
       "native/kernel/src/arch/x86_64/user.rs",
-      "native/kernel/src/user_entry/privilege.rs",
-      "native/kernel/src/user_root_probe/timer_driver.rs",
-      "native/kernel/src/virtual_memory.rs"
+      "native/kernel/src/user_root_probe/timer_driver.rs"
     ],
     "exit_evidence": [
       "fresh QEMU CPL3 observation with controlled kernel entry/return",
@@ -60217,6 +60307,7 @@
     "blocked": false
   },
   "claim_boundaries": [
+    "Cycle 240: PKUSER6 interrupts a fixed spinning CPL3 payload three times on its private RSP0 stack, resumes twice with14 GPRs and legacy FP state preserved, then forces kernel recovery. Timer shutdown precedes descriptor detachment/root restoration/13-page release. Two fresh guests and ordinary denial pass;320 debug,70 user-release,24 VM-release,5 compile-fail,10 boot-exit and21 Python oracle tests pass. docs/checkpoints/cycle240-user-timer-preemption.md This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
     "Cycle 239: PKUSER5 enters one fixed CPL3 payload with cleared GPR/legacy FP state, private TSS.RSP0 and exact ordered fault validation. Two fresh QEMU probes each contain seven faults, return to CPL0, detach descriptors, flush/restore the boot root and release13 task pages. Real execution exposed and repaired VM A/D-bit cleanup rejection.315 debug,65 user-release,24 VM-release,5 compile-fail,10 boot-exit and18 Python oracle tests pass; ordinary boot denies unsigned execution. docs/checkpoints/cycle239-bounded-user-entry.md No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion.",
     "Cycle 238: PKUSER4 adds two guarded supervisor UC MMIO leaves and failure-quarantined timer shutdown. Two fresh QEMU probes each deliver/EOI three interrupts under the candidate root, verify quiescence, restore the original root and release13 task pages while retaining one ACPI snapshot page.300 debug,54 optimized,5 compile-fail,10 boot-exit and15 Python oracle tests pass; ordinary boot still denies unsigned execution. docs/checkpoints/cycle238-owned-root-timer.md Timer delivery is CPL0 on the existing kernel IST, not ring3 or use of the private entry stack as RSP0. User GDT/TSS/IRETQ, GPR/segment/base/debug/extended-state initialization and contained user faults/preemption remain next. Hardware error shutdown is host fault-tested, not guest fault-injected. Capability IPC, services, shell/apps and optical ISO qualification follow; all production and exact-candidate merge gates remain open.",
     "Cycle 237: PKUSER3 executes actual owned CR3 activation, guarded supervisor-stack access, flushing restoration and full13-page release in two fresh QEMU guests; ordinary boot still denies execution.288 debug,42 optimized,5 compile-fail,10 boot-exit tests,13 Python oracle tests and two rejected feature builds pass. docs/checkpoints/cycle237-live-user-root.md CPL0 switching is not user-mode execution. Owned timer/MMIO recovery, user GDT/TSS/IRETQ, architectural-state initialization and contained fault/preemption remain before ring3. Capability IPC, services, shell/apps and optical ISO qualification follow. Full production and exact-candidate merge gates remain open.",

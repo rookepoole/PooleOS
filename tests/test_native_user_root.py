@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class UserRootTests(unittest.TestCase):
     def setUp(self):
         self.markers = json.loads((ROOT / "tests/fixtures/cycle237-user-root-markers.json").read_bytes())["markers"]
-        # Synthetic PKUSER5 parser case built on an immutable historical prefix.
+        # Synthetic PKUSER6 parser case built on an immutable historical prefix.
         # Only the qualifier's fresh guest logs are native execution evidence.
         root = probe.ACTIVE.fullmatch(self.markers[30])[1]
         self.markers.insert(31, f"POOLEOS:KERNEL:USER-ROOT-TIMER PASS contract=PKUSER4 cr3={root} "
@@ -24,6 +24,9 @@ class UserRootTests(unittest.TestCase):
         self.markers.insert(32, f"POOLEOS:KERNEL:USER-ENTRY PASS contract=PKUSER5 cr3={root} "
             "cpl=3 traps=7 private_rsp0=1 gpr_zero=15 fp_cleared=1 cli_denied=1 io_denied=1 "
             "syscall_denied=1 supervisor_fault=1 nx_fault=1 kernel_return=1 descriptors_detached=1 if=0 production=0")
+        self.markers.insert(33, f"POOLEOS:KERNEL:USER-PREEMPT PASS contract=PKUSER6 cr3={root} "
+            "cpl=3 deliveries=3 eois=3 resumes=2 first_progress=10 last_progress=100 "
+            "private_rsp0=1 gpr_preserved=14 fp_preserved=1 timer_quiesced=1 forced_return=1 if=0 production=0")
         self.summary = probe.validate_markers(self.markers)
 
     def reject(self, index, field, value):
@@ -37,7 +40,7 @@ class UserRootTests(unittest.TestCase):
         self.assertEqual((self.summary["root_probe_cpl"], self.summary["cpl"]), (0, 3))
         self.assertEqual(self.summary["cr3_writes"], 2)
         self.assertTrue(self.summary["ring3_executed"])
-        self.assertFalse(self.summary["user_timer_preemption"])
+        self.assertTrue(self.summary["user_timer_preemption"])
         self.assertFalse(self.summary["production_ready"])
 
     def test_order_missing_duplicate_and_every_live_field_rejected(self):
@@ -63,7 +66,7 @@ class UserRootTests(unittest.TestCase):
         self.reject(30, "cr3", f"0x{self.summary['original_root']:016X}")
 
     def test_restoration_must_match_original(self):
-        self.reject(33, "restored", f"0x{self.summary['candidate_root']:016X}")
+        self.reject(34, "restored", f"0x{self.summary['candidate_root']:016X}")
 
     def test_sentinel_binds_candidate_and_generation(self):
         self.reject(30, "stack_probe", f"0x{self.summary['stack_probe'] ^ 1:016X}")
@@ -76,9 +79,9 @@ class UserRootTests(unittest.TestCase):
     def test_numeric_claims_cannot_be_promoted(self):
         for index, field, value in ((29, "pages", "14"), (29, "temporary_aliases", "1"),
                 (30, "cpl", "3"), (30, "if", "1"), (30, "ring3", "1"),
-                (33, "cr3_writes", "1"), (33, "allocated_pages", "0"),
-                (33, "released_pages", "12"), (33, "scrubbed_data_pages", "5"),
-                (33, "production", "1")):
+                (34, "cr3_writes", "1"), (34, "allocated_pages", "0"),
+                (34, "released_pages", "12"), (34, "scrubbed_data_pages", "5"),
+                (34, "production", "1")):
             self.reject(index, field, value)
 
     def test_timer_root_delivery_eoi_quiescence_and_mmio_claims_cannot_change(self):
@@ -89,7 +92,7 @@ class UserRootTests(unittest.TestCase):
 
     def test_retained_acpi_accounting_has_nonzero_bounded_equality(self):
         for value in ("0", "2", "20", str(1 << 64)):
-            self.reject(33, "retained_acpi_pages", value)
+            self.reject(34, "retained_acpi_pages", value)
 
     def test_user_entry_cpl_traps_state_cleanup_and_return_cannot_change(self):
         for field,value in (("cpl","0"),("traps","6"),("private_rsp0","0"),("gpr_zero","14"),
@@ -102,7 +105,7 @@ class UserRootTests(unittest.TestCase):
         self.reject(32,"cr3",f"0x{self.summary['original_root']:016X}")
 
     def test_missing_user_entry_and_old_cpl0_final_cannot_claim_execution(self):
-        self.reject(33,"ring3","0")
+        self.reject(34,"ring3","0")
         changed=self.markers[:32]+self.markers[33:]
         with self.assertRaises(ValueError): probe.validate_markers(changed)
 
@@ -116,6 +119,22 @@ class UserRootTests(unittest.TestCase):
         self.assertIn("read_msr(IA32_APIC_BASE)", source)
         self.assertIn("0x101f => PanicCode::UserRoot,",
                       (ROOT / "native/kernel/src/main.rs").read_text())
+
+    def test_preemption_counts_state_and_root_cannot_be_promoted(self):
+        for field,value in (("cr3",f"0x{self.summary['original_root']:016X}"),("cpl","0"),
+                ("deliveries","0"),("eois","2"),("resumes","3"),("private_rsp0","0"),
+                ("gpr_preserved","13"),("fp_preserved","0"),("timer_quiesced","0"),
+                ("forced_return","0"),("if","1"),("production","1")):
+            self.reject(33,field,value)
+
+    def test_spinning_progress_must_be_positive_increasing_u64(self):
+        for field,value in (("first_progress","0"),("first_progress","100"),
+                ("last_progress","10"),("last_progress","9"),("last_progress",str(1<<64))):
+            self.reject(33,field,value)
+
+    def test_missing_preemption_marker_does_not_claim_a_user_timer(self):
+        with self.assertRaises(ValueError):
+            probe.validate_markers(self.markers[:33]+self.markers[34:])
 
     def test_user_root_exclusion_lists_all_other_development_scenarios(self):
         import tomllib

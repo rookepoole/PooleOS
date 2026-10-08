@@ -110,8 +110,19 @@ impl Timer {
     }
 }
 
-impl Driver for Timer {
-    fn execute(&mut self, root: u64, mappings: Mappings) -> Result<Observation, TimerError> {
+impl Timer {
+    fn configure(
+        &mut self,
+        root: u64,
+        mappings: Mappings,
+        interval_ns: u64,
+    ) -> Result<
+        (
+            LiveInterruptHardware,
+            poolekernel::user_entry::preemption::Budget,
+        ),
+        TimerError,
+    > {
         let mut hardware = self.context(root, mappings)?;
         if self.configured || EXPECTED_ROOT.load(Ordering::Acquire) != 0 {
             return Err(TimerError::State);
@@ -189,7 +200,7 @@ impl Driver for Timer {
         let calibration = hw(calibrate_apic_timer(u32::MAX, current, elapsed, period))?;
         let count = hw(timer_initial_count(
             calibration.apic_ticks_per_second,
-            1_000_000,
+            interval_ns,
         ))?;
         IRQ_TIMER_DELIVERIES.store(0, Ordering::Release);
         IRQ_EOI_COUNT.store(0, Ordering::Release);
@@ -198,6 +209,25 @@ impl Driver for Timer {
         OBSERVED_ROOT.store(0, Ordering::Release);
         EXPECTED_ROOT.store(root, Ordering::Release);
         IRQ_APIC_VIRTUAL.store(timer::APIC_VIRTUAL, Ordering::Release);
+        Ok((
+            hardware,
+            poolekernel::user_entry::preemption::Budget {
+                count,
+                period_fs: period,
+                counter_mask,
+            },
+        ))
+    }
+}
+
+impl Driver for Timer {
+    fn execute(&mut self, root: u64, mappings: Mappings) -> Result<Observation, TimerError> {
+        let (mut hardware, budget) = self.configure(root, mappings, 1_000_000)?;
+        let poolekernel::user_entry::preemption::Budget {
+            count,
+            period_fs: period,
+            counter_mask,
+        } = budget;
         for expected in 1..=3 {
             let start = hw(hardware.hpet_read(0xf0))?;
             hw(hardware.apic_write(0x320, u32::from(TIMER_VECTOR)))?;
@@ -262,6 +292,42 @@ impl Driver for Timer {
         IRQ_APIC_VIRTUAL.store(0, Ordering::Release);
         self.configured = false;
         Ok(())
+    }
+}
+
+/// This combined trusted driver owns user and device exposure under CpuImage's
+/// user quarantine. Device shutdown must precede private-stack detachment.
+pub struct UserRun<'a> {
+    pub entry: &'a mut arch::x86_64::user::Entry,
+    pub timer: &'a mut Timer,
+    pub result: Option<poolekernel::user_entry::preemption::Observation>,
+}
+
+impl poolekernel::user_entry::privilege::Driver for UserRun<'_> {
+    fn execute(
+        &mut self,
+        image: poolekernel::user_entry::ImageAdmission,
+    ) -> Result<
+        poolekernel::user_entry::privilege::Observation,
+        poolekernel::user_entry::privilege::Error,
+    > {
+        use poolekernel::user_entry::privilege::Error;
+        self.result = None;
+        let (_, budget) = self
+            .timer
+            .configure(image.root_physical, self.timer.mappings, 10_000_000)
+            .map_err(|_| Error::Hardware)?;
+        self.entry.set_timer_budget(budget)?;
+        let result = self.entry.execute(image)?;
+        self.result = Some(self.entry.preemption_observation()?);
+        Ok(result)
+    }
+
+    fn quiesce(&mut self, root: u64) -> Result<(), poolekernel::user_entry::privilege::Error> {
+        self.timer
+            .quiesce(root, self.timer.mappings)
+            .map_err(|_| poolekernel::user_entry::privilege::Error::Hardware)?;
+        self.entry.quiesce(root)
     }
 }
 
