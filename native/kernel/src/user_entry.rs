@@ -12,6 +12,7 @@ use crate::virtual_memory::{
     self as vm, AddressSpace, TableMemory, USER_WINDOW_END_EXCLUSIVE, USER_WINDOW_START,
 };
 
+pub mod bootstrap;
 pub mod prepared;
 
 pub const CONTRACT_ID: &str = "PKUSER1";

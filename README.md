@@ -11,7 +11,17 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle 236 adds the kernel's owning user-root
+**Current development checkpoint:** Cycle 237 boots the real native kernel into
+an owned task address space at CPL0, exercises its guarded supervisor stack,
+restores the boot address space and releases all 13 allocated pages. Two fresh
+QEMU probes and an ordinary-boot denial control pass, alongside 288 kernel host
+tests, 42 optimized focused tests, five compile-fail checks, ten boot-exit tests
+and 13 Python regression tests. Live testing also fixed an APIC register read.
+No user-mode task or new ISO exists yet. Next: timer-backed recovery, sanitized
+user entry and contained faults, followed by IPC/services/shell integration.
+[Evidence](docs/checkpoints/cycle237-live-user-root.md).
+
+**Historical development checkpoint:** Cycle 236 adds the kernel's owning user-root
 CPU lifecycle and a privileged x86-64 adapter. Failed switches/restoration keep
 memory retained until verified recovery and detach. All 284 host kernel tests,
 38 optimized focused tests, five compile-fail checks and freestanding kernel/

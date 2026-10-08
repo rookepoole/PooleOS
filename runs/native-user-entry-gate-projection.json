@@ -1,5 +1,5 @@
 {
-  "cycle": 236,
+  "cycle": 237,
   "scope": "read_only_recorded_source_consistency_not_new_guest_execution",
   "checks": [
     {
@@ -10,7 +10,7 @@
     {
       "name": "native_symbol_readiness",
       "ok": false,
-      "detail": "PSYM1 kernel entry evidence: readiness input bindings are stale"
+      "detail": "PSYM1 kernel entry evidence: readiness input bindings are stale; PSYM1 recorded bindings evidence changed; PSYM1 stale implementation input native/kernel/linker.ld"
     },
     {
       "name": "native_policy_readiness",
@@ -20,12 +20,12 @@
     {
       "name": "native_kernel_load_readiness",
       "ok": false,
-      "detail": "stale implementation input native/kernel/src/lib.rs"
+      "detail": "stale implementation input native/boot/Cargo.toml; stale implementation input native/boot/src/exit.rs; stale implementation input native/kernel/linker.ld; stale implementation input native/kernel/src/lib.rs; stale implementation input native/kernel/src/main.rs; stale implementation input native/bootexit/src/lib.rs; stale implementation input tools/qualify_native_pooleboot.py"
     },
     {
       "name": "native_pooleboot_readiness",
       "ok": false,
-      "detail": "stale implementation input native/kernel/src/lib.rs binding"
+      "detail": "stale implementation input native/boot/Cargo.toml binding; stale implementation input native/boot/src/exit.rs binding; stale implementation input native/kernel/linker.ld binding; stale implementation input native/kernel/src/lib.rs binding; stale implementation input native/kernel/src/main.rs binding; stale implementation input native/bootexit/src/lib.rs binding; stale implementation input tools/qualify_native_pooleboot.py binding"
     },
     {
       "name": "native_kernel_revalidation_readiness",
@@ -140,9 +140,11 @@
   ],
   "source_guard": {
     "name": "native_execution_sources",
-    "ok": true,
+    "ok": false,
     "detail": "27 static source closures and 18 reviewed data bindings; not fresh execution, complete tool closure or authentication",
-    "errors": []
+    "errors": [
+      "execution source evidence invalid: load static dependency closure changed"
+    ]
   },
   "passing_profiles": [
     "native_policy_readiness",
@@ -176,5 +178,53 @@
     "native_kernel_locks_readiness"
   ],
   "guest_runs": 0,
-  "production_ready": false
+  "production_ready": false,
+  "static_source_current_profiles": [
+    "entry",
+    "symbols",
+    "policy",
+    "revalidation",
+    "errata_policy"
+  ],
+  "stale_static_source_profiles": [
+    "load",
+    "pooleboot",
+    "transfer",
+    "trap",
+    "cpu_policy",
+    "xstate_policy",
+    "xstate_exception",
+    "privilege_msr_policy",
+    "physical_memory",
+    "virtual_memory",
+    "interrupt_time",
+    "smp_first_ap",
+    "smp_percpu_runtime",
+    "smp_ipi",
+    "scheduler",
+    "scheduler_preempt",
+    "scheduler_deferred",
+    "scheduler_smp",
+    "scheduler_ap_workers",
+    "scheduler_smp_preempt",
+    "atomics",
+    "locks"
+  ],
+  "prerequisite_checks": [
+    {
+      "name": "native_firmware_readiness",
+      "ok": true,
+      "detail": "contract=PFWM1; rust_tests=5/5; no_std_targets=2/2; golden=3/3; negatives=101/101; parser_differential=16384; activation_differential=8192; post_reset_differential=8192; mismatches=0; embedded_payloads=0; live_inventory=false; apply=false; production_ready=false"
+    },
+    {
+      "name": "native_boot_trust_readiness",
+      "ok": false,
+      "detail": "stale PBTRUST1 implementation binding: native/boot/Cargo.toml; stale PBTRUST1 readiness implementation input: native/boot/Cargo.toml"
+    },
+    {
+      "name": "native_elf_loader_readiness",
+      "ok": false,
+      "detail": "readiness input bindings are stale"
+    }
+  ]
 }

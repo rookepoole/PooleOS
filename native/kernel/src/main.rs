@@ -6,6 +6,7 @@
 mod arch {
     pub mod x86_64;
 }
+mod user_root_probe;
 
 use core::cell::UnsafeCell;
 use core::panic::PanicInfo;
@@ -8070,6 +8071,7 @@ extern "C" fn poole_kernel_emergency_panic(code: u32) -> ! {
         0x101c => PanicCode::SchedulerSmpPreempt,
         0x101d => PanicCode::Atomics,
         0x101e => PanicCode::Locks,
+        0x101f => PanicCode::UserRoot,
         _ => PanicCode::UnexpectedReturn,
     };
     let disposition = PANIC_STATE.begin(code);
@@ -8434,6 +8436,10 @@ extern "C" fn poole_kernel_rust_entry(
         });
         logger.write_bytes(&PKENTRY_TRANSFER_DENIED);
         halt_forever()
+    }
+
+    if trap_scenario == DevelopmentTrapScenario::UserRoot {
+        user_root_probe::run(&decoded, validated.core, &mut serial, &mut debugcon);
     }
 
     if trap_scenario == DevelopmentTrapScenario::CpuPolicy {
@@ -11881,6 +11887,9 @@ extern "C" fn poole_kernel_rust_entry(
         }
         DevelopmentTrapScenario::Atomics => poole_kernel_emergency_panic(PanicCode::Atomics as u32),
         DevelopmentTrapScenario::Locks => poole_kernel_emergency_panic(PanicCode::Locks as u32),
+        DevelopmentTrapScenario::UserRoot => {
+            poole_kernel_emergency_panic(PanicCode::UserRoot as u32)
+        }
     }
 }
 

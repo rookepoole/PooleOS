@@ -24,6 +24,14 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle237-live-user-root.md",
+    "native/kernel/src/user_entry/bootstrap.rs",
+    "native/kernel/src/user_root_probe.rs",
+    "runtime/native_user_root.py",
+    "tools/qualify_native_user_root.py",
+    "tests/test_native_user_root.py",
+    "tests/fixtures/cycle237-user-root-markers.json",
+    "tests/fixtures/cycle236-user-entry-readiness.json",
     "docs/checkpoints/cycle236-user-root-cpu-lifecycle.md",
     "native/kernel/src/user_entry/cpu.rs",
     "native/kernel/src/user_entry/cpu_tests.rs",

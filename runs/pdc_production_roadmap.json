@@ -43,13 +43,15 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 236,
+    "last_updated_cycle": 237,
     "selected_move_id": "N13-USER-ENTRY-LIVE-001",
     "immediate_next_move_id": "N13-USER-ENTRY-LIVE-001",
     "owner_independent_next_move_id": "N13-USER-ENTRY-LIVE-001",
     "required_records": [
-      "docs/checkpoints/cycle236-user-root-cpu-lifecycle.md",
+      "docs/checkpoints/cycle237-live-user-root.md",
       "runs/native-user-entry-readiness.json",
+      "docs/checkpoints/cycle236-user-root-cpu-lifecycle.md",
+      "tests/fixtures/cycle236-user-entry-readiness.json",
       "docs/checkpoints/cycle235-owned-user-root.md",
       "tests/fixtures/cycle235-user-entry-readiness.json",
       "docs/checkpoints/cycle234-user-entry-foundation.md",
@@ -206,9 +208,9 @@
     "added_requirement_count": 59
   },
   "baseline": {
-    "pooleos_cycle": 236,
+    "pooleos_cycle": 237,
     "entry_cycle": 79,
-    "pooleos_test_count": 1239,
+    "pooleos_test_count": 1253,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -224,13 +226,13 @@
       "explicit_gap_count": 20,
       "production_ready": false,
       "native_promotion_role": "partially_qualified_development_candidate_non_promoting",
-      "qualification_status": "cpu_lifecycle_host_pass_privileged_adapter_compile_only_guest_pending",
+      "qualification_status": "bounded_cpl0_user_root_guest_pass_ring3_and_full_candidate_pending",
       "passed_check_count_scope": "historical_cycle176_exact_final_canonical_audit",
       "current_cycle_full_canonical_audit_performed": false,
       "last_fully_qualified_cycle": 176,
       "last_fully_qualified_passed_checks": 105,
       "current_candidate_audit": {
-        "cycle": 236,
+        "cycle": 237,
         "status": "not_run",
         "applies_to_current_source": false,
         "aggregate_suite_passed": false,
@@ -349,7 +351,7 @@
         "production_ready": false
       },
       "current_focused_source_projection": {
-        "cycle": 236,
+        "cycle": 237,
         "passed_checks": 2,
         "total_checks": 27,
         "passing_profiles": [
@@ -384,12 +386,53 @@
           "native_kernel_locks_readiness"
         ],
         "pending_downstream_native_checks": 25,
-        "source_current_profiles": 27,
+        "source_current_profiles": 5,
         "source_profiles_total": 27,
-        "pending_source_profiles": [],
+        "pending_source_profiles": [
+          "load",
+          "pooleboot",
+          "transfer",
+          "trap",
+          "cpu_policy",
+          "xstate_policy",
+          "xstate_exception",
+          "privilege_msr_policy",
+          "physical_memory",
+          "virtual_memory",
+          "interrupt_time",
+          "smp_first_ap",
+          "smp_percpu_runtime",
+          "smp_ipi",
+          "scheduler",
+          "scheduler_preempt",
+          "scheduler_deferred",
+          "scheduler_smp",
+          "scheduler_ap_workers",
+          "scheduler_smp_preempt",
+          "atomics",
+          "locks"
+        ],
         "static_source_closure_is_not_native_admission": true,
         "final_receipt_fresh_qemu_runs": 0,
-        "required_next_gate": "new_native_image_and_affected_guest_requalification_then_full_candidate"
+        "required_next_gate": "new_native_image_and_affected_guest_requalification_then_full_candidate",
+        "source_guard_passed": false,
+        "prerequisite_checks": [
+          {
+            "name": "native_firmware_readiness",
+            "ok": true,
+            "detail": "contract=PFWM1; rust_tests=5/5; no_std_targets=2/2; golden=3/3; negatives=101/101; parser_differential=16384; activation_differential=8192; post_reset_differential=8192; mismatches=0; embedded_payloads=0; live_inventory=false; apply=false; production_ready=false"
+          },
+          {
+            "name": "native_boot_trust_readiness",
+            "ok": false,
+            "detail": "stale PBTRUST1 implementation binding: native/boot/Cargo.toml; stale PBTRUST1 readiness implementation input: native/boot/Cargo.toml"
+          },
+          {
+            "name": "native_elf_loader_readiness",
+            "ok": false,
+            "detail": "readiness input bindings are stale"
+          }
+        ]
       },
       "historical_cycle171_source_projection": {
         "cycle": 171,
@@ -3429,15 +3472,20 @@
         "production_ready": false
       },
       "current_closeout_regression": {
-        "cycle": 236,
-        "status": "focused_native_pass_not_full_canonical",
-        "tests_run": 327,
-        "tests_passed": 327,
+        "cycle": 237,
+        "status": "focused_native_and_guest_pass_not_full_canonical",
+        "tests_run": 345,
+        "tests_passed": 345,
         "tests_failed": 0,
         "tests_skipped": 0,
-        "scope": "284_debug_kernel_tests_plus38_repeated_release_user_entry_tests_plus5_compile_fail_checks",
+        "scope": "288_debug_kernel_plus42_repeated_release_plus5_compile_fail_plus10_boot_exit",
+        "additional_python_oracle_tests": 13,
+        "rejected_incompatible_feature_builds": 2,
+        "guest_runs": 3,
+        "user_root_guest_runs": 2,
+        "ordinary_denial_guest_runs": 1,
         "receipt_path": "runs/native-user-entry-readiness.json",
-        "receipt_sha256": "0CE9612DEF69AA63110F6E5A6D4D016DDE8D8F2D7E62A95E36938930D873CAE8",
+        "receipt_sha256": "9D4AF96F0267010526F7BED917CF12546410379AB2EF97432244349E90AD3BCA",
         "canonical_full_replay_performed": false,
         "merge_qualified": false,
         "production_ready": false
@@ -4690,7 +4738,7 @@
       "current_shared_loader_qualification": {
         "cycle": 183,
         "contract_id": "PKELF1",
-        "status": "single_host_replay_pass",
+        "status": "source_requalification_pending",
         "receipt_path": "runs/native_elf_loader_readiness.json",
         "receipt_sha256": "70399A505005A60E04CB801E3B49E5A149B854E3CE9A4F952ECA458761E45E91",
         "implementation_input_count": 19,
@@ -4717,7 +4765,10 @@
         "fresh_qemu_runs": 0,
         "n5_exit_gate_satisfied": false,
         "production_ready": false,
-        "source_validation_cycle": 185
+        "source_validation_cycle": 237,
+        "applies_to_current_source": false,
+        "metric_scope": "retained_historical_counts_not_current_execution",
+        "historical_record": "historical_cycle236_shared_loader_qualification"
       },
       "historical_cycle183_source_projection": {
         "cycle": 183,
@@ -41834,57 +41885,13 @@
         "production_ready": false
       },
       "current_execution_source_qualification": {
-        "cycle": 233,
-        "status": "pass_current_original_capture_projection",
-        "move_id": "N5-FAT32-PARENT-001",
-        "receipt_path": "runs/native_execution_sources.json",
+        "cycle": 237,
+        "status": "retained_capture_sources_stale_after_boot_qualifier_change",
         "receipt_sha256": "65155E981FA217BD9D78218A4E0C0537A574D613ED9FB3E1EBD16511B6A1EA5D",
-        "profiles": 27,
-        "unique_python_sources": 78,
-        "closure_size_range": [
-          4,
-          38
-        ],
-        "fresh_qemu_runs": 28,
-        "retained_profile_receipts": 26,
-        "original_fourteen_records_unchanged": true,
-        "historical_source_record_path": "tests/fixtures/cycle229-execution-sources.json",
-        "historical_source_record_sha256": "9C64EC020BD4D98182DAB38EF65EA7ABBFC15EC3EFD98BA188D6E005C2AE5295",
-        "malformed_records_rejected_by_component_and_gate": 33,
-        "shared_leaf_mutation_invalidates_profile_captures": 27,
-        "upstream_missing_substituted_and_changed_source_controls": 13,
-        "errata_host_qualification": {
-          "status": "pass_policy_denies_current_target",
-          "host_tests": 6,
-          "no_std_builds": 2,
-          "cross_language_vectors": 128,
-          "negative_controls": 24,
-          "target_denial_reasons": 6,
-          "privileged_reads": 0,
-          "firmware_writes": 0,
-          "elapsed_seconds": 10.937,
-          "receipt_sha256": "975C57DDFB54EDB9C1573D2A1B5ABD5B2242996B7FE32028740780A22319ABD8",
-          "previous_receipt_sha256": "9C25E26A8C53AF2A908DE41F51887E15AC7571C7C79EDF1318BAC13539F489B0",
-          "changed_receipt_fields": [
-            "inputs"
-          ],
-          "log_sha256": "8DC57B55A31EC23061832E2377C460920D370AF0A1F1A7F90F0840FBCAD8C0E5",
-          "recorded_admission_repaired": true
-        },
-        "authentication_or_complete_dependency_closure": false,
-        "production_ready": false,
-        "unchanged_parent_profile_records": 4,
-        "format": "POOLEOS-REVIEWED-EXECUTION-INPUTS-2",
-        "reviewed_data_bindings": 18,
-        "unique_data_paths": 13,
-        "original_profile_core_fields_preserved": 4,
-        "aggregate_source_guard_passed": true,
-        "source_current_profiles": 27,
-        "pending_source_profiles": [],
-        "fresh_profile_captures_available": [
+        "source_current_profiles": 5,
+        "pending_source_profiles": [
           "load",
           "pooleboot",
-          "revalidation",
           "transfer",
           "trap",
           "cpu_policy",
@@ -41906,12 +41913,11 @@
           "atomics",
           "locks"
         ],
-        "next_profile": "full_exact_candidate_qualification",
-        "historical_fields_scope": "prior_review_metrics_retained_not_new_execution_counts",
-        "newly_captured_profiles": 14,
-        "capture_count_scope": "23_affected_original_captures_across_Cycles231_232_233_plus_four_unaffected",
-        "old_profile_group_claims_require_current_source_guard": true,
-        "original_capture_projections_validated": 27
+        "aggregate_source_guard_passed": false,
+        "fresh_qemu_runs": 0,
+        "scope": "27_retained_profile_sources_not_new_PKUSER3_profile",
+        "historical_record": "historical_cycle236_execution_source_qualification",
+        "production_ready": false
       },
       "historical_cycle225_candidate_audit": {
         "cycle": 225,
@@ -51904,27 +51910,22 @@
         "inherited_shared_loader_input_count": 19
       },
       "current_user_entry_metadata": {
-        "cycle": 236,
+        "cycle": 237,
         "status": "pass",
-        "tests_run": 84,
-        "tests_passed": 84,
+        "tests_run": 98,
+        "tests_passed": 98,
         "tests_failed": 0,
         "tests_skipped": 0,
-        "elapsed_seconds": 67.572,
-        "runner_elapsed_seconds": 68.39,
-        "log_sha256": "5E261AF830B86EC8130F00909D2B0A136A0ED0306EAC06F613AC1F328550D03D",
+        "elapsed_seconds": 49.382,
+        "runner_elapsed_seconds": 50.204,
+        "log_sha256": "FDA9613EBD5AA6242C80691959CD7D181ED721997AE1F6236A7AE9EDF2C6A758",
         "initial_attempts": [
           {
-            "failures": 1,
+            "failures": 4,
             "errors": 0,
-            "log_sha256": "3493A8978F9CCAED492BB6799E9FBA43763CB858257B60C5315383FE5C2F4AF2"
+            "log_sha256": "C7429478FB6B23C52327EA7E8DA756C451606D29D75D618AD243DFC5B66D7E66"
           }
         ],
-        "pre_final_review_pass": {
-          "tests_passed": 84,
-          "elapsed_seconds": 68.473,
-          "log_sha256": "5D2ECE4A17B06E07AF72F8DDFCF54949EA783D2E4EC387A513C813E32FCB3CBB"
-        },
         "historical_integrity_is_not_new_execution": true,
         "production_ready": false
       },
@@ -52002,6 +52003,157 @@
         ],
         "historical_integrity_is_not_new_execution": true,
         "production_ready": false
+      },
+      "historical_cycle236_closeout_regression": {
+        "cycle": 236,
+        "status": "focused_native_pass_not_full_canonical",
+        "tests_run": 327,
+        "tests_passed": 327,
+        "tests_failed": 0,
+        "tests_skipped": 0,
+        "scope": "284_debug_kernel_tests_plus38_repeated_release_user_entry_tests_plus5_compile_fail_checks",
+        "receipt_path": "tests/fixtures/cycle236-user-entry-readiness.json",
+        "receipt_sha256": "0CE9612DEF69AA63110F6E5A6D4D016DDE8D8F2D7E62A95E36938930D873CAE8",
+        "canonical_full_replay_performed": false,
+        "merge_qualified": false,
+        "production_ready": false
+      },
+      "historical_cycle236_user_entry_metadata": {
+        "cycle": 236,
+        "status": "pass",
+        "tests_run": 84,
+        "tests_passed": 84,
+        "tests_failed": 0,
+        "tests_skipped": 0,
+        "elapsed_seconds": 67.572,
+        "runner_elapsed_seconds": 68.39,
+        "log_sha256": "5E261AF830B86EC8130F00909D2B0A136A0ED0306EAC06F613AC1F328550D03D",
+        "initial_attempts": [
+          {
+            "failures": 1,
+            "errors": 0,
+            "log_sha256": "3493A8978F9CCAED492BB6799E9FBA43763CB858257B60C5315383FE5C2F4AF2"
+          }
+        ],
+        "pre_final_review_pass": {
+          "tests_passed": 84,
+          "elapsed_seconds": 68.473,
+          "log_sha256": "5D2ECE4A17B06E07AF72F8DDFCF54949EA783D2E4EC387A513C813E32FCB3CBB"
+        },
+        "historical_integrity_is_not_new_execution": true,
+        "production_ready": false
+      },
+      "historical_cycle236_shared_loader_qualification": {
+        "cycle": 183,
+        "contract_id": "PKELF1",
+        "status": "single_host_replay_pass",
+        "receipt_path": "runs/native_elf_loader_readiness.json",
+        "receipt_sha256": "70399A505005A60E04CB801E3B49E5A149B854E3CE9A4F952ECA458761E45E91",
+        "implementation_input_count": 19,
+        "new_input_bindings": 8,
+        "host_profile_sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+        "rust_host_tests_passed": 12,
+        "clippy_runs_passed": 3,
+        "no_std_target_builds_passed": 2,
+        "pooleboot_integration_builds_passed": 2,
+        "exact_loaded_byte_vectors_matched": 3,
+        "maximum_relocations_exercised": 4096,
+        "negative_controls_passed": 129,
+        "differential_fuzz_cases": 16384,
+        "differential_mismatches": 0,
+        "host_profile_rejection_cases": 10,
+        "build_input_mutation_cases": 8,
+        "entry_shared_input_mutation_cases": 19,
+        "invalid_output_admission_cases": 2,
+        "invalid_output_created_or_replaced": false,
+        "exact_receipt_reproduction_passed": true,
+        "execution_log_sha256": "A9C743905D74D9DFC26B724F9D42068DCC36817F084A56EDC85D2DB7AC420F64",
+        "complete_host_attestation": false,
+        "second_builder_reproduced": false,
+        "fresh_qemu_runs": 0,
+        "n5_exit_gate_satisfied": false,
+        "production_ready": false,
+        "source_validation_cycle": 185
+      },
+      "historical_cycle236_execution_source_qualification": {
+        "cycle": 233,
+        "status": "pass_current_original_capture_projection",
+        "move_id": "N5-FAT32-PARENT-001",
+        "receipt_path": "runs/native_execution_sources.json",
+        "receipt_sha256": "65155E981FA217BD9D78218A4E0C0537A574D613ED9FB3E1EBD16511B6A1EA5D",
+        "profiles": 27,
+        "unique_python_sources": 78,
+        "closure_size_range": [
+          4,
+          38
+        ],
+        "fresh_qemu_runs": 28,
+        "retained_profile_receipts": 26,
+        "original_fourteen_records_unchanged": true,
+        "historical_source_record_path": "tests/fixtures/cycle229-execution-sources.json",
+        "historical_source_record_sha256": "9C64EC020BD4D98182DAB38EF65EA7ABBFC15EC3EFD98BA188D6E005C2AE5295",
+        "malformed_records_rejected_by_component_and_gate": 33,
+        "shared_leaf_mutation_invalidates_profile_captures": 27,
+        "upstream_missing_substituted_and_changed_source_controls": 13,
+        "errata_host_qualification": {
+          "status": "pass_policy_denies_current_target",
+          "host_tests": 6,
+          "no_std_builds": 2,
+          "cross_language_vectors": 128,
+          "negative_controls": 24,
+          "target_denial_reasons": 6,
+          "privileged_reads": 0,
+          "firmware_writes": 0,
+          "elapsed_seconds": 10.937,
+          "receipt_sha256": "975C57DDFB54EDB9C1573D2A1B5ABD5B2242996B7FE32028740780A22319ABD8",
+          "previous_receipt_sha256": "9C25E26A8C53AF2A908DE41F51887E15AC7571C7C79EDF1318BAC13539F489B0",
+          "changed_receipt_fields": [
+            "inputs"
+          ],
+          "log_sha256": "8DC57B55A31EC23061832E2377C460920D370AF0A1F1A7F90F0840FBCAD8C0E5",
+          "recorded_admission_repaired": true
+        },
+        "authentication_or_complete_dependency_closure": false,
+        "production_ready": false,
+        "unchanged_parent_profile_records": 4,
+        "format": "POOLEOS-REVIEWED-EXECUTION-INPUTS-2",
+        "reviewed_data_bindings": 18,
+        "unique_data_paths": 13,
+        "original_profile_core_fields_preserved": 4,
+        "aggregate_source_guard_passed": true,
+        "source_current_profiles": 27,
+        "pending_source_profiles": [],
+        "fresh_profile_captures_available": [
+          "load",
+          "pooleboot",
+          "revalidation",
+          "transfer",
+          "trap",
+          "cpu_policy",
+          "xstate_policy",
+          "xstate_exception",
+          "privilege_msr_policy",
+          "physical_memory",
+          "virtual_memory",
+          "interrupt_time",
+          "smp_first_ap",
+          "smp_percpu_runtime",
+          "smp_ipi",
+          "scheduler",
+          "scheduler_preempt",
+          "scheduler_deferred",
+          "scheduler_smp",
+          "scheduler_ap_workers",
+          "scheduler_smp_preempt",
+          "atomics",
+          "locks"
+        ],
+        "next_profile": "full_exact_candidate_qualification",
+        "historical_fields_scope": "prior_review_metrics_retained_not_new_execution_counts",
+        "newly_captured_profiles": 14,
+        "capture_count_scope": "23_affected_original_captures_across_Cycles231_232_233_plus_four_unaffected",
+        "old_profile_group_claims_require_current_source_guard": true,
+        "original_capture_projections_validated": 27
       }
     },
     "native": {
@@ -52131,19 +52283,19 @@
       "blocked": true
     },
     "user_space_integration": {
-      "cycle": 236,
+      "cycle": 237,
       "status": "implementation_started",
       "plan_path": "docs/native-userspace-integration-iso.md",
       "selected_stage": "USI-1",
       "selected_requirement": "N13-USER-ENTRY-LIVE-001",
       "receipt_path": "runs/native-user-entry-readiness.json",
       "host_status": "pass",
-      "guest_runs": 0,
+      "guest_runs": 3,
       "ring3_executed": false,
       "iso_built": false,
       "production_ready": false,
       "stages": {
-        "USI-1": "partial_host_cpu_lifecycle_adapter_compile_only",
+        "USI-1": "partial_live_cpl0_root_restore_no_ring3",
         "USI-2": "not_started",
         "USI-3": "not_started",
         "USI-4": "not_started",
@@ -52154,10 +52306,12 @@
       "live_adapter_implemented": true,
       "owned_inactive_supervisor_attachment": true,
       "entry_stack_bytes": 16384,
-      "live_adapter_wired": false,
-      "privileged_adapter_verification": "freestanding_kernel_compile_only",
+      "live_adapter_wired": true,
+      "privileged_adapter_verification": "two_fresh_qemu_CPL0_root_restore_probes_plus_default_denial",
       "cpu_exposure_lifecycle_implemented": true,
-      "actual_cr3_switch_executed": false
+      "actual_cr3_switch_executed": true,
+      "user_root_guest_runs": 2,
+      "ordinary_denial_guest_runs": 1
     },
     "historical_cycle234_user_space_integration": {
       "cycle": 234,
@@ -52205,6 +52359,35 @@
       "live_adapter_implemented": false,
       "owned_inactive_supervisor_attachment": true,
       "entry_stack_bytes": 16384
+    },
+    "historical_cycle236_user_space_integration": {
+      "cycle": 236,
+      "status": "implementation_started",
+      "plan_path": "docs/native-userspace-integration-iso.md",
+      "selected_stage": "USI-1",
+      "selected_requirement": "N13-USER-ENTRY-LIVE-001",
+      "receipt_path": "tests/fixtures/cycle236-user-entry-readiness.json",
+      "host_status": "pass",
+      "guest_runs": 0,
+      "ring3_executed": false,
+      "iso_built": false,
+      "production_ready": false,
+      "stages": {
+        "USI-1": "partial_host_cpu_lifecycle_adapter_compile_only",
+        "USI-2": "not_started",
+        "USI-3": "not_started",
+        "USI-4": "not_started",
+        "USI-5": "not_started"
+      },
+      "continue_full_microkernel_after_iso": true,
+      "required_next": "N13-USER-ENTRY-LIVE-001",
+      "live_adapter_implemented": true,
+      "owned_inactive_supervisor_attachment": true,
+      "entry_stack_bytes": 16384,
+      "live_adapter_wired": false,
+      "privileged_adapter_verification": "freestanding_kernel_compile_only",
+      "cpu_exposure_lifecycle_implemented": true,
+      "actual_cr3_switch_executed": false
     }
   },
   "source_set": [
@@ -53618,12 +53801,13 @@
         "ADD-CAP-001"
       ],
       "current_evidence": [
+        "Cycle 237: PKUSER3 executes actual owned CR3 activation, guarded supervisor-stack access, flushing restoration and full13-page release in two fresh QEMU guests; ordinary boot still denies execution.288 debug,42 optimized,5 compile-fail,10 boot-exit tests,13 Python oracle tests and two rejected feature builds pass. docs/checkpoints/cycle237-live-user-root.md",
         "Cycle 236: PKUSER3 consumes owned roots into a failure-quarantined CPU lifecycle; fresh context/mapping checks precede exposure and flushing restoration precedes detach.284 host tests,38 repeated optimized tests,5 compile-fail checks and freestanding kernel/library compilation pass. docs/checkpoints/cycle236-user-root-cpu-lifecycle.md",
         "Cycle 235: PKUSER2 constructs retained inactive supervisor and guarded entry-stack mappings; read/write/cleanup failures retain ownership; host/freestanding checks only. docs/checkpoints/cycle235-owned-user-root.md",
         "Cycle 234: PKUSER1 inactive user-image admission passes260 kernel host tests,14 optimized focused tests and freestanding-library check; no live user execution or ISO. docs/checkpoints/cycle234-user-entry-foundation.md"
       ],
       "current_gaps": [
-        "The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open.",
+        "CPL0 switching is not user-mode execution. Owned timer/MMIO recovery, user GDT/TSS/IRETQ, architectural-state initialization and contained fault/preemption remain before ring3. Capability IPC, services, shell/apps and optical ISO qualification follow. Full production and exact-candidate merge gates remain open.",
         "No ring-3 task, syscall, or capability object implementation exists"
       ],
       "exit_gate": "a static user task enters ring 3, performs capability-mediated syscalls, receives exceptions, exits cleanly, and cannot access any ungranted kernel object or memory."
@@ -59803,7 +59987,8 @@
         "docs/checkpoints/cycle234-user-entry-foundation.md",
         "docs/native-userspace-integration-iso.md",
         "docs/checkpoints/cycle235-owned-user-root.md",
-        "docs/checkpoints/cycle236-user-root-cpu-lifecycle.md"
+        "docs/checkpoints/cycle236-user-root-cpu-lifecycle.md",
+        "docs/checkpoints/cycle237-live-user-root.md"
       ]
     }
   ],
@@ -59818,7 +60003,7 @@
       "PKERR1 freezes a pure exact-target CPU/errata rejection policy, PKXSTATE1 proves bounded x87/SSE standard-XSAVE ownership, PKXEXC1 proves deliberate #MF/#XM recovery plus terminal test-only #NM rejection with a linked scope audit under WHPX, and PKMSR1 proves only a read-only qemu64 BSP system-linkage/global-MCA/unsupported-PMU observation. PKPMM7 supplies bounded physical ownership, scrubbed lifecycle transactions, a stable guarded five-page manager, external generation-owned active ledgers, checked automatic growth with retirement, bounded-window fallback and pre-effect rejection, streamed lifecycle-gated Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation and retained copy/readback; PKVM1 supplies inactive page-table transactions; PKVM3 proves one-BSP activation/restoration of a complete-profile PMM-owned sparse direct map; PKIRQ1 proves one bounded local timer transaction; PKSMP1 proves one first-AP start/quiesce/park lifecycle; PKSMP2 proves one AP-local GDT/TSS/IDT, guarded-stack, x87/SSE-owner, and interrupt-vector runtime transaction; and PKSMP5 proves three simultaneous AP-local runtimes, partial-start rollback with fresh retry, six fixed IPI classes per AP, three AP-side one-page INVLPG operations, aggregate acknowledgement, and one deferred generation retirement. No target-qualified complete native CPU policy, applicable Model 40h-4Fh errata authority, direct numeric client microcode floor or ratified replacement, target-specific privileged-MSR semantics, syscall/MCE/PMU activation, AVX/extended state, user-task exception delivery, scheduler or migration integration, general interrupt routing/time services, production capability authority, general topology or SMP shootdown, AML or complete ACPI resource-graph execution, complete kernel/user address spaces, heap, MMIO/PAT/MTRR qualification, interrupt-context or concurrent allocator, general pressure, or OOM implementation exists",
       "The exact Tier 1 identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records are captured with zero public raw registers, but seven required channels remain non-complete in total, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification also remain open",
       "No native DMA/IOMMU/interrupt-remapping confinement",
-      "The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open. Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion. User-space integration still needs owned kernel-half mappings/stacks, live ring3/return/fault containment, capabilities/IPC, services, shell/apps and ISO qualification. Production microkernel completion remains N0-N39. PKPMM7 supplies bounded one-BSP physical-page ownership, scrub-before-allocation and scrub-before-reuse with full readback and fault rollback, a stable guarded five-page manager, external generation-owned guarded ledgers, checked automatic repeated growth, verified retirement, bounded-window fallback and pre-effect rejection, exact post-ExitBootServices Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation plus retained snapshot copy/readback. PKVM1 supplies inactive four-level 4 KiB transactions, PKVM3 supplies a complete-profile PMM-owned sparse direct map, cache-alias rejection, exact CR3 restoration, three local invalidation receipts, and generation-retirement gating, and PKSMP5 proves exactly three AP-side INVLPG operations and deferred reclaim for three AP-owned roots, one page per root, one generation, and aggregate target/ack mask 0xE. General topology, address-space-wide shootdown, multiple concurrent generations, production capability authority, incremental concurrent map replacement, huge pages, PCID, COW, user faults, pager IPC, cache/MMIO qualification, heaps/object caches, interrupt-context allocation, concurrent allocation, general pressure and OOM policy, scheduler, task, syscall, capability, IPC, isolation, and asynchronous I/O remain open",
+      "CPL0 switching is not user-mode execution. Owned timer/MMIO recovery, user GDT/TSS/IRETQ, architectural-state initialization and contained fault/preemption remain before ring3. Capability IPC, services, shell/apps and optical ISO qualification follow. Full production and exact-candidate merge gates remain open. The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open. Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion. User-space integration still needs owned kernel-half mappings/stacks, live ring3/return/fault containment, capabilities/IPC, services, shell/apps and ISO qualification. Production microkernel completion remains N0-N39. PKPMM7 supplies bounded one-BSP physical-page ownership, scrub-before-allocation and scrub-before-reuse with full readback and fault rollback, a stable guarded five-page manager, external generation-owned guarded ledgers, checked automatic repeated growth, verified retirement, bounded-window fallback and pre-effect rejection, exact post-ExitBootServices Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation plus retained snapshot copy/readback. PKVM1 supplies inactive four-level 4 KiB transactions, PKVM3 supplies a complete-profile PMM-owned sparse direct map, cache-alias rejection, exact CR3 restoration, three local invalidation receipts, and generation-retirement gating, and PKSMP5 proves exactly three AP-side INVLPG operations and deferred reclaim for three AP-owned roots, one page per root, one generation, and aggregate target/ack mask 0xE. General topology, address-space-wide shootdown, multiple concurrent generations, production capability authority, incremental concurrent map replacement, huge pages, PCID, COW, user faults, pager IPC, cache/MMIO qualification, heaps/object caches, interrupt-context allocation, concurrent allocation, general pressure and OOM policy, scheduler, task, syscall, capability, IPC, isolation, and asynchronous I/O remain open",
       "No native security/crypto/TPM/secrets/MAC/privacy implementation or external review",
       "No isolated native driver domains or virtio reference drivers",
       "No native block/NVMe/USB/input/VFS/PooleFS persistent path",
@@ -59842,13 +60027,13 @@
       "N12",
       "N13"
     ],
-    "title": "Connect bootstrap access and owned timer mappings, then execute a bounded native CR3 and ring-3 return/fault probe",
+    "title": "Attach owned timer/MMIO recovery mappings, then implement sanitized user descriptors/TSS/IRETQ and contained user faults",
     "entry_evidence": [
       "docs/native-userspace-integration-iso.md",
       "runs/native-user-entry-readiness.json",
-      "docs/checkpoints/cycle236-user-root-cpu-lifecycle.md",
-      "native/kernel/src/user_entry/cpu.rs",
-      "native/kernel/src/arch/x86_64.rs"
+      "docs/checkpoints/cycle237-live-user-root.md",
+      "native/kernel/src/user_root_probe.rs",
+      "native/kernel/src/user_entry/bootstrap.rs"
     ],
     "exit_evidence": [
       "fresh QEMU CPL3 observation with controlled kernel entry/return",
@@ -59858,6 +60043,7 @@
     "blocked": false
   },
   "claim_boundaries": [
+    "Cycle 237: PKUSER3 executes actual owned CR3 activation, guarded supervisor-stack access, flushing restoration and full13-page release in two fresh QEMU guests; ordinary boot still denies execution.288 debug,42 optimized,5 compile-fail,10 boot-exit tests,13 Python oracle tests and two rejected feature builds pass. docs/checkpoints/cycle237-live-user-root.md CPL0 switching is not user-mode execution. Owned timer/MMIO recovery, user GDT/TSS/IRETQ, architectural-state initialization and contained fault/preemption remain before ring3. Capability IPC, services, shell/apps and optical ISO qualification follow. Full production and exact-candidate merge gates remain open.",
     "Cycle 236: PKUSER3 consumes owned roots into a failure-quarantined CPU lifecycle; fresh context/mapping checks precede exposure and flushing restoration precedes detach.284 host tests,38 repeated optimized tests,5 compile-fail checks and freestanding kernel/library compilation pass. docs/checkpoints/cycle236-user-root-cpu-lifecycle.md The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open.",
     "Cycle 235: PKUSER2 constructs retained inactive supervisor and guarded entry-stack mappings; read/write/cleanup failures retain ownership; host/freestanding checks only. docs/checkpoints/cycle235-owned-user-root.md Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion.",
     "Cycle 234: PKUSER1 inactive user-image admission passes260 kernel host tests,14 optimized focused tests and freestanding-library check; no live user execution or ISO. docs/checkpoints/cycle234-user-entry-foundation.md User-space integration still needs owned kernel-half mappings/stacks, live ring3/return/fault containment, capabilities/IPC, services, shell/apps and ISO qualification. Production microkernel completion remains N0-N39. 25 retained component admissions are stale on changed native source; historical execution is not new qualification.",

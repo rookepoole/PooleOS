@@ -3841,7 +3841,7 @@ pub unsafe fn write_cr3(value: u64) {
     unsafe { asm!("mov cr3, {}", in(reg) value, options(nostack, preserves_flags)) };
 }
 
-/// Privileged PKUSER3 adapter, not wired into any boot scenario yet.
+/// Privileged PKUSER3 adapter, wired only into the development user-root probe.
 /// The private construction boundary preserves the single-BSP execution lease.
 #[allow(dead_code)]
 pub struct UserRootCpu {
@@ -3884,7 +3884,7 @@ impl poolekernel::user_entry::prepared::cpu::Cpu for UserRootCpu {
                 read_cr3(),
                 read_cr4(),
                 read_efer(),
-                read_msr(CPU_MSR_APIC_BASE),
+                read_apic_base(),
             )
         };
         if apic_base & (1 << 8) == 0 {

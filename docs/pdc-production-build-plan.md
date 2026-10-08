@@ -1,15 +1,42 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-07
-Plan version: 2.139.0-user-root-cpu-lifecycle
-Roadmap cycle: PooleOS Cycle 236
+Plan version: 2.140.0-live-user-root
+Roadmap cycle: PooleOS Cycle 237
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 236: User Root CPU Lifecycle
+## Cycle 237: Live User Root Switch And Restore
+
+USI-1 / N9/N12/N13.3, `N13-USER-ENTRY-LIVE-001`: the owned user root now
+executes in a gated native QEMU profile at CPL0. Two fresh guests activate it,
+read/write the guarded supervisor stack, restore the original root with a flush,
+scrub six data pages and release all 13 owned pages. A third ordinary boot still
+denies unsigned execution. No ring-3 execution or new ISO is claimed.
+See [Cycle 237 evidence](checkpoints/cycle237-live-user-root.md).
+
+288 debug kernel tests, 42 repeated optimized tests, five ownership compile-fail
+tests, ten boot-exit tests, 13 Python oracle tests, two rejected conflicting
+feature builds and freestanding checks pass. Live testing found and repaired an
+APIC register-address error missed by host tests. The bounded linked image grows
+to 160 pages within the existing 192-page mapping capacity, preserving R/RX/RW
+segment boundaries. Failed runs are retained, not overwritten as successes.
+
+Next: owned timer/MMIO mappings and recovery under the task root; then sanitized
+user descriptor/TSS/IRETQ entry, architectural-state isolation and contained
+user faults. Capability IPC, services, an interactive shell and optical ISO
+qualification remain required. The integration flag and all N0-N39 production
+requirements remain open as before; robust microkernel work continues after the
+preview. The 25 stale component admissions and exact-candidate merge gate are
+not satisfied by these three focused guest runs.
+The shared boot-qualifier change also leaves 22 retained Python source closures
+stale (five remain current); their original capture ledger is preserved and its
+aggregate source guard continues to reject until genuine requalification.
+
+## Historical Cycle 236: User Root CPU Lifecycle
 
 USI-1 / N9/N12/N13.3, `N13-USER-ENTRY-LIVE-001`: PKUSER3 now owns the
 transition from prepared mappings to potential CPU exposure. Fresh ownership,

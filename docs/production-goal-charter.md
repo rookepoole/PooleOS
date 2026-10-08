@@ -7,9 +7,16 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 236
+Last roadmap reconciliation: PooleOS Cycle 237
 
-Cycle 236 adds the owning CPU-exposure/restoration lifecycle and compiles its
+Cycle 237 proves bounded CPL0 activation and restoration of the owned user root
+in two fresh QEMU guests, plus ordinary-boot denial. This is direct kernel
+integration progress, not user-mode execution, a usable ISO or production
+qualification. Timer recovery, sanitized user entry and fault containment remain
+next; no normative requirement changes.
+[Cycle 237 evidence](checkpoints/cycle237-live-user-root.md).
+
+Historical Cycle 236 adds the owning CPU-exposure/restoration lifecycle and compiles its
 privileged x86-64 adapter. Fresh host tests cover failure quarantine and retained
 ownership through restoration and cleanup. The adapter is not boot-wired; actual
 ring-3/fault/timer execution and the user-space ISO remain pending. All normative

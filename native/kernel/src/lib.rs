@@ -117,6 +117,7 @@ pub enum PanicCode {
     SchedulerSmpPreempt = 0x101c,
     Atomics = 0x101d,
     Locks = 0x101e,
+    UserRoot = 0x101f,
     UnexpectedReturn = 0x10ff,
 }
 
@@ -146,6 +147,7 @@ pub enum DevelopmentTrapScenario {
     SchedulerSmpPreempt = 20,
     Atomics = 21,
     Locks = 22,
+    UserRoot = 23,
 }
 
 macro_rules! scenario_label {
@@ -179,6 +181,7 @@ scenario_label!(SCENARIO_SCHEDULER_AP_WORKERS, b"scheduler_ap_workers");
 scenario_label!(SCENARIO_SCHEDULER_SMP_PREEMPT, b"scheduler_smp_preempt");
 scenario_label!(SCENARIO_ATOMICS, b"atomics");
 scenario_label!(SCENARIO_LOCKS, b"locks");
+scenario_label!(SCENARIO_USER_ROOT, b"user_root");
 
 const fn scenario_label_text(bytes: &'static [u8]) -> &'static str {
     // SAFETY: every caller supplies an ASCII byte string declared immediately above.
@@ -211,6 +214,7 @@ impl DevelopmentTrapScenario {
             20 => Some(Self::SchedulerSmpPreempt),
             21 => Some(Self::Atomics),
             22 => Some(Self::Locks),
+            23 => Some(Self::UserRoot),
             _ => None,
         }
     }
@@ -240,6 +244,7 @@ impl DevelopmentTrapScenario {
             Self::SchedulerSmpPreempt => scenario_label_text(&SCENARIO_SCHEDULER_SMP_PREEMPT),
             Self::Atomics => scenario_label_text(&SCENARIO_ATOMICS),
             Self::Locks => scenario_label_text(&SCENARIO_LOCKS),
+            Self::UserRoot => scenario_label_text(&SCENARIO_USER_ROOT),
         }
     }
 }
@@ -1834,7 +1839,12 @@ mod tests {
             DevelopmentTrapScenario::from_selector(22),
             Some(DevelopmentTrapScenario::Locks)
         );
-        assert_eq!(DevelopmentTrapScenario::from_selector(23), None);
+        assert_eq!(
+            DevelopmentTrapScenario::from_selector(23),
+            Some(DevelopmentTrapScenario::UserRoot)
+        );
+        assert_eq!(DevelopmentTrapScenario::UserRoot.label(), "user_root");
+        assert_eq!(DevelopmentTrapScenario::from_selector(24), None);
     }
 
     #[test]
