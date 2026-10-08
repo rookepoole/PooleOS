@@ -22,8 +22,21 @@ pub struct Snapshot {
 }
 impl Snapshot {
     pub fn validate(self, in_handler: bool) -> Result<(), Error> {
+        self.validate_owned(in_handler.then_some(TIMER_VECTOR), false)
+    }
+    pub fn validate_owned(self, handler: Option<u8>, backup_owned: bool) -> Result<(), Error> {
         let bank = usize::from(TIMER_VECTOR / 32);
-        let bit = 1 << (TIMER_VECTOR % 32);
+        let bit = (1 << (TIMER_VECTOR % 32))
+            | if backup_owned {
+                1 << (super::watchdog::VECTOR % 32)
+            } else {
+                0
+            };
+        if handler
+            .is_some_and(|v| v != TIMER_VECTOR && !(backup_owned && v == super::watchdog::VECTOR))
+        {
+            return Err(Error::Hardware);
+        }
         if self.lvt & !SENDING != u32::from(TIMER_VECTOR) | MASK
             || self.initial != 0
             || self.current != 0
@@ -34,7 +47,10 @@ impl Snapshot {
         }
         for i in 0..8 {
             let allowed = if i == bank { bit } else { 0 };
-            if self.irr[i] & !allowed != 0 || self.isr[i] != if in_handler { allowed } else { 0 } {
+            let expected_isr = handler
+                .filter(|v| usize::from(v / 32) == i)
+                .map_or(0, |v| 1 << (v % 32));
+            if self.irr[i] & !allowed != 0 || self.isr[i] != expected_isr {
                 return Err(Error::Hardware);
             }
         }
@@ -63,17 +79,22 @@ pub struct Receipt {
 }
 
 pub fn quiesce<H: Hardware>(h: &mut H) -> Result<Receipt, Error> {
+    quiesce_owned(h, false)
+}
+pub fn quiesce_owned<H: Hardware>(h: &mut H, backup_owned: bool) -> Result<Receipt, Error> {
     h.stop()?;
     let first = h.snapshot()?;
-    first.validate(false)?;
+    first.validate_owned(None, backup_owned)?;
     let mut last = first.deliveries;
     for windows in 1..=WINDOW_LIMIT {
         // Open even after an empty first snapshot: a just-accepted interrupt may
         // still be reaching IRR. Device stop/readback remains a prerequisite.
         h.window()?;
         let now = h.snapshot()?;
-        now.validate(false)?;
-        if now.deliveries < last || now.deliveries - first.deliveries > 2 {
+        now.validate_owned(None, backup_owned)?;
+        if now.deliveries < last
+            || now.deliveries - first.deliveries > if backup_owned { 4 } else { 2 }
+        {
             return Err(Error::Hardware);
         }
         last = now.deliveries;

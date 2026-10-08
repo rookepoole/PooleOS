@@ -274,6 +274,10 @@ unsafe fn install() -> Result<(), Error> {
             usize::from(crate::TIMER_VECTOR),
             poole_interrupt_timer as *const () as u64,
         ),
+        (
+            usize::from(user_entry::timer::watchdog::VECTOR),
+            poole_interrupt_watchdog as *const () as u64,
+        ),
     ] {
         let mut gate = IdtGate::interrupt(handler, 0);
         if vector == 3 {

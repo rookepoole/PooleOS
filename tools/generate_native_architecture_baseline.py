@@ -24,6 +24,12 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle248-native-hpet-backup.md",
+    "docs/native-user-hpet-backup.md",
+    "tests/fixtures/cycle247-user-entry-readiness.json",
+    "native/kernel/src/user_entry/timer/watchdog.rs",
+    "native/kernel/src/user_entry/timer/watchdog/tests.rs",
+    "native/kernel/src/arch/x86_64/user_watchdog.rs",
     "docs/checkpoints/cycle247-native-runtime-accounting.md",
     "docs/native-user-runtime-accounting.md",
     "tests/fixtures/cycle246-user-entry-readiness.json",

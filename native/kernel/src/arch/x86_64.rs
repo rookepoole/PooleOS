@@ -51,6 +51,7 @@ const TSS_AVAILABLE_PRESENT_RING0: u64 = 0x89;
 pub mod user;
 mod user_preempt;
 mod user_syscall;
+pub mod user_watchdog;
 
 #[derive(Clone, Copy)]
 #[repr(C, packed)]
@@ -1891,6 +1892,7 @@ unsafe extern "C" {
     fn poole_trigger_device_not_available_rejection() -> !;
     fn poole_device_not_available_fault();
     fn poole_interrupt_timer();
+    fn poole_interrupt_watchdog();
     fn poole_interrupt_apic_error();
     fn poole_interrupt_spurious();
 }
@@ -1934,6 +1936,7 @@ core::arch::global_asm!(
     POOLE_TRAP_ERROR poole_trap_alignment, 17
     POOLE_TRAP_NO_ERROR poole_trap_simd_floating_point, 19
     POOLE_TRAP_NO_ERROR poole_interrupt_timer, 64
+    POOLE_TRAP_NO_ERROR poole_interrupt_watchdog, 65
     POOLE_TRAP_NO_ERROR poole_interrupt_apic_error, 240
     POOLE_TRAP_NO_ERROR poole_interrupt_spurious, 255
 

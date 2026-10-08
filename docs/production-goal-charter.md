@@ -7,9 +7,17 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 247
+Last roadmap reconciliation: PooleOS Cycle 248
 
-Cycle247 proves exactly-once runtime settlement for authenticated returned peer
+Cycle248 adds an owned HPET backup deadline. Two fresh native guests each recover
+a masked-local-timer spinner, retain exact time accounting and preserve16 peer
+survival cases. Next: unknown-runtime recovery, IPC, services, shell/apps and the
+usable ISO. Shared APIC/IF and physical-clock limits remain explicit; no broad
+watchdog, phase exit, merge, release or promotion is claimed. Full robust N0-N39
+microkernel development continues after the integration milestone.
+[Cycle248 evidence](checkpoints/cycle248-native-hpet-backup.md).
+
+Historical Cycle247 proves exactly-once runtime settlement for authenticated returned peer
 quanta, including terminal and failed-cleanup execution. Two fresh guests each
 settle148 dispatches and reject148 duplicate charges while preserving15 survival
 cases. Missing/invalid measurements remain unknown and retain ownership. Next:

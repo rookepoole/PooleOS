@@ -44,7 +44,7 @@ fn idle(h: &crate::LiveInterruptHardware) -> Result<(), Error> {
     Ok(())
 }
 
-pub(super) fn arm_quantum(budget: Budget) -> Result<u64, Error> {
+pub(super) fn arm_quantum(budget: Budget, suppress_local: bool) -> Result<u64, Error> {
     budget.validate()?;
     let mut h = hardware()?;
     idle(&h)?;
@@ -55,13 +55,21 @@ pub(super) fn arm_quantum(budget: Budget) -> Result<u64, Error> {
         return Err(Error::Hardware);
     }
     let start = hw(h.hpet_read(0xf0))?;
-    hw(h.apic_write(0x320, u32::from(crate::TIMER_VECTOR)))?;
+    super::user_watchdog::arm(start).map_err(|_| Error::Hardware)?;
+    let mask = if suppress_local { 1 << 16 } else { 0 };
+    hw(h.apic_write(0x320, u32::from(crate::TIMER_VECTOR) | mask))?;
     hw(h.apic_write(0x380, budget.count))?;
+    if hw(h.apic_read(0x320))? != u32::from(crate::TIMER_VECTOR) | mask
+        || hw(h.apic_read(0x380))? != budget.count
+    {
+        return Err(Error::Hardware);
+    }
     Ok(start)
 }
 
 pub(super) fn finish_quantum(budget: Budget, start: u64) -> Result<u64, Error> {
     let mut h = hardware()?;
+    super::user_watchdog::stop().map_err(|_| Error::Hardware)?;
     let ticks = budget.elapsed(start, hw(h.hpet_read(0xf0))?)?;
     let vector = u32::from(crate::TIMER_VECTOR);
     if hw(h.in_service_count())? != 1
@@ -77,7 +85,16 @@ pub(super) fn finish_quantum(budget: Budget, start: u64) -> Result<u64, Error> {
         return Err(Error::Hardware);
     }
     hw(h.apic_write(0xb0, 0))?;
-    idle(&h)?;
+    // Pending owned backup delivery is drained by the retained timer owner.
+    for bank in 0..8 {
+        let allowed = if bank == 2 { 3 } else { 0 };
+        if hw(h.apic_read(0x100 + bank * 16))? != 0
+            || hw(h.apic_read(0x200 + bank * 16))? & !allowed != 0
+            || hw(h.apic_read(0x180 + bank * 16))? & allowed != 0
+        {
+            return Err(Error::Hardware);
+        }
+    }
     Ok(ticks)
 }
 

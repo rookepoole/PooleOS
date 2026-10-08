@@ -476,7 +476,7 @@ pub fn run(
     log.write_str(" retained_acpi_pages=");
     log.write_decimal_u64(acpi.snapshot_page_count);
     log.write_str(
-        " released_pages=538 scrubbed_data_pages=247 ring3=1 production=0 terminal=halt\n",
+        " released_pages=564 scrubbed_data_pages=259 ring3=1 production=0 terminal=halt\n",
     );
     halt_forever()
 }

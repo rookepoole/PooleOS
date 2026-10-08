@@ -43,6 +43,7 @@ impl Peer {
         topology: interrupt_time::MadtTopology,
         hpet: interrupt_time::HpetDescription,
         probe: timer_driver::Probe,
+        missing_local: bool,
     ) -> Result<Self, PeerFailure> {
         let mut timer =
             Timer::new(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
@@ -50,8 +51,14 @@ impl Peer {
         let bytes = arch::x86_64::user::peer_payload(kind).map_err(|_| PeerFailure::Setup)?;
         let identity = TaskId::new(index, 1).map_err(|_| PeerFailure::Setup)?;
         // SAFETY: exclusive BSP, IF0, before allocation or task activation.
-        let entry = unsafe { arch::x86_64::user::PeerEntry::new(core.initial_stack_top_virtual) }
-            .map_err(|_| PeerFailure::Setup)?;
+        let mut entry =
+            unsafe { arch::x86_64::user::PeerEntry::new(core.initial_stack_top_virtual) }
+                .map_err(|_| PeerFailure::Setup)?;
+        if missing_local {
+            entry
+                .inject_missing_local_timer()
+                .map_err(|_| PeerFailure::Setup)?;
+        }
         let built = spawn_driver::build(manager, core, bits, bytes, Some(timer.mappings()))
             .map_err(PeerFailure::Construction)?;
         Self::install(identity, entry, timer, built, core)
@@ -212,8 +219,11 @@ pub fn run_all(
     let mut preempt_ticks = 0u64;
     let mut failed_ticks = 0u64;
     let mut duplicate_denials = 0u64;
-    for round in 0..15 {
-        let first_kind = if round == 14 {
+    let mut watchdog_ticks = 0u64;
+    for round in 0..16 {
+        let first_kind = if round == 15 {
+            2
+        } else if round == 14 {
             0
         } else if round >= 3 {
             round + 1
@@ -230,7 +240,16 @@ pub fn run_all(
             checked!(
                 100,
                 Peer::new(
-                    0, first_kind, handoff, core, bits, manager, topology, hpet, probe
+                    0,
+                    first_kind,
+                    handoff,
+                    core,
+                    bits,
+                    manager,
+                    topology,
+                    hpet,
+                    probe,
+                    round == 15
                 )
             ),
             checked!(
@@ -244,7 +263,8 @@ pub fn run_all(
                     manager,
                     topology,
                     hpet,
-                    timer_driver::Probe::None
+                    timer_driver::Probe::None,
+                    false
                 )
             ),
         ];
@@ -383,6 +403,7 @@ pub fn run_all(
                         }
                         (2, Reason::Cancelled) => outcome.syscalls == 0,
                         (3, Reason::CallLimit) => outcome.syscalls == 64,
+                        (15, Reason::Watchdog) => outcome.syscalls == 0,
                         (
                             4 | 5,
                             Reason::InvalidReturn {
@@ -451,6 +472,9 @@ pub fn run_all(
                 dead[index] = true;
                 if index == 0 {
                     first_reason = Some(outcome.reason);
+                    if round == 15 {
+                        watchdog_ticks = elapsed;
+                    }
                 }
             }
         }
@@ -458,8 +482,13 @@ pub fn run_all(
         let summary = scheduler.summary();
         let writes = arch::x86_64::user_root_write_count() - before;
         if dead != [true; 2]
-            || (round != 14 && preemptions[0] < 1)
+            || (round < 14 && preemptions[0] < 1)
             || (round == 14 && (!timer_recovered || preemptions[0] != 0))
+            || (round == 15
+                && (first_reason != Some(Reason::Watchdog)
+                    || preemptions[0] != 0
+                    || watchdog_ticks == 0
+                    || after_stop != preemptions[1]))
             || preemptions[1] < 2
             || after_stop < 1
             || summary.running_count != 0
@@ -484,6 +513,7 @@ pub fn run_all(
             Some(Reason::Fault(f)) => ("fault", f.vector),
             Some(Reason::Cancelled) => ("cancel", 0),
             Some(Reason::CallLimit) => ("limit", 64),
+            Some(Reason::Watchdog) => ("watchdog", 65),
             Some(Reason::InvalidReturn { violation, .. }) => ("return", violation as u64),
             None if round == 14 && timer_recovered => ("quarantine", 0),
             _ => stop(119, serial, debugcon),
@@ -548,8 +578,8 @@ pub fn run_all(
     log.write_decimal_u64(u64::from(deliveries));
     log.write_str(" empty_irr_isr=1 kernel_window=1 detached_after_shutdown=1 if=0 production=0\n");
     drop(log);
-    if samples != 148
-        || terminal_samples != 28
+    if samples != 156
+        || terminal_samples != 30
         || duplicate_denials != samples
         || failed_ticks == 0
         || terminal_ticks == 0
@@ -576,4 +606,27 @@ pub fn run_all(
         log.write_decimal_u64(value);
     }
     log.write_str(" failed_cleanup_samples=1 scheduler_match=1 pending=0 unknown=0 clock=hpet charge_window=arm_to_event production=0\n");
+    drop(log);
+    let proof = checked!(128, arch::x86_64::user_watchdog::proof());
+    if proof != [samples, 1, samples, samples] || watchdog_ticks == 0 {
+        stop(128, serial, debugcon);
+    }
+    let mut log = EarlyLogger::new(BootSink {
+        serial,
+        debugcon,
+        ring: &EARLY_RING,
+    });
+    log.write_str("POOLEOS:KERNEL:USER-WATCHDOG PASS contract=PKUSER14 source=hpet_msi local_masked=1 recoveries=1");
+    for (label, value) in [
+        (" arms=", proof[0]),
+        (" stops=", proof[2]),
+        (" restores=", proof[3]),
+        (" ticks=", watchdog_ticks),
+    ] {
+        log.write_str(label);
+        log.write_decimal_u64(value);
+    }
+    log.write_str(
+        " deadline_ns=50000000 peer_exit=84 shared_apic=1 requires_if=1 nmi=0 production=0\n",
+    );
 }

@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 247, 2026-10-08. No new ISO exists yet.
+Status: implementation started, Cycle 248, 2026-10-08. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -43,7 +43,7 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 
 | Stage | Build Plan Binding | Exit Criterion | Current State |
 | --- | --- | --- | --- |
-| USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle247: exact returned-quantum accounting including terminal/failed cleanup and15 survival cases; unknown-runtime/missing-IRQ recovery, general admission/quarantine and stack/exception qualification remain |
+| USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle248: owned HPET backup recovers a masked local timer; exact accounting and16 survival cases; unknown-runtime/general admission/quarantine, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Not started |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Not started |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
@@ -107,6 +107,9 @@ timer draining, exact cleanup quarantine/retry and surviving-peer progress.
 Cycle247 adds retained, exactly-once accounting for all authenticated returned
 peer quanta, including terminal and failed-cleanup samples. The arm-to-event
 charge includes in-quantum kernel overhead, not just user instructions.
+Cycle248 adds a separate HPET MSI deadline for local-timer suppression, with
+owned stop/drain/restore and positively charged terminal recovery. It requires
+working HPET clock/APIC delivery/IF, not NMI recovery or general hardware coverage.
 General spawn admission, persistent quarantine/partial timer configuration and
 slot-commit recovery, complete stack/exception/selector qualification, arbitrary
 timer races, independent missing-delivery recovery, unknown-measurement emergency
@@ -140,7 +143,18 @@ requirements, not items deferred until after the demo.
    products. Preserve the older demo separately; its receipts cannot qualify this
    image. Test the ISO itself, not only a disk image or host library.
 
-## Cycle 247 Native Runtime Accounting
+## Cycle 248 Native HPET Backup Recovery
+
+[Checkpoint](checkpoints/cycle248-native-hpet-backup.md) records two fresh60-marker
+guests with16 survival cases,156 settled dispatches,30 terminal samples and one
+HPET backup recovery each. The local timer mask is read back; a genuine spinning
+user task terminates through vector65 and its peer finishes. Both sources stop,
+drain and restore before detach.539 Rust executions and38 parser tests pass.
+Next: unknown-runtime quarantine recovery, then USI-2 capability IPC. Physical
+clocks, non-MSI/I/O-APIC fallback, NMI and simultaneous pending-source qualification
+remain separately required. No interactive ISO or general watchdog claim follows.
+
+## Historical Cycle 247 Native Runtime Accounting
 
 [Checkpoint](checkpoints/cycle247-native-runtime-accounting.md) records two fresh
 58-marker guests. Each settles148 dispatches,28 terminal samples and one failed-

@@ -10,6 +10,7 @@ struct Fake {
     fail_read: bool,
     fail_window: bool,
     fail_after_delivery: bool,
+    backup: bool,
 }
 impl Fake {
     fn new() -> Self {
@@ -32,6 +33,7 @@ impl Fake {
             fail_read: false,
             fail_window: false,
             fail_after_delivery: false,
+            backup: false,
         }
     }
     fn pending(&mut self) {
@@ -67,11 +69,16 @@ impl Hardware for Fake {
             self.late = false;
         }
         if self.state.pending() && !self.missing {
-            let bank = usize::from(TIMER_VECTOR / 32);
-            let bit = 1 << (TIMER_VECTOR % 32);
+            let vector = if self.backup && self.state.irr[2] & 2 != 0 {
+                65
+            } else {
+                TIMER_VECTOR
+            };
+            let bank = usize::from(vector / 32);
+            let bit = 1 << (vector % 32);
             self.state.irr[bank] &= !bit;
             self.state.isr[bank] |= bit;
-            self.state.validate(true)?;
+            self.state.validate_owned(Some(vector), self.backup)?;
             self.state.deliveries += 1;
             self.state.isr[bank] &= !bit;
             self.state.eois += 1;
@@ -81,6 +88,54 @@ impl Hardware for Fake {
             }
         }
         Ok(())
+    }
+}
+
+#[test]
+fn both_owned_sources_drain_but_backup_without_lease_never_opens_a_window() {
+    let mut h = Fake::new();
+    h.pending();
+    h.state.irr[2] |= 2;
+    assert_eq!(quiesce(&mut h), Err(Error::Hardware));
+    assert_eq!(h.windows, 0);
+    h.backup = true;
+    assert_eq!(quiesce_owned(&mut h, true).unwrap().deliveries, 2);
+    assert_eq!(h.state.irr, [0; 8]);
+    assert_eq!(h.state.isr, [0; 8]);
+    for vector in [64, 65] {
+        let mut s = h.state;
+        s.isr[2] = 1 << (vector % 32);
+        assert!(s.validate_owned(Some(vector), true).is_ok());
+        assert!(
+            s.validate_owned(Some(if vector == 64 { 65 } else { 64 }), true)
+                .is_err()
+        );
+        s.isr[2] = 3;
+        assert!(s.validate_owned(Some(vector), true).is_err());
+        s.isr[2] = 0;
+        s.tmr[2] = 2;
+        assert!(s.validate_owned(None, true).is_err());
+    }
+}
+
+#[test]
+fn missing_backup_and_after_delivery_failure_retain_state_until_retry() {
+    for after_effect in [false, true] {
+        let mut h = Fake::new();
+        h.backup = true;
+        h.state.irr[2] = 2;
+        h.missing = !after_effect;
+        h.fail_after_delivery = after_effect;
+        assert_eq!(quiesce_owned(&mut h, true), Err(Error::Hardware));
+        assert_eq!(h.windows, if after_effect { 1 } else { WINDOW_LIMIT });
+        h.missing = false;
+        h.fail_after_delivery = false;
+        assert_eq!(
+            quiesce_owned(&mut h, true).unwrap().deliveries,
+            u32::from(!after_effect)
+        );
+        assert_eq!(h.state.deliveries, h.state.eois);
+        assert_eq!(h.state.irr, [0; 8]);
     }
 }
 

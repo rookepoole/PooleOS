@@ -277,6 +277,7 @@ impl Driver for Timer {
             return Ok(());
         }
         drain::quiesce(self, root, &mut hardware)?;
+        arch::x86_64::user_watchdog::restore_after_drain()?;
         if TRAP_DEPTH.load(Ordering::Acquire) != 0
             || IRQ_TIMER_DELIVERIES.load(Ordering::Acquire) != IRQ_EOI_COUNT.load(Ordering::Acquire)
             || IRQ_ERROR_COUNT.load(Ordering::Acquire) != 0

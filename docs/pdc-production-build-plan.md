@@ -1,15 +1,42 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.150.0-native-runtime-accounting
-Roadmap cycle: PooleOS Cycle 247
+Plan version: 2.151.0-native-hpet-backup-recovery
+Roadmap cycle: PooleOS Cycle 248
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 247: Native Runtime Accounting
+## Cycle 248: Native HPET Backup Recovery
+
+USI-1 / N8, N12 and N13: PKUSER14 adds a retained HPET comparator lease and
+50ms backup deadline behind the normal local timer. Two fresh60-marker guests
+each recover a spinning task with its local timer masked, charge its time once,
+stop/drain/restore both sources and let the healthy peer exit84. All16 containment
+cases pass:156 dispatches,30 terminal samples and156 duplicate-charge denials.
+539 Rust executions,38 Python oracle tests,601 altered-evidence rejections per
+guest and ordinary unsigned denial pass.
+[Evidence](checkpoints/cycle248-native-hpet-backup.md),
+[invariants and hardware limits](native-user-hpet-backup.md).
+
+The text reservation grew one page within the unchanged192-page cap after a
+recorded link failure. A passing guest attempt's outer capture then detected its
+tracked output write; final qualification uses an isolated candidate receipt
+and zero source changes. Image181pages/entry0xC000, stack guards and guest120s
+bound remain. Explicit QEMU HPET-MSI opt-in does not change default profiles.
+
+Next: unknown-runtime quarantine/emergency accounting, then capability IPC,
+confined services, shell/files/two apps and a usable optical ISO. HPET backup
+shares APIC delivery and IF; it is not NMI or physical-clock failure recovery.
+Non-MSI/I/O-APIC fallback, simultaneous pending sources, general admission and
+stack/exception/hardware qualification remain flagged. All8996 requirements,
+59 additions,97 flags/42 open and20 gaps remain. No phase/flag closure, new ISO,
+merge or production promotion. Complete robust microkernel development follows
+the usable integration milestone.
+
+## Historical Cycle 247: Native Runtime Accounting
 
 USI-1 / N8, N12 and N13: PKUSER13 retains measured quanta before fallible cleanup
 and settles each into its running scheduler task exactly once. Terminal partial

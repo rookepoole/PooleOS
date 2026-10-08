@@ -29,6 +29,7 @@ pub struct PeerEntry {
     run: Option<task::Run>,
     saved: Option<Saved>,
     budget: Option<preemption::Budget>,
+    suppress_local: bool,
 }
 impl PeerEntry {
     /// Same sole-BSP, IF0 and state-ownership preconditions as Entry::prepare.
@@ -38,6 +39,7 @@ impl PeerEntry {
             run: None,
             saved: None,
             budget: None,
+            suppress_local: false,
         })
     }
     pub fn set_budget(&mut self, budget: preemption::Budget) -> Result<(), Error> {
@@ -45,6 +47,13 @@ impl PeerEntry {
             return Err(Error::State);
         }
         self.budget = Some(budget.validate()?);
+        Ok(())
+    }
+    pub fn inject_missing_local_timer(&mut self) -> Result<(), Error> {
+        if self.entry.installed || self.run.is_some() || active() {
+            return Err(Error::State);
+        }
+        self.suppress_local = true;
         Ok(())
     }
 }
@@ -117,7 +126,7 @@ impl task::SliceDriver for PeerEntry {
         ACTIVE_ROOT.store(image.root_physical, Ordering::Release);
         RETURN_STACK_TOP.store(self.entry.original_rsp0, Ordering::Release);
         super::super::user_syscall::enable()?;
-        let start = super::super::user_preempt::arm_quantum(budget)?;
+        let start = super::super::user_preempt::arm_quantum(budget, self.suppress_local)?;
         unsafe { (&mut *(&raw mut SLICE)).as_mut() }
             .ok_or(Error::State)?
             .start = start;
@@ -146,7 +155,14 @@ pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) {
     if s.event.is_some() {
         denied(11, Error::State, t);
     }
-    if t.vector == u64::from(crate::TIMER_VECTOR) {
+    if t.vector == u64::from(user_entry::timer::watchdog::VECTOR) {
+        let outcome = s.run.watchdog(t).unwrap_or_else(|e| denied(16, e, t));
+        s.ticks = Some(
+            super::super::user_watchdog::finish(s.budget, s.start)
+                .unwrap_or_else(|e| denied(16, e, t)),
+        );
+        s.event = Some(Event::Terminated(outcome));
+    } else if t.vector == u64::from(crate::TIMER_VECTOR) {
         let resumable = s.run.preempt(t).unwrap_or_else(|e| denied(11, e, t));
         let ticks = super::super::user_preempt::finish_quantum(s.budget, s.start)
             .unwrap_or_else(|e| denied(12, e, t));

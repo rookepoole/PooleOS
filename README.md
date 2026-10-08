@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle247 accounts native peer quanta exactly
+**Current development checkpoint:** Cycle248 adds native HPET backup recovery.
+Two fresh boots each stop a spinner whose local timer is masked, account its
+execution once, clean up both timers and preserve16 containment cases.
+539 Rust executions and38 Python oracle tests pass. Next: unknown-runtime
+recovery, capability IPC, services, shell/apps and the usable integration ISO.
+No interactive session or new ISO yet; full robust microkernel development
+continues afterward. [Evidence](docs/checkpoints/cycle248-native-hpet-backup.md).
+
+**Historical development checkpoint:** Cycle247 accounts native peer quanta exactly
 once, including terminal execution and failed cleanup. Two fresh boots each
 settle148 dispatches, reject148 duplicate charges and preserve15 survival cases.
 525 Rust executions and36 Python oracle tests pass. Next: independent missing-IRQ

@@ -44,6 +44,7 @@ pub enum Reason {
     },
     Cancelled,
     CallLimit,
+    Watchdog,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -64,6 +65,7 @@ impl Outcome {
                 Reason::InvalidReturn { vector, .. } => !matches!(vector, 64 | syscall::VECTOR),
                 Reason::Cancelled => false,
                 Reason::CallLimit => self.syscalls != 64,
+                Reason::Watchdog => false,
             }
         {
             return Err(privilege::Error::Hardware);
@@ -125,6 +127,13 @@ impl Run {
             return Err(privilege::Error::State);
         }
         self.finish(Reason::Exit(code))
+    }
+    pub fn watchdog(&mut self, trap: &privilege::Trap) -> Result<Outcome, privilege::Error> {
+        if trap.vector != u64::from(super::timer::watchdog::VECTOR) || trap.error != 0 {
+            return Err(privilege::Error::Frame);
+        }
+        syscall::entry_frame(self.image, trap)?;
+        self.finish(Reason::Watchdog)
     }
     pub fn fault(&mut self, t: &privilege::Trap) -> Result<Outcome, privilege::Error> {
         syscall::entry_frame(self.image, t)?;
@@ -564,6 +573,35 @@ mod tests {
     }
     fn run() -> Run {
         Run::new(image(), TaskId::new(0, 1).unwrap()).unwrap()
+    }
+    #[test]
+    fn watchdog_terminates_only_an_authenticated_user_frame_without_resuming_it() {
+        let mut t = trap();
+        t.vector = 65;
+        t.rsp = u64::MAX;
+        t.rip = 0x8000_0000_0000;
+        let mut r = run();
+        let outcome = r.watchdog(&t).unwrap();
+        assert_eq!(outcome.reason, Reason::Watchdog);
+        assert_eq!(outcome.syscalls, 0);
+        outcome.validate(outcome.id, outcome.root).unwrap();
+        assert!(r.watchdog(&t).is_err());
+        assert!(r.call(&trap()).is_err());
+        for case in 0..7 {
+            let mut invalid = t;
+            match case {
+                0 => invalid.root += 4096,
+                1 => invalid.depth = 2,
+                2 => invalid.cs = 8,
+                3 => invalid.ss = 16,
+                4 => invalid.handler_stack -= 8,
+                5 => invalid.error = 1,
+                _ => invalid.vector = 64,
+            }
+            let mut r = run();
+            assert!(r.watchdog(&invalid).is_err());
+            assert_eq!(r.outcome(), None);
+        }
     }
     #[test]
     fn malformed_syscall_state_terminates_only_the_owner() {

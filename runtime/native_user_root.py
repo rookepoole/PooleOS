@@ -1,10 +1,11 @@
-"""Independent marker checks for bounded PKUSER13 quantum accounting."""
+"""Independent marker checks for bounded PKUSER14 HPET backup recovery."""
 from __future__ import annotations
 
 import re
 from runtime import native_kernel_transfer as transfer
 
 FEATURE = "development-user-root"
+WATCHDOG = re.compile(r"POOLEOS:KERNEL:USER-WATCHDOG PASS contract=PKUSER14 source=hpet_msi local_masked=1 recoveries=1 arms=([0-9]+) stops=([0-9]+) restores=([0-9]+) ticks=([0-9]+) deadline_ns=50000000 peer_exit=84 shared_apic=1 requires_if=1 nmi=0 production=0")
 RUNTIME = re.compile(r"POOLEOS:KERNEL:USER-RUNTIME PASS contract=PKUSER13 samples=([0-9]+) terminal_samples=([0-9]+) duplicate_denials=([0-9]+) ticks=([0-9]+) preempt_ticks=([0-9]+) terminal_ticks=([0-9]+) failed_cleanup_ticks=([0-9]+) failed_cleanup_samples=1 scheduler_match=1 pending=0 unknown=0 clock=hpet charge_window=arm_to_event production=0")
 SPAWN = re.compile(r"POOLEOS:KERNEL:USER-SPAWN PASS contract=PKUSER11 quota_failures=1 quota_released_pages=5 quota_scrubbed_pages=5 after_effect_failures=6 cleanup_quarantines=6 cleanup_retries=6 retained_free_denials=30 released_pages=83 scrubbed_pages=83 peer_resumed=1 peer_exit=84 cpu_exposures=0 production=0")
 DRAIN = re.compile(r"POOLEOS:KERNEL:USER-TIMER-DRAIN PASS contract=PKUSER12 pending=1 late=1 quarantines=1 retries=1 retained_pages=13 free_denials=5 restart_denials=2 reap_denials=1 peer_exit=84 deliveries=([0-9]+) eois=([0-9]+) empty_irr_isr=1 kernel_window=1 detached_after_shutdown=1 if=0 production=0")
@@ -15,8 +16,8 @@ ACTIVE = re.compile(r"POOLEOS:KERNEL:USER-ROOT-ACTIVE PASS cr3=(0x[0-9A-F]{16}) 
 TIMER = re.compile(r"POOLEOS:KERNEL:USER-ROOT-TIMER PASS contract=PKUSER4 cr3=(0x[0-9A-F]{16}) deliveries=3 eois=3 mmio_pages=2 quiesced=1 if=0 ring3=0")
 ENTRY = re.compile(r"POOLEOS:KERNEL:USER-ENTRY PASS contract=PKUSER5 cr3=(0x[0-9A-F]{16}) cpl=3 traps=7 private_rsp0=1 gpr_zero=15 fp_cleared=1 cli_denied=1 io_denied=1 syscall_denied=1 supervisor_fault=1 nx_fault=1 kernel_return=1 descriptors_detached=1 if=0 production=0")
 PREEMPT = re.compile(r"POOLEOS:KERNEL:USER-PREEMPT PASS contract=PKUSER6 cr3=(0x[0-9A-F]{16}) cpl=3 deliveries=3 eois=3 resumes=2 first_progress=([0-9]+) last_progress=([0-9]+) private_rsp0=1 gpr_preserved=14 fp_preserved=1 timer_quiesced=1 forced_return=1 if=0 production=0")
-RESULT = re.compile(r"POOLEOS:KERNEL:USER-ROOT-RESULT PASS restored=(0x[0-9A-F]{16}) cr3_writes=([0-9]+) allocated_pages=([0-9]+) retained_acpi_pages=([0-9]+) released_pages=538 scrubbed_data_pages=247 ring3=1 production=0 terminal=halt")
-PEERS = re.compile(r"POOLEOS:KERNEL:USER-PEERS PASS contract=PKUSER10 scheduler=PKSCHED1 round=([0-9]+) first=(exit|fault|cancel|limit|return|quarantine) value=([0-9]+) root0=(0x[0-9A-F]{16}) root1=(0x[0-9A-F]{16}) dispatches=([0-9]+) preempt0=([0-9]+) preempt1=([0-9]+) progress0=([0-9]+) progress1=([0-9]+) ticks0=([0-9]+) ticks1=([0-9]+) survivor_after_stop=([0-9]+) cr3_writes=([0-9]+) return_vector=([0-9]+) survivor_exit=84 states_preserved=1 root_restored=1 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
+RESULT = re.compile(r"POOLEOS:KERNEL:USER-ROOT-RESULT PASS restored=(0x[0-9A-F]{16}) cr3_writes=([0-9]+) allocated_pages=([0-9]+) retained_acpi_pages=([0-9]+) released_pages=564 scrubbed_data_pages=259 ring3=1 production=0 terminal=halt")
+PEERS = re.compile(r"POOLEOS:KERNEL:USER-PEERS PASS contract=PKUSER10 scheduler=PKSCHED1 round=([0-9]+) first=(exit|fault|cancel|limit|return|quarantine|watchdog) value=([0-9]+) root0=(0x[0-9A-F]{16}) root1=(0x[0-9A-F]{16}) dispatches=([0-9]+) preempt0=([0-9]+) preempt1=([0-9]+) progress0=([0-9]+) progress1=([0-9]+) ticks0=([0-9]+) ticks1=([0-9]+) survivor_after_stop=([0-9]+) cr3_writes=([0-9]+) return_vector=([0-9]+) survivor_exit=84 states_preserved=1 root_restored=1 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
 
 
 CALL = re.compile(r"POOLEOS:KERNEL:USER-CALL PASS contract=PKUSER7 abi=PSABI1 profile=development version=1 cr3=(0x[0-9A-F]{16}) calls=12 ok=3 version_denied=1 unknown=1 arguments=4 faults=3 read_faults=1 write_faults=2 cpl=3 entry=syscall return=iretq max_copy=256 input_atomic=1 output_prefix=1 completion_traps=1 msrs_cleared=1 if=0 production=0")
@@ -24,9 +25,9 @@ TASK = re.compile(r"POOLEOS:KERNEL:USER-TASK PASS contract=PKUSER8 slot=0 genera
 
 
 def validate_markers(markers: list[str]) -> dict:
-    if len(markers) != 58 or SPAWN.fullmatch(markers[54]) is None:
-        raise ValueError("PKUSER13 requires exactly 58 markers and transactional rollback")
-    drain = DRAIN.fullmatch(markers[55])
+    if len(markers) != 60 or SPAWN.fullmatch(markers[55]) is None:
+        raise ValueError("PKUSER14 requires exactly 60 markers and transactional rollback")
+    drain = DRAIN.fullmatch(markers[56])
     if drain is None or not 3 <= int(drain[1]) == int(drain[2]) <= 256:
         raise ValueError("PKUSER12 missing or inconsistent timer shutdown proof")
     arm = transfer.TRANSFER_ARM.fullmatch(markers[23])
@@ -41,7 +42,7 @@ def validate_markers(markers: list[str]) -> dict:
     common.pop("kernel_terminal", None)
     common["synthetic_unsigned_terminal_used_for_prefix_parser_only"] = True
     prepared, active, timer, entry, preempt, call, result = [pattern.fullmatch(marker) for pattern, marker in
-                                zip((PREPARED, ACTIVE, TIMER, ENTRY, PREEMPT, CALL, RESULT), [*markers[29:35],markers[57]])]
+                                zip((PREPARED, ACTIVE, TIMER, ENTRY, PREEMPT, CALL, RESULT), [*markers[29:35],markers[59]])]
     if any(m is None for m in (prepared, active, timer, entry, preempt, call, result)):
         raise ValueError("PKUSER7 marker layout or bounded claims changed")
     original, candidate = (int(prepared[i], 16) for i in (1, 2))
@@ -70,7 +71,7 @@ def validate_markers(markers: list[str]) -> dict:
     peers = []
     for index, (reason, value, return_vector) in enumerate((("exit",42,0),("fault",6,0),("cancel",0,0),("limit",64,0),
             ("return",2,256),("return",2,256),("return",3,256),("return",3,256),("return",1,256),("return",2,64),
-            ("fault",0,0),("fault",1,0),("fault",3,0),("fault",13,0),("quarantine",0,0))):
+            ("fault",0,0),("fault",1,0),("fault",3,0),("fault",13,0),("quarantine",0,0),("watchdog",65,0))):
         row = PEERS.fullmatch(markers[39+index])
         if row is None:
             raise ValueError("PKUSER10 missing or malformed peer marker")
@@ -80,11 +81,11 @@ def validate_markers(markers: list[str]) -> dict:
         if (int(row[1]) != index or row[2] != reason or int(row[3]) != value
                 or int(row[15]) != return_vector
                 or roots[0] == roots[1] or any(r == original or r == 0 or r & 4095 or r >= 1<<32 for r in roots)
-                or (index != 14 and p0 < 1) or p1 < 2 or not 1 <= after <= p1 or (cancel and p0 != 3)
-                or (index == 14 and (p0 != 0 or progress0 != 0 or ticks0 <= 0 or after != p1))
+                or (index < 14 and p0 < 1) or p1 < 2 or not 1 <= after <= p1 or (cancel and p0 != 3)
+                or (index >= 14 and (p0 != 0 or progress0 != 0 or ticks0 <= 0 or after != p1))
                 or not 1 <= dispatches <= 64 or dispatches != p0+p1+2-cancel
                 or writes != 2*dispatches+cancel
-                or not all(0 < n < 1<<64 for n in ((progress1,ticks0,ticks1) if index == 14 else (progress0,progress1,ticks0,ticks1)))):
+                or not all(0 < n < 1<<64 for n in ((progress1,ticks0,ticks1) if index >= 14 else (progress0,progress1,ticks0,ticks1)))):
             raise ValueError("PKUSER10 peer isolation, schedule accounting, or survivor progress changed")
         peers.append(dict(round=index,first=reason,value=value,return_vector=return_vector,roots=roots,dispatches=dispatches,
             preemptions=[p0,p1],progress=[progress0,progress1],ticks=[ticks0,ticks1],
@@ -92,18 +93,24 @@ def validate_markers(markers: list[str]) -> dict:
     total_writes = 10 + sum(p["cr3_writes"] for p in peers)
     if int(result[2]) != total_writes:
         raise ValueError("PKUSER10 total root writes not conserved")
-    charge = RUNTIME.fullmatch(markers[56])
+    charge = RUNTIME.fullmatch(markers[57])
     if charge is None:
         raise ValueError("PKUSER13 missing runtime settlement evidence")
     samples, terminal_samples, duplicates, total, preempt_ticks, terminal_ticks, failed_ticks = map(int, charge.groups())
     preemptions = sum(sum(p["preemptions"]) for p in peers)
     if (samples != sum(p["dispatches"] for p in peers) or duplicates != samples
-            or terminal_samples != samples - preemptions - 1 or terminal_samples != 28
+            or terminal_samples != samples - preemptions - 1 or terminal_samples != 30
             or total != sum(sum(p["ticks"]) for p in peers)
             or failed_ticks != peers[14]["ticks"][0]
             or total != preempt_ticks + terminal_ticks + failed_ticks
             or not all(0 < n < 1<<64 for n in (total,preempt_ticks,terminal_ticks,failed_ticks))):
         raise ValueError("PKUSER13 lost, duplicated or inconsistent runtime charge")
+    watchdog = WATCHDOG.fullmatch(markers[58])
+    if watchdog is None:
+        raise ValueError("PKUSER14 missing HPET backup proof")
+    arms, stops, restores, watchdog_ticks = map(int, watchdog.groups())
+    if arms != samples or stops != samples or restores != samples or watchdog_ticks != peers[15]["ticks"][0]:
+        raise ValueError("PKUSER14 ownership or recovered runtime not conserved")
     return {"transfer_prefix": common, "original_root": original, "candidate_root": candidate,
             "generation": generation, "stack_probe": probe, "root_probe_cpl": 0, "cpl": 3,
             "cr3_writes": total_writes, "timer_deliveries": 3, "timer_eois": 3,
@@ -114,8 +121,8 @@ def validate_markers(markers: list[str]) -> dict:
             "syscall_abi": "PSABI1_development", "user_calls": 12, "copy_faults": 3,
             "copy_read_faults": 1, "copy_write_faults": 2, "syscall_msrs_cleared": True,
             "terminated_tasks": tasks, "normal_exits": 1, "fault_terminations": 3,
-            "task_stale_denials": 3, "released_pages": 538, "scrubbed_data_pages": 247,
-            "peer_scheduling": True, "peer_rounds": peers, "peer_survival_cases": 15,
+            "task_stale_denials": 3, "released_pages": 564, "scrubbed_data_pages": 259,
+            "peer_scheduling": True, "peer_rounds": peers, "peer_survival_cases": 16,
             "invalid_return_terminations": 6, "additional_user_exception_terminations": 4,
             "observed_stack_access_vector": 13, "architectural_stack_fault_qualified": False,
             "new_native_exception_vectors": [0, 1, 3],
@@ -131,6 +138,10 @@ def validate_markers(markers: list[str]) -> dict:
             "runtime_preempt_ticks": preempt_ticks, "runtime_terminal_ticks": terminal_ticks,
             "runtime_failed_cleanup_ticks": failed_ticks, "runtime_failed_cleanup_samples": 1,
             "bounded_runtime_accounting": True, "pure_user_instruction_time": False,
+            "bounded_hpet_backup_recovery": True, "watchdog_recoveries": 1,
+            "watchdog_arms": arms, "watchdog_stops": stops, "watchdog_restores": restores,
+            "watchdog_ticks": watchdog_ticks, "watchdog_shared_apic": True,
+            "independent_missing_interrupt_watchdog": False, "nmi_recovery": False,
             "production_ready": False}
 
 
@@ -142,7 +153,7 @@ def negative_controls(markers: list[str]) -> int:
     wrong = markers.copy()
     wrong[23] = wrong[23].replace("trap_scenario=23", "trap_scenario=0")
     candidates.append(wrong)
-    for i in range(29, 58):
+    for i in range(29, 60):
         for match in re.finditer(r"\b[a-zA-Z_0-9]+=[^ ]+", markers[i]):
             changed = markers.copy()
             changed[i] = markers[i][:match.start()] + "invalid=invalid" + markers[i][match.end():]

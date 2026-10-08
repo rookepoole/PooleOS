@@ -65,6 +65,7 @@ struct Adapter<'a> {
 }
 impl Hardware for Adapter<'_> {
     fn stop(&mut self) -> Result<(), TimerError> {
+        arch::x86_64::user_watchdog::stop()?;
         self.timer.mask_sources(self.hw)?;
         hw(self.hw.apic_write(0x380, 0))?;
         Ok(())
@@ -118,15 +119,19 @@ pub(super) fn quiesce(
     if probe == Probe::FailOnce {
         t.probe = Probe::Retry;
     }
-    let result = policy::quiesce(&mut Adapter {
-        timer: t,
-        root,
-        hw: h,
-        fail: probe == Probe::FailOnce,
-    });
+    let backup = arch::x86_64::user_watchdog::owned();
+    let result = policy::quiesce_owned(
+        &mut Adapter {
+            timer: t,
+            root,
+            hw: h,
+            fail: probe == Probe::FailOnce,
+        },
+        backup,
+    );
     if probe == Probe::FailOnce {
         let state = snapshot(h)?;
-        state.validate(false)?;
+        state.validate_owned(None, backup)?;
         if result.is_ok() || state.irr.iter().all(|v| *v == 0) {
             return Err(TimerError::State);
         }
@@ -191,7 +196,9 @@ pub fn dispatch(frame: &TrapFrame, depth: u32) -> bool {
                 .is_some_and(|v| v <= IST1_TOP.load(Ordering::Acquire))
     };
     if depth != 1
-        || frame.vector != u64::from(TIMER_VECTOR)
+        || !(frame.vector == u64::from(TIMER_VECTOR)
+            || (arch::x86_64::user_watchdog::owned()
+                && frame.vector == u64::from(timer::watchdog::VECTOR)))
         || frame.error_code != 0
         || frame.code_selector != u64::from(poolekernel::KERNEL_CODE_SELECTOR)
         || frame.data_selector != u64::from(poolekernel::KERNEL_DATA_SELECTOR)
@@ -213,7 +220,15 @@ pub fn dispatch(frame: &TrapFrame, depth: u32) -> bool {
         local_apic_virtual: timer::APIC_VIRTUAL,
         hpet_virtual: timer::HPET_VIRTUAL,
     };
-    if snapshot(&h).and_then(|s| s.validate(true)).is_err() {
+    if snapshot(&h)
+        .and_then(|s| {
+            s.validate_owned(
+                Some(frame.vector as u8),
+                arch::x86_64::user_watchdog::owned(),
+            )
+        })
+        .is_err()
+    {
         poole_kernel_emergency_panic(PanicCode::UserRoot as u32);
     }
     if hw(h.apic_write(0xb0, 0)).is_err() {

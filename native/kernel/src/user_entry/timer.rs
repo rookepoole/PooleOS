@@ -6,6 +6,7 @@ use crate::virtual_memory::KERNEL_START;
 use poole_handoff::{Handoff, MEMORY_ENTRY_BYTES, MEMORY_MMIO, PAGE_BYTES, RECORD_MEMORY_MAP};
 
 pub mod drain;
+pub mod watchdog;
 
 pub const CONTRACT_ID: &str = "PKUSER4";
 pub const APIC_SLOT: usize = 16;
