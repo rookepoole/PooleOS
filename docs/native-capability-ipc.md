@@ -1,6 +1,6 @@
 # Native Capability IPC
 
-Cycle253 / PKIPC1 (native lifecycle PKIPC2 and reply probe PKIPC3) is an original, bounded PooleKernel mechanism, not a complete
+Cycle254 / PKIPC1 (native lifecycle PKIPC2, replies PKIPC3 and requests PKIPC4) is an original, bounded PooleKernel mechanism, not a complete
 N13/N14 implementation. It advances USI-2 toward the native user-space ISO.
 
 ## Authority And Lifetime
@@ -182,8 +182,10 @@ scrubs12 data pages. [Exact evidence](checkpoints/cycle252-native-ipc-pressure-l
 
 ## Next Required Work
 
-1. Add request/deadline/cancellation ownership and dead-service notification. The
-   new one-use replies are asynchronous; no synchronous call or delivery guarantee.
+1. Add an owned monotonic deadline clock. Cycle254 supplies caller-owned tracked
+   completion/cancellation and dead-service notification via calls10-13; see
+   [request semantics](native-ipc-request-lifetimes.md). Call6 remains asynchronous
+   mailbox delivery; no synchronous call, deadline or execution rollback guarantee.
 2. Extend beyond the five fixed native lifetimes: arbitrary close/destroy/wake/kill
    interleavings, quota recovery, generation exhaustion, persistent quarantine and
    sustained pressure. Never reset authority counters to make a case pass.

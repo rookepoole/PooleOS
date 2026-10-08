@@ -11,7 +11,16 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle253 adds kernel-authenticated sender
+**Current development checkpoint:** Cycle254 adds caller-owned request completion,
+cancellation and dead-service notification. Two fresh native boots verify success,
+discard and service death while clients continue;426 kernel tests pass. The image
+layout now reserves208 pages with the existing36-page guarded stack. Next: owned
+clock/deadlines, service admission and sustained budgets, then init/console,
+shell/files/apps and an interactive ISO. Full microkernel work continues afterward.
+No interactive ISO or production promotion; three old product-readiness tests
+still fail and block merging. [Evidence](docs/checkpoints/cycle254-native-request-lifetimes.md).
+
+**Historical development checkpoint:** Cycle253 adds kernel-authenticated sender
 identity and task-local one-use replies. Real user tasks exchange requests,
 recover copy faults, consume/discard reply tokens and reject replay without
 granting the server permanent send authority. Two fresh native boots and416 kernel

@@ -1,5 +1,6 @@
 use super::*;
 use crate::capability_ipc::reply::{HEADER_BYTES, Operation, RECEIVE_BYTES};
+mod requests;
 
 struct Wire {
     data: [u8; RECEIVE_BYTES],

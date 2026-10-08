@@ -338,6 +338,9 @@ unsafe extern "C" {
     static poole_peer_stack_fault_end: u8;
 }
 pub fn peer_payload(kind: usize) -> Result<&'static [u8], Error> {
+    if kind == 22 || kind == 23 {
+        return super::super::user_ipc::request_payload(kind == 23);
+    }
     if kind == 20 || kind == 21 {
         return super::super::user_ipc::reply_payload(kind == 21);
     }

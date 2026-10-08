@@ -14,6 +14,8 @@ mod pressure;
 pub(super) use pressure::payload as pressure_payload;
 mod reply;
 pub(super) use reply::payload as reply_payload;
+mod request;
+pub(super) use request::payload as request_payload;
 
 fn idle() -> Result<(), Error> {
     if super::user::active() || super::read_rflags() & ((1 << 9) | (1 << 10) | (1 << 18)) != 0 {
@@ -58,6 +60,24 @@ pub(super) fn prepare_wait(
     readiness: poolekernel::capability_ipc::wait::Readiness,
 ) -> Result<poolekernel::capability_ipc::wait::Admission, Status> {
     unsafe { &mut *(&raw mut IPC) }.prepare_wait(caller, handle, readiness)
+}
+
+pub(super) fn prepare_request_wait(
+    caller: Caller,
+    handle: u64,
+) -> Result<poolekernel::capability_ipc::wait::Admission, Status> {
+    unsafe { &mut *(&raw mut IPC) }.prepare_request_wait(caller, handle)
+}
+pub(super) fn request_operation(
+    caller: Caller,
+    handle: u64,
+    address: u64,
+    bytes: usize,
+    operation: poolekernel::capability_ipc::request::Operation,
+    memory: &mut impl Memory,
+) -> (Status, u64) {
+    unsafe { &mut *(&raw mut IPC) }
+        .request_operation(caller, handle, address, bytes, operation, memory)
 }
 
 /// SAFETY: exclusive BSP with both tasks quiescent on the original kernel root.

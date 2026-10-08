@@ -15,11 +15,19 @@ pub enum Operation {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) struct Route {
-    requester: Caller,
-    receive_handle: u64,
-    destination: Object,
-    request_endpoint: Object,
+pub(super) enum Route {
+    Mailbox {
+        requester: Caller,
+        receive_handle: u64,
+        destination: Object,
+        request_endpoint: Object,
+    },
+    Tracked(request::Key),
+}
+impl Route {
+    pub(super) fn tracked(key: request::Key) -> Self {
+        Self::Tracked(key)
+    }
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) struct Slot {
@@ -35,16 +43,28 @@ impl Slot {
 
 impl Space {
     fn live_route(&self, route: Route) -> bool {
-        let Ok(t) = self.table(route.requester.id) else {
+        let Route::Mailbox {
+            requester,
+            receive_handle,
+            destination,
+            request_endpoint,
+        } = route
+        else {
+            let Route::Tracked(key) = route else {
+                unreachable!()
+            };
+            return self.pending_request(key);
+        };
+        let Ok(t) = self.table(requester.id) else {
             return false;
         };
-        let source = self.objects[route.request_endpoint.slot];
-        self.tables[t].caller == Some(route.requester)
-            && source.generation == route.request_endpoint.generation
+        let source = self.objects[request_endpoint.slot];
+        self.tables[t].caller == Some(requester)
+            && source.generation == request_endpoint.generation
             && source.value.is_some()
             && self
-                .resolve(t, route.receive_handle, Rights::RECEIVE)
-                .is_ok_and(|c| c.object == route.destination)
+                .resolve(t, receive_handle, Rights::RECEIVE)
+                .is_ok_and(|c| c.object == destination)
     }
 
     pub(super) fn prune_replies(&mut self) {
@@ -124,7 +144,7 @@ impl Space {
                 let result = self.transfer(caller, handle, address, bytes, true, memory);
                 if result.0 == Status::Ok {
                     let e = self.objects[request.object.slot].value.as_mut().unwrap();
-                    e.queue[(e.head + e.len - 1) % DEPTH].reply = Some(Route {
+                    e.queue[(e.head + e.len - 1) % DEPTH].reply = Some(Route::Mailbox {
                         requester: caller,
                         receive_handle: reply_to,
                         destination: reply.object,
@@ -139,12 +159,16 @@ impl Space {
                     return (Status::Denied, 0);
                 };
                 if operation == Operation::Discard {
+                    if let Route::Tracked(key) = route {
+                        self.finish_request(key, Status::Cancelled, Message::EMPTY);
+                    }
                     self.tables[t].replies[slot].value = None;
                     return (Status::Ok, 0);
                 }
-                let e = self.objects[route.destination.slot].value.as_mut().unwrap();
-                if e.len == DEPTH {
-                    return (Status::Again, 0);
+                if let Route::Mailbox { destination, .. } = route {
+                    if self.objects[destination.slot].value.as_ref().unwrap().len == DEPTH {
+                        return (Status::Again, 0);
+                    }
                 }
                 let mut message = Message {
                     len: bytes,
@@ -157,8 +181,14 @@ impl Space {
                     };
                     *byte = value;
                 }
-                e.queue[(e.head + e.len) % DEPTH] = message;
-                e.len += 1;
+                match route {
+                    Route::Mailbox { destination, .. } => {
+                        let e = self.objects[destination.slot].value.as_mut().unwrap();
+                        e.queue[(e.head + e.len) % DEPTH] = message;
+                        e.len += 1;
+                    }
+                    Route::Tracked(key) => self.finish_request(key, Status::Ok, message),
+                }
                 self.tables[t].replies[slot].value = None;
                 (Status::Ok, bytes as u64)
             }
@@ -207,30 +237,15 @@ impl Space {
             None
         };
         let token = allocation.map_or(0, |(i, g)| (u64::from(g) << 32) | TAG | (i + 1) as u64);
-        let sender = message
-            .sender
-            .expect("queued messages always retain their caller")
-            .id;
-        let mut envelope = [0u8; RECEIVE_BYTES];
-        for (i, word) in [
-            u64::from(sender.slot),
-            u64::from(sender.generation),
-            token,
-            message.len as u64,
-        ]
-        .iter()
-        .enumerate()
-        {
-            envelope[i * 8..i * 8 + 8].copy_from_slice(&word.to_le_bytes());
-        }
-        envelope[HEADER_BYTES..required].copy_from_slice(&message.bytes[..message.len]);
-        for (i, byte) in envelope[..required].iter().enumerate() {
-            if memory.write(address + i as u64, *byte).is_err() {
-                return (Status::Fault, i as u64);
-            }
+        let result = copy_envelope(message, token, address, bytes, memory);
+        if result.0 != Status::Ok {
+            return result;
         }
         // No authority or queue mutation before complete copy-out; no fallible step after it.
         if let Some((i, generation)) = allocation {
+            if let Some(Route::Tracked(key)) = route {
+                self.claim_request(key, self.tables[t].caller.unwrap());
+            }
             self.tables[t].replies[i] = Slot {
                 generation,
                 value: route,
@@ -242,4 +257,40 @@ impl Space {
         e.len -= 1;
         (Status::Ok, required as u64)
     }
+}
+
+pub(super) fn copy_envelope(
+    message: Message,
+    token: u64,
+    address: u64,
+    bytes: usize,
+    memory: &mut impl Memory,
+) -> (Status, u64) {
+    let required = HEADER_BYTES + message.len;
+    if bytes < required {
+        return (Status::TooSmall, required as u64);
+    }
+    let sender = message
+        .sender
+        .expect("queued messages retain their caller")
+        .id;
+    let mut envelope = [0u8; RECEIVE_BYTES];
+    for (i, word) in [
+        u64::from(sender.slot),
+        u64::from(sender.generation),
+        token,
+        message.len as u64,
+    ]
+    .iter()
+    .enumerate()
+    {
+        envelope[i * 8..i * 8 + 8].copy_from_slice(&word.to_le_bytes());
+    }
+    envelope[HEADER_BYTES..required].copy_from_slice(&message.bytes[..message.len]);
+    for (i, byte) in envelope[..required].iter().enumerate() {
+        if memory.write(address + i as u64, *byte).is_err() {
+            return (Status::Fault, i as u64);
+        }
+    }
+    (Status::Ok, required as u64)
 }

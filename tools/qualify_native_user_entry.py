@@ -35,6 +35,9 @@ def source_bindings() -> dict[str, str]:
         "native/kernel/src/capability_ipc.rs", "native/kernel/src/capability_ipc/tests.rs",
         "native/kernel/src/capability_ipc/wait.rs",
         "native/kernel/src/capability_ipc/reply.rs", "native/kernel/src/capability_ipc/tests/replies.rs",
+        "native/kernel/src/capability_ipc/request.rs", "native/kernel/src/capability_ipc/tests/replies/requests.rs",
+        "native/kernel/src/arch/x86_64/user_ipc/request.rs",
+        "native/kernel/src/user_root_probe/peer_driver/ipc_request.rs",
         "native/kernel/src/arch/x86_64/user_ipc/reply.rs",
         "native/kernel/src/user_root_probe/peer_driver/ipc_reply.rs",
         "native/kernel/src/arch/x86_64/user_ipc/pressure.rs",
@@ -64,6 +67,9 @@ def source_bindings() -> dict[str, str]:
         "tools/qualify_native_user_entry.py", "tools/qualify_native_elf_loader.py",
         "specs/native-toolchain-lock.json",
         "tests/test_native_user_root.py", "tests/fixtures/cycle237-user-root-markers.json",
+        "tests/test_native_kernel_map.py",
+        "tests/test_native_kernel_load.py", "tests/test_native_kernel_transfer.py",
+        "specs/native-kernel-virtual-memory-contract.json",
     })
     return {p: digest(ROOT / p) for p in sorted(paths)}
 
@@ -82,11 +88,17 @@ def main() -> int:
     owner_report = Path("C:/Users/rookp/PooleGlyph/tests/reports/conformance_report.json")
     owner_before = digest(owner_report) if owner_report.is_file() else None
     report: dict = {
-        "contract_id": "PKIPC3", "cycle": 253,
-        "scope": "host_and_optional_native_authenticated_sender_and_one_use_reply_authority_guest",
+        "contract_id": "PKIPC4", "cycle": 254,
+        "scope": "host_and_optional_native_caller_owned_request_completion_cancel_and_service_death_guest",
         "status": "fail", "source_bindings": before, "checks": [],
         "guest_runs": 0, "ring3_executed": False, "iso_built": False,
         "n13_exit_passed": False, "production_ready": False,
+        "canonical_product_receipts_current": False,
+        "known_unresolved_readiness_tests": [
+            "tests.test_native_kernel_load.NativeKernelLoadTests.test_contract_and_readiness_pass_semantic_validation",
+            "tests.test_native_kernel_load.NativeKernelLoadTests.test_readiness_detects_stale_input_and_oracle_divergence",
+            "tests.test_native_kernel_transfer.NativeKernelTransferTests.test_contract_and_generated_readiness_are_current",
+        ],
     }
     cargo, _, env = _toolchain(ROOT / ".toolchains/rust-1.97.0")
     common = ["--manifest-path", str(ROOT / "native/Cargo.toml"), "--package", "poolekernel"]
@@ -94,11 +106,11 @@ def main() -> int:
     commands = [
         ("format", [str(cargo), "fmt", *common, "--", "--check"], None),
         ("kernel_host_debug", [str(cargo), "test", *common, "--lib", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 416),
+            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 426),
         ("user_entry_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
             "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 130),
         ("ipc_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "capability_ipc::", "--", "--test-threads=1"], 30),
+            "x86_64-pc-windows-msvc", *bounded, "capability_ipc::", "--", "--test-threads=1"], 40),
         ("vm_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
             "x86_64-pc-windows-msvc", *bounded, "virtual_memory::", "--", "--test-threads=1"], None),
         ("freestanding_library", [str(cargo), "check", *common, "--lib", "--target",
@@ -115,6 +127,17 @@ def main() -> int:
             "--package", "poole-boot-exit", "--lib", "--target", "x86_64-pc-windows-msvc",
             *bounded, "--", "--test-threads=1"], None),
         ("user_root_oracle", [sys.executable, "-B", "-m", "unittest", "tests.test_native_user_root", "-v"], None),
+        ("kernel_map_host", [str(cargo), "test", "--manifest-path", str(ROOT / "native/Cargo.toml"),
+            "--package", "poole-kmap", "--lib", "--target", "x86_64-pc-windows-msvc",
+            *bounded, "--", "--test-threads=1"], None),
+        ("kernel_map_oracle", [sys.executable, "-B", "-m", "unittest", "tests.test_native_kernel_map",
+            "tests.test_native_kernel_load.NativeKernelLoadTests.test_marker_contract_captures_load_mapping_and_cleanup",
+            "tests.test_native_kernel_load.NativeKernelLoadTests.test_marker_contract_rejects_omission_wx_and_page_mismatch",
+            "tests.test_native_kernel_transfer.NativeKernelTransferTests.test_complete_marker_sequence_is_cross_bound",
+            "tests.test_native_kernel_transfer.NativeKernelTransferTests.test_transfer_address_and_cpu_state_mutations_reject",
+            "tests.test_native_kernel_transfer.NativeKernelTransferTests.test_profile_revalidation_and_authority_mutations_reject",
+            "tests.test_native_kernel_transfer.NativeKernelTransferTests.test_marker_omission_order_duplicate_and_return_reject",
+            "-v"], None),
     ]
     for feature in ("development-trap-returning", "development-locks"):
         commands.append(("reject_" + feature, [str(cargo), "check", "--manifest-path",
@@ -133,7 +156,7 @@ def main() -> int:
             log = work / f"{name}.log"
             with log.open("w", encoding="utf-8") as stream:
                 result = subprocess.run(command, cwd=ROOT, env=env, stdout=stream,
-                    stderr=subprocess.STDOUT, timeout=360 if name == "live_user_root" else 180, check=False,
+                    stderr=subprocess.STDOUT, timeout=420 if name == "live_user_root" else 180, check=False,
                     creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
             output = log.read_text(encoding="utf-8")
             match = re.search(r"test result: ok\. (\d+) passed; 0 failed; 0 ignored;", output)
@@ -171,6 +194,7 @@ def main() -> int:
                 report["bounded_capability_ipc"] = all(g["marker_summary"]["bounded_capability_ipc"] for g in live["guest_runs"])
                 report["native_ipc_pressure_lifecycle"] = all(g["marker_summary"]["ipc_persistent_generations"] == 5 and g["marker_summary"]["ipc_native_dead_owner_cases"] == 4 for g in live["guest_runs"])
                 report["native_ipc_reply_authority"] = all(g["marker_summary"]["ipc_authenticated_sender"] and g["marker_summary"]["ipc_one_use_replies"] for g in live["guest_runs"])
+                report["native_ipc_request_lifecycle"] = all(g["marker_summary"]["ipc_caller_owned_completion"] and g["marker_summary"]["ipc_dead_service_notification"] for g in live["guest_runs"])
         report["source_unchanged"] = before == source_bindings()
         report["owner_report_unchanged"] = owner_before == (digest(owner_report) if owner_report.is_file() else None)
         if (len(report["checks"]) == len(commands) and all(c["passed"] for c in report["checks"])
@@ -182,7 +206,7 @@ def main() -> int:
     (work / "receipt.json").write_text(serialized, encoding="utf-8", newline="\n")
     if report["status"] == "pass":
         args.out.write_text(serialized, encoding="utf-8", newline="\n")
-    print(f"PKIPC3 {report['status'].upper()}; guest_runs={report['guest_runs']}; ring3={report['ring3_executed']}; production_ready=false", flush=True)
+    print(f"PKIPC4 {report['status'].upper()}; guest_runs={report['guest_runs']}; ring3={report['ring3_executed']}; production_ready=false", flush=True)
     return 0 if report["status"] == "pass" else 1
 
 

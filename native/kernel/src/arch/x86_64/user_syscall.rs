@@ -311,9 +311,44 @@ pub(super) fn dispatch_owned(
             ),
             None => (Status::Denied, 0),
         },
+        Ok(Request::RequestControl {
+            handle,
+            address,
+            bytes,
+            operation,
+        }) => match caller {
+            Some(caller) => super::user_ipc::request_operation(
+                caller,
+                handle,
+                address,
+                bytes,
+                operation,
+                &mut Access {
+                    root: t.root,
+                    smap: unsafe { read_cr4() } & (1 << 21) != 0,
+                },
+            ),
+            None => (Status::Denied, 0),
+        },
+        Ok(Request::RequestWait(handle)) => match caller {
+            Some(caller) => match super::user_ipc::prepare_request_wait(caller, handle) {
+                Ok(poolekernel::capability_ipc::wait::Admission::Complete(status)) => (status, 0),
+                Ok(poolekernel::capability_ipc::wait::Admission::Pending(ticket)) => {
+                    return Ok(Action::Waiting(ticket));
+                }
+                Ok(poolekernel::capability_ipc::wait::Admission::Ready) => {
+                    return Err(Error::State);
+                }
+                Err(status) => (status, 0),
+            },
+            None => (Status::Denied, 0),
+        },
         Ok(Request::Wait { handle, readiness }) => match caller {
             Some(caller) => match super::user_ipc::prepare_wait(caller, handle, readiness) {
                 Ok(poolekernel::capability_ipc::wait::Admission::Ready) => (Status::Ok, 0),
+                Ok(poolekernel::capability_ipc::wait::Admission::Complete(_)) => {
+                    return Err(Error::State);
+                }
                 Ok(poolekernel::capability_ipc::wait::Admission::Pending(ticket)) => {
                     return Ok(Action::Waiting(ticket));
                 }

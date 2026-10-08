@@ -1,5 +1,5 @@
 {
-  "cycle": 250,
+  "cycle": 254,
   "scope": "read_only_recorded_source_consistency_not_new_guest_execution",
   "checks": [
     {
@@ -20,12 +20,12 @@
     {
       "name": "native_kernel_load_readiness",
       "ok": false,
-      "detail": "stale implementation input native/boot/Cargo.toml; stale implementation input native/boot/src/exit.rs; stale implementation input native/kernel/linker.ld; stale implementation input native/kernel/src/lib.rs; stale implementation input native/kernel/src/main.rs; stale implementation input native/bootexit/src/lib.rs; stale implementation input tools/qualify_native_pooleboot.py"
+      "detail": "stale implementation input native/boot/Cargo.toml; stale implementation input native/boot/src/exit.rs; stale implementation input native/kernel/linker.ld; stale implementation input native/kernel/src/lib.rs; stale implementation input native/kernel/src/main.rs; stale implementation input native/kmap/src/lib.rs; stale implementation input native/bootexit/src/lib.rs; stale implementation input runtime/native_kernel_map.py"
     },
     {
       "name": "native_pooleboot_readiness",
       "ok": false,
-      "detail": "stale implementation input native/boot/Cargo.toml binding; stale implementation input native/boot/src/exit.rs binding; stale implementation input native/kernel/linker.ld binding; stale implementation input native/kernel/src/lib.rs binding; stale implementation input native/kernel/src/main.rs binding; stale implementation input native/bootexit/src/lib.rs binding; stale implementation input tools/qualify_native_pooleboot.py binding"
+      "detail": "stale implementation input native/boot/Cargo.toml binding; stale implementation input native/boot/src/exit.rs binding; stale implementation input native/kernel/linker.ld binding; stale implementation input native/kernel/src/lib.rs binding; stale implementation input native/kernel/src/main.rs binding; stale implementation input native/kmap/src/lib.rs binding; stale implementation input native/bootexit/src/lib.rs binding; stale implementation input runtime/native_kernel_map.py binding"
     },
     {
       "name": "native_kernel_revalidation_readiness",
@@ -40,12 +40,12 @@
     {
       "name": "native_kernel_trap_readiness",
       "ok": false,
-      "detail": "embedded kernel entry dependency is invalid: readiness input bindings are stale; PKTRAP1 readiness input bindings are stale"
+      "detail": "embedded kernel entry dependency is invalid: readiness input bindings are stale; PKTRAP1 readiness input bindings are stale; PKTRAP1 returning returning-run-1 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges; PKTRAP1 returning returning-run-2 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges; PKTRAP1 returning-run-1 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges; PKTRAP1 returning-run-2 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges; PKTRAP1 double_fault double_fault-run-1 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges; PKTRAP1 double_fault double_fault-run-2 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges"
     },
     {
       "name": "native_kernel_cpu_policy_readiness",
       "ok": false,
-      "detail": "embedded kernel entry dependency is invalid: readiness input bindings are stale; PKCPU1 readiness input bindings are stale"
+      "detail": "embedded kernel entry dependency is invalid: readiness input bindings are stale; PKCPU1 readiness input bindings are stale; PKCPU1 cpu-policy-run-1 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges; PKCPU1 cpu-policy-run-2 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges; PKCPU1 cpu-policy-run-1 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges; PKCPU1 cpu-policy-run-2 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges"
     },
     {
       "name": "native_kernel_errata_policy_readiness",
@@ -55,27 +55,27 @@
     {
       "name": "native_kernel_xstate_policy_readiness",
       "ok": false,
-      "detail": "embedded kernel entry dependency is invalid: readiness input bindings are stale; PKXSTATE1 input bindings changed"
+      "detail": "embedded kernel entry dependency is invalid: readiness input bindings are stale; PKXSTATE1 input bindings changed; PKXSTATE1 xstate-policy-run-1 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges; PKXSTATE1 xstate-policy-run-2 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges"
     },
     {
       "name": "native_kernel_xstate_exception_readiness",
       "ok": false,
-      "detail": "embedded kernel entry dependency is invalid: readiness input bindings are stale; PKXEXC1 input bindings changed"
+      "detail": "embedded kernel entry dependency is invalid: readiness input bindings are stale; PKXEXC1 input bindings changed; PKXEXC1 xstate-exception-run-1 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges; PKXEXC1 xstate-exception-run-2 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges"
     },
     {
       "name": "native_kernel_privilege_msr_policy_readiness",
       "ok": false,
-      "detail": "embedded kernel entry dependency is invalid: readiness input bindings are stale; PKMSR1 readiness input bindings are stale"
+      "detail": "embedded kernel entry dependency is invalid: readiness input bindings are stale; PKMSR1 readiness input bindings are stale; PKMSR1 privilege-msr-policy-run-1 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges; PKMSR1 privilege-msr-policy-run-2 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges"
     },
     {
       "name": "native_kernel_physical_memory_readiness",
       "ok": false,
-      "detail": "embedded kernel entry dependency is invalid: readiness input bindings are stale; PKPMM6 readiness input bindings are stale"
+      "detail": "embedded kernel entry dependency is invalid: readiness input bindings are stale; PKPMM6 readiness input bindings are stale; PKPMM7 physical-memory-run-1 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges; PKPMM7 physical-memory-run-2 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges"
     },
     {
       "name": "native_kernel_virtual_memory_readiness",
       "ok": false,
-      "detail": "embedded kernel entry dependency is invalid: readiness input bindings are stale; PKVM3 readiness input bindings are stale"
+      "detail": "embedded kernel entry dependency is invalid: readiness input bindings are stale; PKVM3 readiness input bindings are stale; PKVM3 active-virtual-memory-run-1 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges; PKVM3 active-virtual-memory-run-2 invalid recorded evidence: PKLOAD6 PKMAP2 retained page accounting diverges"
     },
     {
       "name": "native_kernel_interrupt_time_readiness",
@@ -183,12 +183,12 @@
     "entry",
     "symbols",
     "policy",
-    "revalidation",
     "errata_policy"
   ],
   "stale_static_source_profiles": [
     "load",
     "pooleboot",
+    "revalidation",
     "transfer",
     "trap",
     "cpu_policy",

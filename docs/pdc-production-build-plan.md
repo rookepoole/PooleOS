@@ -1,15 +1,41 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.156.0-native-ipc-reply-authority
-Roadmap cycle: PooleOS Cycle 253
+Plan version: 2.157.0-native-request-lifetimes
+Roadmap cycle: PooleOS Cycle 254
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 253: Native Sender And One-Use Reply Authority
+## Cycle 254: Caller-Owned Request Lifetimes
+
+USI-2 now provides bounded caller-owned completion, cancel, wait and take. Native
+tasks survive success, discarded requests, queued service death and claimed
+service death. Completion capacity is reserved at Begin, and the first terminal
+outcome survives queue pressure and subsequent service teardown. Ten new host
+tests and four actual native lifetimes extend, rather than replace, prior tests.
+Two fresh72-marker boots/935 altered-evidence controls each plus ordinary denial
+pass;426 kernel tests,653 Rust executions,72 focused Python oracle tests.
+[Evidence and retained failures](checkpoints/cycle254-native-request-lifetimes.md).
+
+Kernel capacity192->208 pages;196 used. Guarded36-page stack/read-only handoff
+remain, with Rust/Python capacity-bound and no-write overflow tests. The enlarged
+whole-suite harness exceeded120s; revised150s guest/420s child bounds were frozen
+before the successful replay. Kernel task/timer/dispatch limits remain unchanged.
+Three older product-readiness tests remain failing; full exact-candidate canonical
+replay and product migration still gate main. No production promotion or new ISO.
+
+Next N13-CAPABILITY-IPC-001: owned monotonic deadline clock, transactional service
+admission, sustained task budgets, then init/console/input, shell/files/two apps
+and optical ISO acceptance. CPU accounting is not a deadline clock. Cancellation
+does not roll back service side effects. Arbitrary supervision/SMP still open.
+No phase/flag closes:40 phases,301 subphases,8996 requirements,59 additions,
+97 flags/42 open,20 gaps; USI-1/2 partial,3-5 not started. Full N0-N39,
+PooleGlyph/PDC and PooleGlass continue after the usable integration milestone.
+
+## Historical Cycle 253: Native Sender And One-Use Reply Authority
 
 USI-2 now carries kernel-authenticated sender identity and task-local one-use
 reply authority. Real CPL3 tasks exchange requests without giving the server a

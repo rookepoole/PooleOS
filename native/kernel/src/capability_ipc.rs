@@ -18,6 +18,7 @@ pub const DEPTH: usize = 4;
 pub const MAX_BYTES: usize = 64;
 const ENDPOINT_TAG: u64 = 1 << 16;
 pub mod reply;
+pub mod request;
 pub mod wait;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -86,6 +87,7 @@ struct Table {
     wait_generation: u64,
     wait: Option<wait::Wait>,
     replies: [reply::Slot; CAPS],
+    requests: [request::Slot; CAPS],
 }
 impl Table {
     const EMPTY: Self = Self {
@@ -95,6 +97,7 @@ impl Table {
         wait_generation: 0,
         wait: None,
         replies: [reply::Slot::EMPTY; CAPS],
+        requests: [request::Slot::EMPTY; CAPS],
     };
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -283,6 +286,7 @@ impl Space {
         Ok(())
     }
     fn remove_object(&mut self, object: Object) {
+        self.revoke_requests(object);
         for table in &mut self.tables {
             for c in &mut table.caps {
                 if c.value.is_some_and(|cap| cap.object == object) {
@@ -306,6 +310,7 @@ impl Space {
     /// Called after task execution is stopped, before its root or identity is reused.
     pub fn detach(&mut self, owner: TaskId) -> Result<(), Error> {
         let t = self.table(owner)?;
+        self.retire_requests(owner);
         for i in 0..ENDPOINTS {
             if self.objects[i].value.is_some_and(|e| e.owner == owner) {
                 self.remove_object(Object {
@@ -342,6 +347,7 @@ impl Space {
                 && t.wait.is_none()
                 && t.caps.iter().all(|c| c.value.is_none())
                 && t.replies.iter().all(|r| r.value.is_none())
+                && t.requests.iter().all(|r| !r.occupied())
         }) && self.objects.iter().all(|o| o.value.is_none())
     }
     /// Failed copy-in publishes nothing. Failed copy-out keeps the entire message

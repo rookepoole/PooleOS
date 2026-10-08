@@ -61,7 +61,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertEqual(errors, [])
         else:
             self.assertTrue(errors)
-            self.assertEqual("; ".join(errors), expected["detail"])
+            # Release-gate diagnostics display the first eight errors; all errors still reject.
+            self.assertEqual("; ".join(errors[:8]), expected["detail"])
 
     def assert_reclamation_admission(self, receipt: dict) -> None:
         from tools import qualify_native_reclamation_core as core
@@ -197,8 +198,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 253)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1304)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 254)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1307)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -238,8 +239,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "bounded_native_IPC_reply_authority_pass_deadlines_admission_and_full_candidate_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 253)
+        self.assertEqual(current["qualification_status"], "bounded_native_request_lifetimes_pass_clock_admission_and_canonical_product_gates_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 254)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -772,7 +773,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertEqual(record[field], receipt["product"][field])
         sources = {p.relative_to(ROOT).as_posix() for p in (ROOT / "native/kernel/src").rglob("*.rs")}
         inputs = receipt["bindings"]["implementation_inputs"]
-        self.assertEqual((len(sources), len(inputs)), (82, 79))
+        self.assertEqual((len(sources), len(inputs)), (86, 79))
         self.assertEqual(sources - {item["path"] for item in inputs},
                          {"native/kernel/src/user_entry.rs", "native/kernel/src/user_entry/tests.rs",
                           "native/kernel/src/user_entry/prepared.rs", "native/kernel/src/user_entry/prepared_tests.rs",
@@ -782,6 +783,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
                           "native/kernel/src/capability_ipc.rs", "native/kernel/src/capability_ipc/tests.rs",
                           "native/kernel/src/capability_ipc/wait.rs",
                           "native/kernel/src/capability_ipc/reply.rs",
+                          "native/kernel/src/capability_ipc/request.rs",
+                          "native/kernel/src/capability_ipc/tests/replies/requests.rs",
+                          "native/kernel/src/arch/x86_64/user_ipc/request.rs",
+                          "native/kernel/src/user_root_probe/peer_driver/ipc_request.rs",
                           "native/kernel/src/capability_ipc/tests/replies.rs",
                           "native/kernel/src/arch/x86_64/user_ipc/reply.rs",
                           "native/kernel/src/user_root_probe/peer_driver/ipc_reply.rs",
@@ -2578,7 +2583,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         repair = gate["historical_cycle215_retained_map_qualification"]
         boot = gate["historical_cycle215_boot_chain_qualification"]
         self.assertEqual((repair["cycle"], repair["move_id"]), (210, "N5-KMAP-001"))
-        self.assertEqual((kmap.KERNEL_PAGE_CAPACITY, kmap.STACK_FIRST_PAGE, kmap.HANDOFF_FIRST_PAGE), (192, 193, 230))
+        self.assertEqual((kmap.KERNEL_PAGE_CAPACITY, kmap.STACK_FIRST_PAGE, kmap.HANDOFF_FIRST_PAGE), (208, 209, 246))
         self.assertEqual((repair["kernel_pages"], repair["rejected_pages"]), (148, 193))
         self.assertEqual(repair["accepted_boundary_pages"], [148, 192])
         self.assertTrue(repair["rejected_before_table_writes"])
@@ -3623,7 +3628,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
                          "65155E981FA217BD9D78218A4E0C0537A574D613ED9FB3E1EBD16511B6A1EA5D")
         self.assertTrue(sources.evidence_errors(current, ROOT))
         self.assertFalse(pooleos_release_gate.check_native_execution_sources()["ok"])
-        self.assertEqual(len(gate["current_focused_source_projection"]["pending_source_profiles"]), 22)
+        self.assertEqual(len(gate["current_focused_source_projection"]["pending_source_profiles"]), 23)
         self.assertTrue(gate["historical_cycle233_dependency_qualification"]["all_fourteen_profiles_current"])
         self.assertFalse(gate["current_dependency_qualification"]["applies_to_current_source"])
         ownership = gate["historical_cycle233_ownership_qualification"]
@@ -3811,7 +3816,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(lane["receipt_path"], "tests/fixtures/cycle237-user-entry-readiness.json")
         projection = json.loads((ROOT / "runs/native-user-entry-gate-projection.json").read_bytes())
         self.assertEqual(projection["static_source_current_profiles"],
-                         ["entry", "symbols", "policy", "revalidation", "errata_policy"])
+                         ["entry", "symbols", "policy", "errata_policy"])
         for row in json.loads((ROOT / sources.RECEIPT).read_bytes())["profiles"]:
             path, roots = sources.profile_paths(row["profile"])
             current = (row["sources"] == sources.source_closure(ROOT, roots)
@@ -4561,8 +4566,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(gate["canonical_full_replay_performed"] or gate["merge_qualified"])
 
     def test_cycle253_sender_and_reply_authority_require_real_guest_evidence_without_service_promotion(self) -> None:
-        from runtime import native_user_root as probe
-        lane = self.roadmap["baseline"]["user_space_integration"]
+        lane = self.roadmap["baseline"]["historical_cycle253_user_space_integration"]
         self.assertEqual((lane["cycle"],lane["selected_stage"]),(253,"USI-2"))
         for field in ("ipc_authenticated_sender", "ipc_reply_tokens", "ipc_native_saturation_qualified",
                       "ipc_native_dead_peer_qualified", "ipc_native_wait_termination", "continue_full_microkernel_after_iso"):
@@ -4577,8 +4581,6 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual((receipt["cycle"],receipt["status"]),(253,"pass"))
         self.assertTrue(receipt["source_unchanged"] and receipt["owner_report_unchanged"] and receipt["native_ipc_reply_authority"])
         self.assertEqual(len(receipt["source_bindings"]),769)
-        for path, expected in receipt["source_bindings"].items():
-            self.assertEqual(hashlib.sha256((ROOT/path).read_bytes()).hexdigest().upper(),expected,path)
         checks = {c["name"]: c for c in receipt["checks"]}
         self.assertEqual(len(checks),15)
         self.assertTrue(all(c["passed"] for c in checks.values()))
@@ -4590,8 +4592,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         for run in live["guest_runs"]:
             self.assertTrue(run["fresh_vars_copy"] and run["media_read_only"] and run["serial_debugcon_exact_match"])
             self.assertFalse(run["guest_network"] or run["host_acceleration"])
-            s = probe.validate_markers(run["markers"])
-            self.assertEqual(s,run["marker_summary"])
+            s = run["marker_summary"]  # Frozen receipt identity, not current oracle or new execution.
             self.assertEqual((len(run["markers"]),s["peer_survival_cases"],s["cr3_writes"]),(68,17,391))
             self.assertEqual(s["ipc_reply_calls"],[8,11])
             self.assertEqual(s["ipc_reply_ticks"],[1533,2294])
@@ -4601,13 +4602,56 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertEqual((s["ipc_persistent_generations"],s["ipc_native_dead_owner_cases"]),(5,4))
             self.assertFalse(s["ipc_synchronous_call"] or s["ipc_deadlines"] or s["ipc_general_lifecycle"])
             self.assertIsNone(s["unknown_task_total_ticks"])
-            self.assertEqual((probe.negative_controls(run["markers"]),run["hostile_marker_cases_rejected"]),(835,835))
+            self.assertEqual(run["hostile_marker_cases_rejected"],835)
         self.assertEqual(lane["measured_subtotal_all_peer_suites_per_probe"],[143832590,143832590])
         self.assertFalse(any("POOLEOS:KERNEL:ENTRY" in m for m in live["ordinary_denial"]["markers"]))
-        gate = self.roadmap["baseline"]["native_consistency_release_gate"]["current_closeout_regression"]
+        gate = self.roadmap["baseline"]["native_consistency_release_gate"]["historical_cycle253_closeout_regression"]
         self.assertEqual(gate["receipt_sha256"],hashlib.sha256(raw).hexdigest().upper())
         self.assertEqual((gate["tests_passed"],len(gate["initial_attempts"])),(618,1))
         self.assertFalse(gate["canonical_full_replay_performed"] or gate["merge_qualified"])
+
+    def test_cycle254_request_lifetimes_bind_current_sources_and_retain_deadline_and_product_gaps(self) -> None:
+        from runtime import native_user_root as probe
+        lane = self.roadmap["baseline"]["user_space_integration"]
+        self.assertEqual((lane["cycle"], lane["selected_stage"]), (254, "USI-2"))
+        for field in ("ipc_caller_owned_completion", "ipc_client_request_cancellation",
+                      "ipc_dead_service_reply_notification", "ipc_reply_reserved_capacity", "continue_full_microkernel_after_iso"):
+            self.assertTrue(lane[field], field)
+        for field in ("ipc_deadlines", "ipc_request_deadline_ownership", "general_user_program_admission", "iso_built", "production_ready"):
+            self.assertFalse(lane[field], field)
+        raw = (ROOT / lane["receipt_path"]).read_bytes()
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), "61C580013B54AC0D4FB638A5F5C65D6C0CEA3FE51612399773E48FE26D5B67A7")
+        receipt = json.loads(raw)
+        self.assertEqual((receipt["cycle"], receipt["status"], len(receipt["checks"])), (254, "pass", 17))
+        self.assertTrue(receipt["source_unchanged"] and receipt["owner_report_unchanged"] and receipt["native_ipc_request_lifecycle"])
+        self.assertFalse(receipt["canonical_product_receipts_current"])
+        self.assertEqual(len(receipt["known_unresolved_readiness_tests"]), 3)
+        for path, expected in receipt["source_bindings"].items():
+            self.assertEqual(hashlib.sha256((ROOT / path).read_bytes()).hexdigest().upper(), expected, path)
+        self.assertTrue(all(c["passed"] for c in receipt["checks"]))
+        self.assertEqual(sum(c["tests_passed"] or 0 for c in receipt["checks"]), 653)
+        live = receipt["live_user_root"]
+        self.assertEqual((live["kernel"]["image_pages"], live["guest_bound_seconds"]), (196, 150))
+        self.assertEqual(live["kernel"]["sha256"], "5F0721E2DE60A6E772506035C25EEC7DD5ED640408E4B61A2B3C3CA8A244430F")
+        self.assertEqual(len(live["guest_runs"]), 2)
+        for run in live["guest_runs"]:
+            self.assertTrue(run["fresh_vars_copy"] and run["media_read_only"] and run["serial_debugcon_exact_match"])
+            self.assertFalse(run["guest_network"] or run["host_acceleration"])
+            s = probe.validate_markers(run["markers"])
+            self.assertEqual(s, run["marker_summary"])
+            self.assertEqual((len(run["markers"]), s["peer_survival_cases"], s["cr3_writes"]), (72, 17, 415))
+            self.assertEqual((s["released_pages"], s["scrubbed_data_pages"]), (876, 403))
+            self.assertEqual([r["outcome"] for r in s["ipc_request_lifetimes"]], [0, 8, 9, 9])
+            self.assertEqual([r["generation"] for r in s["ipc_request_lifetimes"]], [7, 8, 9, 10])
+            self.assertIsNone(s["unknown_task_total_ticks"])
+            self.assertFalse(s["ipc_deadlines"] or s["ipc_general_lifecycle"])
+            self.assertEqual((probe.negative_controls(run["markers"]), run["hostile_marker_cases_rejected"]), (935, 935))
+        self.assertFalse(any("POOLEOS:KERNEL:ENTRY" in m for m in live["ordinary_denial"]["markers"]))
+        gate = self.roadmap["baseline"]["native_consistency_release_gate"]["current_closeout_regression"]
+        self.assertEqual((gate["tests_passed"], len(gate["initial_attempts"])), (653, 4))
+        self.assertEqual(gate["receipt_sha256"], hashlib.sha256(raw).hexdigest().upper())
+        self.assertTrue(gate["kernel_task_timer_dispatch_bounds_unchanged"])
+        self.assertFalse(gate["qualification_bound_unchanged"] or gate["canonical_full_replay_performed"] or gate["merge_qualified"])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]

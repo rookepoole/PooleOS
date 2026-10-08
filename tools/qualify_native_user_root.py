@@ -22,8 +22,10 @@ def main() -> int:
     work = args.work_dir.resolve()
     if not work.is_relative_to(ROOT): p.error("work directory must be inside repository")
     work.mkdir(parents=True, exist_ok=False)
-    report = {"cycle": 253, "contract_id": "PKIPC3", "status": "fail", "guest_runs": [],
-              "guest_bound_seconds": 120, "hpet_msi": True,
+    report = {"cycle": 254, "contract_id": "PKIPC4", "status": "fail", "guest_runs": [],
+              "guest_bound_seconds": 150, "hpet_msi": True,
+              "prior_guest_bound_seconds": 120,
+              "bound_revision_reason": "four_added_request_lifetimes_outgrew_whole_suite_wall_budget_kernel_limits_unchanged",
               "ring3_executed": False, "iso_built": False, "production_ready": False}
     try:
         lock, profile = tier0.validate_contracts(ROOT)
@@ -56,9 +58,9 @@ def main() -> int:
         for i in (1, 2):
             run_dir = work / f"guest-{i}"
             run_dir.mkdir()
-            print(f"PKIPC3 guest {i}/2, 120-second bound", flush=True)
+            print(f"PKIPC4 guest {i}/2, 150-second bound", flush=True)
             run, _, handoff = boot._execute_once(f"user-root-{i}", lock, profile, qemu,
-                media_path, run_dir, 120, marker_validator=probe.validate_markers,
+                media_path, run_dir, 150, marker_validator=probe.validate_markers,
                 marker_extractor=transfer.extract_markers, completion_marker=probe.COMPLETION, hpet_msi=True)
             prefix = run["marker_summary"]["transfer_prefix"]
             load.validate_oracle_binding(prefix["boot_prefix"], inspected, run["pbp1_transcript"])
@@ -84,7 +86,7 @@ def main() -> int:
         report["failure"] = f"{type(e).__name__}: {e}"
         print(report["failure"], flush=True)
     (work / "receipt.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
-    print(f"PKIPC3 live {report['status']}; ring3={report['ring3_executed']} production=0", flush=True)
+    print(f"PKIPC4 live {report['status']}; ring3={report['ring3_executed']} production=0", flush=True)
     return 0 if report["status"] == "pass" else 1
 
 

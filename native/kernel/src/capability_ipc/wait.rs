@@ -37,6 +37,7 @@ impl Ticket {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Admission {
     Ready,
+    Complete(Status),
     Pending(Ticket),
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -48,10 +49,17 @@ enum State {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) struct Wait {
     ticket: Ticket,
-    handle: u64,
-    object: Object,
-    readiness: Readiness,
+    target: Target,
     state: State,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum Target {
+    Endpoint {
+        handle: u64,
+        object: Object,
+        readiness: Readiness,
+    },
+    Request(u64),
 }
 
 fn reason(status: Status) -> Result<WakeReason, Error> {
@@ -91,6 +99,32 @@ impl Space {
         if self.ready(cap.object, readiness) {
             return Ok(Admission::Ready);
         }
+        self.arm_wait(
+            caller,
+            Target::Endpoint {
+                handle,
+                object: cap.object,
+                readiness,
+            },
+        )
+    }
+    pub fn prepare_request_wait(
+        &mut self,
+        caller: Caller,
+        handle: u64,
+    ) -> Result<Admission, Status> {
+        let status = self.request_status(caller, handle)?;
+        let t = usize::from(caller.id.slot);
+        if self.tables[t].wait.is_some() {
+            return Err(Status::Again);
+        }
+        if let Some(status) = status {
+            return Ok(Admission::Complete(status));
+        }
+        self.arm_wait(caller, Target::Request(handle))
+    }
+    fn arm_wait(&mut self, caller: Caller, target: Target) -> Result<Admission, Status> {
+        let t = usize::from(caller.id.slot);
         let generation = self.tables[t]
             .wait_generation
             .checked_add(1)
@@ -99,9 +133,7 @@ impl Space {
         self.tables[t].wait_generation = generation;
         self.tables[t].wait = Some(Wait {
             ticket,
-            handle,
-            object: cap.object,
-            readiness,
+            target,
             state: State::Armed,
         });
         Ok(Admission::Pending(ticket))
@@ -161,14 +193,25 @@ impl Space {
             if wait.state != State::Parked {
                 continue;
             }
-            let status = match self.resolve(t, wait.handle, wait.readiness.rights()) {
-                Ok(cap) if cap.object == wait.object => {
-                    if !self.ready(cap.object, wait.readiness) {
-                        continue;
+            let status = match wait.target {
+                Target::Endpoint {
+                    handle,
+                    object,
+                    readiness,
+                } => match self.resolve(t, handle, readiness.rights()) {
+                    Ok(cap) if cap.object == object => {
+                        if !self.ready(cap.object, readiness) {
+                            continue;
+                        }
+                        Status::Ok
                     }
-                    Status::Ok
-                }
-                _ => Status::Revoked,
+                    _ => Status::Revoked,
+                },
+                Target::Request(handle) => match self.request_status(wait.ticket.caller, handle) {
+                    Ok(None) => continue,
+                    Ok(Some(status)) => status,
+                    Err(_) => Status::Revoked,
+                },
             };
             self.notify(t, wait, status, scheduler, cpu)?;
             count += 1;

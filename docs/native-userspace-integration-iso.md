@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 253, 2026-10-08. No new ISO exists yet.
+Status: implementation started, Cycle 254, 2026-10-08. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -44,12 +44,20 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | Stage | Build Plan Binding | Exit Criterion | Current State |
 | --- | --- | --- | --- |
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
-| USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Cycle253: kernel-stamped sender identity and task-local one-use replies, with actual CPL3 fault retry, consume/discard and replay denial. Prior pressure/death cases preserved. Deadlines, dead-service notification and general admission remain |
+| USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Cycle254: caller-owned completion/cancel/wait/take, actual success/discard/queued and claimed service death, with all prior cases preserved. Owned clock/deadlines, transactional admission and sustained budgets remain |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Not started |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
 ### Immediate Next Move
+
+Current: [Cycle254 request lifetime evidence](checkpoints/cycle254-native-request-lifetimes.md).
+Build an owned monotonic deadline clock, then transactional admission and sustained
+service budgets. Per-dispatch CPU ticks are not a wall-clock deadline source.
+The196-page kernel has208 reserved pages;36-page guarded stack remains unchanged.
+Migrate old product receipts and replay exact-candidate canonical gates before main.
+Then USI-3 init/confined console/input, USI-4 shell/files/two apps, USI-5 optical ISO.
+The completed substeps below are retained as history, not the current next action.
 
 N13-CAPABILITY-IPC-001 continues USI-2 without declaring USI-1 complete:
 

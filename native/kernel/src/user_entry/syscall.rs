@@ -45,6 +45,13 @@ pub enum Status {
 pub enum Request {
     Version,
     Exit(u32),
+    RequestWait(u64),
+    RequestControl {
+        handle: u64,
+        address: u64,
+        bytes: usize,
+        operation: crate::capability_ipc::request::Operation,
+    },
     Message {
         handle: u64,
         address: u64,
@@ -168,6 +175,40 @@ pub fn request(
             operation: crate::capability_ipc::reply::Operation::Discard,
         }),
         9 => Err(Status::Arguments),
+        10 | 11 => {
+            let max = if number == 10 {
+                crate::capability_ipc::MAX_BYTES
+            } else {
+                crate::capability_ipc::reply::RECEIVE_BYTES
+            };
+            if bytes == 0
+                || bytes > max as u64
+                || destination < USER_WINDOW_START
+                || destination
+                    .checked_add(bytes)
+                    .is_none_or(|e| e > USER_WINDOW_END_EXCLUSIVE)
+            {
+                return Err(Status::Arguments);
+            }
+            Ok(Request::RequestControl {
+                handle: source,
+                address: destination,
+                bytes: bytes as usize,
+                operation: if number == 10 {
+                    crate::capability_ipc::request::Operation::Begin
+                } else {
+                    crate::capability_ipc::request::Operation::Take
+                },
+            })
+        }
+        12 if destination == 0 && bytes == 0 => Ok(Request::RequestControl {
+            handle: source,
+            address: 0,
+            bytes: 0,
+            operation: crate::capability_ipc::request::Operation::Cancel,
+        }),
+        13 if destination == 0 && bytes == 0 => Ok(Request::RequestWait(source)),
+        12 | 13 => Err(Status::Arguments),
         _ => Err(Status::Unknown),
     }
 }
