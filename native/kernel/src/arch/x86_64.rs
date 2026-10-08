@@ -48,6 +48,12 @@ const DOUBLE_FAULT_IST_INDEX: u8 = 2;
 const INTERRUPT_GATE_PRESENT_RING0: u8 = 0x8e;
 const TSS_AVAILABLE_PRESENT_RING0: u64 = 0x89;
 
+pub mod user;
+pub mod user_ipc;
+mod user_preempt;
+mod user_syscall;
+pub mod user_watchdog;
+
 #[derive(Clone, Copy)]
 #[repr(C, packed)]
 struct DescriptorPointer {
@@ -842,6 +848,16 @@ pub unsafe fn write_local_apic_base(value: u64) {
 unsafe fn read_pat() -> u64 {
     // SAFETY: the caller requires CPUID.01H:EDX.PAT before this typed read.
     unsafe { read_msr(IA32_PAT) }
+}
+
+/// Observe PAT only when CPUID advertises the MSR; caller must own CPL0.
+pub unsafe fn read_supported_pat() -> Option<u64> {
+    if cpuid(1, 0).edx & (1 << 16) == 0 {
+        None
+    } else {
+        // SAFETY: the feature check above establishes MSR availability.
+        Some(unsafe { read_pat() })
+    }
 }
 
 unsafe fn read_mtrr_cap() -> u64 {
@@ -1843,13 +1859,20 @@ pub unsafe fn trigger_device_not_available_rejection() -> ! {
 }
 
 unsafe extern "C" {
+    fn poole_trap_divide();
+    fn poole_trap_debug();
     fn poole_trap_breakpoint();
+    fn poole_trap_overflow();
+    fn poole_trap_bound();
     fn poole_trap_invalid_opcode();
     fn poole_trap_device_not_available();
     fn poole_trap_double_fault();
+    fn poole_trap_segment_not_present();
+    fn poole_trap_stack();
     fn poole_trap_general_protection();
     fn poole_trap_page_fault();
     fn poole_trap_x87_floating_point();
+    fn poole_trap_alignment();
     fn poole_trap_simd_floating_point();
     fn poole_trigger_breakpoint();
     fn poole_breakpoint_resume();
@@ -1870,6 +1893,7 @@ unsafe extern "C" {
     fn poole_trigger_device_not_available_rejection() -> !;
     fn poole_device_not_available_fault();
     fn poole_interrupt_timer();
+    fn poole_interrupt_watchdog();
     fn poole_interrupt_apic_error();
     fn poole_interrupt_spurious();
 }
@@ -1897,15 +1921,23 @@ core::arch::global_asm!(
     .size \name, .-\name
     .endm
 
+    POOLE_TRAP_NO_ERROR poole_trap_divide, 0
+    POOLE_TRAP_NO_ERROR poole_trap_debug, 1
     POOLE_TRAP_NO_ERROR poole_trap_breakpoint, 3
+    POOLE_TRAP_NO_ERROR poole_trap_overflow, 4
+    POOLE_TRAP_NO_ERROR poole_trap_bound, 5
     POOLE_TRAP_NO_ERROR poole_trap_invalid_opcode, 6
     POOLE_TRAP_NO_ERROR poole_trap_device_not_available, 7
     POOLE_TRAP_ERROR poole_trap_double_fault, 8
+    POOLE_TRAP_ERROR poole_trap_segment_not_present, 11
+    POOLE_TRAP_ERROR poole_trap_stack, 12
     POOLE_TRAP_ERROR poole_trap_general_protection, 13
     POOLE_TRAP_ERROR poole_trap_page_fault, 14
     POOLE_TRAP_NO_ERROR poole_trap_x87_floating_point, 16
+    POOLE_TRAP_ERROR poole_trap_alignment, 17
     POOLE_TRAP_NO_ERROR poole_trap_simd_floating_point, 19
     POOLE_TRAP_NO_ERROR poole_interrupt_timer, 64
+    POOLE_TRAP_NO_ERROR poole_interrupt_watchdog, 65
     POOLE_TRAP_NO_ERROR poole_interrupt_apic_error, 240
     POOLE_TRAP_NO_ERROR poole_interrupt_spurious, 255
 
@@ -1927,6 +1959,10 @@ poole_trap_common:
     push r13
     push r14
     push r15
+    // Interrupt gates do not clear AC. Never inherit a user's SMAP override.
+    pushfq
+    and qword ptr [rsp], -262145
+    popfq
     cld
     mov rdi, rsp
     call poole_kernel_trap_dispatch
@@ -3839,6 +3875,87 @@ pub unsafe fn read_cr3() -> u64 {
 pub unsafe fn write_cr3(value: u64) {
     // SAFETY: the caller proves that this exact root is activation eligible.
     unsafe { asm!("mov cr3, {}", in(reg) value, options(nostack, preserves_flags)) };
+}
+
+/// Privileged PKUSER3 adapter, wired only into the development user-root probe.
+/// The private construction boundary preserves the single-BSP execution lease.
+#[allow(dead_code)]
+pub struct UserRootCpu {
+    original: u64,
+    candidate: u64,
+    _local: core::marker::PhantomData<*mut ()>,
+}
+
+static USER_ROOT_WRITES: core::sync::atomic::AtomicU64 = core::sync::atomic::AtomicU64::new(0);
+pub fn user_root_write_count() -> u64 {
+    USER_ROOT_WRITES.load(Ordering::Acquire)
+}
+
+#[allow(dead_code)]
+impl UserRootCpu {
+    /// # Safety
+    /// Caller owns the sole BSP execution/CR3 lease at CPL0 with IF clear and
+    /// all APs offline for the entire adapter lifetime. Both audited roots must
+    /// preserve current code, stack, data and exception/NMI paths. Boot mappings,
+    /// owned pages and their aliases must remain retained and serialized; neither
+    /// DMA nor another actor may edit them. No other actor may install either
+    /// root or change paging controls while this adapter is owned. PCIDE, PGE
+    /// and LA57 must stay disabled. This is not a user-entry permission.
+    pub unsafe fn new(original: u64, candidate: u64) -> Self {
+        Self {
+            original,
+            candidate,
+            _local: core::marker::PhantomData,
+        }
+    }
+}
+
+impl poolekernel::user_entry::prepared::cpu::Cpu for UserRootCpu {
+    fn snapshot(
+        &mut self,
+    ) -> Result<
+        poolekernel::user_entry::prepared::cpu::Snapshot,
+        poolekernel::user_entry::prepared::cpu::Error,
+    > {
+        use poolekernel::user_entry::prepared::cpu::{Error, Snapshot};
+        // SAFETY: the constructor requires CPL0 and an exclusive single-BSP lease.
+        let (cr0, cr3, cr4, efer, apic_base) = unsafe {
+            (
+                read_cr0(),
+                read_cr3(),
+                read_cr4(),
+                read_efer(),
+                read_apic_base(),
+            )
+        };
+        if apic_base & (1 << 8) == 0 {
+            return Err(Error::Context);
+        }
+        Ok(Snapshot {
+            cpu_id: cpuid(1, 0).ebx >> 24,
+            active_cpus: 1,
+            cr0,
+            cr3,
+            cr4,
+            efer,
+            rflags: read_rflags(),
+        })
+    }
+
+    fn write_root(
+        &mut self,
+        root: u64,
+    ) -> Result<(), poolekernel::user_entry::prepared::cpu::Error> {
+        use poolekernel::user_entry::prepared::cpu::Error;
+        if root == 0 || root & 0xfff != 0 || (root != self.original && root != self.candidate) {
+            return Err(Error::Root);
+        }
+        // SAFETY: the constructor and owning PKUSER3 lifecycle preserve both
+        // mappings and the serialized PCIDE/PGE-disabled flushing context.
+        unsafe { write_cr3(root) };
+        USER_ROOT_WRITES.fetch_add(1, Ordering::AcqRel);
+        Ok(())
+    }
 }
 
 /// Invalidates one canonical virtual address in the current address space.

@@ -18,6 +18,7 @@ use poole_handoff::{
 pub mod acpi;
 pub mod active_virtual_memory;
 pub mod atomics;
+pub mod capability_ipc;
 pub mod interrupt_time;
 pub mod locks;
 pub mod physical_memory;
@@ -32,6 +33,7 @@ pub mod scheduler_smp_preempt;
 pub mod smp;
 pub mod smp_ipi;
 pub mod smp_runtime;
+pub mod user_entry;
 pub mod virtual_memory;
 pub mod xstate;
 pub mod xstate_exception;
@@ -57,7 +59,7 @@ pub const LOCKS_CONTRACT_ID: &str = locks::CONTRACT_ID;
 #[unsafe(link_section = ".text.pkbuild_literal")]
 static BUILD_ID_BYTES: [u8; 44] = *b"PKBUILD1-CYCLE216-N12-SMP-TXN-V1-00000000001";
 pub const BUILD_ID: &[u8] = &BUILD_ID_BYTES;
-pub const ENTRY_OFFSET: u64 = 0xa000;
+pub const ENTRY_OFFSET: u64 = 0xd000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 
 #[used]
@@ -116,6 +118,7 @@ pub enum PanicCode {
     SchedulerSmpPreempt = 0x101c,
     Atomics = 0x101d,
     Locks = 0x101e,
+    UserRoot = 0x101f,
     UnexpectedReturn = 0x10ff,
 }
 
@@ -145,6 +148,7 @@ pub enum DevelopmentTrapScenario {
     SchedulerSmpPreempt = 20,
     Atomics = 21,
     Locks = 22,
+    UserRoot = 23,
 }
 
 macro_rules! scenario_label {
@@ -178,6 +182,7 @@ scenario_label!(SCENARIO_SCHEDULER_AP_WORKERS, b"scheduler_ap_workers");
 scenario_label!(SCENARIO_SCHEDULER_SMP_PREEMPT, b"scheduler_smp_preempt");
 scenario_label!(SCENARIO_ATOMICS, b"atomics");
 scenario_label!(SCENARIO_LOCKS, b"locks");
+scenario_label!(SCENARIO_USER_ROOT, b"user_root");
 
 const fn scenario_label_text(bytes: &'static [u8]) -> &'static str {
     // SAFETY: every caller supplies an ASCII byte string declared immediately above.
@@ -210,6 +215,7 @@ impl DevelopmentTrapScenario {
             20 => Some(Self::SchedulerSmpPreempt),
             21 => Some(Self::Atomics),
             22 => Some(Self::Locks),
+            23 => Some(Self::UserRoot),
             _ => None,
         }
     }
@@ -239,6 +245,7 @@ impl DevelopmentTrapScenario {
             Self::SchedulerSmpPreempt => scenario_label_text(&SCENARIO_SCHEDULER_SMP_PREEMPT),
             Self::Atomics => scenario_label_text(&SCENARIO_ATOMICS),
             Self::Locks => scenario_label_text(&SCENARIO_LOCKS),
+            Self::UserRoot => scenario_label_text(&SCENARIO_USER_ROOT),
         }
     }
 }
@@ -1465,6 +1472,13 @@ mod tests {
     use super::*;
     use std::vec::Vec;
 
+    #[test]
+    fn runtime_entry_offset_matches_linker_text_start() {
+        let linker = include_str!("../linker.ld").replace("\r\n", "\n");
+        let boundary = std::format!(". = 0x{:X};\n  __poole_text_start = .;", ENTRY_OFFSET);
+        assert!(linker.contains(&boundary));
+    }
+
     #[derive(Default)]
     struct TestSink(Vec<u8>);
 
@@ -1833,7 +1847,12 @@ mod tests {
             DevelopmentTrapScenario::from_selector(22),
             Some(DevelopmentTrapScenario::Locks)
         );
-        assert_eq!(DevelopmentTrapScenario::from_selector(23), None);
+        assert_eq!(
+            DevelopmentTrapScenario::from_selector(23),
+            Some(DevelopmentTrapScenario::UserRoot)
+        );
+        assert_eq!(DevelopmentTrapScenario::UserRoot.label(), "user_root");
+        assert_eq!(DevelopmentTrapScenario::from_selector(24), None);
     }
 
     #[test]

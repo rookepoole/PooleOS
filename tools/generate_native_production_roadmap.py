@@ -126,6 +126,7 @@ SUBPHASE_OVERRIDES = {
     "N12.5": "partial",
     "N12.6": "partial",
     "N12.7": "partial",
+    "N13.3": "partial",
     "N15.1": "partial",
     "N31.7": "partial",
     "N32.1": "complete",
@@ -11093,14 +11094,1932 @@ def apply_cycle233(roadmap: dict, test_count: int) -> dict:
     next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N5-FAT32-PARENT-001")["evidence"].insert(0, checkpoint)
     roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle234(roadmap, test_count)
+
+
+def apply_cycle234(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle234-user-entry-foundation.md"
+    plan = "docs/native-userspace-integration-iso.md"
+    receipt_path = "tests/fixtures/cycle234-user-entry-readiness.json"
+    receipt = json.loads((ROOT / receipt_path).read_bytes())
+    projection = json.loads((ROOT / "runs/native-user-entry-gate-projection.json").read_bytes())
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for name in ("candidate_audit", "focused_source_projection", "closeout_regression",
+                 "dependency_qualification", "ownership_qualification", "boot_chain_qualification",
+                 "cpu_qualification", "corrected_media_replay", "entry_provenance_qualification"):
+        suffix = "source_projection" if name == "focused_source_projection" else name
+        gate["historical_cycle233_" + suffix] = copy.deepcopy(gate["current_" + name])
+    roadmap["baseline"]["pooleos_cycle"] = 234
+    roadmap["baseline"]["pooleos_test_count"] = test_count
+    roadmap["baseline"]["retained_production_owner_blocker"] = copy.deepcopy(roadmap["immediate_next_move"])
+    roadmap["execution_protocol"].update(last_updated_cycle=234,
+        selected_move_id="N13-USER-ENTRY-001", immediate_next_move_id="N13-USER-ENTRY-LIVE-001",
+        owner_independent_next_move_id="N13-USER-ENTRY-LIVE-001")
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, plan, receipt_path]
+    roadmap["immediate_next_move"] = dict(id="N13-USER-ENTRY-LIVE-001", phase_ids=["N7", "N9", "N12", "N13"],
+        title="Attach supervisor mappings and owned entry stacks, then prove a gated real ring-3 transition and contained fault",
+        entry_evidence=[plan, receipt_path, "native/kernel/src/user_entry.rs"],
+        exit_evidence=["fresh QEMU CPL3 observation with controlled kernel entry/return",
+            "user memory and privilege faults remain contained",
+            "exclusive ownership and supported architectural state validated; ordinary boot denial unchanged"],
+        blocked=False)
+    gate["qualification_status"] = "new_user_entry_host_pass_guest_source_requalification_pending"
+    gate["current_entry_provenance_qualification"] = dict(gate["current_entry_provenance_qualification"],
+        applies_to_current_source=False, historical_record="historical_cycle233_entry_provenance_qualification")
+    latest = dict(cycle=233, status="pass", pull_request=80,
+        url="https://github.com/rookepoole/PooleOS/pull/80",
+        source_commit="7f505ca2f1dbeeef51c96995e55b629926df7505",
+        main_commit="507782dfde4a554434173fdae7a1b25a170414ce",
+        tree="89e0575f31d074a3eb071cc93fda7cdfbd909f35", tree_equality_verified=True,
+        checks_passed=106, checks_total=106, doctor_checks_passed=708, doctor_checks_total=708,
+        elapsed_seconds=1157.0, tracked_files=1646, source_unchanged=True, owner_report_unchanged=True,
+        report_sha256="867A9E802442D124B2CCA6922BDFB04FDA023B43E0CE0F262C38B868D7775650",
+        log_sha256="D0DD8C2C17DCAD0F9A910E5A4D23E174E9DDC12CC8B59AA379105AE803E70613",
+        publication_violations=0, applies_to_later_source_edits=False, production_ready=False)
+    gate["current_candidate_audit"] = dict(cycle=234, status="not_run",
+        applies_to_current_source=False, aggregate_suite_passed=False,
+        merge_requires_runtime_inclusive_exact_final_qualification=True,
+        latest_completed_attempt=latest, production_ready=False)
+    gate["current_focused_source_projection"] = dict(cycle=234,
+        passed_checks=len(projection["passing_profiles"]), total_checks=len(projection["checks"]),
+        passing_profiles=projection["passing_profiles"], failed_profiles=projection["failed_profiles"],
+        pending_downstream_native_checks=len(projection["failed_profiles"]),
+        source_current_profiles=27, source_profiles_total=27, pending_source_profiles=[],
+        static_source_closure_is_not_native_admission=True, final_receipt_fresh_qemu_runs=0,
+        required_next_gate="new_native_image_and_affected_guest_requalification_then_full_candidate")
+    for name in ("dependency_qualification", "ownership_qualification", "boot_chain_qualification", "cpu_qualification"):
+        if "current_" + name in gate:
+            gate["current_" + name] = dict(cycle=234, status="source_requalification_pending",
+                applies_to_current_source=False, fresh_current_cycle_qemu_runs=0,
+                live_receipt_source_current=False, virtual_memory_live_receipt_source_current=False,
+                historical_record="historical_cycle233_" + name, production_ready=False)
+    gate["current_closeout_regression"] = dict(cycle=234, status="focused_native_pass_not_full_canonical",
+        tests_run=274, tests_passed=274, tests_failed=0, tests_skipped=0,
+        scope="260_debug_kernel_tests_plus14_repeated_release_user_entry_tests",
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256((ROOT / receipt_path).read_bytes()).hexdigest().upper(),
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=234, status="pass", tests_run=82,
+        tests_passed=82, tests_failed=0, tests_skipped=0, elapsed_seconds=67.934,
+        log_sha256="B151F969732A91C2152EADE786DA970759EA85E0B1C1DCC389B38C688E38A47A",
+        initial_attempts=[dict(failures=36, errors=4), dict(failures=8, errors=1), dict(failures=1, errors=0)],
+        current_native_admissions_passed=2, current_native_admissions_total=27,
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    roadmap["baseline"]["user_space_integration"] = dict(cycle=234, status="implementation_started",
+        plan_path=plan, selected_stage="USI-1", selected_requirement="N13-USER-ENTRY-001",
+        receipt_path=receipt_path, host_status=receipt["status"], guest_runs=0,
+        ring3_executed=False, iso_built=False, production_ready=False,
+        stages={"USI-1": "partial_host_admission_only", "USI-2": "not_started",
+                "USI-3": "not_started", "USI-4": "not_started", "USI-5": "not_started"},
+        continue_full_microkernel_after_iso=True,
+        required_next="N13-USER-ENTRY-LIVE-001")
+    evidence = "Cycle 234: PKUSER1 inactive user-image admission passes260 kernel host tests,14 optimized focused tests and freestanding-library check; no live user execution or ISO. " + checkpoint
+    gap = "User-space integration still needs owned kernel-half mappings/stacks, live ring3/return/fault containment, capabilities/IPC, services, shell/apps and ISO qualification. Production microkernel completion remains N0-N39."
+    phase = next(p for p in roadmap["phases"] if p["id"] == "N13")
+    phase["current_evidence"].insert(0, evidence)
+    phase["current_gaps"].insert(0, gap)
+    roadmap["implementation_flags"].append(dict(id="FLAG-N13-USERSPACE-ISO-001", **{"class": "REQUIRED"},
+        status="open", phase_id="N13", closure_condition="Pass all five native user-space ISO stages with actual isolated tasks, user input, fault containment and fresh optical evidence; do not close production gates", evidence=[checkpoint, plan]))
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap + " 25 retained component admissions are stale on changed native source; historical execution is not new qualification.")
+    return apply_cycle235(roadmap, test_count)
+
+
+def apply_cycle235(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle235-owned-user-root.md"
+    receipt_path = "tests/fixtures/cycle235-user-entry-readiness.json"
+    receipt = json.loads((ROOT / receipt_path).read_bytes())
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle234_" + name] = copy.deepcopy(gate["current_" + name])
+    roadmap["baseline"]["historical_cycle234_user_space_integration"] = copy.deepcopy(roadmap["baseline"]["user_space_integration"])
+    roadmap["baseline"].update(pooleos_cycle=235, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=235, selected_move_id="N13-USER-ENTRY-LIVE-001")
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path]
+    gate["current_candidate_audit"]["cycle"] = 235
+    gate["current_focused_source_projection"]["cycle"] = 235
+    gate["qualification_status"] = "owned_inactive_user_root_host_pass_live_adapter_and_guest_pending"
+    counts = [check["tests_passed"] for check in receipt["checks"] if check["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=235, status="focused_native_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="272_debug_kernel_tests_plus26_repeated_release_user_entry_tests_plus2_compile_fail_checks",
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256((ROOT / receipt_path).read_bytes()).hexdigest().upper(),
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=235, status="pass", tests_run=83,
+        tests_passed=83, tests_failed=0, tests_skipped=0, elapsed_seconds=68.951,
+        log_sha256="00FB0B10C6609DB7628D6F9612E7D1EC394BE869B3B47600650AB5637F825914",
+        initial_attempts=[dict(failures=1, errors=0,
+            log_sha256="58B74451D885355953C1583C6144627899EB34E105050BFADA77DE7092FBAE6C")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    roadmap["baseline"]["user_space_integration"].update(cycle=235,
+        selected_requirement="N13-USER-ENTRY-LIVE-001", receipt_path=receipt_path,
+        host_status=receipt["status"], live_adapter_implemented=False,
+        owned_inactive_supervisor_attachment=True, entry_stack_bytes=16384)
+    roadmap["baseline"]["user_space_integration"]["stages"]["USI-1"] = "partial_host_prepared_root_only"
+    roadmap["immediate_next_move"]["title"] = "Transfer owned prepared root into a CPU-exposed lifecycle, connect bootstrap/timer mappings and prove actual ring-3 entry/return/fault containment"
+    roadmap["immediate_next_move"]["entry_evidence"].append(checkpoint)
+    evidence = "Cycle 235: PKUSER2 constructs retained inactive supervisor and guarded entry-stack mappings; read/write/cleanup failures retain ownership; host/freestanding checks only. " + checkpoint
+    gap = "Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion."
+    phase = next(p for p in roadmap["phases"] if p["id"] == "N13")
+    phase["current_evidence"].insert(0, evidence)
+    phase["current_gaps"][0] = gap
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle236(roadmap, test_count)
+
+
+def apply_cycle236(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle236-user-root-cpu-lifecycle.md"
+    receipt_path = "tests/fixtures/cycle236-user-entry-readiness.json"
+    receipt = json.loads((ROOT / receipt_path).read_bytes())
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle235_" + name] = copy.deepcopy(gate["current_" + name])
+    roadmap["baseline"]["historical_cycle235_user_space_integration"] = copy.deepcopy(roadmap["baseline"]["user_space_integration"])
+    roadmap["baseline"].update(pooleos_cycle=236, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=236)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path]
+    gate["current_candidate_audit"]["cycle"] = 236
+    gate["current_focused_source_projection"]["cycle"] = 236
+    gate["qualification_status"] = "cpu_lifecycle_host_pass_privileged_adapter_compile_only_guest_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=236, status="focused_native_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="284_debug_kernel_tests_plus38_repeated_release_user_entry_tests_plus5_compile_fail_checks",
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256((ROOT / receipt_path).read_bytes()).hexdigest().upper(),
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=236, status="pass", tests_run=84,
+        tests_passed=84, tests_failed=0, tests_skipped=0, elapsed_seconds=67.572,
+        runner_elapsed_seconds=68.390,
+        log_sha256="5E261AF830B86EC8130F00909D2B0A136A0ED0306EAC06F613AC1F328550D03D",
+        initial_attempts=[dict(failures=1, errors=0,
+            log_sha256="3493A8978F9CCAED492BB6799E9FBA43763CB858257B60C5315383FE5C2F4AF2")],
+        pre_final_review_pass=dict(tests_passed=84, elapsed_seconds=68.473,
+            log_sha256="5D2ECE4A17B06E07AF72F8DDFCF54949EA783D2E4EC387A513C813E32FCB3CBB"),
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    lane = roadmap["baseline"]["user_space_integration"]
+    lane.update(cycle=236, receipt_path=receipt_path, host_status=receipt["status"],
+        live_adapter_implemented=True, live_adapter_wired=False,
+        privileged_adapter_verification="freestanding_kernel_compile_only",
+        cpu_exposure_lifecycle_implemented=True, actual_cr3_switch_executed=False)
+    lane["stages"]["USI-1"] = "partial_host_cpu_lifecycle_adapter_compile_only"
+    roadmap["immediate_next_move"]["title"] = "Connect bootstrap access and owned timer mappings, then execute a bounded native CR3 and ring-3 return/fault probe"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", receipt_path, checkpoint,
+        "native/kernel/src/user_entry/cpu.rs", "native/kernel/src/arch/x86_64.rs"]
+    evidence = "Cycle 236: PKUSER3 consumes owned roots into a failure-quarantined CPU lifecycle; fresh context/mapping checks precede exposure and flushing restoration precedes detach.284 host tests,38 repeated optimized tests,5 compile-fail checks and freestanding kernel/library compilation pass. " + checkpoint
+    gap = "The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open."
+    phase = next(p for p in roadmap["phases"] if p["id"] == "N13")
+    phase["current_evidence"].insert(0, evidence)
+    phase["current_gaps"][0] = gap
+    next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")["evidence"].append(checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle237(roadmap, test_count)
+
+
+def apply_cycle237(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle237-live-user-root.md"
+    receipt_path = "tests/fixtures/cycle237-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle236_" + name] = copy.deepcopy(gate["current_" + name])
+    roadmap["baseline"]["historical_cycle236_user_space_integration"] = copy.deepcopy(roadmap["baseline"]["user_space_integration"])
+    roadmap["baseline"].update(pooleos_cycle=237, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=237)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path]
+    gate["current_candidate_audit"]["cycle"] = 237
+    gate["current_focused_source_projection"]["cycle"] = 237
+    projection = json.loads((ROOT / "runs/native-user-entry-gate-projection.json").read_bytes())
+    pending = projection["stale_static_source_profiles"]
+    source_count = len(projection["static_source_current_profiles"])
+    gate["current_focused_source_projection"].update(source_current_profiles=source_count,
+        pending_source_profiles=pending, source_guard_passed=projection["source_guard"]["ok"],
+        prerequisite_checks=projection["prerequisite_checks"])
+    gate["historical_cycle236_shared_loader_qualification"] = copy.deepcopy(gate["current_shared_loader_qualification"])
+    gate["current_shared_loader_qualification"].update(status="source_requalification_pending",
+        source_validation_cycle=237, applies_to_current_source=False,
+        metric_scope="retained_historical_counts_not_current_execution",
+        historical_record="historical_cycle236_shared_loader_qualification")
+    gate["historical_cycle236_execution_source_qualification"] = copy.deepcopy(gate["current_execution_source_qualification"])
+    gate["current_execution_source_qualification"] = dict(cycle=237,
+        status="retained_capture_sources_stale_after_boot_qualifier_change",
+        receipt_sha256=gate["historical_cycle236_execution_source_qualification"]["receipt_sha256"],
+        source_current_profiles=source_count, pending_source_profiles=pending,
+        aggregate_source_guard_passed=False, fresh_qemu_runs=0,
+        scope="27_retained_profile_sources_not_new_PKUSER3_profile",
+        historical_record="historical_cycle236_execution_source_qualification", production_ready=False)
+    gate["qualification_status"] = "bounded_cpl0_user_root_guest_pass_ring3_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=237, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="288_debug_kernel_plus42_repeated_release_plus5_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=13, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=237, status="pass",
+        tests_run=98, tests_passed=98, tests_failed=0, tests_skipped=0,
+        elapsed_seconds=49.382, runner_elapsed_seconds=50.204,
+        log_sha256="FDA9613EBD5AA6242C80691959CD7D181ED721997AE1F6236A7AE9EDF2C6A758",
+        initial_attempts=[dict(failures=4, errors=0,
+            log_sha256="C7429478FB6B23C52327EA7E8DA756C451606D29D75D618AD243DFC5B66D7E66")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    lane = roadmap["baseline"]["user_space_integration"]
+    lane.update(cycle=237, receipt_path=receipt_path, host_status=receipt["status"],
+        live_adapter_wired=True, actual_cr3_switch_executed=True,
+        privileged_adapter_verification="two_fresh_qemu_CPL0_root_restore_probes_plus_default_denial",
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        ring3_executed=False, iso_built=False)
+    lane["stages"]["USI-1"] = "partial_live_cpl0_root_restore_no_ring3"
+    roadmap["immediate_next_move"]["title"] = "Attach owned timer/MMIO recovery mappings, then implement sanitized user descriptors/TSS/IRETQ and contained user faults"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", receipt_path, checkpoint,
+        "native/kernel/src/user_root_probe.rs", "native/kernel/src/user_entry/bootstrap.rs"]
+    evidence = "Cycle 237: PKUSER3 executes actual owned CR3 activation, guarded supervisor-stack access, flushing restoration and full13-page release in two fresh QEMU guests; ordinary boot still denies execution.288 debug,42 optimized,5 compile-fail,10 boot-exit tests,13 Python oracle tests and two rejected feature builds pass. " + checkpoint
+    gap = "CPL0 switching is not user-mode execution. Owned timer/MMIO recovery, user GDT/TSS/IRETQ, architectural-state initialization and contained fault/preemption remain before ring3. Capability IPC, services, shell/apps and optical ISO qualification follow. Full production and exact-candidate merge gates remain open."
+    phase = next(p for p in roadmap["phases"] if p["id"] == "N13")
+    phase["current_evidence"].insert(0, evidence)
+    phase["current_gaps"][0] = gap
+    next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")["evidence"].append(checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle238(roadmap, test_count)
+
+
+def apply_cycle238(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle238-owned-root-timer.md"
+    receipt_path = "tests/fixtures/cycle238-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle237_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle237_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=238, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=238)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path]
+    gate["current_candidate_audit"]["cycle"] = 238
+    gate["current_focused_source_projection"]["cycle"] = 238
+    gate["qualification_status"] = "bounded_cpl0_root_timer_guest_pass_ring3_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=238, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="300_debug_kernel_plus54_repeated_release_plus5_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=15, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=238, status="pass",
+        tests_run=101, tests_passed=101, tests_failed=0, tests_skipped=0,
+        elapsed_seconds=48.658, runner_elapsed_seconds=49.484,
+        log_sha256="27C1DAA43925B3E2A1DDEE07ACF07262EA4BB20507B028661D3039A2B37D8513",
+        initial_attempts=[dict(tests_run=101, failures=3, errors=0,
+            log_sha256="28F210DDA41B258EC84E3CF48BCD7685046C3A35BB1EA1169374287ECBA525CA")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=238, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_CPL0_root_timer_quiesce_restore_probes_plus_default_denial",
+        timer_under_candidate_root_executed=True, verified_timer_shutdown_before_retirement=True,
+        interrupts_per_probe=3, mmio_pages=2, retained_acpi_snapshot_pages=1,
+        ring3_executed=False, iso_built=False)
+    lane["stages"]["USI-1"] = "partial_live_cpl0_root_timer_restore_no_ring3"
+    roadmap["immediate_next_move"]["title"] = "Implement sanitized user descriptors/TSS/IRETQ with architectural-state isolation, then contained ring-3 faults and timer recovery"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", receipt_path, checkpoint,
+        "native/kernel/src/user_root_probe/timer_driver.rs", "native/kernel/src/user_entry/cpu.rs"]
+    evidence = "Cycle 238: PKUSER4 adds two guarded supervisor UC MMIO leaves and failure-quarantined timer shutdown. Two fresh QEMU probes each deliver/EOI three interrupts under the candidate root, verify quiescence, restore the original root and release13 task pages while retaining one ACPI snapshot page.300 debug,54 optimized,5 compile-fail,10 boot-exit and15 Python oracle tests pass; ordinary boot still denies unsigned execution. " + checkpoint
+    gap = "Timer delivery is CPL0 on the existing kernel IST, not ring3 or use of the private entry stack as RSP0. User GDT/TSS/IRETQ, GPR/segment/base/debug/extended-state initialization and contained user faults/preemption remain next. Hardware error shutdown is host fault-tested, not guest fault-injected. Capability IPC, services, shell/apps and optical ISO qualification follow; all production and exact-candidate merge gates remain open."
+    phase = next(p for p in roadmap["phases"] if p["id"] == "N13")
+    phase["current_evidence"].insert(0, evidence)
+    phase["current_gaps"][0] = gap
+    next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")["evidence"].append(checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle239(roadmap, test_count)
+
+
+def apply_cycle239(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle239-bounded-user-entry.md"
+    receipt_path = "tests/fixtures/cycle239-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle238_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle238_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=239, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=239)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path]
+    gate["current_candidate_audit"]["cycle"] = 239
+    gate["current_focused_source_projection"]["cycle"] = 239
+    gate["qualification_status"] = "bounded_cpl3_fault_return_cleanup_pass_user_preemption_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=239, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="315_debug_kernel_plus65_repeated_user_release_plus24_repeated_VM_release_plus5_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=18, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=239, status="pass", tests_run=105,
+        tests_passed=105, tests_failed=0, tests_skipped=0,
+        elapsed_seconds=48.597, runner_elapsed_seconds=49.406,
+        log_sha256="8B84D6C8793446D5212E84F37C440524D684D77852671281766E5069650AC7FC",
+        initial_attempts=[dict(tests_run=105, failures=1, errors=0,
+            log_sha256="B351D09B82DFD8F99FD24600AC9B2FE149076325A005B6A4ACD2029FE0B02D07",
+            cause="prior_CPL0_qualification_status_assertion_not_updated")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=239, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_CPL3_fault_return_cleanup_probes_plus_default_denial",
+        ring3_executed=True, user_faults_per_probe=7, private_tss_rsp0_executed=True,
+        user_timer_preemption=False, architectural_state_profile="single_BSP_legacy_x87_SSE_no_enabled_XSAVE",
+        general_user_program_admission=False, syscall_abi=False, iso_built=False)
+    lane["stages"]["USI-1"] = "partial_live_cpl3_fault_return_cleanup_no_user_preemption"
+    roadmap["immediate_next_move"]["title"] = "Prove bounded timer preemption and supervisor recovery from CPL3, including spinning-task containment, before a versioned syscall ABI and capability IPC"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", receipt_path, checkpoint,
+        "native/kernel/src/arch/x86_64/user.rs", "native/kernel/src/user_entry/privilege.rs",
+        "native/kernel/src/user_root_probe/timer_driver.rs", "native/kernel/src/virtual_memory.rs"]
+    evidence = "Cycle 239: PKUSER5 enters one fixed CPL3 payload with cleared GPR/legacy FP state, private TSS.RSP0 and exact ordered fault validation. Two fresh QEMU probes each contain seven faults, return to CPL0, detach descriptors, flush/restore the boot root and release13 task pages. Real execution exposed and repaired VM A/D-bit cleanup rejection.315 debug,65 user-release,24 VM-release,5 compile-fail,10 boot-exit and18 Python oracle tests pass; ordinary boot denies unsigned execution. " + checkpoint
+    gap = "No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion."
+    for phase_id in ("N7", "N9", "N13"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")["evidence"].append(checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle240(roadmap, test_count)
+
+
+def apply_cycle240(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle240-user-timer-preemption.md"
+    receipt_path = "tests/fixtures/cycle240-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle239_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle239_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=240, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=240)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path]
+    gate["current_candidate_audit"]["cycle"] = 240
+    gate["current_focused_source_projection"]["cycle"] = 240
+    gate["qualification_status"] = "bounded_cpl3_timer_preemption_pass_syscall_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=240, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="320_debug_kernel_plus70_repeated_user_release_plus24_repeated_VM_release_plus5_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=21, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=240, status="pass",
+        tests_run=109, tests_passed=109, tests_failed=0, tests_skipped=0,
+        elapsed_seconds=48.775, runner_elapsed_seconds=49.625,
+        log_sha256="D1D822194CD96CE7390C901C5B43BA106B209A295128DC3786B63198C2D20743",
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=240, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_CPL3_fault_timer_recovery_cleanup_probes_plus_default_denial",
+        user_timer_preemption=True, user_timer_interrupts_per_probe=3, user_resumes_per_probe=2,
+        timer_shutdown_precedes_descriptor_detachment=True,
+        independent_missing_interrupt_watchdog=False, multi_application_scheduling=False,
+        general_user_program_admission=False, syscall_abi=False, iso_built=False)
+    lane["stages"]["USI-1"] = "partial_live_cpl3_timer_recovery_no_syscall_or_peer_scheduling"
+    roadmap["immediate_next_move"]["title"] = "Implement a versioned bounded syscall and recoverable user-copy boundary, then connect task exit and peer scheduling before capability IPC"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", receipt_path, checkpoint,
+        "native/kernel/src/user_entry/preemption.rs", "native/kernel/src/arch/x86_64/user_preempt.rs",
+        "native/kernel/src/arch/x86_64/user.rs", "native/kernel/src/user_root_probe/timer_driver.rs"]
+    evidence = "Cycle 240: PKUSER6 interrupts a fixed spinning CPL3 payload three times on its private RSP0 stack, resumes twice with14 GPRs and legacy FP state preserved, then forces kernel recovery. Timer shutdown precedes descriptor detachment/root restoration/13-page release. Two fresh guests and ordinary denial pass;320 debug,70 user-release,24 VM-release,5 compile-fail,10 boot-exit and21 Python oracle tests pass. " + checkpoint
+    gap = "This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion."
+    for phase_id in ("N7", "N9", "N12", "N13"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")["evidence"].append(checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle241(roadmap, test_count)
+
+
+def apply_cycle241(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle241-native-syscall-usercopy.md"
+    receipt_path = "tests/fixtures/cycle241-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle240_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle240_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=241, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=241)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path, "docs/native-syscall-abi.md"]
+    gate["current_candidate_audit"]["cycle"] = 241
+    gate["current_focused_source_projection"]["cycle"] = 241
+    gate["qualification_status"] = "bounded_development_syscall_copy_pass_task_lifecycle_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=241, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="326_debug_kernel_plus76_repeated_user_release_plus24_repeated_VM_release_plus5_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=23, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=241, status="pass",
+        tests_run=112, tests_passed=112, tests_failed=0, tests_skipped=0,
+        elapsed_seconds=48.713, runner_elapsed_seconds=49.532,
+        log_sha256="F589BFF9A9BB03377AD855AC8CB9A3427ABFA61A2E1ADB580C2E1D28D3D2DE2F",
+        initial_attempts=[dict(tests_run=112, failures=1, errors=0, elapsed_seconds=48.808,
+            reason="old_qualification_status_expectation_not_updated",
+            log_sha256="42E223E12DF2FDA32DF014F1446B9F903CAF123836AB53AB77CFF178C30CDB73")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=241, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_CPL3_syscall_copy_fault_timer_cleanup_probes_plus_default_denial",
+        development_syscall_abi="PSABI1", syscall_abi=True, production_syscall_abi_frozen=False,
+        bounded_user_copy=True, maximum_user_copy_bytes=256, user_calls_per_probe=12,
+        copy_faults_per_probe=3, copy_input_failure_atomic=True, copy_output_failure_reports_prefix=True,
+        syscall_msrs_cleared_before_retirement=True, general_smap_qualification=False,
+        concurrent_user_copy_pinning=False, task_exit_and_reaping=False,
+        multi_application_scheduling=False, general_user_program_admission=False, iso_built=False)
+    lane["stages"]["USI-1"] = "partial_live_cpl3_syscall_copy_timer_no_task_exit_or_peer_scheduling"
+    roadmap["immediate_next_move"]["title"] = "Implement owned user-task exit and fault termination with accounting, then peer scheduling across private roots before capability IPC"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", "docs/native-syscall-abi.md", receipt_path, checkpoint,
+        "native/kernel/src/user_entry/syscall.rs", "native/kernel/src/arch/x86_64/user_syscall.rs",
+        "native/kernel/src/user_entry/preemption.rs", "native/kernel/src/user_entry/cpu.rs"]
+    roadmap["immediate_next_move"]["exit_evidence"] = [
+        "generation-safe owned task termination and exit status with no resume after retirement",
+        "faulting or exiting user task releases only after CPU, timer and syscall authority are revoked",
+        "negative allocation, stale identity, repeated exit and retained-on-cleanup-failure cases",
+        "fresh guest task termination evidence; preserve existing fault, copy, timer and ordinary-denial controls"]
+    evidence = "Cycle 241: PKUSER7 executes12 real CPL3 SYSCALLs with checked IRETQ, version/errors, bounded snapshot user copying, one exact input PF and two exact output PF fixups, then disables/clears entry MSRs before timer recovery and13-page retirement. Two fresh36-marker guests/89 controls each and ordinary denial pass;326 debug,76 user-release,24 VM-release,5 compile-fail,10 boot-exit and23 Python oracle tests pass. " + checkpoint
+    gap = "PSABI1 is a development subset, not a complete frozen production ABI. General SMAP/concurrent pinning, async/SMP entry, arbitrary programs, task exit/reaping/accounting, fault termination and peer scheduling remain open. Syscalls are tested before the timer is armed, not concurrently with it. No native independent missing-IRQ watchdog, IPC/services/shell/apps/optical ISO or hardware qualification.25 native admissions/22 Python closures and full candidate gates remain stale or pending; no merge, phase exit or production promotion."
+    for phase_id in ("N7", "N9", "N12", "N13"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+        if phase_id == "N13":
+            next(s for s in phase["subphases"] if s["id"] == "N13.4")["status"] = "partial"
+    next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")["evidence"].append(checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle242(roadmap, test_count)
+
+
+def apply_cycle242(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle242-user-task-termination.md"
+    receipt_path = "tests/fixtures/cycle242-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle241_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle241_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=242, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=242)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path, "docs/native-task-lifecycle.md"]
+    gate["current_candidate_audit"]["cycle"] = 242
+    gate["current_focused_source_projection"]["cycle"] = 242
+    gate["qualification_status"] = "bounded_task_termination_pass_peer_scheduling_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=242, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="336_debug_kernel_plus86_repeated_user_release_plus24_repeated_VM_release_plus7_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=26, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        initial_attempts=[dict(status="link_failed_before_guest", elapsed_seconds=92.109,
+            reason="text_exceeded_reserved_0x80000_boundary_by_0x1B0E",
+            log_sha256="57B247E22DC1FEEEFE2727984310F6E4AF306628DBD959E58D63D13974D6F092")],
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=242, status="pass",
+        tests_run=116, tests_passed=116, tests_failed=0, tests_skipped=0,
+        elapsed_seconds=50.335, runner_elapsed_seconds=51.188,
+        log_sha256="58E42335CAC463E8531CEDA5AF91950373EB0212F91E52789291E0DCDD647733",
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=242, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_CPL3_owned_exit_fault_reap_probes_plus_default_denial",
+        task_exit_and_reaping=True, task_termination_contract="PKUSER8", sequential_task_lifetimes_per_probe=4,
+        normal_task_exits_per_probe=1, fatal_user_faults_per_probe=3,
+        task_identity_scope="persistent_slot_local_generation_not_capability",
+        released_pages_per_probe=65, scrubbed_data_pages_per_probe=30, actual_root_writes_per_probe=10,
+        failed_cleanup_retains_memory=True, complete_spawn_allocation_rollback=False,
+        multi_application_scheduling=False, general_user_program_admission=False, iso_built=False)
+    lane["stages"]["USI-1"] = "partial_live_owned_task_exit_fault_reap_no_peer_scheduling"
+    roadmap["immediate_next_move"]["title"] = "Connect preemptive peer execution across two private roots; prove one task's exit or fault cannot stop its peer before capability IPC"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", "docs/native-task-lifecycle.md", receipt_path, checkpoint,
+        "native/kernel/src/user_entry/task.rs", "native/kernel/src/arch/x86_64/user_task.rs",
+        "native/kernel/src/user_entry/preemption.rs", "native/kernel/src/user_entry/cpu.rs"]
+    roadmap["immediate_next_move"]["exit_evidence"] = [
+        "two real runnable CPL3 tasks with distinct owned roots and timer-driven state-preserving switches",
+        "surviving peer progresses after normal exit, user fault, and bounded forced termination",
+        "task lifetime, timer, syscall, descriptor and root ownership survive switching and cleanup failures",
+        "resolve fixed syscall stack and call-budget limits before arbitrary application admission; preserve existing controls"]
+    evidence = "Cycle 242: PKUSER8 owns four sequential task lifetimes, records Exit42 and user UD/GP/PF termination, rejects stale generations and restart/reap repetition, and quiesces entry before root restoration and memory release. Two fresh40-marker guests/157 evidence controls each and ordinary denial pass.336 debug,86 user-release,24 VM-release,7 compile-fail,10 boot-exit and26 Python oracle tests pass. " + checkpoint
+    gap = "No peer scheduling or arbitrary-program admission: fixed task payloads have no armed timer, strict initial syscall RSP and a64-call budget still fail fatally, and construction allocation failures are not fully rolled back. Task IDs are slot-local, not capabilities. SMAP/concurrent copy, async/SMP entry, full XSAVE, missing-IRQ watchdog, IPC/services/shell/apps/optical ISO and hardware remain open. Image168pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion."
+    for phase_id in ("N7", "N9", "N12", "N13"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+        if phase_id == "N13":
+            for subphase in phase["subphases"]:
+                if subphase["id"] in ("N13.1", "N13.2", "N13.6"):
+                    subphase["status"] = "partial"
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle243(roadmap, test_count)
+
+
+def apply_cycle243(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle243-native-user-peer-scheduling.md"
+    receipt_path = "tests/fixtures/cycle243-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle242_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle242_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=243, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=243)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path, "docs/native-user-peer-scheduling.md"]
+    gate["current_candidate_audit"]["cycle"] = 243
+    gate["current_focused_source_projection"]["cycle"] = 243
+    gate["qualification_status"] = "bounded_preemptive_peer_tasks_pass_general_admission_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=243, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="345_debug_kernel_plus95_repeated_user_release_plus24_repeated_VM_release_plus7_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=29, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=138.687,
+        log_sha256="F42498A75742F006D5EF5433C4119C86985748491A36B5B2BB94373D5922B8D1",
+        initial_attempts=[dict(status="link_failed_before_guest", elapsed_seconds=70.812,
+            reason="text_exceeded_reserved_0x84000_boundary_by_0x185E",
+            log_sha256="CF2A8F616763992CDB80A1F2034F92D2B7F77AD8F7F784641826DA59CC0C7778")],
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=243, status="pass",
+        tests_run=120, tests_passed=120, tests_failed=0, tests_skipped=0,
+        elapsed_seconds=50.675, runner_elapsed_seconds=51.5,
+        log_sha256="CFA4D6907BB1B7653CF60750A7124AD638D2A3B492A13321E0F98A400295AF77",
+        initial_attempts=[dict(tests_run=120, failures=1, errors=0, elapsed_seconds=50.997,
+            reason="checklist_date_override_differed_from_canonical_default_restored_without_source_change",
+            log_sha256="CDEA5538B3352587474AEE5626C05FC57244C004BA8313C09810F7C68F217105")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=243, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_CPL3_preemptive_peer_survival_probes_plus_default_denial",
+        peer_scheduling_contract="PKUSER9", bounded_peer_scheduling=True,
+        peer_scheduler="PKSCHED1_single_CPU", private_roots_per_round=2, peer_rounds_per_probe=4,
+        peer_preemptions_per_probe=[s["peer_preemptions"] for s in summaries],
+        peer_survival_cases_per_probe=4, legacy_user_state_saved_restored=True,
+        suspended_owner_retains_memory=True, syscall_stack_within_owned_page=True,
+        syscall_budget_terminates_only_task=True, invalid_user_frame_containment=False,
+        timer_pending_race_qualification=False, complete_runtime_tick_accounting=False,
+        released_pages_per_probe=169, scrubbed_data_pages_per_probe=78,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries],
+        multi_application_scheduling=False, general_user_program_admission=False, iso_built=False)
+    lane["stages"]["USI-1"] = "partial_live_preemptive_peer_tasks_no_general_admission_or_ipc"
+    roadmap["immediate_next_move"]["title"] = "Close USI-1 admission containment: transactional spawn, invalid user frames and armed-timer teardown; then capability IPC"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", "docs/native-user-peer-scheduling.md", receipt_path, checkpoint,
+        "native/kernel/src/user_entry/task.rs", "native/kernel/src/arch/x86_64/user_slice.rs",
+        "native/kernel/src/user_root_probe/peer_driver.rs", "native/kernel/src/user_entry/cpu.rs"]
+    roadmap["immediate_next_move"]["exit_evidence"] = [
+        "every failed spawn allocation/mapping step rolls back or explicitly retains exact quarantined ownership",
+        "invalid user return frames and admitted exception classes terminate only the offending task",
+        "pending and late timer teardown cannot release referenced state; qualify peer continuation and accounting",
+        "preserve fresh peer-survival, copy, timer and ordinary-denial controls before broader executable admission"]
+    evidence = "Cycle 243: PKUSER9 joins actual private-root CPL3 tasks to PKSCHED1; preserves GPR/IRET/legacy FP state across quanta; retains suspended memory and proves peer survival after exit/fault/cancel/quota. Two fresh44-marker guests each pass40 dispatches/33 preemptions/249 evidence controls; ordinary denial passes.345 debug,95 user-release,24 VM-release,7 compile-fail,10 boot-exit and29 Python oracle tests pass. " + checkpoint
+    gap = "Bounded one-BSP fixed tasks only. Full spawn rollback, invalid-return-frame containment, pending/late timer recovery, final-sub-quantum accounting, independent missing-IRQ watchdog, general XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion."
+    for phase_id in ("N7", "N9", "N12", "N13"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle244(roadmap, test_count)
+
+
+def apply_cycle244(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle244-user-state-containment.md"
+    receipt_path = "tests/fixtures/cycle244-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle243_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle243_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=244, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=244)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path, "docs/native-user-state-containment.md"]
+    gate["current_candidate_audit"]["cycle"] = 244
+    gate["current_focused_source_projection"]["cycle"] = 244
+    gate["qualification_status"] = "bounded_user_state_containment_pass_spawn_timer_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=244, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="349_debug_kernel_plus99_repeated_user_release_plus24_repeated_VM_release_plus7_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=33, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=260.656,
+        log_sha256="93DE3CD234064943B0F0D6701E612D1229397CA0F2DE8BE764F52E148F763405",
+        initial_attempts=[
+            dict(status="host_regression_reproduced", elapsed_seconds=7.687,
+                reason="bad_user_rsp_reached_kernel_fatal_frame_rejection",
+                log_sha256="96EBBE5D066DF82CD0B2FF3205B091F314CA56FED64D42A789BD61749EEBEDAC"),
+            dict(status="native_probe_failed", elapsed_seconds=174.359,
+                reason="last_case_required_architectural_SS_but_runner_delivered_GP",
+                log_sha256="CD4E67D1790051DEA8CC82D4A3E0D7688567FC29EFB21CB291296663A30E7ED7"),
+            dict(status="diagnostic_reproduced_emulator_deviation", elapsed_seconds=114.375,
+                reason="TCG_GP_0_at_user_RIP_400000BF_native_SS_not_qualified",
+                log_sha256="6B9D407A402E93670F7D90FA8A56A9A17ADEE0AFC389DC32ED27D1A84A12B4BA")],
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=244, status="pass",
+        tests_run=125, tests_passed=125, tests_failed=0, tests_skipped=0,
+        elapsed_seconds=50.505, runner_elapsed_seconds=51.344,
+        log_sha256="0519929E37E9B41292BF97773DB5ED010F9226326F128634C08446A8BA84A12F",
+        initial_attempts=[dict(tests_run=125, failures=2, errors=0, elapsed_seconds=51.812,
+            reason="stale_cycle243_schema_constant_advanced_to244_without_weakening_validation",
+            log_sha256="4AE4F4B075610C9962C99532DE9A4BFE7BFFF9727AF4CE593F2FBDD07EF47A78")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=244, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_CPL3_hostile_state_peer_survival_probes_plus_default_denial",
+        peer_scheduling_contract="PKUSER10", peer_rounds_per_probe=14,
+        peer_preemptions_per_probe=[s["peer_preemptions"] for s in summaries],
+        peer_survival_cases_per_probe=14, invalid_user_frame_containment=True,
+        invalid_user_frame_scope="fixed_admitted_RIP_RSP_RFLAGS_on_owned_syscall_and_timer_entry_not_general_programs",
+        invalid_return_terminations_per_probe=6, new_native_user_exception_vectors=[0, 1, 3],
+        user_exception_policy_vectors=[0,1,3,4,5,6,11,12,13,14,16,17,19],
+        architectural_stack_fault_qualified=False, observed_stack_access_vector=13,
+        emulator_deviation="QEMU_TCG_issue928_issue4205_GP_instead_of_SS_for_noncanonical_stack_access",
+        kernel_entry_ac_cleared=True, general_user_exception_delivery_qualified=False,
+        released_pages_per_probe=429, scrubbed_data_pages_per_probe=198,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries])
+    lane["stages"]["USI-1"] = "partial_live_invalid_return_containment_no_general_admission_or_ipc"
+    roadmap["immediate_next_move"]["title"] = "Make USI-1 spawn transactional, then qualify pending-timer teardown and accounting before capability IPC"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", "docs/native-user-state-containment.md", receipt_path, checkpoint,
+        "native/kernel/src/user_root_probe/peer_driver.rs", "native/kernel/src/user_entry/prepared.rs",
+        "native/kernel/src/user_entry/task.rs", "native/kernel/src/user_root_probe/timer_driver.rs"]
+    roadmap["immediate_next_move"]["exit_evidence"] = [
+        "every failed spawn allocation/mapping step rolls back or retains an explicit exact quarantined owner",
+        "healthy peer and PMM accounting survive failed construction without stale handles or released references",
+        "pending and late timer teardown has bounded recovery before complete terminal-quantum accounting",
+        "preserve 14 live peer-survival cases, explicit TCG stack-fault limitation and ordinary-boot denial"]
+    evidence = "Cycle 244: PKUSER10 separates trusted entry from user RIP/RSP/RFLAGS violations; contains invalid syscall/timer returns and additional exceptions with private stacks, AC cleanup and checked debug-status cleanup. Two fresh54-marker guests each pass140 dispatches/113 preemptions/14 survival cases/493 evidence controls; ordinary denial passes.349 debug,99 user-release,24 VM-release,7 compile-fail,10 boot-exit and33 Python oracle tests pass. " + checkpoint
+    gap = "Bounded one-BSP fixed payloads only. TCG stack access delivers GP rather than architectural SS; native SS and general exception/selector delivery remain unqualified, not waived. Full spawn rollback, pending/late timer recovery, terminal-quantum accounting, independent missing-IRQ recovery, XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 still requires product-contract migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion."
+    for phase_id in ("N7", "N9", "N12", "N13"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle245(roadmap, test_count)
+
+
+def apply_cycle245(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle245-transactional-user-construction.md"
+    receipt_path = "tests/fixtures/cycle245-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle244_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle244_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=245, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=245)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path, "docs/native-user-construction.md"]
+    gate["current_candidate_audit"]["cycle"] = 245
+    gate["current_focused_source_projection"]["cycle"] = 245
+    gate["qualification_status"] = "bounded_transactional_construction_pass_timer_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=245, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="356_debug_kernel_plus106_repeated_user_release_plus24_repeated_VM_release_plus8_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=34, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=253.593,
+        log_sha256="1A429C8BABE82D02E27D7623E76120CF00843E37E466C47C6162C07BE3333FF3",
+        initial_attempts=[dict(tag=tag, status="failed_preserved", elapsed_seconds=elapsed, reason=reason, log_sha256=digest)
+            for tag,elapsed,reason,digest in [
+                ("nativefirst",58.172,"text_exceeded_88000_reservation","CFB19E15D9590472BA1FDBE431A752781C5274AB8B400865CF62AEF0F891C971"),
+                ("nativesecond",107.719,"kernel_user_root_panic_before_peer_completion","8B11AF8A1275BBE8FEB84E368775060729B35615531D5902D2754918165491C9"),
+                ("diagnostic",8.797,"nonexistent_diagnostic_Com1_constructor_rejected_by_compiler","94F527AC23BE0D19C5C78F671AD3CEC95CA8EC8E12FDC85C6A35A67DE153FA7A"),
+                ("diagnosticsecond",37.907,"native_kernel_PF2_at_bootstrap_stack_guard","456EF52C896113D09322D0FC3F70269477EF4FE00DE31DE42168529DB9A5D69C"),
+                ("nativethird",54.157,"repaired_text_exceeded_8C000_reservation","E5C5AA0E311CF37B80C34FB23A9A6BE3938323F1F62A60EE2A6023D4A984B583"),
+                ("nativefourth",79.250,"rollback_probe_stage120","8B11AF8A1275BBE8FEB84E368775060729B35615531D5902D2754918165491C9"),
+                ("diagnosticthird",39.000,"probe_requested_three_tasks_within_32_page_quota_stage12001","456EF52C896113D09322D0FC3F70269477EF4FE00DE31DE42168529DB9A5D69C")]],
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=245, status="pass",
+        tests_run=127, tests_passed=127, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=51.230, elapsed_seconds=52.078,
+        log_sha256="709C0B1335F553D6C3267FC7DD194E0DE23A005DDF4D2C6DEFEC820F33D321BB",
+        initial_attempts=[
+            dict(status="fail", tests_run=127, tests_failed=2, elapsed_seconds=52.297,
+                reason="stale_architecture_binding_and_kernel_source_counts",
+                log_sha256="DAA440C655B89A15B877A264B976091F38BEFEC39F3B8F5DEF2A5BC8D46F4561"),
+            dict(status="fail", tests_run=127, tests_failed=1, elapsed_seconds=51.860,
+                reason="historical_entry_receipt_exact_unbound_source_set_needed_new_paths",
+                log_sha256="B7DE7EDD1E686A15EF0EDDAFEA25746D6D7AECAC5209C32D7DA7EE8D519347EC")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=245, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_native_construction_rollback_retry_peer_continuation_plus_default_denial",
+        construction_contract="PKUSER11", bounded_transactional_construction=True,
+        construction_quota_failures_per_probe=1, construction_after_effect_failures_per_probe=6,
+        construction_cleanup_quarantines_per_probe=6, construction_cleanup_retries_per_probe=6,
+        construction_scrubbed_released_pages_per_probe=83, construction_peer_continuation=True,
+        construction_scope="fixed_five_allocation_never_exposed_image_not_general_executable_or_slot_recovery",
+        general_quarantine_recovery=False, complete_kernel_stack_bound_qualified=False,
+        kernel_stack_guard_regression_repaired=True,
+        released_pages_per_probe=512, scrubbed_data_pages_per_probe=235,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries],
+        peer_preemptions_per_probe=[s["peer_preemptions"] for s in summaries])
+    lane["stages"]["USI-1"] = "partial_live_transactional_construction_no_general_admission_or_ipc"
+    roadmap["immediate_next_move"]["title"] = "Qualify pending and late timer teardown, then terminal accounting before capability IPC"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", "docs/native-user-construction.md", receipt_path, checkpoint,
+        "native/kernel/src/user_root_probe/timer_driver.rs", "native/kernel/src/user_entry/cpu.rs",
+        "native/kernel/src/user_entry/task.rs", "native/kernel/src/arch/x86_64/user_slice.rs"]
+    roadmap["immediate_next_move"]["exit_evidence"] = [
+        "owned pending or late timer work is drained or exactly quarantined before descriptor/root/page teardown",
+        "healthy peers continue after bounded teardown recovery with no late IRQ reaching released memory",
+        "measure terminal subquantum runtime without double accounting and keep missing-IRQ recovery explicit",
+        "preserve construction rollback/retry,14 peer-survival cases and ordinary unsigned-boot denial"]
+    evidence = "Cycle245: PKUSER11 owns all partial construction allocations and transfers exact retention into PreparedImage. Two fresh55-marker guests each prove one quota failure, six after-effect failures, six cleanup quarantines/retries,83 scrubbed/released construction pages and healthy-peer continuation;14 prior survival cases and507 evidence rejections remain.504 Rust executions and34 Python oracle tests pass. Constructor stack-guard regression repaired by frame separation, not larger stacks. " + checkpoint
+    gap = "Bounded one-BSP fixed construction only. General executable admission, persistent quarantine/slot-commit recovery, N3.7 complete stack-depth/high-water and trap nesting, pending/late timer recovery, terminal accounting, independent missing-IRQ recovery, general exception/selector delivery including native SS, XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/optical ISO and hardware remain open. Image177pages/entry0xB000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion."
+    for phase_id in ("N3", "N7", "N9", "N12", "N13"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " Include N3.7 constructor/cleanup/trap stack-depth and high-water qualification, general persistent construction quarantine and final slot-commit recovery."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle246(roadmap, test_count)
+
+
+def apply_cycle246(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle246-owned-timer-shutdown.md"
+    receipt_path = "tests/fixtures/cycle246-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle245_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle245_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=246, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=246)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path, "docs/native-user-timer-shutdown.md"]
+    gate["current_candidate_audit"]["cycle"] = 246
+    gate["current_focused_source_projection"]["cycle"] = 246
+    gate["qualification_status"] = "bounded_timer_shutdown_pass_accounting_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=246, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="361_debug_kernel_plus111_repeated_user_release_plus24_repeated_VM_release_plus8_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=35, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=283.125,
+        log_sha256="9B543AEDBC6E0DF78893333362B5AC837F03E8FF4C9B35C92D46031AAB6FCD9A",
+        initial_attempts=[
+            dict(status="link_failed_before_guest", elapsed_seconds=70.063,
+                reason="text_8D83E_exceeded_8D000_reservation_repaired_with_one_page_within_existing_cap",
+                log_sha256="E0718E78A13E02C6F4DD0178758ADF9F82CD44094CB48F320BA12FA91A35DAA7"),
+            dict(status="guest_timeout", elapsed_seconds=165.000, guest_bound_seconds=90,
+                reason="expanded_probe_passed_original14rounds_but_exceeded_old_bound",
+                log_sha256="93EE7DB24458DAC03A862492554AD618FBE98D12B8F73DA261D3F185DC278743")],
+        diagnostic=dict(status="pass_diagnostic_not_qualification", elapsed_seconds=97.391,
+            guest_elapsed_seconds=93.844, guest_bound_seconds=180, reused_exact_failed_attempt_media=True,
+            log_sha256="509540CCA3E841C59B1B5C9F19F8C39BAE90E579B9E754940F30F71C5A86ABDB"),
+        qualification_guest_bound_seconds=120, bound_frozen_before_fresh_qualification=True,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=246, status="pass",
+        tests_run=129, tests_passed=129, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=51.122, elapsed_seconds=51.953,
+        log_sha256="DBA9CA1E66E7E09566C9F8D97F566356518528E1C23375EEA5702EE3AC6E72FC",
+        initial_attempts=[dict(status="fail", tests_run=129, tests_failed=2,
+            unittest_elapsed_seconds=51.164, elapsed_seconds=52.0,
+            reason="stale_roadmap_last_updated_cycle_schema_constant_245_advanced_to246",
+            log_sha256="5D4B40D29D18551AE8FECBFFE10ACF727251119477EAE944B77702BF23CAEC93")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=246, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_native_pending_late_timer_drain_quarantine_retry_peer_survival_plus_default_denial",
+        timer_shutdown_contract="PKUSER12", bounded_timer_shutdown_recovery=True,
+        timer_shutdown_scope="single_BSP_owned_vector_pending_before_mask_and_empty_then_arrival_before_stop_not_all_silicon_races",
+        timer_drain_max_windows=32, timer_drain_max_new_deliveries_per_shutdown=2,
+        timer_pending_cases_per_probe=1, timer_late_cases_per_probe=1,
+        timer_quarantine_retries_per_probe=1, timer_quarantine_retained_pages_per_probe=13,
+        timer_drain_deliveries_per_probe=[s["timer_drain_deliveries"] for s in summaries],
+        timer_drain_eois_per_probe=[s["timer_drain_eois"] for s in summaries],
+        timer_quarantine_peer_survived=True, timer_pending_race_qualification=False,
+        complete_runtime_tick_accounting=False, failed_cleanup_quantum_accounted=False,
+        peer_rounds_per_probe=15, peer_survival_cases_per_probe=15,
+        released_pages_per_probe=538, scrubbed_data_pages_per_probe=247,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries],
+        peer_preemptions_per_probe=[s["peer_preemptions"] for s in summaries])
+    lane["stages"]["USI-1"] = "partial_live_bounded_timer_shutdown_no_general_admission_or_ipc"
+    roadmap["immediate_next_move"]["title"] = "Account terminal and failed-cleanup quanta exactly once, keep independent missing-IRQ recovery explicit, then capability IPC"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", "docs/native-user-timer-shutdown.md", receipt_path, checkpoint,
+        "native/kernel/src/user_entry/cpu.rs", "native/kernel/src/user_entry/task.rs",
+        "native/kernel/src/user_entry/context.rs", "native/kernel/src/arch/x86_64/user_slice.rs",
+        "native/kernel/src/user_root_probe/peer_driver.rs"]
+    roadmap["immediate_next_move"]["exit_evidence"] = [
+        "terminal partial quanta and consumed quanta whose cleanup fails reach scheduler accounting exactly once",
+        "retry, abandonment, task exit and fault cannot lose or duplicate runtime; ownership remains retained until safe cleanup",
+        "independent missing-interrupt recovery is qualified separately; an external guest bound is not a native watchdog",
+        "preserve construction rollback/retry,15 peer-survival cases, bounded timer-drain controls and ordinary unsigned-boot denial"]
+    evidence = "Cycle246: PKUSER12 stops owned timer work, validates IRR/ISR/TMR and drains only the retained vector inside a checked kernel window. Two fresh57-marker guests each prove pending/late delivery, a13-page cleanup quarantine/retry, healthy-peer survival,15 total survival cases and548 altered-evidence rejections.514 Rust executions and35 Python oracle tests pass. The failed90s attempt is retained; exact-media diagnostic93.844s motivated a fixed120s bound before both fresh qualification boots. " + checkpoint
+    gap = "Bounded one-BSP fixed payloads only. Terminal/failed-cleanup quantum accounting remains incomplete:119 accepted preemptions exclude one consumed quantum discarded by failed cleanup. Arbitrary after-mask silicon races, ambiguous ISR and partial-configuration quarantine recovery, independent missing-IRQ recovery, general executable admission, complete stack/exception/selector qualification including native SS, XSAVE/SMAP/SMP/async, IPC/services/shell/apps/optical ISO and hardware remain open. Image178pages/entry0xB000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion."
+    for phase_id in ("N7", "N8", "N9", "N12", "N13"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " Account terminal and failed-cleanup consumed quanta exactly once through retry/abandonment; qualify independent missing-IRQ recovery and keep broad timer-race/partial-configuration recovery distinct from bounded PKUSER12 evidence."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle247(roadmap, test_count)
+
+
+def apply_cycle247(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle247-native-runtime-accounting.md"
+    receipt_path = "tests/fixtures/cycle247-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle246_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle246_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=247, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=247)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path, "docs/native-user-runtime-accounting.md"]
+    gate["current_candidate_audit"]["cycle"] = 247
+    gate["current_focused_source_projection"]["cycle"] = 247
+    gate["qualification_status"] = "bounded_quantum_accounting_pass_unknown_recovery_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=247, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="368_debug_kernel_plus115_repeated_user_release_plus24_repeated_VM_release_plus8_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=36, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=275.843,
+        log_sha256="5A7AEAED20BE8E6574F86F9DBF15C0D7CF6FD88C82FD5831F1D8C5FCF60DA52D",
+        initial_attempts=[
+            dict(status="link_failed_before_guest", elapsed_seconds=69.234,
+                reason="rodata_B238_exceeded_B000_and_text_8E2FE_exceeded_8E000_fixed_boundaries_within192page_cap",
+                log_sha256="DB012F5F6368E962F1A6E8B48EC1D53AE9E5FF5446924D4FFC47D6501B2AA65D"),
+            dict(status="runtime_continuity_panic", elapsed_seconds=85.219,
+                reason="entry_constant_B000_stale_after_linker_C000_move_fixed_and_host_regression_added",
+                log_sha256="BA82F5AB427610974E67D1C072AFB51BAE4E259B872C6E904B293EF2D162B750")],
+        qualification_guest_bound_seconds=120, qualification_bound_unchanged=True,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=247, status="pass",
+        tests_run=131, tests_passed=131, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=51.090, elapsed_seconds=51.938,
+        log_sha256="7DD0B1FA58A6F4F6BCAA32188264AF914DF0B4E23F2CC5AE8DC45E5EA767E239",
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=247, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_native_exact_quantum_accounting_peer_survival_plus_default_denial",
+        runtime_accounting_contract="PKUSER13", bounded_runtime_accounting=True,
+        failed_cleanup_quantum_accounted=True, complete_runtime_tick_accounting=False,
+        runtime_accounting_scope="authenticated_returned_single_BSP_peer_quanta_not_legacy_diagnostics_or_general_clock_failure",
+        runtime_charge_window="hpet_arm_to_event_includes_in_quantum_kernel_work_excludes_later_cleanup",
+        pure_user_instruction_time=False, unknown_runtime_recovery_qualified=False,
+        physical_clock_coherent_read_qualified=False,
+        runtime_samples_per_probe=[s["runtime_samples"] for s in summaries],
+        runtime_terminal_samples_per_probe=[s["runtime_terminal_samples"] for s in summaries],
+        runtime_duplicate_denials_per_probe=[s["runtime_duplicate_denials"] for s in summaries],
+        runtime_ticks_per_probe=[s["runtime_ticks"] for s in summaries],
+        runtime_terminal_ticks_per_probe=[s["runtime_terminal_ticks"] for s in summaries],
+        runtime_failed_cleanup_ticks_per_probe=[s["runtime_failed_cleanup_ticks"] for s in summaries])
+    lane["stages"]["USI-1"] = "partial_live_bounded_quantum_accounting_no_general_admission_or_ipc"
+    roadmap["immediate_next_move"]["title"] = "Qualify independent missing-IRQ and unknown-runtime recovery, then capability IPC"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", "docs/native-user-runtime-accounting.md", receipt_path, checkpoint,
+        "native/kernel/src/user_entry/task.rs", "native/kernel/src/arch/x86_64/user_preempt.rs",
+        "native/kernel/src/arch/x86_64/user_slice.rs", "native/kernel/src/user_root_probe/peer_driver.rs"]
+    roadmap["immediate_next_move"]["exit_evidence"] = [
+        "native independent recovery from a missing preemption interrupt; an external guest timeout is not a watchdog",
+        "explicit unknown-measurement emergency accounting and retained-resource recovery without fabricated zero time",
+        "preserve exact-once charges across retry and failure,15 peer-survival cases, construction/drain controls and ordinary denial",
+        "keep hardware clock coherence/reset/drift and broad timer races separate from bounded emulator evidence"]
+    evidence = "Cycle247: PKUSER13 retains validated charges before cleanup and atomically settles each scheduler dispatch once. Two fresh58-marker guests each settle148 quanta including28 terminal samples and one failed-cleanup sample;148 duplicates and563 altered-evidence controls reject. All15 survival cases and ordinary denial pass.525 Rust executions and36 oracle tests pass. Runtime-entry drift caught by native continuity is repaired with a host linker-consistency regression. " + checkpoint
+    gap = "Bounded one-BSP authenticated returned peer quanta only. Legacy diagnostics remain unaccounted; unknown/malformed measurements pin ownership and need explicit emergency recovery. Independent missing-IRQ recovery, physical coherent counter reads/reset/drift, pure user/kernel attribution, broad timer races, general quarantine/admission, full stack/exception/selector qualification, XSAVE/SMAP/SMP/async, IPC/services/shell/apps/optical ISO and hardware remain open. Image180pages/entry0xC000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion."
+    for phase_id in ("N8", "N12", "N13"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " PKUSER13 covers authenticated returned peer quanta only; qualify unknown-measurement emergency recovery, independent missing-IRQ recovery, coherent physical counter reads/reset/drift and accounting of all admitted profiles without weakening retained ownership."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle248(roadmap, test_count)
+
+
+def apply_cycle248(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle248-native-hpet-backup.md"
+    receipt_path = "tests/fixtures/cycle248-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle247_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle247_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=248, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=248)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path, "docs/native-user-hpet-backup.md"]
+    gate["current_candidate_audit"]["cycle"] = 248
+    gate["current_focused_source_projection"]["cycle"] = 248
+    gate["qualification_status"] = "bounded_hpet_backup_pass_unknown_recovery_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=248, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="375_debug_kernel_plus122_repeated_user_release_plus24_repeated_VM_release_plus8_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=38, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=308.313, log_sha256="173B5AFE6A5B7587AEAFA0F30913DF43C771322923A78573905A34AFEF49E336",
+        initial_attempts=[
+            dict(status="link_failed_before_guest", elapsed_seconds=82.250,
+                reason="text_9013E_exceeded_90000_repaired_with_one_page_within192page_cap",
+                log_sha256="203316956591B4C047D1A77EE4BA29FEAB2EE12AB675DCF1FA9813145BAE00A3"),
+            dict(status="guest_pass_outer_capture_changed_tracked_output", elapsed_seconds=306.922,
+                guest_runs=3, changed_paths=["runs/native-user-entry-readiness.json"],
+                reason="qualifier_wrote_tracked_receipt_during_capture_final_output_moved_to_ignored_candidate_then_promoted_after_verification",
+                log_sha256="173B5AFE6A5B7587AEAFA0F30913DF43C771322923A78573905A34AFEF49E336")],
+        qualification_guest_bound_seconds=120, qualification_bound_unchanged=True,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=248, status="pass",
+        tests_run=134, tests_passed=134, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=51.304, elapsed_seconds=52.218,
+        log_sha256="209FAA3282CDA7E17EAE4514978470FFE4F66D5A8571F645ADE2CA535A0ED5A4",
+        initial_attempts=[dict(status="fail", tests_run=134, tests_failed=2,
+            unittest_elapsed_seconds=51.618, elapsed_seconds=52.469,
+            reason="stale_kernel_source_count67_now70_and_prior_cycle_qualification_label",
+            log_sha256="98B09CA66FDB772DBCB9207CE512084A72E68CCFCB2F56D7885E2A6D0395E0B4")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=248, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_native_masked_local_timer_hpet_backup_terminal_charge_peer_survival_plus_default_denial",
+        watchdog_contract="PKUSER14", bounded_hpet_backup_recovery=True,
+        watchdog_scope="single_BSP_64bit_HPET_MSI_backup_to_local_timer_shares_APIC_requires_IF_not_NMI",
+        watchdog_deadline_ns=50000000, hpet_msi_launch_opt_in=True,
+        native_simultaneous_pending_sources_qualified=False, ioapic_backup_qualified=False,
+        nmi_recovery_qualified=False, independent_missing_interrupt_watchdog=False,
+        timer_drain_max_new_deliveries_per_shutdown=4,
+        timer_shutdown_scope="single_BSP_owned_local_and_backup_vectors_not_all_silicon_races",
+        peer_rounds_per_probe=16, peer_survival_cases_per_probe=16,
+        released_pages_per_probe=564, scrubbed_data_pages_per_probe=259,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries],
+        peer_preemptions_per_probe=[s["peer_preemptions"] for s in summaries])
+    for field in ("runtime_samples", "runtime_terminal_samples", "runtime_duplicate_denials",
+            "runtime_ticks", "runtime_terminal_ticks", "runtime_failed_cleanup_ticks",
+            "watchdog_recoveries", "watchdog_arms", "watchdog_stops", "watchdog_restores", "watchdog_ticks"):
+        lane[field + "_per_probe"] = [s[field] for s in summaries]
+    lane["stages"]["USI-1"] = "partial_live_bounded_hpet_backup_no_general_admission_or_ipc"
+    roadmap["immediate_next_move"]["title"] = "Recover unknown-runtime quarantines without fabricated time, then capability IPC for the usable ISO"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", "docs/native-user-hpet-backup.md", receipt_path, checkpoint,
+        "native/kernel/src/user_entry/task.rs", "native/kernel/src/user_entry/timer/watchdog.rs",
+        "native/kernel/src/arch/x86_64/user_slice.rs", "native/kernel/src/user_root_probe/peer_driver.rs"]
+    roadmap["immediate_next_move"]["exit_evidence"] = [
+        "explicit unknown-measurement emergency accounting and retained-resource recovery without fabricated zero time",
+        "bounded failed-entry/clock-measurement recovery retains exact device/root ownership until safe cleanup",
+        "preserve16 peer-survival cases including missing-local-timer recovery, exact charges, construction/drain controls and ordinary denial",
+        "keep IOAPIC/NMI/nonMSI/physical clock and simultaneous pending delivery qualification distinct; then USI2 capability IPC"]
+    evidence = "Cycle248: PKUSER14 owns an HPET comparator before device effects, routes a fixed BSP MSI and stops/drains/restores both sources before detach. Two fresh60-marker guests each recover one masked-local-timer spinner, preserve16 survival cases, settle156 dispatches and30 terminal samples and reject156 duplicate charges.539 Rust executions and38 oracle tests pass. The guest remains development-only. " + checkpoint
+    gap = "HPET MSI backup is independent of the local timer, not of HPET clock, APIC delivery or IF. IOAPIC/nonMSI/32bit fallback, NMI recovery, live simultaneous pending sources, physical coherent clock reads/reset/drift, unknown-measurement emergency recovery, partial timer configuration, general quarantine/admission, full stack/exception/XSAVE/SMAP/SMP/async, IPC/services/shell/apps/optical ISO and hardware remain open. Image181pages/entry0xC000 needs product-contract migration and full exact-candidate replay. No phase exit, merge or promotion."
+    for phase_id in ("N8", "N12", "N13"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " PKUSER14 qualifies only local-timer suppression with working HPET/MSI/APIC/IF; implement and qualify unknown-runtime recovery, IOAPIC/nonMSI/32bit fallback, NMI/shared-controller failure and simultaneous-source shutdown without broadening the bounded claim."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle249(roadmap, test_count)
+
+
+def apply_cycle249(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle249-unknown-runtime-recovery.md"
+    receipt_path = "tests/fixtures/cycle249-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle248_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle248_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=249, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=249,
+        immediate_next_move_id="N13-CAPABILITY-IPC-001", owner_independent_next_move_id="N13-CAPABILITY-IPC-001")
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path, "docs/native-user-unknown-runtime.md"]
+    gate["current_candidate_audit"]["cycle"] = 249
+    gate["current_focused_source_projection"]["cycle"] = 249
+    gate["qualification_status"] = "bounded_unknown_runtime_pass_capability_IPC_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=249, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="379_debug_kernel_plus124_repeated_user_release_plus24_repeated_VM_release_plus8_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=40, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=304.453, log_sha256="2E27EC4C1413B13D419390A91A1C01D42861A3E4D61679829D489FDE982F10F5",
+        initial_attempts=[
+            dict(status="link_failed_before_guest", elapsed_seconds=75.047,
+                reason="text_9196E_exceeded_91000_repaired_one_page_within192page_cap",
+                log_sha256="DD5ED5FA1139D45046D71EE86BD2D4627699A2EDE3B4B5C53DEDE6A66E32830A"),
+            dict(status="native_stack_guard_fault_after16cases", elapsed_seconds=217.172,
+                reason="nested_probe_frames_overflow_in_direct_map_manifest_repaired_noninline_sibling_calls_same36page_stack",
+                log_sha256="37D363BD7B0F63BBF4FE401409DB6325A9F608D1C94DD88899BE01F85126EF9D")],
+        qualification_guest_bound_seconds=120, qualification_bound_unchanged=True,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=249, status="pass",
+        tests_run=137, tests_passed=137, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=51.281, elapsed_seconds=52.141,
+        log_sha256="E51FE5AC8597BD5E919B0EA04E9341FA538F4665BDDC5A0590F335CE83DDB7B3",
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=249, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_native_returned_sample_loss_retained_cleanup_retry_peer_survival_plus_default_denial",
+        unknown_runtime_contract="PKUSER15", bounded_unknown_runtime_recovery=True,
+        unknown_runtime_recovery_qualified=False,
+        unknown_runtime_scope="returned_sample_loss_after_authenticated_quantum_not_physical_clock_or_arbitrary_entry_failure",
+        runtime_statistics_scope="PKUSER13_first16case_measured_suite_PKUSER15_separate_unknown_case_no_global_total",
+        unmeasured_dispatches_per_probe=[s["unmeasured_dispatches"] for s in summaries],
+        unknown_task_total_ticks_per_probe=[s["unknown_task_total_ticks"] for s in summaries],
+        unknown_peer_ticks_per_probe=[s["unknown_peer_ticks"] for s in summaries],
+        unknown_recovery_dispatches_per_probe=[s["unknown_recovery_dispatches"] for s in summaries],
+        measured_subtotal_all_peer_suites_per_probe=[s["runtime_ticks"] + s["unknown_peer_ticks"] for s in summaries],
+        physical_clock_failure_recovery=False, persistent_per_generation_runtime_audit=False,
+        peer_rounds_per_probe=16, peer_survival_cases_per_probe=17,
+        released_pages_per_probe=590, scrubbed_data_pages_per_probe=271,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries])
+    lane["stages"]["USI-1"] = "partial_live_bounded_unknown_recovery_no_general_admission_or_ipc"
+    roadmap["immediate_next_move"].update(id="N13-CAPABILITY-IPC-001", phase_ids=["N13", "N14"],
+        title="Implement original capability tables and bounded IPC between isolated user tasks for the usable ISO",
+        entry_evidence=["docs/native-userspace-integration-iso.md", "docs/native-user-unknown-runtime.md",
+            receipt_path, checkpoint, "native/kernel/src/user_entry/task.rs",
+            "native/kernel/src/scheduler.rs", "native/kernel/src/user_entry/syscall.rs"],
+        exit_evidence=[
+            "kernel-owned per-task handles enforce object type, caller identity, generation, rights, quotas and revocation without ambient authority",
+            "bounded versioned messages and failure-atomic queues connect cancellation, wakeup and dead-peer cleanup to owned task lifecycle",
+            "real isolated CPL3 peers exchange messages while stale/forged handles, oversize messages, exhaustion and peer death reject safely",
+            "preserve17 containment cases, explicit unknown time and ordinary denial; retain general admission/stack/clock/SMP/hardware gaps before services and ISO"])
+    evidence = "Cycle249: PKUSER15 records one unmeasured dispatch without changing measured ticks, prevents requeue and retains device/root ownership through cleanup retry. Two fresh61-marker guests each pass17 survival cases and630 altered-evidence controls; the healthy peer exits84.545 Rust executions and40 oracle tests pass. Native stack overflow from nested diagnostic constructors is repaired with sibling noninline calls without enlarging the36page stack. " + checkpoint
+    gap = "Bounded returned-sample loss only; physical clock failure, unsafe entry, persistent generation audit/quarantine, partial timer configuration, shared APIC/IF0/NMI failure, hardware races, general admission, full stack/exception/XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/ISO remain open. Image182pages/entry0xC000 needs product-contract migration; diagnostic text capacity and stack composition remain monitored under the existing integration flag. Full exact-candidate replay remains pending. No phase exit, merge or production promotion."
+    for phase_id in ("N8", "N12", "N13"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " PKUSER15 covers returned sample loss and termination-only retry, not physical clock failure or persistent generation audit. Bound stack composition and text capacity as native capability IPC is added; retain all production and interactive-ISO gates."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle250(roadmap, test_count)
+
+
+def apply_cycle250(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle250-native-capability-ipc.md"
+    receipt_path = "tests/fixtures/cycle250-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle249_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle249_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=250, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=250,
+        selected_move_id="N13-CAPABILITY-IPC-001", immediate_next_move_id="N13-CAPABILITY-IPC-001",
+        owner_independent_next_move_id="N13-CAPABILITY-IPC-001")
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path, "docs/native-capability-ipc.md"]
+    gate["current_candidate_audit"]["cycle"] = 250
+    gate["current_focused_source_projection"]["cycle"] = 250
+    gate["qualification_status"] = "bounded_native_IPC_pass_wait_lifecycle_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=250, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="392_debug_kernel_plus126_repeated_user_release_plus11_IPC_release_plus24_VM_release_plus8_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=42, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=289.094, log_sha256="84D41938F527A8903D5DF231FF8BFC459E6DA8F1796A40FE185D82DF317A0206",
+        initial_attempts=[
+            dict(status="freestanding_adapter_compile_failed", elapsed_seconds=38.437,
+                reason="scheduler_SMP_TaskId_type_mismatch_and_unqualified_ImageAdmission_fixed",
+                log_sha256="D2043B1D2816DF3C76E317B219139B83854688F546E850680C3C602CDAC83AF6"),
+            dict(status="link_failed_before_guest", elapsed_seconds=71.516,
+                reason="text935FE_exceeded92000_RELRO_A2100_exceededA2000_repaired_within192page_cap",
+                log_sha256="BEAD887BC04E5E61AB8F34ED69E62B9C1F51876CB57F72330A9863C177321A97")],
+        qualification_guest_bound_seconds=120, qualification_bound_unchanged=True,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=250, status="pass",
+        tests_run=140, tests_passed=140, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=51.072, elapsed_seconds=51.922,
+        log_sha256="1A01D445708BE6876EF50417CFC788EF0CCA6AFF42BDAB19815A4EF7A406084E",
+        initial_attempts=[dict(status="fail", tests_run=140, tests_failed=1,
+            unittest_elapsed_seconds=53.020, elapsed_seconds=53.875,
+            reason="stale_detailed_N14_not_started_heading_after_native_IPC_fixed_to_partial",
+            log_sha256="037BB8E6DDB1332BED2106EDA734BBAFE19312F49F1EEE7C8E9F6DC5BCCB3C83")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=250, selected_stage="USI-2", receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_CPL3_capability_request_reply_with_native_denials_plus_default_denial",
+        capability_ipc_contract="PKIPC1", bounded_capability_ipc=True,
+        ipc_scope="single_BSP_endpoint_only_bounded_nonblocking_explicit_bootstrap_and_detach",
+        ipc_task_capacity=4, ipc_caps_per_task=4, ipc_endpoint_capacity=4, ipc_queue_depth=4, ipc_message_bytes=64,
+        ipc_blocking=False, ipc_general_lifecycle=False, ipc_sender_badges=False, ipc_reply_tokens=False,
+        ipc_user_delegation=False, ipc_derivation_tree_revocation=False, ipc_native_saturation_qualified=False,
+        ipc_native_dead_peer_qualified=False, ipc_concurrency_qualified=False,
+        released_pages_per_probe=616, scrubbed_data_pages_per_probe=283,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries],
+        measured_subtotal_all_peer_suites_per_probe=[s["runtime_ticks"] + s["unknown_peer_ticks"] + s["ipc_ticks"] for s in summaries],
+        runtime_statistics_scope="PKUSER13_measured_suite_PKUSER15_unknown_case_PKIPC1_exchange_no_global_total")
+    for field in ("runtime_samples", "runtime_terminal_samples", "runtime_duplicate_denials", "runtime_ticks",
+            "runtime_terminal_ticks", "runtime_failed_cleanup_ticks", "watchdog_recoveries", "watchdog_arms",
+            "watchdog_stops", "watchdog_restores", "watchdog_ticks", "peer_preemptions", "unknown_peer_ticks",
+            "unknown_recovery_dispatches", "ipc_dispatches", "ipc_preemptions", "ipc_ticks", "ipc_calls", "ipc_cr3_writes"):
+        lane[field + "_per_probe"] = [s[field] for s in summaries]
+    lane["stages"]["USI-1"] = "partial_live_bounded_unknown_recovery_general_admission_still_open"
+    lane["stages"]["USI-2"] = "partial_native_nonblocking_capability_IPC_wait_lifecycle_pending"
+    roadmap["immediate_next_move"].update(title="Integrate IPC wait/wakeup, cancellation and task-death revocation before native services",
+        entry_evidence=["docs/native-userspace-integration-iso.md", "docs/native-capability-ipc.md", receipt_path, checkpoint,
+            "native/kernel/src/capability_ipc.rs", "native/kernel/src/user_entry/task.rs", "native/kernel/src/scheduler.rs"],
+        exit_evidence=[
+            "owned endpoint waits atomically block and wake the correct task generation exactly once; cancellation cannot lose or replay a completion",
+            "task exit/fault/cancel/quarantine automatically revoke owned IPC state before root reuse, with retained retryable cleanup and explicit dead-peer results",
+            "authenticated sender and one-use reply ownership, native stale/revoked/dead-peer/saturation/partial-output controls with continued peer progress",
+            "preserve17 containment cases, native request/reply and ordinary denial; then init/services/shell/apps/optical acceptance without closing robust microkernel requirements"])
+    evidence = "Cycle250: PKIPC1 enforces kernel-owned endpoint handles, authenticated callers, generations, rights and bounded FIFO copy commits. Two fresh62-marker boots exchange actual transformed8-byte requests/replies and preserve17 survival cases;660 altered-evidence controls per boot reject.571 Rust executions,42 oracle tests and ordinary denial pass. " + checkpoint
+    gap = "Nonblocking single-BSP endpoint-only subset. Scheduler waits/cancellation, automatic lifecycle revocation, sender identity and one-use replies, transactional general bootstrap, derivation-tree revocation, user delegation, audit, wire layouts, shared memory, notifications, priorities, SMP and native saturation/stale/dead-peer/output-fault stress remain. Core host controls do not qualify native races.185-page image needs product-contract migration and full exact-candidate replay; no interactive shell/ISO or production promotion."
+    for phase_id in ("N13", "N14"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["status"] = "partial"
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+        for subphase in phase["subphases"]:
+            if subphase["id"] in ("N13.5", "N13.7", "N14.1", "N14.2", "N14.5", "N14.7"):
+                subphase["status"] = "partial"
+    roadmap["phase_summary"].update(partial=21, not_started=18)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " PKIPC1 is endpoint-only nonblocking IPC with explicit bootstrap teardown. Implement scheduler waits/cancel, automatic lifetime revocation, sender/reply authority, transactional bootstrap, derivation-tree revocation and native saturation/stale/dead-peer/output-fault tests before general services. Preserve all production/ISO gates and185page product-contract migration."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle251(roadmap, test_count)
+
+
+def apply_cycle251(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle251-native-ipc-waits.md"
+    receipt_path = "tests/fixtures/cycle251-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle250_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle250_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=251, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 251
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path]
+    gate["current_candidate_audit"]["cycle"] = 251
+    gate["current_focused_source_projection"]["cycle"] = 251
+    gate["qualification_status"] = "bounded_native_IPC_wait_cancel_retirement_pass_general_lifecycle_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    attempts = [
+        ("nativefirst",6.203,"fixture_private_field_access_fixed_with_retained_admission","6293B438ECA8A0212D222EB0BC528E21735FD220F22985CBCE60D4B86EDA0AC6"),
+        ("nativesecond",42.078,"stale_synthetic_root_counter_373_corrected379","F4FD60EAD2D262B9C9256E1A5A401CA76D116D7AB77DD10099490F9338CB96E2"),
+        ("nativethird",70.375,"text9461E_exceeded94000_fixed_within192page_cap","1C3C80021E3C5EA0000FB9D3E544A16268340F58734AA730DF256D6C2F788232"),
+        ("nativefourth",184.016,"native_stage135_missing_timer_wrapper_wait_and_revoke_forwarding","F8E579DC237EB302407ECC716C1E6A0E73835876E5D447318CC04CC182B6CE91"),
+        ("nativefifth",38.407,"line_number_diagnostic_u32_to_u64_compile_repair","43FFFA37E65066D96FA240D028A8D9C9606BD6E5CEFE762D0EB5B8C967678CDE"),
+        ("nativesixth",40.672,"forwarding_guard_must_accept_rustfmt_whitespace","AACE8FAD2B655ED2B90D6DA820A6D95EE838178594813A3EE235A77AB05F2834"),
+    ]
+    gate["current_closeout_regression"] = dict(cycle=251, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="401_debug_kernel_plus128_user_release_plus17_IPC_release_plus24_VM_release_plus8_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=43, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=289.906, log_sha256="84D41938F527A8903D5DF231FF8BFC459E6DA8F1796A40FE185D82DF317A0206",
+        initial_attempts=[dict(attempt=a, status="fail", elapsed_seconds=e, reason=r, log_sha256=h) for a,e,r,h in attempts],
+        qualification_guest_bound_seconds=120, qualification_bound_unchanged=True,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=251, status="pass",
+        tests_run=142, tests_passed=142, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=54.940, elapsed_seconds=55.812,
+        log_sha256="19D05F0A0E303D21B9EF1E5612BF6B07538F80C42C10B10B3B5587027F753472",
+        initial_attempts=[
+            dict(status="fail", tests_run=142, tests_failed=2, unittest_elapsed_seconds=50.990, elapsed_seconds=51.860,
+                reason="stale_source_count_schema_and_qualification_label",
+                log_sha256="7FD40D8026F9FB9C478008C239CBC9F6D48FBE8CC87CE4A139233E9812CA0FAF"),
+            dict(status="fail", tests_run=142, tests_failed=1, unittest_elapsed_seconds=52.465, elapsed_seconds=53.313,
+                reason="remaining_stale_current_candidate_cycle_assertion",
+                log_sha256="E44EAAFA2DB879DEFE3E370DB30A28062620DCE3424200C8EA77D8D0617AB2B3")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=251, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_CPL3_wait_cancel_exchange_and_automatic_retirement_guests_plus_default_denial",
+        ipc_scope="single_BSP_advisory_readiness_waits_supervisor_cancel_and_automatic_retirement",
+        ipc_blocking=True, ipc_automatic_retirement=True, ipc_wait_many=False, ipc_deadlines=False,
+        ipc_user_cancellation=False, ipc_native_writable_wait_qualified=False,
+        ipc_native_enrolled_fault_quarantine_qualified=False,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries],
+        measured_subtotal_all_peer_suites_per_probe=[s["runtime_ticks"] + s["unknown_peer_ticks"] + s["ipc_ticks"] for s in summaries])
+    for field in ("runtime_samples", "runtime_terminal_samples", "runtime_duplicate_denials", "runtime_ticks",
+            "runtime_terminal_ticks", "runtime_failed_cleanup_ticks", "watchdog_recoveries", "watchdog_arms",
+            "watchdog_stops", "watchdog_restores", "watchdog_ticks", "peer_preemptions", "unknown_peer_ticks",
+            "unknown_recovery_dispatches", "ipc_dispatches", "ipc_preemptions", "ipc_ticks", "ipc_calls", "ipc_cr3_writes",
+            "ipc_waits", "ipc_readiness_wakes", "ipc_cancellations"):
+        lane[field + "_per_probe"] = [s[field] for s in summaries]
+    lane["stages"]["USI-2"] = "partial_native_IPC_readiness_wait_cancel_and_retirement_general_lifecycle_pending"
+    roadmap["immediate_next_move"].update(title="Qualify native IPC death/revocation and reply ownership before services",
+        entry_evidence=["docs/native-userspace-integration-iso.md", "docs/native-capability-ipc.md", receipt_path, checkpoint,
+            "native/kernel/src/capability_ipc/wait.rs", "native/kernel/src/user_entry/task.rs"],
+        exit_evidence=[
+            "native enrolled-owner exit/fault/cancel/quarantine revocation and pending-wait termination retain safe cleanup and surviving peer progress",
+            "native stale/revoked/dead-peer/writable-wait/saturation/partial-output controls and persistent task generations without resetting authority high-water marks",
+            "authenticated sender and one-use reply ownership, deadlines, transactional general admission and sustained service budgets",
+            "preserve17 containment cases, native3-wait2-wake1-cancel exchange and ordinary denial; then init/services/shell/apps/optical acceptance without closing full microkernel obligations"])
+    evidence = "Cycle251: native IPC readiness suspends/resumes private CPL3 tasks;3 waits,2 readiness wakes,1 cancellation and automatic retirement pass in two fresh62-marker boots.401 kernel debug tests,588 Rust executions,43 oracle tests,665 altered-evidence rejections per guest and ordinary denial pass. " + checkpoint
+    gap = "Single-BSP advisory readiness is not RPC or general service lifecycle. Native enrolled-owner fault/cancel/quarantine/dead-peer/revocation/stale/writable-wait/saturation/output-fault and persistent-generation tests remain. Add pending-wait termination, sender identity, one-use replies, deadlines, wait-many, transactional admission, sustained budgets, audit and SMP. Quarantine retains authority until stopped cleanup succeeds.186-page product-contract migration and full exact-candidate replay remain; no interactive ISO or production promotion."
+    for phase_id in ("N13", "N14"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " Cycle251 now implements bounded readiness wait/cancel and automatic retirement hooks; do not treat that as general lifecycle. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle252(roadmap, test_count)
+
+
+def apply_cycle252(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle252-native-ipc-pressure-lifecycle.md"
+    receipt_path = "tests/fixtures/cycle252-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle251_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle251_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=252, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 252
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path]
+    gate["current_candidate_audit"]["cycle"] = 252
+    gate["current_focused_source_projection"]["cycle"] = 252
+    gate["qualification_status"] = "bounded_native_IPC_pressure_lifecycle_pass_reply_authority_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=252, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="403_debug_kernel_plus130_user_release_plus17_IPC_release_plus24_VM_release_plus8_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=46, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=334.891, log_sha256="297A30F9B74F62DF273A913647DF69C06FF1E94F53C14FCED769B7DB510F6223",
+        initial_attempts=[
+            dict(status="fail", elapsed_seconds=97.953, reason="text9645E_exceeded95000_reservation_repaired_within192page_cap",
+                log_sha256="C2F04067395F32E786A95F57C896C218597B3C3375A1439F415489AC4FBE194B"),
+            dict(status="fail", elapsed_seconds=187.171, reason="native_constructor_stack_guard_fault_repaired_by_persistent_in_place_slot_reuse",
+                log_sha256="198EBA13EC0FE3121CC1B0134A9D5196D327CF1E928826F2E142335D2DE108BB")],
+        preflight_failure="fixture_retained_two_syscalls_not_one_assertion_corrected_402_passed_one_failed",
+        qualification_guest_bound_seconds=120, qualification_bound_unchanged=True,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=252, status="pass",
+        tests_run=146, tests_passed=146, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=51.140, elapsed_seconds=51.984,
+        log_sha256="8ED4461BBBFE5D4DC69EC3D245FDA699F9428CA0077B0E5497B5B22AED4B0AB2",
+        initial_attempts=[dict(status="fail", tests_run=146, tests_failed=1,
+            unittest_elapsed_seconds=51.863, elapsed_seconds=52.703,
+            reason="historical_input_inventory_must_remain79_while_current_Rust_sources_advance78",
+            log_sha256="CAEDBE24E305B14452E8C95CF43AE6F9253437EA0C7078355526F9A2B5B376ED")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=252, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_CPL3_pressure_stale_copy_fault_and_enrolled_owner_death_guests_plus_default_denial",
+        ipc_scope="single_BSP_five_persistent_slot_lifetimes_with_queue_pressure_and_four_enrolled_owner_death_paths",
+        ipc_native_saturation_qualified=True, ipc_native_dead_peer_qualified=True,
+        ipc_native_writable_wait_qualified=True, ipc_native_enrolled_fault_quarantine_qualified=True,
+        ipc_native_wait_termination=True, ipc_persistent_generations=5,
+        released_pages_per_probe=746, scrubbed_data_pages_per_probe=343,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries],
+        measured_subtotal_all_peer_suites_per_probe=[s["runtime_ticks"] + s["unknown_peer_ticks"] + s["ipc_ticks"] + sum(sum(p["ticks"]) for p in s["ipc_pressure_rounds"]) for s in summaries],
+        runtime_statistics_scope="measured_PKUSER13_PKUSER15_PKIPC1_PKIPC2_subtotal_excludes_one_unknown_dispatch")
+    for field in ("runtime_samples", "runtime_terminal_samples", "runtime_duplicate_denials", "runtime_ticks",
+            "runtime_terminal_ticks", "runtime_failed_cleanup_ticks", "watchdog_recoveries", "watchdog_arms",
+            "watchdog_stops", "watchdog_restores", "watchdog_ticks", "peer_preemptions", "unknown_peer_ticks",
+            "unknown_recovery_dispatches", "ipc_dispatches", "ipc_preemptions", "ipc_ticks", "ipc_calls", "ipc_cr3_writes",
+            "ipc_waits", "ipc_readiness_wakes", "ipc_cancellations", "ipc_pressure_rounds"):
+        lane[field + "_per_probe"] = [s[field] for s in summaries]
+    lane["stages"]["USI-2"] = "partial_native_IPC_pressure_and_peer_lifecycle_reply_authority_and_general_admission_pending"
+    roadmap["immediate_next_move"].update(title="Implement authenticated sender and one-use reply ownership before native services",
+        entry_evidence=["docs/native-userspace-integration-iso.md", "docs/native-capability-ipc.md", receipt_path, checkpoint,
+            "native/kernel/src/capability_ipc.rs", "native/kernel/src/capability_ipc/wait.rs", "native/kernel/src/user_entry/task.rs"],
+        exit_evidence=[
+            "kernel-authenticated sender identity and generation-bound one-use reply ownership reject spoofed, replayed, cancelled and dead-peer replies",
+            "deadline/cancellation ownership, transactional bootstrap/admission and sustained service budgets remain explicit prerequisites",
+            "retain five native persistent-slot lifetimes, FIFO/writable/partial-output and enrolled-owner death controls, all17 containment cases and ordinary denial",
+            "then init/console/services/shell/files/two apps and optical ISO acceptance; continue complete robust microkernel obligations"])
+    evidence = "Cycle252: five native IPC lifetimes reuse owned task slots and prove FIFO pressure, writable waits, four-byte partial-output retry, stale handles and peer survival through fault/cancel/wait-cancel/quarantine retirement. Two fresh67-marker boots preserve17 earlier containment cases, reject800 altered-evidence controls each and retain ordinary denial.403 kernel tests,592 Rust executions and46 oracle tests pass. " + checkpoint
+    gap = "Bounded single-BSP fixed lifetimes only. Sender identity, one-use reply ownership, deadlines, transactional general bootstrap/admission, sustained budgets, persistent supervision, arbitrary close/destroy/wake/kill races, derivation-tree revocation, quota recovery, concurrency and SMP remain. Guarded constructor stack overflow was repaired with in-place persistent-slot reuse; general stack/hardware proof remains.188-page product-contract migration and full exact-candidate replay are pending; no interactive ISO or production promotion."
+    for phase_id in ("N13", "N14"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " Cycle252 qualifies five bounded native peer lifetimes and blocked-wait termination, not general service supervision. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle253(roadmap, test_count)
+
+
+def apply_cycle253(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle253-native-ipc-reply-authority.md"
+    receipt_path = "tests/fixtures/cycle253-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle252_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle252_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=253, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 253
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path]
+    gate["current_candidate_audit"]["cycle"] = 253
+    gate["current_focused_source_projection"]["cycle"] = 253
+    gate["qualification_status"] = "bounded_native_IPC_reply_authority_pass_deadlines_admission_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=253, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="416_debug_kernel_plus130_user_release_plus30_IPC_release_plus24_VM_release_plus8_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=48, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=317.046, log_sha256="80B2E37841BC3EBF0D0A6D1352F569F29DE67329E8D2BCE5120335B5E1161B8D",
+        initial_attempts=[dict(status="fail", elapsed_seconds=75.265,
+            reason="text98C3E_and_BSS_BC198_exceeded_reservations_repaired_to191pages_within192page_cap",
+            log_sha256="13A7A0B9E8BFAB516EC678353135C4ABB8FAD9010C438C548667E76CA3342FBE")],
+        preflight_host_tests=416, preflight_host_log_sha256="FCE4D2B1EBC7459712BEFFCF2FCC0B1B59FBBB8AEB309E6F620FCB44F12F84DA",
+        qualification_guest_bound_seconds=120, qualification_bound_unchanged=True,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=253, status="pass",
+        tests_run=149, tests_passed=149, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=51.861, elapsed_seconds=52.734,
+        log_sha256="7B1ACC47581F01FE71B11C671D9989E415D9B8F5AFE886CB8EF61D19D20539D1",
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=253, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_CPL3_authenticated_sender_one_use_reply_fault_retry_and_discard_guests_plus_default_denial",
+        ipc_scope="single_BSP_asynchronous_request_metadata_receive_one_use_reply_and_discard",
+        ipc_authenticated_sender=True, ipc_reply_tokens=True, ipc_synchronous_call=False,
+        ipc_request_deadline_ownership=False, ipc_dead_service_reply_notification=False,
+        ipc_reply_reserved_capacity=False, ipc_reply_task_generation=6, ipc_reply_token_generations=2,
+        released_pages_per_probe=772, scrubbed_data_pages_per_probe=355,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries],
+        measured_subtotal_all_peer_suites_per_probe=[s["runtime_ticks"] + s["unknown_peer_ticks"] + s["ipc_ticks"]
+            + sum(sum(p["ticks"]) for p in s["ipc_pressure_rounds"]) + sum(s["ipc_reply_ticks"]) for s in summaries],
+        runtime_statistics_scope="measured_PKUSER13_PKUSER15_PKIPC1_PKIPC2_PKIPC3_subtotal_excludes_one_unknown_dispatch")
+    for field in ("runtime_samples", "runtime_terminal_samples", "runtime_duplicate_denials", "runtime_ticks",
+            "runtime_terminal_ticks", "runtime_failed_cleanup_ticks", "watchdog_recoveries", "watchdog_arms",
+            "watchdog_stops", "watchdog_restores", "watchdog_ticks", "peer_preemptions", "unknown_peer_ticks",
+            "unknown_recovery_dispatches", "ipc_dispatches", "ipc_preemptions", "ipc_ticks", "ipc_calls", "ipc_cr3_writes",
+            "ipc_waits", "ipc_readiness_wakes", "ipc_cancellations", "ipc_pressure_rounds", "ipc_reply_dispatches",
+            "ipc_reply_preemptions", "ipc_reply_ticks", "ipc_reply_cr3_writes", "ipc_reply_calls"):
+        lane[field + "_per_probe"] = [s[field] for s in summaries]
+    lane["stages"]["USI-2"] = "partial_native_sender_reply_authority_deadlines_cancellation_and_general_admission_pending"
+    roadmap["immediate_next_move"].update(title="Implement request deadlines, cancellation and dead-service notification before native service admission",
+        entry_evidence=["docs/native-userspace-integration-iso.md", "docs/native-capability-ipc.md", receipt_path, checkpoint,
+            "native/kernel/src/capability_ipc/reply.rs", "native/kernel/src/capability_ipc/wait.rs", "native/kernel/src/user_entry/task.rs"],
+        exit_evidence=[
+            "kernel-owned request lifecycle and deadlines deliver at-most-once cancellation or dead-service notification without replay or lost ownership",
+            "transactional bootstrap/admission and sustained service budgets replace halt-on-error and fixed lifetime call limits",
+            "qualify image layout/capacity growth:191 of192 bootstrap pages used; preserve existing guarded stack and all native controls",
+            "retain17 containment cases, five pressure lifetimes, authenticated sender/reply fault retry and ordinary denial, then init/console/shell/files/two apps/optical ISO; full robust microkernel continues"])
+    evidence = "Cycle253: kernel-stamped sender identity and task-local one-use replies/discard execute in a sixth persistent-slot lifetime without permanent server SEND grants. Two fresh68-marker boots preserve17 containment cases and five pressure/death lifetimes;835 altered-evidence controls each and ordinary denial pass.416 kernel tests,618 Rust executions,48 oracle tests. " + checkpoint
+    gap = "Asynchronous request/reply is not synchronous Call, correlation, donation, guaranteed reply capacity or caller notification on discard/service death. Request/deadline/cancellation ownership, transactional admission, sustained budgets, persistent supervision, arbitrary races and SMP remain.191-page image leaves one bootstrap page; product-contract/capacity migration and full exact-candidate replay remain. No interactive ISO or production promotion."
+    for phase_id in ("N13", "N14"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " Cycle253 adds bounded sender/reply authority but requires request failure notification before services. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle254(roadmap, test_count)
+
+
+def apply_cycle254(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle254-native-request-lifetimes.md"
+    path = "tests/fixtures/cycle254-user-entry-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle253_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle253_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=254, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 254
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-ipc-request-lifetimes.md"]
+    gate["current_candidate_audit"]["cycle"] = 254
+    gate["current_focused_source_projection"]["cycle"] = 254
+    gate["qualification_status"] = "bounded_native_request_lifetimes_pass_clock_admission_and_canonical_product_gates_pending"
+    count = sum(c["tests_passed"] or 0 for c in receipt["checks"])
+    gate["current_closeout_regression"] = dict(cycle=254, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=count, tests_passed=count, tests_failed=0, tests_skipped=0,
+        scope="426_debug_kernel_130_user_release_40_IPC_release_24_VM_release_8_compile_fail_10_boot_exit_15_kmap",
+        additional_python_oracle_tests=72, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=329.906, log_sha256="6076B20F81ECE3D25E260DCDB8E17B2F61933CF18C417AB52D3F614F440380B8",
+        initial_attempts=[
+            dict(status="fail", reason="linker_capacity", elapsed_seconds=64.250, log_sha256="099C049433016F12368CE377FB66F3DD19A392B7C307F39F7126F17BDEEAABC7"),
+            dict(status="fail", reason="synthetic_layout_prefix", elapsed_seconds=40.594, log_sha256="0A4A8096188057875E0DEE50FA4DBDDC14F7023492574BF297EB42C384A4AD72"),
+            dict(status="fail", reason="three_unmigrated_product_readiness_assertions", elapsed_seconds=43.937, log_sha256="D5C814136CA7A3EE27DC0D0AD0C097F3816FF56B490B7BD7EBDDA2F5F1CE7D08"),
+            dict(status="fail", reason="expanded_suite_120s_harness_timeout_after_first_new_lifetime", elapsed_seconds=194.594, log_sha256="F8500D4AA33DAB8C3C0859454AD3BF2FA18A92F36BB523B11082FD1C4B5B9009")],
+        known_unresolved_readiness_tests=receipt["known_unresolved_readiness_tests"],
+        qualification_guest_bound_seconds=150, prior_guest_bound_seconds=120,
+        qualification_bound_unchanged=False, kernel_task_timer_dispatch_bounds_unchanged=True,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=254, status="pass",
+        tests_run=152, tests_passed=152, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=51.682, elapsed_seconds=52.531,
+        log_sha256="F7978994F628C4094A2A7CDE8CE894584B5252E52B8D55BB9C3EC6AA65D91980",
+        prior_failed_captures=[
+            dict(tests_failed=17, log_sha256="B7F4BF884D9546A4C01E30DA641F6846B2C219D2D8348547541423EA3DC67B14"),
+            dict(tests_failed=5, log_sha256="59CF735A43CEF94BE5D1CD0311E6391258E2A0C0EF68BDFFE8318A2D9439CAA0")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=254, receipt_path=path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_native_request_success_discard_queued_and_claimed_death_guests_plus_default_denial",
+        ipc_scope="single_BSP_caller_owned_request_completion_cancel_wait_take",
+        ipc_caller_owned_completion=True, ipc_client_request_cancellation=True,
+        ipc_dead_service_reply_notification=True, ipc_reply_reserved_capacity=True,
+        ipc_request_deadline_ownership=False, ipc_deadlines=False,
+        kernel_image_pages=196, kernel_capacity_pages=208,
+        released_pages_per_probe=876, scrubbed_data_pages_per_probe=403,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries],
+        known_unresolved_readiness_tests=receipt["known_unresolved_readiness_tests"],
+        measured_subtotal_all_peer_suites_per_probe=[s["runtime_ticks"] + s["unknown_peer_ticks"] + s["ipc_ticks"]
+            + sum(sum(p["ticks"]) for p in s["ipc_pressure_rounds"]) + sum(s["ipc_reply_ticks"])
+            + sum(sum(p["ticks"]) for p in s["ipc_request_lifetimes"]) for s in summaries],
+        runtime_statistics_scope="measured_peer_suites_through_PKIPC4_subtotal_excludes_one_unknown_dispatch")
+    for field in ("runtime_samples", "runtime_terminal_samples", "runtime_duplicate_denials", "runtime_ticks",
+            "runtime_terminal_ticks", "runtime_failed_cleanup_ticks", "watchdog_recoveries", "watchdog_arms",
+            "watchdog_stops", "watchdog_restores", "watchdog_ticks", "peer_preemptions", "unknown_peer_ticks",
+            "unknown_recovery_dispatches", "ipc_dispatches", "ipc_preemptions", "ipc_ticks", "ipc_calls", "ipc_cr3_writes",
+            "ipc_waits", "ipc_readiness_wakes", "ipc_cancellations", "ipc_pressure_rounds", "ipc_reply_dispatches",
+            "ipc_reply_preemptions", "ipc_reply_ticks", "ipc_reply_cr3_writes", "ipc_reply_calls", "ipc_request_lifetimes"):
+        lane[field + "_per_probe"] = [s[field] for s in summaries]
+    lane["stages"]["USI-2"] = "partial_native_request_lifetimes_clock_deadlines_and_general_admission_pending"
+    roadmap["immediate_next_move"].update(title="Implement owned monotonic request deadlines, then transactional service admission and sustained budgets",
+        entry_evidence=["docs/native-userspace-integration-iso.md", "docs/native-ipc-request-lifetimes.md", path, checkpoint,
+            "native/kernel/src/capability_ipc/request.rs", "native/kernel/src/capability_ipc/wait.rs"],
+        exit_evidence=[
+            "owned monotonic service clock drives deadline completion without substituting summed CPU time; preserve first-terminal-wins",
+            "transactional bootstrap/admission and sustained service budgets replace halt-on-error and fixed lifetime call limits",
+            "migrate196-page product contracts and replay all exact-candidate canonical gates before main; three stale readiness assertions remain",
+            "retain all native controls, then init/confined console/input, shell/files/two apps and actual optical ISO; continue full robust microkernel"])
+    evidence = "Cycle254: native caller-owned request completion/cancel/wait/take; four new lifetimes include discard and queued/claimed service death. Two fresh72-marker boots,935 altered-evidence controls each,426 kernel tests/653 Rust executions/72 Python oracle tests; ordinary denial preserved. " + checkpoint
+    gap = "Owned monotonic deadlines, transactional service admission and sustained budgets remain before init/console/shell/apps/ISO.196-page image/208 capacity requires canonical product migration; three old readiness assertions still fail. Cancellation is not side-effect rollback; no SMP/general supervision or interactive ISO claim."
+    for phase_id in ("N13", "N14"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " Cycle254 qualifies bounded tracked outcomes, not deadlines or services. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle255(roadmap, test_count)
+
+
+def apply_cycle255(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle255-continuous-service-clock.md"
+    path = "tests/fixtures/cycle255-user-entry-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle254_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle254_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=255, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 255
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-continuous-clock.md"]
+    gate["current_candidate_audit"]["cycle"] = 255
+    gate["current_focused_source_projection"]["cycle"] = 255
+    gate["qualification_status"] = "bounded_native_continuous_clock_pass_request_deadlines_services_and_canonical_gates_pending"
+    count = sum(c["tests_passed"] or 0 for c in receipt["checks"])
+    gate["current_closeout_regression"] = dict(cycle=255, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=count, tests_passed=count, tests_failed=0, tests_skipped=0,
+        scope="434_debug_kernel_138_user_release_40_IPC_release_24_VM_release_9_compile_fail_10_boot_exit_15_kmap",
+        additional_python_oracle_tests=74, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=328.953, log_sha256="47DDC58097DE63251D14F930A719E3A3222A728B7C53B7B850222AF4F89326AF",
+        initial_attempts=[
+            dict(status="fail", reason="permanent_MMIO_rejected_by_task_supervisor_replay", elapsed_seconds=218.453,
+                 guest_log_sha256="C82A96F6D9FD05E2CEF82D735077F72FB8816945BA26D87C46C2184E3737690E"),
+            dict(status="fail", reason="wrong_MMIO_only_finish_contract", elapsed_seconds=223.765,
+                 guest_log_sha256="F8CA555B19E333F0196933C7365992CB53635D1FDD085D9AE4D2D5C37D590465"),
+            dict(status="fail", reason="text_reservation_398_byte_overflow", elapsed_seconds=58.297,
+                 log_sha256="1849DBE84F007683B3A69F4011430D5FEFF7A05269E58FC55C30B92C1FD970B4"),
+            dict(status="fail", reason="stage5010_missing_temporary_RAM_alias_identified", elapsed_seconds=198.063,
+                 guest_log_sha256="4A1CBE834787352593BA9E9D3D3FC7C2F997C93F8F6085CDC9C1D22D5A225455")],
+        shared_failed_outer_log_sha256="71D30FF5DB19AB42E248C93AD442E342D17FE551765BBD2848DDD8FDBBC9E47C",
+        known_unresolved_readiness_tests=receipt["known_unresolved_readiness_tests"],
+        qualification_guest_bound_seconds=150, qualification_bound_unchanged=True,
+        kernel_task_timer_dispatch_bounds_unchanged=True,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=255, status="pass", tests_run=155,
+        tests_passed=155, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=52.038, elapsed_seconds=52.891,
+        log_sha256="4CE08830E5981CF1672FDB0794327C5109150760CDDF2DE85693C71B4B7EF53D",
+        source_unchanged=True, owner_report_unchanged=True,
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=255, receipt_path=path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_continuous_clock_request_lifetime_guests_plus_default_denial",
+        native_continuous_clock=True, clock_scope="one_BSP_64_bit_HPET_epoch",
+        continuous_clock_per_probe=[s["continuous_clock"] for s in summaries],
+        clock_epoch_request_binding=False, idle_request_expiry=False,
+        ipc_request_deadline_ownership=False, ipc_deadlines=False,
+        kernel_image_pages=197, kernel_capacity_pages=208,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries],
+        measured_subtotal_all_peer_suites_per_probe=[s["runtime_ticks"] + s["unknown_peer_ticks"] + s["ipc_ticks"]
+            + sum(sum(p["ticks"]) for p in s["ipc_pressure_rounds"]) + sum(s["ipc_reply_ticks"])
+            + sum(sum(p["ticks"]) for p in s["ipc_request_lifetimes"]) for s in summaries])
+    for field in ("runtime_samples", "runtime_terminal_samples", "runtime_duplicate_denials", "runtime_ticks",
+            "runtime_terminal_ticks", "runtime_failed_cleanup_ticks", "watchdog_recoveries", "watchdog_arms",
+            "watchdog_stops", "watchdog_restores", "watchdog_ticks", "peer_preemptions", "unknown_peer_ticks",
+            "unknown_recovery_dispatches", "ipc_dispatches", "ipc_preemptions", "ipc_ticks", "ipc_calls", "ipc_cr3_writes",
+            "ipc_waits", "ipc_readiness_wakes", "ipc_cancellations", "ipc_pressure_rounds", "ipc_reply_dispatches",
+            "ipc_reply_preemptions", "ipc_reply_ticks", "ipc_reply_cr3_writes", "ipc_reply_calls", "ipc_request_lifetimes"):
+        lane[field + "_per_probe"] = [s[field] for s in summaries]
+    lane["stages"]["USI-2"] = "partial_continuous_clock_request_deadlines_and_service_admission_pending"
+    roadmap["immediate_next_move"].update(title="Bind request deadlines to the owned clock, then admit sustained user-space services",
+        entry_evidence=["docs/native-userspace-integration-iso.md", "docs/native-continuous-clock.md", path, checkpoint,
+            "native/kernel/src/user_entry/timer/clock.rs", "native/kernel/src/capability_ipc/request.rs"],
+        exit_evidence=[
+            "epoch-bound request expiry preserves first-terminal-wins, rejects late replies, wakes once and handles all-tasks-blocked idle",
+            "poisoned clock epochs retain ownership and cannot revive old deadlines; no fabricated time or host clock substitution",
+            "transactional service admission and sustained budgets precede init/console/input, shell/files/two apps and optical ISO acceptance",
+            "migrate197-page product contracts and replay all exact-candidate canonical gates before main; preserve three known readiness failures"])
+    evidence = "Cycle255: continuous HPET lease across12 native dispatches and4 idle intervals;6 mapping windows/revocations,24 MMIO writes, original config restored without counter reset. Two fresh73-marker boots/955 altered-evidence controls each;434 kernel tests/670 Rust executions/74 Python oracle tests and ordinary denial pass. " + checkpoint
+    gap = "Timed request expiry, all-blocked wakeup and poisoned-epoch handling remain, then transactional admission/sustained budgets and init/console/shell/apps/ISO.197-page image requires canonical product migration; three old readiness assertions still fail. No SMP/physical-clock failure recovery/32-bit wrap/suspend or general recovery claim."
+    for phase_id in ("N13", "N14"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " Cycle255 clock continuity alone does not implement deadline expiry. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle256(roadmap, test_count)
+
+
+def apply_cycle256(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle256-native-request-deadlines.md"
+    path = "tests/fixtures/cycle256-user-entry-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle255_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle255_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=256, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 256
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-request-deadlines.md"]
+    gate["current_candidate_audit"]["cycle"] = 256
+    gate["current_focused_source_projection"]["cycle"] = 256
+    gate["qualification_status"] = "bounded_native_request_deadlines_pass_service_admission_and_canonical_gates_pending"
+    count = sum(c["tests_passed"] or 0 for c in receipt["checks"])
+    attempts = [
+        ("hostfirst", 4.078, "test_compared_non_Eq_Scheduler_fixed_to_public_snapshots", "3A1732BE77C9E50DA24F2C284B849198109528A82E73A174C1270B581879C661"),
+        ("hostsecond", 20.688, "fixture40_vs96_byte_envelope_fixed_to64_byte_payload", "82821739516DCCEE592001D8331ACE064C00D6D1515E68408168696D91DBC78E"),
+        ("nativefirst", 79.875, "text9DC0E_exceeded9D000_one_page_growth_within208", "5829C70E745D9156469BEED5564D4120FE08B42035BEDC56379525E035034B6C"),
+        ("nativesecond", 236.468, "stage6008_after_deadline_client_left_RDX1_before_Exit", "439B0F97BC2AEDC62FDF0AC02997807CA809E9E6EE8CC2F5B687CFFF4B273E56"),
+        ("diagnostic", 158.313, "round0_task0_calls9_UD2_after_bad_Exit_cleared_RDX_and_guarded", "6433D61FBF7EE571CFD7E288C5A3ED621608D56B80E916C424E251B0AFA1FE35"),
+    ]
+    gate["current_closeout_regression"] = dict(cycle=256, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=count, tests_passed=count, tests_failed=0, tests_skipped=0,
+        scope="443_debug_kernel_138_user_release_49_IPC_release_24_VM_release_9_compile_fail_10_boot_exit_15_kmap",
+        additional_python_oracle_tests=76, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=341.688, log_sha256="7186B57A8C8A51528F08AED21CD66A592F1958F7E53640EC73CD042326A7AE12",
+        initial_attempts=[dict(attempt=a, status="fail", elapsed_seconds=e, reason=r, log_sha256=h) for a,e,r,h in attempts],
+        known_unresolved_readiness_tests=receipt["known_unresolved_readiness_tests"],
+        qualification_guest_bound_seconds=150, qualification_bound_unchanged=True,
+        kernel_task_timer_dispatch_bounds_unchanged=True,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=256, status="pass",
+        tests_run=158, tests_passed=158, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=52.295, elapsed_seconds=53.141,
+        log_sha256="91344E385EE6EDB40E22C78080A48CD8868E0802E100E14DA8E40CBE9E48B7A2",
+        source_unchanged=True, owner_report_unchanged=True,
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=256, receipt_path=path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_CPL3_queued_and_claimed_deadlines_all_tasks_blocked_plus_default_denial",
+        capability_ipc_contract="PKIPC5", ipc_scope="single_BSP_epoch_bound_timed_requests_and_polling_idle",
+        native_request_deadlines=True, clock_epoch_request_binding=True, idle_request_expiry=True,
+        ipc_request_deadline_ownership=True, ipc_deadlines=True,
+        native_clock_fault_recovery=False, power_efficient_idle=False,
+        kernel_image_pages=198, kernel_capacity_pages=208,
+        released_pages_per_probe=928, scrubbed_data_pages_per_probe=427,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries],
+        measured_subtotal_all_peer_suites_per_probe=[s["runtime_ticks"] + s["unknown_peer_ticks"] + s["ipc_ticks"]
+            + sum(sum(p["ticks"]) for p in s["ipc_pressure_rounds"]) + sum(s["ipc_reply_ticks"])
+            + sum(sum(p["ticks"]) for p in s["ipc_request_lifetimes"])
+            + sum(sum(p["ticks"]) for p in s["ipc_deadline_lifetimes"]) for s in summaries],
+        runtime_statistics_scope="measured_peer_suites_through_PKIPC5_subtotal_excludes_one_unknown_dispatch")
+    for field in ("runtime_samples", "runtime_terminal_samples", "runtime_duplicate_denials", "runtime_ticks",
+            "runtime_terminal_ticks", "runtime_failed_cleanup_ticks", "watchdog_recoveries", "watchdog_arms",
+            "watchdog_stops", "watchdog_restores", "watchdog_ticks", "peer_preemptions", "unknown_peer_ticks",
+            "unknown_recovery_dispatches", "ipc_dispatches", "ipc_preemptions", "ipc_ticks", "ipc_calls", "ipc_cr3_writes",
+            "ipc_waits", "ipc_readiness_wakes", "ipc_cancellations", "ipc_pressure_rounds", "ipc_reply_dispatches",
+            "ipc_reply_preemptions", "ipc_reply_ticks", "ipc_reply_cr3_writes", "ipc_reply_calls", "ipc_request_lifetimes",
+            "continuous_clock", "deadline_clock", "ipc_deadline_lifetimes"):
+        lane[field + "_per_probe"] = [s[field] for s in summaries]
+    lane["stages"]["USI-2"] = "partial_native_deadlines_transactional_admission_sustained_budgets_and_efficient_idle_pending"
+    roadmap["immediate_next_move"].update(title="Admit sustained user-space services transactionally, then build interactive runtime and ISO",
+        entry_evidence=["docs/native-userspace-integration-iso.md", "docs/native-request-deadlines.md", path, checkpoint,
+            "native/kernel/src/capability_ipc/deadline.rs", "native/kernel/src/user_entry/spawn.rs"],
+        exit_evidence=[
+            "transactional service bootstrap/admission retains rollback ownership on partial failure without halting unrelated tasks",
+            "sustained service budgets replace fixed lifetime call limits; interrupt-driven idle replaces bounded polling with expiry preserved",
+            "init and confined console/input, interactive shell/read-only files/two real apps, then fresh optical ISO interaction and fault containment",
+            "migrate198-page product contracts and replay exact-candidate canonical gates before main; retain three known readiness failures and full microkernel obligations"])
+    evidence = "Cycle256: PKIPC5 owns clock epochs and timed requests; queued/claimed expiry while both tasks block preserves completion and denies late replies. Two fresh76-marker boots/1033 altered-evidence controls each;443 kernel tests/688 Rust executions/76 Python oracle tests and ordinary denial pass. " + checkpoint
+    gap = "Transactional service admission, sustained budgets, interrupt-driven idle and init/console/shell/apps/ISO remain. Current idle polls HPET; live unexpected clock failure halts retaining ownership, not native recovery.198-page image requires canonical product migration; three readiness assertions and full exact-candidate replay block main. No SMP, hard-real-time deadline, side-effect rollback or production claim."
+    for phase_id in ("N13", "N14"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " Cycle256 adds bounded request deadlines, not general services. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle257(roadmap, test_count)
+
+
+def apply_cycle257(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle257-native-task-admission.md"
+    path = "tests/fixtures/cycle257-user-entry-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle256_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle256_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=257, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 257
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-task-admission.md"]
+    gate["current_candidate_audit"]["cycle"] = 257
+    gate["current_focused_source_projection"]["cycle"] = 257
+    gate["qualification_status"] = "bounded_atomic_admission_pass_service_runtime_and_canonical_gates_pending"
+    count = sum(c["tests_passed"] or 0 for c in receipt["checks"])
+    attempts = [
+        ("hostfirst", 5.547, "missing_std_vec_macro_import_fixed", "52485293300CE7CDE28644E26080B07B1A243207A157CBD8712D346E0637E1B3"),
+        ("nativefirst", 39.625, "missing_TableMemory_counter_forwarders_and_bootstrap_scheduler_argument_fixed", "85CDEEF567B775B319852C11E25E504800867E175DBED811ED58A09ED99FE224"),
+        ("nativesecond", 64.297, "RO_C080_and_text_9F9EE_exceeded_layout_reviewed201_of208_pages", "44D13637D6A87D24AFAF99FB8EFAB7D6657BF6C03B277FC497CED4A472757E4C"),
+        ("nativethird", 21.094, "runtime_entry_guard_caught_C000_updated_D000", "02C1D2D35C9A0DEE686AB5D37E77FED6D5E66196209388C7AF9E4A210FC867CE"),
+        ("nativefourth", 210.656, "nested_preparation_hit_stack_guard_split_driver_without_growing36_page_stack", "34B6E20F0FFDFCA34F8DEE375F9BFBAA96EAE69447C3CE57947C7F972523E4E8"),
+    ]
+    gate["current_closeout_regression"] = dict(cycle=257, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=count, tests_passed=count, tests_failed=0, tests_skipped=0,
+        scope="451_debug_kernel_138_user_release_57_IPC_release_24_VM_release_9_compile_fail_10_boot_exit_15_kmap",
+        additional_python_oracle_tests=78, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=378.484, log_sha256="D32CF03F1A8EBD9A4E7016DB4B12543457F21E0D0C07737C205880A5CD370090",
+        initial_attempts=[dict(attempt=a, status="fail", elapsed_seconds=e, reason=r, log_sha256=h) for a,e,r,h in attempts],
+        known_unresolved_readiness_tests=receipt["known_unresolved_readiness_tests"],
+        qualification_guest_bound_seconds=150, qualification_bound_unchanged=True,
+        kernel_task_timer_dispatch_bounds_unchanged=True,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=257, status="pass",
+        tests_run=161, tests_passed=161, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=52.457, elapsed_seconds=53.312,
+        log_sha256="CFB9BDFB95E72807E712EA5AEA161C816F401522D36A2CEC49149C6344A44015",
+        source_unchanged=True, owner_report_unchanged=True,
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=257, receipt_path=path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_CPL3_atomic_admission_rollback_retained_cleanup_retry_and_default_denial",
+        task_admission_contract="PKADMIT1", atomic_ipc_scheduler_admission=True,
+        native_admission_rollback=True, native_admission_cleanup_retry=True,
+        general_user_program_admission=False, native_clock_fault_recovery=False, power_efficient_idle=False,
+        kernel_image_pages=201, kernel_capacity_pages=208, kernel_remaining_capacity_pages=7,
+        normal_demo_boot_separated_from_qualification=False,
+        released_pages_per_probe=980, scrubbed_data_pages_per_probe=451,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries],
+        measured_subtotal_all_peer_suites_per_probe=[s["runtime_ticks"] + s["unknown_peer_ticks"] + s["ipc_ticks"]
+            + sum(sum(p["ticks"]) for p in s["ipc_pressure_rounds"]) + sum(s["ipc_reply_ticks"])
+            + sum(sum(p["ticks"]) for p in s["ipc_request_lifetimes"])
+            + sum(sum(p["ticks"]) for p in s["ipc_deadline_lifetimes"])
+            + sum(s["admission_rollback"]["ticks"]) for s in summaries],
+        runtime_statistics_scope="measured_peer_suites_through_PKADMIT1_subtotal_excludes_one_unknown_dispatch")
+    # Refresh inherited per-probe observations only from this candidate's guests.
+    for field in ("runtime_samples", "runtime_terminal_samples", "runtime_duplicate_denials", "runtime_ticks",
+            "runtime_terminal_ticks", "runtime_failed_cleanup_ticks", "watchdog_recoveries", "watchdog_arms",
+            "watchdog_stops", "watchdog_restores", "watchdog_ticks", "peer_preemptions", "unknown_peer_ticks",
+            "unknown_recovery_dispatches", "ipc_dispatches", "ipc_preemptions", "ipc_ticks", "ipc_calls", "ipc_cr3_writes",
+            "ipc_waits", "ipc_readiness_wakes", "ipc_cancellations", "ipc_pressure_rounds", "ipc_reply_dispatches",
+            "ipc_reply_preemptions", "ipc_reply_ticks", "ipc_reply_cr3_writes", "ipc_reply_calls", "ipc_request_lifetimes",
+            "continuous_clock", "deadline_clock", "ipc_deadline_lifetimes", "admission_rollback"):
+        lane[field + "_per_probe"] = [s[field] for s in summaries]
+    lane["stages"]["USI-2"] = "partial_atomic_admission_sustained_budgets_owned_service_bootstrap_and_efficient_idle_pending"
+    roadmap["immediate_next_move"].update(title="Implement sustained user-space service runtime, then interactive session and ISO",
+        entry_evidence=["docs/native-userspace-integration-iso.md", "docs/native-task-admission.md", path, checkpoint,
+            "native/kernel/src/capability_ipc/admission.rs", "native/kernel/src/user_entry/spawn.rs"],
+        exit_evidence=[
+            "sustained service budgets replace fixed lifetime syscall limits while retaining bounded per-dispatch enforcement",
+            "owned service-image and argument bootstrap binds executable policy; interrupt-driven idle preserves expiry",
+            "init and confined console/input, interactive shell/read-only files/two real apps, then fresh optical ISO interaction and fault containment",
+            "separate normal session boot from exhaustive diagnostics; resolve201_of208_page pressure without dropping qualification",
+            "migrate product contracts and replay exact-candidate canonical gates before main; retain three known readiness failures and full microkernel obligations"])
+    evidence = "Cycle257: PKADMIT1 atomically publishes IPC authority and scheduler membership; native quota failure preserves ownership, denies stale retry, quarantines failed cleanup and runs fresh task generations. Two fresh77-marker boots;451 kernel tests/704 Rust executions/78 Python oracle tests and ordinary denial pass. " + checkpoint
+    gap = "Sustained budgets, owned service-image/argument bootstrap, efficient idle and init/console/shell/apps/ISO remain. Trusted admission is not user authority, a signed loader or general supervisor. Native clock error still halts;201_of208 pages leaves7 and requires diagnostic/profile separation or reviewed capacity migration. Three readiness assertions and full canonical replay block main. No SMP or production claim."
+    for phase_id in ("N13", "N14"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " Cycle257 adds bounded atomic admission, not general services. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle258(roadmap, test_count)
+
+
+def apply_cycle258(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle258-sustained-service-dispatch.md"
+    path = "runs/native-user-entry-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle257_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle257_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=258, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 258
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-sustained-service-dispatch.md"]
+    gate["current_candidate_audit"]["cycle"] = 258
+    gate["current_focused_source_projection"]["cycle"] = 258
+    gate["qualification_status"] = "bounded_sustained_service_dispatch_pass_user_runtime_and_canonical_gates_pending"
+    count = sum(c["tests_passed"] or 0 for c in receipt["checks"])
+    attempts = [
+        ("hostcompile", 16.797, "old_forged_preemption_fixture_used_now_valid_65_calls_replaced_by_invalid_budget_report", "C9AED9A4F0F388C346ED5E37FC66DEB796E412A51BF009693F90AB83B0CB81BE"),
+        ("nativefirst", 40.125, "three_diagnostic_call_counters_still_u32_migrated_to_u64", "43C80C379E744C4D91A0FA0BB0570921BC63C42BD31E125318753CC69A7C905C"),
+        ("nativesecond", 79.297, "text_A19CE_exceeded_A1000_added_one_page_within208", "71CB95A352CF0E16A733D491A455867079FDEF10D281B9BA32F54B17A4210F49"),
+    ]
+    gate["current_closeout_regression"] = dict(cycle=258, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=count, tests_passed=count, tests_failed=0, tests_skipped=0,
+        scope="459_debug_kernel_146_user_release_57_IPC_release_24_VM_release_9_compile_fail_10_boot_exit_15_kmap",
+        additional_python_oracle_tests=81, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=369.078, log_sha256="C224EB054B881CBE1952C3A67548E8576FB8E105B0B7EAC8EF546E80383466D6",
+        initial_attempts=[dict(attempt=a, status="fail", elapsed_seconds=e, reason=r, log_sha256=h) for a,e,r,h in attempts],
+        known_unresolved_readiness_tests=receipt["known_unresolved_readiness_tests"],
+        qualification_guest_bound_seconds=150, qualification_bound_unchanged=True,
+        kernel_task_timer_dispatch_bounds_unchanged=False,
+        hardware_timer_and_capture_bounds_unchanged=True, diagnostic_call_bound_unchanged=True,
+        service_lifetime_call_limit_replaced_by_dispatch_allowance=True,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=258, status="pass",
+        tests_run=165, tests_passed=165, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=52.795, elapsed_seconds=53.641,
+        log_sha256="239AFD4549C0F663C6D43AB5027C9E1B2152748FDC5B378622E6E76B21B0AF19",
+        source_unchanged=True, owner_report_unchanged=True,
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=258, receipt_path=path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_CPL3_replenished_dispatches_completed_call_state_and_peer_fault_survival_plus_default_denial",
+        sustained_service_contract="PKSERVICE1", sustained_service_execution=True,
+        syscall_budget_terminates_only_task=False, diagnostic_lifetime_syscall_limit=64,
+        service_syscalls_per_dispatch=64, budget_yield_saves_completed_result=True,
+        service_owned_executable_policy=False, general_cpu_share_policy=False,
+        general_user_program_admission=False, native_clock_fault_recovery=False, power_efficient_idle=False,
+        kernel_image_pages=202, kernel_capacity_pages=208, kernel_remaining_capacity_pages=6,
+        normal_demo_boot_separated_from_qualification=False,
+        released_pages_per_probe=1006, scrubbed_data_pages_per_probe=463,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries],
+        measured_subtotal_all_peer_suites_per_probe=[s["runtime_ticks"] + s["unknown_peer_ticks"] + s["ipc_ticks"]
+            + sum(sum(p["ticks"]) for p in s["ipc_pressure_rounds"]) + sum(s["ipc_reply_ticks"])
+            + sum(sum(p["ticks"]) for p in s["ipc_request_lifetimes"])
+            + sum(sum(p["ticks"]) for p in s["ipc_deadline_lifetimes"])
+            + sum(s["admission_rollback"]["ticks"]) + sum(s["service_dispatch"]["ticks"]) for s in summaries],
+        runtime_statistics_scope="measured_peer_suites_through_PKSERVICE1_subtotal_excludes_one_unknown_dispatch")
+    for field in ("runtime_samples", "runtime_terminal_samples", "runtime_duplicate_denials", "runtime_ticks",
+            "runtime_terminal_ticks", "runtime_failed_cleanup_ticks", "watchdog_recoveries", "watchdog_arms",
+            "watchdog_stops", "watchdog_restores", "watchdog_ticks", "peer_preemptions", "unknown_peer_ticks",
+            "unknown_recovery_dispatches", "ipc_dispatches", "ipc_preemptions", "ipc_ticks", "ipc_calls", "ipc_cr3_writes",
+            "ipc_waits", "ipc_readiness_wakes", "ipc_cancellations", "ipc_pressure_rounds", "ipc_reply_dispatches",
+            "ipc_reply_preemptions", "ipc_reply_ticks", "ipc_reply_cr3_writes", "ipc_reply_calls", "ipc_request_lifetimes",
+            "continuous_clock", "deadline_clock", "ipc_deadline_lifetimes", "admission_rollback", "service_dispatch"):
+        lane[field + "_per_probe"] = [s[field] for s in summaries]
+    lane["stages"]["USI-2"] = "partial_sustained_dispatch_owned_service_bootstrap_efficient_idle_and_general_resource_policy_pending"
+    roadmap["immediate_next_move"].update(title="Build owned user-space service bootstrap and init, then interactive session and ISO",
+        entry_evidence=["docs/native-userspace-integration-iso.md", "docs/native-sustained-service-dispatch.md",
+            path, checkpoint, "native/kernel/src/user_entry/task.rs", "native/kernel/src/arch/x86_64/user_slice.rs"],
+        exit_evidence=[
+            "separate normal service boot from exhaustive diagnostics and bind owned executable/argument policy",
+            "actual init and confined console/input services use bounded dispatch, IPC ownership and restartable cleanup",
+            "interrupt-driven idle preserves request expiry; general resource policy and native clock-fault recovery remain explicit",
+            "interactive shell/read-only files/two real apps, fresh optical ISO interaction and sustained-session fault containment",
+            "resolve202_of208_page pressure without removing tests; migrate product contracts and replay exact-candidate canonical gates before main"])
+    evidence = "Cycle258: PKSERVICE1 bounds each service dispatch to64 syscall attempts without a64-call lifetime kill. Native tasks preserve completed copy results across12 budget yields; one faults after256 calls and its peer continues to513 calls/Exit100. Two fresh78-marker boots;459 kernel tests/720 Rust executions/81 Python oracle tests and ordinary denial pass. " + checkpoint
+    gap = "Owned executable/argument service bootstrap, init/console/input, efficient idle and shell/files/apps/ISO remain. Dispatch-based allowance is not full CPU-share policy, priority starvation freedom or indefinite uptime. Native clock error still halts;202_of208 pages leaves6 and requires diagnostic/profile separation or reviewed migration. Three readiness assertions and full canonical replay block main. No SMP or production claim."
+    for phase_id in ("N13", "N14"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " Cycle258 adds sustained dispatch, not complete services. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1236)
-    parser.add_argument("--status-date", default="2026-10-07")
+    parser.add_argument("--test-count", type=int, default=1320)
+    parser.add_argument("--status-date", default="2026-10-08")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
     args.out.write_text(json.dumps(roadmap, indent=2, ensure_ascii=True) + "\n", encoding="utf-8", newline="\n")

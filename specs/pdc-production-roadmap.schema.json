@@ -49,10 +49,10 @@
         "inspect_live_pooleglyph_each_turn": {"const": true},
         "verify_master_checklist_coverage_each_turn": {"const": true},
         "new_work_must_be_flagged": {"const": true},
-        "last_updated_cycle": {"const": 233},
-        "selected_move_id": {"const": "N5-FAT32-PARENT-001"},
-        "immediate_next_move_id": {"const": "N0-GOVERNANCE-CUSTODY-001"},
-        "owner_independent_next_move_id": {"const": "N5-FAT32-PARENT-001"},
+        "last_updated_cycle": {"const": 258},
+        "selected_move_id": {"const": "N13-CAPABILITY-IPC-001"},
+        "immediate_next_move_id": {"const": "N13-CAPABILITY-IPC-001"},
+        "owner_independent_next_move_id": {"const": "N13-CAPABILITY-IPC-001"},
         "required_records": {"type": "array", "minItems": 7, "items": {"type": "string"}, "uniqueItems": true},
         "flag_classes": {"type": "array", "minItems": 8, "items": {"type": "string"}, "uniqueItems": true}
       }
@@ -92,9 +92,9 @@
       "properties": {
         "total": {"const": 40},
         "complete": {"const": 0},
-        "partial": {"const": 19},
+        "partial": {"const": 21},
         "blocked": {"const": 1},
-        "not_started": {"const": 20},
+        "not_started": {"const": 18},
         "subphase_total": {"const": 301}
       }
     },
@@ -136,8 +136,8 @@
     },
     "implementation_flags": {
       "type": "array",
-      "minItems": 96,
-      "maxItems": 96,
+      "minItems": 97,
+      "maxItems": 97,
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -168,12 +168,12 @@
       "additionalProperties": false,
       "required": ["id", "phase_ids", "title", "entry_evidence", "exit_evidence", "blocked"],
       "properties": {
-        "id": {"const": "N0-GOVERNANCE-CUSTODY-001"},
+        "id": {"const": "N13-CAPABILITY-IPC-001"},
         "phase_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
         "title": {"type": "string"},
         "entry_evidence": {"type": "array", "minItems": 1, "items": {"type": "string"}},
         "exit_evidence": {"type": "array", "minItems": 1, "items": {"type": "string"}},
-        "blocked": {"const": true}
+        "blocked": {"const": false}
       }
     },
     "claim_boundaries": {"type": "array", "minItems": 6, "items": {"type": "string"}}

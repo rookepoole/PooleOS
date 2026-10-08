@@ -84,6 +84,8 @@ runs/*
 !runs/native-kernel-atomics-readiness.json
 !runs/native-kernel-locks-readiness.json
 !runs/native-kernel-reclamation-core-readiness.json
+!runs/native-user-entry-readiness.json
+!runs/native-user-entry-gate-projection.json
 !runs/native_initial_system_readiness.json
 !runs/native_microcode_readiness.json
 !runs/native_recovery_readiness.json

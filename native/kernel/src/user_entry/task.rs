@@ -1,0 +1,1160 @@
+//! Owned single-BSP task termination. TaskId is scoped identity, not capability authority.
+#![forbid(unsafe_code)]
+
+use super::{
+    ImageAdmission,
+    prepared::{
+        DetachedImage,
+        cpu::{Cpu, CpuImage},
+    },
+    privilege, syscall,
+};
+use crate::{
+    physical_memory::PhysicalMemoryManager, scheduler_smp::TaskId, virtual_memory::TableMemory,
+};
+
+pub const CONTRACT_ID: &str = "PKUSER8";
+pub const CALLS_PER_DISPATCH: u8 = 64;
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Fault {
+    pub vector: u64,
+    pub error: u64,
+    pub instruction: u64,
+    pub address: u64,
+}
+impl Fault {
+    fn valid(self) -> bool {
+        match self.vector {
+            0 | 1 | 3 | 4 | 5 | 6 | 16 | 17 | 19 => self.error == 0 && self.address == 0,
+            11 | 12 | 13 => self.error <= 0xffff && self.address == 0,
+            // Reserved page-table bits or unsupported fault classes are kernel failures.
+            14 => self.error & 4 != 0 && self.error & !0x17 == 0,
+            _ => false,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Reason {
+    Exit(u32),
+    Fault(Fault),
+    InvalidReturn {
+        vector: u64,
+        violation: syscall::ReturnViolation,
+    },
+    Cancelled,
+    CallLimit,
+    CallCounterExhausted,
+    Watchdog,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Outcome {
+    pub id: TaskId,
+    pub root: u64,
+    pub reason: Reason,
+    pub syscalls: u64,
+}
+impl Outcome {
+    pub(crate) fn validate(self, id: TaskId, root: u64) -> Result<(), privilege::Error> {
+        if self.id != id
+            || self.root != root
+            || match self.reason {
+                Reason::Exit(_) => self.syscalls == 0,
+                Reason::Fault(f) => !f.valid(),
+                Reason::InvalidReturn { vector, .. } => !matches!(vector, 64 | syscall::VECTOR),
+                Reason::Cancelled => false,
+                Reason::CallLimit => self.syscalls != 64,
+                Reason::CallCounterExhausted => self.syscalls != u64::MAX,
+                Reason::Watchdog => false,
+            }
+        {
+            return Err(privilege::Error::Hardware);
+        }
+        Ok(())
+    }
+}
+
+/// Pure trap lifecycle. No transition out of a terminal outcome exists.
+pub struct Run {
+    image: ImageAdmission,
+    id: TaskId,
+    calls: u64,
+    sustained: bool,
+    dispatch_open: bool,
+    dispatch_calls: u8,
+    outcome: Option<Outcome>,
+}
+impl Run {
+    pub fn new(image: ImageAdmission, id: TaskId) -> Result<Self, privilege::Error> {
+        TaskId::new(id.slot, id.generation).map_err(|_| privilege::Error::State)?;
+        if image.root_physical == 0 || image.root_physical & 4095 != 0 || image.root_generation == 0
+        {
+            return Err(privilege::Error::Context);
+        }
+        Ok(Self {
+            image,
+            id,
+            calls: 0,
+            sustained: false,
+            dispatch_open: false,
+            dispatch_calls: 0,
+            outcome: None,
+        })
+    }
+    /// Long-lived service policy. Only the supervisor may open/close dispatches.
+    pub fn sustained(image: ImageAdmission, id: TaskId) -> Result<Self, privilege::Error> {
+        let mut run = Self::new(image, id)?;
+        run.sustained = true;
+        Ok(run)
+    }
+    pub const fn is_sustained(&self) -> bool {
+        self.sustained
+    }
+    pub fn begin_dispatch(&mut self) -> Result<(), privilege::Error> {
+        if !self.sustained || self.dispatch_open || self.outcome.is_some() {
+            return Err(privilege::Error::State);
+        }
+        self.dispatch_calls = 0;
+        self.dispatch_open = true;
+        Ok(())
+    }
+    pub fn end_dispatch(&mut self) -> Result<(), privilege::Error> {
+        if !self.sustained || !self.dispatch_open || self.outcome.is_some() {
+            return Err(privilege::Error::State);
+        }
+        self.dispatch_open = false;
+        Ok(())
+    }
+    pub const fn budget_exhausted(&self) -> bool {
+        self.sustained && self.dispatch_open && self.dispatch_calls == CALLS_PER_DISPATCH
+    }
+    pub fn call(&mut self, trap: &privilege::Trap) -> Result<bool, privilege::Error> {
+        if !self.resume(trap, syscall::VECTOR)? {
+            return Ok(false);
+        }
+        if self.sustained && (!self.dispatch_open || self.budget_exhausted()) {
+            return Err(privilege::Error::State);
+        }
+        if !self.sustained && self.calls == 64 {
+            self.finish(Reason::CallLimit)?;
+            return Ok(false);
+        }
+        if self.calls == u64::MAX {
+            self.finish(Reason::CallCounterExhausted)?;
+            return Ok(false);
+        }
+        self.calls += 1;
+        if self.sustained {
+            self.dispatch_calls += 1;
+        }
+        Ok(true)
+    }
+    pub fn preempt(&mut self, trap: &privilege::Trap) -> Result<bool, privilege::Error> {
+        self.resume(trap, 64)
+    }
+    fn resume(&mut self, trap: &privilege::Trap, vector: u64) -> Result<bool, privilege::Error> {
+        if self.outcome.is_some() || (self.sustained && !self.dispatch_open) {
+            return Err(privilege::Error::State);
+        }
+        if trap.vector != vector || trap.error != 0 {
+            return Err(privilege::Error::Frame);
+        }
+        if let Some(violation) = syscall::return_violation(self.image, trap)? {
+            self.finish(Reason::InvalidReturn { vector, violation })?;
+            return Ok(false);
+        }
+        Ok(true)
+    }
+    pub fn exit(&mut self, code: u32) -> Result<Outcome, privilege::Error> {
+        if self.calls == 0 {
+            return Err(privilege::Error::State);
+        }
+        self.finish(Reason::Exit(code))
+    }
+    pub fn watchdog(&mut self, trap: &privilege::Trap) -> Result<Outcome, privilege::Error> {
+        if trap.vector != u64::from(super::timer::watchdog::VECTOR) || trap.error != 0 {
+            return Err(privilege::Error::Frame);
+        }
+        syscall::entry_frame(self.image, trap)?;
+        self.finish(Reason::Watchdog)
+    }
+    pub fn fault(&mut self, t: &privilege::Trap) -> Result<Outcome, privilege::Error> {
+        syscall::entry_frame(self.image, t)?;
+        let fault = Fault {
+            vector: t.vector,
+            error: t.error,
+            instruction: t.rip,
+            address: if t.vector == 14 { t.cr2 } else { 0 },
+        };
+        if !fault.valid() {
+            return Err(privilege::Error::Fault);
+        }
+        // Faulting user RIP/RSP may be invalid. Never IRET back to this frame.
+        self.finish(Reason::Fault(fault))
+    }
+    fn finish(&mut self, reason: Reason) -> Result<Outcome, privilege::Error> {
+        if self.outcome.is_some() || (self.sustained && !self.dispatch_open) {
+            return Err(privilege::Error::State);
+        }
+        let outcome = Outcome {
+            id: self.id,
+            root: self.image.root_physical,
+            reason,
+            syscalls: self.calls,
+        };
+        self.outcome = Some(outcome);
+        Ok(outcome)
+    }
+    pub const fn outcome(&self) -> Option<Outcome> {
+        self.outcome
+    }
+    pub const fn calls(&self) -> u64 {
+        self.calls
+    }
+    pub fn ipc_caller(
+        &self,
+        trap: &privilege::Trap,
+    ) -> Result<crate::capability_ipc::Caller, privilege::Error> {
+        syscall::frame(self.image, trap)?;
+        if self.calls == 0
+            || self.outcome.is_some()
+            || (self.sustained && (!self.dispatch_open || self.dispatch_calls == 0))
+        {
+            return Err(privilege::Error::State);
+        }
+        Ok(crate::capability_ipc::Caller::new(self.id, self.image))
+    }
+    pub fn matches(&self, image: ImageAdmission, id: TaskId) -> bool {
+        self.image == image && self.id == id && self.outcome.is_none()
+    }
+    pub fn admission(&self) -> ImageAdmission {
+        self.image
+    }
+}
+
+/// Trusted architectural adapter. Errors may follow CPU effects. Quiescence
+/// revokes all entry/timer/descriptor references before returning at CPL0/IF0.
+pub trait Driver {
+    fn execute(&mut self, image: ImageAdmission, id: TaskId) -> Result<Outcome, privilege::Error>;
+    fn quiesce(&mut self, root: u64) -> Result<(), privilege::Error>;
+    /// Revoke kernel-owned authority before retiring the root. Retry must be safe.
+    fn revoke(&mut self, id: TaskId) -> Result<(), privilege::Error>;
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Event {
+    Waiting {
+        ticket: crate::capability_ipc::wait::Ticket,
+        syscalls: u64,
+    },
+    /// A completed syscall consumed the dispatch allowance; its result is saved.
+    BudgetYield {
+        syscalls: u64,
+    },
+    Preempted {
+        ticks: u64,
+        syscalls: u64,
+        progress: u64,
+    },
+    Terminated(Outcome),
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Slice {
+    pub id: TaskId,
+    pub root: u64,
+    pub ticks: u64,
+    pub event: Event,
+}
+impl Slice {
+    pub(crate) fn validate(self, id: TaskId, root: u64) -> Result<(), privilege::Error> {
+        if self.id != id || self.root != root {
+            return Err(privilege::Error::Hardware);
+        }
+        match self.event {
+            Event::Preempted { ticks, .. } if ticks > 0 && ticks == self.ticks => Ok(()),
+            Event::BudgetYield { syscalls }
+                if self.ticks > 0 && syscalls >= u64::from(CALLS_PER_DISPATCH) =>
+            {
+                Ok(())
+            }
+            Event::Terminated(o) => o.validate(id, root),
+            Event::Waiting { ticket, syscalls } if ticket.matches(id, root) && syscalls > 0 => {
+                Ok(())
+            }
+            _ => Err(privilege::Error::Hardware),
+        }
+    }
+}
+/// A quantum returns only after saving its private user state. The same owner
+/// must quiesce devices and entry references before the CPU can be suspended.
+pub trait SliceDriver: Driver {
+    /// Failure must leave saved context unchanged. Only a notified wait can resume.
+    fn complete_wait(
+        &mut self,
+        id: TaskId,
+        ticket: crate::capability_ipc::wait::Ticket,
+        status: syscall::Status,
+    ) -> Result<(), privilege::Error>;
+    fn execute_slice(
+        &mut self,
+        image: ImageAdmission,
+        id: TaskId,
+    ) -> Result<Slice, privilege::Error>;
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum State {
+    Prepared,
+    Active,
+    Suspended,
+    Waiting,
+    Quarantined,
+    Terminated,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Error {
+    Identity,
+    Exhausted,
+    Occupied,
+    Missing,
+    State,
+    Cpu(super::prepared::cpu::Error),
+    Accounting(crate::scheduler::Error),
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct Runtime {
+    pub charged_slices: u32,
+    pub charged_ticks: u64,
+    pub pending_ticks: Option<u64>,
+    pub unknown: bool,
+    /// Settled unknown dispatches. charged_ticks remains an incomplete subtotal.
+    pub unmeasured_slices: u32,
+}
+
+struct Owned<H: Cpu, D: Driver> {
+    id: TaskId,
+    cpu: Option<CpuImage<H>>,
+    driver: D,
+    state: State,
+    outcome: Option<Outcome>,
+    last_slice: Option<Slice>,
+    pending_charge: Option<Slice>,
+    runtime: Runtime,
+}
+
+/// A persistent slot owns the exact CPU image and its cleanup adapter. It
+/// increments generations only on successful insertion and never wraps. Slot
+/// identifiers are namespace-local diagnostics, not transferable authority.
+/// Reaping detaches resources; the returned owner must still scrub/release them.
+/// Dropping the slot keeps PMM retention rather than inventing quiescence.
+///
+/// ```compile_fail
+/// use poolekernel::user_entry::{task::{Slot, Driver}, prepared::cpu::Cpu};
+/// fn duplicate<H: Cpu,D: Driver>(s: &Slot<H,D>) -> Slot<H,D> { s.clone() }
+/// ```
+/// ```compile_fail
+/// use poolekernel::user_entry::{task::{Slot, Driver}, prepared::cpu::Cpu};
+/// fn bypass<H: Cpu,D: Driver>(s: &mut Slot<H,D>) { s.owned.take(); }
+/// ```
+pub struct Slot<H: Cpu, D: Driver> {
+    slot: u8,
+    generation: u32,
+    owned: Option<Owned<H, D>>,
+}
+impl<H: Cpu, D: Driver> Slot<H, D> {
+    pub fn new(slot: u8) -> Result<Self, Error> {
+        TaskId::new(slot, 1).map_err(|_| Error::Identity)?;
+        Ok(Self {
+            slot,
+            generation: 0,
+            owned: None,
+        })
+    }
+    fn next_id(&self) -> Result<TaskId, Error> {
+        let generation = self.generation.checked_add(1).ok_or(Error::Exhausted)?;
+        TaskId::new(self.slot, generation).map_err(|_| Error::Identity)
+    }
+    #[allow(clippy::result_large_err)]
+    pub fn insert(
+        &mut self,
+        cpu: CpuImage<H>,
+        driver: D,
+    ) -> Result<TaskId, (Error, CpuImage<H>, D)> {
+        let admit = if self.owned.is_some() {
+            Err(Error::Occupied)
+        } else if cpu.state() != super::prepared::cpu::State::Inactive {
+            Err(Error::State)
+        } else {
+            self.next_id()
+        };
+        let id = match admit {
+            Ok(id) => id,
+            Err(e) => return Err((e, cpu, driver)),
+        };
+        self.generation = id.generation;
+        self.owned = Some(Owned {
+            id,
+            cpu: Some(cpu),
+            driver,
+            state: State::Prepared,
+            outcome: None,
+            last_slice: None,
+            pending_charge: None,
+            runtime: Runtime::default(),
+        });
+        Ok(id)
+    }
+    fn owned(&self, id: TaskId) -> Result<&Owned<H, D>, Error> {
+        let task = self.owned.as_ref().ok_or(Error::Missing)?;
+        if task.id != id {
+            return Err(Error::Identity);
+        }
+        Ok(task)
+    }
+    fn owned_mut(&mut self, id: TaskId) -> Result<&mut Owned<H, D>, Error> {
+        self.owned(id)?;
+        self.owned.as_mut().ok_or(Error::Missing)
+    }
+    pub fn state(&self, id: TaskId) -> Result<State, Error> {
+        Ok(self.owned(id)?.state)
+    }
+    pub fn runtime(&self, id: TaskId) -> Result<Runtime, Error> {
+        Ok(self.owned(id)?.runtime)
+    }
+    pub fn outcome(&self, id: TaskId) -> Result<Outcome, Error> {
+        let task = self.owned(id)?;
+        if task.state != State::Terminated {
+            return Err(Error::State);
+        }
+        task.outcome.ok_or(Error::State)
+    }
+    pub fn activate<M: TableMemory>(
+        &mut self,
+        id: TaskId,
+        manager: &PhysicalMemoryManager,
+        memory: &mut M,
+    ) -> Result<(), Error> {
+        let task = self.owned_mut(id)?;
+        if !matches!(task.state, State::Prepared | State::Suspended)
+            || task.pending_charge.is_some()
+            || task.runtime.unknown
+        {
+            return Err(Error::State);
+        }
+        task.state = State::Quarantined;
+        task.cpu
+            .as_mut()
+            .ok_or(Error::State)?
+            .activate(manager, memory)
+            .map_err(Error::Cpu)?;
+        task.state = State::Active;
+        Ok(())
+    }
+    pub fn run(&mut self, id: TaskId) -> Result<Outcome, Error> {
+        let task = self.owned_mut(id)?;
+        if task.state != State::Active {
+            return Err(Error::State);
+        }
+        task.state = State::Quarantined;
+        let outcome = task
+            .cpu
+            .as_mut()
+            .ok_or(Error::State)?
+            .exercise_task(id, &mut task.driver)
+            .map_err(Error::Cpu)?;
+        task.outcome = Some(outcome);
+        task.state = State::Terminated;
+        Ok(outcome)
+    }
+    pub fn reap<M: TableMemory>(
+        &mut self,
+        id: TaskId,
+        manager: &mut PhysicalMemoryManager,
+        memory: &mut M,
+    ) -> Result<(DetachedImage, Outcome), Error> {
+        let outcome = self.outcome(id)?;
+        let parts = self.detach(id, manager, memory)?;
+        Ok((parts, outcome))
+    }
+    /// Cancel before entry, or recover a failed architectural operation. This
+    /// never fabricates an application exit status or restarts the task.
+    pub fn abandon<M: TableMemory>(
+        &mut self,
+        id: TaskId,
+        manager: &mut PhysicalMemoryManager,
+        memory: &mut M,
+    ) -> Result<DetachedImage, Error> {
+        let task = self.owned_mut(id)?;
+        if !matches!(task.state, State::Prepared | State::Quarantined)
+            || task.pending_charge.is_some()
+            || task.runtime.unknown
+        {
+            return Err(Error::State);
+        }
+        task.state = State::Quarantined;
+        task.cpu
+            .as_mut()
+            .ok_or(Error::State)?
+            .quiesce_task(&mut task.driver)
+            .map_err(Error::Cpu)?;
+        self.detach(id, manager, memory)
+    }
+    fn detach<M: TableMemory>(
+        &mut self,
+        id: TaskId,
+        manager: &mut PhysicalMemoryManager,
+        memory: &mut M,
+    ) -> Result<DetachedImage, Error> {
+        let task = self.owned_mut(id)?;
+        if task.pending_charge.is_some() || task.runtime.unknown {
+            return Err(Error::State);
+        }
+        task.driver
+            .revoke(id)
+            .map_err(|e| Error::Cpu(super::prepared::cpu::Error::User(e)))?;
+        let cpu = task.cpu.take().ok_or(Error::State)?;
+        match cpu.retire(manager, memory) {
+            Ok(parts) => {
+                self.owned = None;
+                Ok(parts)
+            }
+            Err((e, cpu)) => {
+                task.cpu = Some(cpu);
+                Err(Error::Cpu(e))
+            }
+        }
+    }
+}
+
+impl<H: Cpu, D: SliceDriver> Slot<H, D> {
+    /// Terminate a charged, quiescent IPC waiter without resuming its saved frame.
+    /// The supervisor must reap (revoking the wait) and tear down the scheduler ID.
+    pub fn cancel_waiting(
+        &mut self,
+        id: TaskId,
+        ticket: crate::capability_ipc::wait::Ticket,
+    ) -> Result<Outcome, Error> {
+        let task = self.owned_mut(id)?;
+        if task.state != State::Waiting || task.pending_charge.is_some() || task.runtime.unknown {
+            return Err(Error::State);
+        }
+        let slice = task.last_slice.ok_or(Error::State)?;
+        let Event::Waiting {
+            ticket: expected,
+            syscalls,
+        } = slice.event
+        else {
+            return Err(Error::State);
+        };
+        if expected != ticket {
+            return Err(Error::Identity);
+        }
+        let outcome = Outcome {
+            id,
+            root: slice.root,
+            reason: Reason::Cancelled,
+            syscalls,
+        };
+        task.outcome = Some(outcome);
+        task.state = State::Terminated;
+        Ok(outcome)
+    }
+    /// Called only by the exclusive IPC owner after validating its notification.
+    pub fn complete_wait(
+        &mut self,
+        id: TaskId,
+        ticket: crate::capability_ipc::wait::Ticket,
+        status: syscall::Status,
+    ) -> Result<(), Error> {
+        let task = self.owned_mut(id)?;
+        if task.state != State::Waiting || task.pending_charge.is_some() || task.runtime.unknown {
+            return Err(Error::State);
+        }
+        if !matches!(task.last_slice.map(|s| s.event), Some(Event::Waiting { ticket: expected, .. }) if expected == ticket)
+        {
+            return Err(Error::Identity);
+        }
+        task.driver
+            .complete_wait(id, ticket, status)
+            .map_err(|e| Error::Cpu(super::prepared::cpu::Error::User(e)))?;
+        task.state = State::Suspended;
+        Ok(())
+    }
+    /// Settle retained measurement, including after failed cleanup. No user
+    /// outcome is invented. The exclusive slot consumes the charge exactly once.
+    pub fn account_slice(
+        &mut self,
+        id: TaskId,
+        scheduler: &mut crate::scheduler::Scheduler,
+        cpu: crate::scheduler::CpuId,
+    ) -> Result<u64, Error> {
+        let task = self.owned_mut(id)?;
+        let slice = task.pending_charge.ok_or(Error::State)?;
+        if task.runtime.unknown || task.runtime.unmeasured_slices != 0 {
+            return Err(Error::State);
+        }
+        let ordinal = task
+            .runtime
+            .charged_slices
+            .checked_add(1)
+            .ok_or(Error::Exhausted)?;
+        let total = task
+            .runtime
+            .charged_ticks
+            .checked_add(slice.ticks)
+            .ok_or(Error::Exhausted)?;
+        let scheduled =
+            crate::scheduler::TaskId::new(id.slot, id.generation).map_err(Error::Accounting)?;
+        scheduler
+            .account_dispatch(
+                cpu,
+                scheduled,
+                ordinal,
+                task.runtime.charged_ticks,
+                slice.ticks,
+            )
+            .map_err(Error::Accounting)?;
+        task.runtime = Runtime {
+            charged_slices: ordinal,
+            charged_ticks: total,
+            pending_ticks: None,
+            unknown: false,
+            unmeasured_slices: 0,
+        };
+        task.pending_charge = None;
+        Ok(slice.ticks)
+    }
+
+    /// Record missing accounting before termination-only recovery. This does
+    /// not assert quiescence, free resources, or fabricate an application result.
+    pub fn account_unknown(
+        &mut self,
+        id: TaskId,
+        scheduler: &mut crate::scheduler::Scheduler,
+        cpu: crate::scheduler::CpuId,
+    ) -> Result<(), Error> {
+        let task = self.owned_mut(id)?;
+        if task.state != State::Quarantined
+            || !task.runtime.unknown
+            || task.pending_charge.is_some()
+            || task.runtime.pending_ticks.is_some()
+            || task.runtime.unmeasured_slices != 0
+        {
+            return Err(Error::State);
+        }
+        let ordinal = task
+            .runtime
+            .charged_slices
+            .checked_add(1)
+            .ok_or(Error::Exhausted)?;
+        let scheduled =
+            crate::scheduler::TaskId::new(id.slot, id.generation).map_err(Error::Accounting)?;
+        scheduler
+            .record_unmeasured_dispatch(cpu, scheduled, ordinal, task.runtime.charged_ticks)
+            .map_err(Error::Accounting)?;
+        task.runtime.unknown = false;
+        task.runtime.unmeasured_slices = 1;
+        Ok(())
+    }
+
+    pub fn run_slice(&mut self, id: TaskId) -> Result<Slice, Error> {
+        let task = self.owned_mut(id)?;
+        if task.state != State::Active || task.pending_charge.is_some() || task.runtime.unknown {
+            return Err(Error::State);
+        }
+        task.state = State::Quarantined;
+        task.runtime.unknown = true;
+        let cpu = task.cpu.as_mut().ok_or(Error::State)?;
+        let result = cpu.exercise_slice(id, &mut task.driver, &mut task.pending_charge);
+        if let Some(slice) = task.pending_charge {
+            task.runtime.pending_ticks = Some(slice.ticks);
+            task.runtime.unknown = false;
+        }
+        let slice = result.map_err(Error::Cpu)?;
+        match slice.event {
+            Event::Waiting { .. } => {
+                cpu.suspend().map_err(Error::Cpu)?;
+                task.state = State::Waiting;
+            }
+            Event::Preempted { .. } | Event::BudgetYield { .. } => {
+                cpu.suspend().map_err(Error::Cpu)?;
+                task.state = State::Suspended;
+            }
+            Event::Terminated(outcome) => {
+                task.outcome = Some(outcome);
+                task.state = State::Terminated;
+            }
+        }
+        task.last_slice = Some(slice);
+        Ok(slice)
+    }
+
+    /// Kernel-side cancellation of an already quiescent suspended task. TaskId
+    /// is identity only; a future user request still requires capability checks.
+    pub fn cancel_suspended(&mut self, id: TaskId) -> Result<Outcome, Error> {
+        let task = self.owned_mut(id)?;
+        if task.state != State::Suspended || task.pending_charge.is_some() || task.runtime.unknown {
+            return Err(Error::State);
+        }
+        let slice = task.last_slice.ok_or(Error::State)?;
+        let syscalls = match slice.event {
+            Event::Preempted { syscalls, .. } | Event::BudgetYield { syscalls } => syscalls,
+            _ => return Err(Error::State),
+        };
+        let outcome = Outcome {
+            id,
+            root: slice.root,
+            reason: Reason::Cancelled,
+            syscalls,
+        };
+        task.outcome = Some(outcome);
+        task.state = State::Terminated;
+        Ok(outcome)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::{INITIAL_RFLAGS, InitialReturnFrame};
+    use super::*;
+    fn image() -> ImageAdmission {
+        ImageAdmission {
+            root_physical: 0x100000,
+            root_generation: 1,
+            code_physical: 0x200000,
+            stack_physical: 0x210000,
+            initial_frame: InitialReturnFrame {
+                rip: 0x40000010,
+                cs: 0x33,
+                rsp: 0x40004000,
+                ss: 0x2b,
+                rflags: INITIAL_RFLAGS,
+            },
+        }
+    }
+    fn trap() -> privilege::Trap {
+        let f = image().initial_frame;
+        privilege::Trap {
+            root: image().root_physical,
+            vector: syscall::VECTOR,
+            error: 0,
+            rip: f.rip,
+            cs: f.cs,
+            flags: f.rflags,
+            rsp: f.rsp,
+            ss: f.ss,
+            cr2: 0,
+            handler_stack: super::super::prepared::STACK_TOP - privilege::FRAME_BYTES,
+            depth: 1,
+            registers: [0; 15],
+        }
+    }
+    fn run() -> Run {
+        Run::new(image(), TaskId::new(0, 1).unwrap()).unwrap()
+    }
+    #[test]
+    fn ipc_caller_requires_live_authenticated_run_not_register_supplied_identity() {
+        let mut r = run();
+        assert!(r.ipc_caller(&trap()).is_err());
+        r.call(&trap()).unwrap();
+        let c = r.ipc_caller(&trap()).unwrap();
+        let mut t = trap();
+        t.registers.fill(u64::MAX);
+        assert_eq!(r.ipc_caller(&t), Ok(c));
+        t.root += 4096;
+        assert!(r.ipc_caller(&t).is_err());
+        r.exit(0).unwrap();
+        assert!(r.ipc_caller(&trap()).is_err());
+    }
+    #[test]
+    fn watchdog_terminates_only_an_authenticated_user_frame_without_resuming_it() {
+        let mut t = trap();
+        t.vector = 65;
+        t.rsp = u64::MAX;
+        t.rip = 0x8000_0000_0000;
+        let mut r = run();
+        let outcome = r.watchdog(&t).unwrap();
+        assert_eq!(outcome.reason, Reason::Watchdog);
+        assert_eq!(outcome.syscalls, 0);
+        outcome.validate(outcome.id, outcome.root).unwrap();
+        assert!(r.watchdog(&t).is_err());
+        assert!(r.call(&trap()).is_err());
+        for case in 0..7 {
+            let mut invalid = t;
+            match case {
+                0 => invalid.root += 4096,
+                1 => invalid.depth = 2,
+                2 => invalid.cs = 8,
+                3 => invalid.ss = 16,
+                4 => invalid.handler_stack -= 8,
+                5 => invalid.error = 1,
+                _ => invalid.vector = 64,
+            }
+            let mut r = run();
+            assert!(r.watchdog(&invalid).is_err());
+            assert_eq!(r.outcome(), None);
+        }
+    }
+    #[test]
+    fn malformed_syscall_state_terminates_only_the_owner() {
+        for case in 0..6 {
+            let mut t = trap();
+            match case {
+                0 => t.rsp = 0xffff_ffff_8000_0000,
+                1 => t.rsp = 0x8000_0000_0000,
+                2 => t.rip = (t.rip & !4095) + 4096,
+                3 => t.flags |= 1 << 14,
+                4 => t.flags |= 1 << 18,
+                _ => t.flags |= 1 << 8,
+            }
+            let mut r = run();
+            assert_eq!(r.call(&t), Ok(false), "case {case}");
+            assert!(r.outcome().is_some());
+            assert!(r.call(&trap()).is_err());
+            assert_eq!(r.calls(), 0);
+            let expected = match case {
+                0 | 1 => syscall::ReturnViolation::Stack,
+                2 => syscall::ReturnViolation::Instruction,
+                _ => syscall::ReturnViolation::Flags,
+            };
+            let outcome = r.outcome().unwrap();
+            assert_eq!(
+                outcome.reason,
+                Reason::InvalidReturn {
+                    vector: syscall::VECTOR,
+                    violation: expected
+                }
+            );
+            outcome.validate(outcome.id, outcome.root).unwrap();
+            let mut peer = run();
+            assert_eq!(peer.call(&trap()), Ok(true));
+            assert_eq!(peer.exit(84).unwrap().reason, Reason::Exit(84));
+        }
+    }
+    #[test]
+    fn malformed_preempt_state_never_becomes_a_resumable_context() {
+        for case in 0..5 {
+            let mut t = trap();
+            t.vector = 64;
+            let mut r = run();
+            assert_eq!(r.preempt(&t), Ok(true));
+            match case {
+                0 => t.rsp = u64::MAX,
+                1 => t.rsp = image().initial_frame.rsp - 4097,
+                2 => t.rip = 0x8000_0000_0000,
+                3 => t.flags |= 1 << 18,
+                _ => t.flags |= 1 << 14,
+            }
+            assert_eq!(r.preempt(&t), Ok(false));
+            let o = r.outcome().unwrap();
+            o.validate(o.id, o.root).unwrap();
+            assert!(matches!(o.reason, Reason::InvalidReturn { vector: 64, .. }));
+            assert!(r.preempt(&t).is_err());
+            assert!(r.exit(0).is_err());
+            assert_eq!(r.calls(), 0);
+        }
+    }
+    #[test]
+    fn bad_user_state_cannot_mask_untrusted_entry_envelope_or_event() {
+        for vector in [64, syscall::VECTOR] {
+            for case in 0..7 {
+                let mut t = trap();
+                t.vector = vector;
+                t.rsp = u64::MAX;
+                t.flags |= 1 << 18;
+                match case {
+                    0 => t.root += 4096,
+                    1 => t.depth = 2,
+                    2 => t.cs = 8,
+                    3 => t.ss = 16,
+                    4 => t.handler_stack -= 8,
+                    5 => t.error = 1,
+                    _ => t.vector = 8,
+                }
+                let mut r = run();
+                assert!(
+                    if vector == 64 {
+                        r.preempt(&t)
+                    } else {
+                        r.call(&t)
+                    }
+                    .is_err()
+                );
+                assert_eq!(r.outcome(), None);
+                assert_eq!(r.calls(), 0);
+            }
+        }
+    }
+    #[test]
+    fn ordinary_exception_table_rejects_system_events_and_forged_errors() {
+        for vector in 0..32 {
+            let mut t = trap();
+            t.vector = vector;
+            if vector == 14 {
+                t.error = 4;
+            }
+            let admitted = matches!(
+                vector,
+                0 | 1 | 3 | 4 | 5 | 6 | 11 | 12 | 13 | 14 | 16 | 17 | 19
+            );
+            assert_eq!(run().fault(&t).is_ok(), admitted, "vector {vector}");
+            t.error = 0x10000;
+            assert!(run().fault(&t).is_err());
+        }
+        let mut t = trap();
+        t.rsp = u64::MAX;
+        let mut r = run();
+        r.call(&t).unwrap();
+        let mut o = r.outcome().unwrap();
+        o.reason = Reason::InvalidReturn {
+            vector: 8,
+            violation: syscall::ReturnViolation::Stack,
+        };
+        assert!(o.validate(o.id, o.root).is_err());
+    }
+    #[test]
+    fn terminal_outcome_cannot_resume_or_change_and_rejected_calls_do_not_count() {
+        let mut run = run();
+        assert!(run.exit(0).is_err());
+        let mut t = trap();
+        t.root += 4096;
+        assert!(run.call(&t).is_err());
+        run.call(&trap()).unwrap();
+        let o = run.exit(42).unwrap();
+        assert_eq!((o.reason, o.syscalls), (Reason::Exit(42), 1));
+        assert!(run.call(&trap()).is_err());
+        assert!(run.exit(0).is_err());
+        t = trap();
+        t.vector = 6;
+        assert!(run.fault(&t).is_err());
+        assert_eq!(run.outcome(), Some(o));
+    }
+    #[test]
+    fn user_faults_terminate_but_kernel_reserved_or_foreign_frames_reject() {
+        for (vector, error) in [
+            (6, 0),
+            (13, 0),
+            (13, 0xffff),
+            (14, 4),
+            (14, 5),
+            (14, 6),
+            (14, 7),
+            (14, 20),
+            (14, 21),
+        ] {
+            let mut t = trap();
+            t.vector = vector;
+            t.error = error;
+            // Faulting programs may have unusable return addresses and stacks.
+            t.rip = 0x800000000000;
+            t.rsp = u64::MAX;
+            t.cr2 = u64::MAX;
+            let o = run().fault(&t).unwrap();
+            assert!(matches!(o.reason, Reason::Fault(_)));
+            o.validate(o.id, o.root).unwrap();
+        }
+        for case in 0..10 {
+            let mut t = trap();
+            t.vector = 14;
+            t.error = 5;
+            match case {
+                0 => t.root += 4096,
+                1 => t.depth = 2,
+                2 => t.cs = 8,
+                3 => t.ss = 16,
+                4 => t.handler_stack -= 8,
+                5 => t.error = 1,
+                6 => t.error |= 8,
+                7 => t.error |= 32,
+                8 => t.vector = 8,
+                _ => {
+                    t.vector = 6;
+                    t.error = 1;
+                }
+            }
+            let mut r = run();
+            assert!(r.fault(&t).is_err());
+            assert_eq!(r.outcome(), None);
+        }
+    }
+    struct Never;
+    impl Cpu for Never {
+        fn snapshot(
+            &mut self,
+        ) -> Result<super::super::prepared::cpu::Snapshot, super::super::prepared::cpu::Error>
+        {
+            unreachable!()
+        }
+        fn write_root(&mut self, _: u64) -> Result<(), super::super::prepared::cpu::Error> {
+            unreachable!()
+        }
+    }
+    impl Driver for Never {
+        fn revoke(&mut self, _: TaskId) -> Result<(), privilege::Error> {
+            Ok(())
+        }
+        fn execute(&mut self, _: ImageAdmission, _: TaskId) -> Result<Outcome, privilege::Error> {
+            unreachable!()
+        }
+        fn quiesce(&mut self, _: u64) -> Result<(), privilege::Error> {
+            unreachable!()
+        }
+    }
+    #[test]
+    fn generation_and_call_counters_never_wrap_or_acquire_authority() {
+        assert!(Slot::<Never, Never>::new(8).is_err());
+        let mut slot = Slot::<Never, Never>::new(0).unwrap();
+        assert_eq!(slot.next_id().unwrap().generation, 1);
+        slot.generation = u32::MAX - 1;
+        assert_eq!(slot.next_id().unwrap().generation, u32::MAX);
+        slot.generation = u32::MAX;
+        assert_eq!(slot.next_id(), Err(Error::Exhausted));
+        let mut r = run();
+        for _ in 0..64 {
+            r.call(&trap()).unwrap();
+        }
+        assert_eq!(r.call(&trap()), Ok(false));
+        assert_eq!(r.outcome().unwrap().reason, Reason::CallLimit);
+        assert_eq!(r.outcome().unwrap().syscalls, 64);
+        assert!(r.exit(0).is_err());
+    }
+    #[test]
+    fn sustained_calls_yield_instead_of_dying_and_never_refill_mid_dispatch() {
+        let mut r = Run::sustained(image(), run().id).unwrap();
+        assert!(r.call(&trap()).is_err());
+        for dispatch in 1..=16 {
+            r.begin_dispatch().unwrap();
+            assert!(r.begin_dispatch().is_err());
+            for n in 1..=64 {
+                assert_eq!(r.call(&trap()), Ok(true));
+                assert_eq!(r.budget_exhausted(), n == 64);
+            }
+            assert_eq!(r.calls(), dispatch * 64);
+            assert_eq!(r.call(&trap()), Err(privilege::Error::State));
+            assert!(r.outcome().is_none());
+            r.end_dispatch().unwrap();
+            assert!(r.end_dispatch().is_err());
+            assert!(r.call(&trap()).is_err());
+            assert!(r.ipc_caller(&trap()).is_err());
+        }
+        r.begin_dispatch().unwrap();
+        assert!(r.ipc_caller(&trap()).is_err());
+        r.call(&trap()).unwrap();
+        let o = r.exit(100).unwrap();
+        assert_eq!(o.syscalls, 1025);
+        o.validate(o.id, o.root).unwrap();
+        assert!(r.begin_dispatch().is_err());
+        assert!(r.end_dispatch().is_err());
+        assert!(r.call(&trap()).is_err());
+    }
+    #[test]
+    fn sustained_bad_entry_and_bad_return_do_not_consume_allowance() {
+        for terminal in [false, true] {
+            let mut r = Run::sustained(image(), run().id).unwrap();
+            r.begin_dispatch().unwrap();
+            let mut t = trap();
+            if terminal {
+                t.rsp = u64::MAX;
+            } else {
+                t.root += 4096;
+            }
+            let result = r.call(&t);
+            if terminal {
+                assert_eq!(result, Ok(false));
+            } else {
+                assert!(result.is_err());
+            }
+            assert_eq!((r.calls(), r.dispatch_calls), (0, 0));
+            if terminal {
+                assert!(r.begin_dispatch().is_err());
+            } else {
+                assert_eq!(r.call(&trap()), Ok(true));
+            }
+        }
+    }
+    #[test]
+    fn rejected_syscall_attempts_still_consume_the_service_allowance() {
+        let mut r = Run::sustained(image(), run().id).unwrap();
+        r.begin_dispatch().unwrap();
+        for _ in 0..64 {
+            assert!(r.call(&trap()).unwrap());
+            assert!(syscall::request(u64::MAX, 1, 0, 0, 0, 0, 0).is_err());
+        }
+        assert!(r.budget_exhausted());
+        assert_eq!(r.calls(), 64);
+        assert!(r.call(&trap()).is_err());
+    }
+    #[test]
+    fn terminal_call_at_budget_boundary_is_not_replenishable() {
+        let mut r = Run::sustained(image(), run().id).unwrap();
+        r.begin_dispatch().unwrap();
+        for _ in 0..64 {
+            r.call(&trap()).unwrap();
+        }
+        let o = r.exit(9).unwrap();
+        assert_eq!((o.reason, o.syscalls), (Reason::Exit(9), 64));
+        assert!(r.end_dispatch().is_err());
+        assert!(r.begin_dispatch().is_err());
+        let mut diagnostic = run();
+        assert!(!diagnostic.is_sustained());
+        assert!(diagnostic.begin_dispatch().is_err());
+    }
+    #[test]
+    fn sustained_counter_exhaustion_is_terminal_not_wrapped_or_fabricated() {
+        let mut r = Run::sustained(image(), run().id).unwrap();
+        r.begin_dispatch().unwrap();
+        r.calls = u64::MAX - 1;
+        assert_eq!(r.call(&trap()), Ok(true));
+        assert_eq!(r.call(&trap()), Ok(false));
+        let o = r.outcome().unwrap();
+        assert_eq!(
+            (o.reason, o.syscalls),
+            (Reason::CallCounterExhausted, u64::MAX)
+        );
+        o.validate(o.id, o.root).unwrap();
+        assert!(
+            Outcome { syscalls: 64, ..o }
+                .validate(o.id, o.root)
+                .is_err()
+        );
+        assert!(r.begin_dispatch().is_err());
+    }
+    #[test]
+    fn budget_yield_observation_requires_positive_time_and_completed_allowance() {
+        let r = run();
+        let valid = Slice {
+            id: r.id,
+            root: r.image.root_physical,
+            ticks: 1,
+            event: Event::BudgetYield { syscalls: 128 },
+        };
+        valid.validate(r.id, r.image.root_physical).unwrap();
+        assert!(
+            Slice { ticks: 0, ..valid }
+                .validate(r.id, valid.root)
+                .is_err()
+        );
+        assert!(
+            Slice {
+                event: Event::BudgetYield { syscalls: 63 },
+                ..valid
+            }
+            .validate(r.id, valid.root)
+            .is_err()
+        );
+        assert!(
+            valid
+                .validate(
+                    TaskId {
+                        generation: 2,
+                        ..r.id
+                    },
+                    valid.root
+                )
+                .is_err()
+        );
+    }
+}

@@ -151,6 +151,7 @@ def _build_and_test(
         "development-scheduler-smp-preempt",
         "development-atomics",
         "development-locks",
+        "development-user-root",
     }
     if development_feature is not None and development_feature not in allowed_features:
         raise QualificationError("unknown PooleBoot development feature")
@@ -319,6 +320,12 @@ def _available_port() -> int:
         return int(probe.getsockname()[1])
 
 
+def _hpet_msi_options(enabled: bool) -> list[str]:
+    if type(enabled) is not bool:
+        raise ValueError("HPET MSI selection must be an explicit boolean")
+    return ["-global", "hpet.msi=on"] if enabled else []
+
+
 def _execute_once(
     run_id: str,
     lock: dict[str, Any],
@@ -330,7 +337,9 @@ def _execute_once(
     marker_validator: Callable[[list[str]], dict[str, Any]] = native_pooleboot.validate_markers,
     marker_extractor: Callable[[bytes], list[str]] = native_pooleboot.extract_markers,
     completion_marker: bytes = b"POOLEBOOT/0.1 STOP BEFORE TRANSFER",
+    hpet_msi: bool = False,
 ) -> tuple[dict[str, Any], bytes, bytes]:
+    timer_options = _hpet_msi_options(hpet_msi)
     firmware = {item["role"]: item for item in lock["firmware"]["files"]}
     vars_source = qemu_root / firmware["vars_template_copy_only"]["relative_path"]
     shutil.copyfile(vars_source, run_dir / profile["evidence_contract"]["vars_copy"])
@@ -343,6 +352,7 @@ def _execute_once(
         run_dir,
     )
     port = _available_port()
+    command.extend(timer_options)
     command.extend(
         [
             "-device",
@@ -424,6 +434,7 @@ def _execute_once(
                 "media_read_only": True,
                 "guest_network": False,
                 "host_acceleration": False,
+                "hpet_msi": hpet_msi,
                 "qmp_loopback_only": True,
                 "qmp_greeting": greeting,
                 "timestamped_qmp_events_excluded_from_equality": True,

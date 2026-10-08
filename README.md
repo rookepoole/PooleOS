@@ -4,14 +4,236 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
-**Qualified baseline:** checkpoints through Cycle 230 are merged into `main`
-at `bb5e43c` via [PR #79](https://github.com/rookepoole/PooleOS/pull/79).
+**Qualified baseline:** checkpoints through Cycle 233 are merged into `main`
+at `507782d` via [PR #80](https://github.com/rookepoole/PooleOS/pull/80).
 The exact candidate passed 106/106 runtime-inclusive canonical gates and 708/708
 Doctor checks, including bundle and replay inputs. The merged tree matches that
-candidate. All 63 source-branch commits remain cloud-backed; they are not pending
-main merges. This is a development baseline, not a production release.
+candidate. This is a development baseline, not a production release, and its
+qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle 233 completes all fourteen remaining
+**Current development checkpoint:** Cycle258 replaces the normal user-task lifetime
+syscall limit with bounded, replenished dispatch allowances. Two fresh native boots
+prove repeated user-mode execution, preserved syscall results and a surviving
+peer after an application fault;459 kernel tests pass. Next: owned program/argument
+startup and init, then console, shell/files/apps and the usable ISO. No interactive
+ISO yet; full microkernel work continues afterward and canonical gates still block
+main. [Evidence](docs/checkpoints/cycle258-sustained-service-dispatch.md).
+
+**Historical development checkpoint:** Cycle257 adds atomic task startup: scheduler
+publication and IPC permissions succeed together, or new authority is removed
+with memory ownership retained for cleanup. Two fresh native boots prove failed
+startup, cleanup retry and fresh isolated task execution;451 kernel tests pass.
+Next: sustained services, init/console, shell/files/apps and the usable ISO.
+No interactive ISO yet; full microkernel work continues afterward, and canonical
+gates still block main. [Evidence](docs/checkpoints/cycle257-native-task-admission.md).
+
+**Historical development checkpoint:** Cycle256 implements epoch-bound request deadlines
+and wakes a client even when all tasks are blocked. Two fresh native boots prove
+queued/claimed expiry, late-reply denial and retained timeout completion;443 kernel
+tests pass. Next: transactional service admission, sustained budgets and efficient
+idle, then init/console, shell/files/apps and the usable ISO. Full robust microkernel
+development continues afterward. No interactive ISO yet; canonical gates still
+block main. [Evidence](docs/checkpoints/cycle256-native-request-deadlines.md).
+
+**Historical development checkpoint:** Cycle255 adds a continuous owned service clock
+across real user task dispatches and idle periods, with verified mapping teardown.
+Two fresh native boots and434 kernel tests pass. Next: request deadline expiry,
+service admission and sustained budgets, then init/console, shell/files/apps and
+the usable ISO. Full robust microkernel development continues afterward.
+No interactive ISO yet; canonical qualification still gates main.
+[Evidence](docs/checkpoints/cycle255-continuous-service-clock.md).
+
+**Historical development checkpoint:** Cycle254 adds caller-owned request completion,
+cancellation and dead-service notification. Two fresh native boots verify success,
+discard and service death while clients continue;426 kernel tests pass. The image
+layout now reserves208 pages with the existing36-page guarded stack. Next: owned
+clock/deadlines, service admission and sustained budgets, then init/console,
+shell/files/apps and an interactive ISO. Full microkernel work continues afterward.
+No interactive ISO or production promotion; three old product-readiness tests
+still fail and block merging. [Evidence](docs/checkpoints/cycle254-native-request-lifetimes.md).
+
+**Historical development checkpoint:** Cycle253 adds kernel-authenticated sender
+identity and task-local one-use replies. Real user tasks exchange requests,
+recover copy faults, consume/discard reply tokens and reject replay without
+granting the server permanent send authority. Two fresh native boots and416 kernel
+tests pass. Next: request deadlines/cancellation, dead-service notification and
+service admission, then init, console, shell, files, applications and the usable
+ISO. Full microkernel development continues afterward; no interactive ISO yet.
+[Evidence](docs/checkpoints/cycle253-native-ipc-reply-authority.md).
+
+**Historical development checkpoint:** Cycle252 proves native IPC queue pressure,
+partial-copy recovery and peer survival after fault, cancellation, blocked-wait
+termination and cleanup quarantine. Five lifetimes reuse the same owned task slots
+without resetting authority generations. Two fresh native boots and403 kernel tests
+pass. Next: sender/reply authority and service admission, then init, console, shell,
+files, applications and the usable ISO. Complete robust microkernel development
+continues afterward; no interactive ISO yet.
+[Evidence](docs/checkpoints/cycle252-native-ipc-pressure-lifecycle.md).
+
+**Historical development checkpoint:** Cycle251 adds actual IPC suspension/resumption,
+supervisor cancellation and automatic authority cleanup at task retirement. Two
+fresh native boots pass three waits, two readiness wakes, one cancellation and
+the real request/reply exchange, preserving all17 containment cases.401 kernel
+tests pass. Next: native dead-peer/revocation and service integration, then the
+usable ISO. Full robust microkernel work continues afterward; no interactive ISO yet.
+[Evidence](docs/checkpoints/cycle251-native-ipc-waits.md).
+
+**Historical development checkpoint:** Cycle250 adds original kernel-owned capabilities
+and bounded native IPC. Two fresh VM boots exchange actual request/reply bytes
+between isolated user tasks and preserve17 containment cases.571 Rust executions
+and42 Python oracle tests pass. Next: IPC waits/cancellation/lifecycle, then native
+services, shell/apps and a usable ISO. No interactive ISO yet; complete robust
+microkernel development continues afterward.
+[Evidence](docs/checkpoints/cycle250-native-capability-ipc.md).
+
+**Historical development checkpoint:** Cycle249 recovers a task with missing runtime
+measurement without inventing zero time. Two fresh native boots each pass17
+containment cases, retain ownership through cleanup failure, then resume a healthy
+peer.545 Rust executions and40 Python oracle tests pass. Next: capability IPC,
+services, shell/apps and the usable integration ISO. No interactive ISO yet;
+complete robust microkernel development continues afterward.
+[Evidence](docs/checkpoints/cycle249-unknown-runtime-recovery.md).
+
+**Historical development checkpoint:** Cycle248 adds native HPET backup recovery.
+Two fresh boots each stop a spinner whose local timer is masked, account its
+execution once, clean up both timers and preserve16 containment cases.
+539 Rust executions and38 Python oracle tests pass. Next: unknown-runtime
+recovery, capability IPC, services, shell/apps and the usable integration ISO.
+No interactive session or new ISO yet; full robust microkernel development
+continues afterward. [Evidence](docs/checkpoints/cycle248-native-hpet-backup.md).
+
+**Historical development checkpoint:** Cycle247 accounts native peer quanta exactly
+once, including terminal execution and failed cleanup. Two fresh boots each
+settle148 dispatches, reject148 duplicate charges and preserve15 survival cases.
+525 Rust executions and36 Python oracle tests pass. Next: independent missing-IRQ
+and unknown-runtime recovery, IPC, services, shell/apps and the usable ISO.
+No interactive session or new ISO yet. Full robust microkernel development
+continues afterward. [Evidence](docs/checkpoints/cycle247-native-runtime-accounting.md).
+
+**Historical development checkpoint:** Cycle246 adds bounded native timer shutdown
+and recovery while task memory remains owned. Two fresh boots each pass15 peer
+survival cases, including failed-cleanup quarantine/retry;514 Rust executions and
+35 Python oracle tests pass. Next: terminal/failed-cleanup runtime accounting,
+independent missing-IRQ recovery, IPC, services, shell/apps and the usable ISO.
+No interactive session or new ISO yet. The full robust microkernel remains the
+goal afterward. [Evidence](docs/checkpoints/cycle246-owned-timer-shutdown.md).
+
+**Historical development checkpoint:** Cycle245 makes native task construction
+transactional, retries failed cleanup and preserves healthy-peer execution.
+Two fresh boots,504 Rust test executions and34 Python oracle tests pass. Native
+testing also exposed and repaired a constructor stack overflow. Next: timer
+teardown/accounting, IPC, services, shell/apps and the usable user-space ISO.
+No interactive session or new ISO yet; full robust microkernel development
+continues afterward. [Evidence](docs/checkpoints/cycle245-transactional-user-construction.md).
+
+**Historical development checkpoint:** Cycle244 stops malformed user tasks without
+stopping their healthy peers. Two fresh native boots each pass14 survival cases,
+140 dispatches and113 preemptions;489 Rust test executions and33 Python oracle
+tests pass. A reproduced emulator stack-fault deviation remains explicitly
+unqualified for native hardware. Next: spawn rollback and timer/accounting
+hardening, then IPC, services, shell/apps and the usable integration ISO.
+No interactive session or new ISO yet; full robust microkernel development
+continues afterward. [Evidence](docs/checkpoints/cycle244-user-state-containment.md).
+
+**Historical development checkpoint:** Cycle243 runs two real user tasks under the
+native scheduler with separate address spaces and timer-driven context switches.
+Two fresh boots each pass40 dispatches and33 preemptions, with continued peer
+progress after exit, fault, cancellation and syscall-budget exhaustion.481 Rust
+test executions and29 Python oracle tests pass. Next: finish admission/containment
+hardening, then IPC, services, shell/apps and the user-space integration ISO.
+No interactive session or new ISO yet; the complete robust microkernel remains
+the production objective. [Evidence](docs/checkpoints/cycle243-native-user-peer-scheduling.md).
+
+**Historical development checkpoint:** Cycle242 adds owned user-task exit and fatal
+fault termination. Two fresh native guests each run four sequential tasks, reject
+stale IDs and restart/reap repetition, and fully reclaim their memory.336 debug
+kernel tests,110 repeated optimized tests, seven compile-fail checks, ten boot-exit
+tests and26 Python oracle tests pass. Existing copy-fault and timer controls pass.
+Next: preemptive peer scheduling, then IPC, confined services, shell/apps and the
+user-space integration ISO. No interactive session or new ISO yet; full robust
+microkernel development continues after the preview.
+[Evidence](docs/checkpoints/cycle242-user-task-termination.md).
+
+**Historical development checkpoint:** Cycle241 adds real native user-space system
+calls and bounded, recoverable memory copying. Two fresh QEMU guests each pass
+12 calls, three deliberate copy faults, entry-MSR cleanup, timer recovery and
+all13 task-page releases.326 debug kernel tests,100 repeated optimized tests,
+five compile-fail checks, ten boot-exit tests and23 Python oracle tests pass.
+Next: task exit/fault termination and peer scheduling, then IPC, confined
+services, a usable shell and optical ISO. There is no interactive session or
+new ISO yet; full robust microkernel work continues after that preview.
+[Evidence](docs/checkpoints/cycle241-native-syscall-usercopy.md).
+
+**Historical development checkpoint:** Cycle 240 proves timer preemption of a spinning
+ring-3 task in two fresh native QEMU boots. Each run resumes the task twice with
+preserved integer/legacy FP state, then forces kernel recovery on the third
+interrupt. Timer shutdown, descriptor detachment, root restoration and all13
+task-page releases pass.320 debug kernel tests,94 repeated optimized tests and
+ordinary unsigned-boot denial pass. Next: bounded syscall/user-copy mechanisms,
+task lifecycle and peer scheduling, then IPC, services, shell/apps and optical ISO.
+There is no interactive session or new ISO yet; full robust microkernel work
+continues after that preview. [Evidence](docs/checkpoints/cycle240-user-timer-preemption.md).
+
+**Historical development checkpoint:** Cycle 239 executes a real, bounded ring-3
+payload in two fresh native QEMU boots. Private-stack fault handling denies
+privileged operations, kernel reads and stack execution; controlled return,
+descriptor cleanup and all 13 task-page releases pass. Live testing also fixed
+VM cleanup of CPU-accessed page entries. There are 315 passing debug kernel
+tests, 89 repeated optimized tests and preserved ordinary-boot denial.
+Next: user-mode timer preemption, then IPC, services, shell/apps and optical ISO.
+This is not yet an interactive OS or a new ISO. Full microkernel development
+continues after that preview. [Evidence](docs/checkpoints/cycle239-bounded-user-entry.md).
+
+**Historical development checkpoint:** Cycle 238 delivers and acknowledges three
+timer interrupts under the owned task root in each of two fresh native QEMU
+boots. Guarded supervisor-only uncached MMIO mappings and verified timer shutdown
+protect restoration and task-memory release. All 300 kernel host tests, 54
+optimized focused tests, five compile-fail checks, ten boot-exit tests, 15 Python
+oracle tests and the default-boot denial control pass. This is still CPL0, not
+user-program execution or a new ISO. Next: sanitized ring-3 entry and contained
+faults, then IPC, services, shell/apps and optical packaging. Full microkernel
+development continues after the integration ISO.
+[Evidence](docs/checkpoints/cycle238-owned-root-timer.md).
+
+**Historical development checkpoint:** Cycle 237 boots the real native kernel into
+an owned task address space at CPL0, exercises its guarded supervisor stack,
+restores the boot address space and releases all 13 allocated pages. Two fresh
+QEMU probes and an ordinary-boot denial control pass, alongside 288 kernel host
+tests, 42 optimized focused tests, five compile-fail checks, ten boot-exit tests
+and 13 Python regression tests. Live testing also fixed an APIC register read.
+No user-mode task or new ISO exists yet. Next: timer-backed recovery, sanitized
+user entry and contained faults, followed by IPC/services/shell integration.
+[Evidence](docs/checkpoints/cycle237-live-user-root.md).
+
+**Historical development checkpoint:** Cycle 236 adds the kernel's owning user-root
+CPU lifecycle and a privileged x86-64 adapter. Failed switches/restoration keep
+memory retained until verified recovery and detach. All 284 host kernel tests,
+38 optimized focused tests, five compile-fail checks and freestanding kernel/
+library checks pass, as do 84 roadmap/coverage checks. The adapter is not
+boot-wired: no user-mode task or new ISO
+exists yet. Next is bootstrap/timer integration and a bounded real guest probe.
+[Evidence](docs/checkpoints/cycle236-user-root-cpu-lifecycle.md).
+
+**Historical development checkpoint:** Cycle 235 adds an owned inactive user root,
+validated supervisor mappings, and a guarded 16-KiB kernel-entry stack. Failed
+preparation/cleanup preserves physical ownership until verified detach. This
+advances the native user-space integration ISO; no ring-3 execution or new ISO
+exists yet. All 272 kernel host tests, 26 optimized user-entry tests, two
+compile-fail checks and 83 metadata tests pass. Live CPU-state/entry/fault integration and fresh guest qualification
+remain required. [Evidence](docs/checkpoints/cycle235-owned-user-root.md).
+
+**Historical development checkpoint:** Cycle 234 starts the owner-directed
+[native user-space integration ISO](docs/native-userspace-integration-iso.md).
+PKUSER1 adds owned inactive user-image admission, strict page-table checks,
+guarded RX/RW-NX layout, and an initial unprivileged IRETQ frame. All 260 kernel
+host tests, 14 optimized focused tests, format and freestanding-library checks
+pass. No ring-3 task has run and no new ISO has been built. Changed kernel source
+invalidates 25 of 27 retained component admissions; fresh guest qualification and
+exact-candidate gates remain required before merge. The original full microkernel
+and N0-N39 production goals remain mandatory after preview delivery.
+[Cycle 234 evidence](docs/checkpoints/cycle234-user-entry-foundation.md).
+
+**Historical development checkpoint:** Cycle 233 completes all fourteen remaining
 corrected-media profile replays: 28 fresh guest runs, 663 control groups and
 2,863 hostile cases pass. All 27 component and source checks are current, with
 the aggregate reconstructed from original captures. All 354 combined regression

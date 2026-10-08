@@ -84,6 +84,7 @@ pub enum WaitKind {
     Event = 1,
     Mutex = 2,
     ExternalLock = 3,
+    Ipc = 4,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -131,6 +132,8 @@ pub struct TaskSnapshot {
     pub bypass_count: u8,
     pub dispatch_count: u32,
     pub runtime_ticks: u64,
+    /// Nonzero means runtime_ticks is only the measured subtotal, not total time.
+    pub unmeasured_dispatches: u32,
 }
 
 #[derive(Clone, Copy)]
@@ -147,6 +150,8 @@ struct Task {
     bypass_count: u8,
     dispatch_count: u32,
     runtime_ticks: u64,
+    charged_dispatch: u32,
+    unmeasured_dispatches: u32,
 }
 
 impl Task {
@@ -164,6 +169,8 @@ impl Task {
             bypass_count: 0,
             dispatch_count: 0,
             runtime_ticks: 0,
+            charged_dispatch: 0,
+            unmeasured_dispatches: 0,
         }
     }
 
@@ -316,6 +323,8 @@ impl Scheduler {
             bypass_count: 0,
             dispatch_count: 0,
             runtime_ticks: 0,
+            charged_dispatch: 0,
+            unmeasured_dispatches: 0,
         };
         self.bump_sequence();
         Ok(id)
@@ -386,6 +395,61 @@ impl Scheduler {
         self.validate()
     }
 
+    /// Atomic settlement for one owned dispatch. All fallible checks precede
+    /// mutation so a rejected charge can be retried without double accounting.
+    pub fn account_dispatch(
+        &mut self,
+        cpu: CpuId,
+        id: TaskId,
+        dispatch: u32,
+        previous_ticks: u64,
+        ticks: u64,
+    ) -> Result<(), Error> {
+        self.validate()?;
+        if self.current_id(cpu)? != id {
+            return Err(Error::OwnerToken);
+        }
+        let index = self.task_index(id)?;
+        if self.tasks[index].dispatch_count != dispatch
+            || self.tasks[index].runtime_ticks != previous_ticks
+            || self.tasks[index].charged_dispatch.checked_add(1) != Some(dispatch)
+        {
+            return Err(Error::Invariant);
+        }
+        let total = previous_ticks.checked_add(ticks).ok_or(Error::Invariant)?;
+        self.tasks[index].runtime_ticks = total;
+        self.tasks[index].charged_dispatch = dispatch;
+        self.bump_sequence();
+        Ok(())
+    }
+
+    /// Record one lost sample without inventing ticks. The current owner stays
+    /// installed for cleanup, but can only be torn down, never requeued.
+    pub fn record_unmeasured_dispatch(
+        &mut self,
+        cpu: CpuId,
+        id: TaskId,
+        dispatch: u32,
+        previous_ticks: u64,
+    ) -> Result<(), Error> {
+        self.validate()?;
+        if self.current_id(cpu)? != id {
+            return Err(Error::OwnerToken);
+        }
+        let index = self.task_index(id)?;
+        let task = &mut self.tasks[index];
+        if task.dispatch_count != dispatch
+            || task.runtime_ticks != previous_ticks
+            || task.charged_dispatch.checked_add(1) != Some(dispatch)
+        {
+            return Err(Error::Invariant);
+        }
+        task.charged_dispatch = dispatch;
+        task.unmeasured_dispatches = 1;
+        self.bump_sequence();
+        Ok(())
+    }
+
     pub fn yield_current(&mut self, cpu: CpuId) -> Result<TaskId, Error> {
         let id = self.take_current(cpu)?;
         let index = self.task_index(id)?;
@@ -395,6 +459,74 @@ impl Scheduler {
         self.bump_sequence();
         self.validate()?;
         Ok(id)
+    }
+
+    /// IPC transitions commit only after every queue and counter check succeeds.
+    pub fn block_current_for_ipc(&mut self, cpu: CpuId, id: TaskId) -> Result<(), Error> {
+        self.validate()?;
+        if self.current_id(cpu)? != id {
+            return Err(Error::State);
+        }
+        let task = self.tasks[self.task_index(id)?];
+        if task.charged_dispatch != task.dispatch_count || task.wake_reason != WakeReason::None {
+            return Err(Error::State);
+        }
+        let mut staged = *self;
+        staged.block_current(cpu)?;
+        staged.tasks[id.index()].wait_kind = WaitKind::Ipc;
+        staged.validate()?;
+        *self = staged;
+        Ok(())
+    }
+
+    pub fn wake_ipc_waiter(
+        &mut self,
+        id: TaskId,
+        cpu: CpuId,
+        reason: WakeReason,
+    ) -> Result<(), Error> {
+        self.validate()?;
+        self.require_online(cpu)?;
+        if !matches!(
+            reason,
+            WakeReason::Signalled
+                | WakeReason::Cancelled
+                | WakeReason::OwnerGone
+                | WakeReason::TimedOut
+        ) {
+            return Err(Error::State);
+        }
+        let mut staged = *self;
+        staged.wake_kind(id, cpu, reason, WaitKind::Ipc)?;
+        staged.validate()?;
+        *self = staged;
+        Ok(())
+    }
+
+    pub fn consume_ipc_wake(
+        &mut self,
+        cpu: CpuId,
+        id: TaskId,
+        reason: WakeReason,
+    ) -> Result<(), Error> {
+        self.validate()?;
+        if self.current_id(cpu)? != id
+            || self.tasks[id.index()].wake_reason != reason
+            || !matches!(
+                reason,
+                WakeReason::Signalled
+                    | WakeReason::Cancelled
+                    | WakeReason::OwnerGone
+                    | WakeReason::TimedOut
+            )
+        {
+            return Err(Error::State);
+        }
+        let mut staged = *self;
+        staged.consume_wake(cpu)?;
+        staged.validate()?;
+        *self = staged;
+        Ok(())
     }
 
     pub fn block_current(&mut self, cpu: CpuId) -> Result<TaskId, Error> {
@@ -672,6 +804,7 @@ impl Scheduler {
             bypass_count: task.bypass_count,
             dispatch_count: task.dispatch_count,
             runtime_ticks: task.runtime_ticks,
+            unmeasured_dispatches: task.unmeasured_dispatches,
         })
     }
 
@@ -765,6 +898,13 @@ impl Scheduler {
                     return Err(Error::Invariant);
                 }
                 continue;
+            }
+            if task.unmeasured_dispatches != 0
+                && (task.unmeasured_dispatches != 1
+                    || !matches!(task.state, TaskState::Running | TaskState::Dead)
+                    || task.charged_dispatch != task.dispatch_count)
+            {
+                return Err(Error::Invariant);
             }
             match task.state {
                 TaskState::Dormant => {
@@ -929,12 +1069,17 @@ impl Scheduler {
 
     fn current_id(&self, cpu: CpuId) -> Result<TaskId, Error> {
         self.require_online(cpu)?;
-        self.current[cpu.index()].ok_or(Error::CpuIdle)
+        let id = self.current[cpu.index()].ok_or(Error::CpuIdle)?;
+        if self.tasks[self.task_index(id)?].unmeasured_dispatches != 0 {
+            return Err(Error::State);
+        }
+        Ok(id)
     }
 
     fn take_current(&mut self, cpu: CpuId) -> Result<TaskId, Error> {
-        self.require_online(cpu)?;
-        self.current[cpu.index()].take().ok_or(Error::CpuIdle)
+        let id = self.current_id(cpu)?;
+        self.current[cpu.index()] = None;
+        Ok(id)
     }
 
     fn wake(&mut self, id: TaskId, cpu: CpuId, reason: WakeReason) -> Result<(), Error> {
@@ -1179,7 +1324,156 @@ pub fn validate_context_switch_contract(value: &ContextSwitchContract) -> Result
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn ipc_wake_overflow_and_wrong_kind_do_not_mutate_scheduler() {
+        use super::*;
+        let mut s = Scheduler::new(1).unwrap();
+        let cpu = CpuId::new(0).unwrap();
+        let id = s.create_task(0, 1, 16, 1).unwrap();
+        s.activate(id, cpu).unwrap();
+        s.dispatch(cpu).unwrap();
+        s.account_dispatch(cpu, id, 1, 0, 7).unwrap();
+        s.block_current_for_ipc(cpu, id).unwrap();
+        s.wake_count = u32::MAX;
+        let before = s.summary();
+        let task = s.task_snapshot(id).unwrap();
+        assert!(s.wake_ipc_waiter(id, cpu, WakeReason::Signalled).is_err());
+        assert_eq!(s.summary(), before);
+        assert_eq!(s.task_snapshot(id).unwrap(), task);
+        assert_eq!(s.queue_len(cpu), Ok(0));
+        s.validate().unwrap();
+        s.wake_count = 0;
+        s.wake_ipc_waiter(id, cpu, WakeReason::Cancelled).unwrap();
+        s.dispatch(cpu).unwrap();
+        let before = s.summary();
+        assert!(s.consume_ipc_wake(cpu, id, WakeReason::Signalled).is_err());
+        assert_eq!(s.summary(), before);
+        s.consume_ipc_wake(cpu, id, WakeReason::Cancelled).unwrap();
+        assert!(s.consume_ipc_wake(cpu, id, WakeReason::Cancelled).is_err());
+    }
     use super::*;
+
+    #[test]
+    fn unmeasured_dispatch_preserves_subtotal_and_allows_only_retirement() {
+        let mut s = Scheduler::new(1).unwrap();
+        let cpu = CpuId::new(0).unwrap();
+        let id = s.create_task(0, 1, 16, 1).unwrap();
+        let peer = s.create_task(1, 1, 15, 1).unwrap();
+        s.activate(id, cpu).unwrap();
+        s.activate(peer, cpu).unwrap();
+        assert_eq!(s.dispatch(cpu), Ok(id));
+        s.account_dispatch(cpu, id, 1, 0, 23).unwrap();
+        s.yield_current(cpu).unwrap();
+        assert_eq!(s.dispatch(cpu), Ok(id));
+        s.record_unmeasured_dispatch(cpu, id, 2, 23).unwrap();
+        let before = s.task_snapshot(id).unwrap();
+        let sequence = s.sequence;
+        assert_eq!(before.runtime_ticks, 23);
+        assert_eq!(before.unmeasured_dispatches, 1);
+        assert!(s.record_unmeasured_dispatch(cpu, id, 2, 23).is_err());
+        assert!(s.account_dispatch(cpu, id, 2, 23, 0).is_err());
+        assert!(s.account_tick(cpu, 1).is_err());
+        assert!(s.yield_current(cpu).is_err());
+        assert!(s.block_current(cpu).is_err());
+        assert!(s.block_current_for_lock(cpu).is_err());
+        assert!(s.lock_mutex(cpu).is_err());
+        assert_eq!(s.task_snapshot(id).unwrap(), before);
+        assert_eq!(s.sequence, sequence);
+        assert_eq!(s.current(cpu), Ok(Some(id)));
+        s.validate().unwrap();
+        s.teardown(id).unwrap();
+        let retired = s.task_snapshot(id).unwrap();
+        assert_eq!(retired.state, TaskState::Dead);
+        assert_eq!(retired.runtime_ticks, 23);
+        assert_eq!(retired.unmeasured_dispatches, 1);
+        assert_eq!(s.dispatch(cpu), Ok(peer));
+        assert!(s.record_unmeasured_dispatch(cpu, id, 2, 23).is_err());
+    }
+
+    #[test]
+    fn unmeasured_dispatch_rejects_foreign_cpu_identity_ordinal_and_subtotal_atomically() {
+        for case in 0..7 {
+            let mut s = Scheduler::new(1).unwrap();
+            let cpu = CpuId::new(0).unwrap();
+            let id = s.create_task(0, 1, 16, 1).unwrap();
+            s.activate(id, cpu).unwrap();
+            s.dispatch(cpu).unwrap();
+            let mut owner = id;
+            let mut ordinal = 1;
+            let mut previous = 0;
+            let mut wrong_cpu = cpu;
+            match case {
+                0 => owner.generation += 1,
+                1 => owner.slot += 1,
+                2 => ordinal = 2,
+                3 => previous = 1,
+                4 => wrong_cpu = CpuId::new(1).unwrap(),
+                5 => s.account_dispatch(cpu, id, 1, 0, 0).unwrap(),
+                _ => s.tasks[0].charged_dispatch = u32::MAX,
+            }
+            let before = s.task_snapshot(id).unwrap();
+            let sequence = s.sequence;
+            assert!(
+                s.record_unmeasured_dispatch(wrong_cpu, owner, ordinal, previous)
+                    .is_err()
+            );
+            assert_eq!(s.task_snapshot(id).unwrap(), before);
+            assert_eq!(s.sequence, sequence);
+        }
+    }
+
+    #[test]
+    fn dispatch_accounting_rejects_replay_wrong_owner_sequence_and_overflow_atomically() {
+        for case in 0..6 {
+            let mut s = Scheduler::new(1).unwrap();
+            let cpu = CpuId::new(0).unwrap();
+            let id = s.create_task(0, 1, 16, 1).unwrap();
+            s.activate(id, cpu).unwrap();
+            s.dispatch(cpu).unwrap();
+            let mut owner = id;
+            let mut ordinal = 1;
+            let mut previous = 0;
+            match case {
+                0 => owner.generation += 1,
+                1 => owner.slot += 1,
+                2 => ordinal = 2,
+                3 => previous = 1,
+                4 => {
+                    s.tasks[0].runtime_ticks = u64::MAX;
+                    previous = u64::MAX;
+                }
+                _ => {
+                    s.account_dispatch(cpu, id, 1, 0, 0).unwrap();
+                }
+            }
+            let before = s.task_snapshot(id).unwrap();
+            let sequence = s.sequence;
+            assert!(
+                s.account_dispatch(cpu, owner, ordinal, previous, 1)
+                    .is_err()
+            );
+            assert_eq!(s.task_snapshot(id).unwrap(), before);
+            assert_eq!(s.sequence, sequence);
+        }
+    }
+
+    #[test]
+    fn dispatch_accounting_commits_zero_and_nonzero_quanta_once_across_dispatches() {
+        let mut s = Scheduler::new(1).unwrap();
+        let cpu = CpuId::new(0).unwrap();
+        let id = s.create_task(0, 1, 16, 1).unwrap();
+        s.activate(id, cpu).unwrap();
+        let mut total = 0;
+        for (i, ticks) in [0, 5, 0, 13].into_iter().enumerate() {
+            s.dispatch(cpu).unwrap();
+            let ordinal = i as u32 + 1;
+            s.account_dispatch(cpu, id, ordinal, total, ticks).unwrap();
+            assert!(s.account_dispatch(cpu, id, ordinal, total, ticks).is_err());
+            total += ticks;
+            assert_eq!(s.task_snapshot(id).unwrap().runtime_ticks, total);
+            s.yield_current(cpu).unwrap();
+        }
+    }
 
     fn cpu(value: u8) -> CpuId {
         CpuId::new(value).unwrap()

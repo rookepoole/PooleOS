@@ -25,6 +25,7 @@ class PublicationBoundaryTests(unittest.TestCase):
             "sources/buildroot-2026.05/README",
             "lab-os/buildroot/config",
             "runs/private_benchmark.json",
+            "runs/native-user-entry-private.json",
             "firmware/private/device.bin",
         )
         for path in examples:
@@ -88,6 +89,8 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-kernel-atomics-readiness.json",
             "runs/native-kernel-locks-readiness.json",
             "runs/native-kernel-reclamation-core-readiness.json",
+            "runs/native-user-entry-readiness.json",
+            "runs/native-user-entry-gate-projection.json",
             "runs/native_microcode_readiness.json",
             "runs/native_recovery_readiness.json",
             "runs/native_system_manifest_readiness.json",

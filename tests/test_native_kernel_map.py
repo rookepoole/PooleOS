@@ -177,28 +177,28 @@ class NativeKernelMapTests(unittest.TestCase):
                 handoff_capacity_bytes=1024 * 1024,
             ),
         )
-        self.assertEqual([192, 229], model["guard_page_indices"])
+        self.assertEqual([208, 245], model["guard_page_indices"])
         self.assertEqual(441, model["total_mapped_page_count"])
-        self.assertEqual(486, native_kernel_map.TEMPORARY_PAGE_INDEX)
-        self.assertEqual((487, 488, 5, 493), (
+        self.assertEqual(502, native_kernel_map.TEMPORARY_PAGE_INDEX)
+        self.assertEqual((503, 504, 5, 509), (
             native_kernel_map.METADATA_GUARD_LOW_PAGE,
             native_kernel_map.METADATA_FIRST_PAGE,
             native_kernel_map.METADATA_PAGE_COUNT,
             native_kernel_map.METADATA_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((494, 495, 32, 527), (
+        self.assertEqual((510, 511, 32, 543), (
             native_kernel_map.LEDGER_A_GUARD_LOW_PAGE,
             native_kernel_map.LEDGER_A_FIRST_PAGE,
             native_kernel_map.LEDGER_A_PAGE_CAPACITY,
             native_kernel_map.LEDGER_A_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((528, 529, 32, 561), (
+        self.assertEqual((544, 545, 32, 577), (
             native_kernel_map.LEDGER_B_GUARD_LOW_PAGE,
             native_kernel_map.LEDGER_B_FIRST_PAGE,
             native_kernel_map.LEDGER_B_PAGE_CAPACITY,
             native_kernel_map.LEDGER_B_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((562, 563, 564, 565, 566), (
+        self.assertEqual((578, 579, 580, 581, 582), (
             native_kernel_map.MMIO_GUARD_LOW_PAGE,
             native_kernel_map.LOCAL_APIC_PAGE,
             native_kernel_map.MMIO_GUARD_MIDDLE_PAGE,
@@ -237,22 +237,22 @@ class NativeKernelMapTests(unittest.TestCase):
 
     def test_retained_kernel_growth_keeps_reserved_gap_and_capacity_bound(self) -> None:
         retained = native_kernel_map.RetainedRequest(0x0400_0000, 36, 0x0500_0000, 1024 * 1024)
-        for pages in (148, 149, 192, 193):
+        for pages in (148, 149, 192, 193, 208, 209):
             with self.subTest(pages=pages):
                 candidate = copy.deepcopy(plan())
                 candidate["mappings"][-1]["memory_size"] += pages * 4096 - candidate["image_size"]
                 candidate["image_size"] = pages * 4096
                 request = native_kernel_map.request_from_elf_plan(candidate, 48)
-                if pages == 193:
+                if pages == 209:
                     with self.assertRaisesRegex(native_kernel_map.KernelMapError, "kernel collides"):
                         native_kernel_map.build_retained_model(request, retained)
                     continue
                 model = native_kernel_map.build_retained_model(request, retained)
                 self.assertEqual(model["kernel"]["mapped_page_count"], pages)
-                self.assertEqual(model["guard_page_indices"], [192, 229])
-                self.assertEqual(model["stack_first_page_table_index"], 193)
-                self.assertEqual(model["handoff_first_page_table_index"], 230)
-                self.assertLessEqual(230 + 256, native_kernel_map.TABLE_ENTRIES)
+                self.assertEqual(model["guard_page_indices"], [208, 245])
+                self.assertEqual(model["stack_first_page_table_index"], 209)
+                self.assertEqual(model["handoff_first_page_table_index"], 246)
+                self.assertLessEqual(246 + 256, native_kernel_map.TABLE_ENTRIES)
                 self.assertLess(native_kernel_map.MMIO_GUARD_HIGH_PAGE, native_kernel_map.RETAINED_TABLE_ENTRIES)
 
     def test_retained_probe_and_lifecycle_are_exact(self) -> None:
@@ -262,7 +262,7 @@ class NativeKernelMapTests(unittest.TestCase):
         )
         line = (
             "PKMAP2 PASS kernel_pages=149 stack_pages=36 handoff_pages=256 guards=2 "
-            f"total_pages=441 stack_pt=193 handoff_pt=230 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
+            f"total_pages=441 stack_pt=209 handoff_pt=246 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
         )
         self.assertEqual(
             expected["retained_leaf_fingerprint"],

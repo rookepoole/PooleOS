@@ -1,0 +1,603 @@
+"""Historical marker replay is parser coverage, never fresh guest execution."""
+import json
+import re
+import unittest
+from pathlib import Path
+
+from runtime import native_user_root as probe
+from runtime.native_kernel_transfer import KernelTransferError
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+class UserRootTests(unittest.TestCase):
+    def setUp(self):
+        self.markers = json.loads((ROOT / "tests/fixtures/cycle237-user-root-markers.json").read_bytes())["markers"]
+        # Synthetic current-layout addresses; the immutable input is historical evidence only.
+        self.markers = [m.replace("stack_pt=193", "stack_pt=209").replace("handoff_pt=230", "handoff_pt=246")
+                        .replace("FFFFFFFF800E5000", "FFFFFFFF800F5000")
+                        .replace("FFFFFFFF800E6000", "FFFFFFFF800F6000") for m in self.markers]
+        # Synthetic PKUSER10 parser case built on an immutable historical prefix.
+        # Only the qualifier's fresh guest logs are native execution evidence.
+        root = probe.ACTIVE.fullmatch(self.markers[30])[1]
+        self.markers.insert(31, f"POOLEOS:KERNEL:USER-ROOT-TIMER PASS contract=PKUSER4 cr3={root} "
+            "deliveries=3 eois=3 mmio_pages=2 quiesced=1 if=0 ring3=0")
+        self.markers[32] = self.markers[32].replace("allocated_pages=0",
+            "allocated_pages=1 retained_acpi_pages=1")
+        self.markers[32] = self.markers[32].replace("ring3=0", "ring3=1")
+        self.markers.insert(32, f"POOLEOS:KERNEL:USER-ENTRY PASS contract=PKUSER5 cr3={root} "
+            "cpl=3 traps=7 private_rsp0=1 gpr_zero=15 fp_cleared=1 cli_denied=1 io_denied=1 "
+            "syscall_denied=1 supervisor_fault=1 nx_fault=1 kernel_return=1 descriptors_detached=1 if=0 production=0")
+        self.markers.insert(33, f"POOLEOS:KERNEL:USER-PREEMPT PASS contract=PKUSER6 cr3={root} "
+            "cpl=3 deliveries=3 eois=3 resumes=2 first_progress=10 last_progress=100 "
+            "private_rsp0=1 gpr_preserved=14 fp_preserved=1 timer_quiesced=1 forced_return=1 if=0 production=0")
+        self.markers.insert(34, f"POOLEOS:KERNEL:USER-CALL PASS contract=PKUSER7 abi=PSABI1 profile=development version=1 cr3={root} "
+            "calls=12 ok=3 version_denied=1 unknown=1 arguments=4 faults=3 read_faults=1 write_faults=2 "
+            "cpl=3 entry=syscall return=iretq max_copy=256 input_atomic=1 output_prefix=1 completion_traps=1 msrs_cleared=1 if=0 production=0")
+        self.markers[35] = self.markers[35].replace("cr3_writes=2", "cr3_writes=505").replace(
+            "released_pages=13 scrubbed_data_pages=6", "released_pages=1006 scrubbed_data_pages=463")
+        for index,(kind,value,calls) in enumerate((("exit",42,2),("fault",6,0),("fault",13,0),("fault",14,0))):
+            self.markers.insert(35+index, f"POOLEOS:KERNEL:USER-TASK PASS contract=PKUSER8 slot=0 generation={index+1} "
+                f"root={root} reason={kind} value={value} syscalls={calls} cpl=3 stale_denials={int(index>0)} "
+                "restart_denied=1 repeat_reap_denied=1 retained_free_denials=5 entry_quiesced=1 root_restored=1 "
+                "released_pages=13 scrubbed_data_pages=6 production=0")
+        for index,(kind,value,vector) in enumerate((("exit",42,0),("fault",6,0),("cancel",0,0),("limit",64,0),
+                ("return",2,256),("return",2,256),("return",3,256),("return",3,256),("return",1,256),("return",2,64),
+                ("fault",0,0),("fault",1,0),("fault",3,0),("fault",13,0))):
+            cancel = int(index == 2)
+            self.markers.insert(39+index, f"POOLEOS:KERNEL:USER-PEERS PASS contract=PKUSER10 scheduler=PKSCHED1 "
+                f"round={index} first={kind} value={value} root0={root} root1=0x0000000005000000 "
+                f"dispatches={11-cancel} preempt0=3 preempt1=6 progress0=100 progress1=200 "
+                f"ticks0={350-50*cancel} ticks1=650 survivor_after_stop=2 cr3_writes={22-cancel} return_vector={vector} "
+                "survivor_exit=84 states_preserved=1 root_restored=1 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
+        self.markers.insert(53, f"POOLEOS:KERNEL:USER-PEERS PASS contract=PKUSER10 scheduler=PKSCHED1 round=14 first=quarantine value=0 root0={root} root1=0x0000000005000000 dispatches=8 preempt0=0 preempt1=6 progress0=0 progress1=200 ticks0=100 ticks1=650 survivor_after_stop=6 cr3_writes=16 return_vector=0 survivor_exit=84 states_preserved=1 root_restored=1 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
+        self.markers.insert(54, f"POOLEOS:KERNEL:USER-PEERS PASS contract=PKUSER10 scheduler=PKSCHED1 round=15 first=watchdog value=65 root0={root} root1=0x0000000005000000 dispatches=8 preempt0=0 preempt1=6 progress0=0 progress1=200 ticks0=500 ticks1=650 survivor_after_stop=6 cr3_writes=16 return_vector=0 survivor_exit=84 states_preserved=1 root_restored=1 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
+        self.markers.insert(55, "POOLEOS:KERNEL:USER-TIMER-DRAIN PASS contract=PKUSER12 pending=1 late=1 quarantines=1 retries=1 retained_pages=13 free_denials=5 restart_denials=2 reap_denials=1 peer_exit=84 deliveries=3 eois=3 empty_irr_isr=1 kernel_window=1 detached_after_shutdown=1 if=0 production=0")
+        self.markers.insert(55, "POOLEOS:KERNEL:USER-SPAWN PASS contract=PKUSER11 quota_failures=1 quota_released_pages=5 quota_scrubbed_pages=5 after_effect_failures=6 cleanup_quarantines=6 cleanup_retries=6 retained_free_denials=30 released_pages=83 scrubbed_pages=83 peer_resumed=1 peer_exit=84 cpu_exposures=0 production=0")
+        self.markers.insert(57, "POOLEOS:KERNEL:USER-RUNTIME PASS contract=PKUSER13 samples=169 terminal_samples=30 duplicate_denials=169 ticks=15850 preempt_ticks=13800 terminal_ticks=1950 failed_cleanup_ticks=100 failed_cleanup_samples=1 scheduler_match=1 pending=0 unknown=0 clock=hpet charge_window=arm_to_event production=0")
+        self.markers.insert(58, "POOLEOS:KERNEL:USER-WATCHDOG PASS contract=PKUSER14 source=hpet_msi local_masked=1 recoveries=1 arms=169 stops=169 restores=169 ticks=500 deadline_ns=50000000 peer_exit=84 shared_apic=1 requires_if=1 nmi=0 production=0")
+        self.markers.insert(59, f"POOLEOS:KERNEL:USER-UNKNOWN PASS contract=PKUSER15 injection=returned_sample_loss unmeasured=1 measured0=0 total0=unknown pending=0 duplicate_denied=1 stale_denied=1 cpu_denied=1 zero_charge_denied=1 requeue_denied=1 outcome_denied=1 cleanup_retry=1 retained_pages=13 free_denials=5 root0={root} root1=0x0000000005000000 dispatches=8 peer_preemptions=6 peer_progress=200 peer_ticks=650 cr3_writes=16 peer_exit=84 scheduler_match=1 retired_unknown=1 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
+        self.markers.insert(60, f"POOLEOS:KERNEL:USER-IPC PASS contract=PKIPC1 abi=PSABI1 endpoints=2 handles=4 max_bytes=64 depth=4 request_bytes=8 reply_bytes=8 transformed=1 forged_denied=1 rights_denied=1 oversize_denied=1 copy_fault_denied=1 root0={root} root1=0x0000000005000000 dispatches=7 preemptions=2 ticks=100 calls0=9 calls1=4 cr3_writes=14 waits=3 wakes=2 cancellations=1 client_exit=91 server_exit=90 owners_detached=2 objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 blocking=1 automatic_retirement=1 saved_state=1 production=0")
+        for index, owner in enumerate(("exit", "fault", "cancel", "wait_cancel", "quarantine")):
+            dispatches = 5 if index == 0 else 3
+            self.markers.insert(61 + index, f"POOLEOS:KERNEL:USER-IPC-PRESSURE PASS contract=PKIPC2 round={index} generation={index+1} owner={owner} "
+                f"root0={root} root1=0x0000000005000000 dispatches={dispatches} preemptions={int(index==2)} ticks0=100 ticks1=50 "
+                f"calls0={12 if index==0 else 13} calls1={11 if index==0 else int(index==3)} waits={3 if index==0 else 2 if index==3 else 1} "
+                f"wakes={3 if index==0 else 1} revoked={int(index>0)} cr3_writes={dispatches*2+int(index in (2,3))} "
+                f"full_denied=1 stale_denied=1 partial_output={4 if index==0 else 0} survivor_exit=93 persistent_slots=1 automatic_retirement=1 "
+                "objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
+        self.markers.insert(66, f"POOLEOS:KERNEL:USER-IPC-REPLY PASS contract=PKIPC3 generation=6 endpoints=2 handles=3 sender_client=2 sender_server=3 reply_generations=2 reply_consumed=1 reply_discarded=1 replay_denied=2 unminted_denied=1 cross_owner_denied=1 wrong_type_denied=1 request_rights_denied=1 output_prefix=8 input_fault=1 transformed=1 root0={root} root1=0x0000000005000000 dispatches=3 preemptions=0 ticks0=100 ticks1=200 calls0=8 calls1=11 waits=1 wakes=1 cr3_writes=6 client_exit=95 server_exit=94 objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
+        for index, outcome in enumerate((0, 8, 9, 9)):
+            self.markers.insert(67 + index, f"POOLEOS:KERNEL:USER-IPC-REQUEST PASS contract=PKIPC4 round={index} generation={index+7} outcome={outcome} root0={root} root1=0x0000000005000000 dispatches=3 preemptions=0 ticks0=100 ticks1=200 calls0={11 if index==0 else 10} calls1={(5,5,0,2)[index]} waits=1 wakes=1 cr3_writes=6 client_cancel=1 stale_token=0 take_once=1 survivor_query=1 client_exit=97 objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
+        self.markers.insert(71, "POOLEOS:KERNEL:USER-CLOCK PASS contract=PKCLOCK1 origin=100 last=10000100 period_fs=10000000 elapsed_ns=100000000 samples=100 idle_ns=4000000 enters=12 leaves=12 idle_intervals=4 config_restored=1 counter_reset=0 mmio_writes=24 mapping_windows=6 mapping_revoked=6 guards=3 clock=hpet64 scope=one_bsp timed_ipc=0 production=0")
+        for index in range(2):
+            self.markers.insert(72 + index, f"POOLEOS:KERNEL:USER-IPC-DEADLINE PASS contract=PKIPC5 round={index} generation={index+11} root0={root} root1=0x0000000005000000 ticks0=100 ticks1=200 expiry_ns={100000000 + index*150000000} epoch=2 timeout_ns=100000000 dispatches=5 preemptions=0 waits=3 wakes=3 idle_expiries=1 all_blocked=2 late_reply_denied=1 completion_retained=1 calls0=9 calls1=5 client_exit=98 server_exit=99 cr3_writes=10 objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
+        self.markers.insert(74, "POOLEOS:KERNEL:USER-DEADLINE-CLOCK PASS contract=PKIPC5 origin=10000200 last=50000200 period_fs=10000000 elapsed_ns=400000000 samples=100 idle_ns=0 enters=10 leaves=10 idle_expiries=2 epoch=2 expired=2 config_restored=1 counter_reset=0 mmio_writes=16 mapping_windows=4 mapping_revoked=4 guards=3 clock=hpet64 scope=one_bsp timed_ipc=1 production=0")
+        self.markers.insert(75, f"POOLEOS:KERNEL:USER-ADMISSION PASS contract=PKADMIT1 failed_generation=13 retry_generation=14 members=2 steps_before_quota=4 scheduler_unchanged=1 failed_dispatches=0 stale_retry_denied=1 cleanup_quarantine=1 retained_free_denials=5 cleanup_retry=1 first_exchange_atomic=1 root0={root} root1=0x0000000005000000 ticks0=100 ticks1=200 dispatches=6 preemptions=4 cr3_writes=12 exits=2 exit_code=42 objects_remaining=0 released_pages=52 scrubbed_data_pages=24 cpl=3 production=0")
+        self.markers.insert(76, f"POOLEOS:KERNEL:USER-SERVICE PASS contract=PKSERVICE1 generation=15 calls_per_dispatch=64 calls0=256 calls1=513 yields0=4 yields1=8 dispatches=14 timer_preemptions=0 fault_vector=6 survivor_exit=100 survivor_after_fault=4 completed_copy_bytes=8 return_state_preserved=1 allowance_replenished=1 root0={root} root1=0x0000000005000000 ticks0=100 ticks1=200 cr3_writes=28 scheduler_match=1 objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
+        self.summary = probe.validate_markers(self.markers)
+
+    def test_sustained_service_requires_budget_yields_fault_survival_and_real_accounting(self):
+        self.assertTrue(self.summary["sustained_service_execution"])
+        service = self.summary["service_dispatch"]
+        self.assertEqual((service["calls"], service["budget_yields"]), ([256, 513], [4, 8]))
+        self.assertEqual(service["roots"], self.summary["admission_rollback"]["roots"])
+        for field, value in re.findall(r" ([a-z0-9_]+)=([^ ]+)", self.markers[76]):
+            self.reject(76, field, "1" if value == "0" else "0")
+        self.reject(76, "ticks0", str(1 << 64))
+        self.reject(76, "ticks1", str(1 << 64))
+
+    def test_sustained_service_marker_is_required_ordered_and_not_replayable(self):
+        for changed in (self.markers[:76] + self.markers[77:],
+                        self.markers[:76] + [self.markers[76]] + self.markers[76:]):
+            with self.assertRaises(ValueError): probe.validate_markers(changed)
+        changed = self.markers.copy()
+        changed[75], changed[76] = changed[76], changed[75]
+        with self.assertRaises(ValueError): probe.validate_markers(changed)
+
+    def test_service_yield_saves_completed_syscall_result_and_defaults_to_sustained(self):
+        source = (ROOT / "native/kernel/src/arch/x86_64/user_slice.rs").read_text()
+        self.assertIn("None => task::Run::sustained(image, id)?", source)
+        self.assertIn("diagnostic_call_limit: false", source)
+        action = source.split("user_syscall::Action::Returned =>", 1)[1].split("user_syscall::Action::Exit", 1)[0]
+        self.assertIn("snapshot(frame, t.depth)", action)
+        self.assertIn("Context::capture(s.image, &returned)", action)
+        self.assertIn("Event::BudgetYield", action)
+        self.assertIn("s.run.end_dispatch()", action)
+        self.assertNotIn("begin_dispatch", action)
+        self.assertNotIn("t.rip -", action)
+
+    def test_admission_requires_rollback_generation_retention_cleanup_and_fresh_execution(self):
+        self.assertTrue(self.summary["atomic_ipc_scheduler_admission"])
+        for field, value in (("failed_generation", "12"), ("retry_generation", "13"), ("members", "1"),
+                ("steps_before_quota", "3"), ("scheduler_unchanged", "0"), ("failed_dispatches", "1"),
+                ("stale_retry_denied", "0"), ("cleanup_quarantine", "0"), ("retained_free_denials", "4"),
+                ("cleanup_retry", "0"), ("first_exchange_atomic", "0"), ("root0", "0x0000000000000000"),
+                ("ticks0", "0"), ("ticks1", str(1 << 64)), ("dispatches", "5"), ("preemptions", "3"),
+                ("cr3_writes", "10"), ("exits", "1"), ("exit_code", "1"), ("objects_remaining", "1"),
+                ("released_pages", "26"), ("scrubbed_data_pages", "12"), ("production", "1")):
+            self.reject(75, field, value)
+
+    def test_admission_marker_cannot_be_omitted_reordered_or_substituted(self):
+        for changed in (self.markers[:75] + self.markers[76:],
+                        self.markers[:75] + [self.markers[75]] + self.markers[75:]):
+            with self.assertRaises(ValueError): probe.validate_markers(changed)
+        changed = self.markers.copy()
+        changed[74], changed[75] = changed[75], changed[74]
+        with self.assertRaises(ValueError): probe.validate_markers(changed)
+        source = (ROOT / "native/kernel/src/arch/x86_64/user_ipc.rs").read_text()
+        self.assertIn(".admit(scheduler, &members, &plan)", source)
+
+    def test_deadline_lifetimes_require_idle_expiry_retained_completion_and_late_denial(self):
+        payload = (ROOT / "native/kernel/src/arch/x86_64/user_ipc/deadline.rs").read_text()
+        self.assertRegex(payload, r"mov esi, 98\s+xor edx, edx\s+mov eax, 2\s+syscall")
+        self.assertTrue(self.summary["ipc_deadlines"] and self.summary["idle_request_expiry"])
+        self.assertEqual([r["generation"] for r in self.summary["ipc_deadline_lifetimes"]], [11, 12])
+        for index in (72, 73):
+            for field in ("generation", "root0", "ticks0", "ticks1", "expiry_ns", "epoch", "timeout_ns",
+                          "dispatches", "waits", "wakes", "idle_expiries", "all_blocked", "late_reply_denied",
+                          "completion_retained", "calls0", "calls1", "client_exit", "server_exit", "cr3_writes"):
+                self.reject(index, field, "0")
+        self.reject(73, "expiry_ns", "199999999")
+        for index in (72, 73, 74):
+            with self.assertRaises(ValueError):
+                probe.validate_markers(self.markers[:index] + self.markers[index+1:])
+        changed = self.markers.copy()
+        changed[72], changed[73] = changed[73], changed[72]
+        with self.assertRaises(ValueError): probe.validate_markers(changed)
+
+    def test_deadline_clock_requires_new_epoch_raw_conversion_and_verified_teardown(self):
+        for field, value in (("origin", "99"), ("last", str(1 << 64)), ("period_fs", "1000000"),
+                ("elapsed_ns", "1"), ("samples", "50"), ("samples", "4000050"), ("epoch", "1"),
+                ("idle_expiries", "1"), ("expired", "1"), ("counter_reset", "1"), ("config_restored", "0"),
+                ("mapping_windows", "3"), ("mapping_revoked", "0"), ("timed_ipc", "0"), ("production", "1")):
+            self.reject(74, field, value)
+
+    def test_continuous_clock_binds_raw_period_elapsed_and_idle_not_cpu_ticks(self):
+        self.assertTrue(self.summary["native_continuous_clock"])
+        self.assertEqual(self.summary["continuous_clock"]["elapsed_ns"], 100000000)
+        self.assertTrue(self.summary["ipc_deadlines"])
+        for field, value in (("origin", "10000100"), ("last", "99"), ("last", str(1 << 64)),
+                ("period_fs", "99999"), ("period_fs", "100000001"), ("elapsed_ns", "1"),
+                ("samples", "85"), ("samples", "8000083"), ("idle_ns", "3999999"),
+                ("idle_ns", "100000001"), ("enters", "11"), ("leaves", "13"),
+                ("idle_intervals", "3"), ("config_restored", "0"), ("counter_reset", "1"),
+                ("mmio_writes", "3"), ("mapping_windows", "1"), ("mapping_revoked", "0"), ("guards", "0"), ("clock", "cpu_ticks"),
+                ("scope", "smp"), ("timed_ipc", "1"), ("production", "1")):
+            self.reject(71, field, value)
+
+    def test_clock_marker_is_required_ordered_and_cannot_be_duplicated(self):
+        source = (ROOT / "native/kernel/src/user_root_probe/clock_driver.rs").read_text()
+        self.assertNotIn("self.memory.finish()", source)
+        self.assertIn("BootstrapTableMemory::new(self.root, self.memory.physical_address_bits)", source)
+        self.assertIn("Err(poole_kmap::Error::TranslationMissing)", source)
+        with self.assertRaises(ValueError):
+            probe.validate_markers(self.markers[:71] + self.markers[72:])
+        with self.assertRaises(ValueError):
+            probe.validate_markers(self.markers[:72] + self.markers[71:])
+        changed = self.markers.copy()
+        changed[70], changed[71] = changed[71], changed[70]
+        with self.assertRaises(ValueError):
+            probe.validate_markers(changed)
+
+    def test_request_lifetimes_require_four_generations_and_real_terminal_outcomes(self):
+        self.assertTrue(self.summary["ipc_caller_owned_completion"])
+        self.assertTrue(self.summary["ipc_request_cancellation"])
+        self.assertTrue(self.summary["ipc_dead_service_notification"])
+        self.assertTrue(self.summary["ipc_deadlines"])
+        self.assertEqual([r["outcome"] for r in self.summary["ipc_request_lifetimes"]], [0, 8, 9, 9])
+        for index in range(67, 71):
+            for field in ("generation", "ticks0", "ticks1", "dispatches", "calls0", "waits", "wakes",
+                          "cr3_writes", "client_cancel", "take_once", "survivor_query", "client_exit", "released_pages"):
+                self.reject(index, field, "0")
+            for field, value in (("round", "8"), ("outcome", "4"), ("root0", "0x0000000000000000"),
+                                 ("preemptions", "1"), ("calls1", "6"), ("stale_token", "1"), ("production", "1")):
+                self.reject(index, field, value)
+
+    def test_request_outcomes_cannot_be_reordered_replayed_or_omitted(self):
+        for index in range(67, 71):
+            with self.assertRaises(ValueError):
+                probe.validate_markers(self.markers[:index] + self.markers[index+1:])
+            changed = self.markers.copy()
+            changed[index] = self.markers[67 + (index - 66) % 4]
+            with self.assertRaises(ValueError):
+                probe.validate_markers(changed)
+
+    def test_authenticated_reply_requires_identity_token_lifecycle_and_fault_retry(self):
+        self.assertTrue(self.summary["ipc_authenticated_sender"])
+        self.assertTrue(self.summary["ipc_one_use_replies"])
+        self.assertFalse(self.summary["ipc_synchronous_call"])
+        self.assertTrue(self.summary["ipc_deadlines"])
+        for field in ("generation", "sender_client", "sender_server", "reply_generations", "reply_consumed",
+                      "reply_discarded", "replay_denied", "unminted_denied", "cross_owner_denied", "wrong_type_denied",
+                      "request_rights_denied", "output_prefix", "input_fault", "transformed", "ticks0", "ticks1",
+                      "calls0", "calls1", "waits", "wakes", "client_exit", "server_exit", "released_pages"):
+            self.reject(66, field, "0")
+        for field, value in (("root0", "0x0000000000000000"), ("dispatches", "65"), ("preemptions", "1"),
+                             ("handles", "4"), ("cr3_writes", "4"), ("objects_remaining", "1"), ("production", "1")):
+            self.reject(66, field, value)
+
+    def test_missing_or_replayed_reply_cannot_promote_old_queue_exchange(self):
+        for rows in (self.markers[:66] + self.markers[67:], self.markers[:66] + [self.markers[60], self.markers[67]]):
+            with self.assertRaises(ValueError):
+                probe.validate_markers(rows)
+
+    def test_ipc_pressure_requires_five_generations_and_each_enrolled_owner_death_path(self):
+        self.assertEqual(self.summary["ipc_persistent_generations"], 5)
+        self.assertEqual(self.summary["ipc_native_dead_owner_cases"], 4)
+        self.assertTrue(self.summary["ipc_native_wait_termination"])
+        for index in range(61, 66):
+            for field in ("generation", "ticks0", "ticks1", "calls0", "waits", "wakes", "full_denied",
+                          "stale_denied", "survivor_exit", "persistent_slots", "automatic_retirement", "released_pages"):
+                self.reject(index, field, "0")
+            for field, value in (("root0", "0x0000000000000000"), ("dispatches", "65"),
+                                 ("cr3_writes", "1"), ("objects_remaining", "1"), ("production", "1")):
+                self.reject(index, field, value)
+        for index in range(62, 66):
+            self.reject(index, "revoked", "0")
+        self.reject(61, "partial_output", "0")
+        self.reject(61, "calls1", "10")
+        self.reject(64, "calls1", "0")
+
+    def test_ipc_pressure_rejects_reordered_or_replayed_lifetimes(self):
+        for source, target in ((61, 62), (62, 63), (64, 65)):
+            changed = self.markers.copy()
+            changed[target] = changed[source]
+            with self.assertRaises(ValueError):
+                probe.validate_markers(changed)
+        self.assertEqual(self.summary["ipc_native_output_fault_prefix"], 4)
+        self.assertTrue(self.summary["ipc_native_writable_wait"])
+
+    def test_ipc_pressure_reuses_owned_slots_and_does_not_reset_authority(self):
+        source = (ROOT/"native/kernel/src/user_root_probe/peer_driver/ipc_pressure.rs").read_text(encoding="utf-8")
+        self.assertIn("peers: &mut [Peer; 2]", source)
+        self.assertIn("p.restart(", source)
+        self.assertNotIn("Slot::new", source)
+        self.assertNotIn("Space::new", source)
+        self.assertIn("cancel_waiting(p.id, ticket)", source)
+        self.assertIn("p.recover_timer(manager)", source)
+        adapter = (ROOT/"native/kernel/src/arch/x86_64/user_slice.rs").read_text(encoding="utf-8")
+        self.assertIn("Context::initial_with_arguments(image, self.arguments)", adapter)
+
+    def test_ipc_native_exchange_blocks_cancels_and_retires_but_is_not_general_lifecycle(self):
+        self.assertTrue(self.summary["bounded_capability_ipc"])
+        self.assertTrue(self.summary["ipc_blocking"])
+        self.assertTrue(self.summary["ipc_automatic_retirement"])
+        self.assertFalse(self.summary["ipc_general_lifecycle"])
+        for field in ("transformed", "forged_denied", "rights_denied", "oversize_denied", "copy_fault_denied",
+                      "client_exit", "server_exit", "owners_detached", "released_pages", "scrubbed_data_pages",
+                      "waits", "wakes", "cancellations", "automatic_retirement", "saved_state"):
+            self.reject(60, field, "0")
+        for field, value in (("root0", "0x0000000000000000"), ("root1", f"0x{self.summary['original_root']:016X}"),
+                ("dispatches", "65"), ("preemptions", "1"), ("ticks", "0"), ("calls0", "6"), ("calls1", "27"),
+                ("cr3_writes", "7"), ("blocking", "0"), ("objects_remaining", "1"), ("production", "1")):
+            self.reject(60, field, value)
+
+    def test_ipc_suite_does_not_nest_large_constructor_stacks(self):
+        parent = (ROOT/"native/kernel/src/user_root_probe.rs").read_text(encoding="utf-8")
+        self.assertLess(parent.index("peer_driver::unknown::run("), parent.index("peer_driver::ipc::run("))
+        child = (ROOT/"native/kernel/src/user_root_probe/peer_driver/ipc.rs").read_text(encoding="utf-8")
+        self.assertIn("#[inline(never)]\npub(crate) fn run(", child)
+
+    def test_ipc_wait_and_revoke_are_required_and_timer_wrapper_forwards_both(self):
+        task = (ROOT/"native/kernel/src/user_entry/task.rs").read_text(encoding="utf-8")
+        self.assertIn("fn revoke(&mut self, id: TaskId) -> Result<(), privilege::Error>;", task)
+        self.assertRegex(task, r"fn complete_wait\([\s\S]*?\) -> Result<\(\), privilege::Error>;")
+        wrapper = (ROOT/"native/kernel/src/user_root_probe/timer_driver.rs").read_text(encoding="utf-8")
+        self.assertIn("task::Driver::revoke(&mut self.entry, id)", wrapper)
+        self.assertRegex(wrapper, r"task::SliceDriver::complete_wait\(\s*&mut self.entry,\s*id,\s*ticket,\s*status,?\s*\)")
+
+    def test_unknown_time_is_null_not_zero_and_recovery_requires_retired_debt(self):
+        self.assertTrue(self.summary["unknown_runtime_recovery"])
+        self.assertIsNone(self.summary["unknown_task_total_ticks"])
+        self.assertEqual(self.summary["unmeasured_dispatches"],1)
+        self.assertFalse(self.summary["complete_runtime_tick_accounting"])
+        self.assertFalse(self.summary["physical_clock_failure_recovery"])
+        for field in ("unmeasured","duplicate_denied","stale_denied","cpu_denied","zero_charge_denied",
+                "requeue_denied","outcome_denied","cleanup_retry","retained_pages","free_denials",
+                "peer_exit","scheduler_match","retired_unknown","released_pages","scrubbed_data_pages"):
+            self.reject(59,field,"0")
+        for field,value in (("total0","0"),("total0","estimated"),("measured0","1"),("pending","1"),
+                ("injection","hardware_clock_failure"),("production","1"),("root0","0x0000000000000000"),
+                ("root1",f"0x{self.summary['original_root']:016X}"),("root1","0x0000000100000000"),
+                ("dispatches","7"),("peer_preemptions","5"),("peer_progress","0"),("peer_ticks","0"),
+                ("cr3_writes","15")):
+            self.reject(59,field,value)
+        with self.assertRaises(ValueError):
+            probe.validate_markers(self.markers[:59]+self.markers[60:])
+
+    def test_unknown_constructor_runs_after_measured_suite_releases_its_stack_frame(self):
+        parent = (ROOT/"native/kernel/src/user_root_probe.rs").read_text(encoding="utf-8")
+        measured = (ROOT/"native/kernel/src/user_root_probe/peer_driver.rs").read_text(encoding="utf-8")
+        recovery = (ROOT/"native/kernel/src/user_root_probe/peer_driver/unknown.rs").read_text(encoding="utf-8")
+        self.assertLess(parent.index("peer_driver::run_all("), parent.index("peer_driver::unknown::run("))
+        self.assertNotIn("unknown::run(", measured)
+        self.assertIn("#[inline(never)]\npub fn run_all(", measured)
+        self.assertIn("#[inline(never)]\npub(crate) fn run(", recovery)
+
+    def test_runtime_settlement_requires_all_dispatches_terminal_and_failed_cleanup_charges(self):
+        self.assertTrue(self.summary["bounded_runtime_accounting"])
+        self.assertFalse(self.summary["pure_user_instruction_time"])
+        self.assertEqual(self.summary["runtime_failed_cleanup_ticks"],100)
+        for field in ("samples","terminal_samples","duplicate_denials","ticks","preempt_ticks",
+                "terminal_ticks","failed_cleanup_ticks","failed_cleanup_samples","scheduler_match"):
+            self.reject(57,field,"0")
+        for field in ("pending","unknown","production"):
+            self.reject(57,field,"1")
+        self.reject(57,"clock","tsc")
+        self.reject(57,"charge_window","user_only")
+        self.reject(53,"ticks0","0")
+        with self.assertRaises(ValueError):
+            probe.validate_markers(self.markers[:57]+self.markers[59:])
+
+    def test_hpet_backup_proof_requires_exact_owner_accounting_and_surviving_peer(self):
+        self.assertTrue(self.summary["bounded_hpet_backup_recovery"])
+        self.assertFalse(self.summary["independent_missing_interrupt_watchdog"])
+        self.assertFalse(self.summary["nmi_recovery"])
+        for field in ("local_masked","recoveries","arms","stops","restores","ticks","deadline_ns",
+                "peer_exit","shared_apic","requires_if"):
+            self.reject(58,field,"0")
+        for field in ("nmi","production"):
+            self.reject(58,field,"1")
+        for field,value in (("preempt0","1"),("ticks0","499"),("value","64"),("first","exit"),
+                ("survivor_after_stop","5"),("progress0","1")):
+            self.reject(54,field,value)
+        with self.assertRaises(ValueError):
+            probe.validate_markers(self.markers[:58]+self.markers[59:])
+
+    def test_hpet_msi_launch_option_is_explicit_allowlisted_and_boolean(self):
+        from tools.qualify_native_pooleboot import _hpet_msi_options
+        self.assertEqual(_hpet_msi_options(False), [])
+        self.assertEqual(_hpet_msi_options(True), ["-global","hpet.msi=on"])
+        for invalid in (0, 1, None, "on", ["-global","anything"]):
+            with self.assertRaises(ValueError):
+                _hpet_msi_options(invalid)
+
+    def reject(self, index, field, value):
+        changed = self.markers.copy()
+        changed[index], count = re.subn(r"\b" + field + r"=[^ ]+", field + "=" + value, changed[index])
+        self.assertEqual(count, 1)
+        with self.assertRaises((ValueError, KernelTransferError)):
+            probe.validate_markers(changed)
+
+    def test_synthetic_trace_has_only_bounded_user_entry_claims(self):
+        self.assertEqual((self.summary["root_probe_cpl"], self.summary["cpl"]), (0, 3))
+        self.assertEqual(self.summary["cr3_writes"], 505)
+        self.assertTrue(self.summary["ring3_executed"])
+        self.assertTrue(self.summary["user_timer_preemption"])
+        self.assertFalse(self.summary["production_ready"])
+
+    def test_order_missing_duplicate_and_every_live_field_rejected(self):
+        self.assertGreaterEqual(probe.negative_controls(self.markers), 25)
+
+    def test_wrong_selector_rejected(self):
+        for value in ("0", "22", "24", "255"):
+            self.reject(23, "trap_scenario", value)
+
+    def test_spawn_failures_quarantine_retries_and_peer_continuation_are_required(self):
+        self.assertEqual(self.summary["spawn_cleanup_retries"], 6)
+        self.assertTrue(self.summary["spawn_peer_continuation"])
+        for field in ("quota_failures", "quota_released_pages", "quota_scrubbed_pages", "after_effect_failures", "cleanup_quarantines", "cleanup_retries",
+                "retained_free_denials", "released_pages", "scrubbed_pages", "peer_resumed", "peer_exit"):
+            self.reject(55, field, "0")
+        self.reject(55, "cpu_exposures", "1")
+        self.reject(55, "production", "1")
+        for changed in (self.markers[:55] + self.markers[56:],
+                self.markers[:55] + [self.markers[56], self.markers[55]] + self.markers[57:]):
+            with self.assertRaises(ValueError): probe.validate_markers(changed)
+
+
+    def test_timer_recovery_requires_owned_drain_quarantine_and_survivor(self):
+        self.assertEqual(self.summary["timer_quarantine_retries"], 1)
+        self.assertEqual(self.summary["timer_quarantine_retained_pages"], 13)
+        for field in ("pending","late","quarantines","retries","retained_pages","free_denials",
+                "restart_denials","reap_denials","peer_exit","empty_irr_isr","kernel_window","detached_after_shutdown"):
+            self.reject(56, field, "0")
+        for field in ("deliveries","eois"):
+            for value in ("0","2","4","257",str(1<<64)):
+                self.reject(56,field,value)
+        self.reject(56,"if","1")
+        self.reject(56,"production","1")
+        for field,value in (("preempt0","1"),("progress0","1"),("ticks0","1"),
+                ("survivor_after_stop","5"),("first","exit"),("dispatches","7")):
+            self.reject(53,field,value)
+        with self.assertRaises(ValueError):
+            probe.validate_markers(self.markers[:56]+self.markers[57:])
+
+    def test_ordinary_unsigned_terminal_is_not_user_root_execution(self):
+        altered = self.markers[:29] + ["POOLEOS:KERNEL:TRANSFER-DENIED PASS"]
+        with self.assertRaises(ValueError):
+            probe.validate_markers(altered)
+
+    def test_original_must_match_observed_boot_root(self):
+        self.reject(29, "original", "0x0000000010000000")
+
+    def test_candidate_must_be_distinct_aligned_dma32_and_nonzero(self):
+        for value in (0, 1, 1 << 32, self.summary["original_root"]):
+            self.reject(29, "candidate", f"0x{value:016X}")
+
+    def test_active_root_must_match_prepared_candidate(self):
+        self.reject(30, "cr3", f"0x{self.summary['original_root']:016X}")
+
+    def test_restoration_must_match_original(self):
+        self.reject(77, "restored", f"0x{self.summary['candidate_root']:016X}")
+
+    def test_sentinel_binds_candidate_and_generation(self):
+        self.reject(30, "stack_probe", f"0x{self.summary['stack_probe'] ^ 1:016X}")
+        self.reject(29, "generation", str(self.summary["generation"] + 1))
+
+    def test_generation_has_u64_nonzero_bounds(self):
+        for value in ("0", str(1 << 64)):
+            self.reject(29, "generation", value)
+
+    def test_numeric_claims_cannot_be_promoted(self):
+        for index, field, value in ((29, "pages", "14"), (29, "temporary_aliases", "1"),
+                (30, "cpl", "3"), (30, "if", "1"), (30, "ring3", "1"),
+                (77, "cr3_writes", "1"), (77, "allocated_pages", "0"),
+                (77, "released_pages", "12"), (77, "scrubbed_data_pages", "5"),
+                (77, "production", "1")):
+            self.reject(index, field, value)
+
+    def test_timer_root_delivery_eoi_quiescence_and_mmio_claims_cannot_change(self):
+        for field, value in (("cr3", f"0x{self.summary['original_root']:016X}"),
+                ("deliveries", "0"), ("eois", "2"), ("quiesced", "0"),
+                ("mmio_pages", "3"), ("if", "1"), ("ring3", "1")):
+            self.reject(31, field, value)
+
+    def test_retained_acpi_accounting_has_nonzero_bounded_equality(self):
+        for value in ("0", "2", "20", str(1 << 64)):
+            self.reject(77, "retained_acpi_pages", value)
+
+    def test_user_entry_cpl_traps_state_cleanup_and_return_cannot_change(self):
+        for field,value in (("cpl","0"),("traps","6"),("private_rsp0","0"),("gpr_zero","14"),
+                ("fp_cleared","0"),("cli_denied","0"),("io_denied","0"),("syscall_denied","0"),
+                ("supervisor_fault","0"),("nx_fault","0"),("kernel_return","0"),
+                ("descriptors_detached","0"),("if","1"),("production","1")):
+            self.reject(32,field,value)
+
+    def test_user_entry_root_is_bound_to_candidate(self):
+        self.reject(32,"cr3",f"0x{self.summary['original_root']:016X}")
+
+    def test_missing_user_entry_and_old_cpl0_final_cannot_claim_execution(self):
+        self.reject(77,"ring3","0")
+        changed=self.markers[:32]+self.markers[33:]
+        with self.assertRaises(ValueError): probe.validate_markers(changed)
+
+    def test_cpu_adapter_uses_apic_register_accessor_not_capability_mask(self):
+        source = (ROOT / "native/kernel/src/arch/x86_64.rs").read_text()
+        adapter = source.split("impl poolekernel::user_entry::prepared::cpu::Cpu for UserRootCpu", 1)[1]
+        snapshot = adapter.split("fn write_root", 1)[0]
+        self.assertIn("read_apic_base()", snapshot)
+        self.assertNotIn("read_msr(CPU_MSR_APIC_BASE)", source)
+        self.assertIn("const IA32_APIC_BASE: u32 = 0x0000_001b;", source)
+        self.assertIn("read_msr(IA32_APIC_BASE)", source)
+        self.assertIn("0x101f => PanicCode::UserRoot,",
+                      (ROOT / "native/kernel/src/main.rs").read_text())
+
+    def test_preemption_counts_state_and_root_cannot_be_promoted(self):
+        for field,value in (("cr3",f"0x{self.summary['original_root']:016X}"),("cpl","0"),
+                ("deliveries","0"),("eois","2"),("resumes","3"),("private_rsp0","0"),
+                ("gpr_preserved","13"),("fp_preserved","0"),("timer_quiesced","0"),
+                ("forced_return","0"),("if","1"),("production","1")):
+            self.reject(33,field,value)
+
+    def test_spinning_progress_must_be_positive_increasing_u64(self):
+        for field,value in (("first_progress","0"),("first_progress","100"),
+                ("last_progress","10"),("last_progress","9"),("last_progress",str(1<<64))):
+            self.reject(33,field,value)
+
+    def test_missing_preemption_marker_does_not_claim_a_user_timer(self):
+        with self.assertRaises(ValueError):
+            probe.validate_markers(self.markers[:33]+self.markers[34:])
+
+    def test_user_root_exclusion_lists_all_other_development_scenarios(self):
+        import tomllib
+        features = tomllib.loads((ROOT / "native/boot/Cargo.toml").read_text())["features"]
+        source = (ROOT / "native/boot/src/exit.rs").read_text()
+        guard = source.split('feature = "development-user-root",', 1)[1].split('compile_error!', 1)[0]
+        others = set(features) - {"default", "development-transfer", "development-user-root"}
+        self.assertEqual(len(others), 22)
+        self.assertEqual(set(re.findall(r'feature = "([^"]+)"', guard)), others)
+
+    def test_syscall_root_version_errors_copy_and_teardown_are_bound(self):
+        for field,value in (("cr3",f"0x{self.summary['original_root']:016X}"), ("version","2"),
+                ("calls","11"),("ok","4"),("faults","0"),("read_faults","0"),("write_faults","1"),
+                ("cpl","0"),("entry","int80"),("return","sysret"),("max_copy","4096"),
+                ("input_atomic","0"),("output_prefix","0"),("completion_traps","0"),("msrs_cleared","0")):
+            self.reject(34,field,value)
+
+    def test_old_preemption_trace_cannot_claim_syscall_execution(self):
+        with self.assertRaises(ValueError):
+            probe.validate_markers(self.markers[:34]+self.markers[35:])
+
+    def test_task_identity_generations_and_roots_cannot_be_replayed(self):
+        for index in range(35,39):
+            for field,value in (("generation","0"),("generation","5"),("slot","1"),("root","0x0000000000000000"),
+                                ("root","0x0000000000000001"),("root","0x0000000100000000")):
+                self.reject(index,field,value)
+        changed=self.markers.copy();changed[36]=changed[35]
+        with self.assertRaises(ValueError):probe.validate_markers(changed)
+
+    def test_task_termination_cleanup_and_accounting_cannot_be_promoted(self):
+        self.assertEqual((self.summary["normal_exits"],self.summary["fault_terminations"]),(1,3))
+        self.assertTrue(self.summary["peer_scheduling"])
+        for index in range(35,39):
+            for field,value in (("syscalls","3"),("value","99"),("cpl","0"),("restart_denied","0"),
+                    ("repeat_reap_denied","0"),("retained_free_denials","4"),("entry_quiesced","0"),
+                    ("root_restored","0"),("released_pages","12"),("scrubbed_data_pages","5"),("production","1")):
+                self.reject(index,field,value)
+        self.reject(35,"reason","fault");self.reject(36,"reason","exit")
+
+    def test_missing_reordered_or_old_syscall_trace_cannot_claim_task_termination(self):
+        for changed in (self.markers[:35]+self.markers[39:],self.markers[:36]+self.markers[37:],
+                self.markers[:36]+[self.markers[37],self.markers[36]]+self.markers[38:]):
+            with self.assertRaises(ValueError):probe.validate_markers(changed)
+
+    def test_peer_roots_are_distinct_owned_shape_and_ordered(self):
+        for index in range(39,53):
+            for field,value in (("root0","0x0000000000000000"),("root1","0x0000000000000001"),
+                    ("root1","0x0000000100000000"),("root1",f"0x{self.summary['candidate_root']:016X}"),
+                    ("root0",f"0x{self.summary['original_root']:016X}"),("round","99")):
+                self.reject(index,field,value)
+        changed=self.markers.copy(); changed[40],changed[41]=changed[41],changed[40]
+        with self.assertRaises(ValueError): probe.validate_markers(changed)
+        with self.assertRaises(ValueError): probe.validate_markers(self.markers[:39]+self.markers[53:])
+
+    def test_peer_dispatch_preemption_and_root_writes_are_conserved(self):
+        self.assertEqual(self.summary["peer_preemptions"],138)
+        for index in range(39,53):
+            for field,value in (("dispatches","65"),("dispatches","1"),("preempt0","0"),
+                    ("preempt1","1"),("cr3_writes","0"),("progress0","0"),("progress1",str(1<<64)),
+                    ("ticks0","0"),("ticks1",str(1<<64))):
+                self.reject(index,field,value)
+        self.reject(41,"preempt0","4")
+        self.reject(77,"cr3_writes","96")
+
+    def test_invalid_return_reason_vector_and_peer_survival_are_bound(self):
+        self.assertEqual(self.summary["invalid_return_terminations"], 6)
+        self.assertEqual(self.summary["additional_user_exception_terminations"], 4)
+        for index in range(43,49):
+            for field, value in (("first", "fault"), ("value", "99"), ("return_vector", "0")):
+                self.reject(index, field, value)
+        self.reject(48, "return_vector", "256")
+        for index in range(49,53):
+            self.reject(index, "return_vector", "64")
+            self.reject(index, "value", "8")
+
+    def test_private_stack_exception_routes_keep_system_faults_out(self):
+        source = (ROOT / "native/kernel/src/arch/x86_64/user.rs").read_text()
+        table = source.split("for (vector, handler) in [",1)[1].split("] {",1)[0]
+        vectors = set(map(int, re.findall(r"\(\s*([0-9]+),", table)))
+        self.assertEqual(vectors, {0,1,3,4,5,6,11,12,13,14,16,17,19})
+        self.assertIn("IdtGate::interrupt(handler, 0)", source)
+        self.assertIn("if vector == 3 {", source)
+        self.assertIn("gate.attributes |= 0x60;", source)
+        self.assertIn("read_rflags() & syscall::FMASK != 0", source)
+
+    def test_tcg_stack_access_deviation_never_claims_architectural_ss_delivery(self):
+        self.assertFalse(self.summary["architectural_stack_fault_qualified"])
+        self.assertEqual(self.summary["observed_stack_access_vector"], 13)
+        self.assertEqual(self.summary["new_native_exception_vectors"], [0,1,3])
+        self.assertEqual(self.summary["peer_rounds"][13]["value"], 13)
+        self.reject(52, "value", "12")
+
+    def test_trap_entry_clears_inherited_ac_before_rust_and_preserves_saved_frame(self):
+        source = (ROOT / "native/kernel/src/arch/x86_64.rs").read_text()
+        entry = source.split("poole_trap_common:",1)[1].split(".size poole_trap_common",1)[0]
+        self.assertLess(entry.index("push r15"), entry.index("pushfq"))
+        self.assertLess(entry.index("and qword ptr [rsp], -262145"), entry.index("popfq"))
+        self.assertLess(entry.index("popfq"), entry.index("call poole_kernel_trap_dispatch"))
+        self.assertLess(entry.index("cld"), entry.index("call poole_kernel_trap_dispatch"))
+
+    def test_peer_survivor_progress_after_each_stop_is_required(self):
+        self.assertEqual(self.summary["peer_survival_cases"],17)
+        for index in range(39,53):
+            for field,value in (("survivor_after_stop","0"),("survivor_after_stop","7"),
+                    ("survivor_exit","255"),("states_preserved","0"),("root_restored","0"),
+                    ("released_pages","25"),("scrubbed_data_pages","11"),("production","1")):
+                self.reject(index,field,value)
+        self.reject(42,"first","exit");self.reject(42,"value","65")
+
+
+if __name__ == "__main__":
+    unittest.main()

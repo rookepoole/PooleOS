@@ -6,6 +6,7 @@
 mod arch {
     pub mod x86_64;
 }
+mod user_root_probe;
 
 use core::cell::UnsafeCell;
 use core::panic::PanicInfo;
@@ -444,7 +445,7 @@ pkvm_fragment!(
 );
 pkvm_fragment!(
     PKVM_LAYOUT,
-    b"POOLEOS:KERNEL:VM-LAYOUT PASS contract=PKVM1 canonical_bits=48 null_guard_end=0x0000000000010000 user_end=0x0000800000000000 kernel_start=0xFFFF800000000000 direct_start=0xFFFF900000000000 direct_end=0xFFFFD00000000000 temp_start=0xFFFFFFFF801E6000 temp_end=0xFFFFFFFF801E7000 kernel_image_start=0xFFFFFFFF80000000 kernel_image_end=0xFFFFFFFFC0000000 window_start=0x0000000040000000 window_pages=512\n"
+    b"POOLEOS:KERNEL:VM-LAYOUT PASS contract=PKVM1 canonical_bits=48 null_guard_end=0x0000000000010000 user_end=0x0000800000000000 kernel_start=0xFFFF800000000000 direct_start=0xFFFF900000000000 direct_end=0xFFFFD00000000000 temp_start=0xFFFFFFFF801F6000 temp_end=0xFFFFFFFF801F7000 kernel_image_start=0xFFFFFFFF80000000 kernel_image_end=0xFFFFFFFFC0000000 window_start=0x0000000040000000 window_pages=512\n"
 );
 pkvm_fragment!(
     PKVM_TABLES,
@@ -8070,6 +8071,7 @@ extern "C" fn poole_kernel_emergency_panic(code: u32) -> ! {
         0x101c => PanicCode::SchedulerSmpPreempt,
         0x101d => PanicCode::Atomics,
         0x101e => PanicCode::Locks,
+        0x101f => PanicCode::UserRoot,
         _ => PanicCode::UnexpectedReturn,
     };
     let disposition = PANIC_STATE.begin(code);
@@ -8434,6 +8436,10 @@ extern "C" fn poole_kernel_rust_entry(
         });
         logger.write_bytes(&PKENTRY_TRANSFER_DENIED);
         halt_forever()
+    }
+
+    if trap_scenario == DevelopmentTrapScenario::UserRoot {
+        user_root_probe::run(&decoded, validated.core, &mut serial, &mut debugcon);
     }
 
     if trap_scenario == DevelopmentTrapScenario::CpuPolicy {
@@ -11881,6 +11887,9 @@ extern "C" fn poole_kernel_rust_entry(
         }
         DevelopmentTrapScenario::Atomics => poole_kernel_emergency_panic(PanicCode::Atomics as u32),
         DevelopmentTrapScenario::Locks => poole_kernel_emergency_panic(PanicCode::Locks as u32),
+        DevelopmentTrapScenario::UserRoot => {
+            poole_kernel_emergency_panic(PanicCode::UserRoot as u32)
+        }
     }
 }
 
@@ -12255,11 +12264,22 @@ extern "C" fn poole_kernel_trap_dispatch(frame_pointer: *mut TrapFrame) {
         poole_kernel_emergency_panic(PanicCode::TrapContract as u32);
     }
     let depth = TRAP_DEPTH.fetch_add(1, Ordering::AcqRel).wrapping_add(1);
+    // Only a precisely armed user-copy instruction may recover a nested CPL0 page fault.
+    let frame = unsafe { &mut *frame_pointer };
+    if depth == 2
+        && matches!(
+            DevelopmentTrapScenario::from_selector(TRAP_SCENARIO.load(Ordering::Acquire)),
+            Some(DevelopmentTrapScenario::UserRoot)
+        )
+        && arch::x86_64::user::recover_copy_fault(frame, depth)
+    {
+        TRAP_DEPTH.store(1, Ordering::Release);
+        return;
+    }
     if depth != 1 {
         poole_kernel_emergency_panic(PanicCode::TrapContract as u32);
     }
     // SAFETY: every installed PKTRAP1 stub passes its complete normalized frame.
-    let frame = unsafe { &mut *frame_pointer };
     let scenario = DevelopmentTrapScenario::from_selector(TRAP_SCENARIO.load(Ordering::Acquire))
         .unwrap_or_else(|| poole_kernel_emergency_panic(PanicCode::TrapContract as u32));
     if scenario == DevelopmentTrapScenario::XstateException {
@@ -12272,6 +12292,17 @@ extern "C" fn poole_kernel_trap_dispatch(frame_pointer: *mut TrapFrame) {
     }
     if scenario == DevelopmentTrapScenario::SchedulerDeferred {
         dispatch_scheduler_deferred(frame, depth);
+        return;
+    }
+    if scenario == DevelopmentTrapScenario::UserRoot {
+        if user_root_probe::dispatch_drain(frame, depth) {
+            return;
+        }
+        if arch::x86_64::user::active() {
+            arch::x86_64::user::dispatch(frame, depth);
+            return;
+        }
+        user_root_probe::dispatch_timer(frame, depth);
         return;
     }
     if matches!(

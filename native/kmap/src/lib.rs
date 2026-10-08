@@ -13,7 +13,7 @@ pub const RETAINED_TABLE_ENTRIES: usize = 2 * TABLE_ENTRIES;
 pub const MIN_VIRTUAL_BASE: u64 = 0xffff_ffff_8000_0000;
 pub const MAX_VIRTUAL_EXCLUSIVE: u64 = 0xffff_ffff_c000_0000;
 // Reserve kernel growth space without moving the retained stack per image.
-pub const KERNEL_PAGE_CAPACITY: usize = 192;
+pub const KERNEL_PAGE_CAPACITY: usize = 208;
 pub const STACK_GUARD_LOW_PAGE: usize = KERNEL_PAGE_CAPACITY;
 pub const STACK_FIRST_PAGE: usize = STACK_GUARD_LOW_PAGE + 1;
 pub const STACK_PAGE_COUNT: usize = 36;
@@ -1496,7 +1496,7 @@ mod tests {
 
     #[test]
     fn retained_kernel_growth_preserves_guards_and_rejects_overflow_before_writes() {
-        for pages in [148u32, 192, 193] {
+        for pages in [148u32, 192, 193, 208, 209] {
             let mut growing = request();
             growing.mappings[3].byte_count += (pages - growing.page_count) * PAGE_SIZE as u32;
             growing.page_count = pages;
@@ -1518,7 +1518,7 @@ mod tests {
                 &mut table,
                 &mut retained_table,
             );
-            if pages == 193 {
+            if pages == 209 {
                 assert_eq!(result, Err(Error::RetainedRange));
                 for output in [&root, &pdpt, &directory, &table, &retained_table] {
                     assert_eq!(output, &original);
