@@ -5,12 +5,15 @@ use poolekernel::user_entry::preemption;
 use poolekernel::user_entry::prepared::{STACK_BOTTOM, STACK_TOP};
 use poolekernel::user_entry::syscall;
 use poolekernel::user_entry::task;
+#[path = "user_slice.rs"]
+mod slices;
 #[path = "user_task.rs"]
 mod tasks;
 use poolekernel::user_entry::{
     self, ImageAdmission, InitialReturnFrame,
     privilege::{self, Action, Controls, Driver, Error, Layout, Observation, Sequence, Trap},
 };
+pub use slices::{PeerEntry, peer_payload};
 pub use tasks::payload as task_payload;
 
 #[repr(C, align(16))]
@@ -449,6 +452,11 @@ pub fn dispatch(frame: &mut TrapFrame, depth: u32) {
         reject();
     }
     let t = snapshot(frame, depth);
+    if slices::active() {
+        slices::dispatch(&t, frame);
+        crate::TRAP_DEPTH.store(0, Ordering::Release);
+        return;
+    }
     if unsafe { (&*(&raw const TASK)).is_some() } {
         tasks::dispatch(&t, frame);
         crate::TRAP_DEPTH.store(0, Ordering::Release);

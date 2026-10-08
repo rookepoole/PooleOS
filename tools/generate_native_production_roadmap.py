@@ -11581,7 +11581,7 @@ def apply_cycle241(roadmap: dict, test_count: int) -> dict:
 
 def apply_cycle242(roadmap: dict, test_count: int) -> dict:
     checkpoint = "docs/checkpoints/cycle242-user-task-termination.md"
-    receipt_path = "runs/native-user-entry-readiness.json"
+    receipt_path = "tests/fixtures/cycle242-user-entry-readiness.json"
     raw = (ROOT / receipt_path).read_bytes()
     receipt = json.loads(raw)
     baseline = roadmap["baseline"]
@@ -11645,13 +11645,88 @@ def apply_cycle242(roadmap: dict, test_count: int) -> dict:
     flag["evidence"].append(checkpoint)
     roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle243(roadmap, test_count)
+
+
+def apply_cycle243(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle243-native-user-peer-scheduling.md"
+    receipt_path = "runs/native-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle242_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle242_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=243, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=243)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path, "docs/native-user-peer-scheduling.md"]
+    gate["current_candidate_audit"]["cycle"] = 243
+    gate["current_focused_source_projection"]["cycle"] = 243
+    gate["qualification_status"] = "bounded_preemptive_peer_tasks_pass_general_admission_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=243, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="345_debug_kernel_plus95_repeated_user_release_plus24_repeated_VM_release_plus7_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=29, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=138.687,
+        log_sha256="F42498A75742F006D5EF5433C4119C86985748491A36B5B2BB94373D5922B8D1",
+        initial_attempts=[dict(status="link_failed_before_guest", elapsed_seconds=70.812,
+            reason="text_exceeded_reserved_0x84000_boundary_by_0x185E",
+            log_sha256="CF2A8F616763992CDB80A1F2034F92D2B7F77AD8F7F784641826DA59CC0C7778")],
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=243, status="pass",
+        tests_run=120, tests_passed=120, tests_failed=0, tests_skipped=0,
+        elapsed_seconds=50.675, runner_elapsed_seconds=51.5,
+        log_sha256="CFA4D6907BB1B7653CF60750A7124AD638D2A3B492A13321E0F98A400295AF77",
+        initial_attempts=[dict(tests_run=120, failures=1, errors=0, elapsed_seconds=50.997,
+            reason="checklist_date_override_differed_from_canonical_default_restored_without_source_change",
+            log_sha256="CDEA5538B3352587474AEE5626C05FC57244C004BA8313C09810F7C68F217105")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=243, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_CPL3_preemptive_peer_survival_probes_plus_default_denial",
+        peer_scheduling_contract="PKUSER9", bounded_peer_scheduling=True,
+        peer_scheduler="PKSCHED1_single_CPU", private_roots_per_round=2, peer_rounds_per_probe=4,
+        peer_preemptions_per_probe=[s["peer_preemptions"] for s in summaries],
+        peer_survival_cases_per_probe=4, legacy_user_state_saved_restored=True,
+        suspended_owner_retains_memory=True, syscall_stack_within_owned_page=True,
+        syscall_budget_terminates_only_task=True, invalid_user_frame_containment=False,
+        timer_pending_race_qualification=False, complete_runtime_tick_accounting=False,
+        released_pages_per_probe=169, scrubbed_data_pages_per_probe=78,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries],
+        multi_application_scheduling=False, general_user_program_admission=False, iso_built=False)
+    lane["stages"]["USI-1"] = "partial_live_preemptive_peer_tasks_no_general_admission_or_ipc"
+    roadmap["immediate_next_move"]["title"] = "Close USI-1 admission containment: transactional spawn, invalid user frames and armed-timer teardown; then capability IPC"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", "docs/native-user-peer-scheduling.md", receipt_path, checkpoint,
+        "native/kernel/src/user_entry/task.rs", "native/kernel/src/arch/x86_64/user_slice.rs",
+        "native/kernel/src/user_root_probe/peer_driver.rs", "native/kernel/src/user_entry/cpu.rs"]
+    roadmap["immediate_next_move"]["exit_evidence"] = [
+        "every failed spawn allocation/mapping step rolls back or explicitly retains exact quarantined ownership",
+        "invalid user return frames and admitted exception classes terminate only the offending task",
+        "pending and late timer teardown cannot release referenced state; qualify peer continuation and accounting",
+        "preserve fresh peer-survival, copy, timer and ordinary-denial controls before broader executable admission"]
+    evidence = "Cycle 243: PKUSER9 joins actual private-root CPL3 tasks to PKSCHED1; preserves GPR/IRET/legacy FP state across quanta; retains suspended memory and proves peer survival after exit/fault/cancel/quota. Two fresh44-marker guests each pass40 dispatches/33 preemptions/249 evidence controls; ordinary denial passes.345 debug,95 user-release,24 VM-release,7 compile-fail,10 boot-exit and29 Python oracle tests pass. " + checkpoint
+    gap = "Bounded one-BSP fixed tasks only. Full spawn rollback, invalid-return-frame containment, pending/late timer recovery, final-sub-quantum accounting, independent missing-IRQ watchdog, general XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion."
+    for phase_id in ("N7", "N9", "N12", "N13"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1271)
+    parser.add_argument("--test-count", type=int, default=1275)
     parser.add_argument("--status-date", default="2026-10-08")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

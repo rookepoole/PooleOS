@@ -25,8 +25,33 @@ struct StopControl {
     corrupt: u8,
     entries: u32,
     shutdowns: u32,
+    slice_terminal: bool,
+    zero_ticks: bool,
 }
 struct StopDriver(Rc<RefCell<StopControl>>);
+impl task::SliceDriver for StopDriver {
+    fn execute_slice(
+        &mut self,
+        image: ImageAdmission,
+        id: TaskId,
+    ) -> Result<task::Slice, privilege::Error> {
+        let o = task::Driver::execute(self, image, id)?;
+        let c = self.0.borrow();
+        Ok(task::Slice {
+            id: o.id,
+            root: o.root,
+            event: if c.slice_terminal {
+                task::Event::Terminated(o)
+            } else {
+                task::Event::Preempted {
+                    ticks: u64::from(!c.zero_ticks),
+                    syscalls: o.syscalls,
+                    progress: u64::from(c.entries),
+                }
+            },
+        })
+    }
+}
 impl task::Driver for StopDriver {
     fn execute(&mut self, image: ImageAdmission, id: TaskId) -> Result<Outcome, privilege::Error> {
         let mut c = self.0.borrow_mut();
@@ -197,6 +222,143 @@ fn prepared_task_cancel_has_no_cpu_or_driver_effect() {
     assert_eq!(c.borrow().entries, 0);
     assert_eq!(c.borrow().shutdowns, 0);
     assert_eq!(slot.state(id), Err(task::Error::Missing));
+}
+
+#[test]
+fn task_quanta_retain_memory_across_suspension_and_restore_before_resuming() {
+    let mut s = setup();
+    let (mut slot, c, id) = task_slot(s.owner);
+    assert!(slot.cancel_suspended(id).is_err());
+    for n in 1..=3 {
+        slot.activate(id, &s.manager, &mut s.memory).unwrap();
+        assert!(slot.cancel_suspended(id).is_err());
+        let result = slot.run_slice(id).unwrap();
+        assert_eq!(
+            result.event,
+            task::Event::Preempted {
+                ticks: 1,
+                syscalls: 2,
+                progress: n
+            }
+        );
+        assert_eq!(slot.state(id), Ok(task::State::Suspended));
+        assert_eq!(s.machine.borrow().snapshot.cr3, s.original);
+        assert!(slot.run_slice(id).is_err());
+        assert!(slot.reap(id, &mut s.manager, &mut s.memory).is_err());
+        retained(&mut s.manager, &s.handles);
+    }
+    c.borrow_mut().slice_terminal = true;
+    slot.activate(id, &s.manager, &mut s.memory).unwrap();
+    assert!(matches!(
+        slot.run_slice(id).unwrap().event,
+        task::Event::Terminated(_)
+    ));
+    assert!(slot.activate(id, &s.manager, &mut s.memory).is_err());
+    slot.reap(id, &mut s.manager, &mut s.memory).unwrap();
+    assert_eq!(
+        s.machine.borrow().writes,
+        [
+            s.candidate,
+            s.original,
+            s.candidate,
+            s.original,
+            s.candidate,
+            s.original,
+            s.candidate,
+            s.original
+        ]
+    );
+    assert_eq!(c.borrow().shutdowns, 4);
+}
+
+#[test]
+fn cancellation_never_reenters_saved_state_and_stale_cancel_has_no_effect() {
+    let mut s = setup();
+    let (mut slot, c, id) = task_slot(s.owner);
+    slot.activate(id, &s.manager, &mut s.memory).unwrap();
+    slot.run_slice(id).unwrap();
+    assert_eq!(
+        slot.cancel_suspended(TaskId {
+            generation: 2,
+            ..id
+        }),
+        Err(task::Error::Identity)
+    );
+    let o = slot.cancel_suspended(id).unwrap();
+    assert_eq!(o.reason, Reason::Cancelled);
+    assert!(slot.cancel_suspended(id).is_err());
+    assert!(slot.activate(id, &s.manager, &mut s.memory).is_err());
+    assert!(slot.run_slice(id).is_err());
+    retained(&mut s.manager, &s.handles);
+    slot.reap(id, &mut s.manager, &mut s.memory).unwrap();
+    assert_eq!(
+        s.machine.borrow().writes,
+        [s.candidate, s.original, s.original]
+    );
+    assert_eq!(c.borrow().entries, 1);
+}
+
+#[test]
+fn quantum_execute_quiesce_or_suspend_failure_cannot_resume_or_free() {
+    for case in 0..3 {
+        let mut s = setup();
+        let (mut slot, c, id) = task_slot(s.owner);
+        slot.activate(id, &s.manager, &mut s.memory).unwrap();
+        match case {
+            0 => c.borrow_mut().fail_execute = true,
+            1 => c.borrow_mut().fail_quiesce = true,
+            _ => s.machine.borrow_mut().write_error = true,
+        }
+        assert!(slot.run_slice(id).is_err());
+        assert_eq!(slot.state(id), Ok(task::State::Quarantined));
+        assert!(slot.activate(id, &s.manager, &mut s.memory).is_err());
+        assert!(slot.run_slice(id).is_err());
+        assert!(slot.cancel_suspended(id).is_err());
+        retained(&mut s.manager, &s.handles);
+        c.borrow_mut().fail_execute = false;
+        c.borrow_mut().fail_quiesce = false;
+        s.machine.borrow_mut().write_error = false;
+        slot.abandon(id, &mut s.manager, &mut s.memory).unwrap();
+        assert_eq!(c.borrow().entries, 1);
+    }
+}
+
+#[test]
+fn forged_quantum_observations_never_admit_suspended_state() {
+    for case in 0..4 {
+        let mut s = setup();
+        let (mut slot, c, id) = task_slot(s.owner);
+        if case == 3 {
+            c.borrow_mut().zero_ticks = true;
+        } else {
+            c.borrow_mut().corrupt = [1, 2, 4][case];
+        }
+        slot.activate(id, &s.manager, &mut s.memory).unwrap();
+        assert!(slot.run_slice(id).is_err());
+        assert_eq!(slot.state(id), Ok(task::State::Quarantined));
+        retained(&mut s.manager, &s.handles);
+        slot.abandon(id, &mut s.manager, &mut s.memory).unwrap();
+    }
+}
+
+#[test]
+fn suspended_resume_revalidates_cpu_identity_and_root_mappings_before_effects() {
+    for case in 0..2 {
+        let mut s = setup();
+        let (mut slot, c, id) = task_slot(s.owner);
+        slot.activate(id, &s.manager, &mut s.memory).unwrap();
+        slot.run_slice(id).unwrap();
+        if case == 0 {
+            s.machine.borrow_mut().snapshot.cpu_id += 1;
+        } else {
+            s.memory.pages.get_mut(&s.candidate).unwrap()[0] = 0;
+        }
+        assert!(slot.activate(id, &s.manager, &mut s.memory).is_err());
+        assert_eq!(s.machine.borrow().writes, [s.candidate, s.original]);
+        assert_eq!(c.borrow().entries, 1);
+        retained(&mut s.manager, &s.handles);
+        assert!(slot.run_slice(id).is_err());
+    }
 }
 
 impl Cpu for Hardware {

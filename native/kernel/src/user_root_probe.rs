@@ -13,6 +13,7 @@ use poolekernel::user_entry::{
 };
 use virtual_memory::{AddressSpace, CachePolicy, Error, Permissions, USER_WINDOW_START};
 
+mod peer_driver;
 mod task_driver;
 mod timer_driver;
 pub use timer_driver::dispatch_timer;
@@ -449,6 +450,16 @@ pub fn run(
     if arch::x86_64::user_root_write_count() != 10 {
         stop(93, serial, debugcon);
     }
+    peer_driver::run_all(
+        handoff,
+        core,
+        bits,
+        &mut manager,
+        topology,
+        hpet,
+        serial,
+        debugcon,
+    );
     let mut log = EarlyLogger::new(BootSink {
         serial,
         debugcon,
@@ -463,6 +474,8 @@ pub fn run(
     log.write_decimal_u64(manager.summary().allocated_pages);
     log.write_str(" retained_acpi_pages=");
     log.write_decimal_u64(acpi.snapshot_page_count);
-    log.write_str(" released_pages=65 scrubbed_data_pages=30 ring3=1 production=0 terminal=halt\n");
+    log.write_str(
+        " released_pages=169 scrubbed_data_pages=78 ring3=1 production=0 terminal=halt\n",
+    );
     halt_forever()
 }

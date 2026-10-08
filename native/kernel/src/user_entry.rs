@@ -13,6 +13,7 @@ use crate::virtual_memory::{
 };
 
 pub mod bootstrap;
+pub mod context;
 pub mod preemption;
 pub mod prepared;
 pub mod privilege;
@@ -184,7 +185,8 @@ fn admit_image_with_roots<M: TableMemory>(
                 } else {
                     0
                 };
-                if entry != expected {
+                let hardware_bits = if expected & PRESENT != 0 { ACCESSED } else { 0 };
+                if entry & !hardware_bits != expected {
                     return Err(Error::UnexpectedMapping);
                 }
             }

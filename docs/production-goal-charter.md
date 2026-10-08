@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 242
+Last roadmap reconciliation: PooleOS Cycle 243
 
-Cycle242 proves four sequential owned task lifetimes per fresh guest: normal
+Cycle243 proves native preemptive execution of two CPL3 tasks across distinct
+private roots, state-preserving suspend/resume, and peer survival after exit,
+fault, cancellation and syscall-budget exhaustion. N12/N13 remain partial.
+Next: remaining admission/containment hardening, then capability IPC, confined
+services, shell/apps and the user-space integration ISO. Full robust microkernel,
+PooleGlyph/PDC/PooleGlass and all production gates remain required. No normative
+requirement, phase completion, merge, release or promotion change occurs.
+[Cycle243 evidence](checkpoints/cycle243-native-user-peer-scheduling.md).
+
+Historical Cycle242 proves four sequential owned task lifetimes per fresh guest: normal
 exit and #UD/#GP/#PF termination, stale-ID/restart rejection, quiescence before
 root restoration and full memory release. N13.1/2/6 are partial. Next: preemptive
 peer execution, then IPC/services and the usable integration ISO. Arbitrary

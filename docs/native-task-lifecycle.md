@@ -1,6 +1,11 @@
 # PKUSER8 Development Task Lifecycle
 
-Cycle 242. Original PooleKernel, one BSP, fixed admitted payloads. Partial
+Historical Cycle 242 baseline. Cycle243 extends this lifecycle with retained
+suspend/resume, cancellation and task-only call-limit termination; see
+[PKUSER9 peer scheduling](native-user-peer-scheduling.md) for current scope.
+The sequential measurements and follow-on list below describe Cycle242 only.
+
+Original PooleKernel, one BSP, fixed admitted payloads. Partial
 N13.1/N13.2/N13.6, not a complete task API, scheduler, or production contract.
 
 ## Ownership And Identity

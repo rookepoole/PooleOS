@@ -70,6 +70,7 @@ pub enum State {
     Inactive,
     Uncertain,
     Active,
+    Suspended,
     Restored,
 }
 
@@ -246,6 +247,43 @@ impl<H: Cpu> CpuImage<H> {
         Ok(())
     }
 
+    pub(crate) fn exercise_slice<D: crate::user_entry::task::SliceDriver>(
+        &mut self,
+        id: crate::scheduler_smp::TaskId,
+        driver: &mut D,
+    ) -> Result<crate::user_entry::task::Slice, Error> {
+        let image = self.user_context()?;
+        if !self.timer_quiescent || !self.user_quiescent {
+            return Err(Error::State);
+        }
+        self.user_quiescent = false;
+        let result = driver.execute_slice(image, id);
+        self.quiesce_task(driver)?;
+        let slice = result.map_err(Error::User)?;
+        slice
+            .validate(id, image.root_physical)
+            .map_err(Error::User)?;
+        Ok(slice)
+    }
+
+    /// Flush back to the scheduler root without detaching or releasing any hold.
+    /// Failure leaves an uncertain owner that cannot resume until safely retired.
+    pub(crate) fn suspend(&mut self) -> Result<(), Error> {
+        self.user_context()?;
+        if !self.timer_quiescent || !self.user_quiescent {
+            return Err(Error::State);
+        }
+        let context = self.context.ok_or(Error::State)?;
+        self.state = State::Uncertain;
+        self.hardware.write_root(context.cr3)?;
+        let current = self.hardware.snapshot()?;
+        if !current.same_context(context) || current.cr3 != context.cr3 {
+            return Err(Error::Context);
+        }
+        self.state = State::Suspended;
+        Ok(())
+    }
+
     /// Re-audit ownership and all mappings immediately before the first write.
     /// The adapter must also prove the executing code, stack, data and exception
     /// paths survive both roots. This operation does not initialize user state.
@@ -254,11 +292,15 @@ impl<H: Cpu> CpuImage<H> {
         manager: &PhysicalMemoryManager,
         memory: &mut M,
     ) -> Result<(), Error> {
-        if self.state != State::Inactive {
+        if !matches!(self.state, State::Inactive | State::Suspended) {
             return Err(Error::State);
         }
         let before = self.hardware.snapshot()?;
         if !before.supported() {
+            return Err(Error::Context);
+        }
+        if self.state == State::Suspended && !before.same_context(self.context.ok_or(Error::State)?)
+        {
             return Err(Error::Context);
         }
         let original = self.core.page_table_root_physical;

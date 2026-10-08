@@ -11,7 +11,16 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle242 adds owned user-task exit and fatal
+**Current development checkpoint:** Cycle243 runs two real user tasks under the
+native scheduler with separate address spaces and timer-driven context switches.
+Two fresh boots each pass40 dispatches and33 preemptions, with continued peer
+progress after exit, fault, cancellation and syscall-budget exhaustion.481 Rust
+test executions and29 Python oracle tests pass. Next: finish admission/containment
+hardening, then IPC, services, shell/apps and the user-space integration ISO.
+No interactive session or new ISO yet; the complete robust microkernel remains
+the production objective. [Evidence](docs/checkpoints/cycle243-native-user-peer-scheduling.md).
+
+**Historical development checkpoint:** Cycle242 adds owned user-task exit and fatal
 fault termination. Two fresh native guests each run four sequential tasks, reject
 stale IDs and restart/reap repetition, and fully reclaim their memory.336 debug
 kernel tests,110 repeated optimized tests, seven compile-fail checks, ten boot-exit

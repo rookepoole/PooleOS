@@ -99,7 +99,8 @@ pub fn frame(image: ImageAdmission, t: &Trap) -> Result<(), Error> {
         || t.error != 0
         || t.cs != f.cs
         || t.ss != f.ss
-        || t.rsp != f.rsp
+        || t.rsp < f.rsp.saturating_sub(4096)
+        || t.rsp > f.rsp
         || t.handler_stack != STACK_TOP - FRAME_BYTES
         || t.rip < f.rip
         || t.rip >= (f.rip & !4095) + 4096

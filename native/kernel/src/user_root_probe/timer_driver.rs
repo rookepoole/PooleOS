@@ -344,3 +344,40 @@ pub fn dispatch_timer(frame: &TrapFrame, depth: u32) {
     OBSERVED_ROOT.store(observed, Ordering::Release);
     dispatch_interrupt_time(frame, depth);
 }
+
+/// Owns timer and saved task state together; never detaches entry before device shutdown.
+pub struct PeerRun {
+    pub entry: arch::x86_64::user::PeerEntry,
+    pub timer: Timer,
+}
+impl poolekernel::user_entry::task::Driver for PeerRun {
+    fn execute(
+        &mut self,
+        _: poolekernel::user_entry::ImageAdmission,
+        _: poolekernel::scheduler_smp::TaskId,
+    ) -> Result<poolekernel::user_entry::task::Outcome, poolekernel::user_entry::privilege::Error>
+    {
+        Err(poolekernel::user_entry::privilege::Error::State)
+    }
+    fn quiesce(&mut self, root: u64) -> Result<(), poolekernel::user_entry::privilege::Error> {
+        self.timer
+            .quiesce(root, self.timer.mappings)
+            .map_err(|_| poolekernel::user_entry::privilege::Error::Hardware)?;
+        poolekernel::user_entry::task::Driver::quiesce(&mut self.entry, root)
+    }
+}
+impl poolekernel::user_entry::task::SliceDriver for PeerRun {
+    fn execute_slice(
+        &mut self,
+        image: poolekernel::user_entry::ImageAdmission,
+        id: poolekernel::scheduler_smp::TaskId,
+    ) -> Result<poolekernel::user_entry::task::Slice, poolekernel::user_entry::privilege::Error>
+    {
+        let (_, budget) = self
+            .timer
+            .configure(image.root_physical, self.timer.mappings, 10_000_000)
+            .map_err(|_| poolekernel::user_entry::privilege::Error::Hardware)?;
+        self.entry.set_budget(budget)?;
+        poolekernel::user_entry::task::SliceDriver::execute_slice(&mut self.entry, image, id)
+    }
+}

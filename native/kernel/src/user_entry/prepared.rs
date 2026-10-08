@@ -283,7 +283,8 @@ impl PreparedImage {
                 KERNEL_SLOT => supervisor,
                 _ => 0,
             };
-            if read(memory, image.root_physical, index)? != expected {
+            let hardware_bits = if expected & P != 0 { A } else { 0 };
+            if read(memory, image.root_physical, index)? & !hardware_bits != expected {
                 return Err(Error::Readback);
             }
         }
@@ -297,7 +298,15 @@ impl PreparedImage {
                     (2, i) => self.timer.and_then(|t| t.leaf(i)).unwrap_or(0),
                     _ => 0,
                 };
-                if read(memory, tables + page * PAGE_BYTES, index)? != expected {
+                // Only present leaves may acquire dirty bits; absent guards stay exact zero.
+                let hardware_bits = if expected & P == 0 {
+                    0
+                } else if page == 2 {
+                    A | D
+                } else {
+                    A
+                };
+                if read(memory, tables + page * PAGE_BYTES, index)? & !hardware_bits != expected {
                     return Err(Error::Readback);
                 }
             }

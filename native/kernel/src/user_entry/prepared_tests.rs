@@ -252,6 +252,74 @@ fn ready_timer(f: Fixture) -> (PhysicalMemoryManager, Memory, PreparedImage) {
 }
 
 #[test]
+fn attached_hardware_accessed_dirty_bits_survive_read_only_revalidation() {
+    let f = Fixture::new();
+    let core = f.core;
+    let root = f.parts.space.summary().root_physical;
+    let tables = f.parts.stack_tables.start_page * PAGE_BYTES;
+    let (manager, mut memory, prepared) = ready_timer(f);
+    for index in [STACK_SLOT, KERNEL_SLOT] {
+        memory.pages.get_mut(&root).unwrap()[index] |= A;
+    }
+    for page in 0..2 {
+        memory.pages.get_mut(&(tables + page * PAGE_BYTES)).unwrap()[0] |= A;
+    }
+    for entry in memory.pages.get_mut(&(tables + 2 * PAGE_BYTES)).unwrap() {
+        if *entry & P != 0 {
+            *entry |= A | D;
+        }
+    }
+    let before = memory.pages.clone();
+    let writes = memory.writes;
+    assert_eq!(
+        prepared.revalidate(&manager, &mut memory, core).unwrap(),
+        prepared.admission().unwrap()
+    );
+    assert_eq!(memory.pages, before);
+    assert_eq!(memory.writes, writes);
+}
+
+#[test]
+fn attached_resume_rejects_dirty_parents_guard_bits_and_permission_drift() {
+    for (page, index, bit) in [
+        (3, STACK_SLOT, D),
+        (3, KERNEL_SLOT, D),
+        (3, 255, A),
+        (0, 0, D),
+        (1, 0, D),
+        (0, 1, A),
+        (1, 1, D),
+        (2, 0, A),
+        (2, 5, D),
+        (2, 15, A),
+        (2, 17, D),
+        (2, 19, A),
+        (2, 1, W),
+        (2, 1, NX),
+        (2, 1, 1 << 2),
+        (2, 16, W),
+        (2, 18, NX),
+        (2, 18, 1 << 2),
+    ] {
+        let f = Fixture::new();
+        let core = f.core;
+        let root = f.parts.space.summary().root_physical;
+        let tables = f.parts.stack_tables.start_page * PAGE_BYTES;
+        let (manager, mut memory, prepared) = ready_timer(f);
+        let table = if page == 3 {
+            root
+        } else {
+            tables + page * PAGE_BYTES
+        };
+        memory.pages.get_mut(&table).unwrap()[index] ^= bit;
+        assert!(
+            prepared.revalidate(&manager, &mut memory, core).is_err(),
+            "{page}/{index}/{bit}"
+        );
+    }
+}
+
+#[test]
 fn timer_leaves_and_guards_are_replayed_before_admission() {
     for index in [15, 16, 17, 18, 19] {
         let f = Fixture::new();

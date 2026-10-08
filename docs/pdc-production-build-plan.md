@@ -1,15 +1,41 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.145.0-user-task-termination
-Roadmap cycle: PooleOS Cycle 242
+Plan version: 2.146.0-native-user-peer-scheduling
+Roadmap cycle: PooleOS Cycle 243
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 242: Owned Task Exit And Fatal Fault Termination
+## Cycle 243: Native Preemptive User Peers
+
+USI-1 / N12.5-7 and N13.1-4,6: PKUSER9 connects two real CPL3 private-root tasks
+to the existing PKSCHED1 scheduler. Saved GPR/IRET/legacy FP state, timer quiescence,
+root restoration and retained ownership support repeated suspension/resumption.
+Two fresh guests each pass40 dispatches/33 preemptions and peer survival after
+exit, fault, spinner cancellation and syscall-limit termination.481 Rust test
+executions,29 Python oracle tests and ordinary unsigned-boot denial pass.
+[Evidence](checkpoints/cycle243-native-user-peer-scheduling.md),
+[mechanism and remaining limits](native-user-peer-scheduling.md).
+
+The syscall stack may move within its owned page; the call-limit now terminates
+only the task. Resume handles hardware A/D bits without accepting mapping drift.
+Measured text growth required four reserved pages; all native checks reran on the
+172-page image, below the unchanged192-page cap. N12/N13 remain partial; no phase
+or flag closes. All8996 requirements,59 additions,97 flags/42 open and20 gaps stay.
+
+Next, under `FLAG-N13-USERSPACE-ISO-001`: transactional spawn rollback, task-only
+invalid-return-frame handling, armed-timer teardown races and complete accounting.
+Then capability IPC, confined services, shell/apps and actual optical ISO.
+Current fixed tasks prove healthy-timer peer progress, not arbitrary-program or
+device-failure containment. Independent watchdog/SMP/full XSAVE/SMAP/hardware
+qualification, stale-product replay and full exact-candidate gates remain open.
+No new ISO, merge or production promotion. Full N0-N39 microkernel development
+continues after the usable integration milestone.
+
+## Historical Cycle 242: Owned Task Exit And Fatal Fault Termination
 
 USI-1 / N13.1,N13.2,N13.6: PKUSER8 owns task identity, CPU image and cleanup
 driver, records exit/fault status and syscall accounting, rejects stale IDs and
@@ -3995,13 +4021,13 @@ Exit gate: deterministic and randomized SMP schedule tests show no lost wakeup, 
 Inherited sections: `035-038`. Added: `ADD-CAP-001`.  
 Goal: enter user mode with an unforgeable authority model rather than Unix ambient privilege.
 
-Cycle242 adds owned sequential task exit/fault termination and cleanup to live
-ring-3 entry, private-stack faults, timer recovery and bounded user copying.
-N13.1/2/3/4/6 are partial. General spawn rollback, unrestricted syscall stacks,
-nonfatal dispatch-budget handling, exception delivery, capabilities, peer
-scheduling and the phase exit remain unestablished.
-See `docs/native-userspace-integration-iso.md`, `docs/native-syscall-abi.md`
-and `docs/native-task-lifecycle.md`.
+Cycle243 connects preemptive private-root peer tasks to PKSCHED1, preserving
+state and proving survivor progress after exit/fault/cancel/call-limit stops.
+N13.1/2/3/4/6 are partial. Full spawn rollback, invalid user-frame containment,
+pending-timer recovery, complete accounting, general exception delivery,
+capabilities, arbitrary applications and the phase exit remain unestablished.
+See `docs/native-userspace-integration-iso.md`, `docs/native-syscall-abi.md`,
+`docs/native-task-lifecycle.md` and `docs/native-user-peer-scheduling.md`.
 
 Subphases:
 

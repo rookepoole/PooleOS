@@ -44,6 +44,43 @@ fn idle(h: &crate::LiveInterruptHardware) -> Result<(), Error> {
     Ok(())
 }
 
+pub(super) fn arm_quantum(budget: Budget) -> Result<u64, Error> {
+    budget.validate()?;
+    let mut h = hardware()?;
+    idle(&h)?;
+    if hw(h.hpet_read(0))? >> 32 != budget.period_fs
+        || hw(h.apic_read(0x380))? != 0
+        || hw(h.apic_read(0x390))? != 0
+    {
+        return Err(Error::Hardware);
+    }
+    let start = hw(h.hpet_read(0xf0))?;
+    hw(h.apic_write(0x320, u32::from(crate::TIMER_VECTOR)))?;
+    hw(h.apic_write(0x380, budget.count))?;
+    Ok(start)
+}
+
+pub(super) fn finish_quantum(budget: Budget, start: u64) -> Result<u64, Error> {
+    let mut h = hardware()?;
+    let ticks = budget.elapsed(start, hw(h.hpet_read(0xf0))?)?;
+    let vector = u32::from(crate::TIMER_VECTOR);
+    if hw(h.in_service_count())? != 1
+        || hw(h.apic_read(0x100 + u64::from(vector / 32) * 16))? != 1 << (vector % 32)
+        || hw(h.apic_read(0x320))? != vector
+        || hw(h.apic_read(0x390))? != 0
+    {
+        return Err(Error::Hardware);
+    }
+    hw(h.apic_write(0x320, vector | (1 << 16)))?;
+    hw(h.apic_write(0x380, 0))?;
+    if hw(h.apic_read(0x380))? != 0 || hw(h.apic_read(0x390))? != 0 {
+        return Err(Error::Hardware);
+    }
+    hw(h.apic_write(0xb0, 0))?;
+    idle(&h)?;
+    Ok(ticks)
+}
+
 impl Session {
     pub(super) fn new(
         image: ImageAdmission,

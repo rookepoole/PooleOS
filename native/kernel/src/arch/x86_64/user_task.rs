@@ -47,13 +47,14 @@ pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) {
     let task =
         unsafe { (&mut *(&raw mut TASK)).as_mut() }.unwrap_or_else(|| denied(8, Error::State, t));
     if t.vector == syscall::VECTOR {
-        task.call(t).unwrap_or_else(|e| denied(8, e, t));
-        let code =
-            super::super::user_syscall::dispatch(t, frame).unwrap_or_else(|e| denied(8, e, t));
-        let Some(code) = code else {
-            return;
-        };
-        task.exit(code).unwrap_or_else(|e| denied(8, e, t));
+        if task.call(t).unwrap_or_else(|e| denied(8, e, t)) {
+            let code =
+                super::super::user_syscall::dispatch(t, frame).unwrap_or_else(|e| denied(8, e, t));
+            let Some(code) = code else {
+                return;
+            };
+            task.exit(code).unwrap_or_else(|e| denied(8, e, t));
+        }
     } else {
         task.fault(t).unwrap_or_else(|e| denied(9, e, t));
     }

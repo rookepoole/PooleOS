@@ -24,6 +24,12 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle243-native-user-peer-scheduling.md",
+    "docs/native-user-peer-scheduling.md",
+    "native/kernel/src/user_entry/context.rs",
+    "native/kernel/src/arch/x86_64/user_slice.rs",
+    "native/kernel/src/user_root_probe/peer_driver.rs",
+    "tests/fixtures/cycle242-user-entry-readiness.json",
     "docs/checkpoints/cycle242-user-task-termination.md",
     "docs/native-task-lifecycle.md",
     "native/kernel/src/user_entry/task.rs",

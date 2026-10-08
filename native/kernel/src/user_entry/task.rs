@@ -38,6 +38,8 @@ impl Fault {
 pub enum Reason {
     Exit(u32),
     Fault(Fault),
+    Cancelled,
+    CallLimit,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -55,6 +57,8 @@ impl Outcome {
             || match self.reason {
                 Reason::Exit(_) => self.syscalls == 0,
                 Reason::Fault(f) => !f.valid(),
+                Reason::Cancelled => false,
+                Reason::CallLimit => self.syscalls != 64,
             }
         {
             return Err(privilege::Error::Hardware);
@@ -84,13 +88,17 @@ impl Run {
             outcome: None,
         })
     }
-    pub fn call(&mut self, trap: &privilege::Trap) -> Result<(), privilege::Error> {
-        if self.outcome.is_some() || self.calls >= 64 {
+    pub fn call(&mut self, trap: &privilege::Trap) -> Result<bool, privilege::Error> {
+        if self.outcome.is_some() {
             return Err(privilege::Error::State);
         }
         syscall::frame(self.image, trap)?;
+        if self.calls == 64 {
+            self.finish(Reason::CallLimit)?;
+            return Ok(false);
+        }
         self.calls += 1;
-        Ok(())
+        Ok(true)
     }
     pub fn exit(&mut self, code: u32) -> Result<Outcome, privilege::Error> {
         if self.calls == 0 {
@@ -136,6 +144,12 @@ impl Run {
     pub const fn outcome(&self) -> Option<Outcome> {
         self.outcome
     }
+    pub const fn calls(&self) -> u32 {
+        self.calls
+    }
+    pub fn matches(&self, image: ImageAdmission, id: TaskId) -> bool {
+        self.image == image && self.id == id && self.outcome.is_none()
+    }
 }
 
 /// Trusted architectural adapter. Errors may follow CPU effects. Quiescence
@@ -146,9 +160,49 @@ pub trait Driver {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Event {
+    Preempted {
+        ticks: u64,
+        syscalls: u32,
+        progress: u64,
+    },
+    Terminated(Outcome),
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Slice {
+    pub id: TaskId,
+    pub root: u64,
+    pub event: Event,
+}
+impl Slice {
+    pub(crate) fn validate(self, id: TaskId, root: u64) -> Result<(), privilege::Error> {
+        if self.id != id || self.root != root {
+            return Err(privilege::Error::Hardware);
+        }
+        match self.event {
+            Event::Preempted {
+                ticks, syscalls, ..
+            } if ticks > 0 && syscalls <= 64 => Ok(()),
+            Event::Terminated(o) => o.validate(id, root),
+            _ => Err(privilege::Error::Hardware),
+        }
+    }
+}
+/// A quantum returns only after saving its private user state. The same owner
+/// must quiesce devices and entry references before the CPU can be suspended.
+pub trait SliceDriver: Driver {
+    fn execute_slice(
+        &mut self,
+        image: ImageAdmission,
+        id: TaskId,
+    ) -> Result<Slice, privilege::Error>;
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum State {
     Prepared,
     Active,
+    Suspended,
     Quarantined,
     Terminated,
 }
@@ -168,6 +222,7 @@ struct Owned<H: Cpu, D: Driver> {
     driver: D,
     state: State,
     outcome: Option<Outcome>,
+    last_slice: Option<Slice>,
 }
 
 /// A persistent slot owns the exact CPU image and its cleanup adapter. It
@@ -226,6 +281,7 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
             driver,
             state: State::Prepared,
             outcome: None,
+            last_slice: None,
         });
         Ok(id)
     }
@@ -257,7 +313,7 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
         memory: &mut M,
     ) -> Result<(), Error> {
         let task = self.owned_mut(id)?;
-        if task.state != State::Prepared {
+        if !matches!(task.state, State::Prepared | State::Suspended) {
             return Err(Error::State);
         }
         task.state = State::Quarantined;
@@ -333,6 +389,54 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
                 Err(Error::Cpu(e))
             }
         }
+    }
+}
+
+impl<H: Cpu, D: SliceDriver> Slot<H, D> {
+    pub fn run_slice(&mut self, id: TaskId) -> Result<Slice, Error> {
+        let task = self.owned_mut(id)?;
+        if task.state != State::Active {
+            return Err(Error::State);
+        }
+        task.state = State::Quarantined;
+        let cpu = task.cpu.as_mut().ok_or(Error::State)?;
+        let slice = cpu
+            .exercise_slice(id, &mut task.driver)
+            .map_err(Error::Cpu)?;
+        match slice.event {
+            Event::Preempted { .. } => {
+                cpu.suspend().map_err(Error::Cpu)?;
+                task.state = State::Suspended;
+            }
+            Event::Terminated(outcome) => {
+                task.outcome = Some(outcome);
+                task.state = State::Terminated;
+            }
+        }
+        task.last_slice = Some(slice);
+        Ok(slice)
+    }
+
+    /// Kernel-side cancellation of an already quiescent suspended task. TaskId
+    /// is identity only; a future user request still requires capability checks.
+    pub fn cancel_suspended(&mut self, id: TaskId) -> Result<Outcome, Error> {
+        let task = self.owned_mut(id)?;
+        if task.state != State::Suspended {
+            return Err(Error::State);
+        }
+        let slice = task.last_slice.ok_or(Error::State)?;
+        let Event::Preempted { syscalls, .. } = slice.event else {
+            return Err(Error::State);
+        };
+        let outcome = Outcome {
+            id,
+            root: slice.root,
+            reason: Reason::Cancelled,
+            syscalls,
+        };
+        task.outcome = Some(outcome);
+        task.state = State::Terminated;
+        Ok(outcome)
     }
 }
 
@@ -473,7 +577,9 @@ mod tests {
         for _ in 0..64 {
             r.call(&trap()).unwrap();
         }
-        assert!(r.call(&trap()).is_err());
-        assert_eq!(r.exit(0).unwrap().syscalls, 64);
+        assert_eq!(r.call(&trap()), Ok(false));
+        assert_eq!(r.outcome().unwrap().reason, Reason::CallLimit);
+        assert_eq!(r.outcome().unwrap().syscalls, 64);
+        assert!(r.exit(0).is_err());
     }
 }
