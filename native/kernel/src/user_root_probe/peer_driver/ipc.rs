@@ -51,20 +51,19 @@ pub(crate) fn run(
     if peers[0].root == peers[1].root || manager.summary().allocated_pages != baseline + 26 {
         stop(135, serial, debugcon);
     }
+    let mut scheduler = checked!(scheduler::Scheduler::new(1));
+    let cpu = checked!(scheduler::CpuId::new(0));
     let handles = checked!(unsafe {
-        arch::x86_64::user_ipc::bootstrap([
-            (peers[0].id, peers[0].admission),
-            (peers[1].id, peers[1].admission),
-        ])
+        arch::x86_64::user_ipc::bootstrap(
+            [
+                (peers[0].id, peers[0].admission),
+                (peers[1].id, peers[1].admission),
+            ],
+            &mut scheduler,
+        )
     });
     if handles != [0x100010001, 0x100010001, 0x100010002, 0x100010002] {
         stop(135, serial, debugcon);
-    }
-    let mut scheduler = checked!(scheduler::Scheduler::new(1));
-    let cpu = checked!(scheduler::CpuId::new(0));
-    for p in &peers {
-        let id = checked!(scheduler.create_task(p.id.slot, p.id.generation, 16, 1));
-        checked!(scheduler.activate(id, cpu));
     }
     let mut stopped = [false; 2];
     let mut calls = [0; 2];

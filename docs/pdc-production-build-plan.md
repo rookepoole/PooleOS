@@ -1,15 +1,40 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.159.0-native-request-deadlines
-Roadmap cycle: PooleOS Cycle 256
+Plan version: 2.160.0-atomic-task-admission
+Roadmap cycle: PooleOS Cycle 257
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 256: Native Request Deadlines
+## Cycle 257: Atomic Task Admission
+
+PKADMIT1 publishes bounded scheduler membership and IPC authority together.
+Failed startup revokes only new authority, preserves existing work and generation
+high-water marks, and leaves prepared-image cleanup with its original owner.
+Two fresh native boots prove quota rollback without dispatch, stale-generation
+denial, retained cleanup/retry and successful isolated tasks at fresh generations.
+451 kernel tests,704 Rust executions,78 Python oracle tests and ordinary denial
+pass. Both77-marker boots reject1059 altered-evidence controls.
+[Evidence and retained failures](checkpoints/cycle257-native-task-admission.md).
+
+Next N13-CAPABILITY-IPC-001: sustained service budgets, owned executable/argument
+bootstrap and efficient idle; then init/confined console/input, shell/files/two
+apps and actual optical ISO qualification. Trusted admission is not arbitrary
+program loading or a complete supervisor. No usable ISO yet.
+
+The image uses201/208 pages. Separate normal session boot from exhaustive
+qualification workloads and resolve capacity pressure before exhaustion without
+dropping checks. An added nested preparation frame hit the stack guard; the driver
+was split and requalified with the36-page guarded stack unchanged. Canonical
+product migration, three readiness failures and full exact-candidate replay still
+block main. USI-1/2 remain partial, USI-3/4/5 not started. No phase/flag closure:
+40 phases,301 subphases,8996 requirements,59 additions,97 flags/42 open,20 gaps.
+Full microkernel, PooleGlyph/PDC and accessible PooleGlass obligations remain.
+
+## Historical Cycle 256: Native Request Deadlines
 
 PKIPC5 moves continuous clock ownership into the persistent IPC Space. Syscall14
 admits bounded epoch-bound deadlines. First-terminal-wins expiry invalidates late

@@ -135,6 +135,27 @@ pub(crate) fn run(
     if let Err(stage) = clock.finish_deadlines(serial, debugcon) {
         stop(7000 + stage, serial, debugcon);
     }
+    // Preparation has a large bounded frame; do not nest it beneath admission.
+    for generation in [13, 14] {
+        for p in peers.iter_mut() {
+            checked!(p.restart(
+                0,
+                [0; 6],
+                handoff,
+                core,
+                bits,
+                manager,
+                topology,
+                hpet,
+                timer_driver::Probe::None
+            ));
+        }
+        if generation == 13 {
+            super::admission::rollback(&mut peers, baseline, manager, serial, debugcon);
+        } else {
+            super::admission::run(&mut peers, baseline, manager, serial, debugcon);
+        }
+    }
 }
 
 #[inline(never)]
@@ -173,11 +194,16 @@ fn run_round(
             stop(2003, serial, debugcon);
         }
     }
+    let mut scheduler = checked!(scheduler::Scheduler::new(1));
+    let cpu = checked!(scheduler::CpuId::new(0));
     let handles = checked!(unsafe {
-        arch::x86_64::user_ipc::bootstrap([
-            (peers[0].id, peers[0].admission),
-            (peers[1].id, peers[1].admission),
-        ])
+        arch::x86_64::user_ipc::bootstrap(
+            [
+                (peers[0].id, peers[0].admission),
+                (peers[1].id, peers[1].admission),
+            ],
+            &mut scheduler,
+        )
     });
     let base = (u64::from(round + 1) << 32) | 0x10001;
     if handles != [base, base, base + 1, base + 1] {
@@ -205,12 +231,6 @@ fn run_round(
                 })
             });
         }
-    }
-    let mut scheduler = checked!(scheduler::Scheduler::new(1));
-    let cpu = checked!(scheduler::CpuId::new(0));
-    for p in peers.iter() {
-        let id = checked!(scheduler.create_task(p.id.slot, p.id.generation, 16, 1));
-        checked!(scheduler.activate(id, cpu));
     }
     let mut dead = [false; 2];
     let mut waiting = [None; 2];

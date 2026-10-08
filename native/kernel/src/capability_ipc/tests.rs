@@ -2,6 +2,7 @@ use super::wait::{Admission, Readiness, Ticket};
 use super::*;
 use crate::scheduler::{CpuId, Scheduler, WakeReason};
 use crate::virtual_memory::USER_WINDOW_START as BASE;
+mod admission;
 mod replies;
 
 fn scheduled(slot: u8) -> crate::scheduler::TaskId {

@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle256 implements epoch-bound request deadlines
+**Current development checkpoint:** Cycle257 adds atomic task startup: scheduler
+publication and IPC permissions succeed together, or new authority is removed
+with memory ownership retained for cleanup. Two fresh native boots prove failed
+startup, cleanup retry and fresh isolated task execution;451 kernel tests pass.
+Next: sustained services, init/console, shell/files/apps and the usable ISO.
+No interactive ISO yet; full microkernel work continues afterward, and canonical
+gates still block main. [Evidence](docs/checkpoints/cycle257-native-task-admission.md).
+
+**Historical development checkpoint:** Cycle256 implements epoch-bound request deadlines
 and wakes a client even when all tasks are blocked. Two fresh native boots prove
 queued/claimed expiry, late-reply denial and retained timeout completion;443 kernel
 tests pass. Next: transactional service admission, sustained budgets and efficient

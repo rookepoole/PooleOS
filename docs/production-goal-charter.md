@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 256
+Last roadmap reconciliation: PooleOS Cycle 257
 
-Cycle256 adds epoch-bound request deadlines and all-tasks-blocked expiry. Two
+Cycle257 adds failure-atomic task/IPC admission, native quota rollback and retained
+cleanup retry, then fresh isolated task execution. Next: sustained service budgets,
+owned image/argument bootstrap and efficient idle, then init/console/shell/apps
+and the usable native ISO. Qualification must remain separate from normal demo
+startup;201/208 image pages requires capacity attention. Full N0-N39, PooleGlyph/PDC
+and accessible PooleGlass remain required. No ISO or production promotion;
+canonical product migration and full replay still gate main.
+[Cycle257 evidence](checkpoints/cycle257-native-task-admission.md).
+
+Historical Cycle256 adds epoch-bound request deadlines and all-tasks-blocked expiry. Two
 fresh native boots prove queued/claimed timeout, retained completion and late-reply
 denial. Next: transactional service admission, sustained budgets and efficient
 idle, then init/console/shell/apps and the usable native ISO. Full N0-N39,

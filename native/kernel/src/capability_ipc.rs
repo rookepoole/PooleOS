@@ -17,6 +17,7 @@ pub const ENDPOINTS: usize = 4;
 pub const DEPTH: usize = 4;
 pub const MAX_BYTES: usize = 64;
 const ENDPOINT_TAG: u64 = 1 << 16;
+pub mod admission;
 pub mod deadline;
 pub mod reply;
 pub mod request;
@@ -313,6 +314,11 @@ impl Space {
     /// Called after task execution is stopped, before its root or identity is reused.
     pub fn detach(&mut self, owner: TaskId) -> Result<(), Error> {
         let t = self.table(owner)?;
+        self.detach_table(t, owner);
+        Ok(())
+    }
+    // The admission transaction already owns these exact, never-dispatched tables.
+    fn detach_table(&mut self, t: usize, owner: TaskId) {
         self.retire_requests(owner);
         for i in 0..ENDPOINTS {
             if self.objects[i].value.is_some_and(|e| e.owner == owner) {
@@ -331,7 +337,6 @@ impl Space {
             r.value = None;
         }
         self.prune_replies();
-        Ok(())
     }
     /// Retirement hook: absence is idempotent, a different live generation is not.
     pub fn detach_if_attached(&mut self, owner: TaskId) -> Result<(), Error> {

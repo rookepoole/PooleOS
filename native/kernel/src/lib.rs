@@ -59,7 +59,7 @@ pub const LOCKS_CONTRACT_ID: &str = locks::CONTRACT_ID;
 #[unsafe(link_section = ".text.pkbuild_literal")]
 static BUILD_ID_BYTES: [u8; 44] = *b"PKBUILD1-CYCLE216-N12-SMP-TXN-V1-00000000001";
 pub const BUILD_ID: &[u8] = &BUILD_ID_BYTES;
-pub const ENTRY_OFFSET: u64 = 0xc000;
+pub const ENTRY_OFFSET: u64 = 0xd000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 
 #[used]

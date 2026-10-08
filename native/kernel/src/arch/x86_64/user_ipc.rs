@@ -35,24 +35,39 @@ fn idle() -> Result<(), Error> {
 }
 
 /// SAFETY: exclusive BSP, no running task or concurrent reference to this owner.
-pub unsafe fn bootstrap(tasks: [(TaskId, ImageAdmission); 2]) -> Result<[u64; 4], Error> {
+pub unsafe fn bootstrap(
+    tasks: [(TaskId, ImageAdmission); 2],
+    scheduler: &mut poolekernel::scheduler::Scheduler,
+) -> Result<[u64; 4], Error> {
+    use poolekernel::capability_ipc::admission::{Member, Step};
     idle()?;
     let s = unsafe { &mut *(&raw mut IPC) };
     if !s.is_empty() {
         return Err(Error::State);
     }
-    for (id, image) in tasks {
-        s.attach(id, image).map_err(|_| Error::State)?;
-    }
-    let reply = s.create_endpoint(tasks[0].0).map_err(|_| Error::State)?;
-    let request = s.create_endpoint(tasks[1].0).map_err(|_| Error::State)?;
-    let client_send = s
-        .derive(tasks[1].0, request, tasks[0].0, Rights::SEND)
+    let members = tasks.map(|(id, image)| Member {
+        id,
+        image,
+        priority: 16,
+    });
+    let plan = [
+        Step::Endpoint { member: 0 },
+        Step::Endpoint { member: 1 },
+        Step::Grant {
+            endpoint: 1,
+            target: tasks[0].0,
+            rights: Rights::SEND,
+        },
+        Step::Grant {
+            endpoint: 0,
+            target: tasks[1].0,
+            rights: Rights::SEND,
+        },
+    ];
+    let result = s
+        .admit(scheduler, &members, &plan)
         .map_err(|_| Error::State)?;
-    let server_send = s
-        .derive(tasks[0].0, reply, tasks[1].0, Rights::SEND)
-        .map_err(|_| Error::State)?;
-    Ok([reply, request, client_send, server_send])
+    Ok(result.handles[..4].try_into().map_err(|_| Error::State)?)
 }
 
 /// SAFETY: exclusive BSP and stopped task; detach before freeing its image.

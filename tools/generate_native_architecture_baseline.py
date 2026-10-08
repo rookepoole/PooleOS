@@ -24,6 +24,12 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle257-native-task-admission.md",
+    "docs/native-task-admission.md",
+    "tests/fixtures/cycle256-user-entry-readiness.json",
+    "native/kernel/src/capability_ipc/admission.rs",
+    "native/kernel/src/capability_ipc/tests/admission.rs",
+    "native/kernel/src/user_root_probe/peer_driver/admission.rs",
     "docs/checkpoints/cycle256-native-request-deadlines.md",
     "docs/native-request-deadlines.md",
     "tests/fixtures/cycle255-user-entry-readiness.json",
