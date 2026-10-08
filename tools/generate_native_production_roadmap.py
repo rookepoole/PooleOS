@@ -12063,7 +12063,7 @@ def apply_cycle247(roadmap: dict, test_count: int) -> dict:
 
 def apply_cycle248(roadmap: dict, test_count: int) -> dict:
     checkpoint = "docs/checkpoints/cycle248-native-hpet-backup.md"
-    receipt_path = "runs/native-user-entry-readiness.json"
+    receipt_path = "tests/fixtures/cycle248-user-entry-readiness.json"
     raw = (ROOT / receipt_path).read_bytes()
     receipt = json.loads(raw)
     baseline = roadmap["baseline"]
@@ -12145,12 +12145,93 @@ def apply_cycle248(roadmap: dict, test_count: int) -> dict:
     flag["closure_condition"] += " PKUSER14 qualifies only local-timer suppression with working HPET/MSI/APIC/IF; implement and qualify unknown-runtime recovery, IOAPIC/nonMSI/32bit fallback, NMI/shared-controller failure and simultaneous-source shutdown without broadening the bounded claim."
     roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle249(roadmap, test_count)
+
+
+def apply_cycle249(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle249-unknown-runtime-recovery.md"
+    receipt_path = "runs/native-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle248_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle248_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=249, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=249,
+        immediate_next_move_id="N13-CAPABILITY-IPC-001", owner_independent_next_move_id="N13-CAPABILITY-IPC-001")
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path, "docs/native-user-unknown-runtime.md"]
+    gate["current_candidate_audit"]["cycle"] = 249
+    gate["current_focused_source_projection"]["cycle"] = 249
+    gate["qualification_status"] = "bounded_unknown_runtime_pass_capability_IPC_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=249, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="379_debug_kernel_plus124_repeated_user_release_plus24_repeated_VM_release_plus8_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=40, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=304.453, log_sha256="2E27EC4C1413B13D419390A91A1C01D42861A3E4D61679829D489FDE982F10F5",
+        initial_attempts=[
+            dict(status="link_failed_before_guest", elapsed_seconds=75.047,
+                reason="text_9196E_exceeded_91000_repaired_one_page_within192page_cap",
+                log_sha256="DD5ED5FA1139D45046D71EE86BD2D4627699A2EDE3B4B5C53DEDE6A66E32830A"),
+            dict(status="native_stack_guard_fault_after16cases", elapsed_seconds=217.172,
+                reason="nested_probe_frames_overflow_in_direct_map_manifest_repaired_noninline_sibling_calls_same36page_stack",
+                log_sha256="37D363BD7B0F63BBF4FE401409DB6325A9F608D1C94DD88899BE01F85126EF9D")],
+        qualification_guest_bound_seconds=120, qualification_bound_unchanged=True,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=249, status="pass",
+        tests_run=137, tests_passed=137, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=51.281, elapsed_seconds=52.141,
+        log_sha256="E51FE5AC8597BD5E919B0EA04E9341FA538F4665BDDC5A0590F335CE83DDB7B3",
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=249, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_native_returned_sample_loss_retained_cleanup_retry_peer_survival_plus_default_denial",
+        unknown_runtime_contract="PKUSER15", bounded_unknown_runtime_recovery=True,
+        unknown_runtime_recovery_qualified=False,
+        unknown_runtime_scope="returned_sample_loss_after_authenticated_quantum_not_physical_clock_or_arbitrary_entry_failure",
+        runtime_statistics_scope="PKUSER13_first16case_measured_suite_PKUSER15_separate_unknown_case_no_global_total",
+        unmeasured_dispatches_per_probe=[s["unmeasured_dispatches"] for s in summaries],
+        unknown_task_total_ticks_per_probe=[s["unknown_task_total_ticks"] for s in summaries],
+        unknown_peer_ticks_per_probe=[s["unknown_peer_ticks"] for s in summaries],
+        unknown_recovery_dispatches_per_probe=[s["unknown_recovery_dispatches"] for s in summaries],
+        measured_subtotal_all_peer_suites_per_probe=[s["runtime_ticks"] + s["unknown_peer_ticks"] for s in summaries],
+        physical_clock_failure_recovery=False, persistent_per_generation_runtime_audit=False,
+        peer_rounds_per_probe=16, peer_survival_cases_per_probe=17,
+        released_pages_per_probe=590, scrubbed_data_pages_per_probe=271,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries])
+    lane["stages"]["USI-1"] = "partial_live_bounded_unknown_recovery_no_general_admission_or_ipc"
+    roadmap["immediate_next_move"].update(id="N13-CAPABILITY-IPC-001", phase_ids=["N13", "N14"],
+        title="Implement original capability tables and bounded IPC between isolated user tasks for the usable ISO",
+        entry_evidence=["docs/native-userspace-integration-iso.md", "docs/native-user-unknown-runtime.md",
+            receipt_path, checkpoint, "native/kernel/src/user_entry/task.rs",
+            "native/kernel/src/scheduler.rs", "native/kernel/src/user_entry/syscall.rs"],
+        exit_evidence=[
+            "kernel-owned per-task handles enforce object type, caller identity, generation, rights, quotas and revocation without ambient authority",
+            "bounded versioned messages and failure-atomic queues connect cancellation, wakeup and dead-peer cleanup to owned task lifecycle",
+            "real isolated CPL3 peers exchange messages while stale/forged handles, oversize messages, exhaustion and peer death reject safely",
+            "preserve17 containment cases, explicit unknown time and ordinary denial; retain general admission/stack/clock/SMP/hardware gaps before services and ISO"])
+    evidence = "Cycle249: PKUSER15 records one unmeasured dispatch without changing measured ticks, prevents requeue and retains device/root ownership through cleanup retry. Two fresh61-marker guests each pass17 survival cases and630 altered-evidence controls; the healthy peer exits84.545 Rust executions and40 oracle tests pass. Native stack overflow from nested diagnostic constructors is repaired with sibling noninline calls without enlarging the36page stack. " + checkpoint
+    gap = "Bounded returned-sample loss only; physical clock failure, unsafe entry, persistent generation audit/quarantine, partial timer configuration, shared APIC/IF0/NMI failure, hardware races, general admission, full stack/exception/XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/ISO remain open. Image182pages/entry0xC000 needs product-contract migration; diagnostic text capacity and stack composition remain monitored under the existing integration flag. Full exact-candidate replay remains pending. No phase exit, merge or production promotion."
+    for phase_id in ("N8", "N12", "N13"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " PKUSER15 covers returned sample loss and termination-only retry, not physical clock failure or persistent generation audit. Bound stack composition and text capacity as native capability IPC is added; retain all production and interactive-ISO gates."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1289)
+    parser.add_argument("--test-count", type=int, default=1292)
     parser.add_argument("--status-date", default="2026-10-08")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

@@ -1,15 +1,38 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.151.0-native-hpet-backup-recovery
-Roadmap cycle: PooleOS Cycle 248
+Plan version: 2.152.0-native-unknown-runtime-recovery
+Roadmap cycle: PooleOS Cycle 249
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 248: Native HPET Backup Recovery
+## Cycle 249: Unknown Runtime Recovery
+
+PKUSER15 records a lost runtime sample explicitly, forbids requeue or fabricated
+zero charging, and retains the task's resources until device/root cleanup succeeds.
+Two fresh native boots each complete17 containment cases; a healthy user peer
+continues after the failed task is retired.545 Rust executions,40 Python oracle
+tests,630 altered-evidence rejections per guest and ordinary boot denial pass.
+[Evidence](checkpoints/cycle249-unknown-runtime-recovery.md),
+[mechanism and limits](native-user-unknown-runtime.md).
+
+Testing found and repaired a one-page text-reservation overflow and a real kernel
+stack-guard fault caused by nested diagnostic constructors. The suites now run as
+non-inlined siblings. The image is182 pages within the192-page cap; entry0xC000,
+36-page guarded stack and120s guest bound remain unchanged. General stack-bound
+qualification is not claimed.
+
+Next move: N13-CAPABILITY-IPC-001, USI-2 groundwork, then native services, shell,
+bundled files/two applications and the usable optical ISO. USI-1 and N12/N13 stay
+partial; USI-2 is not yet implemented. All8996 requirements,59 additions,97 flags
+(42 open),20 program gaps and40 phases remain. No phase/flag closure or production
+promotion. Full robust microkernel, PooleGlyph/PDC and PooleGlass work continues
+after the user-space milestone.
+
+## Historical Cycle 248: Native HPET Backup Recovery
 
 USI-1 / N8, N12 and N13: PKUSER14 adds a retained HPET comparator lease and
 50ms backup deadline behind the normal local timer. Two fresh60-marker guests

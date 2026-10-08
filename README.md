@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle248 adds native HPET backup recovery.
+**Current development checkpoint:** Cycle249 recovers a task with missing runtime
+measurement without inventing zero time. Two fresh native boots each pass17
+containment cases, retain ownership through cleanup failure, then resume a healthy
+peer.545 Rust executions and40 Python oracle tests pass. Next: capability IPC,
+services, shell/apps and the usable integration ISO. No interactive ISO yet;
+complete robust microkernel development continues afterward.
+[Evidence](docs/checkpoints/cycle249-unknown-runtime-recovery.md).
+
+**Historical development checkpoint:** Cycle248 adds native HPET backup recovery.
 Two fresh boots each stop a spinner whose local timer is masked, account its
 execution once, clean up both timers and preserve16 containment cases.
 539 Rust executions and38 Python oracle tests pass. Next: unknown-runtime

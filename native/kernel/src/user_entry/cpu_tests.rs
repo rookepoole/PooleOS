@@ -203,7 +203,7 @@ fn runtime_terminal_and_cleanup_failure_keep_exact_charge_across_rejected_settle
 }
 
 #[test]
-fn runtime_missing_measurement_is_unknown_not_zero_and_never_released() {
+fn runtime_missing_measurement_is_unknown_not_zero_and_retained_until_recorded() {
     let mut s = setup();
     let (mut slot, c, id) = task_slot(s.owner);
     c.borrow_mut().fail_execute = true;
@@ -220,6 +220,101 @@ fn runtime_missing_measurement_is_unknown_not_zero_and_never_released() {
     assert!(slot.account_slice(id, &mut scheduler, cpu).is_err());
     assert!(slot.abandon(id, &mut s.manager, &mut s.memory).is_err());
     retained(&mut s.manager, &s.handles);
+}
+
+#[test]
+fn unknown_settlement_preserves_measured_prefix_and_retries_device_and_root_cleanup() {
+    for prior_slice in [false, true] {
+        let mut s = setup();
+        let (mut slot, c, id) = task_slot(s.owner);
+        let (mut scheduler, cpu) = running_scheduler(id);
+        let sid = crate::scheduler::TaskId::new(id.slot, id.generation).unwrap();
+        if prior_slice {
+            slot.activate(id, &s.manager, &mut s.memory).unwrap();
+            slot.run_slice(id).unwrap();
+            slot.account_slice(id, &mut scheduler, cpu).unwrap();
+            scheduler.yield_current(cpu).unwrap();
+            scheduler.dispatch(cpu).unwrap();
+        }
+        c.borrow_mut().fail_execute = true;
+        c.borrow_mut().fail_quiesce = true;
+        slot.activate(id, &s.manager, &mut s.memory).unwrap();
+        assert!(slot.run_slice(id).is_err());
+        let pending = slot.runtime(id).unwrap();
+        assert!(pending.unknown);
+        assert_eq!(pending.charged_ticks, u64::from(prior_slice));
+        assert!(slot.abandon(id, &mut s.manager, &mut s.memory).is_err());
+        assert!(
+            slot.account_unknown(
+                TaskId {
+                    generation: 2,
+                    ..id
+                },
+                &mut scheduler,
+                cpu
+            )
+            .is_err()
+        );
+        assert!(
+            slot.account_unknown(id, &mut scheduler, crate::scheduler::CpuId::new(1).unwrap())
+                .is_err()
+        );
+        let (mut foreign, _) = running_scheduler(TaskId::new(1, 1).unwrap());
+        assert!(slot.account_unknown(id, &mut foreign, cpu).is_err());
+        assert_eq!(slot.runtime(id).unwrap(), pending);
+        slot.account_unknown(id, &mut scheduler, cpu).unwrap();
+        let settled = slot.runtime(id).unwrap();
+        assert!(!settled.unknown);
+        assert_eq!(settled.unmeasured_slices, 1);
+        assert_eq!(settled.charged_ticks, u64::from(prior_slice));
+        assert_eq!(
+            scheduler.task_snapshot(sid).unwrap().unmeasured_dispatches,
+            1
+        );
+        assert!(slot.account_unknown(id, &mut scheduler, cpu).is_err());
+        assert!(slot.account_slice(id, &mut scheduler, cpu).is_err());
+        assert!(slot.activate(id, &s.manager, &mut s.memory).is_err());
+        assert!(slot.cancel_suspended(id).is_err());
+        assert!(slot.outcome(id).is_err());
+        assert!(slot.reap(id, &mut s.manager, &mut s.memory).is_err());
+        assert!(slot.abandon(id, &mut s.manager, &mut s.memory).is_err());
+        retained(&mut s.manager, &s.handles);
+        c.borrow_mut().fail_quiesce = false;
+        s.machine.borrow_mut().write_error = true;
+        assert!(slot.abandon(id, &mut s.manager, &mut s.memory).is_err());
+        retained(&mut s.manager, &s.handles);
+        assert_eq!(slot.runtime(id).unwrap(), settled);
+        assert_eq!(scheduler.current(cpu), Ok(Some(sid)));
+        s.machine.borrow_mut().write_error = false;
+        slot.abandon(id, &mut s.manager, &mut s.memory).unwrap();
+        scheduler.teardown(sid).unwrap();
+        assert_eq!(
+            scheduler.task_snapshot(sid).unwrap().unmeasured_dispatches,
+            1
+        );
+        assert_eq!(
+            scheduler.task_snapshot(sid).unwrap().runtime_ticks,
+            u64::from(prior_slice)
+        );
+        assert_eq!(c.borrow().entries, 1 + u32::from(prior_slice));
+    }
+}
+
+#[test]
+fn unknown_settlement_cannot_discard_a_valid_pending_measurement() {
+    let mut s = setup();
+    let (mut slot, _, id) = task_slot(s.owner);
+    let (mut scheduler, cpu) = running_scheduler(id);
+    assert!(slot.account_unknown(id, &mut scheduler, cpu).is_err());
+    slot.activate(id, &s.manager, &mut s.memory).unwrap();
+    assert!(slot.account_unknown(id, &mut scheduler, cpu).is_err());
+    slot.run_slice(id).unwrap();
+    assert!(slot.account_unknown(id, &mut scheduler, cpu).is_err());
+    slot.account_slice(id, &mut scheduler, cpu).unwrap();
+    assert!(slot.account_unknown(id, &mut scheduler, cpu).is_err());
+    slot.cancel_suspended(id).unwrap();
+    assert!(slot.account_unknown(id, &mut scheduler, cpu).is_err());
+    slot.reap(id, &mut s.manager, &mut s.memory).unwrap();
 }
 
 #[test]

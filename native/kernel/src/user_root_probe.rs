@@ -461,6 +461,17 @@ pub fn run(
         serial,
         debugcon,
     );
+    // Release the large measured-suite stack frame before another constructor.
+    peer_driver::unknown::run(
+        handoff,
+        core,
+        bits,
+        &mut manager,
+        topology,
+        hpet,
+        serial,
+        debugcon,
+    );
     let mut log = EarlyLogger::new(BootSink {
         serial,
         debugcon,
@@ -476,7 +487,7 @@ pub fn run(
     log.write_str(" retained_acpi_pages=");
     log.write_decimal_u64(acpi.snapshot_page_count);
     log.write_str(
-        " released_pages=564 scrubbed_data_pages=259 ring3=1 production=0 terminal=halt\n",
+        " released_pages=590 scrubbed_data_pages=271 ring3=1 production=0 terminal=halt\n",
     );
     halt_forever()
 }

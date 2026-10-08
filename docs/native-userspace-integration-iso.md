@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 248, 2026-10-08. No new ISO exists yet.
+Status: implementation started, Cycle 249, 2026-10-08. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -43,11 +43,37 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 
 | Stage | Build Plan Binding | Exit Criterion | Current State |
 | --- | --- | --- | --- |
-| USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle248: owned HPET backup recovers a masked local timer; exact accounting and16 survival cases; unknown-runtime/general admission/quarantine, broader watchdog and stack/exception qualification remain |
+| USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Not started |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Not started |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
+
+### Immediate Next Move
+
+N13-CAPABILITY-IPC-001 starts USI-2 groundwork without declaring USI-1 complete:
+
+1. Add original kernel-owned typed objects and per-task capability tables. Resolve
+   handles against authenticated caller identity; reject forged/stale generations,
+   wrong object types, rights amplification and generation wrap. Bound allocation
+   and handle counts; define destruction and revocation ownership before reuse.
+2. Add bounded endpoint messages with explicit ABI versions, lengths and rights.
+   Copy from owned user memory before publishing a message; define failure-atomic
+   queue/charge updates. Do not treat a raw task ID or address as authority.
+3. Connect wait/wakeup, cancellation, dead-peer cleanup and reply ownership to the
+   existing scheduler and retained task lifecycle. Test quota/queue exhaustion,
+   duplicate wakeups, revoked endpoints and failure at every mutation boundary.
+4. Execute an actual request/reply exchange between isolated CPL3 tasks, with
+   native denied-handle/oversize/dead-peer controls and surviving-peer progress.
+   Preserve all17 containment cases and ordinary boot denial. Broader capability
+   transfer, shared-memory IPC, concurrency and full N14 qualification stay explicit.
+5. Only then build USI-3 services and USI-4 interaction. Optical packaging must
+   boot the actual usable session and pass the acceptance script above.
+
+Cycle249 evidence is [here](checkpoints/cycle249-unknown-runtime-recovery.md).
+Its sample-loss injection is not a real hardware-clock failure. Keep that limit,
+general stack bounds, persistent audit/quarantine and the current182-page product
+contract migration visible under FLAG-N13-USERSPACE-ISO-001.
 
 ### USI-1 Substeps
 
@@ -143,7 +169,16 @@ requirements, not items deferred until after the demo.
    products. Preserve the older demo separately; its receipts cannot qualify this
    image. Test the ISO itself, not only a disk image or host library.
 
-## Cycle 248 Native HPET Backup Recovery
+## Cycle 249 Unknown Runtime Recovery
+
+[Checkpoint](checkpoints/cycle249-unknown-runtime-recovery.md) records two fresh
+61-marker guests with17 survival cases. The new case records missing time as
+unknown, forbids requeue/zero charging, retains the exact cleanup owner and lets
+a healthy peer continue after retirement.545 Rust executions and40 oracle tests
+pass. The stack-guard failure and sibling-call repair are retained. Next: USI-2
+capability/IPC groundwork, without closing general USI-1 or production gaps.
+
+## Historical Cycle 248 Native HPET Backup Recovery
 
 [Checkpoint](checkpoints/cycle248-native-hpet-backup.md) records two fresh60-marker
 guests with16 survival cases,156 settled dispatches,30 terminal samples and one

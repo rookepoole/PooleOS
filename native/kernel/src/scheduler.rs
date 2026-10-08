@@ -131,6 +131,8 @@ pub struct TaskSnapshot {
     pub bypass_count: u8,
     pub dispatch_count: u32,
     pub runtime_ticks: u64,
+    /// Nonzero means runtime_ticks is only the measured subtotal, not total time.
+    pub unmeasured_dispatches: u32,
 }
 
 #[derive(Clone, Copy)]
@@ -148,6 +150,7 @@ struct Task {
     dispatch_count: u32,
     runtime_ticks: u64,
     charged_dispatch: u32,
+    unmeasured_dispatches: u32,
 }
 
 impl Task {
@@ -166,6 +169,7 @@ impl Task {
             dispatch_count: 0,
             runtime_ticks: 0,
             charged_dispatch: 0,
+            unmeasured_dispatches: 0,
         }
     }
 
@@ -319,6 +323,7 @@ impl Scheduler {
             dispatch_count: 0,
             runtime_ticks: 0,
             charged_dispatch: 0,
+            unmeasured_dispatches: 0,
         };
         self.bump_sequence();
         Ok(id)
@@ -413,6 +418,33 @@ impl Scheduler {
         let total = previous_ticks.checked_add(ticks).ok_or(Error::Invariant)?;
         self.tasks[index].runtime_ticks = total;
         self.tasks[index].charged_dispatch = dispatch;
+        self.bump_sequence();
+        Ok(())
+    }
+
+    /// Record one lost sample without inventing ticks. The current owner stays
+    /// installed for cleanup, but can only be torn down, never requeued.
+    pub fn record_unmeasured_dispatch(
+        &mut self,
+        cpu: CpuId,
+        id: TaskId,
+        dispatch: u32,
+        previous_ticks: u64,
+    ) -> Result<(), Error> {
+        self.validate()?;
+        if self.current_id(cpu)? != id {
+            return Err(Error::OwnerToken);
+        }
+        let index = self.task_index(id)?;
+        let task = &mut self.tasks[index];
+        if task.dispatch_count != dispatch
+            || task.runtime_ticks != previous_ticks
+            || task.charged_dispatch.checked_add(1) != Some(dispatch)
+        {
+            return Err(Error::Invariant);
+        }
+        task.charged_dispatch = dispatch;
+        task.unmeasured_dispatches = 1;
         self.bump_sequence();
         Ok(())
     }
@@ -703,6 +735,7 @@ impl Scheduler {
             bypass_count: task.bypass_count,
             dispatch_count: task.dispatch_count,
             runtime_ticks: task.runtime_ticks,
+            unmeasured_dispatches: task.unmeasured_dispatches,
         })
     }
 
@@ -796,6 +829,13 @@ impl Scheduler {
                     return Err(Error::Invariant);
                 }
                 continue;
+            }
+            if task.unmeasured_dispatches != 0
+                && (task.unmeasured_dispatches != 1
+                    || !matches!(task.state, TaskState::Running | TaskState::Dead)
+                    || task.charged_dispatch != task.dispatch_count)
+            {
+                return Err(Error::Invariant);
             }
             match task.state {
                 TaskState::Dormant => {
@@ -960,12 +1000,17 @@ impl Scheduler {
 
     fn current_id(&self, cpu: CpuId) -> Result<TaskId, Error> {
         self.require_online(cpu)?;
-        self.current[cpu.index()].ok_or(Error::CpuIdle)
+        let id = self.current[cpu.index()].ok_or(Error::CpuIdle)?;
+        if self.tasks[self.task_index(id)?].unmeasured_dispatches != 0 {
+            return Err(Error::State);
+        }
+        Ok(id)
     }
 
     fn take_current(&mut self, cpu: CpuId) -> Result<TaskId, Error> {
-        self.require_online(cpu)?;
-        self.current[cpu.index()].take().ok_or(Error::CpuIdle)
+        let id = self.current_id(cpu)?;
+        self.current[cpu.index()] = None;
+        Ok(id)
     }
 
     fn wake(&mut self, id: TaskId, cpu: CpuId, reason: WakeReason) -> Result<(), Error> {
@@ -1211,6 +1256,75 @@ pub fn validate_context_switch_contract(value: &ContextSwitchContract) -> Result
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn unmeasured_dispatch_preserves_subtotal_and_allows_only_retirement() {
+        let mut s = Scheduler::new(1).unwrap();
+        let cpu = CpuId::new(0).unwrap();
+        let id = s.create_task(0, 1, 16, 1).unwrap();
+        let peer = s.create_task(1, 1, 15, 1).unwrap();
+        s.activate(id, cpu).unwrap();
+        s.activate(peer, cpu).unwrap();
+        assert_eq!(s.dispatch(cpu), Ok(id));
+        s.account_dispatch(cpu, id, 1, 0, 23).unwrap();
+        s.yield_current(cpu).unwrap();
+        assert_eq!(s.dispatch(cpu), Ok(id));
+        s.record_unmeasured_dispatch(cpu, id, 2, 23).unwrap();
+        let before = s.task_snapshot(id).unwrap();
+        let sequence = s.sequence;
+        assert_eq!(before.runtime_ticks, 23);
+        assert_eq!(before.unmeasured_dispatches, 1);
+        assert!(s.record_unmeasured_dispatch(cpu, id, 2, 23).is_err());
+        assert!(s.account_dispatch(cpu, id, 2, 23, 0).is_err());
+        assert!(s.account_tick(cpu, 1).is_err());
+        assert!(s.yield_current(cpu).is_err());
+        assert!(s.block_current(cpu).is_err());
+        assert!(s.block_current_for_lock(cpu).is_err());
+        assert!(s.lock_mutex(cpu).is_err());
+        assert_eq!(s.task_snapshot(id).unwrap(), before);
+        assert_eq!(s.sequence, sequence);
+        assert_eq!(s.current(cpu), Ok(Some(id)));
+        s.validate().unwrap();
+        s.teardown(id).unwrap();
+        let retired = s.task_snapshot(id).unwrap();
+        assert_eq!(retired.state, TaskState::Dead);
+        assert_eq!(retired.runtime_ticks, 23);
+        assert_eq!(retired.unmeasured_dispatches, 1);
+        assert_eq!(s.dispatch(cpu), Ok(peer));
+        assert!(s.record_unmeasured_dispatch(cpu, id, 2, 23).is_err());
+    }
+
+    #[test]
+    fn unmeasured_dispatch_rejects_foreign_cpu_identity_ordinal_and_subtotal_atomically() {
+        for case in 0..7 {
+            let mut s = Scheduler::new(1).unwrap();
+            let cpu = CpuId::new(0).unwrap();
+            let id = s.create_task(0, 1, 16, 1).unwrap();
+            s.activate(id, cpu).unwrap();
+            s.dispatch(cpu).unwrap();
+            let mut owner = id;
+            let mut ordinal = 1;
+            let mut previous = 0;
+            let mut wrong_cpu = cpu;
+            match case {
+                0 => owner.generation += 1,
+                1 => owner.slot += 1,
+                2 => ordinal = 2,
+                3 => previous = 1,
+                4 => wrong_cpu = CpuId::new(1).unwrap(),
+                5 => s.account_dispatch(cpu, id, 1, 0, 0).unwrap(),
+                _ => s.tasks[0].charged_dispatch = u32::MAX,
+            }
+            let before = s.task_snapshot(id).unwrap();
+            let sequence = s.sequence;
+            assert!(
+                s.record_unmeasured_dispatch(wrong_cpu, owner, ordinal, previous)
+                    .is_err()
+            );
+            assert_eq!(s.task_snapshot(id).unwrap(), before);
+            assert_eq!(s.sequence, sequence);
+        }
+    }
 
     #[test]
     fn dispatch_accounting_rejects_replay_wrong_owner_sequence_and_overflow_atomically() {

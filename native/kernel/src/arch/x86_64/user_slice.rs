@@ -30,6 +30,7 @@ pub struct PeerEntry {
     saved: Option<Saved>,
     budget: Option<preemption::Budget>,
     suppress_local: bool,
+    lose_sample: bool,
 }
 impl PeerEntry {
     /// Same sole-BSP, IF0 and state-ownership preconditions as Entry::prepare.
@@ -40,6 +41,7 @@ impl PeerEntry {
             saved: None,
             budget: None,
             suppress_local: false,
+            lose_sample: false,
         })
     }
     pub fn set_budget(&mut self, budget: preemption::Budget) -> Result<(), Error> {
@@ -54,6 +56,14 @@ impl PeerEntry {
             return Err(Error::State);
         }
         self.suppress_local = true;
+        Ok(())
+    }
+    /// Development fault injection after a real authenticated quantum returns.
+    pub fn inject_lost_sample(&mut self) -> Result<(), Error> {
+        if self.entry.installed || self.run.is_some() || active() {
+            return Err(Error::State);
+        }
+        self.lose_sample = true;
         Ok(())
     }
 }
@@ -140,6 +150,10 @@ impl task::SliceDriver for PeerEntry {
         let ticks = session.ticks.ok_or(Error::State)?;
         self.run = Some(session.run);
         self.saved = session.saved;
+        if self.lose_sample {
+            self.lose_sample = false;
+            return Err(Error::Hardware);
+        }
         Ok(Slice {
             id,
             root: image.root_physical,

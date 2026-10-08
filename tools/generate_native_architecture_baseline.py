@@ -24,6 +24,10 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle249-unknown-runtime-recovery.md",
+    "docs/native-user-unknown-runtime.md",
+    "tests/fixtures/cycle248-user-entry-readiness.json",
+    "native/kernel/src/user_root_probe/peer_driver/unknown.rs",
     "docs/checkpoints/cycle248-native-hpet-backup.md",
     "docs/native-user-hpet-backup.md",
     "tests/fixtures/cycle247-user-entry-readiness.json",

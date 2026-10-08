@@ -10,6 +10,8 @@ use poolekernel::{
 };
 use timer_driver::{PeerRun, Timer};
 
+pub(super) mod unknown;
+
 // A constructor error carries its owner even if cleanup or slot commit failed.
 // This development harness halts on unanticipated quarantine; no owner is freed.
 #[allow(dead_code)]
@@ -48,7 +50,8 @@ impl Peer {
         let mut timer =
             Timer::new(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
         timer.set_probe(probe);
-        let bytes = arch::x86_64::user::peer_payload(kind).map_err(|_| PeerFailure::Setup)?;
+        let bytes = arch::x86_64::user::peer_payload(if kind == 15 { 0 } else { kind })
+            .map_err(|_| PeerFailure::Setup)?;
         let identity = TaskId::new(index, 1).map_err(|_| PeerFailure::Setup)?;
         // SAFETY: exclusive BSP, IF0, before allocation or task activation.
         let mut entry =
@@ -58,6 +61,9 @@ impl Peer {
             entry
                 .inject_missing_local_timer()
                 .map_err(|_| PeerFailure::Setup)?;
+        }
+        if kind == 15 {
+            entry.inject_lost_sample().map_err(|_| PeerFailure::Setup)?;
         }
         let built = spawn_driver::build(manager, core, bits, bytes, Some(timer.mappings()))
             .map_err(PeerFailure::Construction)?;
@@ -190,6 +196,7 @@ impl Peer {
     }
 }
 
+#[inline(never)]
 pub fn run_all(
     handoff: &Handoff<'_>,
     core: CoreRecord,

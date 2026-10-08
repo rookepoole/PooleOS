@@ -245,6 +245,8 @@ pub struct Runtime {
     pub charged_ticks: u64,
     pub pending_ticks: Option<u64>,
     pub unknown: bool,
+    /// Settled unknown dispatches. charged_ticks remains an incomplete subtotal.
+    pub unmeasured_slices: u32,
 }
 
 struct Owned<H: Cpu, D: Driver> {
@@ -450,7 +452,7 @@ impl<H: Cpu, D: SliceDriver> Slot<H, D> {
     ) -> Result<u64, Error> {
         let task = self.owned_mut(id)?;
         let slice = task.pending_charge.ok_or(Error::State)?;
-        if task.runtime.unknown {
+        if task.runtime.unknown || task.runtime.unmeasured_slices != 0 {
             return Err(Error::State);
         }
         let ordinal = task
@@ -479,9 +481,42 @@ impl<H: Cpu, D: SliceDriver> Slot<H, D> {
             charged_ticks: total,
             pending_ticks: None,
             unknown: false,
+            unmeasured_slices: 0,
         };
         task.pending_charge = None;
         Ok(slice.ticks)
+    }
+
+    /// Record missing accounting before termination-only recovery. This does
+    /// not assert quiescence, free resources, or fabricate an application result.
+    pub fn account_unknown(
+        &mut self,
+        id: TaskId,
+        scheduler: &mut crate::scheduler::Scheduler,
+        cpu: crate::scheduler::CpuId,
+    ) -> Result<(), Error> {
+        let task = self.owned_mut(id)?;
+        if task.state != State::Quarantined
+            || !task.runtime.unknown
+            || task.pending_charge.is_some()
+            || task.runtime.pending_ticks.is_some()
+            || task.runtime.unmeasured_slices != 0
+        {
+            return Err(Error::State);
+        }
+        let ordinal = task
+            .runtime
+            .charged_slices
+            .checked_add(1)
+            .ok_or(Error::Exhausted)?;
+        let scheduled =
+            crate::scheduler::TaskId::new(id.slot, id.generation).map_err(Error::Accounting)?;
+        scheduler
+            .record_unmeasured_dispatch(cpu, scheduled, ordinal, task.runtime.charged_ticks)
+            .map_err(Error::Accounting)?;
+        task.runtime.unknown = false;
+        task.runtime.unmeasured_slices = 1;
+        Ok(())
     }
 
     pub fn run_slice(&mut self, id: TaskId) -> Result<Slice, Error> {
