@@ -14,6 +14,7 @@ use crate::{
 };
 
 pub const CONTRACT_ID: &str = "PKUSER8";
+pub const CALLS_PER_DISPATCH: u8 = 64;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Fault {
@@ -44,6 +45,7 @@ pub enum Reason {
     },
     Cancelled,
     CallLimit,
+    CallCounterExhausted,
     Watchdog,
 }
 
@@ -52,19 +54,19 @@ pub struct Outcome {
     pub id: TaskId,
     pub root: u64,
     pub reason: Reason,
-    pub syscalls: u32,
+    pub syscalls: u64,
 }
 impl Outcome {
     pub(crate) fn validate(self, id: TaskId, root: u64) -> Result<(), privilege::Error> {
         if self.id != id
             || self.root != root
-            || self.syscalls > 64
             || match self.reason {
                 Reason::Exit(_) => self.syscalls == 0,
                 Reason::Fault(f) => !f.valid(),
                 Reason::InvalidReturn { vector, .. } => !matches!(vector, 64 | syscall::VECTOR),
                 Reason::Cancelled => false,
                 Reason::CallLimit => self.syscalls != 64,
+                Reason::CallCounterExhausted => self.syscalls != u64::MAX,
                 Reason::Watchdog => false,
             }
         {
@@ -78,7 +80,10 @@ impl Outcome {
 pub struct Run {
     image: ImageAdmission,
     id: TaskId,
-    calls: u32,
+    calls: u64,
+    sustained: bool,
+    dispatch_open: bool,
+    dispatch_calls: u8,
     outcome: Option<Outcome>,
 }
 impl Run {
@@ -92,25 +97,65 @@ impl Run {
             image,
             id,
             calls: 0,
+            sustained: false,
+            dispatch_open: false,
+            dispatch_calls: 0,
             outcome: None,
         })
+    }
+    /// Long-lived service policy. Only the supervisor may open/close dispatches.
+    pub fn sustained(image: ImageAdmission, id: TaskId) -> Result<Self, privilege::Error> {
+        let mut run = Self::new(image, id)?;
+        run.sustained = true;
+        Ok(run)
+    }
+    pub const fn is_sustained(&self) -> bool {
+        self.sustained
+    }
+    pub fn begin_dispatch(&mut self) -> Result<(), privilege::Error> {
+        if !self.sustained || self.dispatch_open || self.outcome.is_some() {
+            return Err(privilege::Error::State);
+        }
+        self.dispatch_calls = 0;
+        self.dispatch_open = true;
+        Ok(())
+    }
+    pub fn end_dispatch(&mut self) -> Result<(), privilege::Error> {
+        if !self.sustained || !self.dispatch_open || self.outcome.is_some() {
+            return Err(privilege::Error::State);
+        }
+        self.dispatch_open = false;
+        Ok(())
+    }
+    pub const fn budget_exhausted(&self) -> bool {
+        self.sustained && self.dispatch_open && self.dispatch_calls == CALLS_PER_DISPATCH
     }
     pub fn call(&mut self, trap: &privilege::Trap) -> Result<bool, privilege::Error> {
         if !self.resume(trap, syscall::VECTOR)? {
             return Ok(false);
         }
-        if self.calls == 64 {
+        if self.sustained && (!self.dispatch_open || self.budget_exhausted()) {
+            return Err(privilege::Error::State);
+        }
+        if !self.sustained && self.calls == 64 {
             self.finish(Reason::CallLimit)?;
             return Ok(false);
         }
+        if self.calls == u64::MAX {
+            self.finish(Reason::CallCounterExhausted)?;
+            return Ok(false);
+        }
         self.calls += 1;
+        if self.sustained {
+            self.dispatch_calls += 1;
+        }
         Ok(true)
     }
     pub fn preempt(&mut self, trap: &privilege::Trap) -> Result<bool, privilege::Error> {
         self.resume(trap, 64)
     }
     fn resume(&mut self, trap: &privilege::Trap, vector: u64) -> Result<bool, privilege::Error> {
-        if self.outcome.is_some() {
+        if self.outcome.is_some() || (self.sustained && !self.dispatch_open) {
             return Err(privilege::Error::State);
         }
         if trap.vector != vector || trap.error != 0 {
@@ -150,7 +195,7 @@ impl Run {
         self.finish(Reason::Fault(fault))
     }
     fn finish(&mut self, reason: Reason) -> Result<Outcome, privilege::Error> {
-        if self.outcome.is_some() {
+        if self.outcome.is_some() || (self.sustained && !self.dispatch_open) {
             return Err(privilege::Error::State);
         }
         let outcome = Outcome {
@@ -165,7 +210,7 @@ impl Run {
     pub const fn outcome(&self) -> Option<Outcome> {
         self.outcome
     }
-    pub const fn calls(&self) -> u32 {
+    pub const fn calls(&self) -> u64 {
         self.calls
     }
     pub fn ipc_caller(
@@ -173,7 +218,10 @@ impl Run {
         trap: &privilege::Trap,
     ) -> Result<crate::capability_ipc::Caller, privilege::Error> {
         syscall::frame(self.image, trap)?;
-        if self.calls == 0 || self.outcome.is_some() {
+        if self.calls == 0
+            || self.outcome.is_some()
+            || (self.sustained && (!self.dispatch_open || self.dispatch_calls == 0))
+        {
             return Err(privilege::Error::State);
         }
         Ok(crate::capability_ipc::Caller::new(self.id, self.image))
@@ -199,11 +247,15 @@ pub trait Driver {
 pub enum Event {
     Waiting {
         ticket: crate::capability_ipc::wait::Ticket,
-        syscalls: u32,
+        syscalls: u64,
+    },
+    /// A completed syscall consumed the dispatch allowance; its result is saved.
+    BudgetYield {
+        syscalls: u64,
     },
     Preempted {
         ticks: u64,
-        syscalls: u32,
+        syscalls: u64,
         progress: u64,
     },
     Terminated(Outcome),
@@ -221,13 +273,14 @@ impl Slice {
             return Err(privilege::Error::Hardware);
         }
         match self.event {
-            Event::Preempted {
-                ticks, syscalls, ..
-            } if ticks > 0 && ticks == self.ticks && syscalls <= 64 => Ok(()),
-            Event::Terminated(o) => o.validate(id, root),
-            Event::Waiting { ticket, syscalls }
-                if ticket.matches(id, root) && (1..=64).contains(&syscalls) =>
+            Event::Preempted { ticks, .. } if ticks > 0 && ticks == self.ticks => Ok(()),
+            Event::BudgetYield { syscalls }
+                if self.ticks > 0 && syscalls >= u64::from(CALLS_PER_DISPATCH) =>
             {
+                Ok(())
+            }
+            Event::Terminated(o) => o.validate(id, root),
+            Event::Waiting { ticket, syscalls } if ticket.matches(id, root) && syscalls > 0 => {
                 Ok(())
             }
             _ => Err(privilege::Error::Hardware),
@@ -626,7 +679,7 @@ impl<H: Cpu, D: SliceDriver> Slot<H, D> {
                 cpu.suspend().map_err(Error::Cpu)?;
                 task.state = State::Waiting;
             }
-            Event::Preempted { .. } => {
+            Event::Preempted { .. } | Event::BudgetYield { .. } => {
                 cpu.suspend().map_err(Error::Cpu)?;
                 task.state = State::Suspended;
             }
@@ -647,8 +700,9 @@ impl<H: Cpu, D: SliceDriver> Slot<H, D> {
             return Err(Error::State);
         }
         let slice = task.last_slice.ok_or(Error::State)?;
-        let Event::Preempted { syscalls, .. } = slice.event else {
-            return Err(Error::State);
+        let syscalls = match slice.event {
+            Event::Preempted { syscalls, .. } | Event::BudgetYield { syscalls } => syscalls,
+            _ => return Err(Error::State),
         };
         let outcome = Outcome {
             id,
@@ -966,5 +1020,141 @@ mod tests {
         assert_eq!(r.outcome().unwrap().reason, Reason::CallLimit);
         assert_eq!(r.outcome().unwrap().syscalls, 64);
         assert!(r.exit(0).is_err());
+    }
+    #[test]
+    fn sustained_calls_yield_instead_of_dying_and_never_refill_mid_dispatch() {
+        let mut r = Run::sustained(image(), run().id).unwrap();
+        assert!(r.call(&trap()).is_err());
+        for dispatch in 1..=16 {
+            r.begin_dispatch().unwrap();
+            assert!(r.begin_dispatch().is_err());
+            for n in 1..=64 {
+                assert_eq!(r.call(&trap()), Ok(true));
+                assert_eq!(r.budget_exhausted(), n == 64);
+            }
+            assert_eq!(r.calls(), dispatch * 64);
+            assert_eq!(r.call(&trap()), Err(privilege::Error::State));
+            assert!(r.outcome().is_none());
+            r.end_dispatch().unwrap();
+            assert!(r.end_dispatch().is_err());
+            assert!(r.call(&trap()).is_err());
+            assert!(r.ipc_caller(&trap()).is_err());
+        }
+        r.begin_dispatch().unwrap();
+        assert!(r.ipc_caller(&trap()).is_err());
+        r.call(&trap()).unwrap();
+        let o = r.exit(100).unwrap();
+        assert_eq!(o.syscalls, 1025);
+        o.validate(o.id, o.root).unwrap();
+        assert!(r.begin_dispatch().is_err());
+        assert!(r.end_dispatch().is_err());
+        assert!(r.call(&trap()).is_err());
+    }
+    #[test]
+    fn sustained_bad_entry_and_bad_return_do_not_consume_allowance() {
+        for terminal in [false, true] {
+            let mut r = Run::sustained(image(), run().id).unwrap();
+            r.begin_dispatch().unwrap();
+            let mut t = trap();
+            if terminal {
+                t.rsp = u64::MAX;
+            } else {
+                t.root += 4096;
+            }
+            let result = r.call(&t);
+            if terminal {
+                assert_eq!(result, Ok(false));
+            } else {
+                assert!(result.is_err());
+            }
+            assert_eq!((r.calls(), r.dispatch_calls), (0, 0));
+            if terminal {
+                assert!(r.begin_dispatch().is_err());
+            } else {
+                assert_eq!(r.call(&trap()), Ok(true));
+            }
+        }
+    }
+    #[test]
+    fn rejected_syscall_attempts_still_consume_the_service_allowance() {
+        let mut r = Run::sustained(image(), run().id).unwrap();
+        r.begin_dispatch().unwrap();
+        for _ in 0..64 {
+            assert!(r.call(&trap()).unwrap());
+            assert!(syscall::request(u64::MAX, 1, 0, 0, 0, 0, 0).is_err());
+        }
+        assert!(r.budget_exhausted());
+        assert_eq!(r.calls(), 64);
+        assert!(r.call(&trap()).is_err());
+    }
+    #[test]
+    fn terminal_call_at_budget_boundary_is_not_replenishable() {
+        let mut r = Run::sustained(image(), run().id).unwrap();
+        r.begin_dispatch().unwrap();
+        for _ in 0..64 {
+            r.call(&trap()).unwrap();
+        }
+        let o = r.exit(9).unwrap();
+        assert_eq!((o.reason, o.syscalls), (Reason::Exit(9), 64));
+        assert!(r.end_dispatch().is_err());
+        assert!(r.begin_dispatch().is_err());
+        let mut diagnostic = run();
+        assert!(!diagnostic.is_sustained());
+        assert!(diagnostic.begin_dispatch().is_err());
+    }
+    #[test]
+    fn sustained_counter_exhaustion_is_terminal_not_wrapped_or_fabricated() {
+        let mut r = Run::sustained(image(), run().id).unwrap();
+        r.begin_dispatch().unwrap();
+        r.calls = u64::MAX - 1;
+        assert_eq!(r.call(&trap()), Ok(true));
+        assert_eq!(r.call(&trap()), Ok(false));
+        let o = r.outcome().unwrap();
+        assert_eq!(
+            (o.reason, o.syscalls),
+            (Reason::CallCounterExhausted, u64::MAX)
+        );
+        o.validate(o.id, o.root).unwrap();
+        assert!(
+            Outcome { syscalls: 64, ..o }
+                .validate(o.id, o.root)
+                .is_err()
+        );
+        assert!(r.begin_dispatch().is_err());
+    }
+    #[test]
+    fn budget_yield_observation_requires_positive_time_and_completed_allowance() {
+        let r = run();
+        let valid = Slice {
+            id: r.id,
+            root: r.image.root_physical,
+            ticks: 1,
+            event: Event::BudgetYield { syscalls: 128 },
+        };
+        valid.validate(r.id, r.image.root_physical).unwrap();
+        assert!(
+            Slice { ticks: 0, ..valid }
+                .validate(r.id, valid.root)
+                .is_err()
+        );
+        assert!(
+            Slice {
+                event: Event::BudgetYield { syscalls: 63 },
+                ..valid
+            }
+            .validate(r.id, valid.root)
+            .is_err()
+        );
+        assert!(
+            valid
+                .validate(
+                    TaskId {
+                        generation: 2,
+                        ..r.id
+                    },
+                    valid.root
+                )
+                .is_err()
+        );
     }
 }

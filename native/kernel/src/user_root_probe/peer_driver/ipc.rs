@@ -111,6 +111,7 @@ pub(crate) fn run(
         let elapsed = checked!(p.slot.account_slice(p.id, &mut scheduler, cpu));
         ticks = checked!(ticks.checked_add(elapsed).ok_or(()));
         match slice.event {
+            Event::BudgetYield { .. } => stop(8990, serial, debugcon),
             Event::Waiting { ticket, .. } => {
                 checked!(unsafe {
                     arch::x86_64::user_ipc::with_waits(|space| {

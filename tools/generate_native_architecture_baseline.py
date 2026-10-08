@@ -24,6 +24,10 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle258-sustained-service-dispatch.md",
+    "docs/native-sustained-service-dispatch.md",
+    "tests/fixtures/cycle257-user-entry-readiness.json",
+    "native/kernel/src/user_root_probe/peer_driver/service.rs",
     "docs/checkpoints/cycle257-native-task-admission.md",
     "docs/native-task-admission.md",
     "tests/fixtures/cycle256-user-entry-readiness.json",

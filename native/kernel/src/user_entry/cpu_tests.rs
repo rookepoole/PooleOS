@@ -26,6 +26,7 @@ struct StopControl {
     entries: u32,
     shutdowns: u32,
     slice_terminal: bool,
+    budget_yield: bool,
     zero_ticks: bool,
     wait: Option<crate::capability_ipc::wait::Ticket>,
     fail_complete: bool,
@@ -67,6 +68,14 @@ impl task::SliceDriver for StopDriver {
                 }
             } else if c.slice_terminal {
                 task::Event::Terminated(o)
+            } else if c.budget_yield || c.corrupt == 4 {
+                task::Event::BudgetYield {
+                    syscalls: if c.corrupt == 4 {
+                        63
+                    } else {
+                        u64::from(c.entries) * 64
+                    },
+                }
             } else {
                 task::Event::Preempted {
                     ticks: u64::from(!c.zero_ticks),
@@ -103,7 +112,10 @@ impl task::Driver for StopDriver {
             1 => o.id.generation += 1,
             2 => o.root += 4096,
             3 => o.syscalls = 0,
-            4 => o.syscalls = 65,
+            4 => {
+                o.syscalls = 65;
+                o.reason = Reason::CallCounterExhausted;
+            }
             _ => {}
         }
         Ok(o)
@@ -729,6 +741,62 @@ fn cancellation_never_reenters_saved_state_and_stale_cancel_has_no_effect() {
         [s.candidate, s.original, s.original]
     );
     assert_eq!(c.borrow().entries, 1);
+}
+
+#[test]
+fn budget_yield_requires_settlement_before_replenishment_or_cancellation() {
+    let mut s = setup();
+    let (mut slot, c, id) = task_slot(s.owner);
+    c.borrow_mut().budget_yield = true;
+    let (mut scheduler, cpu) = running_scheduler(id);
+    for n in 1..=5 {
+        slot.activate(id, &s.manager, &mut s.memory).unwrap();
+        assert_eq!(
+            slot.run_slice(id).unwrap().event,
+            task::Event::BudgetYield { syscalls: n * 64 }
+        );
+        assert_eq!(slot.state(id), Ok(task::State::Suspended));
+        assert!(slot.activate(id, &s.manager, &mut s.memory).is_err());
+        assert!(slot.cancel_suspended(id).is_err());
+        retained(&mut s.manager, &s.handles);
+        slot.account_slice(id, &mut scheduler, cpu).unwrap();
+        assert!(slot.account_slice(id, &mut scheduler, cpu).is_err());
+        scheduler.yield_current(cpu).unwrap();
+        scheduler.dispatch(cpu).unwrap();
+    }
+    let o = slot.cancel_suspended(id).unwrap();
+    assert_eq!((o.reason, o.syscalls), (Reason::Cancelled, 320));
+    assert_eq!(slot.runtime(id).unwrap().charged_slices, 5);
+    assert!(slot.activate(id, &s.manager, &mut s.memory).is_err());
+    slot.reap(id, &mut s.manager, &mut s.memory).unwrap();
+    assert_eq!(c.borrow().entries, 5);
+}
+
+#[test]
+fn budget_yield_cleanup_failure_retains_the_charge_and_cannot_resume() {
+    for fail_quiesce in [false, true] {
+        let mut s = setup();
+        let (mut slot, c, id) = task_slot(s.owner);
+        c.borrow_mut().budget_yield = true;
+        slot.activate(id, &s.manager, &mut s.memory).unwrap();
+        if fail_quiesce {
+            c.borrow_mut().fail_quiesce = true;
+        } else {
+            s.machine.borrow_mut().write_error = true;
+        }
+        assert!(slot.run_slice(id).is_err());
+        assert_eq!(slot.state(id), Ok(task::State::Quarantined));
+        assert_eq!(slot.runtime(id).unwrap().pending_ticks, Some(1));
+        assert!(slot.activate(id, &s.manager, &mut s.memory).is_err());
+        assert!(slot.cancel_suspended(id).is_err());
+        retained(&mut s.manager, &s.handles);
+        let (mut scheduler, cpu) = running_scheduler(id);
+        slot.account_slice(id, &mut scheduler, cpu).unwrap();
+        c.borrow_mut().fail_quiesce = false;
+        s.machine.borrow_mut().write_error = false;
+        slot.abandon(id, &mut s.manager, &mut s.memory).unwrap();
+        assert_eq!(c.borrow().entries, 1);
+    }
 }
 
 #[test]

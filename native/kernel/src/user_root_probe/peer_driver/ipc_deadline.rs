@@ -73,7 +73,7 @@ pub(super) fn run(
     }
     let mut stopped = [false; 2];
     let mut waiting = [None; 2];
-    let mut calls = [0u32; 2];
+    let mut calls = [0u64; 2];
     let mut ticks = [0u64; 2];
     let mut waits = 0u64;
     let mut wakes = 0u64;
@@ -134,6 +134,7 @@ pub(super) fn run(
                 .ok_or(())
         );
         match slice.event {
+            Event::BudgetYield { .. } => stop(8990, serial, debugcon),
             Event::Waiting { ticket, .. } => {
                 checked!(unsafe {
                     arch::x86_64::user_ipc::with_waits(|s| s.park_wait(ticket, &mut scheduler, cpu))

@@ -181,7 +181,7 @@ pub(super) fn run(
                 checked!(scheduler.teardown(id));
                 stopped[index] = true;
             }
-            Event::Waiting { .. } => stop(8012, serial, debugcon),
+            Event::Waiting { .. } | Event::BudgetYield { .. } => stop(8012, serial, debugcon),
         }
     }
     checked!(scheduler.validate());

@@ -156,6 +156,20 @@ pub(crate) fn run(
             super::admission::run(&mut peers, baseline, manager, serial, debugcon);
         }
     }
+    for (index, p) in peers.iter_mut().enumerate() {
+        checked!(p.restart(
+            26,
+            [if index == 0 { 256 } else { 512 }, index as u64, 0, 0, 0, 0],
+            handoff,
+            core,
+            bits,
+            manager,
+            topology,
+            hpet,
+            timer_driver::Probe::None
+        ));
+    }
+    super::service::run(&mut peers, baseline, manager, serial, debugcon);
 }
 
 #[inline(never)]
@@ -296,6 +310,7 @@ fn run_round(
         } else {
             let slice = checked!(result);
             match slice.event {
+                Event::BudgetYield { .. } => stop(8990, serial, debugcon),
                 Event::Waiting { ticket, .. } => {
                     checked!(unsafe {
                         arch::x86_64::user_ipc::with_waits(|s| {

@@ -16,6 +16,7 @@ mod ipc_deadline;
 pub(super) mod ipc_pressure;
 mod ipc_reply;
 mod ipc_request;
+mod service;
 pub(super) mod unknown;
 
 // A constructor error carries its owner even if cleanup or slot commit failed.
@@ -92,6 +93,11 @@ impl Peer {
         let mut entry =
             unsafe { arch::x86_64::user::PeerEntry::new(core.initial_stack_top_virtual) }
                 .map_err(|_| PeerFailure::Setup)?;
+        if kind == 4 {
+            entry
+                .use_diagnostic_call_limit()
+                .map_err(|_| PeerFailure::Setup)?;
+        }
         entry
             .set_initial_arguments(arguments)
             .map_err(|_| PeerFailure::Setup)?;
@@ -174,6 +180,11 @@ impl Peer {
         let mut entry =
             unsafe { arch::x86_64::user::PeerEntry::new(core.initial_stack_top_virtual) }
                 .map_err(|_| PeerFailure::Setup)?;
+        if kind == 4 {
+            entry
+                .use_diagnostic_call_limit()
+                .map_err(|_| PeerFailure::Setup)?;
+        }
         entry
             .set_initial_arguments(arguments)
             .map_err(|_| PeerFailure::Setup)?;
@@ -456,7 +467,7 @@ pub fn run_all(
             let slice = checked!(107, result);
             let mut terminated = None;
             match slice.event {
-                Event::Waiting { .. } => stop(108, serial, debugcon),
+                Event::Waiting { .. } | Event::BudgetYield { .. } => stop(108, serial, debugcon),
                 Event::Preempted {
                     ticks: observed,
                     syscalls,

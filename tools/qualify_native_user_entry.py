@@ -32,6 +32,7 @@ def source_bindings() -> dict[str, str]:
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "runtime").glob("*.py"))
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "tools").glob("qualify_native_*.py"))
     paths.update({
+        "native/kernel/src/user_root_probe/peer_driver/service.rs",
         "native/kernel/src/capability_ipc/admission.rs",
         "native/kernel/src/capability_ipc/tests/admission.rs",
         "native/kernel/src/user_root_probe/peer_driver/admission.rs",
@@ -97,8 +98,8 @@ def main() -> int:
     owner_report = Path("C:/Users/rookp/PooleGlyph/tests/reports/conformance_report.json")
     owner_before = digest(owner_report) if owner_report.is_file() else None
     report: dict = {
-        "contract_id": "PKADMIT1", "cycle": 257,
-        "scope": "host_and_native_atomic_IPC_scheduler_admission_retained_cleanup_and_fresh_task_retry",
+        "contract_id": "PKSERVICE1", "cycle": 258,
+        "scope": "host_and_native_sustained_service_dispatch_with_budget_yield_and_peer_survival",
         "status": "fail", "source_bindings": before, "checks": [],
         "guest_runs": 0, "ring3_executed": False, "iso_built": False,
         "n13_exit_passed": False, "production_ready": False,
@@ -115,9 +116,9 @@ def main() -> int:
     commands = [
         ("format", [str(cargo), "fmt", *common, "--", "--check"], None),
         ("kernel_host_debug", [str(cargo), "test", *common, "--lib", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 451),
+            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 459),
         ("user_entry_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 138),
+            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 146),
         ("ipc_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
             "x86_64-pc-windows-msvc", *bounded, "capability_ipc::", "--", "--test-threads=1"], 57),
         ("vm_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
@@ -209,6 +210,7 @@ def main() -> int:
                 report["native_continuous_clock"] = all(g["marker_summary"]["native_continuous_clock"] for g in live["guest_runs"])
                 report["native_request_deadlines"] = all(g["marker_summary"]["ipc_deadlines"] and g["marker_summary"]["idle_request_expiry"] for g in live["guest_runs"])
                 report["atomic_ipc_scheduler_admission"] = all(g["marker_summary"]["atomic_ipc_scheduler_admission"] for g in live["guest_runs"])
+                report["sustained_service_execution"] = all(g["marker_summary"]["sustained_service_execution"] for g in live["guest_runs"])
         report["source_unchanged"] = before == source_bindings()
         report["owner_report_unchanged"] = owner_before == (digest(owner_report) if owner_report.is_file() else None)
         if (len(report["checks"]) == len(commands) and all(c["passed"] for c in report["checks"])
@@ -220,7 +222,7 @@ def main() -> int:
     (work / "receipt.json").write_text(serialized, encoding="utf-8", newline="\n")
     if report["status"] == "pass":
         args.out.write_text(serialized, encoding="utf-8", newline="\n")
-    print(f"PKADMIT1 {report['status'].upper()}; guest_runs={report['guest_runs']}; ring3={report['ring3_executed']}; production_ready=false", flush=True)
+    print(f"PKSERVICE1 {report['status'].upper()}; guest_runs={report['guest_runs']}; ring3={report['ring3_executed']}; production_ready=false", flush=True)
     return 0 if report["status"] == "pass" else 1
 
 

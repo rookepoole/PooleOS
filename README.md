@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle257 adds atomic task startup: scheduler
+**Current development checkpoint:** Cycle258 replaces the normal user-task lifetime
+syscall limit with bounded, replenished dispatch allowances. Two fresh native boots
+prove repeated user-mode execution, preserved syscall results and a surviving
+peer after an application fault;459 kernel tests pass. Next: owned program/argument
+startup and init, then console, shell/files/apps and the usable ISO. No interactive
+ISO yet; full microkernel work continues afterward and canonical gates still block
+main. [Evidence](docs/checkpoints/cycle258-sustained-service-dispatch.md).
+
+**Historical development checkpoint:** Cycle257 adds atomic task startup: scheduler
 publication and IPC permissions succeed together, or new authority is removed
 with memory ownership retained for cleanup. Two fresh native boots prove failed
 startup, cleanup retry and fresh isolated task execution;451 kernel tests pass.

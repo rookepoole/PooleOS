@@ -32,6 +32,7 @@ pub struct PeerEntry {
     suppress_local: bool,
     lose_sample: bool,
     arguments: [u64; 6],
+    diagnostic_call_limit: bool,
 }
 impl PeerEntry {
     /// Same sole-BSP, IF0 and state-ownership preconditions as Entry::prepare.
@@ -44,7 +45,16 @@ impl PeerEntry {
             suppress_local: false,
             lose_sample: false,
             arguments: [0; 6],
+            diagnostic_call_limit: false,
         })
+    }
+    /// Explicit bounded diagnostic only; normal peers use replenished dispatches.
+    pub fn use_diagnostic_call_limit(&mut self) -> Result<(), Error> {
+        if self.entry.installed || self.run.is_some() || self.saved.is_some() || active() {
+            return Err(Error::State);
+        }
+        self.diagnostic_call_limit = true;
+        Ok(())
     }
     pub fn set_budget(&mut self, budget: preemption::Budget) -> Result<(), Error> {
         if self.entry.installed || super::active() || active() {
@@ -158,10 +168,14 @@ impl task::SliceDriver for PeerEntry {
             .map(|s| s.context)
             .unwrap_or_else(|| Context::initial_with_arguments(image, self.arguments));
         context.validate(image)?;
-        let run = match self.run.take() {
+        let mut run = match self.run.take() {
             Some(r) => r,
-            None => task::Run::new(image, id)?,
+            None if self.diagnostic_call_limit => task::Run::new(image, id)?,
+            None => task::Run::sustained(image, id)?,
         };
+        if run.is_sustained() {
+            run.begin_dispatch()?;
+        }
         self.entry.installed = true;
         // Install and restore only after the owning CpuImage entered quarantine.
         unsafe {
@@ -249,6 +263,9 @@ pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) {
                 syscalls: s.run.calls(),
                 progress: t.registers[0],
             });
+            if s.run.is_sustained() {
+                s.run.end_dispatch().unwrap_or_else(|e| denied(11, e, t));
+            }
         } else {
             s.event = Some(Event::Terminated(
                 s.run
@@ -263,7 +280,32 @@ pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) {
                 match super::super::user_syscall::dispatch_owned(t, frame, Some(caller))
                     .unwrap_or_else(|e| denied(13, e, t))
                 {
-                    super::super::user_syscall::Action::Returned => return,
+                    super::super::user_syscall::Action::Returned => {
+                        if !s.run.budget_exhausted() {
+                            return;
+                        }
+                        // Capture the completed call's result, never replay its effects.
+                        let returned = snapshot(frame, t.depth);
+                        let context = Context::capture(s.image, &returned)
+                            .unwrap_or_else(|e| denied(13, e, t));
+                        let mut fx = FxsaveArea([0; 512]);
+                        unsafe {
+                            fxsave_area(fx.0.as_mut_ptr());
+                        }
+                        s.saved = Some(Saved { context, fx });
+                        s.ticks = Some(
+                            super::super::user_preempt::terminal_ticks(s.budget, s.start)
+                                .unwrap_or_else(|e| denied(14, e, t)),
+                        );
+                        s.event = Some(Event::BudgetYield {
+                            syscalls: s.run.calls(),
+                        });
+                        s.run.end_dispatch().unwrap_or_else(|e| denied(13, e, t));
+                        super::super::user_syscall::disable(t.root)
+                            .unwrap_or_else(|e| denied(15, e, t));
+                        return_kernel(frame);
+                        return;
+                    }
                     super::super::user_syscall::Action::Exit(code) => {
                         s.run.exit(code).unwrap_or_else(|e| denied(13, e, t));
                     }
@@ -283,6 +325,9 @@ pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) {
                             ticket,
                             syscalls: s.run.calls(),
                         });
+                        if s.run.is_sustained() {
+                            s.run.end_dispatch().unwrap_or_else(|e| denied(13, e, t));
+                        }
                         super::super::user_syscall::disable(t.root)
                             .unwrap_or_else(|e| denied(15, e, t));
                         return_kernel(frame);
@@ -340,6 +385,8 @@ unsafe extern "C" {
     static poole_peer_breakpoint_end: u8;
     static poole_peer_stack_fault: u8;
     static poole_peer_stack_fault_end: u8;
+    static poole_peer_service: u8;
+    static poole_peer_service_end: u8;
 }
 pub fn peer_payload(kind: usize) -> Result<&'static [u8], Error> {
     if kind == 24 || kind == 25 {
@@ -396,6 +443,10 @@ pub fn peer_payload(kind: usize) -> Result<&'static [u8], Error> {
         14 => (
             &raw const poole_peer_stack_fault,
             &raw const poole_peer_stack_fault_end,
+        ),
+        26 => (
+            &raw const poole_peer_service,
+            &raw const poole_peer_service_end,
         ),
         _ => return Err(Error::Layout),
     };
@@ -601,5 +652,52 @@ poole_peer_\name\()_end:
     peer debug, 8000000, 53, 10
     peer breakpoint, 8000000, 54, 11
     peer stack_fault, 8000000, 55, 12
+
+    .global poole_peer_service
+poole_peer_service:
+    mov r13, rdi
+    mov r14, rsi
+    xor r12d, r12d
+    sub rsp, 32
+    movabs rbx, 0x1122334455667788
+    movq xmm15, rbx
+1:  inc r12
+    mov qword ptr [rsp], r12
+    mov qword ptr [rsp + 8], 0
+    mov eax, 1
+    mov edi, 1
+    mov rsi, rsp
+    lea rdx, [rsp + 8]
+    mov r10d, 8
+    xor r8d, r8d
+    xor r9d, r9d
+    syscall
+    test rax, rax
+    jnz 9f
+    cmp rdx, 8
+    jne 9f
+    cmp qword ptr [rsp + 8], r12
+    jne 9f
+    movq rax, xmm15
+    cmp rax, rbx
+    jne 9f
+    cmp r12, r13
+    jb 1b
+    test r14, r14
+    jnz 2f
+    ud2
+2:  mov esi, 100
+    jmp 3f
+9:  mov esi, 255
+3:  mov eax, 2
+    mov edi, 1
+    xor edx, edx
+    xor r10d, r10d
+    xor r8d, r8d
+    xor r9d, r9d
+    syscall
+    ud2
+    .global poole_peer_service_end
+poole_peer_service_end:
 "#
 );

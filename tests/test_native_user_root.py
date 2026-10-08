@@ -34,8 +34,8 @@ class UserRootTests(unittest.TestCase):
         self.markers.insert(34, f"POOLEOS:KERNEL:USER-CALL PASS contract=PKUSER7 abi=PSABI1 profile=development version=1 cr3={root} "
             "calls=12 ok=3 version_denied=1 unknown=1 arguments=4 faults=3 read_faults=1 write_faults=2 "
             "cpl=3 entry=syscall return=iretq max_copy=256 input_atomic=1 output_prefix=1 completion_traps=1 msrs_cleared=1 if=0 production=0")
-        self.markers[35] = self.markers[35].replace("cr3_writes=2", "cr3_writes=477").replace(
-            "released_pages=13 scrubbed_data_pages=6", "released_pages=980 scrubbed_data_pages=451")
+        self.markers[35] = self.markers[35].replace("cr3_writes=2", "cr3_writes=505").replace(
+            "released_pages=13 scrubbed_data_pages=6", "released_pages=1006 scrubbed_data_pages=463")
         for index,(kind,value,calls) in enumerate((("exit",42,2),("fault",6,0),("fault",13,0),("fault",14,0))):
             self.markers.insert(35+index, f"POOLEOS:KERNEL:USER-TASK PASS contract=PKUSER8 slot=0 generation={index+1} "
                 f"root={root} reason={kind} value={value} syscalls={calls} cpl=3 stale_denials={int(index>0)} "
@@ -74,7 +74,38 @@ class UserRootTests(unittest.TestCase):
             self.markers.insert(72 + index, f"POOLEOS:KERNEL:USER-IPC-DEADLINE PASS contract=PKIPC5 round={index} generation={index+11} root0={root} root1=0x0000000005000000 ticks0=100 ticks1=200 expiry_ns={100000000 + index*150000000} epoch=2 timeout_ns=100000000 dispatches=5 preemptions=0 waits=3 wakes=3 idle_expiries=1 all_blocked=2 late_reply_denied=1 completion_retained=1 calls0=9 calls1=5 client_exit=98 server_exit=99 cr3_writes=10 objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
         self.markers.insert(74, "POOLEOS:KERNEL:USER-DEADLINE-CLOCK PASS contract=PKIPC5 origin=10000200 last=50000200 period_fs=10000000 elapsed_ns=400000000 samples=100 idle_ns=0 enters=10 leaves=10 idle_expiries=2 epoch=2 expired=2 config_restored=1 counter_reset=0 mmio_writes=16 mapping_windows=4 mapping_revoked=4 guards=3 clock=hpet64 scope=one_bsp timed_ipc=1 production=0")
         self.markers.insert(75, f"POOLEOS:KERNEL:USER-ADMISSION PASS contract=PKADMIT1 failed_generation=13 retry_generation=14 members=2 steps_before_quota=4 scheduler_unchanged=1 failed_dispatches=0 stale_retry_denied=1 cleanup_quarantine=1 retained_free_denials=5 cleanup_retry=1 first_exchange_atomic=1 root0={root} root1=0x0000000005000000 ticks0=100 ticks1=200 dispatches=6 preemptions=4 cr3_writes=12 exits=2 exit_code=42 objects_remaining=0 released_pages=52 scrubbed_data_pages=24 cpl=3 production=0")
+        self.markers.insert(76, f"POOLEOS:KERNEL:USER-SERVICE PASS contract=PKSERVICE1 generation=15 calls_per_dispatch=64 calls0=256 calls1=513 yields0=4 yields1=8 dispatches=14 timer_preemptions=0 fault_vector=6 survivor_exit=100 survivor_after_fault=4 completed_copy_bytes=8 return_state_preserved=1 allowance_replenished=1 root0={root} root1=0x0000000005000000 ticks0=100 ticks1=200 cr3_writes=28 scheduler_match=1 objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
         self.summary = probe.validate_markers(self.markers)
+
+    def test_sustained_service_requires_budget_yields_fault_survival_and_real_accounting(self):
+        self.assertTrue(self.summary["sustained_service_execution"])
+        service = self.summary["service_dispatch"]
+        self.assertEqual((service["calls"], service["budget_yields"]), ([256, 513], [4, 8]))
+        self.assertEqual(service["roots"], self.summary["admission_rollback"]["roots"])
+        for field, value in re.findall(r" ([a-z0-9_]+)=([^ ]+)", self.markers[76]):
+            self.reject(76, field, "1" if value == "0" else "0")
+        self.reject(76, "ticks0", str(1 << 64))
+        self.reject(76, "ticks1", str(1 << 64))
+
+    def test_sustained_service_marker_is_required_ordered_and_not_replayable(self):
+        for changed in (self.markers[:76] + self.markers[77:],
+                        self.markers[:76] + [self.markers[76]] + self.markers[76:]):
+            with self.assertRaises(ValueError): probe.validate_markers(changed)
+        changed = self.markers.copy()
+        changed[75], changed[76] = changed[76], changed[75]
+        with self.assertRaises(ValueError): probe.validate_markers(changed)
+
+    def test_service_yield_saves_completed_syscall_result_and_defaults_to_sustained(self):
+        source = (ROOT / "native/kernel/src/arch/x86_64/user_slice.rs").read_text()
+        self.assertIn("None => task::Run::sustained(image, id)?", source)
+        self.assertIn("diagnostic_call_limit: false", source)
+        action = source.split("user_syscall::Action::Returned =>", 1)[1].split("user_syscall::Action::Exit", 1)[0]
+        self.assertIn("snapshot(frame, t.depth)", action)
+        self.assertIn("Context::capture(s.image, &returned)", action)
+        self.assertIn("Event::BudgetYield", action)
+        self.assertIn("s.run.end_dispatch()", action)
+        self.assertNotIn("begin_dispatch", action)
+        self.assertNotIn("t.rip -", action)
 
     def test_admission_requires_rollback_generation_retention_cleanup_and_fresh_execution(self):
         self.assertTrue(self.summary["atomic_ipc_scheduler_admission"])
@@ -331,7 +362,7 @@ class UserRootTests(unittest.TestCase):
 
     def test_synthetic_trace_has_only_bounded_user_entry_claims(self):
         self.assertEqual((self.summary["root_probe_cpl"], self.summary["cpl"]), (0, 3))
-        self.assertEqual(self.summary["cr3_writes"], 477)
+        self.assertEqual(self.summary["cr3_writes"], 505)
         self.assertTrue(self.summary["ring3_executed"])
         self.assertTrue(self.summary["user_timer_preemption"])
         self.assertFalse(self.summary["production_ready"])
@@ -389,7 +420,7 @@ class UserRootTests(unittest.TestCase):
         self.reject(30, "cr3", f"0x{self.summary['original_root']:016X}")
 
     def test_restoration_must_match_original(self):
-        self.reject(76, "restored", f"0x{self.summary['candidate_root']:016X}")
+        self.reject(77, "restored", f"0x{self.summary['candidate_root']:016X}")
 
     def test_sentinel_binds_candidate_and_generation(self):
         self.reject(30, "stack_probe", f"0x{self.summary['stack_probe'] ^ 1:016X}")
@@ -402,9 +433,9 @@ class UserRootTests(unittest.TestCase):
     def test_numeric_claims_cannot_be_promoted(self):
         for index, field, value in ((29, "pages", "14"), (29, "temporary_aliases", "1"),
                 (30, "cpl", "3"), (30, "if", "1"), (30, "ring3", "1"),
-                (76, "cr3_writes", "1"), (76, "allocated_pages", "0"),
-                (76, "released_pages", "12"), (76, "scrubbed_data_pages", "5"),
-                (76, "production", "1")):
+                (77, "cr3_writes", "1"), (77, "allocated_pages", "0"),
+                (77, "released_pages", "12"), (77, "scrubbed_data_pages", "5"),
+                (77, "production", "1")):
             self.reject(index, field, value)
 
     def test_timer_root_delivery_eoi_quiescence_and_mmio_claims_cannot_change(self):
@@ -415,7 +446,7 @@ class UserRootTests(unittest.TestCase):
 
     def test_retained_acpi_accounting_has_nonzero_bounded_equality(self):
         for value in ("0", "2", "20", str(1 << 64)):
-            self.reject(76, "retained_acpi_pages", value)
+            self.reject(77, "retained_acpi_pages", value)
 
     def test_user_entry_cpl_traps_state_cleanup_and_return_cannot_change(self):
         for field,value in (("cpl","0"),("traps","6"),("private_rsp0","0"),("gpr_zero","14"),
@@ -428,7 +459,7 @@ class UserRootTests(unittest.TestCase):
         self.reject(32,"cr3",f"0x{self.summary['original_root']:016X}")
 
     def test_missing_user_entry_and_old_cpl0_final_cannot_claim_execution(self):
-        self.reject(76,"ring3","0")
+        self.reject(77,"ring3","0")
         changed=self.markers[:32]+self.markers[33:]
         with self.assertRaises(ValueError): probe.validate_markers(changed)
 
@@ -520,7 +551,7 @@ class UserRootTests(unittest.TestCase):
                     ("ticks0","0"),("ticks1",str(1<<64))):
                 self.reject(index,field,value)
         self.reject(41,"preempt0","4")
-        self.reject(76,"cr3_writes","96")
+        self.reject(77,"cr3_writes","96")
 
     def test_invalid_return_reason_vector_and_peer_survival_are_bound(self):
         self.assertEqual(self.summary["invalid_return_terminations"], 6)

@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 257
+Last roadmap reconciliation: PooleOS Cycle 258
 
-Cycle257 adds failure-atomic task/IPC admission, native quota rollback and retained
+Cycle258 adds bounded replenished user-task dispatch allowances, preserving
+completed syscall results and measured-runtime settlement. Two fresh native boots
+prove sustained task execution and surviving-peer progress after a fault. Next:
+owned executable/argument startup, normal boot separation and init/console/input,
+then efficient idle, shell/files/apps and usable optical ISO acceptance. The image
+uses202/208 pages; canonical migration and full replay still gate main. No ISO or
+production promotion. Full N0-N39, PooleGlyph/PDC and accessible PooleGlass remain.
+[Cycle258 evidence](checkpoints/cycle258-sustained-service-dispatch.md).
+
+Historical Cycle257 adds failure-atomic task/IPC admission, native quota rollback and retained
 cleanup retry, then fresh isolated task execution. Next: sustained service budgets,
 owned image/argument bootstrap and efficient idle, then init/console/shell/apps
 and the usable native ISO. Qualification must remain separate from normal demo
