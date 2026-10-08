@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle250 adds original kernel-owned capabilities
+**Current development checkpoint:** Cycle251 adds actual IPC suspension/resumption,
+supervisor cancellation and automatic authority cleanup at task retirement. Two
+fresh native boots pass three waits, two readiness wakes, one cancellation and
+the real request/reply exchange, preserving all17 containment cases.401 kernel
+tests pass. Next: native dead-peer/revocation and service integration, then the
+usable ISO. Full robust microkernel work continues afterward; no interactive ISO yet.
+[Evidence](docs/checkpoints/cycle251-native-ipc-waits.md).
+
+**Historical development checkpoint:** Cycle250 adds original kernel-owned capabilities
 and bounded native IPC. Two fresh VM boots exchange actual request/reply bytes
 between isolated user tasks and preserve17 containment cases.571 Rust executions
 and42 Python oracle tests pass. Next: IPC waits/cancellation/lifecycle, then native

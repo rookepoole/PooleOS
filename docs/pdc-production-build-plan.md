@@ -1,15 +1,46 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.153.0-native-capability-ipc
-Roadmap cycle: PooleOS Cycle 250
+Plan version: 2.154.0-native-ipc-waits
+Roadmap cycle: PooleOS Cycle 251
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 250: Native Capability IPC
+## Cycle 251: Native IPC Waiting And Retirement
+
+USI-2 now connects endpoint readiness to actual scheduler blocking and saved-user
+resumption. Two fresh native boots each prove3 suspensions,2 readiness wakes,
+1 supervisor cancellation, real transformed request/reply and automatic endpoint
+revocation during task retirement. The native payloads no longer poll. All17
+containment cases and ordinary boot denial pass.401 kernel debug tests plus187
+additional Rust executions and43 Python oracle tests pass; each guest rejects665
+altered-evidence controls. [Evidence](checkpoints/cycle251-native-ipc-waits.md).
+
+Wait tickets bind task/root/generation and consume once; no user buffer is retained.
+IPC scheduler changes commit after validation. Failed completion or retirement
+retains retryable ownership. Required driver hooks fix a native timer-wrapper
+forwarding omission found by the first guest. Compile/oracle/link failures and
+the stopped guest are retained. Image186 pages within192; entry0xC000,36-page
+guarded stack and120-second guest bound remain unchanged.
+
+Next within N13-CAPABILITY-IPC-001: native enrolled-owner death/revocation/stale,
+writable-wait/saturation/output-fault and persistent-generation tests; authenticated
+sender/one-use reply ownership, deadlines, pending-wait termination and transactional
+admission. Readiness is advisory, not RPC. Quarantine authority remains until stopped
+cleanup succeeds. Four task tables/64 calls are still development limits.
+Then init/services, shell/files/two apps and an actual optical integration ISO.
+Complete robust microkernel, PooleGlyph/PDC and PooleGlass development continues.
+
+No phase or flag closes:40 phases (21 partial,1 blocked,18 not started),301 subphases,
+8996 requirements,59 additions,97 flags/42 open and20 gaps are retained. Existing
+FLAG-N13-USERSPACE-ISO-001 records the added gaps. N14.6 multiplexing/event objects
+is not implemented by a single endpoint wait. Full candidate qualification and
+186-page product-contract migration remain; no new ISO, merge or production promotion.
+
+## Historical Cycle 250: Native Capability IPC
 
 USI-2 now has original kernel-owned endpoint objects, per-task capabilities,
 rights/generation checks, bounded messages and fault-safe queue commits. Two

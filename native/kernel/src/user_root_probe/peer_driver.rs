@@ -348,6 +348,7 @@ pub fn run_all(
             let slice = checked!(107, result);
             let mut terminated = None;
             match slice.event {
+                Event::Waiting { .. } => stop(108, serial, debugcon),
                 Event::Preempted {
                     ticks: observed,
                     syscalls,

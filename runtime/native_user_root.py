@@ -5,7 +5,7 @@ import re
 from runtime import native_kernel_transfer as transfer
 
 FEATURE = "development-user-root"
-IPC = re.compile(r"POOLEOS:KERNEL:USER-IPC PASS contract=PKIPC1 abi=PSABI1 endpoints=2 handles=4 max_bytes=64 depth=4 request_bytes=8 reply_bytes=8 transformed=1 forged_denied=1 rights_denied=1 oversize_denied=1 copy_fault_denied=1 root0=(0x[0-9A-F]{16}) root1=(0x[0-9A-F]{16}) dispatches=([0-9]+) preemptions=([0-9]+) ticks=([0-9]+) calls0=([0-9]+) calls1=([0-9]+) cr3_writes=([0-9]+) client_exit=91 server_exit=90 owners_detached=2 objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 blocking=0 production=0")
+IPC = re.compile(r"POOLEOS:KERNEL:USER-IPC PASS contract=PKIPC1 abi=PSABI1 endpoints=2 handles=4 max_bytes=64 depth=4 request_bytes=8 reply_bytes=8 transformed=1 forged_denied=1 rights_denied=1 oversize_denied=1 copy_fault_denied=1 root0=(0x[0-9A-F]{16}) root1=(0x[0-9A-F]{16}) dispatches=([0-9]+) preemptions=([0-9]+) ticks=([0-9]+) calls0=([0-9]+) calls1=([0-9]+) cr3_writes=([0-9]+) waits=3 wakes=2 cancellations=1 client_exit=91 server_exit=90 owners_detached=2 objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 blocking=1 automatic_retirement=1 saved_state=1 production=0")
 UNKNOWN = re.compile(r"POOLEOS:KERNEL:USER-UNKNOWN PASS contract=PKUSER15 injection=returned_sample_loss unmeasured=1 measured0=0 total0=unknown pending=0 duplicate_denied=1 stale_denied=1 cpu_denied=1 zero_charge_denied=1 requeue_denied=1 outcome_denied=1 cleanup_retry=1 retained_pages=13 free_denials=5 root0=(0x[0-9A-F]{16}) root1=(0x[0-9A-F]{16}) dispatches=([0-9]+) peer_preemptions=([0-9]+) peer_progress=([0-9]+) peer_ticks=([0-9]+) cr3_writes=([0-9]+) peer_exit=84 scheduler_match=1 retired_unknown=1 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
 WATCHDOG = re.compile(r"POOLEOS:KERNEL:USER-WATCHDOG PASS contract=PKUSER14 source=hpet_msi local_masked=1 recoveries=1 arms=([0-9]+) stops=([0-9]+) restores=([0-9]+) ticks=([0-9]+) deadline_ns=50000000 peer_exit=84 shared_apic=1 requires_if=1 nmi=0 production=0")
 RUNTIME = re.compile(r"POOLEOS:KERNEL:USER-RUNTIME PASS contract=PKUSER13 samples=([0-9]+) terminal_samples=([0-9]+) duplicate_denials=([0-9]+) ticks=([0-9]+) preempt_ticks=([0-9]+) terminal_ticks=([0-9]+) failed_cleanup_ticks=([0-9]+) failed_cleanup_samples=1 scheduler_match=1 pending=0 unknown=0 clock=hpet charge_window=arm_to_event production=0")
@@ -109,8 +109,8 @@ def validate_markers(markers: list[str]) -> dict:
     ipc_roots = [int(ipc[i], 16) for i in (1, 2)]
     ipc_dispatches, ipc_preempts, ipc_ticks, calls0, calls1, ipc_writes = (int(ipc[i]) for i in range(3, 9))
     if (ipc_roots[0] == ipc_roots[1] or any(r == original or r == 0 or r & 4095 or r >= 1<<32 for r in ipc_roots)
-            or not 2 <= ipc_dispatches <= 64 or ipc_dispatches != ipc_preempts + 2
-            or not 0 < ipc_ticks < 1<<64 or not 7 <= calls0 <= 30 or not 3 <= calls1 <= 26
+            or not 5 <= ipc_dispatches <= 64 or ipc_dispatches != ipc_preempts + 5
+            or not 0 < ipc_ticks < 1<<64 or calls0 != 9 or calls1 != 4
             or ipc_writes != 2 * ipc_dispatches):
         raise ValueError("PKIPC1 root, syscall or scheduler conservation changed")
     total_writes = 10 + sum(p["cr3_writes"] for p in peers) + unknown_writes + ipc_writes
@@ -147,7 +147,9 @@ def validate_markers(markers: list[str]) -> dict:
             "task_stale_denials": 3, "released_pages": 616, "scrubbed_data_pages": 283,
             "bounded_capability_ipc": True, "ipc_roots": ipc_roots, "ipc_dispatches": ipc_dispatches,
             "ipc_preemptions": ipc_preempts, "ipc_ticks": ipc_ticks, "ipc_calls": [calls0, calls1],
-            "ipc_cr3_writes": ipc_writes, "ipc_blocking": False, "ipc_general_lifecycle": False,
+            "ipc_cr3_writes": ipc_writes, "ipc_blocking": True, "ipc_general_lifecycle": False,
+            "ipc_waits": 3, "ipc_readiness_wakes": 2, "ipc_cancellations": 1,
+            "ipc_automatic_retirement": True, "ipc_saved_state_preserved": True,
             "peer_scheduling": True, "peer_rounds": peers, "peer_survival_cases": 17,
             "unknown_runtime_recovery": True, "unmeasured_dispatches": 1,
             "unknown_task_total_ticks": None, "unknown_task_measured_ticks": 0,

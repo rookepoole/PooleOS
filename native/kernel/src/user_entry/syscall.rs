@@ -1,4 +1,4 @@
-//! Versioned, nonblocking development ABI. IPC needs separately granted authority.
+//! Versioned development ABI. IPC needs separately granted authority.
 #![forbid(unsafe_code)]
 
 use super::{
@@ -37,12 +37,18 @@ pub enum Status {
     Denied = 5,
     Again = 6,
     TooSmall = 7,
+    Cancelled = 8,
+    Revoked = 9,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Request {
     Version,
     Exit(u32),
+    Wait {
+        handle: u64,
+        readiness: crate::capability_ipc::wait::Readiness,
+    },
     Ipc {
         handle: u64,
         address: u64,
@@ -113,6 +119,15 @@ pub fn request(
                 send: number == 3,
             })
         }
+        5 if destination <= 1 && bytes == 0 => Ok(Request::Wait {
+            handle: source,
+            readiness: if destination == 0 {
+                crate::capability_ipc::wait::Readiness::Readable
+            } else {
+                crate::capability_ipc::wait::Readiness::Writable
+            },
+        }),
+        5 => Err(Status::Arguments),
         _ => Err(Status::Unknown),
     }
 }

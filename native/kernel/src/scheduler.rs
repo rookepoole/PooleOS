@@ -84,6 +84,7 @@ pub enum WaitKind {
     Event = 1,
     Mutex = 2,
     ExternalLock = 3,
+    Ipc = 4,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -458,6 +459,68 @@ impl Scheduler {
         self.bump_sequence();
         self.validate()?;
         Ok(id)
+    }
+
+    /// IPC transitions commit only after every queue and counter check succeeds.
+    pub fn block_current_for_ipc(&mut self, cpu: CpuId, id: TaskId) -> Result<(), Error> {
+        self.validate()?;
+        if self.current_id(cpu)? != id {
+            return Err(Error::State);
+        }
+        let task = self.tasks[self.task_index(id)?];
+        if task.charged_dispatch != task.dispatch_count || task.wake_reason != WakeReason::None {
+            return Err(Error::State);
+        }
+        let mut staged = *self;
+        staged.block_current(cpu)?;
+        staged.tasks[id.index()].wait_kind = WaitKind::Ipc;
+        staged.validate()?;
+        *self = staged;
+        Ok(())
+    }
+
+    pub fn wake_ipc_waiter(
+        &mut self,
+        id: TaskId,
+        cpu: CpuId,
+        reason: WakeReason,
+    ) -> Result<(), Error> {
+        self.validate()?;
+        self.require_online(cpu)?;
+        if !matches!(
+            reason,
+            WakeReason::Signalled | WakeReason::Cancelled | WakeReason::OwnerGone
+        ) {
+            return Err(Error::State);
+        }
+        let mut staged = *self;
+        staged.wake_kind(id, cpu, reason, WaitKind::Ipc)?;
+        staged.validate()?;
+        *self = staged;
+        Ok(())
+    }
+
+    pub fn consume_ipc_wake(
+        &mut self,
+        cpu: CpuId,
+        id: TaskId,
+        reason: WakeReason,
+    ) -> Result<(), Error> {
+        self.validate()?;
+        if self.current_id(cpu)? != id
+            || self.tasks[id.index()].wake_reason != reason
+            || !matches!(
+                reason,
+                WakeReason::Signalled | WakeReason::Cancelled | WakeReason::OwnerGone
+            )
+        {
+            return Err(Error::State);
+        }
+        let mut staged = *self;
+        staged.consume_wake(cpu)?;
+        staged.validate()?;
+        *self = staged;
+        Ok(())
     }
 
     pub fn block_current(&mut self, cpu: CpuId) -> Result<TaskId, Error> {
@@ -1255,6 +1318,33 @@ pub fn validate_context_switch_contract(value: &ContextSwitchContract) -> Result
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn ipc_wake_overflow_and_wrong_kind_do_not_mutate_scheduler() {
+        use super::*;
+        let mut s = Scheduler::new(1).unwrap();
+        let cpu = CpuId::new(0).unwrap();
+        let id = s.create_task(0, 1, 16, 1).unwrap();
+        s.activate(id, cpu).unwrap();
+        s.dispatch(cpu).unwrap();
+        s.account_dispatch(cpu, id, 1, 0, 7).unwrap();
+        s.block_current_for_ipc(cpu, id).unwrap();
+        s.wake_count = u32::MAX;
+        let before = s.summary();
+        let task = s.task_snapshot(id).unwrap();
+        assert!(s.wake_ipc_waiter(id, cpu, WakeReason::Signalled).is_err());
+        assert_eq!(s.summary(), before);
+        assert_eq!(s.task_snapshot(id).unwrap(), task);
+        assert_eq!(s.queue_len(cpu), Ok(0));
+        s.validate().unwrap();
+        s.wake_count = 0;
+        s.wake_ipc_waiter(id, cpu, WakeReason::Cancelled).unwrap();
+        s.dispatch(cpu).unwrap();
+        let before = s.summary();
+        assert!(s.consume_ipc_wake(cpu, id, WakeReason::Signalled).is_err());
+        assert_eq!(s.summary(), before);
+        s.consume_ipc_wake(cpu, id, WakeReason::Cancelled).unwrap();
+        assert!(s.consume_ipc_wake(cpu, id, WakeReason::Cancelled).is_err());
+    }
     use super::*;
 
     #[test]

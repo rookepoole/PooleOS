@@ -378,6 +378,12 @@ pub struct PeerRun {
     pub timer: Timer,
 }
 impl poolekernel::user_entry::task::Driver for PeerRun {
+    fn revoke(
+        &mut self,
+        id: poolekernel::scheduler_smp::TaskId,
+    ) -> Result<(), poolekernel::user_entry::privilege::Error> {
+        poolekernel::user_entry::task::Driver::revoke(&mut self.entry, id)
+    }
     fn execute(
         &mut self,
         _: poolekernel::user_entry::ImageAdmission,
@@ -394,6 +400,19 @@ impl poolekernel::user_entry::task::Driver for PeerRun {
     }
 }
 impl poolekernel::user_entry::task::SliceDriver for PeerRun {
+    fn complete_wait(
+        &mut self,
+        id: poolekernel::scheduler_smp::TaskId,
+        ticket: poolekernel::capability_ipc::wait::Ticket,
+        status: poolekernel::user_entry::syscall::Status,
+    ) -> Result<(), poolekernel::user_entry::privilege::Error> {
+        poolekernel::user_entry::task::SliceDriver::complete_wait(
+            &mut self.entry,
+            id,
+            ticket,
+            status,
+        )
+    }
     fn execute_slice(
         &mut self,
         image: poolekernel::user_entry::ImageAdmission,

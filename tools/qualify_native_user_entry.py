@@ -33,6 +33,7 @@ def source_bindings() -> dict[str, str]:
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "tools").glob("qualify_native_*.py"))
     paths.update({
         "native/kernel/src/capability_ipc.rs", "native/kernel/src/capability_ipc/tests.rs",
+        "native/kernel/src/capability_ipc/wait.rs",
         "native/kernel/src/arch/x86_64/user_ipc.rs", "native/kernel/src/user_root_probe/peer_driver/ipc.rs",
         "native/kernel/src/user_entry.rs", "native/kernel/src/user_entry/tests.rs",
         "native/kernel/src/user_entry/prepared.rs", "native/kernel/src/user_entry/prepared_tests.rs",
@@ -76,8 +77,8 @@ def main() -> int:
     owner_report = Path("C:/Users/rookp/PooleGlyph/tests/reports/conformance_report.json")
     owner_before = digest(owner_report) if owner_report.is_file() else None
     report: dict = {
-        "contract_id": "PKIPC1", "cycle": 250,
-        "scope": "host_and_optional_bounded_nonblocking_capability_ipc_guest",
+        "contract_id": "PKIPC1", "cycle": 251,
+        "scope": "host_and_optional_bounded_IPC_readiness_wait_cancel_retirement_guest",
         "status": "fail", "source_bindings": before, "checks": [],
         "guest_runs": 0, "ring3_executed": False, "iso_built": False,
         "n13_exit_passed": False, "production_ready": False,
@@ -88,11 +89,11 @@ def main() -> int:
     commands = [
         ("format", [str(cargo), "fmt", *common, "--", "--check"], None),
         ("kernel_host_debug", [str(cargo), "test", *common, "--lib", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 392),
+            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 401),
         ("user_entry_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 126),
+            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 128),
         ("ipc_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "capability_ipc::", "--", "--test-threads=1"], 11),
+            "x86_64-pc-windows-msvc", *bounded, "capability_ipc::", "--", "--test-threads=1"], 17),
         ("vm_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
             "x86_64-pc-windows-msvc", *bounded, "virtual_memory::", "--", "--test-threads=1"], None),
         ("freestanding_library", [str(cargo), "check", *common, "--lib", "--target",

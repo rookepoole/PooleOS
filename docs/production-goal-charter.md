@@ -7,9 +7,17 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 250
+Last roadmap reconciliation: PooleOS Cycle 251
 
-Cycle250 implements bounded capability-protected nonblocking IPC. Two fresh native
+Cycle251 connects IPC readiness to real scheduler waits, cancellation and checked
+resumption, and automatically revokes authority before task retirement. Two fresh
+native boots preserve17 containment cases and complete the new exchange. Native
+death/revocation/saturation, sender/reply ownership and general service admission
+remain next, then shell/apps and the usable ISO. All N0-N39 obligations remain;
+this milestone does not close full microkernel or production requirements.
+[Cycle251 evidence](checkpoints/cycle251-native-ipc-waits.md).
+
+Historical Cycle250 implements bounded capability-protected nonblocking IPC. Two fresh native
 guests exchange transformed request/reply bytes through granted handles while
 preserving17 containment cases and ordinary denial. USI-2/N14 are partial, not
 complete. Next: scheduler waits/cancellation/reply ownership and task-death

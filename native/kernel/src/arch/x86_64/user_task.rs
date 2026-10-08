@@ -3,6 +3,9 @@ use super::*;
 use poolekernel::scheduler_smp::TaskId;
 
 impl task::Driver for Entry {
+    fn revoke(&mut self, id: TaskId) -> Result<(), Error> {
+        unsafe { super::super::user_ipc::detach(id) }
+    }
     fn execute(&mut self, image: ImageAdmission, id: TaskId) -> Result<task::Outcome, Error> {
         self.context(image.root_physical)?;
         if self.installed

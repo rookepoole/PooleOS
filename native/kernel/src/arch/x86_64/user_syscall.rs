@@ -18,7 +18,7 @@ static mut poole_syscall_user_rsp: u64 = 0;
 #[derive(Clone, Copy)]
 pub struct Observation {
     pub calls: u32,
-    pub statuses: [u32; 8],
+    pub statuses: [u32; 10],
     pub read_faults: u32,
     pub write_faults: u32,
 }
@@ -26,7 +26,7 @@ struct Session {
     image: ImageAdmission,
     active: bool,
     sealed: bool,
-    counts: [u32; 8],
+    counts: [u32; 10],
 }
 unsafe extern "C" {
     fn poole_user_syscall_entry();
@@ -52,7 +52,7 @@ pub(super) fn prepare(image: ImageAdmission) -> Result<(), Error> {
                 image,
                 active: false,
                 sealed: false,
-                counts: [0; 8],
+                counts: [0; 10],
             }),
         );
     }
@@ -145,7 +145,7 @@ pub(super) fn observe() -> Result<Observation, Error> {
 pub(super) fn finish(root: u64) -> Result<(), Error> {
     let o = observe()?;
     if o.calls != 12
-        || o.statuses != [3, 1, 1, 4, 3, 0, 0, 0]
+        || o.statuses != [3, 1, 1, 4, 3, 0, 0, 0, 0, 0]
         || o.read_faults != 1
         || o.write_faults != 2
     {
@@ -225,14 +225,24 @@ impl Memory for Access {
 }
 
 pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) -> Result<Option<u32>, Error> {
-    dispatch_owned(t, frame, None)
+    match dispatch_owned(t, frame, None)? {
+        Action::Returned => Ok(None),
+        Action::Exit(code) => Ok(Some(code)),
+        Action::Waiting(_) => Err(Error::State),
+    }
+}
+
+pub(super) enum Action {
+    Returned,
+    Exit(u32),
+    Waiting(poolekernel::capability_ipc::wait::Ticket),
 }
 
 pub(super) fn dispatch_owned(
     t: &Trap,
     frame: &mut TrapFrame,
     caller: Option<poolekernel::capability_ipc::Caller>,
-) -> Result<Option<u32>, Error> {
+) -> Result<Action, Error> {
     let s = unsafe { (&mut *(&raw mut SESSION)).as_mut() }.ok_or(Error::State)?;
     if !s.active
         || s.sealed
@@ -248,7 +258,7 @@ pub(super) fn dispatch_owned(
         Ok(Request::Version) => (Status::Ok, syscall::VERSION),
         Ok(Request::Exit(code)) => {
             s.counts[Status::Ok as usize] += 1;
-            return Ok(Some(code));
+            return Ok(Action::Exit(code));
         }
         Ok(Request::Copy {
             source,
@@ -282,13 +292,23 @@ pub(super) fn dispatch_owned(
             ),
             None => (Status::Denied, 0),
         },
+        Ok(Request::Wait { handle, readiness }) => match caller {
+            Some(caller) => match super::user_ipc::prepare_wait(caller, handle, readiness) {
+                Ok(poolekernel::capability_ipc::wait::Admission::Ready) => (Status::Ok, 0),
+                Ok(poolekernel::capability_ipc::wait::Admission::Pending(ticket)) => {
+                    return Ok(Action::Waiting(ticket));
+                }
+                Err(status) => (status, 0),
+            },
+            None => (Status::Denied, 0),
+        },
         Err(e) => (e, 0),
     };
     s.counts[result.0 as usize] += 1;
     frame.rax = result.0 as u64;
     frame.rdx = result.1;
     frame.rflags = t.flags & !((1 << 10) | (1 << 16));
-    Ok(None)
+    Ok(Action::Returned)
 }
 
 pub(super) fn recover(t: &Trap) -> Option<u64> {

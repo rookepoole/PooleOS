@@ -1,5 +1,11 @@
 # PKUSER8 Development Task Lifecycle
 
+Cycle251 adds a Waiting state, charged quiescent IPC suspension, exactly-once
+notified resumption, and mandatory authority revocation before Slot retirement.
+Native adapters and their timer wrapper implement the hooks; failed revocation
+retains the root for retry. See [IPC lifetime and remaining work](native-capability-ipc.md).
+This does not qualify arbitrary service supervision or every enrolled-owner death path.
+
 Historical Cycle 242 baseline. Cycle243 extends this lifecycle with retained
 suspend/resume, cancellation and task-only call-limit termination; see
 [PKUSER9 peer scheduling](native-user-peer-scheduling.md) for current scope.

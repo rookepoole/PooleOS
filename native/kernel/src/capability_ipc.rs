@@ -17,6 +17,7 @@ pub const ENDPOINTS: usize = 4;
 pub const DEPTH: usize = 4;
 pub const MAX_BYTES: usize = 64;
 const ENDPOINT_TAG: u64 = 1 << 16;
+pub mod wait;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Rights(u8);
@@ -81,12 +82,16 @@ struct Table {
     last_task_generation: u32,
     caller: Option<Caller>,
     caps: [CapSlot; CAPS],
+    wait_generation: u64,
+    wait: Option<wait::Wait>,
 }
 impl Table {
     const EMPTY: Self = Self {
         last_task_generation: 0,
         caller: None,
         caps: [CapSlot::EMPTY; CAPS],
+        wait_generation: 0,
+        wait: None,
     };
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -120,7 +125,7 @@ impl ObjectSlot {
 }
 
 /// The caller must hold this owner exclusively across validation, copy and commit.
-/// No user-visible creation, transfer, blocking or destruction syscall exists yet.
+/// Creation, delegation and destruction remain trusted supervisor operations.
 #[derive(Debug, Eq, PartialEq)]
 pub struct Space {
     tables: [Table; TASKS],
@@ -304,13 +309,24 @@ impl Space {
             c.value = None;
         }
         self.tables[t].caller = None;
+        self.tables[t].wait = None;
         Ok(())
     }
+    /// Retirement hook: absence is idempotent, a different live generation is not.
+    pub fn detach_if_attached(&mut self, owner: TaskId) -> Result<(), Error> {
+        let table = self
+            .tables
+            .get(usize::from(owner.slot))
+            .ok_or(Error::Identity)?;
+        if table.caller.is_none() {
+            return Ok(());
+        }
+        self.detach(owner)
+    }
     pub fn is_empty(&self) -> bool {
-        self.tables
-            .iter()
-            .all(|t| t.caller.is_none() && t.caps.iter().all(|c| c.value.is_none()))
-            && self.objects.iter().all(|o| o.value.is_none())
+        self.tables.iter().all(|t| {
+            t.caller.is_none() && t.wait.is_none() && t.caps.iter().all(|c| c.value.is_none())
+        }) && self.objects.iter().all(|o| o.value.is_none())
     }
     /// Failed copy-in publishes nothing. Failed copy-out keeps the entire message
     /// queued and reports only the user-memory prefix written, never a dequeue.

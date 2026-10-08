@@ -44,8 +44,24 @@ pub unsafe fn bootstrap(tasks: [(TaskId, ImageAdmission); 2]) -> Result<[u64; 4]
 pub unsafe fn detach(id: TaskId) -> Result<(), Error> {
     idle()?;
     unsafe { &mut *(&raw mut IPC) }
-        .detach(id)
+        .detach_if_attached(id)
         .map_err(|_| Error::State)
+}
+
+pub(super) fn prepare_wait(
+    caller: Caller,
+    handle: u64,
+    readiness: poolekernel::capability_ipc::wait::Readiness,
+) -> Result<poolekernel::capability_ipc::wait::Admission, Status> {
+    unsafe { &mut *(&raw mut IPC) }.prepare_wait(caller, handle, readiness)
+}
+
+/// SAFETY: exclusive BSP with both tasks quiescent on the original kernel root.
+pub unsafe fn with_waits<T>(
+    f: impl FnOnce(&mut Space) -> Result<T, poolekernel::capability_ipc::Error>,
+) -> Result<T, Error> {
+    idle()?;
+    f(unsafe { &mut *(&raw mut IPC) }).map_err(|_| Error::State)
 }
 
 /// SAFETY: same exclusive owner boundary as bootstrap.
@@ -100,6 +116,22 @@ poole_ipc_client:
     mov r14, 0x504F4F4C45495043
     mov qword ptr [rsp], r14
     mov edi, 1
+    mov r15, 0x12563478
+    movq xmm15, r15
+    mov rsi, r13
+    xor edx, edx
+    xor r10d, r10d
+    mov eax, 5
+    syscall
+    cmp eax, 8
+    jne 9f
+    test edx, edx
+    jne 9f
+    cmp r15, 0x12563478
+    jne 9f
+    movq rax, xmm15
+    cmp rax, r15
+    jne 9f
     mov esi, 0
     mov rdx, rsp
     mov r10d, 8
@@ -134,22 +166,27 @@ poole_ipc_client:
     jne 9f
     cmp edx, 8
     jne 9f
-    mov r15d, 24
-1:  mov eax, 4
+    mov eax, 5
     mov rsi, r13
+    xor edx, edx
+    xor r10d, r10d
+    syscall
+    test eax, eax
+    jne 9f
+    test edx, edx
+    jne 9f
+    cmp r15, 0x12563478
+    jne 9f
+    movq rax, xmm15
+    cmp rax, r15
+    jne 9f
+    mov eax, 4
+    mov r10d, 8
     mov rdx, rsp
     syscall
     test eax, eax
-    jz 3f
-    cmp eax, 6
     jne 9f
-    dec r15d
-    jz 9f
-    mov ebx, 5000000
-2:  dec ebx
-    jnz 2b
-    jmp 1b
-3:  cmp edx, 8
+    cmp edx, 8
     jne 9f
     xor r14, 0x13579BDF
     cmp qword ptr [rsp], r14
@@ -167,24 +204,24 @@ poole_ipc_server:
     sub rsp, 16
     mov r12, 0x0000000100010002
     mov r13, 0x0000000100010001
-    mov r15d, 24
     mov edi, 1
+    mov eax, 5
+    mov rsi, r13
+    xor edx, edx
+    xor r10d, r10d
+    syscall
+    test eax, eax
+    jne 9f
+    test edx, edx
+    jne 9f
     mov r10d, 8
-1:  mov eax, 4
+    mov eax, 4
     mov rsi, r13
     mov rdx, rsp
     syscall
     test eax, eax
-    jz 3f
-    cmp eax, 6
     jne 9f
-    dec r15d
-    jz 9f
-    mov ebx, 5000000
-2:  dec ebx
-    jnz 2b
-    jmp 1b
-3:  cmp edx, 8
+    cmp edx, 8
     jne 9f
     mov r14, 0x504F4F4C45495043
     cmp qword ptr [rsp], r14

@@ -27,9 +27,28 @@ struct StopControl {
     shutdowns: u32,
     slice_terminal: bool,
     zero_ticks: bool,
+    wait: Option<crate::capability_ipc::wait::Ticket>,
+    fail_complete: bool,
+    completions: u32,
+    fail_revoke: bool,
+    revocations: u32,
 }
 struct StopDriver(Rc<RefCell<StopControl>>);
 impl task::SliceDriver for StopDriver {
+    fn complete_wait(
+        &mut self,
+        _: TaskId,
+        _: crate::capability_ipc::wait::Ticket,
+        _: crate::user_entry::syscall::Status,
+    ) -> Result<(), privilege::Error> {
+        let mut c = self.0.borrow_mut();
+        if c.fail_complete {
+            return Err(privilege::Error::State);
+        }
+        c.completions += 1;
+        c.wait = None;
+        Ok(())
+    }
     fn execute_slice(
         &mut self,
         image: ImageAdmission,
@@ -41,7 +60,12 @@ impl task::SliceDriver for StopDriver {
             id: o.id,
             root: o.root,
             ticks: u64::from(!c.zero_ticks),
-            event: if c.slice_terminal {
+            event: if let Some(ticket) = c.wait {
+                task::Event::Waiting {
+                    ticket,
+                    syscalls: o.syscalls,
+                }
+            } else if c.slice_terminal {
                 task::Event::Terminated(o)
             } else {
                 task::Event::Preempted {
@@ -54,6 +78,15 @@ impl task::SliceDriver for StopDriver {
     }
 }
 impl task::Driver for StopDriver {
+    fn revoke(&mut self, _: TaskId) -> Result<(), privilege::Error> {
+        let mut c = self.0.borrow_mut();
+        c.revocations += 1;
+        if c.fail_revoke {
+            Err(privilege::Error::State)
+        } else {
+            Ok(())
+        }
+    }
     fn execute(&mut self, image: ImageAdmission, id: TaskId) -> Result<Outcome, privilege::Error> {
         let mut c = self.0.borrow_mut();
         c.entries += 1;
@@ -105,6 +138,99 @@ fn running_scheduler(id: TaskId) -> (crate::scheduler::Scheduler, crate::schedul
     scheduler.activate(sid, cpu).unwrap();
     scheduler.dispatch(cpu).unwrap();
     (scheduler, cpu)
+}
+
+#[test]
+fn waiting_task_requires_settled_slice_and_exact_notification_before_resuming() {
+    use crate::capability_ipc::{
+        Caller, Space,
+        wait::{Admission, Readiness},
+    };
+    let mut s = setup();
+    let image = s.image;
+    let (mut slot, c, id) = task_slot(s.owner);
+    let mut space = Space::new();
+    space.attach(id, image).unwrap();
+    let h = space.create_endpoint(id).unwrap();
+    let Admission::Pending(ticket) = space
+        .prepare_wait(Caller::new(id, image), h, Readiness::Readable)
+        .unwrap()
+    else {
+        panic!()
+    };
+    c.borrow_mut().wait = Some(ticket);
+    let (mut scheduler, cpu) = running_scheduler(id);
+    slot.activate(id, &s.manager, &mut s.memory).unwrap();
+    slot.run_slice(id).unwrap();
+    assert_eq!(slot.state(id), Ok(task::State::Waiting));
+    assert_eq!(s.machine.borrow().snapshot.cr3, s.original);
+    assert!(slot.activate(id, &s.manager, &mut s.memory).is_err());
+    assert!(slot.cancel_suspended(id).is_err());
+    assert!(slot.reap(id, &mut s.manager, &mut s.memory).is_err());
+    assert!(
+        slot.complete_wait(id, ticket, crate::user_entry::syscall::Status::Ok)
+            .is_err()
+    );
+    slot.account_slice(id, &mut scheduler, cpu).unwrap();
+    space.park_wait(ticket, &mut scheduler, cpu).unwrap();
+    space.cancel_wait(ticket, &mut scheduler, cpu).unwrap();
+    scheduler.dispatch(cpu).unwrap();
+    c.borrow_mut().fail_complete = true;
+    assert!(
+        space
+            .complete_wait(ticket, &mut scheduler, cpu, |status| {
+                slot.complete_wait(id, ticket, status)
+                    .map_err(|_| crate::capability_ipc::Error::Denied)
+            })
+            .is_err()
+    );
+    assert_eq!(c.borrow().completions, 0);
+    assert_eq!(slot.state(id), Ok(task::State::Waiting));
+    retained(&mut s.manager, &s.handles);
+    c.borrow_mut().fail_complete = false;
+    space
+        .complete_wait(ticket, &mut scheduler, cpu, |status| {
+            slot.complete_wait(id, ticket, status)
+                .map_err(|_| crate::capability_ipc::Error::Denied)
+        })
+        .unwrap();
+    assert_eq!(c.borrow().completions, 1);
+    assert!(
+        slot.complete_wait(id, ticket, crate::user_entry::syscall::Status::Ok)
+            .is_err()
+    );
+    slot.activate(id, &s.manager, &mut s.memory).unwrap();
+    c.borrow_mut().slice_terminal = true;
+    slot.run_slice(id).unwrap();
+    slot.account_slice(id, &mut scheduler, cpu).unwrap();
+    slot.reap(id, &mut s.manager, &mut s.memory).unwrap();
+}
+
+#[test]
+fn retirement_revocation_failure_retains_root_and_supports_terminal_and_quarantine_retry() {
+    for failed_execution in [false, true] {
+        let mut s = setup();
+        let (mut slot, c, id) = task_slot(s.owner);
+        c.borrow_mut().fail_execute = failed_execution;
+        slot.activate(id, &s.manager, &mut s.memory).unwrap();
+        assert_eq!(slot.run(id).is_err(), failed_execution);
+        c.borrow_mut().fail_revoke = true;
+        if failed_execution {
+            assert!(slot.abandon(id, &mut s.manager, &mut s.memory).is_err());
+        } else {
+            assert!(slot.reap(id, &mut s.manager, &mut s.memory).is_err());
+        }
+        retained(&mut s.manager, &s.handles);
+        assert_eq!(s.machine.borrow().writes, [s.candidate]);
+        c.borrow_mut().fail_revoke = false;
+        if failed_execution {
+            slot.abandon(id, &mut s.manager, &mut s.memory).unwrap();
+        } else {
+            slot.reap(id, &mut s.manager, &mut s.memory).unwrap();
+        }
+        assert_eq!(c.borrow().revocations, 2);
+        assert_eq!(s.machine.borrow().writes, [s.candidate, s.original]);
+    }
 }
 
 #[test]
@@ -632,6 +758,7 @@ impl Cpu for Hardware {
 }
 
 struct Setup {
+    image: ImageAdmission,
     manager: PhysicalMemoryManager,
     memory: Memory,
     owner: CpuImage<Hardware>,
@@ -654,7 +781,8 @@ fn setup_with_timer(timer: bool) -> Setup {
     } else {
         ready(fixture)
     };
-    let candidate = prepared.admission().unwrap().root_physical;
+    let image = prepared.admission().unwrap();
+    let candidate = image.root_physical;
     let machine = Rc::new(RefCell::new(Machine {
         snapshot: Snapshot {
             cpu_id: 7,
@@ -675,6 +803,7 @@ fn setup_with_timer(timer: bool) -> Setup {
     }));
     let owner = CpuImage::new(prepared, Hardware(Rc::clone(&machine)), core);
     Setup {
+        image,
         manager,
         memory,
         owner,

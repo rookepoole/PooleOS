@@ -24,6 +24,9 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle251-native-ipc-waits.md",
+    "tests/fixtures/cycle250-user-entry-readiness.json",
+    "native/kernel/src/capability_ipc/wait.rs",
     "docs/checkpoints/cycle250-native-capability-ipc.md",
     "docs/native-capability-ipc.md",
     "tests/fixtures/cycle249-user-entry-readiness.json",

@@ -1,5 +1,276 @@
+use super::wait::{Admission, Readiness, Ticket};
 use super::*;
+use crate::scheduler::{CpuId, Scheduler, WakeReason};
 use crate::virtual_memory::USER_WINDOW_START as BASE;
+
+fn scheduled(slot: u8) -> crate::scheduler::TaskId {
+    crate::scheduler::TaskId::new(slot, 1).unwrap()
+}
+fn running(slot: u8) -> (Scheduler, CpuId) {
+    let mut scheduler = Scheduler::new(1).unwrap();
+    let cpu = CpuId::new(0).unwrap();
+    let id = scheduler.create_task(slot, 1, 16, 1).unwrap();
+    scheduler.activate(id, cpu).unwrap();
+    scheduler.dispatch(cpu).unwrap();
+    (scheduler, cpu)
+}
+fn pending(s: &mut Space, slot: u8, h: u64, readiness: Readiness) -> Ticket {
+    let Admission::Pending(ticket) = s.prepare_wait(caller(slot), h, readiness).unwrap() else {
+        panic!("not pending")
+    };
+    ticket
+}
+fn charge(s: &mut Scheduler, cpu: CpuId, slot: u8) {
+    let snapshot = s.task_snapshot(scheduled(slot)).unwrap();
+    s.account_dispatch(
+        cpu,
+        scheduled(slot),
+        snapshot.dispatch_count,
+        snapshot.runtime_ticks,
+        7,
+    )
+    .unwrap();
+}
+
+#[test]
+fn wait_authority_duplicate_exhaustion_and_abi_arguments_are_checked() {
+    let mut s = space();
+    let h = s.create_endpoint(id(0)).unwrap();
+    let send = s.derive(id(0), h, id(1), Rights::SEND).unwrap();
+    assert_eq!(
+        s.prepare_wait(caller(1), send, Readiness::Readable),
+        Err(Status::Denied)
+    );
+    assert_eq!(
+        s.prepare_wait(
+            Caller {
+                generation: 2,
+                ..caller(0)
+            },
+            h,
+            Readiness::Readable
+        ),
+        Err(Status::Denied)
+    );
+    assert_eq!(
+        s.prepare_wait(caller(0), 0, Readiness::Readable),
+        Err(Status::Denied)
+    );
+    assert_eq!(
+        s.prepare_wait(caller(1), send, Readiness::Writable),
+        Ok(Admission::Ready)
+    );
+    s.tables[0].wait_generation = u64::MAX;
+    assert_eq!(
+        s.prepare_wait(caller(0), h, Readiness::Readable),
+        Err(Status::Again)
+    );
+    assert!(s.tables[0].wait.is_none());
+    s.tables[0].wait_generation = 0;
+    pending(&mut s, 0, h, Readiness::Readable);
+    assert_eq!(
+        s.prepare_wait(caller(0), h, Readiness::Readable),
+        Err(Status::Again)
+    );
+    use crate::user_entry::syscall::{Request, request};
+    assert_eq!(
+        request(5, 1, h, 0, 0, 0, 0),
+        Ok(Request::Wait {
+            handle: h,
+            readiness: Readiness::Readable
+        })
+    );
+    assert_eq!(
+        request(5, 1, h, 1, 0, 0, 0),
+        Ok(Request::Wait {
+            handle: h,
+            readiness: Readiness::Writable
+        })
+    );
+    for args in [
+        (1, 2, 0, 0, 0),
+        (1, 0, 1, 0, 0),
+        (1, 0, 0, 1, 0),
+        (1, 0, 0, 0, 1),
+    ] {
+        assert_eq!(
+            request(5, args.0, h, args.1, args.2, args.3, args.4),
+            Err(Status::Arguments)
+        );
+    }
+    assert_eq!(request(5, 2, h, 0, 0, 0, 0), Err(Status::Version));
+}
+
+#[test]
+fn wait_park_rejects_uncharged_wrong_cpu_and_duplicate_without_losing_owner() {
+    let mut s = space();
+    let h = s.create_endpoint(id(0)).unwrap();
+    let ticket = pending(&mut s, 0, h, Readiness::Readable);
+    let (mut scheduler, cpu) = running(0);
+    let before = scheduler.summary();
+    assert!(s.park_wait(ticket, &mut scheduler, cpu).is_err());
+    assert_eq!(scheduler.summary(), before);
+    charge(&mut scheduler, cpu, 0);
+    assert!(
+        s.park_wait(ticket, &mut scheduler, CpuId::new(1).unwrap())
+            .is_err()
+    );
+    s.park_wait(ticket, &mut scheduler, cpu).unwrap();
+    let before = scheduler.summary();
+    assert!(s.park_wait(ticket, &mut scheduler, cpu).is_err());
+    assert!(scheduler.cancel_wait(scheduled(0), cpu).is_err());
+    assert!(scheduler.signal_wait(scheduled(0), cpu).is_err());
+    assert_eq!(scheduler.summary(), before);
+    assert_eq!(s.poll_wakes(&mut scheduler, cpu), Ok(0));
+    scheduler.validate().unwrap();
+}
+
+#[test]
+fn arrival_between_arm_and_park_is_not_lost_and_completion_retries_exactly_once() {
+    let mut s = space();
+    let h = s.create_endpoint(id(0)).unwrap();
+    let ticket = pending(&mut s, 0, h, Readiness::Readable);
+    assert_eq!(
+        s.transfer(caller(0), h, BASE, 8, true, &mut Bytes::new()),
+        (Status::Ok, 8)
+    );
+    let (mut scheduler, cpu) = running(0);
+    charge(&mut scheduler, cpu, 0);
+    s.park_wait(ticket, &mut scheduler, cpu).unwrap();
+    assert_eq!(s.poll_wakes(&mut scheduler, cpu), Ok(1));
+    assert_eq!(s.poll_wakes(&mut scheduler, cpu), Ok(0));
+    assert!(s.cancel_wait(ticket, &mut scheduler, cpu).is_err());
+    assert!(
+        s.complete_wait(ticket, &mut scheduler, cpu, |_| panic!("not dispatched"))
+            .is_err()
+    );
+    scheduler.dispatch(cpu).unwrap();
+    let before = scheduler.summary();
+    assert!(
+        s.complete_wait(ticket, &mut scheduler, cpu, |_| Err(Error::Denied))
+            .is_err()
+    );
+    assert_eq!(scheduler.summary(), before);
+    assert_eq!(
+        scheduler.task_snapshot(scheduled(0)).unwrap().wake_reason,
+        WakeReason::Signalled
+    );
+    assert_eq!(
+        s.complete_wait(ticket, &mut scheduler, cpu, |status| {
+            assert_eq!(status, Status::Ok);
+            Ok(())
+        }),
+        Ok(Status::Ok)
+    );
+    assert!(
+        s.complete_wait(ticket, &mut scheduler, cpu, |_| panic!("replayed"))
+            .is_err()
+    );
+    assert_eq!(
+        s.transfer(caller(0), h, BASE, 8, false, &mut Bytes::new()),
+        (Status::Ok, 8)
+    );
+    let next = pending(&mut s, 0, h, Readiness::Readable);
+    assert_ne!(next, ticket);
+    assert!(s.park_wait(ticket, &mut scheduler, cpu).is_err());
+}
+
+#[test]
+fn writable_wait_wakes_after_dequeue_without_reserving_capacity_or_borrowing_buffer() {
+    let mut s = space();
+    let h = s.create_endpoint(id(0)).unwrap();
+    let mut memory = Bytes::new();
+    for _ in 0..DEPTH {
+        assert_eq!(
+            s.transfer(caller(0), h, BASE, 8, true, &mut memory),
+            (Status::Ok, 8)
+        );
+    }
+    let ticket = pending(&mut s, 0, h, Readiness::Writable);
+    let (mut scheduler, cpu) = running(0);
+    charge(&mut scheduler, cpu, 0);
+    s.park_wait(ticket, &mut scheduler, cpu).unwrap();
+    assert_eq!(s.poll_wakes(&mut scheduler, cpu), Ok(0));
+    assert_eq!(
+        s.transfer(caller(0), h, BASE, 8, false, &mut memory),
+        (Status::Ok, 8)
+    );
+    assert_eq!(s.poll_wakes(&mut scheduler, cpu), Ok(1));
+    assert_eq!(
+        s.transfer(caller(0), h, BASE, 8, true, &mut memory),
+        (Status::Ok, 8)
+    );
+    scheduler.dispatch(cpu).unwrap();
+    s.complete_wait(ticket, &mut scheduler, cpu, |_| Ok(()))
+        .unwrap();
+    assert_eq!(
+        s.transfer(caller(0), h, BASE, 8, true, &mut memory),
+        (Status::Again, 0)
+    );
+}
+
+#[test]
+fn cancelled_and_revoked_waits_resume_once_and_destroyed_objects_cannot_rebind() {
+    for mode in 0..4 {
+        let mut s = space();
+        let h = s.create_endpoint(id(0)).unwrap();
+        let receive = s.derive(id(0), h, id(1), Rights::RECEIVE).unwrap();
+        let ticket = pending(&mut s, 1, receive, Readiness::Readable);
+        let (mut scheduler, cpu) = running(1);
+        charge(&mut scheduler, cpu, 1);
+        s.park_wait(ticket, &mut scheduler, cpu).unwrap();
+        match mode {
+            0 => s.cancel_wait(ticket, &mut scheduler, cpu).unwrap(),
+            1 => s.close(id(1), receive).unwrap(),
+            2 => s.destroy(id(0), h).unwrap(),
+            _ => s.detach(id(0)).unwrap(),
+        }
+        if mode != 0 {
+            if mode == 2 {
+                s.create_endpoint(id(0)).unwrap();
+            }
+            assert_eq!(s.poll_wakes(&mut scheduler, cpu), Ok(1));
+        }
+        assert_eq!(s.poll_wakes(&mut scheduler, cpu), Ok(0));
+        scheduler.dispatch(cpu).unwrap();
+        let expected = if mode == 0 {
+            Status::Cancelled
+        } else {
+            Status::Revoked
+        };
+        assert_eq!(
+            s.complete_wait(ticket, &mut scheduler, cpu, |status| {
+                assert_eq!(status, expected);
+                Ok(())
+            }),
+            Ok(expected)
+        );
+        assert!(s.cancel_wait(ticket, &mut scheduler, cpu).is_err());
+        scheduler.validate().unwrap();
+    }
+}
+
+#[test]
+fn detached_waiter_cannot_wake_reused_task_or_reset_ticket_generation() {
+    let mut s = space();
+    let h = s.create_endpoint(id(0)).unwrap();
+    let ticket = pending(&mut s, 0, h, Readiness::Readable);
+    let (mut scheduler, cpu) = running(0);
+    charge(&mut scheduler, cpu, 0);
+    s.park_wait(ticket, &mut scheduler, cpu).unwrap();
+    s.detach_if_attached(id(0)).unwrap();
+    scheduler.teardown(scheduled(0)).unwrap();
+    s.detach_if_attached(id(0)).unwrap();
+    let next = TaskId {
+        generation: 2,
+        ..id(0)
+    };
+    s.attach(next, image(0)).unwrap();
+    assert_eq!(s.tables[0].wait_generation, 1);
+    assert!(s.detach_if_attached(id(0)).is_err());
+    assert!(s.cancel_wait(ticket, &mut scheduler, cpu).is_err());
+    assert_eq!(s.poll_wakes(&mut scheduler, cpu), Ok(0));
+}
 
 fn image(slot: u8) -> ImageAdmission {
     ImageAdmission {

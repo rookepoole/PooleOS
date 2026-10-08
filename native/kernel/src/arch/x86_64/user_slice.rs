@@ -68,6 +68,9 @@ impl PeerEntry {
     }
 }
 impl task::Driver for PeerEntry {
+    fn revoke(&mut self, id: TaskId) -> Result<(), Error> {
+        unsafe { super::super::user_ipc::detach(id) }
+    }
     fn execute(&mut self, _: ImageAdmission, _: TaskId) -> Result<task::Outcome, Error> {
         Err(Error::State)
     }
@@ -83,6 +86,36 @@ impl task::Driver for PeerEntry {
     }
 }
 impl task::SliceDriver for PeerEntry {
+    fn complete_wait(
+        &mut self,
+        id: TaskId,
+        ticket: poolekernel::capability_ipc::wait::Ticket,
+        status: syscall::Status,
+    ) -> Result<(), Error> {
+        if self.entry.installed
+            || super::active()
+            || active()
+            || !matches!(
+                status,
+                syscall::Status::Ok | syscall::Status::Cancelled | syscall::Status::Revoked
+            )
+        {
+            return Err(Error::State);
+        }
+        let run = self.run.as_ref().ok_or(Error::State)?;
+        let image = run.admission();
+        if !run.matches(image, id) || !ticket.matches_image(id, image) {
+            return Err(Error::State);
+        }
+        let saved = self.saved.as_mut().ok_or(Error::State)?;
+        let mut context = saved.context;
+        context.registers[14] = status as u64;
+        context.registers[11] = 0;
+        context.frame.rflags &= !((1 << 10) | (1 << 16));
+        context.validate(image)?;
+        saved.context = context;
+        Ok(())
+    }
     fn execute_slice(&mut self, image: ImageAdmission, id: TaskId) -> Result<Slice, Error> {
         self.entry.context(image.root_physical)?;
         if self.entry.installed
@@ -209,12 +242,35 @@ pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) {
         if t.vector == syscall::VECTOR {
             if s.run.call(t).unwrap_or_else(|e| denied(13, e, t)) {
                 let caller = s.run.ipc_caller(t).unwrap_or_else(|e| denied(13, e, t));
-                let Some(code) = super::super::user_syscall::dispatch_owned(t, frame, Some(caller))
+                match super::super::user_syscall::dispatch_owned(t, frame, Some(caller))
                     .unwrap_or_else(|e| denied(13, e, t))
-                else {
-                    return;
-                };
-                s.run.exit(code).unwrap_or_else(|e| denied(13, e, t));
+                {
+                    super::super::user_syscall::Action::Returned => return,
+                    super::super::user_syscall::Action::Exit(code) => {
+                        s.run.exit(code).unwrap_or_else(|e| denied(13, e, t));
+                    }
+                    super::super::user_syscall::Action::Waiting(ticket) => {
+                        let context =
+                            Context::capture(s.image, t).unwrap_or_else(|e| denied(13, e, t));
+                        let mut fx = FxsaveArea([0; 512]);
+                        unsafe {
+                            fxsave_area(fx.0.as_mut_ptr());
+                        }
+                        s.saved = Some(Saved { context, fx });
+                        s.ticks = Some(
+                            super::super::user_preempt::terminal_ticks(s.budget, s.start)
+                                .unwrap_or_else(|e| denied(14, e, t)),
+                        );
+                        s.event = Some(Event::Waiting {
+                            ticket,
+                            syscalls: s.run.calls(),
+                        });
+                        super::super::user_syscall::disable(t.root)
+                            .unwrap_or_else(|e| denied(15, e, t));
+                        return_kernel(frame);
+                        return;
+                    }
+                }
             }
         } else {
             s.run.fault(t).unwrap_or_else(|e| denied(14, e, t));

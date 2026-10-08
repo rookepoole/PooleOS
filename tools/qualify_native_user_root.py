@@ -22,7 +22,7 @@ def main() -> int:
     work = args.work_dir.resolve()
     if not work.is_relative_to(ROOT): p.error("work directory must be inside repository")
     work.mkdir(parents=True, exist_ok=False)
-    report = {"cycle": 250, "contract_id": "PKIPC1", "status": "fail", "guest_runs": [],
+    report = {"cycle": 251, "contract_id": "PKIPC1", "status": "fail", "guest_runs": [],
               "guest_bound_seconds": 120, "hpet_msi": True,
               "ring3_executed": False, "iso_built": False, "production_ready": False}
     try:

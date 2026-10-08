@@ -43,13 +43,15 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 250,
+    "last_updated_cycle": 251,
     "selected_move_id": "N13-CAPABILITY-IPC-001",
     "immediate_next_move_id": "N13-CAPABILITY-IPC-001",
     "owner_independent_next_move_id": "N13-CAPABILITY-IPC-001",
     "required_records": [
-      "docs/checkpoints/cycle250-native-capability-ipc.md",
+      "docs/checkpoints/cycle251-native-ipc-waits.md",
       "runs/native-user-entry-readiness.json",
+      "docs/checkpoints/cycle250-native-capability-ipc.md",
+      "tests/fixtures/cycle250-user-entry-readiness.json",
       "docs/native-capability-ipc.md",
       "docs/checkpoints/cycle249-unknown-runtime-recovery.md",
       "tests/fixtures/cycle249-user-entry-readiness.json",
@@ -244,9 +246,9 @@
     "added_requirement_count": 59
   },
   "baseline": {
-    "pooleos_cycle": 250,
+    "pooleos_cycle": 251,
     "entry_cycle": 79,
-    "pooleos_test_count": 1295,
+    "pooleos_test_count": 1297,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -262,13 +264,13 @@
       "explicit_gap_count": 20,
       "production_ready": false,
       "native_promotion_role": "partially_qualified_development_candidate_non_promoting",
-      "qualification_status": "bounded_native_IPC_pass_wait_lifecycle_and_full_candidate_pending",
+      "qualification_status": "bounded_native_IPC_wait_cancel_retirement_pass_general_lifecycle_and_full_candidate_pending",
       "passed_check_count_scope": "historical_cycle176_exact_final_canonical_audit",
       "current_cycle_full_canonical_audit_performed": false,
       "last_fully_qualified_cycle": 176,
       "last_fully_qualified_passed_checks": 105,
       "current_candidate_audit": {
-        "cycle": 250,
+        "cycle": 251,
         "status": "not_run",
         "applies_to_current_source": false,
         "aggregate_suite_passed": false,
@@ -387,7 +389,7 @@
         "production_ready": false
       },
       "current_focused_source_projection": {
-        "cycle": 250,
+        "cycle": 251,
         "passed_checks": 2,
         "total_checks": 27,
         "passing_profiles": [
@@ -3508,34 +3510,64 @@
         "production_ready": false
       },
       "current_closeout_regression": {
-        "cycle": 250,
+        "cycle": 251,
         "status": "focused_native_and_guest_pass_not_full_canonical",
-        "tests_run": 571,
-        "tests_passed": 571,
+        "tests_run": 588,
+        "tests_passed": 588,
         "tests_failed": 0,
         "tests_skipped": 0,
-        "scope": "392_debug_kernel_plus126_repeated_user_release_plus11_IPC_release_plus24_VM_release_plus8_compile_fail_plus10_boot_exit",
-        "additional_python_oracle_tests": 42,
+        "scope": "401_debug_kernel_plus128_user_release_plus17_IPC_release_plus24_VM_release_plus8_compile_fail_plus10_boot_exit",
+        "additional_python_oracle_tests": 43,
         "rejected_incompatible_feature_builds": 2,
         "guest_runs": 3,
         "user_root_guest_runs": 2,
         "ordinary_denial_guest_runs": 1,
         "receipt_path": "runs/native-user-entry-readiness.json",
-        "receipt_sha256": "EB1AE8097D9418F95AFCD8ECF41F960C75B3B50E8B6AFC4245602B632D86F48D",
-        "elapsed_seconds": 289.094,
+        "receipt_sha256": "1744A690DC5276B054724F53BE85493988D8617043E641B86FF5FE3F3B902FCE",
+        "elapsed_seconds": 289.906,
         "log_sha256": "84D41938F527A8903D5DF231FF8BFC459E6DA8F1796A40FE185D82DF317A0206",
         "initial_attempts": [
           {
-            "status": "freestanding_adapter_compile_failed",
-            "elapsed_seconds": 38.437,
-            "reason": "scheduler_SMP_TaskId_type_mismatch_and_unqualified_ImageAdmission_fixed",
-            "log_sha256": "D2043B1D2816DF3C76E317B219139B83854688F546E850680C3C602CDAC83AF6"
+            "attempt": "nativefirst",
+            "status": "fail",
+            "elapsed_seconds": 6.203,
+            "reason": "fixture_private_field_access_fixed_with_retained_admission",
+            "log_sha256": "6293B438ECA8A0212D222EB0BC528E21735FD220F22985CBCE60D4B86EDA0AC6"
           },
           {
-            "status": "link_failed_before_guest",
-            "elapsed_seconds": 71.516,
-            "reason": "text935FE_exceeded92000_RELRO_A2100_exceededA2000_repaired_within192page_cap",
-            "log_sha256": "BEAD887BC04E5E61AB8F34ED69E62B9C1F51876CB57F72330A9863C177321A97"
+            "attempt": "nativesecond",
+            "status": "fail",
+            "elapsed_seconds": 42.078,
+            "reason": "stale_synthetic_root_counter_373_corrected379",
+            "log_sha256": "F4FD60EAD2D262B9C9256E1A5A401CA76D116D7AB77DD10099490F9338CB96E2"
+          },
+          {
+            "attempt": "nativethird",
+            "status": "fail",
+            "elapsed_seconds": 70.375,
+            "reason": "text9461E_exceeded94000_fixed_within192page_cap",
+            "log_sha256": "1C3C80021E3C5EA0000FB9D3E544A16268340F58734AA730DF256D6C2F788232"
+          },
+          {
+            "attempt": "nativefourth",
+            "status": "fail",
+            "elapsed_seconds": 184.016,
+            "reason": "native_stage135_missing_timer_wrapper_wait_and_revoke_forwarding",
+            "log_sha256": "F8E579DC237EB302407ECC716C1E6A0E73835876E5D447318CC04CC182B6CE91"
+          },
+          {
+            "attempt": "nativefifth",
+            "status": "fail",
+            "elapsed_seconds": 38.407,
+            "reason": "line_number_diagnostic_u32_to_u64_compile_repair",
+            "log_sha256": "43FFFA37E65066D96FA240D028A8D9C9606BD6E5CEFE762D0EB5B8C967678CDE"
+          },
+          {
+            "attempt": "nativesixth",
+            "status": "fail",
+            "elapsed_seconds": 40.672,
+            "reason": "forwarding_guard_must_accept_rustfmt_whitespace",
+            "log_sha256": "AACE8FAD2B655ED2B90D6DA820A6D95EE838178594813A3EE235A77AB05F2834"
           }
         ],
         "qualification_guest_bound_seconds": 120,
@@ -51964,24 +51996,33 @@
         "inherited_shared_loader_input_count": 19
       },
       "current_user_entry_metadata": {
-        "cycle": 250,
+        "cycle": 251,
         "status": "pass",
-        "tests_run": 140,
-        "tests_passed": 140,
+        "tests_run": 142,
+        "tests_passed": 142,
         "tests_failed": 0,
         "tests_skipped": 0,
-        "unittest_elapsed_seconds": 51.072,
-        "elapsed_seconds": 51.922,
-        "log_sha256": "1A01D445708BE6876EF50417CFC788EF0CCA6AFF42BDAB19815A4EF7A406084E",
+        "unittest_elapsed_seconds": 54.94,
+        "elapsed_seconds": 55.812,
+        "log_sha256": "19D05F0A0E303D21B9EF1E5612BF6B07538F80C42C10B10B3B5587027F753472",
         "initial_attempts": [
           {
             "status": "fail",
-            "tests_run": 140,
+            "tests_run": 142,
+            "tests_failed": 2,
+            "unittest_elapsed_seconds": 50.99,
+            "elapsed_seconds": 51.86,
+            "reason": "stale_source_count_schema_and_qualification_label",
+            "log_sha256": "7FD40D8026F9FB9C478008C239CBC9F6D48FBE8CC87CE4A139233E9812CA0FAF"
+          },
+          {
+            "status": "fail",
+            "tests_run": 142,
             "tests_failed": 1,
-            "unittest_elapsed_seconds": 53.02,
-            "elapsed_seconds": 53.875,
-            "reason": "stale_detailed_N14_not_started_heading_after_native_IPC_fixed_to_partial",
-            "log_sha256": "037BB8E6DDB1332BED2106EDA734BBAFE19312F49F1EEE7C8E9F6DC5BCCB3C83"
+            "unittest_elapsed_seconds": 52.465,
+            "elapsed_seconds": 53.313,
+            "reason": "remaining_stale_current_candidate_cycle_assertion",
+            "log_sha256": "E44EAAFA2DB879DEFE3E370DB30A28062620DCE3424200C8EA77D8D0617AB2B3"
           }
         ],
         "historical_integrity_is_not_new_execution": true,
@@ -52900,6 +52941,67 @@
         "log_sha256": "E51FE5AC8597BD5E919B0EA04E9341FA538F4665BDDC5A0590F335CE83DDB7B3",
         "historical_integrity_is_not_new_execution": true,
         "production_ready": false
+      },
+      "historical_cycle250_closeout_regression": {
+        "cycle": 250,
+        "status": "focused_native_and_guest_pass_not_full_canonical",
+        "tests_run": 571,
+        "tests_passed": 571,
+        "tests_failed": 0,
+        "tests_skipped": 0,
+        "scope": "392_debug_kernel_plus126_repeated_user_release_plus11_IPC_release_plus24_VM_release_plus8_compile_fail_plus10_boot_exit",
+        "additional_python_oracle_tests": 42,
+        "rejected_incompatible_feature_builds": 2,
+        "guest_runs": 3,
+        "user_root_guest_runs": 2,
+        "ordinary_denial_guest_runs": 1,
+        "receipt_path": "tests/fixtures/cycle250-user-entry-readiness.json",
+        "receipt_sha256": "EB1AE8097D9418F95AFCD8ECF41F960C75B3B50E8B6AFC4245602B632D86F48D",
+        "elapsed_seconds": 289.094,
+        "log_sha256": "84D41938F527A8903D5DF231FF8BFC459E6DA8F1796A40FE185D82DF317A0206",
+        "initial_attempts": [
+          {
+            "status": "freestanding_adapter_compile_failed",
+            "elapsed_seconds": 38.437,
+            "reason": "scheduler_SMP_TaskId_type_mismatch_and_unqualified_ImageAdmission_fixed",
+            "log_sha256": "D2043B1D2816DF3C76E317B219139B83854688F546E850680C3C602CDAC83AF6"
+          },
+          {
+            "status": "link_failed_before_guest",
+            "elapsed_seconds": 71.516,
+            "reason": "text935FE_exceeded92000_RELRO_A2100_exceededA2000_repaired_within192page_cap",
+            "log_sha256": "BEAD887BC04E5E61AB8F34ED69E62B9C1F51876CB57F72330A9863C177321A97"
+          }
+        ],
+        "qualification_guest_bound_seconds": 120,
+        "qualification_bound_unchanged": true,
+        "canonical_full_replay_performed": false,
+        "merge_qualified": false,
+        "production_ready": false
+      },
+      "historical_cycle250_user_entry_metadata": {
+        "cycle": 250,
+        "status": "pass",
+        "tests_run": 140,
+        "tests_passed": 140,
+        "tests_failed": 0,
+        "tests_skipped": 0,
+        "unittest_elapsed_seconds": 51.072,
+        "elapsed_seconds": 51.922,
+        "log_sha256": "1A01D445708BE6876EF50417CFC788EF0CCA6AFF42BDAB19815A4EF7A406084E",
+        "initial_attempts": [
+          {
+            "status": "fail",
+            "tests_run": 140,
+            "tests_failed": 1,
+            "unittest_elapsed_seconds": 53.02,
+            "elapsed_seconds": 53.875,
+            "reason": "stale_detailed_N14_not_started_heading_after_native_IPC_fixed_to_partial",
+            "log_sha256": "037BB8E6DDB1332BED2106EDA734BBAFE19312F49F1EEE7C8E9F6DC5BCCB3C83"
+          }
+        ],
+        "historical_integrity_is_not_new_execution": true,
+        "production_ready": false
       }
     },
     "native": {
@@ -53029,7 +53131,7 @@
       "blocked": true
     },
     "user_space_integration": {
-      "cycle": 250,
+      "cycle": 251,
       "status": "implementation_started",
       "plan_path": "docs/native-userspace-integration-iso.md",
       "selected_stage": "USI-2",
@@ -53042,7 +53144,7 @@
       "production_ready": false,
       "stages": {
         "USI-1": "partial_live_bounded_unknown_recovery_general_admission_still_open",
-        "USI-2": "partial_native_nonblocking_capability_IPC_wait_lifecycle_pending",
+        "USI-2": "partial_native_IPC_readiness_wait_cancel_and_retirement_general_lifecycle_pending",
         "USI-3": "not_started",
         "USI-4": "not_started",
         "USI-5": "not_started"
@@ -53053,7 +53155,7 @@
       "owned_inactive_supervisor_attachment": true,
       "entry_stack_bytes": 16384,
       "live_adapter_wired": true,
-      "privileged_adapter_verification": "two_fresh_qemu_CPL3_capability_request_reply_with_native_denials_plus_default_denial",
+      "privileged_adapter_verification": "two_fresh_CPL3_wait_cancel_exchange_and_automatic_retirement_guests_plus_default_denial",
       "cpu_exposure_lifecycle_implemented": true,
       "actual_cr3_switch_executed": true,
       "user_root_guest_runs": 2,
@@ -53094,8 +53196,8 @@
       "released_pages_per_probe": 616,
       "scrubbed_data_pages_per_probe": 283,
       "actual_root_writes_per_probe": [
-        345,
-        345
+        349,
+        349
       ],
       "failed_cleanup_retains_memory": true,
       "complete_spawn_allocation_rollback": false,
@@ -53194,16 +53296,16 @@
         156
       ],
       "runtime_ticks_per_probe": [
-        136814920,
-        136814920
+        136815074,
+        136815074
       ],
       "runtime_terminal_ticks_per_probe": [
-        10807990,
-        10807990
+        10808113,
+        10808113
       ],
       "runtime_failed_cleanup_ticks_per_probe": [
-        1000055,
-        1000055
+        1000056,
+        1000056
       ],
       "watchdog_contract": "PKUSER14",
       "bounded_hpet_backup_recovery": true,
@@ -53246,28 +53348,28 @@
         null
       ],
       "unknown_peer_ticks_per_probe": [
-        6000476,
-        6000476
+        6000479,
+        6000479
       ],
       "unknown_recovery_dispatches_per_probe": [
         8,
         8
       ],
       "measured_subtotal_all_peer_suites_per_probe": [
-        143816850,
-        143816850
+        142817393,
+        142817393
       ],
       "physical_clock_failure_recovery": false,
       "persistent_per_generation_runtime_audit": false,
       "capability_ipc_contract": "PKIPC1",
       "bounded_capability_ipc": true,
-      "ipc_scope": "single_BSP_endpoint_only_bounded_nonblocking_explicit_bootstrap_and_detach",
+      "ipc_scope": "single_BSP_advisory_readiness_waits_supervisor_cancel_and_automatic_retirement",
       "ipc_task_capacity": 4,
       "ipc_caps_per_task": 4,
       "ipc_endpoint_capacity": 4,
       "ipc_queue_depth": 4,
       "ipc_message_bytes": 64,
-      "ipc_blocking": false,
+      "ipc_blocking": true,
       "ipc_general_lifecycle": false,
       "ipc_sender_badges": false,
       "ipc_reply_tokens": false,
@@ -53277,30 +53379,48 @@
       "ipc_native_dead_peer_qualified": false,
       "ipc_concurrency_qualified": false,
       "ipc_dispatches_per_probe": [
-        3,
-        3
+        5,
+        5
       ],
       "ipc_preemptions_per_probe": [
-        1,
-        1
+        0,
+        0
       ],
       "ipc_ticks_per_probe": [
-        1001454,
-        1001454
+        1840,
+        1840
       ],
       "ipc_calls_per_probe": [
         [
-          8,
-          3
+          9,
+          4
         ],
         [
-          8,
-          3
+          9,
+          4
         ]
       ],
       "ipc_cr3_writes_per_probe": [
-        6,
-        6
+        10,
+        10
+      ],
+      "ipc_automatic_retirement": true,
+      "ipc_wait_many": false,
+      "ipc_deadlines": false,
+      "ipc_user_cancellation": false,
+      "ipc_native_writable_wait_qualified": false,
+      "ipc_native_enrolled_fault_quarantine_qualified": false,
+      "ipc_waits_per_probe": [
+        3,
+        3
+      ],
+      "ipc_readiness_wakes_per_probe": [
+        2,
+        2
+      ],
+      "ipc_cancellations_per_probe": [
+        1,
+        1
       ]
     },
     "historical_cycle234_user_space_integration": {
@@ -54758,6 +54878,281 @@
       ],
       "physical_clock_failure_recovery": false,
       "persistent_per_generation_runtime_audit": false
+    },
+    "historical_cycle250_user_space_integration": {
+      "cycle": 250,
+      "status": "implementation_started",
+      "plan_path": "docs/native-userspace-integration-iso.md",
+      "selected_stage": "USI-2",
+      "selected_requirement": "N13-USER-ENTRY-LIVE-001",
+      "receipt_path": "tests/fixtures/cycle250-user-entry-readiness.json",
+      "host_status": "pass",
+      "guest_runs": 3,
+      "ring3_executed": true,
+      "iso_built": false,
+      "production_ready": false,
+      "stages": {
+        "USI-1": "partial_live_bounded_unknown_recovery_general_admission_still_open",
+        "USI-2": "partial_native_nonblocking_capability_IPC_wait_lifecycle_pending",
+        "USI-3": "not_started",
+        "USI-4": "not_started",
+        "USI-5": "not_started"
+      },
+      "continue_full_microkernel_after_iso": true,
+      "required_next": "N13-USER-ENTRY-LIVE-001",
+      "live_adapter_implemented": true,
+      "owned_inactive_supervisor_attachment": true,
+      "entry_stack_bytes": 16384,
+      "live_adapter_wired": true,
+      "privileged_adapter_verification": "two_fresh_qemu_CPL3_capability_request_reply_with_native_denials_plus_default_denial",
+      "cpu_exposure_lifecycle_implemented": true,
+      "actual_cr3_switch_executed": true,
+      "user_root_guest_runs": 2,
+      "ordinary_denial_guest_runs": 1,
+      "timer_under_candidate_root_executed": true,
+      "verified_timer_shutdown_before_retirement": true,
+      "interrupts_per_probe": 3,
+      "mmio_pages": 2,
+      "retained_acpi_snapshot_pages": 1,
+      "user_faults_per_probe": 7,
+      "private_tss_rsp0_executed": true,
+      "user_timer_preemption": true,
+      "architectural_state_profile": "single_BSP_legacy_x87_SSE_no_enabled_XSAVE",
+      "general_user_program_admission": false,
+      "syscall_abi": true,
+      "user_timer_interrupts_per_probe": 3,
+      "user_resumes_per_probe": 2,
+      "timer_shutdown_precedes_descriptor_detachment": true,
+      "independent_missing_interrupt_watchdog": false,
+      "multi_application_scheduling": false,
+      "development_syscall_abi": "PSABI1",
+      "production_syscall_abi_frozen": false,
+      "bounded_user_copy": true,
+      "maximum_user_copy_bytes": 256,
+      "user_calls_per_probe": 12,
+      "copy_faults_per_probe": 3,
+      "copy_input_failure_atomic": true,
+      "copy_output_failure_reports_prefix": true,
+      "syscall_msrs_cleared_before_retirement": true,
+      "general_smap_qualification": false,
+      "concurrent_user_copy_pinning": false,
+      "task_exit_and_reaping": true,
+      "task_termination_contract": "PKUSER8",
+      "sequential_task_lifetimes_per_probe": 4,
+      "normal_task_exits_per_probe": 1,
+      "fatal_user_faults_per_probe": 3,
+      "task_identity_scope": "persistent_slot_local_generation_not_capability",
+      "released_pages_per_probe": 616,
+      "scrubbed_data_pages_per_probe": 283,
+      "actual_root_writes_per_probe": [
+        345,
+        345
+      ],
+      "failed_cleanup_retains_memory": true,
+      "complete_spawn_allocation_rollback": false,
+      "peer_scheduling_contract": "PKUSER10",
+      "bounded_peer_scheduling": true,
+      "peer_scheduler": "PKSCHED1_single_CPU",
+      "private_roots_per_round": 2,
+      "peer_rounds_per_probe": 16,
+      "peer_preemptions_per_probe": [
+        125,
+        125
+      ],
+      "peer_survival_cases_per_probe": 17,
+      "legacy_user_state_saved_restored": true,
+      "suspended_owner_retains_memory": true,
+      "syscall_stack_within_owned_page": true,
+      "syscall_budget_terminates_only_task": true,
+      "invalid_user_frame_containment": true,
+      "timer_pending_race_qualification": false,
+      "complete_runtime_tick_accounting": false,
+      "invalid_user_frame_scope": "fixed_admitted_RIP_RSP_RFLAGS_on_owned_syscall_and_timer_entry_not_general_programs",
+      "invalid_return_terminations_per_probe": 6,
+      "new_native_user_exception_vectors": [
+        0,
+        1,
+        3
+      ],
+      "user_exception_policy_vectors": [
+        0,
+        1,
+        3,
+        4,
+        5,
+        6,
+        11,
+        12,
+        13,
+        14,
+        16,
+        17,
+        19
+      ],
+      "architectural_stack_fault_qualified": false,
+      "observed_stack_access_vector": 13,
+      "emulator_deviation": "QEMU_TCG_issue928_issue4205_GP_instead_of_SS_for_noncanonical_stack_access",
+      "kernel_entry_ac_cleared": true,
+      "general_user_exception_delivery_qualified": false,
+      "construction_contract": "PKUSER11",
+      "bounded_transactional_construction": true,
+      "construction_quota_failures_per_probe": 1,
+      "construction_after_effect_failures_per_probe": 6,
+      "construction_cleanup_quarantines_per_probe": 6,
+      "construction_cleanup_retries_per_probe": 6,
+      "construction_scrubbed_released_pages_per_probe": 83,
+      "construction_peer_continuation": true,
+      "construction_scope": "fixed_five_allocation_never_exposed_image_not_general_executable_or_slot_recovery",
+      "general_quarantine_recovery": false,
+      "complete_kernel_stack_bound_qualified": false,
+      "kernel_stack_guard_regression_repaired": true,
+      "timer_shutdown_contract": "PKUSER12",
+      "bounded_timer_shutdown_recovery": true,
+      "timer_shutdown_scope": "single_BSP_owned_local_and_backup_vectors_not_all_silicon_races",
+      "timer_drain_max_windows": 32,
+      "timer_drain_max_new_deliveries_per_shutdown": 4,
+      "timer_pending_cases_per_probe": 1,
+      "timer_late_cases_per_probe": 1,
+      "timer_quarantine_retries_per_probe": 1,
+      "timer_quarantine_retained_pages_per_probe": 13,
+      "timer_drain_deliveries_per_probe": [
+        3,
+        3
+      ],
+      "timer_drain_eois_per_probe": [
+        3,
+        3
+      ],
+      "timer_quarantine_peer_survived": true,
+      "failed_cleanup_quantum_accounted": true,
+      "runtime_accounting_contract": "PKUSER13",
+      "bounded_runtime_accounting": true,
+      "runtime_accounting_scope": "authenticated_returned_single_BSP_peer_quanta_not_legacy_diagnostics_or_general_clock_failure",
+      "runtime_charge_window": "hpet_arm_to_event_includes_in_quantum_kernel_work_excludes_later_cleanup",
+      "pure_user_instruction_time": false,
+      "unknown_runtime_recovery_qualified": false,
+      "physical_clock_coherent_read_qualified": false,
+      "runtime_samples_per_probe": [
+        156,
+        156
+      ],
+      "runtime_terminal_samples_per_probe": [
+        30,
+        30
+      ],
+      "runtime_duplicate_denials_per_probe": [
+        156,
+        156
+      ],
+      "runtime_ticks_per_probe": [
+        136814920,
+        136814920
+      ],
+      "runtime_terminal_ticks_per_probe": [
+        10807990,
+        10807990
+      ],
+      "runtime_failed_cleanup_ticks_per_probe": [
+        1000055,
+        1000055
+      ],
+      "watchdog_contract": "PKUSER14",
+      "bounded_hpet_backup_recovery": true,
+      "watchdog_scope": "single_BSP_64bit_HPET_MSI_backup_to_local_timer_shares_APIC_requires_IF_not_NMI",
+      "watchdog_deadline_ns": 50000000,
+      "hpet_msi_launch_opt_in": true,
+      "native_simultaneous_pending_sources_qualified": false,
+      "ioapic_backup_qualified": false,
+      "nmi_recovery_qualified": false,
+      "watchdog_recoveries_per_probe": [
+        1,
+        1
+      ],
+      "watchdog_arms_per_probe": [
+        156,
+        156
+      ],
+      "watchdog_stops_per_probe": [
+        156,
+        156
+      ],
+      "watchdog_restores_per_probe": [
+        156,
+        156
+      ],
+      "watchdog_ticks_per_probe": [
+        5000028,
+        5000028
+      ],
+      "unknown_runtime_contract": "PKUSER15",
+      "bounded_unknown_runtime_recovery": true,
+      "unknown_runtime_scope": "returned_sample_loss_after_authenticated_quantum_not_physical_clock_or_arbitrary_entry_failure",
+      "runtime_statistics_scope": "PKUSER13_measured_suite_PKUSER15_unknown_case_PKIPC1_exchange_no_global_total",
+      "unmeasured_dispatches_per_probe": [
+        1,
+        1
+      ],
+      "unknown_task_total_ticks_per_probe": [
+        null,
+        null
+      ],
+      "unknown_peer_ticks_per_probe": [
+        6000476,
+        6000476
+      ],
+      "unknown_recovery_dispatches_per_probe": [
+        8,
+        8
+      ],
+      "measured_subtotal_all_peer_suites_per_probe": [
+        143816850,
+        143816850
+      ],
+      "physical_clock_failure_recovery": false,
+      "persistent_per_generation_runtime_audit": false,
+      "capability_ipc_contract": "PKIPC1",
+      "bounded_capability_ipc": true,
+      "ipc_scope": "single_BSP_endpoint_only_bounded_nonblocking_explicit_bootstrap_and_detach",
+      "ipc_task_capacity": 4,
+      "ipc_caps_per_task": 4,
+      "ipc_endpoint_capacity": 4,
+      "ipc_queue_depth": 4,
+      "ipc_message_bytes": 64,
+      "ipc_blocking": false,
+      "ipc_general_lifecycle": false,
+      "ipc_sender_badges": false,
+      "ipc_reply_tokens": false,
+      "ipc_user_delegation": false,
+      "ipc_derivation_tree_revocation": false,
+      "ipc_native_saturation_qualified": false,
+      "ipc_native_dead_peer_qualified": false,
+      "ipc_concurrency_qualified": false,
+      "ipc_dispatches_per_probe": [
+        3,
+        3
+      ],
+      "ipc_preemptions_per_probe": [
+        1,
+        1
+      ],
+      "ipc_ticks_per_probe": [
+        1001454,
+        1001454
+      ],
+      "ipc_calls_per_probe": [
+        [
+          8,
+          3
+        ],
+        [
+          8,
+          3
+        ]
+      ],
+      "ipc_cr3_writes_per_probe": [
+        6,
+        6
+      ]
     }
   },
   "source_set": [
@@ -56233,6 +56628,7 @@
         "ADD-CAP-001"
       ],
       "current_evidence": [
+        "Cycle251: native IPC readiness suspends/resumes private CPL3 tasks;3 waits,2 readiness wakes,1 cancellation and automatic retirement pass in two fresh62-marker boots.401 kernel debug tests,588 Rust executions,43 oracle tests,665 altered-evidence rejections per guest and ordinary denial pass. docs/checkpoints/cycle251-native-ipc-waits.md",
         "Cycle250: PKIPC1 enforces kernel-owned endpoint handles, authenticated callers, generations, rights and bounded FIFO copy commits. Two fresh62-marker boots exchange actual transformed8-byte requests/replies and preserve17 survival cases;660 altered-evidence controls per boot reject.571 Rust executions,42 oracle tests and ordinary denial pass. docs/checkpoints/cycle250-native-capability-ipc.md",
         "Cycle249: PKUSER15 records one unmeasured dispatch without changing measured ticks, prevents requeue and retains device/root ownership through cleanup retry. Two fresh61-marker guests each pass17 survival cases and630 altered-evidence controls; the healthy peer exits84.545 Rust executions and40 oracle tests pass. Native stack overflow from nested diagnostic constructors is repaired with sibling noninline calls without enlarging the36page stack. docs/checkpoints/cycle249-unknown-runtime-recovery.md",
         "Cycle248: PKUSER14 owns an HPET comparator before device effects, routes a fixed BSP MSI and stops/drains/restores both sources before detach. Two fresh60-marker guests each recover one masked-local-timer spinner, preserve16 survival cases, settle156 dispatches and30 terminal samples and reject156 duplicate charges.539 Rust executions and38 oracle tests pass. The guest remains development-only. docs/checkpoints/cycle248-native-hpet-backup.md",
@@ -56252,6 +56648,7 @@
         "Cycle 234: PKUSER1 inactive user-image admission passes260 kernel host tests,14 optimized focused tests and freestanding-library check; no live user execution or ISO. docs/checkpoints/cycle234-user-entry-foundation.md"
       ],
       "current_gaps": [
+        "Single-BSP advisory readiness is not RPC or general service lifecycle. Native enrolled-owner fault/cancel/quarantine/dead-peer/revocation/stale/writable-wait/saturation/output-fault and persistent-generation tests remain. Add pending-wait termination, sender identity, one-use replies, deadlines, wait-many, transactional admission, sustained budgets, audit and SMP. Quarantine retains authority until stopped cleanup succeeds.186-page product-contract migration and full exact-candidate replay remain; no interactive ISO or production promotion.",
         "Nonblocking single-BSP endpoint-only subset. Scheduler waits/cancellation, automatic lifecycle revocation, sender identity and one-use replies, transactional general bootstrap, derivation-tree revocation, user delegation, audit, wire layouts, shared memory, notifications, priorities, SMP and native saturation/stale/dead-peer/output-fault stress remain. Core host controls do not qualify native races.185-page image needs product-contract migration and full exact-candidate replay; no interactive shell/ISO or production promotion.",
         "Bounded returned-sample loss only; physical clock failure, unsafe entry, persistent generation audit/quarantine, partial timer configuration, shared APIC/IF0/NMI failure, hardware races, general admission, full stack/exception/XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/ISO remain open. Image182pages/entry0xC000 needs product-contract migration; diagnostic text capacity and stack composition remain monitored under the existing integration flag. Full exact-candidate replay remains pending. No phase exit, merge or production promotion.",
         "HPET MSI backup is independent of the local timer, not of HPET clock, APIC delivery or IF. IOAPIC/nonMSI/32bit fallback, NMI recovery, live simultaneous pending sources, physical coherent clock reads/reset/drift, unknown-measurement emergency recovery, partial timer configuration, general quarantine/admission, full stack/exception/XSAVE/SMAP/SMP/async, IPC/services/shell/apps/optical ISO and hardware remain open. Image181pages/entry0xC000 needs product-contract migration and full exact-candidate replay. No phase exit, merge or promotion.",
@@ -56325,9 +56722,11 @@
         "ADD-ABI-001"
       ],
       "current_evidence": [
+        "Cycle251: native IPC readiness suspends/resumes private CPL3 tasks;3 waits,2 readiness wakes,1 cancellation and automatic retirement pass in two fresh62-marker boots.401 kernel debug tests,588 Rust executions,43 oracle tests,665 altered-evidence rejections per guest and ordinary denial pass. docs/checkpoints/cycle251-native-ipc-waits.md",
         "Cycle250: PKIPC1 enforces kernel-owned endpoint handles, authenticated callers, generations, rights and bounded FIFO copy commits. Two fresh62-marker boots exchange actual transformed8-byte requests/replies and preserve17 survival cases;660 altered-evidence controls per boot reject.571 Rust executions,42 oracle tests and ordinary denial pass. docs/checkpoints/cycle250-native-capability-ipc.md"
       ],
       "current_gaps": [
+        "Single-BSP advisory readiness is not RPC or general service lifecycle. Native enrolled-owner fault/cancel/quarantine/dead-peer/revocation/stale/writable-wait/saturation/output-fault and persistent-generation tests remain. Add pending-wait termination, sender identity, one-use replies, deadlines, wait-many, transactional admission, sustained budgets, audit and SMP. Quarantine retains authority until stopped cleanup succeeds.186-page product-contract migration and full exact-candidate replay remain; no interactive ISO or production promotion.",
         "Nonblocking single-BSP endpoint-only subset. Scheduler waits/cancellation, automatic lifecycle revocation, sender identity and one-use replies, transactional general bootstrap, derivation-tree revocation, user delegation, audit, wire layouts, shared memory, notifications, priorities, SMP and native saturation/stale/dead-peer/output-fault stress remain. Core host controls do not qualify native races.185-page image needs product-contract migration and full exact-candidate replay; no interactive shell/ISO or production promotion.",
         "No native IPC, isolation, async completion, or quota implementation exists"
       ],
@@ -62442,7 +62841,7 @@
       "class": "REQUIRED",
       "status": "open",
       "phase_id": "N13",
-      "closure_condition": "Pass all five native user-space ISO stages with actual isolated tasks, user input, fault containment and fresh optical evidence; do not close production gates Include N3.7 constructor/cleanup/trap stack-depth and high-water qualification, general persistent construction quarantine and final slot-commit recovery. Account terminal and failed-cleanup consumed quanta exactly once through retry/abandonment; qualify independent missing-IRQ recovery and keep broad timer-race/partial-configuration recovery distinct from bounded PKUSER12 evidence. PKUSER13 covers authenticated returned peer quanta only; qualify unknown-measurement emergency recovery, independent missing-IRQ recovery, coherent physical counter reads/reset/drift and accounting of all admitted profiles without weakening retained ownership. PKUSER14 qualifies only local-timer suppression with working HPET/MSI/APIC/IF; implement and qualify unknown-runtime recovery, IOAPIC/nonMSI/32bit fallback, NMI/shared-controller failure and simultaneous-source shutdown without broadening the bounded claim. PKUSER15 covers returned sample loss and termination-only retry, not physical clock failure or persistent generation audit. Bound stack composition and text capacity as native capability IPC is added; retain all production and interactive-ISO gates. PKIPC1 is endpoint-only nonblocking IPC with explicit bootstrap teardown. Implement scheduler waits/cancel, automatic lifetime revocation, sender/reply authority, transactional bootstrap, derivation-tree revocation and native saturation/stale/dead-peer/output-fault tests before general services. Preserve all production/ISO gates and185page product-contract migration.",
+      "closure_condition": "Pass all five native user-space ISO stages with actual isolated tasks, user input, fault containment and fresh optical evidence; do not close production gates Include N3.7 constructor/cleanup/trap stack-depth and high-water qualification, general persistent construction quarantine and final slot-commit recovery. Account terminal and failed-cleanup consumed quanta exactly once through retry/abandonment; qualify independent missing-IRQ recovery and keep broad timer-race/partial-configuration recovery distinct from bounded PKUSER12 evidence. PKUSER13 covers authenticated returned peer quanta only; qualify unknown-measurement emergency recovery, independent missing-IRQ recovery, coherent physical counter reads/reset/drift and accounting of all admitted profiles without weakening retained ownership. PKUSER14 qualifies only local-timer suppression with working HPET/MSI/APIC/IF; implement and qualify unknown-runtime recovery, IOAPIC/nonMSI/32bit fallback, NMI/shared-controller failure and simultaneous-source shutdown without broadening the bounded claim. PKUSER15 covers returned sample loss and termination-only retry, not physical clock failure or persistent generation audit. Bound stack composition and text capacity as native capability IPC is added; retain all production and interactive-ISO gates. PKIPC1 is endpoint-only nonblocking IPC with explicit bootstrap teardown. Implement scheduler waits/cancel, automatic lifetime revocation, sender/reply authority, transactional bootstrap, derivation-tree revocation and native saturation/stale/dead-peer/output-fault tests before general services. Preserve all production/ISO gates and185page product-contract migration. Cycle251 now implements bounded readiness wait/cancel and automatic retirement hooks; do not treat that as general lifecycle. Single-BSP advisory readiness is not RPC or general service lifecycle. Native enrolled-owner fault/cancel/quarantine/dead-peer/revocation/stale/writable-wait/saturation/output-fault and persistent-generation tests remain. Add pending-wait termination, sender identity, one-use replies, deadlines, wait-many, transactional admission, sustained budgets, audit and SMP. Quarantine retains authority until stopped cleanup succeeds.186-page product-contract migration and full exact-candidate replay remain; no interactive ISO or production promotion.",
       "evidence": [
         "docs/checkpoints/cycle234-user-entry-foundation.md",
         "docs/native-userspace-integration-iso.md",
@@ -62461,7 +62860,8 @@
         "docs/checkpoints/cycle247-native-runtime-accounting.md",
         "docs/checkpoints/cycle248-native-hpet-backup.md",
         "docs/checkpoints/cycle249-unknown-runtime-recovery.md",
-        "docs/checkpoints/cycle250-native-capability-ipc.md"
+        "docs/checkpoints/cycle250-native-capability-ipc.md",
+        "docs/checkpoints/cycle251-native-ipc-waits.md"
       ]
     }
   ],
@@ -62476,7 +62876,7 @@
       "PKERR1 freezes a pure exact-target CPU/errata rejection policy, PKXSTATE1 proves bounded x87/SSE standard-XSAVE ownership, PKXEXC1 proves deliberate #MF/#XM recovery plus terminal test-only #NM rejection with a linked scope audit under WHPX, and PKMSR1 proves only a read-only qemu64 BSP system-linkage/global-MCA/unsupported-PMU observation. PKPMM7 supplies bounded physical ownership, scrubbed lifecycle transactions, a stable guarded five-page manager, external generation-owned active ledgers, checked automatic growth with retirement, bounded-window fallback and pre-effect rejection, streamed lifecycle-gated Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation and retained copy/readback; PKVM1 supplies inactive page-table transactions; PKVM3 proves one-BSP activation/restoration of a complete-profile PMM-owned sparse direct map; PKIRQ1 proves one bounded local timer transaction; PKSMP1 proves one first-AP start/quiesce/park lifecycle; PKSMP2 proves one AP-local GDT/TSS/IDT, guarded-stack, x87/SSE-owner, and interrupt-vector runtime transaction; and PKSMP5 proves three simultaneous AP-local runtimes, partial-start rollback with fresh retry, six fixed IPI classes per AP, three AP-side one-page INVLPG operations, aggregate acknowledgement, and one deferred generation retirement. No target-qualified complete native CPU policy, applicable Model 40h-4Fh errata authority, direct numeric client microcode floor or ratified replacement, target-specific privileged-MSR semantics, syscall/MCE/PMU activation, AVX/extended state, user-task exception delivery, scheduler or migration integration, general interrupt routing/time services, production capability authority, general topology or SMP shootdown, AML or complete ACPI resource-graph execution, complete kernel/user address spaces, heap, MMIO/PAT/MTRR qualification, interrupt-context or concurrent allocator, general pressure, or OOM implementation exists",
       "The exact Tier 1 identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records are captured with zero public raw registers, but seven required channels remain non-complete in total, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification also remain open",
       "No native DMA/IOMMU/interrupt-remapping confinement",
-      "Nonblocking single-BSP endpoint-only subset. Scheduler waits/cancellation, automatic lifecycle revocation, sender identity and one-use replies, transactional general bootstrap, derivation-tree revocation, user delegation, audit, wire layouts, shared memory, notifications, priorities, SMP and native saturation/stale/dead-peer/output-fault stress remain. Core host controls do not qualify native races.185-page image needs product-contract migration and full exact-candidate replay; no interactive shell/ISO or production promotion. Bounded returned-sample loss only; physical clock failure, unsafe entry, persistent generation audit/quarantine, partial timer configuration, shared APIC/IF0/NMI failure, hardware races, general admission, full stack/exception/XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/ISO remain open. Image182pages/entry0xC000 needs product-contract migration; diagnostic text capacity and stack composition remain monitored under the existing integration flag. Full exact-candidate replay remains pending. No phase exit, merge or production promotion. HPET MSI backup is independent of the local timer, not of HPET clock, APIC delivery or IF. IOAPIC/nonMSI/32bit fallback, NMI recovery, live simultaneous pending sources, physical coherent clock reads/reset/drift, unknown-measurement emergency recovery, partial timer configuration, general quarantine/admission, full stack/exception/XSAVE/SMAP/SMP/async, IPC/services/shell/apps/optical ISO and hardware remain open. Image181pages/entry0xC000 needs product-contract migration and full exact-candidate replay. No phase exit, merge or promotion. Bounded one-BSP authenticated returned peer quanta only. Legacy diagnostics remain unaccounted; unknown/malformed measurements pin ownership and need explicit emergency recovery. Independent missing-IRQ recovery, physical coherent counter reads/reset/drift, pure user/kernel attribution, broad timer races, general quarantine/admission, full stack/exception/selector qualification, XSAVE/SMAP/SMP/async, IPC/services/shell/apps/optical ISO and hardware remain open. Image180pages/entry0xC000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion. Bounded one-BSP fixed payloads only. Terminal/failed-cleanup quantum accounting remains incomplete:119 accepted preemptions exclude one consumed quantum discarded by failed cleanup. Arbitrary after-mask silicon races, ambiguous ISR and partial-configuration quarantine recovery, independent missing-IRQ recovery, general executable admission, complete stack/exception/selector qualification including native SS, XSAVE/SMAP/SMP/async, IPC/services/shell/apps/optical ISO and hardware remain open. Image178pages/entry0xB000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion. Bounded one-BSP fixed construction only. General executable admission, persistent quarantine/slot-commit recovery, N3.7 complete stack-depth/high-water and trap nesting, pending/late timer recovery, terminal accounting, independent missing-IRQ recovery, general exception/selector delivery including native SS, XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/optical ISO and hardware remain open. Image177pages/entry0xB000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion. Bounded one-BSP fixed payloads only. TCG stack access delivers GP rather than architectural SS; native SS and general exception/selector delivery remain unqualified, not waived. Full spawn rollback, pending/late timer recovery, terminal-quantum accounting, independent missing-IRQ recovery, XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 still requires product-contract migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. Bounded one-BSP fixed tasks only. Full spawn rollback, invalid-return-frame containment, pending/late timer recovery, final-sub-quantum accounting, independent missing-IRQ watchdog, general XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. No peer scheduling or arbitrary-program admission: fixed task payloads have no armed timer, strict initial syscall RSP and a64-call budget still fail fatally, and construction allocation failures are not fully rolled back. Task IDs are slot-local, not capabilities. SMAP/concurrent copy, async/SMP entry, full XSAVE, missing-IRQ watchdog, IPC/services/shell/apps/optical ISO and hardware remain open. Image168pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. PSABI1 is a development subset, not a complete frozen production ABI. General SMAP/concurrent pinning, async/SMP entry, arbitrary programs, task exit/reaping/accounting, fault termination and peer scheduling remain open. Syscalls are tested before the timer is armed, not concurrently with it. No native independent missing-IRQ watchdog, IPC/services/shell/apps/optical ISO or hardware qualification.25 native admissions/22 Python closures and full candidate gates remain stale or pending; no merge, phase exit or production promotion. This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion. Timer delivery is CPL0 on the existing kernel IST, not ring3 or use of the private entry stack as RSP0. User GDT/TSS/IRETQ, GPR/segment/base/debug/extended-state initialization and contained user faults/preemption remain next. Hardware error shutdown is host fault-tested, not guest fault-injected. Capability IPC, services, shell/apps and optical ISO qualification follow; all production and exact-candidate merge gates remain open. CPL0 switching is not user-mode execution. Owned timer/MMIO recovery, user GDT/TSS/IRETQ, architectural-state initialization and contained fault/preemption remain before ring3. Capability IPC, services, shell/apps and optical ISO qualification follow. Full production and exact-candidate merge gates remain open. The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open. Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion. User-space integration still needs owned kernel-half mappings/stacks, live ring3/return/fault containment, capabilities/IPC, services, shell/apps and ISO qualification. Production microkernel completion remains N0-N39. PKPMM7 supplies bounded one-BSP physical-page ownership, scrub-before-allocation and scrub-before-reuse with full readback and fault rollback, a stable guarded five-page manager, external generation-owned guarded ledgers, checked automatic repeated growth, verified retirement, bounded-window fallback and pre-effect rejection, exact post-ExitBootServices Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation plus retained snapshot copy/readback. PKVM1 supplies inactive four-level 4 KiB transactions, PKVM3 supplies a complete-profile PMM-owned sparse direct map, cache-alias rejection, exact CR3 restoration, three local invalidation receipts, and generation-retirement gating, and PKSMP5 proves exactly three AP-side INVLPG operations and deferred reclaim for three AP-owned roots, one page per root, one generation, and aggregate target/ack mask 0xE. General topology, address-space-wide shootdown, multiple concurrent generations, production capability authority, incremental concurrent map replacement, huge pages, PCID, COW, user faults, pager IPC, cache/MMIO qualification, heaps/object caches, interrupt-context allocation, concurrent allocation, general pressure and OOM policy, scheduler, task, syscall, capability, IPC, isolation, and asynchronous I/O remain open",
+      "Single-BSP advisory readiness is not RPC or general service lifecycle. Native enrolled-owner fault/cancel/quarantine/dead-peer/revocation/stale/writable-wait/saturation/output-fault and persistent-generation tests remain. Add pending-wait termination, sender identity, one-use replies, deadlines, wait-many, transactional admission, sustained budgets, audit and SMP. Quarantine retains authority until stopped cleanup succeeds.186-page product-contract migration and full exact-candidate replay remain; no interactive ISO or production promotion. Nonblocking single-BSP endpoint-only subset. Scheduler waits/cancellation, automatic lifecycle revocation, sender identity and one-use replies, transactional general bootstrap, derivation-tree revocation, user delegation, audit, wire layouts, shared memory, notifications, priorities, SMP and native saturation/stale/dead-peer/output-fault stress remain. Core host controls do not qualify native races.185-page image needs product-contract migration and full exact-candidate replay; no interactive shell/ISO or production promotion. Bounded returned-sample loss only; physical clock failure, unsafe entry, persistent generation audit/quarantine, partial timer configuration, shared APIC/IF0/NMI failure, hardware races, general admission, full stack/exception/XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/ISO remain open. Image182pages/entry0xC000 needs product-contract migration; diagnostic text capacity and stack composition remain monitored under the existing integration flag. Full exact-candidate replay remains pending. No phase exit, merge or production promotion. HPET MSI backup is independent of the local timer, not of HPET clock, APIC delivery or IF. IOAPIC/nonMSI/32bit fallback, NMI recovery, live simultaneous pending sources, physical coherent clock reads/reset/drift, unknown-measurement emergency recovery, partial timer configuration, general quarantine/admission, full stack/exception/XSAVE/SMAP/SMP/async, IPC/services/shell/apps/optical ISO and hardware remain open. Image181pages/entry0xC000 needs product-contract migration and full exact-candidate replay. No phase exit, merge or promotion. Bounded one-BSP authenticated returned peer quanta only. Legacy diagnostics remain unaccounted; unknown/malformed measurements pin ownership and need explicit emergency recovery. Independent missing-IRQ recovery, physical coherent counter reads/reset/drift, pure user/kernel attribution, broad timer races, general quarantine/admission, full stack/exception/selector qualification, XSAVE/SMAP/SMP/async, IPC/services/shell/apps/optical ISO and hardware remain open. Image180pages/entry0xC000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion. Bounded one-BSP fixed payloads only. Terminal/failed-cleanup quantum accounting remains incomplete:119 accepted preemptions exclude one consumed quantum discarded by failed cleanup. Arbitrary after-mask silicon races, ambiguous ISR and partial-configuration quarantine recovery, independent missing-IRQ recovery, general executable admission, complete stack/exception/selector qualification including native SS, XSAVE/SMAP/SMP/async, IPC/services/shell/apps/optical ISO and hardware remain open. Image178pages/entry0xB000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion. Bounded one-BSP fixed construction only. General executable admission, persistent quarantine/slot-commit recovery, N3.7 complete stack-depth/high-water and trap nesting, pending/late timer recovery, terminal accounting, independent missing-IRQ recovery, general exception/selector delivery including native SS, XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/optical ISO and hardware remain open. Image177pages/entry0xB000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion. Bounded one-BSP fixed payloads only. TCG stack access delivers GP rather than architectural SS; native SS and general exception/selector delivery remain unqualified, not waived. Full spawn rollback, pending/late timer recovery, terminal-quantum accounting, independent missing-IRQ recovery, XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 still requires product-contract migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. Bounded one-BSP fixed tasks only. Full spawn rollback, invalid-return-frame containment, pending/late timer recovery, final-sub-quantum accounting, independent missing-IRQ watchdog, general XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. No peer scheduling or arbitrary-program admission: fixed task payloads have no armed timer, strict initial syscall RSP and a64-call budget still fail fatally, and construction allocation failures are not fully rolled back. Task IDs are slot-local, not capabilities. SMAP/concurrent copy, async/SMP entry, full XSAVE, missing-IRQ watchdog, IPC/services/shell/apps/optical ISO and hardware remain open. Image168pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. PSABI1 is a development subset, not a complete frozen production ABI. General SMAP/concurrent pinning, async/SMP entry, arbitrary programs, task exit/reaping/accounting, fault termination and peer scheduling remain open. Syscalls are tested before the timer is armed, not concurrently with it. No native independent missing-IRQ watchdog, IPC/services/shell/apps/optical ISO or hardware qualification.25 native admissions/22 Python closures and full candidate gates remain stale or pending; no merge, phase exit or production promotion. This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion. Timer delivery is CPL0 on the existing kernel IST, not ring3 or use of the private entry stack as RSP0. User GDT/TSS/IRETQ, GPR/segment/base/debug/extended-state initialization and contained user faults/preemption remain next. Hardware error shutdown is host fault-tested, not guest fault-injected. Capability IPC, services, shell/apps and optical ISO qualification follow; all production and exact-candidate merge gates remain open. CPL0 switching is not user-mode execution. Owned timer/MMIO recovery, user GDT/TSS/IRETQ, architectural-state initialization and contained fault/preemption remain before ring3. Capability IPC, services, shell/apps and optical ISO qualification follow. Full production and exact-candidate merge gates remain open. The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open. Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion. User-space integration still needs owned kernel-half mappings/stacks, live ring3/return/fault containment, capabilities/IPC, services, shell/apps and ISO qualification. Production microkernel completion remains N0-N39. PKPMM7 supplies bounded one-BSP physical-page ownership, scrub-before-allocation and scrub-before-reuse with full readback and fault rollback, a stable guarded five-page manager, external generation-owned guarded ledgers, checked automatic repeated growth, verified retirement, bounded-window fallback and pre-effect rejection, exact post-ExitBootServices Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation plus retained snapshot copy/readback. PKVM1 supplies inactive four-level 4 KiB transactions, PKVM3 supplies a complete-profile PMM-owned sparse direct map, cache-alias rejection, exact CR3 restoration, three local invalidation receipts, and generation-retirement gating, and PKSMP5 proves exactly three AP-side INVLPG operations and deferred reclaim for three AP-owned roots, one page per root, one generation, and aggregate target/ack mask 0xE. General topology, address-space-wide shootdown, multiple concurrent generations, production capability authority, incremental concurrent map replacement, huge pages, PCID, COW, user faults, pager IPC, cache/MMIO qualification, heaps/object caches, interrupt-context allocation, concurrent allocation, general pressure and OOM policy, scheduler, task, syscall, capability, IPC, isolation, and asynchronous I/O remain open",
       "No native security/crypto/TPM/secrets/MAC/privacy implementation or external review",
       "No isolated native driver domains or virtio reference drivers",
       "No native block/NVMe/USB/input/VFS/PooleFS persistent path",
@@ -62498,25 +62898,25 @@
       "N13",
       "N14"
     ],
-    "title": "Integrate IPC wait/wakeup, cancellation and task-death revocation before native services",
+    "title": "Qualify native IPC death/revocation and reply ownership before services",
     "entry_evidence": [
       "docs/native-userspace-integration-iso.md",
       "docs/native-capability-ipc.md",
       "runs/native-user-entry-readiness.json",
-      "docs/checkpoints/cycle250-native-capability-ipc.md",
-      "native/kernel/src/capability_ipc.rs",
-      "native/kernel/src/user_entry/task.rs",
-      "native/kernel/src/scheduler.rs"
+      "docs/checkpoints/cycle251-native-ipc-waits.md",
+      "native/kernel/src/capability_ipc/wait.rs",
+      "native/kernel/src/user_entry/task.rs"
     ],
     "exit_evidence": [
-      "owned endpoint waits atomically block and wake the correct task generation exactly once; cancellation cannot lose or replay a completion",
-      "task exit/fault/cancel/quarantine automatically revoke owned IPC state before root reuse, with retained retryable cleanup and explicit dead-peer results",
-      "authenticated sender and one-use reply ownership, native stale/revoked/dead-peer/saturation/partial-output controls with continued peer progress",
-      "preserve17 containment cases, native request/reply and ordinary denial; then init/services/shell/apps/optical acceptance without closing robust microkernel requirements"
+      "native enrolled-owner exit/fault/cancel/quarantine revocation and pending-wait termination retain safe cleanup and surviving peer progress",
+      "native stale/revoked/dead-peer/writable-wait/saturation/partial-output controls and persistent task generations without resetting authority high-water marks",
+      "authenticated sender and one-use reply ownership, deadlines, transactional general admission and sustained service budgets",
+      "preserve17 containment cases, native3-wait2-wake1-cancel exchange and ordinary denial; then init/services/shell/apps/optical acceptance without closing full microkernel obligations"
     ],
     "blocked": false
   },
   "claim_boundaries": [
+    "Cycle251: native IPC readiness suspends/resumes private CPL3 tasks;3 waits,2 readiness wakes,1 cancellation and automatic retirement pass in two fresh62-marker boots.401 kernel debug tests,588 Rust executions,43 oracle tests,665 altered-evidence rejections per guest and ordinary denial pass. docs/checkpoints/cycle251-native-ipc-waits.md Single-BSP advisory readiness is not RPC or general service lifecycle. Native enrolled-owner fault/cancel/quarantine/dead-peer/revocation/stale/writable-wait/saturation/output-fault and persistent-generation tests remain. Add pending-wait termination, sender identity, one-use replies, deadlines, wait-many, transactional admission, sustained budgets, audit and SMP. Quarantine retains authority until stopped cleanup succeeds.186-page product-contract migration and full exact-candidate replay remain; no interactive ISO or production promotion.",
     "Cycle250: PKIPC1 enforces kernel-owned endpoint handles, authenticated callers, generations, rights and bounded FIFO copy commits. Two fresh62-marker boots exchange actual transformed8-byte requests/replies and preserve17 survival cases;660 altered-evidence controls per boot reject.571 Rust executions,42 oracle tests and ordinary denial pass. docs/checkpoints/cycle250-native-capability-ipc.md Nonblocking single-BSP endpoint-only subset. Scheduler waits/cancellation, automatic lifecycle revocation, sender identity and one-use replies, transactional general bootstrap, derivation-tree revocation, user delegation, audit, wire layouts, shared memory, notifications, priorities, SMP and native saturation/stale/dead-peer/output-fault stress remain. Core host controls do not qualify native races.185-page image needs product-contract migration and full exact-candidate replay; no interactive shell/ISO or production promotion.",
     "Cycle249: PKUSER15 records one unmeasured dispatch without changing measured ticks, prevents requeue and retains device/root ownership through cleanup retry. Two fresh61-marker guests each pass17 survival cases and630 altered-evidence controls; the healthy peer exits84.545 Rust executions and40 oracle tests pass. Native stack overflow from nested diagnostic constructors is repaired with sibling noninline calls without enlarging the36page stack. docs/checkpoints/cycle249-unknown-runtime-recovery.md Bounded returned-sample loss only; physical clock failure, unsafe entry, persistent generation audit/quarantine, partial timer configuration, shared APIC/IF0/NMI failure, hardware races, general admission, full stack/exception/XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/ISO remain open. Image182pages/entry0xC000 needs product-contract migration; diagnostic text capacity and stack composition remain monitored under the existing integration flag. Full exact-candidate replay remains pending. No phase exit, merge or production promotion.",
     "Cycle248: PKUSER14 owns an HPET comparator before device effects, routes a fixed BSP MSI and stops/drains/restores both sources before detach. Two fresh60-marker guests each recover one masked-local-timer spinner, preserve16 survival cases, settle156 dispatches and30 terminal samples and reject156 duplicate charges.539 Rust executions and38 oracle tests pass. The guest remains development-only. docs/checkpoints/cycle248-native-hpet-backup.md HPET MSI backup is independent of the local timer, not of HPET clock, APIC delivery or IF. IOAPIC/nonMSI/32bit fallback, NMI recovery, live simultaneous pending sources, physical coherent clock reads/reset/drift, unknown-measurement emergency recovery, partial timer configuration, general quarantine/admission, full stack/exception/XSAVE/SMAP/SMP/async, IPC/services/shell/apps/optical ISO and hardware remain open. Image181pages/entry0xC000 needs product-contract migration and full exact-candidate replay. No phase exit, merge or promotion.",

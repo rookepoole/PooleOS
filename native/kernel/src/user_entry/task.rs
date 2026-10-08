@@ -181,6 +181,9 @@ impl Run {
     pub fn matches(&self, image: ImageAdmission, id: TaskId) -> bool {
         self.image == image && self.id == id && self.outcome.is_none()
     }
+    pub fn admission(&self) -> ImageAdmission {
+        self.image
+    }
 }
 
 /// Trusted architectural adapter. Errors may follow CPU effects. Quiescence
@@ -188,10 +191,16 @@ impl Run {
 pub trait Driver {
     fn execute(&mut self, image: ImageAdmission, id: TaskId) -> Result<Outcome, privilege::Error>;
     fn quiesce(&mut self, root: u64) -> Result<(), privilege::Error>;
+    /// Revoke kernel-owned authority before retiring the root. Retry must be safe.
+    fn revoke(&mut self, id: TaskId) -> Result<(), privilege::Error>;
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Event {
+    Waiting {
+        ticket: crate::capability_ipc::wait::Ticket,
+        syscalls: u32,
+    },
     Preempted {
         ticks: u64,
         syscalls: u32,
@@ -216,6 +225,11 @@ impl Slice {
                 ticks, syscalls, ..
             } if ticks > 0 && ticks == self.ticks && syscalls <= 64 => Ok(()),
             Event::Terminated(o) => o.validate(id, root),
+            Event::Waiting { ticket, syscalls }
+                if ticket.matches(id, root) && (1..=64).contains(&syscalls) =>
+            {
+                Ok(())
+            }
             _ => Err(privilege::Error::Hardware),
         }
     }
@@ -223,6 +237,13 @@ impl Slice {
 /// A quantum returns only after saving its private user state. The same owner
 /// must quiesce devices and entry references before the CPU can be suspended.
 pub trait SliceDriver: Driver {
+    /// Failure must leave saved context unchanged. Only a notified wait can resume.
+    fn complete_wait(
+        &mut self,
+        id: TaskId,
+        ticket: crate::capability_ipc::wait::Ticket,
+        status: syscall::Status,
+    ) -> Result<(), privilege::Error>;
     fn execute_slice(
         &mut self,
         image: ImageAdmission,
@@ -235,6 +256,7 @@ pub enum State {
     Prepared,
     Active,
     Suspended,
+    Waiting,
     Quarantined,
     Terminated,
 }
@@ -437,6 +459,9 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
         if task.pending_charge.is_some() || task.runtime.unknown {
             return Err(Error::State);
         }
+        task.driver
+            .revoke(id)
+            .map_err(|e| Error::Cpu(super::prepared::cpu::Error::User(e)))?;
         let cpu = task.cpu.take().ok_or(Error::State)?;
         match cpu.retire(manager, memory) {
             Ok(parts) => {
@@ -452,6 +477,27 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
 }
 
 impl<H: Cpu, D: SliceDriver> Slot<H, D> {
+    /// Called only by the exclusive IPC owner after validating its notification.
+    pub fn complete_wait(
+        &mut self,
+        id: TaskId,
+        ticket: crate::capability_ipc::wait::Ticket,
+        status: syscall::Status,
+    ) -> Result<(), Error> {
+        let task = self.owned_mut(id)?;
+        if task.state != State::Waiting || task.pending_charge.is_some() || task.runtime.unknown {
+            return Err(Error::State);
+        }
+        if !matches!(task.last_slice.map(|s| s.event), Some(Event::Waiting { ticket: expected, .. }) if expected == ticket)
+        {
+            return Err(Error::Identity);
+        }
+        task.driver
+            .complete_wait(id, ticket, status)
+            .map_err(|e| Error::Cpu(super::prepared::cpu::Error::User(e)))?;
+        task.state = State::Suspended;
+        Ok(())
+    }
     /// Settle retained measurement, including after failed cleanup. No user
     /// outcome is invented. The exclusive slot consumes the charge exactly once.
     pub fn account_slice(
@@ -544,6 +590,10 @@ impl<H: Cpu, D: SliceDriver> Slot<H, D> {
         }
         let slice = result.map_err(Error::Cpu)?;
         match slice.event {
+            Event::Waiting { .. } => {
+                cpu.suspend().map_err(Error::Cpu)?;
+                task.state = State::Waiting;
+            }
             Event::Preempted { .. } => {
                 cpu.suspend().map_err(Error::Cpu)?;
                 task.state = State::Suspended;
@@ -857,6 +907,9 @@ mod tests {
         }
     }
     impl Driver for Never {
+        fn revoke(&mut self, _: TaskId) -> Result<(), privilege::Error> {
+            Ok(())
+        }
         fn execute(&mut self, _: ImageAdmission, _: TaskId) -> Result<Outcome, privilege::Error> {
             unreachable!()
         }

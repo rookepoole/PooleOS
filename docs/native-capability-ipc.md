@@ -1,6 +1,6 @@
 # Native Capability IPC
 
-Cycle250 / PKIPC1 is an original, bounded PooleKernel mechanism, not a complete
+Cycle251 / PKIPC1 is an original, bounded PooleKernel mechanism, not a complete
 N13/N14 implementation. It advances USI-2 toward the native user-space ISO.
 
 ## Authority And Lifetime
@@ -25,7 +25,11 @@ rights. Close removes one slot; it does not revoke descendants. Destroy removes
 the object, its queued messages and every alias. Stopped-owner detach destroys
 its endpoints and closes its remaining handles before image release. Other owners'
 objects survive. No user-facing creation, grant, close or destroy syscall exists.
-The explicit probe teardown is not yet automatic service-lifecycle enforcement.
+Task retirement now calls the mandatory architectural `revoke` hook before root
+retirement. Both native task adapters implement it; the timer wrapper forwards it.
+Failure retains the task and its memory for cleanup retry. This is automatic
+retirement cleanup, not a complete service supervisor or native dead-peer stress
+qualification. Quarantined tasks retain authority until stopped cleanup succeeds.
 
 ## Development ABI
 
@@ -33,6 +37,10 @@ PSABI1 retains version 1 and existing calls 0-2. Calls 3/4 are nonblocking send/
 RAX=operation, RDI=version, RSI=task-local handle, RDX=user buffer, R10=length or
 capacity, R8/R9=zero. Return RAX=status and RDX=value. Statuses 0-4 retain their
 meaning; 5=Denied, 6=Again (empty/full), 7=TooSmall (value=required message bytes).
+Call5 waits for endpoint readiness: RSI=handle, RDX=0 readable or1 writable,
+R10/R8/R9=zero. RAX returns0 ready,8 cancelled,9 revoked; RDX returns0. Version,
+argument and authority errors retain existing statuses. An already-ready endpoint
+returns immediately. Cancellation is supervisor-only; users cannot target a task.
 Lengths 1-64, checked user-window addresses, reserved fields and version are checked.
 The current 64-call task limit and one-page payload admission remain development
 constraints, not adequate long-running service policy.
@@ -46,6 +54,35 @@ invalid handle and short-buffer results do not touch user memory. The exclusive
 mutable owner spans authorization, copy and commit. Exact nested copy faults use
 the existing recovery record without borrowing the suspended IPC owner.
 
+## Wait Ownership
+
+One outstanding wait per task stores caller/root/root-generation, handle/object,
+readiness and a non-wrapping64-bit ticket generation. No user buffer is retained.
+The ticket is private kernel identity, not a user capability. States are Armed,
+Parked, Notified, then consumed. An IPC slice saves the checked user context and
+legacy FX state, quiesces both timers/entry state, restores the original root and
+settles measured runtime before scheduler blocking. Waiting tasks cannot activate.
+
+Scheduler block/wake/consume stage a bounded copy and commit after validation.
+Wrong CPU/generation, uncharged dispatch, wrong wait kind, overflow and duplicate
+notification reject without partially modifying the IPC transition. Generic event
+wakes cannot wake an IPC waiter. The supervisor polls after every quantum and
+park, closing the arm/park readiness gap. Each wake commits independently; a later
+failure does not undo earlier wakes. This relies on the exclusive single-BSP owner.
+
+Completion checks the ticket and scheduled wake reason, validates and patches
+saved RAX/RDX/flags, consumes the wake and releases the wait once. Driver completion
+must be failure-atomic; no fallible operation follows successful context update.
+Required trait methods prevent wrappers from silently defaulting these operations.
+Close/destroy/dead-owner invalidation produces Revoked for a parked peer; cancelling
+a parked wait produces Cancelled. Detach clears the stopped task's own wait; its
+supervisor must also tear down that scheduler identity. Generations survive detach.
+
+Readiness is advisory, not a reservation: another operation may consume a message
+or fill capacity before the resumed task retries. A notified Ready may precede later
+revocation; the subsequent transfer must revalidate. There is no user-memory loan,
+blocking copy, direct RPC, deadline, wait-many or automatic user-request restart.
+
 ## Invariants And Tests
 
 | ID | Predicate | Current Verifier |
@@ -54,24 +91,28 @@ the existing recovery record without borrowing the suspended IPC owner.
 | IPC-REUSE | Stale cap/object/task generations never regain authority | Host close/reuse, object destruction and exhaustion tests |
 | IPC-BOUND | Finite allocation and queues; no mutation on quota failure | Host table/object exhaustion, FIFO wrap/full/empty tests |
 | IPC-COPY | Input fault publishes nothing; output fault does not dequeue | Every one of64 fault offsets in host tests; native unmapped copy-in denial |
-| IPC-OWN | Detach invalidates owned objects before root release | Host dead-owner/unrelated-peer test; native explicit owner teardown |
+| IPC-OWN | Detach invalidates owned objects before root release | Host dead-owner and failed-hook retry; native automatic retirement |
+| IPC-WAIT | Charged, quiescent tasks block and consume one identity-bound wake | Host arm/park arrival, stale/replay/cancel/revoke/overflow tests; native three waits/two wakes/one cancellation |
 | IPC-NATIVE | Real isolated user programs exchange actual bytes | Two fresh native boots, separate roots, transformed8-byte request/reply |
 | IPC-CONSERVE | No older containment/ordinary-denial regression |17 survival cases, exact runtime/root accounting and ordinary denial per qualification |
 
 The native client rejects an invalid handle, receive through SEND-only authority,
 65-byte send and unmapped source. It sends 8 bytes; the server reads and transforms
 them, sends 8 reply bytes, and exits 90. The client checks those bytes and exits 91.
-Both kernel-owned tables are explicitly detached, all endpoints disappear, and
-26 pages/12 data-scrub pages are released. Polling is bounded development code,
-not scheduler blocking. Native stale/revoked/dead-peer/queue-saturation/copy-out
+The client first receives a supervisor cancellation, then both tasks block for
+request/reply readiness without polling loops. Native selected GPR/SIMD and stack
+checks survive resumption. Both tables retire automatically, all endpoints disappear,
+and26 pages/12 data-scrub pages are released. Native revoked/dead-peer/write-readiness,
+queue-saturation/copy-out
 controls are still needed even though corresponding core host tests pass.
 
 ## Next Required Work
 
-1. Add owned wait records, atomic block/wake and cancellation transitions; no lost
-   wake, duplicate completion, stale task generation or detached saved context.
-2. Integrate detach/revocation into success, fault, cancel and quarantine paths,
-   with cleanup retry, explicit dead-peer results and retained ownership on failure.
+1. Extend the native experiment to dead-owner/revoked/stale handles, writable waits,
+   quota pressure, cancellation races and repeated task generations. Do not reset
+   Space to bypass its high-water checks; use persistent owned task slots.
+2. Qualify enrolled endpoint owners through native fault/cancel/quarantine cleanup
+   and retained retry, plus pending-wait task termination and scheduler teardown.
 3. Add authenticated sender identity, one-use reply ownership, deadlines and
    cancellation races. Two ordinary queues are not authenticated RPC reply tokens.
 4. Add native saturation, stale/revoked handle, partial output, dead-peer and
@@ -92,6 +133,6 @@ The official [seL4 capability tutorial](https://docs.sel4.systems/Tutorials/capa
 was reviewed 2026-10-08 for the distinction between an object, a rights-bearing
 capability and caller-local lookup. The [IPC tutorial](https://docs.sel4.systems/Tutorials/ipc.html)
 was available on this review. They are reference material only: PooleKernel imports
-no seL4 implementation, ABI or verification claim. PKIPC1's bounded queued
-nonblocking development protocol is PooleOS-specific. A kernel command shell,
+no seL4 implementation, ABI or verification claim. PKIPC1's bounded queues and
+advisory readiness development protocol are PooleOS-specific. A kernel command shell,
 foreign microkernel or scripted screen is not an alternative acceptance route.

@@ -162,6 +162,7 @@ pub(crate) fn run(
         }
         ticks = checked!(ticks.checked_add(elapsed).ok_or(()));
         match slice.event {
+            Event::Waiting { .. } => stop(133, serial, debugcon),
             Event::Preempted {
                 ticks: observed,
                 syscalls,
