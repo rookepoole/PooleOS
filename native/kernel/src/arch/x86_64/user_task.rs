@@ -57,6 +57,7 @@ pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) {
         }
     } else {
         task.fault(t).unwrap_or_else(|e| denied(9, e, t));
+        acknowledge_user_fault(t).unwrap_or_else(|e| denied(9, e, t));
     }
     // Never IRET to the stopped user frame, even when RIP/RSP themselves are bad.
     super::super::user_syscall::disable(t.root).unwrap_or_else(|e| denied(10, e, t));

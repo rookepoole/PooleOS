@@ -143,10 +143,7 @@ pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) {
         denied(11, Error::State, t);
     }
     if t.vector == u64::from(crate::TIMER_VECTOR) {
-        if t.error != 0 {
-            denied(11, Error::Fault, t);
-        }
-        let context = Context::capture(s.image, t).unwrap_or_else(|e| denied(11, e, t));
+        let resumable = s.run.preempt(t).unwrap_or_else(|e| denied(11, e, t));
         let ticks = super::super::user_preempt::finish_quantum(s.budget, s.start)
             .unwrap_or_else(|e| denied(12, e, t));
         if crate::IRQ_TIMER_DELIVERIES.fetch_add(1, Ordering::AcqRel) != 0
@@ -154,16 +151,25 @@ pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) {
         {
             denied(12, Error::Hardware, t);
         }
-        let mut fx = FxsaveArea([0; 512]);
-        unsafe {
-            fxsave_area(fx.0.as_mut_ptr());
+        if resumable {
+            let context = Context::capture(s.image, t).unwrap_or_else(|e| denied(11, e, t));
+            let mut fx = FxsaveArea([0; 512]);
+            unsafe {
+                fxsave_area(fx.0.as_mut_ptr());
+            }
+            s.saved = Some(Saved { context, fx });
+            s.event = Some(Event::Preempted {
+                ticks,
+                syscalls: s.run.calls(),
+                progress: t.registers[0],
+            });
+        } else {
+            s.event = Some(Event::Terminated(
+                s.run
+                    .outcome()
+                    .unwrap_or_else(|| denied(11, Error::State, t)),
+            ));
         }
-        s.saved = Some(Saved { context, fx });
-        s.event = Some(Event::Preempted {
-            ticks,
-            syscalls: s.run.calls(),
-            progress: t.registers[0],
-        });
     } else {
         if t.vector == syscall::VECTOR {
             if s.run.call(t).unwrap_or_else(|e| denied(13, e, t)) {
@@ -176,6 +182,7 @@ pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) {
             }
         } else {
             s.run.fault(t).unwrap_or_else(|e| denied(14, e, t));
+            acknowledge_user_fault(t).unwrap_or_else(|e| denied(14, e, t));
         }
         s.event = Some(Event::Terminated(
             s.run
@@ -199,6 +206,26 @@ unsafe extern "C" {
     static poole_peer_survivor_end: u8;
     static poole_peer_limit: u8;
     static poole_peer_limit_end: u8;
+    static poole_peer_bad_stack: u8;
+    static poole_peer_bad_stack_end: u8;
+    static poole_peer_noncanonical_stack: u8;
+    static poole_peer_noncanonical_stack_end: u8;
+    static poole_peer_nt: u8;
+    static poole_peer_nt_end: u8;
+    static poole_peer_ac: u8;
+    static poole_peer_ac_end: u8;
+    static poole_peer_last_syscall: u8;
+    static poole_peer_last_syscall_end: u8;
+    static poole_peer_timer_stack: u8;
+    static poole_peer_timer_stack_end: u8;
+    static poole_peer_divide: u8;
+    static poole_peer_divide_end: u8;
+    static poole_peer_debug: u8;
+    static poole_peer_debug_end: u8;
+    static poole_peer_breakpoint: u8;
+    static poole_peer_breakpoint_end: u8;
+    static poole_peer_stack_fault: u8;
+    static poole_peer_stack_fault_end: u8;
 }
 pub fn peer_payload(kind: usize) -> Result<&'static [u8], Error> {
     let (s, e) = match kind {
@@ -210,6 +237,37 @@ pub fn peer_payload(kind: usize) -> Result<&'static [u8], Error> {
             &raw const poole_peer_survivor_end,
         ),
         4 => (&raw const poole_peer_limit, &raw const poole_peer_limit_end),
+        5 => (
+            &raw const poole_peer_bad_stack,
+            &raw const poole_peer_bad_stack_end,
+        ),
+        6 => (
+            &raw const poole_peer_noncanonical_stack,
+            &raw const poole_peer_noncanonical_stack_end,
+        ),
+        7 => (&raw const poole_peer_nt, &raw const poole_peer_nt_end),
+        8 => (&raw const poole_peer_ac, &raw const poole_peer_ac_end),
+        9 => (
+            &raw const poole_peer_last_syscall,
+            &raw const poole_peer_last_syscall_end,
+        ),
+        10 => (
+            &raw const poole_peer_timer_stack,
+            &raw const poole_peer_timer_stack_end,
+        ),
+        11 => (
+            &raw const poole_peer_divide,
+            &raw const poole_peer_divide_end,
+        ),
+        12 => (&raw const poole_peer_debug, &raw const poole_peer_debug_end),
+        13 => (
+            &raw const poole_peer_breakpoint,
+            &raw const poole_peer_breakpoint_end,
+        ),
+        14 => (
+            &raw const poole_peer_stack_fault,
+            &raw const poole_peer_stack_fault_end,
+        ),
         _ => return Err(Error::Layout),
     };
     let n = (e as usize).checked_sub(s as usize).ok_or(Error::Layout)?;
@@ -324,6 +382,55 @@ poole_peer_\name:
     jnz 8b
     .elseif \terminal == 1
     ud2
+    .elseif \terminal >= 3
+    xor eax, eax
+    mov edi, 1
+    xor esi, esi
+    xor edx, edx
+    xor r8d, r8d
+    xor r9d, r9d
+    xor r10d, r10d
+    .if \terminal == 3
+    movabs rsp, 0xffffffff80000000
+    syscall
+    .elseif \terminal == 4
+    movabs rsp, 0x800000000000
+    syscall
+    .elseif \terminal == 5
+    pushfq
+    or qword ptr [rsp], 0x4000
+    popfq
+    syscall
+    .elseif \terminal == 6
+    pushfq
+    or qword ptr [rsp], 0x40000
+    popfq
+    syscall
+    .elseif \terminal == 7
+    jmp 8f
+    .elseif \terminal == 8
+    pushfq
+    or qword ptr [rsp], 0x40000
+    popfq
+    movabs rsp, 0xffffffff80000000
+8:  pause
+    jmp 8b
+    .elseif \terminal == 9
+    mov eax, 1
+    xor ecx, ecx
+    div rcx
+    .elseif \terminal == 10
+    pushfq
+    or qword ptr [rsp], 0x100
+    popfq
+    nop
+    .elseif \terminal == 11
+    int3
+    .elseif \terminal == 12
+    movabs rsp, 0x800000000000
+    mov rax, qword ptr [rsp]
+    .endif
+    ud2
     .else
     mov eax, 2
     mov edi, 1
@@ -343,6 +450,10 @@ poole_peer_\name:
     xor r10d, r10d
     syscall
     ud2
+    .if \terminal == 7
+    .fill 4078 - (. - poole_peer_\name), 1, 0x90
+8:  syscall
+    .endif
     .global poole_peer_\name\()_end
 poole_peer_\name\()_end:
     .endm
@@ -351,5 +462,15 @@ poole_peer_\name\()_end:
     peer spin, -1, 44, 0
     peer survivor, 20000000, 84, 0
     peer limit, 8000000, 45, 2
+    peer bad_stack, 8000000, 46, 3
+    peer noncanonical_stack, 8000000, 47, 4
+    peer nt, 8000000, 48, 5
+    peer ac, 8000000, 49, 6
+    peer last_syscall, 8000000, 50, 7
+    peer timer_stack, 8000000, 51, 8
+    peer divide, 8000000, 52, 9
+    peer debug, 8000000, 53, 10
+    peer breakpoint, 8000000, 54, 11
+    peer stack_fault, 8000000, 55, 12
 "#
 );

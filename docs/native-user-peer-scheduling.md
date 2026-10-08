@@ -3,6 +3,10 @@
 Cycle 243, USI-1, partial N12.5-7 and N13.1-4,6. Original PooleKernel;
 one BSP and fixed development payloads, not arbitrary-program admission.
 
+Historical checkpoint: [Cycle244 containment](native-user-state-containment.md)
+extends this mechanism and supersedes its invalid-return-state gap. Other
+remaining limits below are not implicitly closed.
+
 ## Mechanism
 
 The existing PKSCHED1 `Scheduler` owns two runnable queue entries. Each task's

@@ -1857,13 +1857,20 @@ pub unsafe fn trigger_device_not_available_rejection() -> ! {
 }
 
 unsafe extern "C" {
+    fn poole_trap_divide();
+    fn poole_trap_debug();
     fn poole_trap_breakpoint();
+    fn poole_trap_overflow();
+    fn poole_trap_bound();
     fn poole_trap_invalid_opcode();
     fn poole_trap_device_not_available();
     fn poole_trap_double_fault();
+    fn poole_trap_segment_not_present();
+    fn poole_trap_stack();
     fn poole_trap_general_protection();
     fn poole_trap_page_fault();
     fn poole_trap_x87_floating_point();
+    fn poole_trap_alignment();
     fn poole_trap_simd_floating_point();
     fn poole_trigger_breakpoint();
     fn poole_breakpoint_resume();
@@ -1911,13 +1918,20 @@ core::arch::global_asm!(
     .size \name, .-\name
     .endm
 
+    POOLE_TRAP_NO_ERROR poole_trap_divide, 0
+    POOLE_TRAP_NO_ERROR poole_trap_debug, 1
     POOLE_TRAP_NO_ERROR poole_trap_breakpoint, 3
+    POOLE_TRAP_NO_ERROR poole_trap_overflow, 4
+    POOLE_TRAP_NO_ERROR poole_trap_bound, 5
     POOLE_TRAP_NO_ERROR poole_trap_invalid_opcode, 6
     POOLE_TRAP_NO_ERROR poole_trap_device_not_available, 7
     POOLE_TRAP_ERROR poole_trap_double_fault, 8
+    POOLE_TRAP_ERROR poole_trap_segment_not_present, 11
+    POOLE_TRAP_ERROR poole_trap_stack, 12
     POOLE_TRAP_ERROR poole_trap_general_protection, 13
     POOLE_TRAP_ERROR poole_trap_page_fault, 14
     POOLE_TRAP_NO_ERROR poole_trap_x87_floating_point, 16
+    POOLE_TRAP_ERROR poole_trap_alignment, 17
     POOLE_TRAP_NO_ERROR poole_trap_simd_floating_point, 19
     POOLE_TRAP_NO_ERROR poole_interrupt_timer, 64
     POOLE_TRAP_NO_ERROR poole_interrupt_apic_error, 240
@@ -1941,6 +1955,10 @@ poole_trap_common:
     push r13
     push r14
     push r15
+    // Interrupt gates do not clear AC. Never inherit a user's SMAP override.
+    pushfq
+    and qword ptr [rsp], -262145
+    popfq
     cld
     mov rdi, rsp
     call poole_kernel_trap_dispatch

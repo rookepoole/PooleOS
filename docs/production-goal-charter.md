@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 243
+Last roadmap reconciliation: PooleOS Cycle 244
 
-Cycle243 proves native preemptive execution of two CPL3 tasks across distinct
+Cycle244 contains invalid user return state and additional exceptions without
+stopping a healthy peer. Two fresh guests each pass14 survival cases. The TCG
+stack-access deviation is explicit; native #SS remains unqualified. N12/N13
+remain partial. Next: transactional spawn and timer/accounting hardening, then
+IPC, services, shell/apps and the user-space integration ISO. No normative
+requirement, phase completion, merge, release or promotion changes. The full
+microkernel, PooleGlyph/PDC/PooleGlass and production objective remains required.
+[Cycle244 evidence](checkpoints/cycle244-user-state-containment.md).
+
+Historical Cycle243 proves native preemptive execution of two CPL3 tasks across distinct
 private roots, state-preserving suspend/resume, and peer survival after exit,
 fault, cancellation and syscall-budget exhaustion. N12/N13 remain partial.
 Next: remaining admission/containment hardening, then capability IPC, confined

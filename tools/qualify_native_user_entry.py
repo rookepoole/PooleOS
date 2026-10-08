@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run bounded host, freestanding and optional PKUSER9 peer-scheduling guests."""
+"""Run bounded host, freestanding and optional PKUSER10 peer-scheduling guests."""
 
 from __future__ import annotations
 
@@ -67,8 +67,8 @@ def main() -> int:
     owner_report = Path("C:/Users/rookp/PooleGlyph/tests/reports/conformance_report.json")
     owner_before = digest(owner_report) if owner_report.is_file() else None
     report: dict = {
-        "contract_id": "PKUSER9", "cycle": 243,
-        "scope": "host_and_optional_bounded_preemptive_peer_tasks_guest",
+        "contract_id": "PKUSER10", "cycle": 244,
+        "scope": "host_and_optional_bounded_hostile_user_state_containment_guest",
         "status": "fail", "source_bindings": before, "checks": [],
         "guest_runs": 0, "ring3_executed": False, "iso_built": False,
         "n13_exit_passed": False, "production_ready": False,
@@ -79,9 +79,9 @@ def main() -> int:
     commands = [
         ("format", [str(cargo), "fmt", *common, "--", "--check"], None),
         ("kernel_host_debug", [str(cargo), "test", *common, "--lib", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 345),
+            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 349),
         ("user_entry_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 95),
+            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 99),
         ("vm_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
             "x86_64-pc-windows-msvc", *bounded, "virtual_memory::", "--", "--test-threads=1"], None),
         ("freestanding_library", [str(cargo), "check", *common, "--lib", "--target",
@@ -143,7 +143,7 @@ def main() -> int:
                 report["user_timer_preemption"] = all(g["marker_summary"]["user_timer_preemption"] for g in live["guest_runs"])
                 report["development_syscall_abi"] = all(g["marker_summary"]["syscall_abi"] == "PSABI1_development" for g in live["guest_runs"])
                 report["user_task_termination"] = all(g["marker_summary"]["normal_exits"] == 1 and g["marker_summary"]["fault_terminations"] == 3 for g in live["guest_runs"])
-                report["peer_scheduling"] = all(g["marker_summary"]["peer_scheduling"] and g["marker_summary"]["peer_survival_cases"] == 4 for g in live["guest_runs"])
+                report["peer_scheduling"] = all(g["marker_summary"]["peer_scheduling"] and g["marker_summary"]["peer_survival_cases"] == 14 for g in live["guest_runs"])
         report["source_unchanged"] = before == source_bindings()
         report["owner_report_unchanged"] = owner_before == (digest(owner_report) if owner_report.is_file() else None)
         if (len(report["checks"]) == len(commands) and all(c["passed"] for c in report["checks"])
@@ -155,7 +155,7 @@ def main() -> int:
     (work / "receipt.json").write_text(serialized, encoding="utf-8", newline="\n")
     if report["status"] == "pass":
         args.out.write_text(serialized, encoding="utf-8", newline="\n")
-    print(f"PKUSER9 {report['status'].upper()}; guest_runs={report['guest_runs']}; ring3={report['ring3_executed']}; production_ready=false", flush=True)
+    print(f"PKUSER10 {report['status'].upper()}; guest_runs={report['guest_runs']}; ring3={report['ring3_executed']}; production_ready=false", flush=True)
     return 0 if report["status"] == "pass" else 1
 
 

@@ -3,7 +3,10 @@ use super::*;
 use poolekernel::{
     scheduler,
     scheduler_smp::TaskId,
-    user_entry::task::{self, Event, Reason, Slot},
+    user_entry::{
+        syscall::ReturnViolation,
+        task::{self, Event, Reason, Slot},
+    },
 };
 use timer_driver::{PeerRun, Timer};
 
@@ -193,8 +196,8 @@ pub fn run_all(
         };
     }
     let baseline = manager.summary().allocated_pages;
-    for round in 0..4 {
-        let first_kind = if round == 3 { 4 } else { round };
+    for round in 0..14 {
+        let first_kind = if round >= 3 { round + 1 } else { round };
         let mut peers = [
             checked!(
                 100,
@@ -282,10 +285,67 @@ pub fn run_all(
                         }
                         (2, Reason::Cancelled) => outcome.syscalls == 0,
                         (3, Reason::CallLimit) => outcome.syscalls == 64,
+                        (
+                            4 | 5,
+                            Reason::InvalidReturn {
+                                vector: 256,
+                                violation: ReturnViolation::Stack,
+                            },
+                        )
+                        | (
+                            6 | 7,
+                            Reason::InvalidReturn {
+                                vector: 256,
+                                violation: ReturnViolation::Flags,
+                            },
+                        )
+                        | (
+                            8,
+                            Reason::InvalidReturn {
+                                vector: 256,
+                                violation: ReturnViolation::Instruction,
+                            },
+                        )
+                        | (
+                            9,
+                            Reason::InvalidReturn {
+                                vector: 64,
+                                violation: ReturnViolation::Stack,
+                            },
+                        ) => outcome.syscalls == 0,
+                        (10..=13, Reason::Fault(f)) => {
+                            // This TCG-only probe records QEMU issue 928, not native #SS qualification.
+                            f.vector == [0, 1, 3, 13][round - 10]
+                                && f.error == 0
+                                && outcome.syscalls == 0
+                        }
                         _ => false,
                     }
                 };
                 if !valid || (index == 1 && !dead[0]) {
+                    let mut log = EarlyLogger::new(BootSink {
+                        serial,
+                        debugcon,
+                        ring: &EARLY_RING,
+                    });
+                    log.write_str("POOLEOS:KERNEL:USER-PEER-REJECT round=");
+                    log.write_decimal_u64(round as u64);
+                    log.write_str(" task=");
+                    log.write_decimal_u64(index as u64);
+                    log.write_str(" syscalls=");
+                    log.write_decimal_u64(u64::from(outcome.syscalls));
+                    if let Reason::Fault(f) = outcome.reason {
+                        for (label, value) in [
+                            (" vector=", f.vector),
+                            (" error=", f.error),
+                            (" instruction=", f.instruction),
+                            (" address=", f.address),
+                        ] {
+                            log.write_str(label);
+                            log.write_hex_u64(value);
+                        }
+                    }
+                    log.write_str("\n");
                     stop(113, serial, debugcon);
                 }
                 checked!(114, scheduler.teardown(scheduled));
@@ -325,6 +385,7 @@ pub fn run_all(
             Some(Reason::Fault(f)) => ("fault", f.vector),
             Some(Reason::Cancelled) => ("cancel", 0),
             Some(Reason::CallLimit) => ("limit", 64),
+            Some(Reason::InvalidReturn { violation, .. }) => ("return", violation as u64),
             _ => stop(119, serial, debugcon),
         };
         let mut log = EarlyLogger::new(BootSink {
@@ -332,7 +393,7 @@ pub fn run_all(
             debugcon,
             ring: &EARLY_RING,
         });
-        log.write_str("POOLEOS:KERNEL:USER-PEERS PASS contract=PKUSER9 scheduler=PKSCHED1 round=");
+        log.write_str("POOLEOS:KERNEL:USER-PEERS PASS contract=PKUSER10 scheduler=PKSCHED1 round=");
         log.write_decimal_u64(round as u64);
         log.write_str(" first=");
         log.write_str(reason);
@@ -356,6 +417,11 @@ pub fn run_all(
             log.write_str(label);
             log.write_decimal_u64(value);
         }
+        log.write_str(" return_vector=");
+        log.write_decimal_u64(match first_reason {
+            Some(Reason::InvalidReturn { vector, .. }) => vector,
+            _ => 0,
+        });
         log.write_str(" survivor_exit=84 states_preserved=1 root_restored=1 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0\n");
     }
 }

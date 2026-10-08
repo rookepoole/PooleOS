@@ -11,7 +11,16 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle243 runs two real user tasks under the
+**Current development checkpoint:** Cycle244 stops malformed user tasks without
+stopping their healthy peers. Two fresh native boots each pass14 survival cases,
+140 dispatches and113 preemptions;489 Rust test executions and33 Python oracle
+tests pass. A reproduced emulator stack-fault deviation remains explicitly
+unqualified for native hardware. Next: spawn rollback and timer/accounting
+hardening, then IPC, services, shell/apps and the usable integration ISO.
+No interactive session or new ISO yet; full robust microkernel development
+continues afterward. [Evidence](docs/checkpoints/cycle244-user-state-containment.md).
+
+**Historical development checkpoint:** Cycle243 runs two real user tasks under the
 native scheduler with separate address spaces and timer-driven context switches.
 Two fresh boots each pass40 dispatches and33 preemptions, with continued peer
 progress after exit, fault, cancellation and syscall-budget exhaustion.481 Rust

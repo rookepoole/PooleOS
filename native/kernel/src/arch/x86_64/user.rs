@@ -257,19 +257,30 @@ unsafe fn install() -> Result<(), Error> {
     }
     // IST=0 makes CPL3 faults use this task's TSS.RSP0, not the shared test IST.
     for (vector, handler) in [
+        (0, poole_trap_divide as *const () as u64),
+        (1, poole_trap_debug as *const () as u64),
+        (3, poole_trap_breakpoint as *const () as u64),
+        (4, poole_trap_overflow as *const () as u64),
+        (5, poole_trap_bound as *const () as u64),
         (6, poole_trap_invalid_opcode as *const () as u64),
+        (11, poole_trap_segment_not_present as *const () as u64),
+        (12, poole_trap_stack as *const () as u64),
         (13, poole_trap_general_protection as *const () as u64),
         (14, poole_trap_page_fault as *const () as u64),
+        (16, poole_trap_x87_floating_point as *const () as u64),
+        (17, poole_trap_alignment as *const () as u64),
+        (19, poole_trap_simd_floating_point as *const () as u64),
         (
             usize::from(crate::TIMER_VECTOR),
             poole_interrupt_timer as *const () as u64,
         ),
     ] {
+        let mut gate = IdtGate::interrupt(handler, 0);
+        if vector == 3 {
+            gate.attributes |= 0x60;
+        }
         unsafe {
-            write_volatile(
-                (&raw mut IDT.0).cast::<IdtGate>().add(vector),
-                IdtGate::interrupt(handler, 0),
-            );
+            write_volatile((&raw mut IDT.0).cast::<IdtGate>().add(vector), gate);
         }
     }
     let mut observed = DescriptorPointer { limit: 0, base: 0 };
@@ -384,6 +395,23 @@ pub fn active() -> bool {
     ACTIVE_ROOT.load(Ordering::Acquire) != 0
 }
 
+// Only call after the task lifecycle authenticated and accepted this user fault.
+fn acknowledge_user_fault(t: &Trap) -> Result<(), Error> {
+    if t.vector == 1 {
+        let dr6: u64;
+        unsafe {
+            asm!("mov {}, dr6", out(reg) dr6, options(nomem, nostack, preserves_flags));
+        }
+        if dr6 & 0xa00f != 0 {
+            return Err(Error::Hardware);
+        }
+        unsafe {
+            asm!("mov dr6, {}", in(reg) 0xffff0ff0u64, options(nomem, nostack, preserves_flags));
+        }
+    }
+    Ok(())
+}
+
 fn snapshot(frame: &TrapFrame, depth: u32) -> Trap {
     Trap {
         root: unsafe { read_cr3() },
@@ -448,7 +476,10 @@ pub fn dispatch(frame: &mut TrapFrame, depth: u32) {
     let reject =
         || -> ! { crate::poole_kernel_emergency_panic(poolekernel::PanicCode::UserRoot as u32) };
     let root = unsafe { read_cr3() };
-    if !active() || root != ACTIVE_ROOT.load(Ordering::Acquire) || read_rflags() & (1 << 9) != 0 {
+    if !active()
+        || root != ACTIVE_ROOT.load(Ordering::Acquire)
+        || read_rflags() & syscall::FMASK != 0
+    {
         reject();
     }
     let t = snapshot(frame, depth);

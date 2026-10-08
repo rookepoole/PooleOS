@@ -24,6 +24,9 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle244-user-state-containment.md",
+    "docs/native-user-state-containment.md",
+    "tests/fixtures/cycle243-user-entry-readiness.json",
     "docs/checkpoints/cycle243-native-user-peer-scheduling.md",
     "docs/native-user-peer-scheduling.md",
     "native/kernel/src/user_entry/context.rs",

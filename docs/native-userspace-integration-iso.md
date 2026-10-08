@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 243, 2026-10-08. No new ISO exists yet.
+Status: implementation started, Cycle 244, 2026-10-08. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -43,7 +43,7 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 
 | Stage | Build Plan Binding | Exit Criterion | Current State |
 | --- | --- | --- | --- |
-| USI-1 User entry and containment | N7, N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle243: preemptive private-root peers survive exit/fault/cancel/quota; full spawn rollback, invalid-frame containment and timer teardown races remain |
+| USI-1 User entry and containment | N7, N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle244:14 peer-survival cases including invalid return state; full spawn rollback, timer races/accounting and general exception delivery remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Not started |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Not started |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
@@ -101,9 +101,10 @@ Cycle243 connects substeps6-7 to PKSCHED1: two actual private-root tasks, timer
 suspension/resumption, cancellation, task-only call-limit termination and proven
 survivor progress. The syscall stack may move within its owned page. Historical
 statements above describe each earlier cycle, not current completion. Remaining
-USI-1 work is tracked explicitly in [PKUSER9 limits](native-user-peer-scheduling.md):
-full spawn rollback, invalid user return-frame/exception containment, timer
-pending/late/missing-delivery cases and final-sub-quantum accounting. General
+USI-1 work now follows [PKUSER10 limits](native-user-state-containment.md):
+Cycle244 contains invalid RIP/RSP/RFLAGS and additional live faults. Full spawn
+rollback, general exception/selector delivery, timer pending/late/missing-delivery
+cases and final-sub-quantum accounting remain. General
 admission stays disabled until these contracts are qualified.
 
 No unsafe user execution is permitted just because an admission function passes.
@@ -132,7 +133,17 @@ requirements, not items deferred until after the demo.
    products. Preserve the older demo separately; its receipts cannot qualify this
    image. Test the ISO itself, not only a disk image or host library.
 
-## Cycle 243 Preemptive Peer Scheduling
+## Cycle 244 Invalid User State Containment
+
+[Checkpoint](checkpoints/cycle244-user-state-containment.md) records two fresh
+54-marker guests, each140 dispatches/113 preemptions/14 survival cases. Invalid
+RIP/RSP/RFLAGS stop only the offender. New native exception vectors0,1,3 are
+contained; the stack-access case records TCG's #GP and does not qualify #SS.
+All429 task pages are released,198 data pages scrubbed and291 root writes checked.
+Ordinary unsigned boot still denies execution. The next dependency is transactional
+spawn rollback, then timer recovery/accounting, capability IPC and services.
+
+## Historical Cycle 243 Preemptive Peer Scheduling
 
 [Checkpoint](checkpoints/cycle243-native-user-peer-scheduling.md) records two
 fresh44-marker guests, each40 peer dispatches/33 preemptions/four survival cases,

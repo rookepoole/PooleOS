@@ -25,8 +25,8 @@ pub struct Fault {
 impl Fault {
     fn valid(self) -> bool {
         match self.vector {
-            6 => self.error == 0 && self.address == 0,
-            13 => self.error <= 0xffff && self.address == 0,
+            0 | 1 | 3 | 4 | 5 | 6 | 16 | 17 | 19 => self.error == 0 && self.address == 0,
+            11 | 12 | 13 => self.error <= 0xffff && self.address == 0,
             // Reserved page-table bits or unsupported fault classes are kernel failures.
             14 => self.error & 4 != 0 && self.error & !0x17 == 0,
             _ => false,
@@ -38,6 +38,10 @@ impl Fault {
 pub enum Reason {
     Exit(u32),
     Fault(Fault),
+    InvalidReturn {
+        vector: u64,
+        violation: syscall::ReturnViolation,
+    },
     Cancelled,
     CallLimit,
 }
@@ -57,6 +61,7 @@ impl Outcome {
             || match self.reason {
                 Reason::Exit(_) => self.syscalls == 0,
                 Reason::Fault(f) => !f.valid(),
+                Reason::InvalidReturn { vector, .. } => !matches!(vector, 64 | syscall::VECTOR),
                 Reason::Cancelled => false,
                 Reason::CallLimit => self.syscalls != 64,
             }
@@ -89,15 +94,30 @@ impl Run {
         })
     }
     pub fn call(&mut self, trap: &privilege::Trap) -> Result<bool, privilege::Error> {
-        if self.outcome.is_some() {
-            return Err(privilege::Error::State);
+        if !self.resume(trap, syscall::VECTOR)? {
+            return Ok(false);
         }
-        syscall::frame(self.image, trap)?;
         if self.calls == 64 {
             self.finish(Reason::CallLimit)?;
             return Ok(false);
         }
         self.calls += 1;
+        Ok(true)
+    }
+    pub fn preempt(&mut self, trap: &privilege::Trap) -> Result<bool, privilege::Error> {
+        self.resume(trap, 64)
+    }
+    fn resume(&mut self, trap: &privilege::Trap, vector: u64) -> Result<bool, privilege::Error> {
+        if self.outcome.is_some() {
+            return Err(privilege::Error::State);
+        }
+        if trap.vector != vector || trap.error != 0 {
+            return Err(privilege::Error::Frame);
+        }
+        if let Some(violation) = syscall::return_violation(self.image, trap)? {
+            self.finish(Reason::InvalidReturn { vector, violation })?;
+            return Ok(false);
+        }
         Ok(true)
     }
     pub fn exit(&mut self, code: u32) -> Result<Outcome, privilege::Error> {
@@ -107,15 +127,7 @@ impl Run {
         self.finish(Reason::Exit(code))
     }
     pub fn fault(&mut self, t: &privilege::Trap) -> Result<Outcome, privilege::Error> {
-        let f = self.image.initial_frame;
-        if t.root != self.image.root_physical
-            || t.cs != f.cs
-            || t.ss != f.ss
-            || t.depth != 1
-            || t.handler_stack != super::prepared::STACK_TOP - privilege::FRAME_BYTES
-        {
-            return Err(privilege::Error::Frame);
-        }
+        syscall::entry_frame(self.image, t)?;
         let fault = Fault {
             vector: t.vector,
             error: t.error,
@@ -478,6 +490,123 @@ mod tests {
     }
     fn run() -> Run {
         Run::new(image(), TaskId::new(0, 1).unwrap()).unwrap()
+    }
+    #[test]
+    fn malformed_syscall_state_terminates_only_the_owner() {
+        for case in 0..6 {
+            let mut t = trap();
+            match case {
+                0 => t.rsp = 0xffff_ffff_8000_0000,
+                1 => t.rsp = 0x8000_0000_0000,
+                2 => t.rip = (t.rip & !4095) + 4096,
+                3 => t.flags |= 1 << 14,
+                4 => t.flags |= 1 << 18,
+                _ => t.flags |= 1 << 8,
+            }
+            let mut r = run();
+            assert_eq!(r.call(&t), Ok(false), "case {case}");
+            assert!(r.outcome().is_some());
+            assert!(r.call(&trap()).is_err());
+            assert_eq!(r.calls(), 0);
+            let expected = match case {
+                0 | 1 => syscall::ReturnViolation::Stack,
+                2 => syscall::ReturnViolation::Instruction,
+                _ => syscall::ReturnViolation::Flags,
+            };
+            let outcome = r.outcome().unwrap();
+            assert_eq!(
+                outcome.reason,
+                Reason::InvalidReturn {
+                    vector: syscall::VECTOR,
+                    violation: expected
+                }
+            );
+            outcome.validate(outcome.id, outcome.root).unwrap();
+            let mut peer = run();
+            assert_eq!(peer.call(&trap()), Ok(true));
+            assert_eq!(peer.exit(84).unwrap().reason, Reason::Exit(84));
+        }
+    }
+    #[test]
+    fn malformed_preempt_state_never_becomes_a_resumable_context() {
+        for case in 0..5 {
+            let mut t = trap();
+            t.vector = 64;
+            let mut r = run();
+            assert_eq!(r.preempt(&t), Ok(true));
+            match case {
+                0 => t.rsp = u64::MAX,
+                1 => t.rsp = image().initial_frame.rsp - 4097,
+                2 => t.rip = 0x8000_0000_0000,
+                3 => t.flags |= 1 << 18,
+                _ => t.flags |= 1 << 14,
+            }
+            assert_eq!(r.preempt(&t), Ok(false));
+            let o = r.outcome().unwrap();
+            o.validate(o.id, o.root).unwrap();
+            assert!(matches!(o.reason, Reason::InvalidReturn { vector: 64, .. }));
+            assert!(r.preempt(&t).is_err());
+            assert!(r.exit(0).is_err());
+            assert_eq!(r.calls(), 0);
+        }
+    }
+    #[test]
+    fn bad_user_state_cannot_mask_untrusted_entry_envelope_or_event() {
+        for vector in [64, syscall::VECTOR] {
+            for case in 0..7 {
+                let mut t = trap();
+                t.vector = vector;
+                t.rsp = u64::MAX;
+                t.flags |= 1 << 18;
+                match case {
+                    0 => t.root += 4096,
+                    1 => t.depth = 2,
+                    2 => t.cs = 8,
+                    3 => t.ss = 16,
+                    4 => t.handler_stack -= 8,
+                    5 => t.error = 1,
+                    _ => t.vector = 8,
+                }
+                let mut r = run();
+                assert!(
+                    if vector == 64 {
+                        r.preempt(&t)
+                    } else {
+                        r.call(&t)
+                    }
+                    .is_err()
+                );
+                assert_eq!(r.outcome(), None);
+                assert_eq!(r.calls(), 0);
+            }
+        }
+    }
+    #[test]
+    fn ordinary_exception_table_rejects_system_events_and_forged_errors() {
+        for vector in 0..32 {
+            let mut t = trap();
+            t.vector = vector;
+            if vector == 14 {
+                t.error = 4;
+            }
+            let admitted = matches!(
+                vector,
+                0 | 1 | 3 | 4 | 5 | 6 | 11 | 12 | 13 | 14 | 16 | 17 | 19
+            );
+            assert_eq!(run().fault(&t).is_ok(), admitted, "vector {vector}");
+            t.error = 0x10000;
+            assert!(run().fault(&t).is_err());
+        }
+        let mut t = trap();
+        t.rsp = u64::MAX;
+        let mut r = run();
+        r.call(&t).unwrap();
+        let mut o = r.outcome().unwrap();
+        o.reason = Reason::InvalidReturn {
+            vector: 8,
+            violation: syscall::ReturnViolation::Stack,
+        };
+        assert!(o.validate(o.id, o.root).is_err());
     }
     #[test]
     fn terminal_outcome_cannot_resume_or_change_and_rejected_calls_do_not_count() {

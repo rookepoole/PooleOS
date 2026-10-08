@@ -1,15 +1,39 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.146.0-native-user-peer-scheduling
-Roadmap cycle: PooleOS Cycle 243
+Plan version: 2.147.0-native-user-state-containment
+Roadmap cycle: PooleOS Cycle 244
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 243: Native Preemptive User Peers
+## Cycle 244: Task-Only Invalid State Containment
+
+USI-1 / N12.5-7 and N13.3,6: PKUSER10 distinguishes kernel-owned entry
+invariants from invalid user RIP/RSP/RFLAGS. Invalid syscall/timer return state
+stops only its task. Private-stack exception gates, AC cleanup and checked debug
+status cleanup extend containment. Two fresh guests each pass14 peer-survival
+cases,140 dispatches and113 preemptions.489 Rust test executions,33 Python oracle
+tests and ordinary unsigned-boot denial pass.
+[Evidence](checkpoints/cycle244-user-state-containment.md),
+[mechanism and limits](native-user-state-containment.md).
+
+The new stack-access probe exposed a QEMU TCG deviation: #GP instead of #SS.
+Both failed captures remain recorded. The revised emulator probe explicitly
+does not qualify native #SS; host/static coverage is not delivery evidence.
+N12/N13 remain partial, with no phase or flag closure. All8996 requirements,
+59 additions,97 flags/42 open and20 gaps remain.172-page reservations are unchanged.
+
+Next under `FLAG-N13-USERSPACE-ISO-001`: transactional spawn rollback, pending/late
+timer recovery and complete accounting, then capability IPC, confined services,
+shell/apps and an actual optical ISO. Independent missing-IRQ recovery, complete
+exception/selector qualification, XSAVE/SMP/async/SMAP, hardware and full candidate
+gates remain open. No arbitrary application admission, new ISO, merge or production
+promotion. Full robust N0-N39 development continues after the usable milestone.
+
+## Historical Cycle 243: Native Preemptive User Peers
 
 USI-1 / N12.5-7 and N13.1-4,6: PKUSER9 connects two real CPL3 private-root tasks
 to the existing PKSCHED1 scheduler. Saved GPR/IRET/legacy FP state, timer quiescence,
@@ -4021,13 +4045,15 @@ Exit gate: deterministic and randomized SMP schedule tests show no lost wakeup, 
 Inherited sections: `035-038`. Added: `ADD-CAP-001`.  
 Goal: enter user mode with an unforgeable authority model rather than Unix ambient privilege.
 
-Cycle243 connects preemptive private-root peer tasks to PKSCHED1, preserving
-state and proving survivor progress after exit/fault/cancel/call-limit stops.
-N13.1/2/3/4/6 are partial. Full spawn rollback, invalid user-frame containment,
-pending-timer recovery, complete accounting, general exception delivery,
+Cycle244 adds task-only invalid RIP/RSP/RFLAGS containment and private-stack
+exception handling to the Cycle243 preemptive peers. Fourteen live survival
+cases pass, but the TCG #GP-for-#SS deviation does not qualify native #SS.
+N13.1/2/3/4/6 are partial. Full spawn rollback, pending-timer recovery,
+complete accounting, general exception/selector delivery,
 capabilities, arbitrary applications and the phase exit remain unestablished.
 See `docs/native-userspace-integration-iso.md`, `docs/native-syscall-abi.md`,
-`docs/native-task-lifecycle.md` and `docs/native-user-peer-scheduling.md`.
+`docs/native-task-lifecycle.md`, `docs/native-user-peer-scheduling.md` and
+`docs/native-user-state-containment.md`.
 
 Subphases:
 

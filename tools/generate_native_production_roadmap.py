@@ -11650,7 +11650,7 @@ def apply_cycle242(roadmap: dict, test_count: int) -> dict:
 
 def apply_cycle243(roadmap: dict, test_count: int) -> dict:
     checkpoint = "docs/checkpoints/cycle243-native-user-peer-scheduling.md"
-    receipt_path = "runs/native-user-entry-readiness.json"
+    receipt_path = "tests/fixtures/cycle243-user-entry-readiness.json"
     raw = (ROOT / receipt_path).read_bytes()
     receipt = json.loads(raw)
     baseline = roadmap["baseline"]
@@ -11720,13 +11720,96 @@ def apply_cycle243(roadmap: dict, test_count: int) -> dict:
     flag["evidence"].append(checkpoint)
     roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle244(roadmap, test_count)
+
+
+def apply_cycle244(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle244-user-state-containment.md"
+    receipt_path = "runs/native-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle243_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle243_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=244, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=244)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path, "docs/native-user-state-containment.md"]
+    gate["current_candidate_audit"]["cycle"] = 244
+    gate["current_focused_source_projection"]["cycle"] = 244
+    gate["qualification_status"] = "bounded_user_state_containment_pass_spawn_timer_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=244, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="349_debug_kernel_plus99_repeated_user_release_plus24_repeated_VM_release_plus7_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=33, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=260.656,
+        log_sha256="93DE3CD234064943B0F0D6701E612D1229397CA0F2DE8BE764F52E148F763405",
+        initial_attempts=[
+            dict(status="host_regression_reproduced", elapsed_seconds=7.687,
+                reason="bad_user_rsp_reached_kernel_fatal_frame_rejection",
+                log_sha256="96EBBE5D066DF82CD0B2FF3205B091F314CA56FED64D42A789BD61749EEBEDAC"),
+            dict(status="native_probe_failed", elapsed_seconds=174.359,
+                reason="last_case_required_architectural_SS_but_runner_delivered_GP",
+                log_sha256="CD4E67D1790051DEA8CC82D4A3E0D7688567FC29EFB21CB291296663A30E7ED7"),
+            dict(status="diagnostic_reproduced_emulator_deviation", elapsed_seconds=114.375,
+                reason="TCG_GP_0_at_user_RIP_400000BF_native_SS_not_qualified",
+                log_sha256="6B9D407A402E93670F7D90FA8A56A9A17ADEE0AFC389DC32ED27D1A84A12B4BA")],
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=244, status="pass",
+        tests_run=125, tests_passed=125, tests_failed=0, tests_skipped=0,
+        elapsed_seconds=50.505, runner_elapsed_seconds=51.344,
+        log_sha256="0519929E37E9B41292BF97773DB5ED010F9226326F128634C08446A8BA84A12F",
+        initial_attempts=[dict(tests_run=125, failures=2, errors=0, elapsed_seconds=51.812,
+            reason="stale_cycle243_schema_constant_advanced_to244_without_weakening_validation",
+            log_sha256="4AE4F4B075610C9962C99532DE9A4BFE7BFFF9727AF4CE593F2FBDD07EF47A78")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=244, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_CPL3_hostile_state_peer_survival_probes_plus_default_denial",
+        peer_scheduling_contract="PKUSER10", peer_rounds_per_probe=14,
+        peer_preemptions_per_probe=[s["peer_preemptions"] for s in summaries],
+        peer_survival_cases_per_probe=14, invalid_user_frame_containment=True,
+        invalid_user_frame_scope="fixed_admitted_RIP_RSP_RFLAGS_on_owned_syscall_and_timer_entry_not_general_programs",
+        invalid_return_terminations_per_probe=6, new_native_user_exception_vectors=[0, 1, 3],
+        user_exception_policy_vectors=[0,1,3,4,5,6,11,12,13,14,16,17,19],
+        architectural_stack_fault_qualified=False, observed_stack_access_vector=13,
+        emulator_deviation="QEMU_TCG_issue928_issue4205_GP_instead_of_SS_for_noncanonical_stack_access",
+        kernel_entry_ac_cleared=True, general_user_exception_delivery_qualified=False,
+        released_pages_per_probe=429, scrubbed_data_pages_per_probe=198,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries])
+    lane["stages"]["USI-1"] = "partial_live_invalid_return_containment_no_general_admission_or_ipc"
+    roadmap["immediate_next_move"]["title"] = "Make USI-1 spawn transactional, then qualify pending-timer teardown and accounting before capability IPC"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", "docs/native-user-state-containment.md", receipt_path, checkpoint,
+        "native/kernel/src/user_root_probe/peer_driver.rs", "native/kernel/src/user_entry/prepared.rs",
+        "native/kernel/src/user_entry/task.rs", "native/kernel/src/user_root_probe/timer_driver.rs"]
+    roadmap["immediate_next_move"]["exit_evidence"] = [
+        "every failed spawn allocation/mapping step rolls back or retains an explicit exact quarantined owner",
+        "healthy peer and PMM accounting survive failed construction without stale handles or released references",
+        "pending and late timer teardown has bounded recovery before complete terminal-quantum accounting",
+        "preserve 14 live peer-survival cases, explicit TCG stack-fault limitation and ordinary-boot denial"]
+    evidence = "Cycle 244: PKUSER10 separates trusted entry from user RIP/RSP/RFLAGS violations; contains invalid syscall/timer returns and additional exceptions with private stacks, AC cleanup and checked debug-status cleanup. Two fresh54-marker guests each pass140 dispatches/113 preemptions/14 survival cases/493 evidence controls; ordinary denial passes.349 debug,99 user-release,24 VM-release,7 compile-fail,10 boot-exit and33 Python oracle tests pass. " + checkpoint
+    gap = "Bounded one-BSP fixed payloads only. TCG stack access delivers GP rather than architectural SS; native SS and general exception/selector delivery remain unqualified, not waived. Full spawn rollback, pending/late timer recovery, terminal-quantum accounting, independent missing-IRQ recovery, XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 still requires product-contract migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion."
+    for phase_id in ("N7", "N9", "N12", "N13"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1275)
+    parser.add_argument("--test-count", type=int, default=1280)
     parser.add_argument("--status-date", default="2026-10-08")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

@@ -91,22 +91,44 @@ pub fn request(
     }
 }
 
-pub fn frame(image: ImageAdmission, t: &Trap) -> Result<(), Error> {
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(u64)]
+pub enum ReturnViolation {
+    Instruction = 1,
+    Stack = 2,
+    Flags = 3,
+}
+
+/// Authenticate kernel-owned entry state independently of user-controlled resume state.
+pub fn entry_frame(image: ImageAdmission, t: &Trap) -> Result<(), Error> {
     let f = image.initial_frame;
     if t.root != image.root_physical
         || t.depth != 1
-        || t.vector != VECTOR
-        || t.error != 0
         || t.cs != f.cs
         || t.ss != f.ss
-        || t.rsp < f.rsp.saturating_sub(4096)
-        || t.rsp > f.rsp
         || t.handler_stack != STACK_TOP - FRAME_BYTES
-        || t.rip < f.rip
-        || t.rip >= (f.rip & !4095) + 4096
-        || t.flags & !USER_FLAGS != 0
-        || t.flags & INITIAL_RFLAGS != INITIAL_RFLAGS
     {
+        return Err(Error::Frame);
+    }
+    Ok(())
+}
+
+pub fn return_violation(image: ImageAdmission, t: &Trap) -> Result<Option<ReturnViolation>, Error> {
+    entry_frame(image, t)?;
+    let f = image.initial_frame;
+    Ok(if t.rip < f.rip || t.rip >= (f.rip & !4095) + 4096 {
+        Some(ReturnViolation::Instruction)
+    } else if t.rsp < f.rsp.saturating_sub(4096) || t.rsp > f.rsp {
+        Some(ReturnViolation::Stack)
+    } else if t.flags & !USER_FLAGS != 0 || t.flags & INITIAL_RFLAGS != INITIAL_RFLAGS {
+        Some(ReturnViolation::Flags)
+    } else {
+        None
+    })
+}
+
+pub fn frame(image: ImageAdmission, t: &Trap) -> Result<(), Error> {
+    if t.vector != VECTOR || t.error != 0 || return_violation(image, t)?.is_some() {
         return Err(Error::Frame);
     }
     Ok(())
