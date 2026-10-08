@@ -24,6 +24,11 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle241-native-syscall-usercopy.md",
+    "docs/native-syscall-abi.md",
+    "native/kernel/src/user_entry/syscall.rs",
+    "native/kernel/src/arch/x86_64/user_syscall.rs",
+    "tests/fixtures/cycle240-user-entry-readiness.json",
     "docs/checkpoints/cycle240-user-timer-preemption.md",
     "native/kernel/src/user_entry/preemption.rs",
     "native/kernel/src/arch/x86_64/user_preempt.rs",

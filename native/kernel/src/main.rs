@@ -12264,11 +12264,22 @@ extern "C" fn poole_kernel_trap_dispatch(frame_pointer: *mut TrapFrame) {
         poole_kernel_emergency_panic(PanicCode::TrapContract as u32);
     }
     let depth = TRAP_DEPTH.fetch_add(1, Ordering::AcqRel).wrapping_add(1);
+    // Only a precisely armed user-copy instruction may recover a nested CPL0 page fault.
+    let frame = unsafe { &mut *frame_pointer };
+    if depth == 2
+        && matches!(
+            DevelopmentTrapScenario::from_selector(TRAP_SCENARIO.load(Ordering::Acquire)),
+            Some(DevelopmentTrapScenario::UserRoot)
+        )
+        && arch::x86_64::user::recover_copy_fault(frame, depth)
+    {
+        TRAP_DEPTH.store(1, Ordering::Release);
+        return;
+    }
     if depth != 1 {
         poole_kernel_emergency_panic(PanicCode::TrapContract as u32);
     }
     // SAFETY: every installed PKTRAP1 stub passes its complete normalized frame.
-    let frame = unsafe { &mut *frame_pointer };
     let scenario = DevelopmentTrapScenario::from_selector(TRAP_SCENARIO.load(Ordering::Acquire))
         .unwrap_or_else(|| poole_kernel_emergency_panic(PanicCode::TrapContract as u32));
     if scenario == DevelopmentTrapScenario::XstateException {

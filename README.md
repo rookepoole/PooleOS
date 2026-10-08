@@ -11,7 +11,17 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle 240 proves timer preemption of a spinning
+**Current development checkpoint:** Cycle241 adds real native user-space system
+calls and bounded, recoverable memory copying. Two fresh QEMU guests each pass
+12 calls, three deliberate copy faults, entry-MSR cleanup, timer recovery and
+all13 task-page releases.326 debug kernel tests,100 repeated optimized tests,
+five compile-fail checks, ten boot-exit tests and23 Python oracle tests pass.
+Next: task exit/fault termination and peer scheduling, then IPC, confined
+services, a usable shell and optical ISO. There is no interactive session or
+new ISO yet; full robust microkernel work continues after that preview.
+[Evidence](docs/checkpoints/cycle241-native-syscall-usercopy.md).
+
+**Historical development checkpoint:** Cycle 240 proves timer preemption of a spinning
 ring-3 task in two fresh native QEMU boots. Each run resumes the task twice with
 preserved integer/legacy FP state, then forces kernel recovery on the third
 interrupt. Timer shutdown, descriptor detachment, root restoration and all13

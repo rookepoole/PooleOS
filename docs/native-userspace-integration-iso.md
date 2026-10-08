@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 240, 2026-10-08. No new ISO exists yet.
+Status: implementation started, Cycle 241, 2026-10-08. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -43,7 +43,7 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 
 | Stage | Build Plan Binding | Exit Criterion | Current State |
 | --- | --- | --- | --- |
-| USI-1 User entry and containment | N7, N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle240: actual CPL3 fault/timer recovery and cleanup pass; syscall/user copy, peer scheduling and arbitrary-program admission pending |
+| USI-1 User entry and containment | N7, N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle241: actual CPL3 syscall/user-copy faults, timer recovery and cleanup pass; task exit, peer scheduling and arbitrary-program admission pending |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Not started |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Not started |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
@@ -77,6 +77,11 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 5. Add a narrow versioned syscall ABI and hardened user copying with recoverable
    faults, bounded lengths, checked arithmetic and stable ownership. Do not use
    raw user pointers or numeric addresses as authority.
+   Cycle241 proves12 actual SYSCALLs with checked IRETQ and three exact copy
+   faults per guest. Input failure is destination-atomic; output failure reports
+   its committed prefix. Ownership is exclusive BSP/IF0 with fixed mappings,
+   not general pinning. Production ABI freeze, SMAP CPU coverage, concurrent
+   mapping, asynchronous entry and syscall/timer concurrency remain open.
 6. Connect private address spaces to scheduler execution/lifetime holds. Support
    preemption, exit, cleanup and accounting for the declared single-CPU profile.
 7. Contain user #PF/#GP/#UD while treating kernel faults as kernel faults; prove
@@ -110,6 +115,21 @@ requirements, not items deferred until after the demo.
 7. Rebuild the optical image from corrected media tools and the exact integration
    products. Preserve the older demo separately; its receipts cannot qualify this
    image. Test the ISO itself, not only a disk image or host library.
+
+## Cycle 241 Live System Calls
+
+[Checkpoint](checkpoints/cycle241-native-syscall-usercopy.md) and
+[PSABI1 development subset](native-syscall-abi.md) bind the actual instructions,
+return frame, errors, copy semantics, fault fixups and cleanup. The12-call count
+is the fixed test workload, not the production application contract. Version and
+self-memory-copy operations grant no kernel object or endpoint authority.
+
+Two fresh36-marker probes each reject89 evidence mutations, finish the original
+seven privilege faults,12 calls/three copy faults, completion trap, three user
+timer interrupts/two resumes and full task-memory retirement. The ordinary
+unsigned-boot control still denies entry. No general SMAP/SMP/NMI qualification,
+task exit, fault termination, peer scheduler, service or ISO exists from this
+cycle. These are next dependencies, not omitted preview requirements.
 
 ## Cycle 234 Implementation
 

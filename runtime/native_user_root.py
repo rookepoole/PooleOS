@@ -1,4 +1,4 @@
-"""Independent marker checks for the bounded PKUSER6 user-preemption probe."""
+"""Independent marker checks for the bounded PKUSER7 syscall/user-copy probe."""
 from __future__ import annotations
 
 import re
@@ -15,9 +15,12 @@ PREEMPT = re.compile(r"POOLEOS:KERNEL:USER-PREEMPT PASS contract=PKUSER6 cr3=(0x
 RESULT = re.compile(r"POOLEOS:KERNEL:USER-ROOT-RESULT PASS restored=(0x[0-9A-F]{16}) cr3_writes=2 allocated_pages=([0-9]+) retained_acpi_pages=([0-9]+) released_pages=13 scrubbed_data_pages=6 ring3=1 production=0 terminal=halt")
 
 
+CALL = re.compile(r"POOLEOS:KERNEL:USER-CALL PASS contract=PKUSER7 abi=PSABI1 profile=development version=1 cr3=(0x[0-9A-F]{16}) calls=12 ok=3 version_denied=1 unknown=1 arguments=4 faults=3 read_faults=1 write_faults=2 cpl=3 entry=syscall return=iretq max_copy=256 input_atomic=1 output_prefix=1 completion_traps=1 msrs_cleared=1 if=0 production=0")
+
+
 def validate_markers(markers: list[str]) -> dict:
-    if len(markers) != 35:
-        raise ValueError("PKUSER6 requires exactly 35 markers")
+    if len(markers) != 36:
+        raise ValueError("PKUSER7 requires exactly 36 markers")
     arm = transfer.TRANSFER_ARM.fullmatch(markers[23])
     if arm is None or int(arm.group(10)) != SELECTOR:
         raise ValueError("PKUSER3 wrong development selector")
@@ -29,10 +32,10 @@ def validate_markers(markers: list[str]) -> dict:
     common["transfer_arm"]["trap_scenario"] = SELECTOR
     common.pop("kernel_terminal", None)
     common["synthetic_unsigned_terminal_used_for_prefix_parser_only"] = True
-    prepared, active, timer, entry, preempt, result = [pattern.fullmatch(marker) for pattern, marker in
-                                zip((PREPARED, ACTIVE, TIMER, ENTRY, PREEMPT, RESULT), markers[29:])]
-    if any(m is None for m in (prepared, active, timer, entry, preempt, result)):
-        raise ValueError("PKUSER6 marker layout or bounded claims changed")
+    prepared, active, timer, entry, preempt, call, result = [pattern.fullmatch(marker) for pattern, marker in
+                                zip((PREPARED, ACTIVE, TIMER, ENTRY, PREEMPT, CALL, RESULT), markers[29:])]
+    if any(m is None for m in (prepared, active, timer, entry, preempt, call, result)):
+        raise ValueError("PKUSER7 marker layout or bounded claims changed")
     original, candidate = (int(prepared[i], 16) for i in (1, 2))
     generation = int(prepared[3])
     probe = int(active[2], 16)
@@ -41,6 +44,7 @@ def validate_markers(markers: list[str]) -> dict:
             or generation == 0 or generation >= (1 << 64)
             or int(active[1], 16) != candidate or int(timer[1], 16) != candidate or int(entry[1], 16) != candidate
             or int(preempt[1], 16) != candidate or not (0 < int(preempt[2]) < int(preempt[3]) < (1 << 64))
+            or int(call[1], 16) != candidate
             or int(result[1], 16) != original
             or not (0 < int(result[2]) == int(result[3]) <= 19)
             or probe != candidate ^ generation ^ 0x504B555345523300):
@@ -52,6 +56,8 @@ def validate_markers(markers: list[str]) -> dict:
             "ring3_executed": True, "user_traps": 7, "private_rsp0": True,
             "user_timer_preemption": True, "user_timer_deliveries": 3, "user_timer_eois": 3,
             "user_resumes": 2, "first_progress": int(preempt[2]), "last_progress": int(preempt[3]),
+            "syscall_abi": "PSABI1_development", "user_calls": 12, "copy_faults": 3,
+            "copy_read_faults": 1, "copy_write_faults": 2, "syscall_msrs_cleared": True,
             "production_ready": False}
 
 
@@ -63,7 +69,7 @@ def negative_controls(markers: list[str]) -> int:
     wrong = markers.copy()
     wrong[23] = wrong[23].replace("trap_scenario=23", "trap_scenario=0")
     candidates.append(wrong)
-    for i in range(29, 35):
+    for i in range(29, 36):
         for match in re.finditer(r"\b[a-zA-Z_0-9]+=[^ ]+", markers[i]):
             changed = markers.copy()
             changed[i] = markers[i][:match.start()] + "invalid=invalid" + markers[i][match.end():]

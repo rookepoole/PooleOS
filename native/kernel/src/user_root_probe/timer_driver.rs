@@ -301,6 +301,7 @@ pub struct UserRun<'a> {
     pub entry: &'a mut arch::x86_64::user::Entry,
     pub timer: &'a mut Timer,
     pub result: Option<poolekernel::user_entry::preemption::Observation>,
+    pub calls: Option<arch::x86_64::user::CallObservation>,
 }
 
 impl poolekernel::user_entry::privilege::Driver for UserRun<'_> {
@@ -313,6 +314,7 @@ impl poolekernel::user_entry::privilege::Driver for UserRun<'_> {
     > {
         use poolekernel::user_entry::privilege::Error;
         self.result = None;
+        self.calls = None;
         let (_, budget) = self
             .timer
             .configure(image.root_physical, self.timer.mappings, 10_000_000)
@@ -320,6 +322,7 @@ impl poolekernel::user_entry::privilege::Driver for UserRun<'_> {
         self.entry.set_timer_budget(budget)?;
         let result = self.entry.execute(image)?;
         self.result = Some(self.entry.preemption_observation()?);
+        self.calls = Some(self.entry.syscall_observation()?);
         Ok(result)
     }
 

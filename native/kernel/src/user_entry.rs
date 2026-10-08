@@ -16,6 +16,7 @@ pub mod bootstrap;
 pub mod preemption;
 pub mod prepared;
 pub mod privilege;
+pub mod syscall;
 pub mod timer;
 
 pub const CONTRACT_ID: &str = "PKUSER1";

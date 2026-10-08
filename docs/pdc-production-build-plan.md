@@ -1,15 +1,42 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.143.0-user-timer-preemption
-Roadmap cycle: PooleOS Cycle 240
+Plan version: 2.144.0-native-syscall-usercopy
+Roadmap cycle: PooleOS Cycle 241
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 240: Timer Preemption From User Space
+## Cycle 241: Native System Calls And Recoverable User Copy
+
+USI-1 / N13.3-N13.4, `N13-USER-ENTRY-LIVE-001`: PKUSER7 adds actual SYSCALL
+entry and checked IRETQ, explicit version/error results, 256-byte bounded
+snapshot copying and instruction-specific nested page-fault recovery. Two fresh
+CPL3 guests each execute12 calls, recover one input/two output faults, verify
+input failure has no destination effect and output failure reports its prefix,
+then clear syscall MSRs before timer recovery and full13-page retirement.
+326 debug kernel,76 user-release,24 VM-release,5 compile-fail,10 boot-exit,
+23 Python oracle tests and ordinary unsigned-boot denial pass.
+[Evidence](checkpoints/cycle241-native-syscall-usercopy.md),
+[development ABI](native-syscall-abi.md).
+
+N13.4 advances to partial; N13.3 remains partial. PSABI1 is a development subset,
+not complete production ABI qualification. Kernel root/flag invariant failures
+are fatal, not reported as ordinary user pointer errors. General SMAP coverage,
+concurrent pin/copy, async/SMP entry, syscall/timer concurrency and an independent
+missing-interrupt watchdog remain flagged under the open integration work.
+
+Next: owned task exit/fault termination and accounting, then peer scheduling
+across private roots, capability IPC, confined services, an interactive shell
+and two apps, and actual optical ISO qualification. All8,996 requirements,
+59 additions,97 flags/42 open and20 gaps remain. No phase closes, no new ISO,
+no merge or production promotion;25 native admissions/22 Python closures and
+the exact-candidate gate remain stale or pending. Full N0-N39 microkernel work
+continues after the preview.
+
+## Historical Cycle 240: Timer Preemption From User Space
 
 USI-1 / N7/N9/N12/N13.3, `N13-USER-ENTRY-LIVE-001`: PKUSER6 interrupts a fixed
 spinning CPL3 task three times on its private RSP0 stack, resumes it twice with
@@ -3942,9 +3969,11 @@ Exit gate: deterministic and randomized SMP schedule tests show no lost wakeup, 
 Inherited sections: `035-038`. Added: `ADD-CAP-001`.  
 Goal: enter user mode with an unforgeable authority model rather than Unix ambient privilege.
 
-Cycle 234 starts N13.3 with host-tested inactive user-image admission and a
-bounded initial IRETQ frame. No live user task, syscall, capability, exception
-delivery or phase exit is established. See `docs/native-userspace-integration-iso.md`.
+Cycle241 has live fixed-task ring-3 entry, private-stack faults, timer recovery,
+and a development SYSCALL/IRETQ ABI with bounded recoverable user copying.
+N13.3 and N13.4 are partial. Task lifecycle, general exception delivery,
+capabilities, peer scheduling and the phase exit remain unestablished.
+See `docs/native-userspace-integration-iso.md` and `docs/native-syscall-abi.md`.
 
 Subphases:
 

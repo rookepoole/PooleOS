@@ -373,9 +373,11 @@ pub fn run(
         entry: &mut user,
         timer: &mut timer,
         result: None,
+        calls: None,
     };
     let entry = checked!(41, owner.exercise_user(&mut run));
     let preempt = checked!(42, run.result.ok_or(()));
+    let calls = checked!(43, run.calls.ok_or(()));
     {
         let mut log = EarlyLogger::new(BootSink {
             serial,
@@ -396,6 +398,23 @@ pub fn run(
         log.write_str(" last_progress=");
         log.write_decimal_u64(preempt.last_progress);
         log.write_str(" private_rsp0=1 gpr_preserved=14 fp_preserved=1 timer_quiesced=1 forced_return=1 if=0 production=0\n");
+        log.write_str("POOLEOS:KERNEL:USER-CALL PASS contract=PKUSER7 abi=PSABI1 profile=development version=1 cr3=");
+        log.write_hex_u64(entry.root);
+        log.write_str(" calls=");
+        log.write_decimal_u64(u64::from(calls.calls));
+        for (name, count) in [
+            (" ok=", calls.statuses[0]),
+            (" version_denied=", calls.statuses[1]),
+            (" unknown=", calls.statuses[2]),
+            (" arguments=", calls.statuses[3]),
+            (" faults=", calls.statuses[4]),
+            (" read_faults=", calls.read_faults),
+            (" write_faults=", calls.write_faults),
+        ] {
+            log.write_str(name);
+            log.write_decimal_u64(u64::from(count));
+        }
+        log.write_str(" cpl=3 entry=syscall return=iretq max_copy=256 input_atomic=1 output_prefix=1 completion_traps=1 msrs_cleared=1 if=0 production=0\n");
     }
     let mut parts = checked!(21, owner.retire(&mut manager, &mut memory));
     if checked!(

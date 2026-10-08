@@ -50,6 +50,7 @@ const TSS_AVAILABLE_PRESENT_RING0: u64 = 0x89;
 
 pub mod user;
 mod user_preempt;
+mod user_syscall;
 
 #[derive(Clone, Copy)]
 #[repr(C, packed)]

@@ -152,6 +152,10 @@ impl Sequence {
         self.completed
     }
 
+    pub const fn image(&self) -> ImageAdmission {
+        self.image
+    }
+
     /// Only a matching, contained event advances the sequence; failure is atomic.
     pub fn accept(&mut self, t: &Trap) -> Result<Action, Error> {
         if self.completed >= TRAP_COUNT {

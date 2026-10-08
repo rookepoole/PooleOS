@@ -1,7 +1,9 @@
 //! Development-only single-BSP user entry, with private-stack fault recovery.
+pub use super::user_syscall::Observation as CallObservation;
 use super::*;
 use poolekernel::user_entry::preemption;
 use poolekernel::user_entry::prepared::{STACK_BOTTOM, STACK_TOP};
+use poolekernel::user_entry::syscall;
 use poolekernel::user_entry::{
     self, ImageAdmission, InitialReturnFrame,
     privilege::{self, Action, Controls, Driver, Error, Layout, Observation, Sequence, Trap},
@@ -34,6 +36,8 @@ unsafe extern "C" {
     static poole_user_spin: u8;
     static poole_user_spin_pause: u8;
     static poole_user_spin_jump: u8;
+    static poole_user_calls: u8;
+    static poole_user_calls_done: u8;
 }
 
 fn layout() -> Result<Layout, Error> {
@@ -216,6 +220,10 @@ impl Entry {
         }
         unsafe { auxiliary_clean(self.sep) }
     }
+
+    pub fn syscall_observation(&self) -> Result<CallObservation, Error> {
+        super::user_syscall::observe()
+    }
 }
 
 unsafe fn install() -> Result<(), Error> {
@@ -305,6 +313,7 @@ impl Driver for Entry {
         unsafe {
             install()?;
             initialize_fx()?;
+            super::user_syscall::prepare(image)?;
             write_volatile(&raw mut LIVE, Some(sequence));
             write_volatile(&raw mut PREEMPT, preempt);
         }
@@ -335,6 +344,7 @@ impl Driver for Entry {
     }
 
     fn quiesce(&mut self, root: u64) -> Result<(), Error> {
+        super::user_syscall::clear(root)?;
         self.context(root)?;
         if !self.installed {
             return Ok(());
@@ -363,6 +373,39 @@ impl Driver for Entry {
 
 pub fn active() -> bool {
     ACTIVE_ROOT.load(Ordering::Acquire) != 0
+}
+
+fn snapshot(frame: &TrapFrame, depth: u32) -> Trap {
+    Trap {
+        root: unsafe { read_cr3() },
+        vector: frame.vector,
+        error: frame.error_code,
+        rip: frame.rip,
+        cs: frame.code_selector,
+        flags: frame.rflags,
+        rsp: frame.rsp,
+        ss: frame.data_selector,
+        cr2: read_cr2(),
+        handler_stack: frame as *const _ as u64,
+        depth,
+        registers: [
+            frame.r15, frame.r14, frame.r13, frame.r12, frame.r11, frame.r10, frame.r9, frame.r8,
+            frame.rsi, frame.rdi, frame.rbp, frame.rdx, frame.rcx, frame.rbx, frame.rax,
+        ],
+    }
+}
+
+pub fn recover_copy_fault(frame: &mut TrapFrame, depth: u32) -> bool {
+    if !active() || unsafe { read_cr3() } != ACTIVE_ROOT.load(Ordering::Acquire) {
+        return false;
+    }
+    let t = snapshot(frame, depth);
+    if let Some(rip) = super::user_syscall::recover(&t) {
+        frame.rip = rip;
+        true
+    } else {
+        false
+    }
 }
 
 fn denied(stage: u64, error: Error, t: &Trap) -> ! {
@@ -401,23 +444,33 @@ pub fn dispatch(frame: &mut TrapFrame, depth: u32) {
     }
     // SAFETY: entry serialized one BSP, IF0; no reference to LIVE survives IRETQ.
     let sequence = unsafe { (&mut *(&raw mut LIVE)).as_mut() }.unwrap_or_else(|| reject());
-    let t = Trap {
-        root,
-        vector: frame.vector,
-        error: frame.error_code,
-        rip: frame.rip,
-        cs: frame.code_selector,
-        flags: frame.rflags,
-        rsp: frame.rsp,
-        ss: frame.data_selector,
-        cr2: read_cr2(),
-        handler_stack: frame as *const _ as u64,
-        depth,
-        registers: [
-            frame.r15, frame.r14, frame.r13, frame.r12, frame.r11, frame.r10, frame.r9, frame.r8,
-            frame.rsi, frame.rdi, frame.rbp, frame.rdx, frame.rcx, frame.rbx, frame.rax,
-        ],
-    };
+    let t = snapshot(frame, depth);
+    if t.vector == syscall::VECTOR {
+        if sequence.completed() != privilege::TRAP_COUNT {
+            reject()
+        }
+        super::user_syscall::dispatch(&t, frame).unwrap_or_else(|e| denied(4, e, &t));
+        crate::TRAP_DEPTH.store(0, Ordering::Release);
+        return;
+    }
+    let calls_done = sequence.image().initial_frame.rip
+        + ((&raw const poole_user_calls_done) as u64 - (&raw const poole_user_payload) as u64);
+    if sequence.completed() == privilege::TRAP_COUNT && t.vector == 6 && t.rip == calls_done {
+        let checked = Trap {
+            vector: syscall::VECTOR,
+            ..t
+        };
+        syscall::frame(sequence.image(), &checked).unwrap_or_else(|e| denied(5, e, &t));
+        super::user_syscall::finish(root).unwrap_or_else(|e| denied(6, e, &t));
+        frame.rflags = user_entry::INITIAL_RFLAGS;
+        if let Some(session) = unsafe { (&mut *(&raw mut PREEMPT)).as_mut() } {
+            frame.rip = session.start(&t).unwrap_or_else(|e| denied(3, e, &t));
+        } else {
+            return_kernel(frame)
+        }
+        crate::TRAP_DEPTH.store(0, Ordering::Release);
+        return;
+    }
     if frame.vector == u64::from(crate::TIMER_VECTOR) {
         let session = unsafe { (&mut *(&raw mut PREEMPT)).as_mut() }.unwrap_or_else(|| reject());
         if sequence.completed() != privilege::TRAP_COUNT {
@@ -455,11 +508,9 @@ pub fn dispatch(frame: &mut TrapFrame, depth: u32) {
             if (0..16).any(|i| unsafe { p.add(160 + i).read_volatile() } != 0xff) {
                 reject();
             }
-            if let Some(session) = unsafe { (&mut *(&raw mut PREEMPT)).as_mut() } {
-                frame.rip = session.start(&t).unwrap_or_else(|e| denied(3, e, &t));
-            } else {
-                return_kernel(frame);
-            }
+            super::user_syscall::enable().unwrap_or_else(|e| denied(7, e, &t));
+            frame.rip = sequence.image().initial_frame.rip
+                + ((&raw const poole_user_calls) as u64 - (&raw const poole_user_payload) as u64);
         }
     }
     crate::TRAP_DEPTH.store(0, Ordering::Release);
@@ -562,6 +613,81 @@ poole_user_nx_resume:
     fld1
     .global poole_user_done
 poole_user_done:
+    ud2
+    .macro POOLE_CALL_CHECK status, result
+    syscall
+    cmp rax, \status
+    jne poole_user_call_failed
+    cmp rdx, \result
+    jne poole_user_call_failed
+    .endm
+    .global poole_user_calls
+poole_user_calls:
+    mov edi, 1
+    xor eax, eax
+    xor esi, esi
+    xor edx, edx
+    xor r10d, r10d
+    xor r8d, r8d
+    xor r9d, r9d
+    std
+    POOLE_CALL_CHECK 0, 1
+    mov eax, 99
+    POOLE_CALL_CHECK 2, 0
+    xor eax, eax
+    mov edi, 2
+    POOLE_CALL_CHECK 1, 0
+    mov edi, 1
+    mov eax, 1
+    mov r8d, 1
+    POOLE_CALL_CHECK 3, 0
+    xor r8d, r8d
+    movabs rbx, 0x504f4f4c454f5321
+    mov qword ptr [rsp - 63], rbx
+    lea rsi, [rsp - 63]
+    lea rdx, [rsp - 127]
+    mov r10d, 8
+    mov eax, 1
+    POOLE_CALL_CHECK 0, 8
+    cmp qword ptr [rsp - 127], rbx
+    jne poole_user_call_failed
+    mov eax, 1
+    xor esi, esi
+    xor edx, edx
+    xor r10d, r10d
+    POOLE_CALL_CHECK 0, 0
+    mov eax, 1
+    mov r10d, 257
+    POOLE_CALL_CHECK 3, 0
+    mov eax, 1
+    mov r10d, 8
+    movabs rsi, 0xffffffff80000000
+    lea rdx, [rsp - 127]
+    POOLE_CALL_CHECK 3, 0
+    mov eax, 1
+    mov rsi, -4
+    lea rdx, [rsp - 127]
+    POOLE_CALL_CHECK 3, 0
+    mov eax, 1
+    lea rsi, [rsp - 4]
+    lea rdx, [rsp - 127]
+    POOLE_CALL_CHECK 4, 0
+    cmp qword ptr [rsp - 127], rbx
+    jne poole_user_call_failed
+    mov eax, 1
+    lea rsi, [rsp - 63]
+    lea rdx, [rsp - 4]
+    POOLE_CALL_CHECK 4, 4
+    cmp dword ptr [rsp - 4], ebx
+    jne poole_user_call_failed
+    mov eax, 1
+    lea rsi, [rsp - 63]
+    lea rdx, [rip + poole_user_payload]
+    POOLE_CALL_CHECK 4, 0
+    .global poole_user_calls_done
+poole_user_calls_done:
+    ud2
+poole_user_call_failed:
     ud2
     .global poole_user_spin
 poole_user_spin:
