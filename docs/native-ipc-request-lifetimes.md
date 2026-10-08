@@ -40,6 +40,10 @@ receivers cannot be inferred from a live shared endpoint. A malicious live servi
 can still ignore a request until a future clock-backed deadline mechanism exists.
 Current execution is serialized on one BSP; SMP/interleaving qualification remains.
 
+Cycle255 qualifies the [continuous service clock](native-continuous-clock.md) as
+a prerequisite. Request deadline expiry and the all-blocked wake path are still
+unimplemented; callers do not acquire timeout guarantees from the clock alone.
+
 Native generations7-10 prove success, discard, queued service death and claimed
 service death. Each client first cancels/consumes a separate request, later waits
 and consumes the real outcome, rejects repeat take, queries the ABI and exits97.

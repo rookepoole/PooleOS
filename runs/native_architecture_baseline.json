@@ -358,6 +358,42 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle255-continuous-service-clock.md",
+      "sha256": "8F951B6BEA3594649E5EEFDEB6D3182C3A7349EA07104A3CBF983181DA49CF19",
+      "byte_count": 6580,
+      "line_count": 106
+    },
+    {
+      "path": "docs/native-continuous-clock.md",
+      "sha256": "D2FB53E491359CF01B7AC299EACB86F2E345096C7E9868A435530A30A71F67D1",
+      "byte_count": 4340,
+      "line_count": 74
+    },
+    {
+      "path": "tests/fixtures/cycle254-user-entry-readiness.json",
+      "sha256": "61C580013B54AC0D4FB638A5F5C65D6C0CEA3FE51612399773E48FE26D5B67A7",
+      "byte_count": 316862,
+      "line_count": 6545
+    },
+    {
+      "path": "native/kernel/src/user_entry/timer/clock.rs",
+      "sha256": "430665791EFFB288036C5523CEE153D791FDEE59B3DB8E73E1134AACD1FB6F8F",
+      "byte_count": 4758,
+      "line_count": 147
+    },
+    {
+      "path": "native/kernel/src/user_entry/timer/clock/tests.rs",
+      "sha256": "983E50B7F62F0F9CA3A1C13A4FE26CEBB308F06C6FC96544B82C36126381D5F2",
+      "byte_count": 6588,
+      "line_count": 210
+    },
+    {
+      "path": "native/kernel/src/user_root_probe/clock_driver.rs",
+      "sha256": "154361FF90333BBE5E4B3A9796D7F223EA491AB6AB4B099EFBEAC228B2E9610C",
+      "byte_count": 10912,
+      "line_count": 297
+    },
+    {
       "path": "docs/checkpoints/cycle254-native-request-lifetimes.md",
       "sha256": "686411B7A373ABBEE3B1A28374CC10F6C64EC387EFBB31DED1305700CBD435B8",
       "byte_count": 6614,
@@ -365,9 +401,9 @@
     },
     {
       "path": "docs/native-ipc-request-lifetimes.md",
-      "sha256": "CBE65FCFDFBC2C424DE4C8CBD2EB10D951C5275A0BE9E15F105B7403D579B033",
-      "byte_count": 3260,
-      "line_count": 48
+      "sha256": "F369F373CFEE2A8E15321A41AD2A63F94C2D50A1A534D933335843AC13ED10ED",
+      "byte_count": 3501,
+      "line_count": 52
     },
     {
       "path": "tests/fixtures/cycle253-user-entry-readiness.json",
@@ -455,9 +491,9 @@
     },
     {
       "path": "native/kernel/src/user_root_probe/peer_driver/ipc_pressure.rs",
-      "sha256": "D3BF5D03915C055801092DA8BF4639AF4793EEAE4D590F0FF4912EFDD4C4085B",
-      "byte_count": 13138,
-      "line_count": 378
+      "sha256": "3313C0449B6B214F5601B51A41E11496BE9526B2ECB3F0656A60E59910F11AE4",
+      "byte_count": 13473,
+      "line_count": 387
     },
     {
       "path": "docs/checkpoints/cycle251-native-ipc-waits.md",
@@ -845,15 +881,15 @@
     },
     {
       "path": "native/kernel/src/user_entry/timer.rs",
-      "sha256": "682D3BC45CDC8FE5738395D2709B9A33ACE1C3E478FEF0BEA32902395051DD82",
-      "byte_count": 7011,
-      "line_count": 194
+      "sha256": "DE8F89F2A180A4A2A6BC753172CC18534FAF7076D5C79A72A36B382153A80031",
+      "byte_count": 7163,
+      "line_count": 197
     },
     {
       "path": "native/kernel/src/user_root_probe/timer_driver.rs",
-      "sha256": "0C9B45004A2061D2ABEC4D0EC36D5544354F74694CDD72566DB4F79E94827A73",
-      "byte_count": 16333,
-      "line_count": 429
+      "sha256": "E13216DBEE1561A41DF561EE2D354C61744B016FACEA811F5B081FA6EB588F63",
+      "byte_count": 16439,
+      "line_count": 431
     },
     {
       "path": "tests/fixtures/cycle237-user-entry-readiness.json",
@@ -875,27 +911,27 @@
     },
     {
       "path": "native/kernel/src/user_root_probe.rs",
-      "sha256": "259847558696B79D69074458D590C9243531A7D88A2D684F13E1223794A69EA3",
-      "byte_count": 17955,
-      "line_count": 513
+      "sha256": "EE3F996F559DE4005766B4B5D8A204174964C8D6E5AFE565A4C0D7CF40246023",
+      "byte_count": 17973,
+      "line_count": 514
     },
     {
       "path": "runtime/native_user_root.py",
-      "sha256": "B181CD25774362F9181BBF3FF551CB9DABEA0AB95776E7EFFF3063AC0D3A9F26",
-      "byte_count": 24082,
-      "line_count": 263
+      "sha256": "813AEF7D2DC5F03E9FB4CBD8066786110A719A34A4BE9E6769FEEC97B7B2D508",
+      "byte_count": 25563,
+      "line_count": 279
     },
     {
       "path": "tools/qualify_native_user_root.py",
-      "sha256": "D8E3D5DE8E6B106392810D3788AC73A3C1A0315AA79ED8251E784AE276BE1335",
-      "byte_count": 5568,
+      "sha256": "5F88C860B989C463F5C7800D54E177C50A29ADA17CBBC3DE6253258AD8FF607C",
+      "byte_count": 5574,
       "line_count": 94
     },
     {
       "path": "tests/test_native_user_root.py",
-      "sha256": "59FA7DAB447AA442E971BE6D0D2292D6F5EBFD4871F6996C3A4EE1D4E043CC58",
-      "byte_count": 35435,
-      "line_count": 494
+      "sha256": "32B3924E1778AEBF260512DA1DD80084C426CFFAB4C676BC54D856F7C51ACB04",
+      "byte_count": 37598,
+      "line_count": 522
     },
     {
       "path": "tests/fixtures/cycle237-user-root-markers.json",
@@ -965,9 +1001,9 @@
     },
     {
       "path": "docs/native-userspace-integration-iso.md",
-      "sha256": "BDD77EBE7D03F8C99AC3717B9480A3D463701CD5BEFA389CD349678156305B9F",
-      "byte_count": 26039,
-      "line_count": 394
+      "sha256": "DD4D7C65A11E166A2433BB078833045D05DE390767E65F990C836E41A2DC731A",
+      "byte_count": 26196,
+      "line_count": 397
     },
     {
       "path": "native/kernel/src/user_entry.rs",
@@ -983,19 +1019,19 @@
     },
     {
       "path": "tools/qualify_native_user_entry.py",
-      "sha256": "B8CDEC5F5DBDCD80352FBFE2A6E6576BD5E77AC43C749AF9896652207B64EE4F",
-      "byte_count": 15456,
-      "line_count": 214
+      "sha256": "FE67D6CF638DA78685CCB865714F0024D5B7382504D475EE8C11E08053084D0E",
+      "byte_count": 15963,
+      "line_count": 219
     },
     {
       "path": "runs/native-user-entry-readiness.json",
-      "sha256": "61C580013B54AC0D4FB638A5F5C65D6C0CEA3FE51612399773E48FE26D5B67A7",
-      "byte_count": 316862,
-      "line_count": 6545
+      "sha256": "D52730EE4BDF217718BCB099DB9CAC2AC3E3F5610A1E84B1CEBF7F968181E793",
+      "byte_count": 319991,
+      "line_count": 6614
     },
     {
       "path": "runs/native-user-entry-gate-projection.json",
-      "sha256": "F14390B9541BE7AA3DFAA7E18DDF9B25AB331DB9A624791EFB789D0586E07805",
+      "sha256": "F5460275B5A23FF37D3B201C306A064B4EB9DCF6455E1471A902848CC19E2E15",
       "byte_count": 11514,
       "line_count": 230
     },
@@ -2309,15 +2345,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "EE4257BC1AE8B0C639D47583093C464FA58E0BECCE04AA59E60BFE3B765517D5",
-      "byte_count": 142269,
-      "line_count": 1931
+      "sha256": "47CAE1F0DC2D70640BC7C816C976CA88D860E0EEA65E9C15AB0877A1431BF267",
+      "byte_count": 142817,
+      "line_count": 1939
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "D6E8F8058DA390ED4A2DC0A174CD3D8DEF01E7A2100CD1CC6B23EB8DE1516D43",
-      "byte_count": 552421,
-      "line_count": 5279
+      "sha256": "BD491786E6DA7FEE3E1EC84333ACE042F0BB16D987D7E12657F90C7FFA726B32",
+      "byte_count": 554151,
+      "line_count": 5305
     },
     {
       "path": "docs/publication-boundary.md",

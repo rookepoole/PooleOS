@@ -13,6 +13,7 @@ use poolekernel::user_entry::{
 };
 use virtual_memory::{AddressSpace, CachePolicy, Error, Permissions, USER_WINDOW_START};
 
+mod clock_driver;
 mod peer_driver;
 mod spawn_driver;
 mod task_driver;

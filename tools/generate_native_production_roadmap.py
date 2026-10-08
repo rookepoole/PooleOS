@@ -12569,7 +12569,7 @@ def apply_cycle253(roadmap: dict, test_count: int) -> dict:
 
 def apply_cycle254(roadmap: dict, test_count: int) -> dict:
     checkpoint = "docs/checkpoints/cycle254-native-request-lifetimes.md"
-    path = "runs/native-user-entry-readiness.json"
+    path = "tests/fixtures/cycle254-user-entry-readiness.json"
     raw = (ROOT / path).read_bytes()
     receipt = json.loads(raw)
     baseline = roadmap["baseline"]
@@ -12651,12 +12651,100 @@ def apply_cycle254(roadmap: dict, test_count: int) -> dict:
     flag["closure_condition"] += " Cycle254 qualifies bounded tracked outcomes, not deadlines or services. " + gap
     roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle255(roadmap, test_count)
+
+
+def apply_cycle255(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle255-continuous-service-clock.md"
+    path = "runs/native-user-entry-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle254_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle254_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=255, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 255
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-continuous-clock.md"]
+    gate["current_candidate_audit"]["cycle"] = 255
+    gate["current_focused_source_projection"]["cycle"] = 255
+    gate["qualification_status"] = "bounded_native_continuous_clock_pass_request_deadlines_services_and_canonical_gates_pending"
+    count = sum(c["tests_passed"] or 0 for c in receipt["checks"])
+    gate["current_closeout_regression"] = dict(cycle=255, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=count, tests_passed=count, tests_failed=0, tests_skipped=0,
+        scope="434_debug_kernel_138_user_release_40_IPC_release_24_VM_release_9_compile_fail_10_boot_exit_15_kmap",
+        additional_python_oracle_tests=74, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=328.953, log_sha256="47DDC58097DE63251D14F930A719E3A3222A728B7C53B7B850222AF4F89326AF",
+        initial_attempts=[
+            dict(status="fail", reason="permanent_MMIO_rejected_by_task_supervisor_replay", elapsed_seconds=218.453,
+                 guest_log_sha256="C82A96F6D9FD05E2CEF82D735077F72FB8816945BA26D87C46C2184E3737690E"),
+            dict(status="fail", reason="wrong_MMIO_only_finish_contract", elapsed_seconds=223.765,
+                 guest_log_sha256="F8CA555B19E333F0196933C7365992CB53635D1FDD085D9AE4D2D5C37D590465"),
+            dict(status="fail", reason="text_reservation_398_byte_overflow", elapsed_seconds=58.297,
+                 log_sha256="1849DBE84F007683B3A69F4011430D5FEFF7A05269E58FC55C30B92C1FD970B4"),
+            dict(status="fail", reason="stage5010_missing_temporary_RAM_alias_identified", elapsed_seconds=198.063,
+                 guest_log_sha256="4A1CBE834787352593BA9E9D3D3FC7C2F997C93F8F6085CDC9C1D22D5A225455")],
+        shared_failed_outer_log_sha256="71D30FF5DB19AB42E248C93AD442E342D17FE551765BBD2848DDD8FDBBC9E47C",
+        known_unresolved_readiness_tests=receipt["known_unresolved_readiness_tests"],
+        qualification_guest_bound_seconds=150, qualification_bound_unchanged=True,
+        kernel_task_timer_dispatch_bounds_unchanged=True,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=255, status="pass", tests_run=155,
+        tests_passed=155, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=52.038, elapsed_seconds=52.891,
+        log_sha256="4CE08830E5981CF1672FDB0794327C5109150760CDDF2DE85693C71B4B7EF53D",
+        source_unchanged=True, owner_report_unchanged=True,
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=255, receipt_path=path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_continuous_clock_request_lifetime_guests_plus_default_denial",
+        native_continuous_clock=True, clock_scope="one_BSP_64_bit_HPET_epoch",
+        continuous_clock_per_probe=[s["continuous_clock"] for s in summaries],
+        clock_epoch_request_binding=False, idle_request_expiry=False,
+        ipc_request_deadline_ownership=False, ipc_deadlines=False,
+        kernel_image_pages=197, kernel_capacity_pages=208,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries],
+        measured_subtotal_all_peer_suites_per_probe=[s["runtime_ticks"] + s["unknown_peer_ticks"] + s["ipc_ticks"]
+            + sum(sum(p["ticks"]) for p in s["ipc_pressure_rounds"]) + sum(s["ipc_reply_ticks"])
+            + sum(sum(p["ticks"]) for p in s["ipc_request_lifetimes"]) for s in summaries])
+    for field in ("runtime_samples", "runtime_terminal_samples", "runtime_duplicate_denials", "runtime_ticks",
+            "runtime_terminal_ticks", "runtime_failed_cleanup_ticks", "watchdog_recoveries", "watchdog_arms",
+            "watchdog_stops", "watchdog_restores", "watchdog_ticks", "peer_preemptions", "unknown_peer_ticks",
+            "unknown_recovery_dispatches", "ipc_dispatches", "ipc_preemptions", "ipc_ticks", "ipc_calls", "ipc_cr3_writes",
+            "ipc_waits", "ipc_readiness_wakes", "ipc_cancellations", "ipc_pressure_rounds", "ipc_reply_dispatches",
+            "ipc_reply_preemptions", "ipc_reply_ticks", "ipc_reply_cr3_writes", "ipc_reply_calls", "ipc_request_lifetimes"):
+        lane[field + "_per_probe"] = [s[field] for s in summaries]
+    lane["stages"]["USI-2"] = "partial_continuous_clock_request_deadlines_and_service_admission_pending"
+    roadmap["immediate_next_move"].update(title="Bind request deadlines to the owned clock, then admit sustained user-space services",
+        entry_evidence=["docs/native-userspace-integration-iso.md", "docs/native-continuous-clock.md", path, checkpoint,
+            "native/kernel/src/user_entry/timer/clock.rs", "native/kernel/src/capability_ipc/request.rs"],
+        exit_evidence=[
+            "epoch-bound request expiry preserves first-terminal-wins, rejects late replies, wakes once and handles all-tasks-blocked idle",
+            "poisoned clock epochs retain ownership and cannot revive old deadlines; no fabricated time or host clock substitution",
+            "transactional service admission and sustained budgets precede init/console/input, shell/files/two apps and optical ISO acceptance",
+            "migrate197-page product contracts and replay all exact-candidate canonical gates before main; preserve three known readiness failures"])
+    evidence = "Cycle255: continuous HPET lease across12 native dispatches and4 idle intervals;6 mapping windows/revocations,24 MMIO writes, original config restored without counter reset. Two fresh73-marker boots/955 altered-evidence controls each;434 kernel tests/670 Rust executions/74 Python oracle tests and ordinary denial pass. " + checkpoint
+    gap = "Timed request expiry, all-blocked wakeup and poisoned-epoch handling remain, then transactional admission/sustained budgets and init/console/shell/apps/ISO.197-page image requires canonical product migration; three old readiness assertions still fail. No SMP/physical-clock failure recovery/32-bit wrap/suspend or general recovery claim."
+    for phase_id in ("N13", "N14"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " Cycle255 clock continuity alone does not implement deadline expiry. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1307)
+    parser.add_argument("--test-count", type=int, default=1310)
     parser.add_argument("--status-date", default="2026-10-08")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

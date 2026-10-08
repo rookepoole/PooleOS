@@ -86,6 +86,9 @@ pub(crate) fn run(
         ));
     }
     super::ipc_reply::run(&mut peers, baseline, manager, serial, debugcon);
+    let mut clock = checked!(clock_driver::Session::start(
+        handoff, core, bits, manager, topology, hpet
+    ));
     for round in 0..4u32 {
         for (index, p) in peers.iter_mut().enumerate() {
             checked!(p.restart(
@@ -101,6 +104,12 @@ pub(crate) fn run(
             ));
         }
         super::ipc_request::run(&mut peers, round, baseline, manager, serial, debugcon);
+        clock
+            .idle_interval()
+            .unwrap_or_else(|_| stop(2551, serial, debugcon));
+    }
+    if let Err(stage) = clock.finish(serial, debugcon) {
+        stop(5000 + stage, serial, debugcon);
     }
 }
 

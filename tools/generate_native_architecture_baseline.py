@@ -24,6 +24,12 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle255-continuous-service-clock.md",
+    "docs/native-continuous-clock.md",
+    "tests/fixtures/cycle254-user-entry-readiness.json",
+    "native/kernel/src/user_entry/timer/clock.rs",
+    "native/kernel/src/user_entry/timer/clock/tests.rs",
+    "native/kernel/src/user_root_probe/clock_driver.rs",
     "docs/checkpoints/cycle254-native-request-lifetimes.md",
     "docs/native-ipc-request-lifetimes.md",
     "tests/fixtures/cycle253-user-entry-readiness.json",

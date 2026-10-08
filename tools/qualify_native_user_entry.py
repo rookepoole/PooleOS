@@ -38,6 +38,8 @@ def source_bindings() -> dict[str, str]:
         "native/kernel/src/capability_ipc/request.rs", "native/kernel/src/capability_ipc/tests/replies/requests.rs",
         "native/kernel/src/arch/x86_64/user_ipc/request.rs",
         "native/kernel/src/user_root_probe/peer_driver/ipc_request.rs",
+        "native/kernel/src/user_root_probe/clock_driver.rs",
+        "native/kernel/src/user_entry/timer/clock.rs", "native/kernel/src/user_entry/timer/clock/tests.rs",
         "native/kernel/src/arch/x86_64/user_ipc/reply.rs",
         "native/kernel/src/user_root_probe/peer_driver/ipc_reply.rs",
         "native/kernel/src/arch/x86_64/user_ipc/pressure.rs",
@@ -88,8 +90,8 @@ def main() -> int:
     owner_report = Path("C:/Users/rookp/PooleGlyph/tests/reports/conformance_report.json")
     owner_before = digest(owner_report) if owner_report.is_file() else None
     report: dict = {
-        "contract_id": "PKIPC4", "cycle": 254,
-        "scope": "host_and_optional_native_caller_owned_request_completion_cancel_and_service_death_guest",
+        "contract_id": "PKCLOCK1", "cycle": 255,
+        "scope": "host_and_optional_native_continuous_hpet_clock_across_request_lifetimes_and_idle",
         "status": "fail", "source_bindings": before, "checks": [],
         "guest_runs": 0, "ring3_executed": False, "iso_built": False,
         "n13_exit_passed": False, "production_ready": False,
@@ -106,9 +108,9 @@ def main() -> int:
     commands = [
         ("format", [str(cargo), "fmt", *common, "--", "--check"], None),
         ("kernel_host_debug", [str(cargo), "test", *common, "--lib", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 426),
+            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 434),
         ("user_entry_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 130),
+            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 138),
         ("ipc_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
             "x86_64-pc-windows-msvc", *bounded, "capability_ipc::", "--", "--test-threads=1"], 40),
         ("vm_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
@@ -139,6 +141,8 @@ def main() -> int:
             "tests.test_native_kernel_transfer.NativeKernelTransferTests.test_marker_omission_order_duplicate_and_return_reject",
             "-v"], None),
     ]
+    commands.append(("clock_ownership_compile_fail", [str(cargo), "test", *common, "--doc", "--target",
+        "x86_64-pc-windows-msvc", *bounded, "user_entry::timer::clock::", "--", "--test-threads=1"], 1))
     for feature in ("development-trap-returning", "development-locks"):
         commands.append(("reject_" + feature, [str(cargo), "check", "--manifest-path",
             str(ROOT / "native/Cargo.toml"), "--package", "pooleboot", "--bin", "PooleBoot",
@@ -195,6 +199,7 @@ def main() -> int:
                 report["native_ipc_pressure_lifecycle"] = all(g["marker_summary"]["ipc_persistent_generations"] == 5 and g["marker_summary"]["ipc_native_dead_owner_cases"] == 4 for g in live["guest_runs"])
                 report["native_ipc_reply_authority"] = all(g["marker_summary"]["ipc_authenticated_sender"] and g["marker_summary"]["ipc_one_use_replies"] for g in live["guest_runs"])
                 report["native_ipc_request_lifecycle"] = all(g["marker_summary"]["ipc_caller_owned_completion"] and g["marker_summary"]["ipc_dead_service_notification"] for g in live["guest_runs"])
+                report["native_continuous_clock"] = all(g["marker_summary"]["native_continuous_clock"] for g in live["guest_runs"])
         report["source_unchanged"] = before == source_bindings()
         report["owner_report_unchanged"] = owner_before == (digest(owner_report) if owner_report.is_file() else None)
         if (len(report["checks"]) == len(commands) and all(c["passed"] for c in report["checks"])
@@ -206,7 +211,7 @@ def main() -> int:
     (work / "receipt.json").write_text(serialized, encoding="utf-8", newline="\n")
     if report["status"] == "pass":
         args.out.write_text(serialized, encoding="utf-8", newline="\n")
-    print(f"PKIPC4 {report['status'].upper()}; guest_runs={report['guest_runs']}; ring3={report['ring3_executed']}; production_ready=false", flush=True)
+    print(f"PKCLOCK1 {report['status'].upper()}; guest_runs={report['guest_runs']}; ring3={report['ring3_executed']}; production_ready=false", flush=True)
     return 0 if report["status"] == "pass" else 1
 
 

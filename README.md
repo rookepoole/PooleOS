@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle254 adds caller-owned request completion,
+**Current development checkpoint:** Cycle255 adds a continuous owned service clock
+across real user task dispatches and idle periods, with verified mapping teardown.
+Two fresh native boots and434 kernel tests pass. Next: request deadline expiry,
+service admission and sustained budgets, then init/console, shell/files/apps and
+the usable ISO. Full robust microkernel development continues afterward.
+No interactive ISO yet; canonical qualification still gates main.
+[Evidence](docs/checkpoints/cycle255-continuous-service-clock.md).
+
+**Historical development checkpoint:** Cycle254 adds caller-owned request completion,
 cancellation and dead-service notification. Two fresh native boots verify success,
 discard and service death while clients continue;426 kernel tests pass. The image
 layout now reserves208 pages with the existing36-page guarded stack. Next: owned

@@ -172,6 +172,7 @@ impl Timer {
         }
         // Mark effects before the first write; errors must still pass quiescence.
         self.configured = true;
+        super::clock_driver::enter(root, mappings)?;
         if self.topology.pcat_compatible {
             // SAFETY: validated MADT PCAT_COMPAT, single BSP, no concurrent PIC owner.
             unsafe { arch::x86_64::mask_legacy_pic() }.map_err(|_| TimerError::Hardware)?;
@@ -293,6 +294,7 @@ impl Driver for Timer {
             return Err(TimerError::Hardware);
         }
         Self::idle(&mut hardware)?;
+        super::clock_driver::leave(root, mappings)?;
         EXPECTED_ROOT.store(0, Ordering::Release);
         IRQ_APIC_VIRTUAL.store(0, Ordering::Release);
         self.configured = false;

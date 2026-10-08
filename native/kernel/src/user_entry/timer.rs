@@ -5,6 +5,7 @@ use crate::physical_memory::PhysicalMemoryManager;
 use crate::virtual_memory::KERNEL_START;
 use poole_handoff::{Handoff, MEMORY_ENTRY_BYTES, MEMORY_MMIO, PAGE_BYTES, RECORD_MEMORY_MAP};
 
+pub mod clock;
 pub mod drain;
 pub mod watchdog;
 
@@ -77,7 +78,9 @@ impl Mappings {
         Ok(Self { apic, hpet })
     }
 
-    pub(crate) fn validate(&self, manager: &PhysicalMemoryManager, bits: u8) -> Result<(), Error> {
+    /// Recheck that these device pages do not alias allocator-admitted RAM.
+    /// This does not grant device ownership or install a mapping.
+    pub fn validate(&self, manager: &PhysicalMemoryManager, bits: u8) -> Result<(), Error> {
         let mask = super::physical_mask(bits).map_err(|_| Error::Address)?;
         if self.apic & !mask != 0 || self.hpet & !mask != 0 {
             return Err(Error::Address);

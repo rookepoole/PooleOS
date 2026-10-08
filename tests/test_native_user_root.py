@@ -69,7 +69,35 @@ class UserRootTests(unittest.TestCase):
         self.markers.insert(66, f"POOLEOS:KERNEL:USER-IPC-REPLY PASS contract=PKIPC3 generation=6 endpoints=2 handles=3 sender_client=2 sender_server=3 reply_generations=2 reply_consumed=1 reply_discarded=1 replay_denied=2 unminted_denied=1 cross_owner_denied=1 wrong_type_denied=1 request_rights_denied=1 output_prefix=8 input_fault=1 transformed=1 root0={root} root1=0x0000000005000000 dispatches=3 preemptions=0 ticks0=100 ticks1=200 calls0=8 calls1=11 waits=1 wakes=1 cr3_writes=6 client_exit=95 server_exit=94 objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
         for index, outcome in enumerate((0, 8, 9, 9)):
             self.markers.insert(67 + index, f"POOLEOS:KERNEL:USER-IPC-REQUEST PASS contract=PKIPC4 round={index} generation={index+7} outcome={outcome} root0={root} root1=0x0000000005000000 dispatches=3 preemptions=0 ticks0=100 ticks1=200 calls0={11 if index==0 else 10} calls1={(5,5,0,2)[index]} waits=1 wakes=1 cr3_writes=6 client_cancel=1 stale_token=0 take_once=1 survivor_query=1 client_exit=97 objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
+        self.markers.insert(71, "POOLEOS:KERNEL:USER-CLOCK PASS contract=PKCLOCK1 origin=100 last=10000100 period_fs=10000000 elapsed_ns=100000000 samples=100 idle_ns=4000000 enters=12 leaves=12 idle_intervals=4 config_restored=1 counter_reset=0 mmio_writes=24 mapping_windows=6 mapping_revoked=6 guards=3 clock=hpet64 scope=one_bsp timed_ipc=0 production=0")
         self.summary = probe.validate_markers(self.markers)
+
+    def test_continuous_clock_binds_raw_period_elapsed_and_idle_not_cpu_ticks(self):
+        self.assertTrue(self.summary["native_continuous_clock"])
+        self.assertEqual(self.summary["continuous_clock"]["elapsed_ns"], 100000000)
+        self.assertFalse(self.summary["ipc_deadlines"])
+        for field, value in (("origin", "10000100"), ("last", "99"), ("last", str(1 << 64)),
+                ("period_fs", "99999"), ("period_fs", "100000001"), ("elapsed_ns", "1"),
+                ("samples", "32"), ("samples", "8000030"), ("idle_ns", "3999999"),
+                ("idle_ns", "100000001"), ("enters", "11"), ("leaves", "13"),
+                ("idle_intervals", "3"), ("config_restored", "0"), ("counter_reset", "1"),
+                ("mmio_writes", "3"), ("mapping_windows", "1"), ("mapping_revoked", "0"), ("guards", "0"), ("clock", "cpu_ticks"),
+                ("scope", "smp"), ("timed_ipc", "1"), ("production", "1")):
+            self.reject(71, field, value)
+
+    def test_clock_marker_is_required_ordered_and_cannot_be_duplicated(self):
+        source = (ROOT / "native/kernel/src/user_root_probe/clock_driver.rs").read_text()
+        self.assertNotIn("self.memory.finish()", source)
+        self.assertIn("BootstrapTableMemory::new(self.root, self.memory.physical_address_bits)", source)
+        self.assertIn("Err(poole_kmap::Error::TranslationMissing)", source)
+        with self.assertRaises(ValueError):
+            probe.validate_markers(self.markers[:71] + self.markers[72:])
+        with self.assertRaises(ValueError):
+            probe.validate_markers(self.markers[:72] + self.markers[71:])
+        changed = self.markers.copy()
+        changed[70], changed[71] = changed[71], changed[70]
+        with self.assertRaises(ValueError):
+            probe.validate_markers(changed)
 
     def test_request_lifetimes_require_four_generations_and_real_terminal_outcomes(self):
         self.assertTrue(self.summary["ipc_caller_owned_completion"])
@@ -311,7 +339,7 @@ class UserRootTests(unittest.TestCase):
         self.reject(30, "cr3", f"0x{self.summary['original_root']:016X}")
 
     def test_restoration_must_match_original(self):
-        self.reject(71, "restored", f"0x{self.summary['candidate_root']:016X}")
+        self.reject(72, "restored", f"0x{self.summary['candidate_root']:016X}")
 
     def test_sentinel_binds_candidate_and_generation(self):
         self.reject(30, "stack_probe", f"0x{self.summary['stack_probe'] ^ 1:016X}")
@@ -324,9 +352,9 @@ class UserRootTests(unittest.TestCase):
     def test_numeric_claims_cannot_be_promoted(self):
         for index, field, value in ((29, "pages", "14"), (29, "temporary_aliases", "1"),
                 (30, "cpl", "3"), (30, "if", "1"), (30, "ring3", "1"),
-                (71, "cr3_writes", "1"), (71, "allocated_pages", "0"),
-                (71, "released_pages", "12"), (71, "scrubbed_data_pages", "5"),
-                (71, "production", "1")):
+                (72, "cr3_writes", "1"), (72, "allocated_pages", "0"),
+                (72, "released_pages", "12"), (72, "scrubbed_data_pages", "5"),
+                (72, "production", "1")):
             self.reject(index, field, value)
 
     def test_timer_root_delivery_eoi_quiescence_and_mmio_claims_cannot_change(self):
@@ -337,7 +365,7 @@ class UserRootTests(unittest.TestCase):
 
     def test_retained_acpi_accounting_has_nonzero_bounded_equality(self):
         for value in ("0", "2", "20", str(1 << 64)):
-            self.reject(71, "retained_acpi_pages", value)
+            self.reject(72, "retained_acpi_pages", value)
 
     def test_user_entry_cpl_traps_state_cleanup_and_return_cannot_change(self):
         for field,value in (("cpl","0"),("traps","6"),("private_rsp0","0"),("gpr_zero","14"),
@@ -350,7 +378,7 @@ class UserRootTests(unittest.TestCase):
         self.reject(32,"cr3",f"0x{self.summary['original_root']:016X}")
 
     def test_missing_user_entry_and_old_cpl0_final_cannot_claim_execution(self):
-        self.reject(71,"ring3","0")
+        self.reject(72,"ring3","0")
         changed=self.markers[:32]+self.markers[33:]
         with self.assertRaises(ValueError): probe.validate_markers(changed)
 
@@ -442,7 +470,7 @@ class UserRootTests(unittest.TestCase):
                     ("ticks0","0"),("ticks1",str(1<<64))):
                 self.reject(index,field,value)
         self.reject(41,"preempt0","4")
-        self.reject(71,"cr3_writes","96")
+        self.reject(72,"cr3_writes","96")
 
     def test_invalid_return_reason_vector_and_peer_survival_are_bound(self):
         self.assertEqual(self.summary["invalid_return_terminations"], 6)

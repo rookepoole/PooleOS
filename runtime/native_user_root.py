@@ -5,6 +5,7 @@ import re
 from runtime import native_kernel_transfer as transfer
 
 FEATURE = "development-user-root"
+CLOCK = re.compile(r"POOLEOS:KERNEL:USER-CLOCK PASS contract=PKCLOCK1 origin=([0-9]+) last=([0-9]+) period_fs=([0-9]+) elapsed_ns=([0-9]+) samples=([0-9]+) idle_ns=([0-9]+) enters=12 leaves=12 idle_intervals=4 config_restored=1 counter_reset=0 mmio_writes=24 mapping_windows=6 mapping_revoked=6 guards=3 clock=hpet64 scope=one_bsp timed_ipc=0 production=0")
 REQUEST = re.compile(r"POOLEOS:KERNEL:USER-IPC-REQUEST PASS contract=PKIPC4 round=([0-9]+) generation=([0-9]+) outcome=([0-9]+) root0=(0x[0-9A-F]{16}) root1=(0x[0-9A-F]{16}) dispatches=([0-9]+) preemptions=([0-9]+) ticks0=([0-9]+) ticks1=([0-9]+) calls0=([0-9]+) calls1=([0-9]+) waits=1 wakes=1 cr3_writes=([0-9]+) client_cancel=1 stale_token=0 take_once=1 survivor_query=1 client_exit=97 objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
 REPLY = re.compile(r"POOLEOS:KERNEL:USER-IPC-REPLY PASS contract=PKIPC3 generation=6 endpoints=2 handles=3 sender_client=2 sender_server=3 reply_generations=2 reply_consumed=1 reply_discarded=1 replay_denied=2 unminted_denied=1 cross_owner_denied=1 wrong_type_denied=1 request_rights_denied=1 output_prefix=8 input_fault=1 transformed=1 root0=(0x[0-9A-F]{16}) root1=(0x[0-9A-F]{16}) dispatches=([0-9]+) preemptions=([0-9]+) ticks0=([0-9]+) ticks1=([0-9]+) calls0=8 calls1=11 waits=1 wakes=1 cr3_writes=([0-9]+) client_exit=95 server_exit=94 objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
 PRESSURE = re.compile(r"POOLEOS:KERNEL:USER-IPC-PRESSURE PASS contract=PKIPC2 round=([0-9]+) generation=([0-9]+) owner=(exit|fault|cancel|wait_cancel|quarantine) root0=(0x[0-9A-F]{16}) root1=(0x[0-9A-F]{16}) dispatches=([0-9]+) preemptions=([0-9]+) ticks0=([0-9]+) ticks1=([0-9]+) calls0=([0-9]+) calls1=([0-9]+) waits=([0-9]+) wakes=([0-9]+) revoked=([0-9]+) cr3_writes=([0-9]+) full_denied=1 stale_denied=1 partial_output=([0-9]+) survivor_exit=93 persistent_slots=1 automatic_retirement=1 objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
@@ -30,8 +31,8 @@ TASK = re.compile(r"POOLEOS:KERNEL:USER-TASK PASS contract=PKUSER8 slot=0 genera
 
 
 def validate_markers(markers: list[str]) -> dict:
-    if len(markers) != 72 or SPAWN.fullmatch(markers[55]) is None:
-        raise ValueError("PKIPC4 requires exactly 72 markers and transactional rollback")
+    if len(markers) != 73 or SPAWN.fullmatch(markers[55]) is None:
+        raise ValueError("PKCLOCK1 requires exactly 73 markers and transactional rollback")
     drain = DRAIN.fullmatch(markers[56])
     if drain is None or not 3 <= int(drain[1]) == int(drain[2]) <= 256:
         raise ValueError("PKUSER12 missing or inconsistent timer shutdown proof")
@@ -47,7 +48,7 @@ def validate_markers(markers: list[str]) -> dict:
     common.pop("kernel_terminal", None)
     common["synthetic_unsigned_terminal_used_for_prefix_parser_only"] = True
     prepared, active, timer, entry, preempt, call, result = [pattern.fullmatch(marker) for pattern, marker in
-                                zip((PREPARED, ACTIVE, TIMER, ENTRY, PREEMPT, CALL, RESULT), [*markers[29:35],markers[71]])]
+                                zip((PREPARED, ACTIVE, TIMER, ENTRY, PREEMPT, CALL, RESULT), [*markers[29:35],markers[72]])]
     if any(m is None for m in (prepared, active, timer, entry, preempt, call, result)):
         raise ValueError("PKUSER7 marker layout or bounded claims changed")
     original, candidate = (int(prepared[i], 16) for i in (1, 2))
@@ -164,6 +165,15 @@ def validate_markers(markers: list[str]) -> dict:
         requests.append(dict(round=index, generation=generation_, outcome=outcome, roots=roots_,
             dispatches=dispatches_, preemptions=preempts_, ticks=[t0, t1], calls=[c0, c1], cr3_writes=writes_))
         total_writes += writes_
+    clock = CLOCK.fullmatch(markers[71])
+    if clock is None:
+        raise ValueError("PKCLOCK1 missing continuous owner and teardown proof")
+    origin, last, period, elapsed, clock_samples, idle_ns = map(int, clock.groups())
+    if (not 0 <= origin < last < 1 << 64 or not 100_000 <= period <= 100_000_000
+            or not 0 < elapsed < 1 << 64 or elapsed != (last - origin) * period // 1_000_000
+            or not 4_000_000 <= idle_ns <= elapsed or not 33 <= clock_samples <= 8_000_029
+            or sum(r["dispatches"] for r in requests) != 12):
+        raise ValueError("PKCLOCK1 raw counter, idle progress or child conservation changed")
     if int(result[2]) != total_writes:
         raise ValueError("PKUSER10 total root writes not conserved")
     charge = RUNTIME.fullmatch(markers[57])
@@ -197,6 +207,12 @@ def validate_markers(markers: list[str]) -> dict:
             "task_stale_denials": 3, "released_pages": 876, "scrubbed_data_pages": 403,
             "ipc_request_lifetimes": requests, "ipc_caller_owned_completion": True,
             "ipc_request_cancellation": True, "ipc_dead_service_notification": True,
+            "continuous_clock": {"origin": origin, "last": last, "period_fs": period,
+                "elapsed_ns": elapsed, "samples": clock_samples, "idle_ns": idle_ns,
+                "child_enters": 12, "child_leaves": 12, "idle_intervals": 4,
+                "config_restored": True, "counter_reset": False, "mmio_writes": 24,
+                "mapping_windows": 6, "mapping_revoked": 6},
+            "native_continuous_clock": True, "clock_scope": "one_bsp_hpet64",
             "ipc_authenticated_sender": True, "ipc_one_use_replies": True,
             "ipc_reply_roots": reply_roots, "ipc_reply_dispatches": reply_dispatches,
             "ipc_reply_preemptions": reply_preempts, "ipc_reply_ticks": [reply_ticks0, reply_ticks1],
@@ -249,7 +265,7 @@ def negative_controls(markers: list[str]) -> int:
     wrong = markers.copy()
     wrong[23] = wrong[23].replace("trap_scenario=23", "trap_scenario=0")
     candidates.append(wrong)
-    for i in range(29, 72):
+    for i in range(29, 73):
         for match in re.finditer(r"\b[a-zA-Z_0-9]+=[^ ]+", markers[i]):
             changed = markers.copy()
             changed[i] = markers[i][:match.start()] + "invalid=invalid" + markers[i][match.end():]

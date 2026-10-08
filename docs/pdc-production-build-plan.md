@@ -1,15 +1,41 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.157.0-native-request-lifetimes
-Roadmap cycle: PooleOS Cycle 254
+Plan version: 2.158.0-continuous-service-clock
+Roadmap cycle: PooleOS Cycle 255
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 254: Caller-Owned Request Lifetimes
+## Cycle 255: Continuous Service Clock
+
+PKCLOCK1 provides a non-copyable continuous64-bit HPET owner across twelve actual
+task dispatches and four idle intervals. Counter samples are independent of task
+CPU charges; regression, overflow and uncertain reads poison the epoch. Six
+short guarded MMIO windows preserve existing strict task-construction mappings;
+raw leaf readback, missing translations and complete empty-region replay verify
+teardown. Original configuration is restored without resetting the counter.
+Two fresh73-marker boots/955 altered-evidence controls each plus ordinary denial
+pass;434 kernel tests,670 Rust executions and74 focused Python oracle tests.
+[Evidence and four retained failures](checkpoints/cycle255-continuous-service-clock.md).
+
+Image197 pages within unchanged208-page capacity;36-page guarded stack and150s
+guest/420s live-child bounds unchanged. The production charter checkpoint summary
+is reconciled with this plan. Three older product-readiness assertions and full
+exact-candidate canonical replay remain main-merge blockers. No new ISO yet.
+
+Next N13-CAPABILITY-IPC-001: bind request deadlines to the clock epoch, expire
+while all tasks are blocked, preserve first-terminal-wins and handle poisoned
+epochs; then transactional service admission and sustained budgets. Continue to
+init/console/input, shell/files/two apps and actual optical ISO qualification.
+Physical clock recovery,32-bit wrap,suspend/resume,SMP and general recovery stay
+flagged. No phase/flag closes:40 phases,301 subphases,8996 requirements,59 additions,
+97 flags/42 open,20 gaps. USI-1/2 partial,3-5 not started. Full robust microkernel,
+PooleGlyph/PDC and accessible PooleGlass remain the production goal.
+
+## Historical Cycle 254: Caller-Owned Request Lifetimes
 
 USI-2 now provides bounded caller-owned completion, cancel, wait and take. Native
 tasks survive success, discarded requests, queued service death and claimed
