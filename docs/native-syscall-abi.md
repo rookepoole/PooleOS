@@ -1,6 +1,6 @@
 # PSABI1 Development Syscall Profile
 
-Current extension, Cycle251: calls3/4 send/receive through granted endpoint handles;
+Current extension, Cycle252 (wire layout unchanged since251): calls3/4 send/receive through granted endpoint handles;
 call5 waits for readable/writable readiness with scheduler suspension and checked
 resumption. Statuses5-9 add Denied, Again, TooSmall, Cancelled and Revoked. See the
 [current IPC contract](native-capability-ipc.md) for the exact register layout,

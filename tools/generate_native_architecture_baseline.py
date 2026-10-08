@@ -24,6 +24,10 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle252-native-ipc-pressure-lifecycle.md",
+    "tests/fixtures/cycle251-user-entry-readiness.json",
+    "native/kernel/src/arch/x86_64/user_ipc/pressure.rs",
+    "native/kernel/src/user_root_probe/peer_driver/ipc_pressure.rs",
     "docs/checkpoints/cycle251-native-ipc-waits.md",
     "tests/fixtures/cycle250-user-entry-readiness.json",
     "native/kernel/src/capability_ipc/wait.rs",

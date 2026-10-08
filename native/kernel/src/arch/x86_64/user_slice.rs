@@ -31,6 +31,7 @@ pub struct PeerEntry {
     budget: Option<preemption::Budget>,
     suppress_local: bool,
     lose_sample: bool,
+    arguments: [u64; 6],
 }
 impl PeerEntry {
     /// Same sole-BSP, IF0 and state-ownership preconditions as Entry::prepare.
@@ -42,6 +43,7 @@ impl PeerEntry {
             budget: None,
             suppress_local: false,
             lose_sample: false,
+            arguments: [0; 6],
         })
     }
     pub fn set_budget(&mut self, budget: preemption::Budget) -> Result<(), Error> {
@@ -49,6 +51,18 @@ impl PeerEntry {
             return Err(Error::State);
         }
         self.budget = Some(budget.validate()?);
+        Ok(())
+    }
+    pub fn set_initial_arguments(&mut self, arguments: [u64; 6]) -> Result<(), Error> {
+        if self.entry.installed
+            || self.run.is_some()
+            || self.saved.is_some()
+            || super::active()
+            || active()
+        {
+            return Err(Error::State);
+        }
+        self.arguments = arguments;
         Ok(())
     }
     pub fn inject_missing_local_timer(&mut self) -> Result<(), Error> {
@@ -138,7 +152,7 @@ impl task::SliceDriver for PeerEntry {
             .saved
             .as_ref()
             .map(|s| s.context)
-            .unwrap_or_else(|| Context::initial(image));
+            .unwrap_or_else(|| Context::initial_with_arguments(image, self.arguments));
         context.validate(image)?;
         let run = match self.run.take() {
             Some(r) => r,
@@ -324,6 +338,9 @@ unsafe extern "C" {
     static poole_peer_stack_fault_end: u8;
 }
 pub fn peer_payload(kind: usize) -> Result<&'static [u8], Error> {
+    if kind == 18 || kind == 19 {
+        return super::super::user_ipc::pressure_payload(kind == 19);
+    }
     if kind == 16 || kind == 17 {
         return super::super::user_ipc::payload(kind == 17);
     }

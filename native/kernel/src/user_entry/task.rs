@@ -477,6 +477,38 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
 }
 
 impl<H: Cpu, D: SliceDriver> Slot<H, D> {
+    /// Terminate a charged, quiescent IPC waiter without resuming its saved frame.
+    /// The supervisor must reap (revoking the wait) and tear down the scheduler ID.
+    pub fn cancel_waiting(
+        &mut self,
+        id: TaskId,
+        ticket: crate::capability_ipc::wait::Ticket,
+    ) -> Result<Outcome, Error> {
+        let task = self.owned_mut(id)?;
+        if task.state != State::Waiting || task.pending_charge.is_some() || task.runtime.unknown {
+            return Err(Error::State);
+        }
+        let slice = task.last_slice.ok_or(Error::State)?;
+        let Event::Waiting {
+            ticket: expected,
+            syscalls,
+        } = slice.event
+        else {
+            return Err(Error::State);
+        };
+        if expected != ticket {
+            return Err(Error::Identity);
+        }
+        let outcome = Outcome {
+            id,
+            root: slice.root,
+            reason: Reason::Cancelled,
+            syscalls,
+        };
+        task.outcome = Some(outcome);
+        task.state = State::Terminated;
+        Ok(outcome)
+    }
     /// Called only by the exclusive IPC owner after validating its notification.
     pub fn complete_wait(
         &mut self,

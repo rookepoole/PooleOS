@@ -207,6 +207,84 @@ fn waiting_task_requires_settled_slice_and_exact_notification_before_resuming() 
 }
 
 #[test]
+fn waiting_task_termination_never_resumes_and_retains_failed_retirement_for_retry() {
+    use crate::capability_ipc::{
+        Caller, Space,
+        wait::{Admission, Readiness},
+    };
+    for notified in [false, true] {
+        let mut s = setup();
+        let image = s.image;
+        let (mut slot, c, id) = task_slot(s.owner);
+        let mut space = Space::new();
+        space.attach(id, image).unwrap();
+        let h = space.create_endpoint(id).unwrap();
+        let Admission::Pending(ticket) = space
+            .prepare_wait(Caller::new(id, image), h, Readiness::Readable)
+            .unwrap()
+        else {
+            panic!()
+        };
+        let other = TaskId::new(1, 1).unwrap();
+        let other_image = ImageAdmission {
+            root_physical: image.root_physical + 4096,
+            ..image
+        };
+        space.attach(other, other_image).unwrap();
+        let other_h = space.create_endpoint(other).unwrap();
+        let Admission::Pending(wrong) = space
+            .prepare_wait(
+                Caller::new(other, other_image),
+                other_h,
+                Readiness::Readable,
+            )
+            .unwrap()
+        else {
+            panic!()
+        };
+        assert!(slot.cancel_waiting(id, ticket).is_err());
+        c.borrow_mut().wait = Some(ticket);
+        let (mut scheduler, cpu) = running_scheduler(id);
+        slot.activate(id, &s.manager, &mut s.memory).unwrap();
+        assert!(slot.cancel_waiting(id, ticket).is_err());
+        slot.run_slice(id).unwrap();
+        assert!(slot.cancel_waiting(id, ticket).is_err());
+        slot.account_slice(id, &mut scheduler, cpu).unwrap();
+        space.park_wait(ticket, &mut scheduler, cpu).unwrap();
+        if notified {
+            space.cancel_wait(ticket, &mut scheduler, cpu).unwrap();
+        }
+        assert_eq!(slot.cancel_waiting(id, wrong), Err(task::Error::Identity));
+        assert_eq!(slot.state(id), Ok(task::State::Waiting));
+        let outcome = slot.cancel_waiting(id, ticket).unwrap();
+        assert_eq!(outcome.reason, Reason::Cancelled);
+        assert_eq!(outcome.syscalls, 2);
+        assert!(slot.cancel_waiting(id, ticket).is_err());
+        assert!(
+            slot.complete_wait(id, ticket, crate::user_entry::syscall::Status::Cancelled)
+                .is_err()
+        );
+        assert!(slot.activate(id, &s.manager, &mut s.memory).is_err());
+        assert_eq!(c.borrow().completions, 0);
+        c.borrow_mut().fail_revoke = true;
+        assert!(slot.reap(id, &mut s.manager, &mut s.memory).is_err());
+        retained(&mut s.manager, &s.handles);
+        c.borrow_mut().fail_revoke = false;
+        let (_, actual) = slot.reap(id, &mut s.manager, &mut s.memory).unwrap();
+        assert_eq!(actual, outcome);
+        space.detach(id).unwrap();
+        scheduler
+            .teardown(crate::scheduler::TaskId::new(id.slot, id.generation).unwrap())
+            .unwrap();
+        assert!(space.cancel_wait(ticket, &mut scheduler, cpu).is_err());
+        assert_eq!(scheduler.summary().runnable_count, 0);
+        assert_eq!(scheduler.summary().dead_count, 1);
+        scheduler.validate().unwrap();
+        assert_eq!(s.machine.borrow().snapshot.cr3, s.original);
+    }
+}
+
+#[test]
 fn retirement_revocation_failure_retains_root_and_supports_terminal_and_quarantine_retry() {
     for failed_execution in [false, true] {
         let mut s = setup();

@@ -22,7 +22,7 @@ def main() -> int:
     work = args.work_dir.resolve()
     if not work.is_relative_to(ROOT): p.error("work directory must be inside repository")
     work.mkdir(parents=True, exist_ok=False)
-    report = {"cycle": 251, "contract_id": "PKIPC1", "status": "fail", "guest_runs": [],
+    report = {"cycle": 252, "contract_id": "PKIPC2", "status": "fail", "guest_runs": [],
               "guest_bound_seconds": 120, "hpet_msi": True,
               "ring3_executed": False, "iso_built": False, "production_ready": False}
     try:
@@ -56,7 +56,7 @@ def main() -> int:
         for i in (1, 2):
             run_dir = work / f"guest-{i}"
             run_dir.mkdir()
-            print(f"PKIPC1 guest {i}/2, 120-second bound", flush=True)
+            print(f"PKIPC2 guest {i}/2, 120-second bound", flush=True)
             run, _, handoff = boot._execute_once(f"user-root-{i}", lock, profile, qemu,
                 media_path, run_dir, 120, marker_validator=probe.validate_markers,
                 marker_extractor=transfer.extract_markers, completion_marker=probe.COMPLETION, hpet_msi=True)
@@ -84,7 +84,7 @@ def main() -> int:
         report["failure"] = f"{type(e).__name__}: {e}"
         print(report["failure"], flush=True)
     (work / "receipt.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
-    print(f"PKIPC1 live {report['status']}; ring3={report['ring3_executed']} production=0", flush=True)
+    print(f"PKIPC2 live {report['status']}; ring3={report['ring3_executed']} production=0", flush=True)
     return 0 if report["status"] == "pass" else 1
 
 

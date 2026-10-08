@@ -1,6 +1,16 @@
 # PKUSER8 Development Task Lifecycle
 
-Cycle251 adds a Waiting state, charged quiescent IPC suspension, exactly-once
+Cycle252 adds `cancel_waiting(id, ticket)`: only a charged, quiescent Waiting task
+with the exact retained ticket can become Terminated/Cancelled. It never resumes
+the saved frame. The supervisor must reap and tear down the scheduler identity;
+failed revocation retains ownership for retry. Native enrolled-owner fault,
+preempted cancellation, blocked cancellation and cleanup-quarantine recovery now
+have surviving-peer evidence. Persistent slots advance through five generations.
+Explicit six-word startup data fills only RDI/RSI/RDX/RCX/R8/R9; remaining initial
+registers stay zero. This is not a production executable-startup ABI or general
+service supervisor. [Evidence](checkpoints/cycle252-native-ipc-pressure-lifecycle.md).
+
+Historical Cycle251 adds a Waiting state, charged quiescent IPC suspension, exactly-once
 notified resumption, and mandatory authority revocation before Slot retirement.
 Native adapters and their timer wrapper implement the hooks; failed revocation
 retains the root for retry. See [IPC lifetime and remaining work](native-capability-ipc.md).

@@ -1,15 +1,41 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.154.0-native-ipc-waits
-Roadmap cycle: PooleOS Cycle 251
+Plan version: 2.155.0-native-ipc-pressure-lifecycle
+Roadmap cycle: PooleOS Cycle 252
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 251: Native IPC Waiting And Retirement
+## Cycle 252: Native IPC Pressure And Peer Lifetime
+
+USI-2 now qualifies five native IPC lifetimes on persistent owned slots. Real CPL3
+programs fill a FIFO, block for write readiness, recover a four-byte partial output
+fault without losing the message, and reject stale handles after reuse. An enrolled
+owner faults, is cancelled while preempted or blocked, or enters failed-cleanup
+quarantine; its surviving peer resumes with Revoked and completes independent IPC.
+Two fresh67-marker guests preserve all17 older containment cases and ordinary denial.
+403 kernel tests,592 Rust executions,46 oracle tests and800 altered-evidence
+rejections per guest pass. [Evidence](checkpoints/cycle252-native-ipc-pressure-lifecycle.md).
+
+New kernel support explicitly initializes six user argument registers and terminates
+charged, quiescent IPC waiters without resuming them. Retirement and scheduler
+teardown remain required. A native constructor stack-guard failure was repaired by
+reusing task slots in place; the36-page stack and192-page image cap are unchanged.
+The image is188 pages; full stack and product-contract qualification remain open.
+
+N13-CAPABILITY-IPC-001 next: authenticated sender identity and one-use reply ownership,
+deadlines, transactional bootstrap/admission and sustained service budgets. Then
+init/console, shell/files/two apps and optical ISO acceptance. Queue-pressure and
+five fixed lifetimes do not establish arbitrary supervision, concurrency or all
+revocation races. Keep these gaps under FLAG-N13-USERSPACE-ISO-001. No phase/flag
+closes:40 phases,301 subphases,8996 requirements,59 additions,97 flags/42 open,
+20 gaps. Full robust microkernel, PooleGlyph/PDC and PooleGlass work continues.
+No new ISO, full canonical pass, main merge, release or production promotion.
+
+## Historical Cycle 251: Native IPC Waiting And Retirement
 
 USI-2 now connects endpoint readiness to actual scheduler blocking and saved-user
 resumption. Two fresh native boots each prove3 suspensions,2 readiness wakes,

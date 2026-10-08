@@ -22,6 +22,15 @@ impl Context {
             frame: image.initial_frame,
         }
     }
+    /// Explicit supervisor-selected user data, not inherited kernel registers.
+    /// The six integer startup arguments use RDI, RSI, RDX, RCX, R8, R9.
+    pub fn initial_with_arguments(image: ImageAdmission, arguments: [u64; 6]) -> Self {
+        let mut context = Self::initial(image);
+        for (index, value) in [9, 8, 11, 12, 7, 6].into_iter().zip(arguments) {
+            context.registers[index] = value;
+        }
+        context
+    }
     pub fn capture(image: ImageAdmission, trap: &Trap) -> Result<Self, Error> {
         // Reuse checked IRET geometry; the caller separately authenticates the event.
         syscall::frame(
@@ -82,6 +91,20 @@ mod tests {
                 ss: super::super::USER_DATA_SELECTOR,
             },
         }
+    }
+    #[test]
+    fn startup_arguments_change_only_the_six_declared_user_registers() {
+        let c = Context::initial_with_arguments(image(), [11, 22, 33, 44, 55, 66]);
+        assert_eq!(
+            c.registers,
+            [0, 0, 0, 0, 0, 0, 66, 55, 22, 11, 0, 33, 44, 0, 0]
+        );
+        assert_eq!(c.frame, image().initial_frame);
+        c.validate(image()).unwrap();
+        assert_eq!(
+            Context::initial_with_arguments(image(), [0; 6]),
+            Context::initial(image())
+        );
     }
     #[test]
     fn context_roundtrip_preserves_every_register_and_usable_stack_position() {

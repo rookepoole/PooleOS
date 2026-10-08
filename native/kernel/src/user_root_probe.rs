@@ -482,6 +482,16 @@ pub fn run(
         serial,
         debugcon,
     );
+    peer_driver::ipc_pressure::run(
+        handoff,
+        core,
+        bits,
+        &mut manager,
+        topology,
+        hpet,
+        serial,
+        debugcon,
+    );
     let mut log = EarlyLogger::new(BootSink {
         serial,
         debugcon,
@@ -497,7 +507,7 @@ pub fn run(
     log.write_str(" retained_acpi_pages=");
     log.write_decimal_u64(acpi.snapshot_page_count);
     log.write_str(
-        " released_pages=616 scrubbed_data_pages=283 ring3=1 production=0 terminal=halt\n",
+        " released_pages=746 scrubbed_data_pages=343 ring3=1 production=0 terminal=halt\n",
     );
     halt_forever()
 }

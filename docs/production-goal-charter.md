@@ -7,9 +7,16 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 251
+Last roadmap reconciliation: PooleOS Cycle 252
 
-Cycle251 connects IPC readiness to real scheduler waits, cancellation and checked
+Cycle252 adds guarded blocked-wait termination and explicit user startup arguments.
+Two fresh native boots prove queue pressure, partial-copy retry, persistent task
+generations and surviving-peer progress through four enrolled-owner death/recovery
+paths. Next: sender/reply authority and service admission, then init/console/shell/
+apps and the usable ISO. Full N0-N39, PooleGlyph/PDC and PooleGlass obligations remain.
+[Cycle252 evidence](checkpoints/cycle252-native-ipc-pressure-lifecycle.md).
+
+Historical Cycle251 connects IPC readiness to real scheduler waits, cancellation and checked
 resumption, and automatically revokes authority before task retirement. Two fresh
 native boots preserve17 containment cases and complete the new exchange. Native
 death/revocation/saturation, sender/reply ownership and general service admission

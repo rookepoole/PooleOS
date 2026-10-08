@@ -10,6 +10,8 @@ use poolekernel::{
 };
 
 static mut IPC: Space = Space::new();
+mod pressure;
+pub(super) use pressure::payload as pressure_payload;
 
 fn idle() -> Result<(), Error> {
     if super::user::active() || super::read_rflags() & ((1 << 9) | (1 << 10) | (1 << 18)) != 0 {

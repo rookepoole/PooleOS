@@ -1,6 +1,6 @@
 # Native Capability IPC
 
-Cycle251 / PKIPC1 is an original, bounded PooleKernel mechanism, not a complete
+Cycle252 / PKIPC1 (native lifecycle probe PKIPC2) is an original, bounded PooleKernel mechanism, not a complete
 N13/N14 implementation. It advances USI-2 toward the native user-space ISO.
 
 ## Authority And Lifetime
@@ -28,8 +28,9 @@ objects survive. No user-facing creation, grant, close or destroy syscall exists
 Task retirement now calls the mandatory architectural `revoke` hook before root
 retirement. Both native task adapters implement it; the timer wrapper forwards it.
 Failure retains the task and its memory for cleanup retry. This is automatic
-retirement cleanup, not a complete service supervisor or native dead-peer stress
-qualification. Quarantined tasks retain authority until stopped cleanup succeeds.
+retirement cleanup, not a complete service supervisor. Native fixed owner-fault,
+preempted cancellation, blocked cancellation and cleanup-quarantine retry now have
+surviving-peer evidence. Quarantined tasks retain authority until stopped cleanup succeeds.
 
 ## Development ABI
 
@@ -78,6 +79,13 @@ Close/destroy/dead-owner invalidation produces Revoked for a parked peer; cancel
 a parked wait produces Cancelled. Detach clears the stopped task's own wait; its
 supervisor must also tear down that scheduler identity. Generations survive detach.
 
+`Slot::cancel_waiting` terminates a charged, quiescent waiter with its exact ticket
+without completing or resuming the saved frame. Reap still runs revocation and
+root retirement; the supervisor then removes the scheduler identity. Host tests
+cover both parked and already-notified waits, wrong tickets, unsettled accounting,
+repeat termination and failed-retirement retry. Native evidence includes one
+parked owner termination and denied use of its detached ticket, not all wake/kill races.
+
 Readiness is advisory, not a reservation: another operation may consume a message
 or fill capacity before the resumed task retries. A notified Ready may precede later
 revocation; the subsequent transfer must revalidate. There is no user-memory loan,
@@ -88,10 +96,10 @@ blocking copy, direct RPC, deadline, wait-many or automatic user-request restart
 | ID | Predicate | Current Verifier |
 | --- | --- | --- |
 | IPC-AUTH | Caller/table/root/generation and typed rights must match | Host identity/type/rights tests; native invalid handle and wrong-direction denial |
-| IPC-REUSE | Stale cap/object/task generations never regain authority | Host close/reuse, object destruction and exhaustion tests |
-| IPC-BOUND | Finite allocation and queues; no mutation on quota failure | Host table/object exhaustion, FIFO wrap/full/empty tests |
-| IPC-COPY | Input fault publishes nothing; output fault does not dequeue | Every one of64 fault offsets in host tests; native unmapped copy-in denial |
-| IPC-OWN | Detach invalidates owned objects before root release | Host dead-owner and failed-hook retry; native automatic retirement |
+| IPC-REUSE | Stale cap/object/task generations never regain authority | Host close/reuse, object destruction and exhaustion; native five persistent-slot generations and old-handle rejection |
+| IPC-BOUND | Finite allocation and queues; no mutation on quota failure | Host table/object exhaustion; native full queue, FIFO drain, writable wake and retry |
+| IPC-COPY | Input fault publishes nothing; output fault does not dequeue | Every one of64 fault offsets in host tests; native input denial and four-byte partial-output retry |
+| IPC-OWN | Detach invalidates owned objects before root release | Host failed-hook retry; native exit/fault/preempted-cancel/wait-cancel/quarantine retirement and surviving peer |
 | IPC-WAIT | Charged, quiescent tasks block and consume one identity-bound wake | Host arm/park arrival, stale/replay/cancel/revoke/overflow tests; native three waits/two wakes/one cancellation |
 | IPC-NATIVE | Real isolated user programs exchange actual bytes | Two fresh native boots, separate roots, transformed8-byte request/reply |
 | IPC-CONSERVE | No older containment/ordinary-denial regression |17 survival cases, exact runtime/root accounting and ordinary denial per qualification |
@@ -102,28 +110,35 @@ them, sends 8 reply bytes, and exits 90. The client checks those bytes and exits
 The client first receives a supervisor cancellation, then both tasks block for
 request/reply readiness without polling loops. Native selected GPR/SIMD and stack
 checks survive resumption. Both tables retire automatically, all endpoints disappear,
-and26 pages/12 data-scrub pages are released. Native revoked/dead-peer/write-readiness,
-queue-saturation/copy-out
-controls are still needed even though corresponding core host tests pass.
+and26 pages/12 data-scrub pages are released.
+
+The separate PKIPC2 experiment reuses two owned slots through five generations
+without resetting Space or its cap/object/wait high-water marks. Startup arguments
+select only public test values; table lookup still authenticates every call. Each
+round fills a four-message queue and rejects a fifth send before touching its
+unmapped source. The first drains FIFO messages, rejects a short receive, recovers
+a real four-byte partial output fault without dequeue, wakes a writer and completes
+the transformed sum. Later rounds retire an enrolled owner through fault, preempted
+cancellation, blocked cancellation or cleanup failure/retry. A waiting peer receives
+Revoked, rejects further transfer/wait on the destroyed endpoint and completes
+independent IPC on its surviving object. Generation1 rejects a zero-generation
+handle; generations2-5 reject actual prior handles. Each round releases26 pages and
+scrubs12 data pages. [Exact evidence](checkpoints/cycle252-native-ipc-pressure-lifecycle.md).
 
 ## Next Required Work
 
-1. Extend the native experiment to dead-owner/revoked/stale handles, writable waits,
-   quota pressure, cancellation races and repeated task generations. Do not reset
-   Space to bypass its high-water checks; use persistent owned task slots.
-2. Qualify enrolled endpoint owners through native fault/cancel/quarantine cleanup
-   and retained retry, plus pending-wait task termination and scheduler teardown.
-3. Add authenticated sender identity, one-use reply ownership, deadlines and
+1. Add authenticated sender identity, one-use reply ownership, deadlines and
    cancellation races. Two ordinary queues are not authenticated RPC reply tokens.
-4. Add native saturation, stale/revoked handle, partial output, dead-peer and
-   repeated lifecycle tests. Keep quotas failure-atomic across all mutations.
-5. Before general services: transactional bootstrap/admission, derivation-tree
+2. Extend beyond the five fixed native lifetimes: arbitrary close/destroy/wake/kill
+   interleavings, quota recovery, generation exhaustion, persistent quarantine and
+   sustained pressure. Never reset authority counters to make a case pass.
+3. Before general services: transactional bootstrap/admission, derivation-tree
    revocation, user delegation, generated wire layouts, audit provenance, shared
    memory/notifications, concurrency/SMP, priority propagation and sustained policy.
 
 The bootstrap helper currently retains partial state on error and the diagnostic
 halts; it is not a transactional general loader. Capacity exhaustion and object
-destruction have host coverage, not a general pressure/recovery policy. Queue
+destruction have host coverage and bounded native lifecycle evidence, not a general pressure/recovery policy. Queue
 clearing is logical initialization, not a physical secure-erasure claim. Broader
 stack, exception, clock, hardware and product-contract qualification remain open.
 

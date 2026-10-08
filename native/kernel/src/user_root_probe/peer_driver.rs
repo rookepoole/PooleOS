@@ -11,6 +11,7 @@ use poolekernel::{
 use timer_driver::{PeerRun, Timer};
 
 pub(super) mod ipc;
+pub(super) mod ipc_pressure;
 pub(super) mod unknown;
 
 // A constructor error carries its owner even if cleanup or slot commit failed.
@@ -49,16 +50,47 @@ impl Peer {
         probe: timer_driver::Probe,
         missing_local: bool,
     ) -> Result<Self, PeerFailure> {
+        Self::new_with_arguments(
+            index,
+            kind,
+            [0; 6],
+            handoff,
+            core,
+            bits,
+            manager,
+            topology,
+            hpet,
+            probe,
+            missing_local,
+        )
+    }
+
+    #[inline(never)]
+    fn new_with_arguments(
+        index: u8,
+        kind: usize,
+        arguments: [u64; 6],
+        handoff: &Handoff<'_>,
+        core: CoreRecord,
+        bits: u8,
+        manager: &mut PhysicalMemoryManager,
+        topology: interrupt_time::MadtTopology,
+        hpet: interrupt_time::HpetDescription,
+        probe: timer_driver::Probe,
+        missing_local: bool,
+    ) -> Result<Self, PeerFailure> {
         let mut timer =
             Timer::new(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
         timer.set_probe(probe);
         let bytes = arch::x86_64::user::peer_payload(if kind == 15 { 0 } else { kind })
             .map_err(|_| PeerFailure::Setup)?;
-        let identity = TaskId::new(index, 1).map_err(|_| PeerFailure::Setup)?;
         // SAFETY: exclusive BSP, IF0, before allocation or task activation.
         let mut entry =
             unsafe { arch::x86_64::user::PeerEntry::new(core.initial_stack_top_virtual) }
                 .map_err(|_| PeerFailure::Setup)?;
+        entry
+            .set_initial_arguments(arguments)
+            .map_err(|_| PeerFailure::Setup)?;
         if missing_local {
             entry
                 .inject_missing_local_timer()
@@ -69,19 +101,19 @@ impl Peer {
         }
         let built = spawn_driver::build(manager, core, bits, bytes, Some(timer.mappings()))
             .map_err(PeerFailure::Construction)?;
-        Self::install(identity, entry, timer, built, core)
+        Self::install(index, entry, timer, built, core)
     }
 
     // Keep slot/CPU-image temporaries off the deep mapping-validation call path.
     #[inline(never)]
     fn install(
-        identity: TaskId,
+        index: u8,
         entry: arch::x86_64::user::PeerEntry,
         timer: Timer,
         built: spawn_driver::Built,
         core: CoreRecord,
     ) -> Result<Self, PeerFailure> {
-        let mut slot = Slot::new(identity.slot).expect("validated namespace-local task slot");
+        let mut slot = Slot::new(index).map_err(|_| PeerFailure::Setup)?;
         let spawn_driver::Built {
             prepared,
             memory,
@@ -112,6 +144,78 @@ impl Peer {
             root,
             admission,
         })
+    }
+    /// Reuse the exact empty slot in place; never copy a large ownership container
+    /// through the constructor's deep mapping-validation stack.
+    #[inline(never)]
+    fn restart(
+        &mut self,
+        kind: usize,
+        arguments: [u64; 6],
+        handoff: &Handoff<'_>,
+        core: CoreRecord,
+        bits: u8,
+        manager: &mut PhysicalMemoryManager,
+        topology: interrupt_time::MadtTopology,
+        hpet: interrupt_time::HpetDescription,
+        probe: timer_driver::Probe,
+    ) -> Result<(), PeerFailure> {
+        if self.slot.state(self.id) != Err(task::Error::Missing) {
+            return Err(PeerFailure::Setup);
+        }
+        let mut timer =
+            Timer::new(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
+        timer.set_probe(probe);
+        let bytes = arch::x86_64::user::peer_payload(kind).map_err(|_| PeerFailure::Setup)?;
+        let mut entry =
+            unsafe { arch::x86_64::user::PeerEntry::new(core.initial_stack_top_virtual) }
+                .map_err(|_| PeerFailure::Setup)?;
+        entry
+            .set_initial_arguments(arguments)
+            .map_err(|_| PeerFailure::Setup)?;
+        let built = spawn_driver::build(manager, core, bits, bytes, Some(timer.mappings()))
+            .map_err(PeerFailure::Construction)?;
+        self.reinstall(entry, timer, built, core)
+    }
+    #[inline(never)]
+    fn reinstall(
+        &mut self,
+        entry: arch::x86_64::user::PeerEntry,
+        timer: Timer,
+        built: spawn_driver::Built,
+        core: CoreRecord,
+    ) -> Result<(), PeerFailure> {
+        let spawn_driver::Built {
+            prepared,
+            memory,
+            handles,
+            image,
+        } = built;
+        let admission = prepared
+            .admission()
+            .expect("successful construction admits its image");
+        let root = admission.root_physical;
+        let cpu = unsafe { arch::x86_64::UserRootCpu::new(core.page_table_root_physical, root) };
+        let id = match self
+            .slot
+            .insert(CpuImage::new(prepared, cpu, core), PeerRun { entry, timer })
+        {
+            Ok(id) => id,
+            Err((_, image, driver)) => {
+                return Err(PeerFailure::Slot {
+                    image,
+                    driver,
+                    memory,
+                });
+            }
+        };
+        self.id = id;
+        self.memory = memory;
+        self.handles = handles;
+        self.image = image;
+        self.root = root;
+        self.admission = admission;
+        Ok(())
     }
     fn reap(
         &mut self,

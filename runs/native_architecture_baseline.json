@@ -358,6 +358,30 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle252-native-ipc-pressure-lifecycle.md",
+      "sha256": "D4BFB9CDE92B5190F571C6C211C19AFD9C7F96BA22AF84111D533D7DE71E768F",
+      "byte_count": 7345,
+      "line_count": 123
+    },
+    {
+      "path": "tests/fixtures/cycle251-user-entry-readiness.json",
+      "sha256": "1744A690DC5276B054724F53BE85493988D8617043E641B86FF5FE3F3B902FCE",
+      "byte_count": 291754,
+      "line_count": 5979
+    },
+    {
+      "path": "native/kernel/src/arch/x86_64/user_ipc/pressure.rs",
+      "sha256": "64610F7F66708F404C0D985E186F733CC5D67B5DE0A8DA241ED98178C9C37DC0",
+      "byte_count": 4850,
+      "line_count": 269
+    },
+    {
+      "path": "native/kernel/src/user_root_probe/peer_driver/ipc_pressure.rs",
+      "sha256": "A97863110F35E22A85F550DE3AE7F06C52FFBA25FDCD7802A6B884793A2201AB",
+      "byte_count": 12232,
+      "line_count": 348
+    },
+    {
       "path": "docs/checkpoints/cycle251-native-ipc-waits.md",
       "sha256": "4B282BE64A341B664764C2F0822C77A1773D2EB6FB415EF3629940BEE6D815F1",
       "byte_count": 7410,
@@ -383,9 +407,9 @@
     },
     {
       "path": "docs/native-capability-ipc.md",
-      "sha256": "7686A18277553EEA28B24630A41604D3C13383B641E6E295A2C9F2D3177EF13E",
-      "byte_count": 9522,
-      "line_count": 138
+      "sha256": "C0DAB3DDDB736F5965D4EA382D5FEA52CCA9EE7626B63CDCAFEB2607C523AB53",
+      "byte_count": 10867,
+      "line_count": 153
     },
     {
       "path": "tests/fixtures/cycle249-user-entry-readiness.json",
@@ -407,9 +431,9 @@
     },
     {
       "path": "native/kernel/src/arch/x86_64/user_ipc.rs",
-      "sha256": "891E2402D3E23E794B27F38C857259B7B0D325A18C69564190CCB22DABD37513",
-      "byte_count": 5898,
-      "line_count": 247
+      "sha256": "5653642DA6C4EE1A7F5A07EDFACE7EFA5032EA4ABB48A320A0FA2F144A7EDC64",
+      "byte_count": 5966,
+      "line_count": 249
     },
     {
       "path": "native/kernel/src/user_root_probe/peer_driver/ipc.rs",
@@ -599,21 +623,21 @@
     },
     {
       "path": "native/kernel/src/user_entry/context.rs",
-      "sha256": "7AE8771D3FD6D645416529EE59C2D81EBF720CC53B4364DCC30D239F575E454E",
-      "byte_count": 4432,
-      "line_count": 141
+      "sha256": "8D88DB4AA6B12532DE5E1DDA4D8296031AAB7CCDA0405A6EE67836CB0981C26B",
+      "byte_count": 5396,
+      "line_count": 164
     },
     {
       "path": "native/kernel/src/arch/x86_64/user_slice.rs",
-      "sha256": "7A591175D838E8C59D5E6013E9F08DD13191AB08F57312A197749CFAA5DA6A93",
-      "byte_count": 17703,
-      "line_count": 575
+      "sha256": "5A8E23CA30FD4428B9DCBE73C8459DE9AE2BB61E24C5818846F7F503341512B7",
+      "byte_count": 18259,
+      "line_count": 592
     },
     {
       "path": "native/kernel/src/user_root_probe/peer_driver.rs",
-      "sha256": "B9658981D93D5C7302ED5434C0EE5783966D45B4279B7E3ED3D7A5A962C08BB4",
-      "byte_count": 25051,
-      "line_count": 643
+      "sha256": "BB9A20615B960AFDE5F662C0CF6DBC9BC8DF780EC80F07A3679BF5ECF05ED15E",
+      "byte_count": 28350,
+      "line_count": 747
     },
     {
       "path": "tests/fixtures/cycle242-user-entry-readiness.json",
@@ -629,15 +653,15 @@
     },
     {
       "path": "docs/native-task-lifecycle.md",
-      "sha256": "4D9EFB02C45B0E570691E455E4EEE30520C6AD4A24C0E7670290E076C7E84CA5",
-      "byte_count": 5994,
-      "line_count": 100
+      "sha256": "21832680DFCC8251F9B8FBA6FF2369C3CB0EEB8173A104A13A98194B3A4BE831",
+      "byte_count": 6738,
+      "line_count": 110
     },
     {
       "path": "native/kernel/src/user_entry/task.rs",
-      "sha256": "4A16D045D83AB95288F4F4A3FC20032087EEE2E1345436334AA078246609D6C3",
-      "byte_count": 31412,
-      "line_count": 938
+      "sha256": "AB5DFA5348AB3ED48E3DFC0E534865D2A3DFF47F1D99C71775C7DA239FBB5017",
+      "byte_count": 32485,
+      "line_count": 970
     },
     {
       "path": "native/kernel/src/arch/x86_64/user_task.rs",
@@ -665,8 +689,8 @@
     },
     {
       "path": "docs/native-syscall-abi.md",
-      "sha256": "A4B7D5D4E3A681E0F29B24F4CA150B834143AA05AC5562B647CDF541225F34AD",
-      "byte_count": 5664,
+      "sha256": "6BC1A4E6169CF5B30A3515E761B974F3044E2A399E6C47EFF3988AC2C3BB7215",
+      "byte_count": 5697,
       "line_count": 92
     },
     {
@@ -773,27 +797,27 @@
     },
     {
       "path": "native/kernel/src/user_root_probe.rs",
-      "sha256": "40E9E425E1AA65434F0F0A7797346D168FBDF5F173994CC447B2EF9B659E67E2",
-      "byte_count": 17779,
-      "line_count": 503
+      "sha256": "DB03119F54520C079383E032DC13DA02F19EB7BEA3FA8085D95A5EBE0B4BDC4B",
+      "byte_count": 17955,
+      "line_count": 513
     },
     {
       "path": "runtime/native_user_root.py",
-      "sha256": "C62F4F08A101C87975297C832E7D72E601D9F6A74B4BF8C923C6A82FBC041954",
-      "byte_count": 17700,
-      "line_count": 201
+      "sha256": "56FE3228A7C3F7452F80C4D841747D08FEB35CD6B1B6D88559C54E9833EAD535",
+      "byte_count": 20271,
+      "line_count": 226
     },
     {
       "path": "tools/qualify_native_user_root.py",
-      "sha256": "D3DC574A49FBA88C25D422867ACF1855D8E896854E97212B350A4F5E27F861C1",
+      "sha256": "968E3F1350328946ECABA41A28E41F2AD2D684895C2C2D4A6977170B2F6CFD69",
       "byte_count": 5393,
       "line_count": 92
     },
     {
       "path": "tests/test_native_user_root.py",
-      "sha256": "98667D3BC6EA0DC7A0F51BE687D77C41FB55251F18478D0BD09E37CA0FAD9E95",
-      "byte_count": 27901,
-      "line_count": 400
+      "sha256": "486312A8D0C264DEA3513554FBC51531CA21C58CBE4EF216E18B2E94CC66796E",
+      "byte_count": 31061,
+      "line_count": 445
     },
     {
       "path": "tests/fixtures/cycle237-user-root-markers.json",
@@ -821,9 +845,9 @@
     },
     {
       "path": "native/kernel/src/user_entry/cpu_tests.rs",
-      "sha256": "A71C1143D1E546052B95D9AD4A7F9A0541D000B84FA196869097AD4BC3D0B5E6",
-      "byte_count": 48800,
-      "line_count": 1337
+      "sha256": "965B683AD85306E3838578C2CDF3C44C88253BADC7555C7408217B9A9F655AA0",
+      "byte_count": 52034,
+      "line_count": 1415
     },
     {
       "path": "tests/fixtures/cycle235-user-entry-readiness.json",
@@ -863,9 +887,9 @@
     },
     {
       "path": "docs/native-userspace-integration-iso.md",
-      "sha256": "221003C85B57B8CED574EEFC9C7F9243F676CC9DD6692331F4327DBB76E2227D",
-      "byte_count": 24756,
-      "line_count": 378
+      "sha256": "009E00B7B5A88CF92EEEB5FDE5594A5570F9FF1711E8DF598F5F13427094C180",
+      "byte_count": 25163,
+      "line_count": 383
     },
     {
       "path": "native/kernel/src/user_entry.rs",
@@ -881,15 +905,15 @@
     },
     {
       "path": "tools/qualify_native_user_entry.py",
-      "sha256": "044E8C265826DA64BE21FC06CAFAEA2A46F163E61EDF1A5BD4506287CF1D5CE3",
-      "byte_count": 12434,
-      "line_count": 183
+      "sha256": "FDC87C1D2D4BB8365743B397CCC4AC85150D20A801CA80F81CB64EFC03CF5131",
+      "byte_count": 12797,
+      "line_count": 186
     },
     {
       "path": "runs/native-user-entry-readiness.json",
-      "sha256": "1744A690DC5276B054724F53BE85493988D8617043E641B86FF5FE3F3B902FCE",
-      "byte_count": 291754,
-      "line_count": 5979
+      "sha256": "DF8F0D515B1DB8817F65F3159B76FAC33C0A73568A92BCEFF7EFB82C210D79F9",
+      "byte_count": 302880,
+      "line_count": 6246
     },
     {
       "path": "runs/native-user-entry-gate-projection.json",
@@ -2207,15 +2231,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "812F142FB2606E570216220540855C699D1DE2114046311051563306A8FF72F9",
-      "byte_count": 141195,
-      "line_count": 1916
+      "sha256": "B91DE9E530D6D61A85AC85E18E7262BAB72602BFEEA6E407A8393760622B8E9B",
+      "byte_count": 141703,
+      "line_count": 1923
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "F53718CEEB8505BDD8E24C484891B2E7BADDE9A1F29E5851D642E3221FD3E7CD",
-      "byte_count": 547271,
-      "line_count": 5203
+      "sha256": "0D74D06E1BE9BEFEC512FC6C69380CE2384DCCE3A5C8EC5C42C16943B0164911",
+      "byte_count": 549085,
+      "line_count": 5229
     },
     {
       "path": "docs/publication-boundary.md",

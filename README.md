@@ -11,7 +11,16 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle251 adds actual IPC suspension/resumption,
+**Current development checkpoint:** Cycle252 proves native IPC queue pressure,
+partial-copy recovery and peer survival after fault, cancellation, blocked-wait
+termination and cleanup quarantine. Five lifetimes reuse the same owned task slots
+without resetting authority generations. Two fresh native boots and403 kernel tests
+pass. Next: sender/reply authority and service admission, then init, console, shell,
+files, applications and the usable ISO. Complete robust microkernel development
+continues afterward; no interactive ISO yet.
+[Evidence](docs/checkpoints/cycle252-native-ipc-pressure-lifecycle.md).
+
+**Historical development checkpoint:** Cycle251 adds actual IPC suspension/resumption,
 supervisor cancellation and automatic authority cleanup at task retirement. Two
 fresh native boots pass three waits, two readiness wakes, one cancellation and
 the real request/reply exchange, preserving all17 containment cases.401 kernel
