@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run bounded host and freestanding checks for inactive PKUSER1 admission."""
+"""Run bounded host and freestanding checks for inactive PKUSER2 preparation."""
 
 from __future__ import annotations
 
@@ -30,6 +30,7 @@ def source_bindings() -> dict[str, str]:
     paths = {p for p in tracked if Path(p).suffix in {".rs", ".toml", ".lock", ".ld"}}
     paths.update({
         "native/kernel/src/user_entry.rs", "native/kernel/src/user_entry/tests.rs",
+        "native/kernel/src/user_entry/prepared.rs", "native/kernel/src/user_entry/prepared_tests.rs",
         "tools/qualify_native_user_entry.py", "tools/qualify_native_elf_loader.py",
         "specs/native-toolchain-lock.json",
     })
@@ -49,8 +50,8 @@ def main() -> int:
     owner_report = Path("C:/Users/rookp/PooleGlyph/tests/reports/conformance_report.json")
     owner_before = digest(owner_report) if owner_report.is_file() else None
     report: dict = {
-        "contract_id": "PKUSER1", "cycle": 234,
-        "scope": "host_executed_inactive_user_image_admission",
+        "contract_id": "PKUSER2", "cycle": 235,
+        "scope": "host_executed_inactive_user_image_preparation",
         "status": "fail", "source_bindings": before, "checks": [],
         "guest_runs": 0, "ring3_executed": False, "iso_built": False,
         "n13_exit_passed": False, "production_ready": False,
@@ -61,11 +62,13 @@ def main() -> int:
     commands = [
         ("format", [str(cargo), "fmt", *common, "--", "--check"], None),
         ("kernel_host_debug", [str(cargo), "test", *common, "--lib", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 260),
+            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 272),
         ("user_entry_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "user_entry::tests", "--", "--test-threads=1"], 14),
+            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 26),
         ("freestanding_library", [str(cargo), "check", *common, "--lib", "--target",
             "x86_64-unknown-none", *bounded], None),
+        ("prepared_ownership_compile_fail", [str(cargo), "test", *common, "--doc", "--target",
+            "x86_64-pc-windows-msvc", *bounded, "user_entry::prepared", "--", "--test-threads=1"], 2),
     ]
     try:
         for name, command, expected in commands:
@@ -99,7 +102,7 @@ def main() -> int:
     (work / "receipt.json").write_text(serialized, encoding="utf-8", newline="\n")
     if report["status"] == "pass":
         args.out.write_text(serialized, encoding="utf-8", newline="\n")
-    print(f"PKUSER1 {report['status'].upper()}; guest_runs=0; production_ready=false", flush=True)
+    print(f"PKUSER2 {report['status'].upper()}; guest_runs=0; production_ready=false", flush=True)
     return 0 if report["status"] == "pass" else 1
 
 

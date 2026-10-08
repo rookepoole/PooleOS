@@ -141,27 +141,32 @@ impl PhysicalMemoryManager {
         &mut self,
         retained: [Option<RetainedAllocation>; N],
     ) -> Result<(), (Error, [Option<RetainedAllocation>; N])> {
-        let validate = (|| {
-            self.require_operational()?;
-            for token in retained.iter().flatten() {
-                self.validate_allocation_inner(token.handle)?;
-                let allocation = self.allocation_entries()[usize::from(token.handle.slot)];
-                if allocation.retention_id != token.identity || token.identity == 0 {
-                    return Err(Error::RetentionIdentity);
-                }
-                if allocation.release_excluded {
-                    return Err(Error::MetadataOwnership);
-                }
-            }
-            Ok(())
-        })();
-        if let Err(error) = validate {
+        if let Err(error) = self.validate_retentions(&retained) {
             return Err((error, retained));
         }
         for token in retained.into_iter().flatten() {
             self.allocation_entries_mut()[usize::from(token.handle.slot)].retention_id = 0;
         }
         self.seal_metadata_integrity();
+        Ok(())
+    }
+
+    /// Validate the exact owning tokens before an owner's physical cleanup.
+    pub(crate) fn validate_retentions(
+        &self,
+        retained: &[Option<RetainedAllocation>],
+    ) -> Result<(), Error> {
+        self.require_operational()?;
+        for token in retained.iter().flatten() {
+            self.validate_allocation_inner(token.handle)?;
+            let allocation = self.allocation_entries()[usize::from(token.handle.slot)];
+            if allocation.retention_id != token.identity || token.identity == 0 {
+                return Err(Error::RetentionIdentity);
+            }
+            if allocation.release_excluded {
+                return Err(Error::MetadataOwnership);
+            }
+        }
         Ok(())
     }
 

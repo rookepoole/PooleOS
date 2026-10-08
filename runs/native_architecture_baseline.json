@@ -358,6 +358,30 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle235-owned-user-root.md",
+      "sha256": "4ED9EBA5C629D1B40467D79960EF45DE77A292031A0885A35BB488EEA8840CCE",
+      "byte_count": 6249,
+      "line_count": 101
+    },
+    {
+      "path": "native/kernel/src/user_entry/prepared.rs",
+      "sha256": "F1C38D5FB0C3535F05987953AB44D12FCC8EC52808A341A5B2B3A99110CAC7D9",
+      "byte_count": 17280,
+      "line_count": 459
+    },
+    {
+      "path": "native/kernel/src/user_entry/prepared_tests.rs",
+      "sha256": "83D5155B74A8D2C6E34D6C3EFE037E9C9D754CE5A7883D92D3C0DF2D9911E52F",
+      "byte_count": 18468,
+      "line_count": 535
+    },
+    {
+      "path": "tests/fixtures/cycle234-user-entry-readiness.json",
+      "sha256": "196D6F2966213FB1B996D9A9B8A0647104449104330464ECCB1A1421B94F3351",
+      "byte_count": 75427,
+      "line_count": 685
+    },
+    {
       "path": "docs/checkpoints/cycle234-user-entry-foundation.md",
       "sha256": "66B3AC743CF1727FB25A0438B3A3F0292996E02707347901281DB53142DC8860",
       "byte_count": 7101,
@@ -365,15 +389,15 @@
     },
     {
       "path": "docs/native-userspace-integration-iso.md",
-      "sha256": "D4E2DE7B2EBCC65147A5DC52314D07D5A96EB87C14991D1768154BCC4F8A9CD9",
-      "byte_count": 8896,
-      "line_count": 137
+      "sha256": "224CEB2146ECF92C1022F3DE3FCFF2D58BCC38BA05F5F1335D74162777FCA6C3",
+      "byte_count": 9534,
+      "line_count": 145
     },
     {
       "path": "native/kernel/src/user_entry.rs",
-      "sha256": "FE72C9C2E1FDA3CC2848C43A68A78950905F178AABC5FC3EFB838EB4AB5AA272",
-      "byte_count": 8113,
-      "line_count": 241
+      "sha256": "6861CF5CBC30BB28E097815D3C80337E6E66B396B567B73DF96D912262B71A9C",
+      "byte_count": 8809,
+      "line_count": 264
     },
     {
       "path": "native/kernel/src/user_entry/tests.rs",
@@ -383,19 +407,19 @@
     },
     {
       "path": "tools/qualify_native_user_entry.py",
-      "sha256": "5489B8C776892E785C5795A3FC74EF5E74B51C541770D9036300F24E8DF9E8FA",
-      "byte_count": 5294,
-      "line_count": 107
+      "sha256": "899D7B72275DCF9C52AB75E74AFAC12D9BC5E5E13D0A563C9FABEC3A604D79F7",
+      "byte_count": 5593,
+      "line_count": 110
     },
     {
       "path": "runs/native-user-entry-readiness.json",
-      "sha256": "196D6F2966213FB1B996D9A9B8A0647104449104330464ECCB1A1421B94F3351",
-      "byte_count": 75427,
-      "line_count": 685
+      "sha256": "967233D0AFDAD3B8485A93EE74AB759E2BC6E2E1EEA6690499F8DF97E5B22EFD",
+      "byte_count": 76526,
+      "line_count": 714
     },
     {
       "path": "runs/native-user-entry-gate-projection.json",
-      "sha256": "30D052E748AE744D70F1803D3E76C1CEB82B2BAD8D42CCFA1708942E8C6227A5",
+      "sha256": "AC3904AF13BD3320545D953CBBB19FFDA35EAD24877901FE3C6E2D01E411CDB6",
       "byte_count": 7019,
       "line_count": 180
     },
@@ -1709,15 +1733,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "51D464CD74D9959B49151E5223BF374B6B1EFCD1A1604625319F6B5EFA4C2D89",
-      "byte_count": 132194,
-      "line_count": 1784
+      "sha256": "87631DF865D90C87CC9F1C11D8598AE140E42CA51C623090ED0D9A106AA72BD5",
+      "byte_count": 132602,
+      "line_count": 1790
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "B3BD875313252000BC1A35C74B7DC5DC5BCD427BD46D99555620A76428D9C2ED",
-      "byte_count": 518374,
-      "line_count": 4753
+      "sha256": "64C50D79CEEBBECB9BED089D89CE9170ED0FC416C501AF9D618BE82CFBFCA557",
+      "byte_count": 519596,
+      "line_count": 4772
     },
     {
       "path": "docs/publication-boundary.md",
@@ -2513,9 +2537,9 @@
     },
     {
       "path": "native/kernel/src/physical_memory/retention.rs",
-      "sha256": "CEBC587CFCD784D747C202EF4935EDCFD5A1FEE6E97F28EDCB3AD8EA6CD61EB8",
-      "byte_count": 9602,
-      "line_count": 248
+      "sha256": "D3AF30B0D01EDED4BA7C6C1C834B1C8F6F7DD27AFD4480BACBC7E59F954E5AF7",
+      "byte_count": 9754,
+      "line_count": 253
     },
     {
       "path": "native/kernel/src/physical_memory/tests/retention.rs",

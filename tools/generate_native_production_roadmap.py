@@ -11100,7 +11100,7 @@ def apply_cycle233(roadmap: dict, test_count: int) -> dict:
 def apply_cycle234(roadmap: dict, test_count: int) -> dict:
     checkpoint = "docs/checkpoints/cycle234-user-entry-foundation.md"
     plan = "docs/native-userspace-integration-iso.md"
-    receipt_path = "runs/native-user-entry-readiness.json"
+    receipt_path = "tests/fixtures/cycle234-user-entry-readiness.json"
     receipt = json.loads((ROOT / receipt_path).read_bytes())
     projection = json.loads((ROOT / "runs/native-user-entry-gate-projection.json").read_bytes())
     gate = roadmap["baseline"]["native_consistency_release_gate"]
@@ -11181,13 +11181,58 @@ def apply_cycle234(roadmap: dict, test_count: int) -> dict:
         status="open", phase_id="N13", closure_condition="Pass all five native user-space ISO stages with actual isolated tasks, user input, fault containment and fresh optical evidence; do not close production gates", evidence=[checkpoint, plan]))
     roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap + " 25 retained component admissions are stale on changed native source; historical execution is not new qualification.")
+    return apply_cycle235(roadmap, test_count)
+
+
+def apply_cycle235(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle235-owned-user-root.md"
+    receipt_path = "runs/native-user-entry-readiness.json"
+    receipt = json.loads((ROOT / receipt_path).read_bytes())
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle234_" + name] = copy.deepcopy(gate["current_" + name])
+    roadmap["baseline"]["historical_cycle234_user_space_integration"] = copy.deepcopy(roadmap["baseline"]["user_space_integration"])
+    roadmap["baseline"].update(pooleos_cycle=235, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=235, selected_move_id="N13-USER-ENTRY-LIVE-001")
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path]
+    gate["current_candidate_audit"]["cycle"] = 235
+    gate["current_focused_source_projection"]["cycle"] = 235
+    gate["qualification_status"] = "owned_inactive_user_root_host_pass_live_adapter_and_guest_pending"
+    counts = [check["tests_passed"] for check in receipt["checks"] if check["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=235, status="focused_native_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="272_debug_kernel_tests_plus26_repeated_release_user_entry_tests_plus2_compile_fail_checks",
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256((ROOT / receipt_path).read_bytes()).hexdigest().upper(),
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=235, status="pass", tests_run=83,
+        tests_passed=83, tests_failed=0, tests_skipped=0, elapsed_seconds=68.951,
+        log_sha256="00FB0B10C6609DB7628D6F9612E7D1EC394BE869B3B47600650AB5637F825914",
+        initial_attempts=[dict(failures=1, errors=0,
+            log_sha256="58B74451D885355953C1583C6144627899EB34E105050BFADA77DE7092FBAE6C")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    roadmap["baseline"]["user_space_integration"].update(cycle=235,
+        selected_requirement="N13-USER-ENTRY-LIVE-001", receipt_path=receipt_path,
+        host_status=receipt["status"], live_adapter_implemented=False,
+        owned_inactive_supervisor_attachment=True, entry_stack_bytes=16384)
+    roadmap["baseline"]["user_space_integration"]["stages"]["USI-1"] = "partial_host_prepared_root_only"
+    roadmap["immediate_next_move"]["title"] = "Transfer owned prepared root into a CPU-exposed lifecycle, connect bootstrap/timer mappings and prove actual ring-3 entry/return/fault containment"
+    roadmap["immediate_next_move"]["entry_evidence"].append(checkpoint)
+    evidence = "Cycle 235: PKUSER2 constructs retained inactive supervisor and guarded entry-stack mappings; read/write/cleanup failures retain ownership; host/freestanding checks only. " + checkpoint
+    gap = "Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion."
+    phase = next(p for p in roadmap["phases"] if p["id"] == "N13")
+    phase["current_evidence"].insert(0, evidence)
+    phase["current_gaps"][0] = gap
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1237)
+    parser.add_argument("--test-count", type=int, default=1238)
     parser.add_argument("--status-date", default="2026-10-07")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

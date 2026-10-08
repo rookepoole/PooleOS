@@ -1,15 +1,34 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-07
-Plan version: 2.137.0-userspace-integration
-Roadmap cycle: PooleOS Cycle 234
+Plan version: 2.138.0-owned-user-root
+Roadmap cycle: PooleOS Cycle 235
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 234: User-Space Integration Foundation
+## Cycle 235: Owned User Root And Entry Stack
+
+USI-1 / N9/N12/N13.3, `N13-USER-ENTRY-LIVE-001`: PKUSER2 now constructs a
+retained inactive task root with the validated supervisor subtree and a private
+guarded 16-KiB kernel-entry stack. Failed construction and cleanup preserve
+ownership until verified detach; source/permissions are re-audited after writes.
+See [Cycle 235 evidence](checkpoints/cycle235-owned-user-root.md).
+
+Three initial host-test failures were repaired and retained. All 272 kernel host
+tests, 26 repeated optimized tests, two compile-fail ownership checks, formatting
+and freestanding compilation pass. The 83 metadata tests pass after one stale
+status assertion was updated; the failed run remains retained. Live
+CR3/GDT/TSS/IRETQ, timer recovery and user faults are not yet exercised. The live
+adapter must reconcile temporary mappings and timer/MMIO ownership, initialize
+scrubbed contents and supported CPU state, and enforce post-activation lifetime
+retirement. These remain prerequisites under the existing open integration flag,
+not deferred production-only work. No phase/item closes. Next is still actual
+ring-3 entry/return/fault containment before capabilities/IPC and user services.
+
+## Historical Cycle 234: User-Space Integration Foundation
 
 Owner-directed next deliverable: a usable native user-space integration ISO,
 followed by continued full robust microkernel development. The dependency-ordered

@@ -12,6 +12,8 @@ use crate::virtual_memory::{
     self as vm, AddressSpace, TableMemory, USER_WINDOW_END_EXCLUSIVE, USER_WINDOW_START,
 };
 
+pub mod prepared;
+
 pub const CONTRACT_ID: &str = "PKUSER1";
 // Preserve the existing kernel code/data and two-slot TSS at GDT indices 1..4.
 // Data before code also leaves the required ordering for a later SYSRET ABI.
@@ -108,6 +110,17 @@ pub fn admit_initial_image<M: TableMemory>(
     image: InitialImage,
     physical_address_bits: u8,
 ) -> Result<ImageAdmission, Error> {
+    admit_image_with_roots(manager, space, memory, image, physical_address_bits, &[])
+}
+
+fn admit_image_with_roots<M: TableMemory>(
+    manager: &PhysicalMemoryManager,
+    space: &AddressSpace,
+    memory: &mut M,
+    image: InitialImage,
+    physical_address_bits: u8,
+    roots: &[(usize, u64)],
+) -> Result<ImageAdmission, Error> {
     image.validate()?;
     let mask = physical_mask(physical_address_bits)?;
     let summary = space.summary();
@@ -156,8 +169,18 @@ pub fn admit_initial_image<M: TableMemory>(
                 if entry & !ACCESSED != expected {
                     return Err(Error::ParentEntry);
                 }
-            } else if entry != 0 {
-                return Err(Error::UnexpectedMapping);
+            } else {
+                let expected = if level == 0 {
+                    roots
+                        .iter()
+                        .find_map(|&(slot, value)| (slot == index).then_some(value))
+                        .unwrap_or(0)
+                } else {
+                    0
+                };
+                if entry != expected {
+                    return Err(Error::UnexpectedMapping);
+                }
             }
         }
     }

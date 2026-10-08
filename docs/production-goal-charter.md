@@ -7,9 +7,15 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 234
+Last roadmap reconciliation: PooleOS Cycle 235
 
-Cycle 234 follows the owner's direction to pursue a usable native user-space
+Cycle 235 adds an owned inactive user root and guarded kernel-entry stack under
+the existing user-space ISO milestone. Retention, failed construction/cleanup,
+supervisor permission and ownership boundaries receive host tests. CPU activation,
+fault containment and the new ISO remain pending. Normative production scope is
+unchanged. [Cycle 235 evidence](checkpoints/cycle235-owned-user-root.md).
+
+Historical Cycle 234 follows the owner's direction to pursue a usable native user-space
 integration ISO before continuing the complete robust microkernel. The bounded
 milestone and its dependencies are in `docs/native-userspace-integration-iso.md`.
 This sequencing direction changes no normative production requirement. Initial

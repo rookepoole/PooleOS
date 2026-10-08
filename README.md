@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle 234 starts the owner-directed
+**Current development checkpoint:** Cycle 235 adds an owned inactive user root,
+validated supervisor mappings, and a guarded 16-KiB kernel-entry stack. Failed
+preparation/cleanup preserves physical ownership until verified detach. This
+advances the native user-space integration ISO; no ring-3 execution or new ISO
+exists yet. All 272 kernel host tests, 26 optimized user-entry tests, two
+compile-fail checks and 83 metadata tests pass. Live CPU-state/entry/fault integration and fresh guest qualification
+remain required. [Evidence](docs/checkpoints/cycle235-owned-user-root.md).
+
+**Historical development checkpoint:** Cycle 234 starts the owner-directed
 [native user-space integration ISO](docs/native-userspace-integration-iso.md).
 PKUSER1 adds owned inactive user-image admission, strict page-table checks,
 guarded RX/RW-NX layout, and an initial unprivileged IRETQ frame. All 260 kernel

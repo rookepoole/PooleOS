@@ -24,6 +24,10 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle235-owned-user-root.md",
+    "native/kernel/src/user_entry/prepared.rs",
+    "native/kernel/src/user_entry/prepared_tests.rs",
+    "tests/fixtures/cycle234-user-entry-readiness.json",
     "docs/checkpoints/cycle234-user-entry-foundation.md",
     "docs/native-userspace-integration-iso.md",
     "native/kernel/src/user_entry.rs",
