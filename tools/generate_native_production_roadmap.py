@@ -11281,7 +11281,7 @@ def apply_cycle236(roadmap: dict, test_count: int) -> dict:
 
 def apply_cycle237(roadmap: dict, test_count: int) -> dict:
     checkpoint = "docs/checkpoints/cycle237-live-user-root.md"
-    receipt_path = "runs/native-user-entry-readiness.json"
+    receipt_path = "tests/fixtures/cycle237-user-entry-readiness.json"
     raw = (ROOT / receipt_path).read_bytes()
     receipt = json.loads(raw)
     gate = roadmap["baseline"]["native_consistency_release_gate"]
@@ -11347,14 +11347,67 @@ def apply_cycle237(roadmap: dict, test_count: int) -> dict:
     next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")["evidence"].append(checkpoint)
     roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle238(roadmap, test_count)
+
+
+def apply_cycle238(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle238-owned-root-timer.md"
+    receipt_path = "runs/native-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle237_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle237_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=238, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=238)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path]
+    gate["current_candidate_audit"]["cycle"] = 238
+    gate["current_focused_source_projection"]["cycle"] = 238
+    gate["qualification_status"] = "bounded_cpl0_root_timer_guest_pass_ring3_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=238, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="300_debug_kernel_plus54_repeated_release_plus5_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=15, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=238, status="pass",
+        tests_run=101, tests_passed=101, tests_failed=0, tests_skipped=0,
+        elapsed_seconds=48.658, runner_elapsed_seconds=49.484,
+        log_sha256="27C1DAA43925B3E2A1DDEE07ACF07262EA4BB20507B028661D3039A2B37D8513",
+        initial_attempts=[dict(tests_run=101, failures=3, errors=0,
+            log_sha256="28F210DDA41B258EC84E3CF48BCD7685046C3A35BB1EA1169374287ECBA525CA")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=238, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_CPL0_root_timer_quiesce_restore_probes_plus_default_denial",
+        timer_under_candidate_root_executed=True, verified_timer_shutdown_before_retirement=True,
+        interrupts_per_probe=3, mmio_pages=2, retained_acpi_snapshot_pages=1,
+        ring3_executed=False, iso_built=False)
+    lane["stages"]["USI-1"] = "partial_live_cpl0_root_timer_restore_no_ring3"
+    roadmap["immediate_next_move"]["title"] = "Implement sanitized user descriptors/TSS/IRETQ with architectural-state isolation, then contained ring-3 faults and timer recovery"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", receipt_path, checkpoint,
+        "native/kernel/src/user_root_probe/timer_driver.rs", "native/kernel/src/user_entry/cpu.rs"]
+    evidence = "Cycle 238: PKUSER4 adds two guarded supervisor UC MMIO leaves and failure-quarantined timer shutdown. Two fresh QEMU probes each deliver/EOI three interrupts under the candidate root, verify quiescence, restore the original root and release13 task pages while retaining one ACPI snapshot page.300 debug,54 optimized,5 compile-fail,10 boot-exit and15 Python oracle tests pass; ordinary boot still denies unsigned execution. " + checkpoint
+    gap = "Timer delivery is CPL0 on the existing kernel IST, not ring3 or use of the private entry stack as RSP0. User GDT/TSS/IRETQ, GPR/segment/base/debug/extended-state initialization and contained user faults/preemption remain next. Hardware error shutdown is host fault-tested, not guest fault-injected. Capability IPC, services, shell/apps and optical ISO qualification follow; all production and exact-candidate merge gates remain open."
+    phase = next(p for p in roadmap["phases"] if p["id"] == "N13")
+    phase["current_evidence"].insert(0, evidence)
+    phase["current_gaps"][0] = gap
+    next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")["evidence"].append(checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1253)
-    parser.add_argument("--status-date", default="2026-10-07")
+    parser.add_argument("--test-count", type=int, default=1256)
+    parser.add_argument("--status-date", default="2026-10-08")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
     args.out.write_text(json.dumps(roadmap, indent=2, ensure_ascii=True) + "\n", encoding="utf-8", newline="\n")

@@ -14,6 +14,7 @@ use crate::virtual_memory::{
 
 pub mod bootstrap;
 pub mod prepared;
+pub mod timer;
 
 pub const CONTRACT_ID: &str = "PKUSER1";
 // Preserve the existing kernel code/data and two-slot TSS at GDT indices 1..4.

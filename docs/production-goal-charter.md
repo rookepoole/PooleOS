@@ -1,15 +1,21 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-10-07
+Status date: 2026-10-08
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 237
+Last roadmap reconciliation: PooleOS Cycle 238
 
-Cycle 237 proves bounded CPL0 activation and restoration of the owned user root
+Cycle 238 proves bounded timer interrupts under the owned candidate root and
+verified shutdown before restoration and memory release in two fresh QEMU boots.
+Sanitized user entry and contained user faults are next. No user-mode execution,
+usable ISO, production promotion or normative requirement change is claimed.
+[Cycle 238 evidence](checkpoints/cycle238-owned-root-timer.md).
+
+Historical Cycle 237 proves bounded CPL0 activation and restoration of the owned user root
 in two fresh QEMU guests, plus ordinary-boot denial. This is direct kernel
 integration progress, not user-mode execution, a usable ISO or production
 qualification. Timer recovery, sanitized user entry and fault containment remain

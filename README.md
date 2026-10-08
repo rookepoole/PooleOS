@@ -11,7 +11,18 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle 237 boots the real native kernel into
+**Current development checkpoint:** Cycle 238 delivers and acknowledges three
+timer interrupts under the owned task root in each of two fresh native QEMU
+boots. Guarded supervisor-only uncached MMIO mappings and verified timer shutdown
+protect restoration and task-memory release. All 300 kernel host tests, 54
+optimized focused tests, five compile-fail checks, ten boot-exit tests, 15 Python
+oracle tests and the default-boot denial control pass. This is still CPL0, not
+user-program execution or a new ISO. Next: sanitized ring-3 entry and contained
+faults, then IPC, services, shell/apps and optical packaging. Full microkernel
+development continues after the integration ISO.
+[Evidence](docs/checkpoints/cycle238-owned-root-timer.md).
+
+**Historical development checkpoint:** Cycle 237 boots the real native kernel into
 an owned task address space at CPL0, exercises its guarded supervisor stack,
 restores the boot address space and releases all 13 allocated pages. Two fresh
 QEMU probes and an ordinary-boot denial control pass, alongside 288 kernel host

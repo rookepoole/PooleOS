@@ -57,10 +57,18 @@ struct Setup {
 }
 
 fn setup() -> Setup {
+    setup_with_timer(false)
+}
+
+fn setup_with_timer(timer: bool) -> Setup {
     let fixture = Fixture::new();
     let handles = fixture.handles();
     let core = fixture.core;
-    let (manager, memory, prepared) = ready(fixture);
+    let (manager, memory, prepared) = if timer {
+        ready_timer(fixture)
+    } else {
+        ready(fixture)
+    };
     let candidate = prepared.admission().unwrap().root_physical;
     let machine = Rc::new(RefCell::new(Machine {
         snapshot: Snapshot {
@@ -333,4 +341,155 @@ fn never_exposed_owner_can_detach_without_inventing_a_cpu_flush() {
         .unwrap_or_else(|(e, _)| panic!("cancel {e:?}"));
     assert!(s.machine.borrow().writes.is_empty());
     assert_eq!(s.machine.borrow().reads, 0);
+}
+
+struct TimerDriver {
+    machine: Rc<RefCell<Machine>>,
+    execute_error: bool,
+    stop_error: bool,
+    change_context: bool,
+    malformed: u8,
+    calls: std::vec::Vec<&'static str>,
+}
+
+impl TimerDriver {
+    fn new(s: &Setup) -> Self {
+        Self {
+            machine: Rc::clone(&s.machine),
+            execute_error: false,
+            stop_error: false,
+            change_context: false,
+            malformed: 0,
+            calls: std::vec::Vec::new(),
+        }
+    }
+}
+
+impl crate::user_entry::timer::Driver for TimerDriver {
+    fn execute(
+        &mut self,
+        root: u64,
+        mappings: timer::Mappings,
+    ) -> Result<timer::Observation, timer::Error> {
+        assert_eq!(mappings, timer::Mappings::fixture());
+        assert_eq!(self.machine.borrow().snapshot.cr3, root);
+        self.calls.push("execute");
+        if self.execute_error {
+            return Err(timer::Error::Hardware);
+        }
+        Ok(timer::Observation {
+            observed_root: root + u64::from(self.malformed == 1),
+            deliveries: if self.malformed == 2 { 0 } else { 3 },
+            eois: if self.malformed == 3 { 2 } else { 3 },
+        })
+    }
+    fn quiesce(&mut self, root: u64, _: timer::Mappings) -> Result<(), timer::Error> {
+        assert_eq!(self.machine.borrow().snapshot.cr3, root);
+        self.calls.push("stop");
+        if self.change_context {
+            self.machine.borrow_mut().snapshot.cpu_id += 1;
+        }
+        if self.stop_error {
+            Err(timer::Error::Hardware)
+        } else {
+            Ok(())
+        }
+    }
+}
+
+#[test]
+fn timer_success_shutdown_precedes_root_restore_and_leaf_cleanup() {
+    let mut s = setup_with_timer(true);
+    let mut driver = TimerDriver::new(&s);
+    s.owner.activate(&s.manager, &mut s.memory).unwrap();
+    assert_eq!(s.owner.exercise_timer(&mut driver).unwrap().deliveries, 3);
+    assert_eq!(driver.calls, ["execute", "stop"]);
+    retained(&mut s.manager, &s.handles);
+    let parts = s
+        .owner
+        .retire(&mut s.manager, &mut s.memory)
+        .unwrap_or_else(|(e, _)| panic!("{e:?}"));
+    for page in parts.stack_tables.start_page..parts.stack_tables.start_page + 3 {
+        assert_eq!(s.memory.pages[&(page * PAGE_BYTES)], [0; 512]);
+    }
+    assert_eq!(s.machine.borrow().writes, [s.candidate, s.original]);
+}
+
+#[test]
+fn failed_timer_execution_still_runs_verified_shutdown() {
+    let mut s = setup_with_timer(true);
+    let mut driver = TimerDriver::new(&s);
+    driver.execute_error = true;
+    s.owner.activate(&s.manager, &mut s.memory).unwrap();
+    assert_eq!(
+        s.owner.exercise_timer(&mut driver),
+        Err(CpuError::Timer(timer::Error::Hardware))
+    );
+    assert_eq!(driver.calls, ["execute", "stop"]);
+    assert!(s.owner.retire(&mut s.manager, &mut s.memory).is_ok());
+}
+
+#[test]
+fn failed_shutdown_prevents_cr3_restore_and_all_memory_release_until_retry() {
+    for execute_error in [false, true] {
+        let mut s = setup_with_timer(true);
+        let mut driver = TimerDriver::new(&s);
+        driver.execute_error = execute_error;
+        driver.stop_error = true;
+        s.owner.activate(&s.manager, &mut s.memory).unwrap();
+        assert!(s.owner.exercise_timer(&mut driver).is_err());
+        let writes = s.memory.writes;
+        let (error, mut owner) = s.owner.retire(&mut s.manager, &mut s.memory).err().unwrap();
+        assert_eq!(error, CpuError::Timer(timer::Error::State));
+        assert_eq!(s.machine.borrow().writes, [s.candidate]);
+        assert_eq!(s.memory.writes, writes);
+        retained(&mut s.manager, &s.handles);
+        assert!(owner.exercise_timer(&mut driver).is_err());
+        assert_eq!(driver.calls, ["execute", "stop"]);
+        driver.stop_error = false;
+        owner.quiesce_timer(&mut driver).unwrap();
+        assert!(owner.retire(&mut s.manager, &mut s.memory).is_ok());
+    }
+}
+
+#[test]
+fn context_drift_during_shutdown_never_admits_retirement() {
+    let mut s = setup_with_timer(true);
+    let mut driver = TimerDriver::new(&s);
+    driver.change_context = true;
+    s.owner.activate(&s.manager, &mut s.memory).unwrap();
+    assert_eq!(s.owner.exercise_timer(&mut driver), Err(CpuError::Context));
+    assert!(s.owner.retire(&mut s.manager, &mut s.memory).is_err());
+    assert_eq!(s.machine.borrow().writes, [s.candidate]);
+    retained(&mut s.manager, &s.handles);
+}
+
+#[test]
+fn malformed_timer_observations_fail_even_after_safe_shutdown() {
+    for malformed in 1..=3 {
+        let mut s = setup_with_timer(true);
+        let mut driver = TimerDriver::new(&s);
+        driver.malformed = malformed;
+        s.owner.activate(&s.manager, &mut s.memory).unwrap();
+        assert_eq!(
+            s.owner.exercise_timer(&mut driver),
+            Err(CpuError::Timer(timer::Error::Hardware))
+        );
+        assert_eq!(driver.calls, ["execute", "stop"]);
+        assert!(s.owner.retire(&mut s.manager, &mut s.memory).is_ok());
+    }
+}
+
+#[test]
+fn timer_requires_active_mapped_owner_without_touching_driver() {
+    for mapped in [false, true] {
+        let mut s = setup_with_timer(mapped);
+        let mut driver = TimerDriver::new(&s);
+        assert!(s.owner.exercise_timer(&mut driver).is_err());
+        if !mapped {
+            s.owner.activate(&s.manager, &mut s.memory).unwrap();
+            assert!(s.owner.exercise_timer(&mut driver).is_err());
+        }
+        assert!(driver.calls.is_empty());
+    }
 }

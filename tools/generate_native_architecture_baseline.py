@@ -24,6 +24,10 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle238-owned-root-timer.md",
+    "native/kernel/src/user_entry/timer.rs",
+    "native/kernel/src/user_root_probe/timer_driver.rs",
+    "tests/fixtures/cycle237-user-entry-readiness.json",
     "docs/checkpoints/cycle237-live-user-root.md",
     "native/kernel/src/user_entry/bootstrap.rs",
     "native/kernel/src/user_root_probe.rs",

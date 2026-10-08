@@ -1,5 +1,6 @@
 use super::*;
 use crate::physical_memory::PhysicalMemoryError;
+use crate::user_entry::timer;
 use crate::virtual_memory::{CachePolicy, Permissions, USER_WINDOW_START};
 use std::collections::BTreeMap;
 
@@ -227,6 +228,60 @@ fn retained(manager: &mut PhysicalMemoryManager, handles: &[AllocationHandle]) {
             Err(PhysicalMemoryError::AllocationRetained)
         );
     }
+}
+
+fn ready_timer(f: Fixture) -> (PhysicalMemoryManager, Memory, PreparedImage) {
+    let Fixture {
+        mut manager,
+        parts,
+        mut memory,
+        image,
+        core,
+    } = f;
+    let prepared = PreparedImage::prepare_with_timer(
+        parts,
+        &mut manager,
+        &mut memory,
+        image,
+        core,
+        36,
+        timer::Mappings::fixture(),
+    )
+    .unwrap_or_else(|(e, _)| panic!("{e:?}"));
+    (manager, memory, prepared)
+}
+
+#[test]
+fn timer_leaves_and_guards_are_replayed_before_admission() {
+    for index in [15, 16, 17, 18, 19] {
+        let f = Fixture::new();
+        let pt = (f.parts.stack_tables.start_page + 2) * PAGE_BYTES;
+        let core = f.core;
+        let (manager, mut memory, prepared) = ready_timer(f);
+        prepared.revalidate(&manager, &mut memory, core).unwrap();
+        memory.pages.get_mut(&pt).unwrap()[index] ^= 1 << 2;
+        assert!(prepared.revalidate(&manager, &mut memory, core).is_err());
+    }
+}
+
+#[test]
+fn timer_boot_alias_rejects_before_any_candidate_write() {
+    let mut f = Fixture::new();
+    f.core.kernel_physical_base = timer::Mappings::fixture().pages()[0];
+    let before = f.memory.writes;
+    assert!(
+        PreparedImage::prepare_with_timer(
+            f.parts,
+            &mut f.manager,
+            &mut f.memory,
+            f.image,
+            f.core,
+            36,
+            timer::Mappings::fixture()
+        )
+        .is_err()
+    );
+    assert_eq!(f.memory.writes, before);
 }
 
 #[test]

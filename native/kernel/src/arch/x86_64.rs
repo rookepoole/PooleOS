@@ -844,6 +844,16 @@ unsafe fn read_pat() -> u64 {
     unsafe { read_msr(IA32_PAT) }
 }
 
+/// Observe PAT only when CPUID advertises the MSR; caller must own CPL0.
+pub unsafe fn read_supported_pat() -> Option<u64> {
+    if cpuid(1, 0).edx & (1 << 16) == 0 {
+        None
+    } else {
+        // SAFETY: the feature check above establishes MSR availability.
+        Some(unsafe { read_pat() })
+    }
+}
+
 unsafe fn read_mtrr_cap() -> u64 {
     // SAFETY: the caller requires CPUID.01H:EDX.MTRR before this typed read.
     unsafe { read_msr(IA32_MTRR_CAP) }

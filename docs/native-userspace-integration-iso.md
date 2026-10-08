@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 237, 2026-10-07. No new ISO exists yet.
+Status: implementation started, Cycle 238, 2026-10-08. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -43,7 +43,7 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 
 | Stage | Build Plan Binding | Exit Criterion | Current State |
 | --- | --- | --- | --- |
-| USI-1 User entry and containment | N7, N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle 237: two actual CPL0 root switch/stack/restore/release probes pass; ordinary denial preserved; no ring-3 execution yet |
+| USI-1 User entry and containment | N7, N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle 238: two actual CPL0 root/timer/quiescence/restore/release probes pass; ordinary denial preserved; no ring-3 execution yet |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Not started |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Not started |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
@@ -59,8 +59,10 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
    Cycle 237 proves activation/restoration at CPL0 with a bounded original-root
    identity adapter, no added temporary aliases, scrubbed data and full release.
    The adapter proves identity and permissions before each physical access and
-   is never used while the candidate root is active. Timer/MMIO ownership and
-   recovery remain required before user execution.
+   is never used while the candidate root is active. Cycle 238 adds guarded UC
+   timer mappings and proves three interrupt/EOI pairs under the candidate root,
+   verified shutdown and retained-on-failure retirement. This uses the existing
+   kernel IST, not the future task-private RSP0/entry path.
 3. Install user descriptors and a valid kernel-entry stack/TSS; add a minimal
    reviewed IRETQ entry/return path. Clear non-argument registers and initialize
    segment/base, debug, and supported extended state without leaking kernel data.
@@ -125,13 +127,23 @@ Qualification command:
 python -B tools/qualify_native_user_entry.py --work-dir outputs/a-new-user-entry-run
 ```
 
-## Cycle 237 Live Integration
+## Cycle 238 Live Integration
+
+[Owned Root Timer Evidence](checkpoints/cycle238-owned-root-timer.md) records two
+fresh native CPL0 root/timer probes and ordinary denial. Each probe receives
+three timer interrupts under its own CR3, then verifies quiescence before root
+restoration and task-page release. ACPI snapshot ownership is counted separately.
+The timer has native poll/time bounds; stopped-clock or missing-delivery paths
+cannot wait forever. Host driver-failure tests enforce memory quarantine, but
+these failures have not yet been injected into the guest hardware adapter.
+
+## Historical Cycle 237 Live Integration
 
 [Live User Root Evidence](checkpoints/cycle237-live-user-root.md) records two
 fresh native CPL0 probes and one default-denial boot, current source hashes,
 host/freestanding checks, hostile marker controls and retained failures.
 Selector 23 is development-only and excludes all other development scenarios.
-It does not execute its static user UD2 payload, enter ring 3, enable interrupts,
+That historical version does not execute its static user UD2 payload, enter ring 3, enable interrupts,
 run user fault recovery or build an optical ISO.
 
 To include live execution in a new bounded qualification:

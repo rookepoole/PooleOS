@@ -61,6 +61,7 @@ pub struct PreparedImage {
     image: InitialImage,
     bits: u8,
     admission: Option<ImageAdmission>,
+    timer: Option<super::timer::Mappings>,
 }
 
 pub struct DetachedImage {
@@ -107,6 +108,42 @@ impl PreparedImage {
         core: CoreRecord,
         physical_bits: u8,
     ) -> Result<Self, (Error, Self)> {
+        Self::prepare_inner(parts, manager, memory, image, core, physical_bits, None)
+    }
+
+    /// Add two guarded supervisor UC device leaves. The mapping plan does not
+    /// grant device authority; the privileged timer adapter owns that lease.
+    #[allow(clippy::result_large_err, clippy::too_many_arguments)]
+    pub fn prepare_with_timer<M: TableMemory>(
+        parts: DetachedImage,
+        manager: &mut PhysicalMemoryManager,
+        memory: &mut M,
+        image: InitialImage,
+        core: CoreRecord,
+        physical_bits: u8,
+        timer: super::timer::Mappings,
+    ) -> Result<Self, (Error, Self)> {
+        Self::prepare_inner(
+            parts,
+            manager,
+            memory,
+            image,
+            core,
+            physical_bits,
+            Some(timer),
+        )
+    }
+
+    #[allow(clippy::result_large_err, clippy::too_many_arguments)]
+    fn prepare_inner<M: TableMemory>(
+        parts: DetachedImage,
+        manager: &mut PhysicalMemoryManager,
+        memory: &mut M,
+        image: InitialImage,
+        core: CoreRecord,
+        physical_bits: u8,
+        timer: Option<super::timer::Mappings>,
+    ) -> Result<Self, (Error, Self)> {
         let mut prepared = Self {
             space: parts.space,
             stack: parts.stack,
@@ -115,6 +152,7 @@ impl PreparedImage {
             image,
             bits: physical_bits,
             admission: None,
+            timer,
         };
         match prepared.build(manager, memory, core) {
             Ok(admission) => {
@@ -170,7 +208,8 @@ impl PreparedImage {
         {
             return Err(Error::Layout);
         }
-        let supervisor = audit_supervisor(memory, core, mask, &handles)?;
+        self.validate_timer(manager)?;
+        let supervisor = audit_supervisor(memory, core, mask, &handles, self.timer)?;
         // Retain the entire set atomically before the first write. Every later
         // failure returns this quarantined owner, including a failed readback.
         self.retained = manager
@@ -199,6 +238,16 @@ impl PreparedImage {
                 ((self.stack.start_page + page) * PAGE_BYTES) | P | W | NX,
             )?;
         }
+        if let Some(timer) = self.timer {
+            for index in [super::timer::APIC_SLOT, super::timer::HPET_SLOT] {
+                write(
+                    memory,
+                    tables + 2 * PAGE_BYTES,
+                    index,
+                    timer.leaf(index).ok_or(Error::Layout)?,
+                )?;
+            }
+        }
         write(memory, image.root_physical, STACK_SLOT, tables | P | W | NX)?;
         write(memory, image.root_physical, KERNEL_SLOT, supervisor)?;
         memory.finish().map_err(|_| Error::Memory)?;
@@ -215,7 +264,7 @@ impl PreparedImage {
         if replay != image {
             return Err(Error::Readback);
         }
-        if audit_supervisor(memory, core, mask, &handles)? != supervisor {
+        if audit_supervisor(memory, core, mask, &handles, self.timer)? != supervisor {
             return Err(Error::Readback);
         }
         Ok(image)
@@ -245,6 +294,7 @@ impl PreparedImage {
                     (2, i) if i >= 1 && i <= STACK_PAGE_COUNT as usize => {
                         ((self.stack.start_page + i as u64 - 1) * PAGE_BYTES) | P | W | NX
                     }
+                    (2, i) => self.timer.and_then(|t| t.leaf(i)).unwrap_or(0),
                     _ => 0,
                 };
                 if read(memory, tables + page * PAGE_BYTES, index)? != expected {
@@ -261,6 +311,15 @@ impl PreparedImage {
         self.admission
     }
 
+    fn validate_timer(&self, manager: &PhysicalMemoryManager) -> Result<(), Error> {
+        if let Some(timer) = self.timer {
+            timer
+                .validate(manager, self.bits)
+                .map_err(|_| Error::Ownership)?;
+        }
+        Ok(())
+    }
+
     fn revalidate<M: TableMemory>(
         &self,
         manager: &PhysicalMemoryManager,
@@ -271,11 +330,13 @@ impl PreparedImage {
         manager
             .validate_retentions(&self.retained)
             .map_err(|_| Error::Ownership)?;
+        self.validate_timer(manager)?;
         let supervisor = audit_supervisor(
             memory,
             core,
             physical_mask(self.bits).map_err(Error::Image)?,
             &self.handles(),
+            self.timer,
         )?;
         self.audit_attached(memory, image, supervisor)?;
         let replay = super::admit_image_with_roots(
@@ -361,6 +422,7 @@ fn audit_supervisor<M: TableMemory>(
     core: CoreRecord,
     mask: u64,
     owned: &[Option<AllocationHandle>],
+    timer: Option<super::timer::Mappings>,
 ) -> Result<u64, Error> {
     let root = core.page_table_root_physical;
     let kernel_pages = core.kernel_physical_size.div_ceil(PAGE_BYTES);
@@ -447,6 +509,9 @@ fn audit_supervisor<M: TableMemory>(
         let end = start
             .checked_add(pages * PAGE_BYTES)
             .ok_or(Error::Supervisor)?;
+        if timer.is_some_and(|t| t.pages().iter().any(|&p| p < end && start < p + PAGE_BYTES)) {
+            return Err(Error::Ownership);
+        }
         for &(other, other_pages) in &boot_ranges[..i] {
             let other_end = other
                 .checked_add(other_pages * PAGE_BYTES)

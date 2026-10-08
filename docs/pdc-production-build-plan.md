@@ -1,15 +1,40 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-10-07
-Plan version: 2.140.0-live-user-root
-Roadmap cycle: PooleOS Cycle 237
+Status date: 2026-10-08
+Plan version: 2.141.0-owned-root-timer
+Roadmap cycle: PooleOS Cycle 238
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 237: Live User Root Switch And Restore
+## Cycle 238: Timer Recovery Under The Owned Root
+
+USI-1 / N9/N12/N13.3, `N13-USER-ENTRY-LIVE-001`: PKUSER4 supplies two guarded
+supervisor-only UC/NX APIC/HPET leaves. Validated ACPI/APIC identity, PAT, PMM and
+boot-range alias checks precede device use. The CPU owner marks possible timer
+exposure before calling the driver and refuses retirement until verified shutdown.
+Two fresh QEMU probes each deliver/acknowledge three interrupts under the candidate
+CR3, stop/mask/drain the timer, restore the original root and release all 13 task
+pages. One separately owned ACPI snapshot page remains retained. Ordinary boot
+still denies unsigned execution. [Evidence](checkpoints/cycle238-owned-root-timer.md).
+
+300 debug, 54 optimized, five compile-fail, ten boot-exit and 15 Python oracle
+tests pass, as do conflicting-feature rejection and freestanding checks. No
+ring-3 execution, private-stack interrupt entry, generic device framework, SMP
+timer lifecycle, guest-injected hardware failure or new ISO is claimed.
+
+Next: sanitized user descriptors/TSS/IRETQ, GPR/segment/base/debug/extended-state
+initialization, actual ring-3 entry/return, contained faults and timer recovery.
+Then capability IPC, isolated init/services, interactive shell and applications,
+and optical ISO qualification. The complete robust microkernel program continues
+after preview acceptance. All 8,996 requirements and 59 additions remain; no
+production phase or flag closes. The 25 stale component admissions, 22 stale
+retained Python source closures, boot-trust/ELF prerequisites and exact-candidate
+merge/production gates remain explicitly open, with historical evidence intact.
+
+## Historical Cycle 237: Live User Root Switch And Restore
 
 USI-1 / N9/N12/N13.3, `N13-USER-ENTRY-LIVE-001`: the owned user root now
 executes in a gated native QEMU profile at CPL0. Two fresh guests activate it,

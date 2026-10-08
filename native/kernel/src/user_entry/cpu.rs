@@ -4,6 +4,7 @@
 //! passing mock proves the state machine, not execution or hardware retirement.
 
 use super::{CoreRecord, DetachedImage, PhysicalMemoryManager, PreparedImage, TableMemory};
+use crate::user_entry::timer;
 
 pub const CONTRACT_ID: &str = "PKUSER3";
 const CR0_REQUIRED: u64 = 1 | (1 << 16) | (1 << 31);
@@ -48,6 +49,7 @@ pub enum Error {
     Context,
     Root,
     Hardware,
+    Timer(timer::Error),
 }
 
 /// Implementations must truthfully observe this CPU and serialize all CR3,
@@ -93,6 +95,7 @@ pub struct CpuImage<H: Cpu> {
     core: CoreRecord,
     context: Option<Snapshot>,
     state: State,
+    timer_quiescent: bool,
 }
 
 impl<H: Cpu> CpuImage<H> {
@@ -103,11 +106,63 @@ impl<H: Cpu> CpuImage<H> {
             core,
             context: None,
             state: State::Inactive,
+            timer_quiescent: true,
         }
     }
 
     pub const fn state(&self) -> State {
         self.state
+    }
+
+    fn timer_context(&mut self) -> Result<timer::Mappings, Error> {
+        if self.state != State::Active {
+            return Err(Error::State);
+        }
+        let context = self.context.ok_or(Error::State)?;
+        let current = self.hardware.snapshot()?;
+        if !current.same_context(context)
+            || current.cr3 != self.prepared.space.summary().root_physical
+        {
+            return Err(Error::Context);
+        }
+        self.prepared.timer.ok_or(Error::Timer(timer::Error::State))
+    }
+
+    /// Open a bounded trusted-driver interrupt window. Device exposure is marked
+    /// before any driver call; every path must verify shutdown before retirement.
+    pub fn exercise_timer<T: timer::Driver>(
+        &mut self,
+        driver: &mut T,
+    ) -> Result<timer::Observation, Error> {
+        let mappings = self.timer_context()?;
+        if !self.timer_quiescent {
+            return Err(Error::Timer(timer::Error::State));
+        }
+        self.timer_quiescent = false;
+        let root = self.prepared.space.summary().root_physical;
+        let observation = driver.execute(root, mappings);
+        self.quiesce_timer(driver)?;
+        let observation = observation.map_err(Error::Timer)?;
+        if observation.observed_root != root
+            || observation.deliveries == 0
+            || observation.deliveries != observation.eois
+        {
+            return Err(Error::Timer(timer::Error::Hardware));
+        }
+        Ok(observation)
+    }
+
+    /// Failed shutdown can be retried only on the same active CPU/root. This is
+    /// not permission to restore CR3 while a pending interrupt still needs it.
+    pub fn quiesce_timer<T: timer::Driver>(&mut self, driver: &mut T) -> Result<(), Error> {
+        let mappings = self.timer_context()?;
+        self.timer_quiescent = false;
+        driver
+            .quiesce(self.prepared.space.summary().root_physical, mappings)
+            .map_err(Error::Timer)?;
+        self.timer_context()?;
+        self.timer_quiescent = true;
+        Ok(())
     }
 
     /// Re-audit ownership and all mappings immediately before the first write.
@@ -161,6 +216,9 @@ impl<H: Cpu> CpuImage<H> {
         manager: &mut PhysicalMemoryManager,
         memory: &mut M,
     ) -> Result<DetachedImage, (Error, Self)> {
+        if !self.timer_quiescent {
+            return Err((Error::Timer(timer::Error::State), self));
+        }
         if self.state != State::Inactive {
             let restoration = (|| {
                 manager

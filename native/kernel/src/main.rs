@@ -12283,6 +12283,10 @@ extern "C" fn poole_kernel_trap_dispatch(frame_pointer: *mut TrapFrame) {
         dispatch_scheduler_deferred(frame, depth);
         return;
     }
+    if scenario == DevelopmentTrapScenario::UserRoot {
+        user_root_probe::dispatch_timer(frame, depth);
+        return;
+    }
     if matches!(
         scenario,
         DevelopmentTrapScenario::InterruptTime | DevelopmentTrapScenario::Atomics

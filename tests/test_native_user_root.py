@@ -13,6 +13,13 @@ ROOT = Path(__file__).resolve().parents[1]
 class UserRootTests(unittest.TestCase):
     def setUp(self):
         self.markers = json.loads((ROOT / "tests/fixtures/cycle237-user-root-markers.json").read_bytes())["markers"]
+        # Synthetic PKUSER4 parser case built on an immutable historical prefix.
+        # Only the qualifier's fresh guest logs are native execution evidence.
+        root = probe.ACTIVE.fullmatch(self.markers[30])[1]
+        self.markers.insert(31, f"POOLEOS:KERNEL:USER-ROOT-TIMER PASS contract=PKUSER4 cr3={root} "
+            "deliveries=3 eois=3 mmio_pages=2 quiesced=1 if=0 ring3=0")
+        self.markers[32] = self.markers[32].replace("allocated_pages=0",
+            "allocated_pages=1 retained_acpi_pages=1")
         self.summary = probe.validate_markers(self.markers)
 
     def reject(self, index, field, value):
@@ -22,7 +29,7 @@ class UserRootTests(unittest.TestCase):
         with self.assertRaises((ValueError, KernelTransferError)):
             probe.validate_markers(changed)
 
-    def test_captured_trace_has_only_bounded_cpl0_claims(self):
+    def test_synthetic_trace_has_only_bounded_cpl0_claims(self):
         self.assertEqual(self.summary["cpl"], 0)
         self.assertEqual(self.summary["cr3_writes"], 2)
         self.assertFalse(self.summary["ring3_executed"])
@@ -51,7 +58,7 @@ class UserRootTests(unittest.TestCase):
         self.reject(30, "cr3", f"0x{self.summary['original_root']:016X}")
 
     def test_restoration_must_match_original(self):
-        self.reject(31, "restored", f"0x{self.summary['candidate_root']:016X}")
+        self.reject(32, "restored", f"0x{self.summary['candidate_root']:016X}")
 
     def test_sentinel_binds_candidate_and_generation(self):
         self.reject(30, "stack_probe", f"0x{self.summary['stack_probe'] ^ 1:016X}")
@@ -64,10 +71,20 @@ class UserRootTests(unittest.TestCase):
     def test_numeric_claims_cannot_be_promoted(self):
         for index, field, value in ((29, "pages", "14"), (29, "temporary_aliases", "1"),
                 (30, "cpl", "3"), (30, "if", "1"), (30, "ring3", "1"),
-                (31, "cr3_writes", "1"), (31, "allocated_pages", "1"),
-                (31, "released_pages", "12"), (31, "scrubbed_data_pages", "5"),
-                (31, "production", "1")):
+                (32, "cr3_writes", "1"), (32, "allocated_pages", "0"),
+                (32, "released_pages", "12"), (32, "scrubbed_data_pages", "5"),
+                (32, "production", "1")):
             self.reject(index, field, value)
+
+    def test_timer_root_delivery_eoi_quiescence_and_mmio_claims_cannot_change(self):
+        for field, value in (("cr3", f"0x{self.summary['original_root']:016X}"),
+                ("deliveries", "0"), ("eois", "2"), ("quiesced", "0"),
+                ("mmio_pages", "3"), ("if", "1"), ("ring3", "1")):
+            self.reject(31, field, value)
+
+    def test_retained_acpi_accounting_has_nonzero_bounded_equality(self):
+        for value in ("0", "2", "20", str(1 << 64)):
+            self.reject(32, "retained_acpi_pages", value)
 
     def test_cpu_adapter_uses_apic_register_accessor_not_capability_mask(self):
         source = (ROOT / "native/kernel/src/arch/x86_64.rs").read_text()

@@ -13,6 +13,9 @@ use poolekernel::user_entry::{
 };
 use virtual_memory::{AddressSpace, CachePolicy, Error, Permissions, USER_WINDOW_START};
 
+mod timer_driver;
+pub use timer_driver::dispatch_timer;
+
 struct Memory {
     access: Access,
     root: u64,
@@ -120,15 +123,48 @@ pub fn run(
     }
     let bits = checked!(1, arch::x86_64::physical_address_bits().ok_or(()));
     // SAFETY: development selector23 is entered once at CPL0 with IF/DF clear;
-    // no AP is started, and this profile never enables interrupts or DMA.
-    let descriptors =
-        unsafe { arch::x86_64::install_descriptor_tables(core.initial_stack_top_virtual) };
-    checked!(2, validate_descriptor_state(&descriptors));
+    // no AP or DMA is started. Only the bounded timer driver may enable IF.
+    let descriptors = unsafe {
+        arch::x86_64::install_interrupt_descriptor_tables(core.initial_stack_top_virtual)
+    };
+    checked!(2, validate_interrupt_descriptor_state(&descriptors));
     IST1_BOTTOM.store(descriptors.ist1_bottom, Ordering::Release);
     IST1_TOP.store(descriptors.ist1_top, Ordering::Release);
     IST2_BOTTOM.store(descriptors.ist2_bottom, Ordering::Release);
     IST2_TOP.store(descriptors.ist2_top, Ordering::Release);
     let mut manager = checked!(3, PhysicalMemoryManager::from_handoff(handoff, core, 32));
+    checked!(
+        32,
+        manager.advance_reclaim_stage(ReclaimStage::PostExitBootServices)
+    );
+    let mut bootstrap = checked!(
+        33,
+        BootstrapTableMemory::new(core.page_table_root_physical, bits)
+    );
+    let acpi = checked!(
+        34,
+        acpi::consume_required_tables(handoff, &mut manager, &mut bootstrap)
+    );
+    let madt = acpi.required_tables[0];
+    let hpet = acpi.required_tables[2];
+    let topology = checked!(
+        35,
+        parse_madt(
+            &mut bootstrap,
+            acpi.snapshot_physical_address + madt.snapshot_offset,
+            madt.byte_count
+        )
+    );
+    let hpet = checked!(
+        36,
+        parse_hpet(
+            &mut bootstrap,
+            acpi.snapshot_physical_address + hpet.snapshot_offset,
+            hpet.byte_count
+        )
+    );
+    checked!(37, bootstrap.finish());
+    let mut timer = checked!(38, timer_driver::Timer::new(handoff, topology, hpet, bits));
     let tables = checked!(
         4,
         manager.allocate(Zone::Dma32, 4, virtual_memory::TABLE_OWNER)
@@ -205,7 +241,7 @@ pub fn run(
     );
     let prepared = checked!(
         15,
-        PreparedImage::prepare(
+        PreparedImage::prepare_with_timer(
             DetachedImage {
                 space,
                 stack: entry_stack,
@@ -215,7 +251,8 @@ pub fn run(
             &mut memory,
             image,
             core,
-            bits
+            bits,
+            timer.mappings()
         )
     );
     for handle in handles {
@@ -261,6 +298,7 @@ pub fn run(
             CpuError::Context => "context",
             CpuError::Root => "root",
             CpuError::Hardware => "hardware",
+            CpuError::Timer(_) => "timer",
         });
         for (label, value) in [
             (" cr0=", before.cr0),
@@ -299,6 +337,21 @@ pub fn run(
         log.write_hex_u64(observed_probe);
         log.write_str(" cpl=0 if=0 ring3=0\n");
     }
+    let irq = checked!(39, owner.exercise_timer(&mut timer));
+    {
+        let mut log = EarlyLogger::new(BootSink {
+            serial,
+            debugcon,
+            ring: &EARLY_RING,
+        });
+        log.write_str("POOLEOS:KERNEL:USER-ROOT-TIMER PASS contract=PKUSER4 cr3=");
+        log.write_hex_u64(irq.observed_root);
+        log.write_str(" deliveries=");
+        log.write_decimal_u64(u64::from(irq.deliveries));
+        log.write_str(" eois=");
+        log.write_decimal_u64(u64::from(irq.eois));
+        log.write_str(" mmio_pages=2 quiesced=1 if=0 ring3=0\n");
+    }
     let mut parts = checked!(21, owner.retire(&mut manager, &mut memory));
     if checked!(
         22,
@@ -322,7 +375,9 @@ pub fn run(
     checked!(28, manager.free(parts.stack));
     checked!(29, manager.free(parts.stack_tables));
     checked!(30, memory.finish());
-    if manager.summary().allocated_pages != 0 {
+    if manager.summary().allocated_pages != acpi.snapshot_page_count
+        || manager.free(acpi.allocation) != Err(PhysicalMemoryError::MetadataOwnership)
+    {
         stop(31, serial, debugcon);
     }
     let mut log = EarlyLogger::new(BootSink {
@@ -333,6 +388,10 @@ pub fn run(
     log.write_str("POOLEOS:KERNEL:USER-ROOT-RESULT PASS restored=");
     // SAFETY: this remains the serialized CPL0 profile, now back on the boot root.
     log.write_hex_u64(unsafe { arch::x86_64::read_cr3() });
-    log.write_str(" cr3_writes=2 allocated_pages=0 released_pages=13 scrubbed_data_pages=6 ring3=0 production=0 terminal=halt\n");
+    log.write_str(" cr3_writes=2 allocated_pages=");
+    log.write_decimal_u64(manager.summary().allocated_pages);
+    log.write_str(" retained_acpi_pages=");
+    log.write_decimal_u64(acpi.snapshot_page_count);
+    log.write_str(" released_pages=13 scrubbed_data_pages=6 ring3=0 production=0 terminal=halt\n");
     halt_forever()
 }
