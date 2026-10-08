@@ -5,6 +5,7 @@ import re
 from runtime import native_kernel_transfer as transfer
 
 FEATURE = "development-user-root"
+IPC = re.compile(r"POOLEOS:KERNEL:USER-IPC PASS contract=PKIPC1 abi=PSABI1 endpoints=2 handles=4 max_bytes=64 depth=4 request_bytes=8 reply_bytes=8 transformed=1 forged_denied=1 rights_denied=1 oversize_denied=1 copy_fault_denied=1 root0=(0x[0-9A-F]{16}) root1=(0x[0-9A-F]{16}) dispatches=([0-9]+) preemptions=([0-9]+) ticks=([0-9]+) calls0=([0-9]+) calls1=([0-9]+) cr3_writes=([0-9]+) client_exit=91 server_exit=90 owners_detached=2 objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 blocking=0 production=0")
 UNKNOWN = re.compile(r"POOLEOS:KERNEL:USER-UNKNOWN PASS contract=PKUSER15 injection=returned_sample_loss unmeasured=1 measured0=0 total0=unknown pending=0 duplicate_denied=1 stale_denied=1 cpu_denied=1 zero_charge_denied=1 requeue_denied=1 outcome_denied=1 cleanup_retry=1 retained_pages=13 free_denials=5 root0=(0x[0-9A-F]{16}) root1=(0x[0-9A-F]{16}) dispatches=([0-9]+) peer_preemptions=([0-9]+) peer_progress=([0-9]+) peer_ticks=([0-9]+) cr3_writes=([0-9]+) peer_exit=84 scheduler_match=1 retired_unknown=1 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
 WATCHDOG = re.compile(r"POOLEOS:KERNEL:USER-WATCHDOG PASS contract=PKUSER14 source=hpet_msi local_masked=1 recoveries=1 arms=([0-9]+) stops=([0-9]+) restores=([0-9]+) ticks=([0-9]+) deadline_ns=50000000 peer_exit=84 shared_apic=1 requires_if=1 nmi=0 production=0")
 RUNTIME = re.compile(r"POOLEOS:KERNEL:USER-RUNTIME PASS contract=PKUSER13 samples=([0-9]+) terminal_samples=([0-9]+) duplicate_denials=([0-9]+) ticks=([0-9]+) preempt_ticks=([0-9]+) terminal_ticks=([0-9]+) failed_cleanup_ticks=([0-9]+) failed_cleanup_samples=1 scheduler_match=1 pending=0 unknown=0 clock=hpet charge_window=arm_to_event production=0")
@@ -17,7 +18,7 @@ ACTIVE = re.compile(r"POOLEOS:KERNEL:USER-ROOT-ACTIVE PASS cr3=(0x[0-9A-F]{16}) 
 TIMER = re.compile(r"POOLEOS:KERNEL:USER-ROOT-TIMER PASS contract=PKUSER4 cr3=(0x[0-9A-F]{16}) deliveries=3 eois=3 mmio_pages=2 quiesced=1 if=0 ring3=0")
 ENTRY = re.compile(r"POOLEOS:KERNEL:USER-ENTRY PASS contract=PKUSER5 cr3=(0x[0-9A-F]{16}) cpl=3 traps=7 private_rsp0=1 gpr_zero=15 fp_cleared=1 cli_denied=1 io_denied=1 syscall_denied=1 supervisor_fault=1 nx_fault=1 kernel_return=1 descriptors_detached=1 if=0 production=0")
 PREEMPT = re.compile(r"POOLEOS:KERNEL:USER-PREEMPT PASS contract=PKUSER6 cr3=(0x[0-9A-F]{16}) cpl=3 deliveries=3 eois=3 resumes=2 first_progress=([0-9]+) last_progress=([0-9]+) private_rsp0=1 gpr_preserved=14 fp_preserved=1 timer_quiesced=1 forced_return=1 if=0 production=0")
-RESULT = re.compile(r"POOLEOS:KERNEL:USER-ROOT-RESULT PASS restored=(0x[0-9A-F]{16}) cr3_writes=([0-9]+) allocated_pages=([0-9]+) retained_acpi_pages=([0-9]+) released_pages=590 scrubbed_data_pages=271 ring3=1 production=0 terminal=halt")
+RESULT = re.compile(r"POOLEOS:KERNEL:USER-ROOT-RESULT PASS restored=(0x[0-9A-F]{16}) cr3_writes=([0-9]+) allocated_pages=([0-9]+) retained_acpi_pages=([0-9]+) released_pages=616 scrubbed_data_pages=283 ring3=1 production=0 terminal=halt")
 PEERS = re.compile(r"POOLEOS:KERNEL:USER-PEERS PASS contract=PKUSER10 scheduler=PKSCHED1 round=([0-9]+) first=(exit|fault|cancel|limit|return|quarantine|watchdog) value=([0-9]+) root0=(0x[0-9A-F]{16}) root1=(0x[0-9A-F]{16}) dispatches=([0-9]+) preempt0=([0-9]+) preempt1=([0-9]+) progress0=([0-9]+) progress1=([0-9]+) ticks0=([0-9]+) ticks1=([0-9]+) survivor_after_stop=([0-9]+) cr3_writes=([0-9]+) return_vector=([0-9]+) survivor_exit=84 states_preserved=1 root_restored=1 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
 
 
@@ -26,8 +27,8 @@ TASK = re.compile(r"POOLEOS:KERNEL:USER-TASK PASS contract=PKUSER8 slot=0 genera
 
 
 def validate_markers(markers: list[str]) -> dict:
-    if len(markers) != 61 or SPAWN.fullmatch(markers[55]) is None:
-        raise ValueError("PKUSER15 requires exactly 61 markers and transactional rollback")
+    if len(markers) != 62 or SPAWN.fullmatch(markers[55]) is None:
+        raise ValueError("PKIPC1 requires exactly 62 markers and transactional rollback")
     drain = DRAIN.fullmatch(markers[56])
     if drain is None or not 3 <= int(drain[1]) == int(drain[2]) <= 256:
         raise ValueError("PKUSER12 missing or inconsistent timer shutdown proof")
@@ -43,7 +44,7 @@ def validate_markers(markers: list[str]) -> dict:
     common.pop("kernel_terminal", None)
     common["synthetic_unsigned_terminal_used_for_prefix_parser_only"] = True
     prepared, active, timer, entry, preempt, call, result = [pattern.fullmatch(marker) for pattern, marker in
-                                zip((PREPARED, ACTIVE, TIMER, ENTRY, PREEMPT, CALL, RESULT), [*markers[29:35],markers[60]])]
+                                zip((PREPARED, ACTIVE, TIMER, ENTRY, PREEMPT, CALL, RESULT), [*markers[29:35],markers[61]])]
     if any(m is None for m in (prepared, active, timer, entry, preempt, call, result)):
         raise ValueError("PKUSER7 marker layout or bounded claims changed")
     original, candidate = (int(prepared[i], 16) for i in (1, 2))
@@ -102,7 +103,17 @@ def validate_markers(markers: list[str]) -> dict:
             or unknown_writes != 2 * unknown_dispatches
             or not all(0 < n < 1<<64 for n in (unknown_progress, unknown_peer_ticks))):
         raise ValueError("PKUSER15 peer progress, identity, or root-write conservation changed")
-    total_writes = 10 + sum(p["cr3_writes"] for p in peers) + unknown_writes
+    ipc = IPC.fullmatch(markers[60])
+    if ipc is None:
+        raise ValueError("PKIPC1 missing native request/reply evidence")
+    ipc_roots = [int(ipc[i], 16) for i in (1, 2)]
+    ipc_dispatches, ipc_preempts, ipc_ticks, calls0, calls1, ipc_writes = (int(ipc[i]) for i in range(3, 9))
+    if (ipc_roots[0] == ipc_roots[1] or any(r == original or r == 0 or r & 4095 or r >= 1<<32 for r in ipc_roots)
+            or not 2 <= ipc_dispatches <= 64 or ipc_dispatches != ipc_preempts + 2
+            or not 0 < ipc_ticks < 1<<64 or not 7 <= calls0 <= 30 or not 3 <= calls1 <= 26
+            or ipc_writes != 2 * ipc_dispatches):
+        raise ValueError("PKIPC1 root, syscall or scheduler conservation changed")
+    total_writes = 10 + sum(p["cr3_writes"] for p in peers) + unknown_writes + ipc_writes
     if int(result[2]) != total_writes:
         raise ValueError("PKUSER10 total root writes not conserved")
     charge = RUNTIME.fullmatch(markers[57])
@@ -133,7 +144,10 @@ def validate_markers(markers: list[str]) -> dict:
             "syscall_abi": "PSABI1_development", "user_calls": 12, "copy_faults": 3,
             "copy_read_faults": 1, "copy_write_faults": 2, "syscall_msrs_cleared": True,
             "terminated_tasks": tasks, "normal_exits": 1, "fault_terminations": 3,
-            "task_stale_denials": 3, "released_pages": 590, "scrubbed_data_pages": 271,
+            "task_stale_denials": 3, "released_pages": 616, "scrubbed_data_pages": 283,
+            "bounded_capability_ipc": True, "ipc_roots": ipc_roots, "ipc_dispatches": ipc_dispatches,
+            "ipc_preemptions": ipc_preempts, "ipc_ticks": ipc_ticks, "ipc_calls": [calls0, calls1],
+            "ipc_cr3_writes": ipc_writes, "ipc_blocking": False, "ipc_general_lifecycle": False,
             "peer_scheduling": True, "peer_rounds": peers, "peer_survival_cases": 17,
             "unknown_runtime_recovery": True, "unmeasured_dispatches": 1,
             "unknown_task_total_ticks": None, "unknown_task_measured_ticks": 0,
@@ -171,7 +185,7 @@ def negative_controls(markers: list[str]) -> int:
     wrong = markers.copy()
     wrong[23] = wrong[23].replace("trap_scenario=23", "trap_scenario=0")
     candidates.append(wrong)
-    for i in range(29, 61):
+    for i in range(29, 62):
         for match in re.finditer(r"\b[a-zA-Z_0-9]+=[^ ]+", markers[i]):
             changed = markers.copy()
             changed[i] = markers[i][:match.start()] + "invalid=invalid" + markers[i][match.end():]

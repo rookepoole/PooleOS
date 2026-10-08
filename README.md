@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle249 recovers a task with missing runtime
+**Current development checkpoint:** Cycle250 adds original kernel-owned capabilities
+and bounded native IPC. Two fresh VM boots exchange actual request/reply bytes
+between isolated user tasks and preserve17 containment cases.571 Rust executions
+and42 Python oracle tests pass. Next: IPC waits/cancellation/lifecycle, then native
+services, shell/apps and a usable ISO. No interactive ISO yet; complete robust
+microkernel development continues afterward.
+[Evidence](docs/checkpoints/cycle250-native-capability-ipc.md).
+
+**Historical development checkpoint:** Cycle249 recovers a task with missing runtime
 measurement without inventing zero time. Two fresh native boots each pass17
 containment cases, retain ownership through cleanup failure, then resume a healthy
 peer.545 Rust executions and40 Python oracle tests pass. Next: capability IPC,

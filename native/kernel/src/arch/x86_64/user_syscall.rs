@@ -18,7 +18,7 @@ static mut poole_syscall_user_rsp: u64 = 0;
 #[derive(Clone, Copy)]
 pub struct Observation {
     pub calls: u32,
-    pub statuses: [u32; 5],
+    pub statuses: [u32; 8],
     pub read_faults: u32,
     pub write_faults: u32,
 }
@@ -26,7 +26,7 @@ struct Session {
     image: ImageAdmission,
     active: bool,
     sealed: bool,
-    counts: [u32; 5],
+    counts: [u32; 8],
 }
 unsafe extern "C" {
     fn poole_user_syscall_entry();
@@ -52,7 +52,7 @@ pub(super) fn prepare(image: ImageAdmission) -> Result<(), Error> {
                 image,
                 active: false,
                 sealed: false,
-                counts: [0; 5],
+                counts: [0; 8],
             }),
         );
     }
@@ -144,7 +144,11 @@ pub(super) fn observe() -> Result<Observation, Error> {
 
 pub(super) fn finish(root: u64) -> Result<(), Error> {
     let o = observe()?;
-    if o.calls != 12 || o.statuses != [3, 1, 1, 4, 3] || o.read_faults != 1 || o.write_faults != 2 {
+    if o.calls != 12
+        || o.statuses != [3, 1, 1, 4, 3, 0, 0, 0]
+        || o.read_faults != 1
+        || o.write_faults != 2
+    {
         return Err(Error::State);
     }
     disable(root)?;
@@ -221,6 +225,14 @@ impl Memory for Access {
 }
 
 pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) -> Result<Option<u32>, Error> {
+    dispatch_owned(t, frame, None)
+}
+
+pub(super) fn dispatch_owned(
+    t: &Trap,
+    frame: &mut TrapFrame,
+    caller: Option<poolekernel::capability_ipc::Caller>,
+) -> Result<Option<u32>, Error> {
     let s = unsafe { (&mut *(&raw mut SESSION)).as_mut() }.ok_or(Error::State)?;
     if !s.active
         || s.sealed
@@ -251,6 +263,25 @@ pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) -> Result<Option<u32>, E
             destination,
             bytes,
         ),
+        Ok(Request::Ipc {
+            handle,
+            address,
+            bytes,
+            send,
+        }) => match caller {
+            Some(caller) => super::user_ipc::transfer(
+                caller,
+                handle,
+                address,
+                bytes,
+                send,
+                &mut Access {
+                    root: t.root,
+                    smap: unsafe { read_cr4() } & (1 << 21) != 0,
+                },
+            ),
+            None => (Status::Denied, 0),
+        },
         Err(e) => (e, 0),
     };
     s.counts[result.0 as usize] += 1;

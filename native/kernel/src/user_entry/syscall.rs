@@ -1,4 +1,4 @@
-//! Versioned, nonblocking first-user ABI. No endpoint or object authority is granted.
+//! Versioned, nonblocking development ABI. IPC needs separately granted authority.
 #![forbid(unsafe_code)]
 
 use super::{
@@ -34,12 +34,21 @@ pub enum Status {
     Unknown = 2,
     Arguments = 3,
     Fault = 4,
+    Denied = 5,
+    Again = 6,
+    TooSmall = 7,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Request {
     Version,
     Exit(u32),
+    Ipc {
+        handle: u64,
+        address: u64,
+        bytes: usize,
+        send: bool,
+    },
     Copy {
         source: u64,
         destination: u64,
@@ -87,6 +96,23 @@ pub fn request(
             Ok(Request::Exit(source as u32))
         }
         2 => Err(Status::Arguments),
+        3 | 4 => {
+            if bytes == 0
+                || bytes > crate::capability_ipc::MAX_BYTES as u64
+                || destination < USER_WINDOW_START
+                || destination
+                    .checked_add(bytes)
+                    .is_none_or(|end| end > USER_WINDOW_END_EXCLUSIVE)
+            {
+                return Err(Status::Arguments);
+            }
+            Ok(Request::Ipc {
+                handle: source,
+                address: destination,
+                bytes: bytes as usize,
+                send: number == 3,
+            })
+        }
         _ => Err(Status::Unknown),
     }
 }
@@ -270,6 +296,38 @@ mod tests {
             );
         }
         assert_eq!(request(2, 0, 42, 0, 0, 0, 0), Err(Status::Version));
+    }
+    #[test]
+    fn ipc_version_bounds_flags_and_direction_do_not_grant_authority() {
+        for n in [3, 4] {
+            assert_eq!(
+                request(n, VERSION, u64::MAX, USER_WINDOW_START, 64, 0, 0),
+                Ok(Request::Ipc {
+                    handle: u64::MAX,
+                    address: USER_WINDOW_START,
+                    bytes: 64,
+                    send: n == 3
+                })
+            );
+            assert_eq!(
+                request(n, 2, 1, USER_WINDOW_START, 8, 0, 0),
+                Err(Status::Version)
+            );
+            for (address, bytes, flags, reserved) in [
+                (USER_WINDOW_START, 0, 0, 0),
+                (USER_WINDOW_START, 65, 0, 0),
+                (0, 8, 0, 0),
+                (u64::MAX - 3, 8, 0, 0),
+                (USER_WINDOW_END_EXCLUSIVE - 3, 4, 0, 0),
+                (USER_WINDOW_START, 8, 1, 0),
+                (USER_WINDOW_START, 8, 0, 1),
+            ] {
+                assert_eq!(
+                    request(n, VERSION, 1, address, bytes, flags, reserved),
+                    Err(Status::Arguments)
+                );
+            }
+        }
     }
     #[test]
     fn copy_bounds_include_zero_unaligned_edges_but_not_wrap_or_kernel() {

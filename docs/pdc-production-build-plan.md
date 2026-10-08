@@ -1,15 +1,40 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.152.0-native-unknown-runtime-recovery
-Roadmap cycle: PooleOS Cycle 249
+Plan version: 2.153.0-native-capability-ipc
+Roadmap cycle: PooleOS Cycle 250
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 249: Unknown Runtime Recovery
+## Cycle 250: Native Capability IPC
+
+USI-2 now has original kernel-owned endpoint objects, per-task capabilities,
+rights/generation checks, bounded messages and fault-safe queue commits. Two
+fresh native boots execute an actual8-byte request/reply between isolated CPL3
+programs and reject invalid handle, wrong rights, oversize and input-fault requests.
+All17 containment cases and ordinary boot denial remain passing.571 Rust
+executions,42 Python oracle tests and660 altered-evidence controls per guest pass.
+[Evidence](checkpoints/cycle250-native-capability-ipc.md),
+[authority, ABI and limits](native-capability-ipc.md).
+
+N13.5/.7 and N14.1/.2/.5/.7 are partial; N14 has started. Counts:21 partial phases,
+1 blocked,18 not started,0 complete. All8996 requirements,59 additions,97 flags
+(42 open),20 gaps and301 subphases remain. No phase or flag closes. The185-page
+image stays within192 pages, with entry0xC000 and the36-page guarded stack unchanged.
+Compile and link-reservation failures are retained with passing repairs.
+
+Next within N13-CAPABILITY-IPC-001: scheduler blocking/wakeup, cancellation,
+one-use reply ownership, automatic task-death revocation and native saturation,
+stale/dead-peer/output-fault tests. Current explicit probe teardown and host
+negative coverage are not general service lifecycle. Then init/services, native
+shell/files/two apps and optical ISO acceptance. Full robust microkernel,
+PooleGlyph/PDC and PooleGlass development continues afterward. No interactive ISO,
+full canonical pass, main merge, release or production promotion is claimed.
+
+## Historical Cycle 249: Unknown Runtime Recovery
 
 PKUSER15 records a lost runtime sample explicitly, forbids requeue or fabricated
 zero charging, and retains the task's resources until device/root cleanup succeeds.
@@ -3197,7 +3222,7 @@ The exact section titles, start/end lines, subheading counts, and checkbox count
 | N11 | Not started | `030` | 42 | 0 |
 | N12 | Partial | `031-034` | 193 | 1 |
 | N13 | Partial | `035-038` | 183 | 1 |
-| N14 | Not started | `039-041,163-164` | 261 | 1 |
+| N14 | Partial | `039-041,163-164` | 261 | 1 |
 | N15 | Partial | `107-112,155` | 240 | 1 |
 | N16 | Not started | `150` | 96 | 3 |
 | N17 | Not started | `047-050,166` | 268 | 0 |
@@ -4200,7 +4225,14 @@ Subphases:
 
 Exit gate: a static user task enters ring 3, performs capability-mediated syscalls, receives exceptions, exits cleanly, and cannot access any ungranted kernel object or memory.
 
-### N14 - IPC, Identity, Isolation, Async I/O, and Resource Control (`not_started`)
+### N14 - IPC, Identity, Isolation, Async I/O, and Resource Control (`partial`)
+
+Cycle250: endpoint-only capability tables and bounded nonblocking native messages
+are implemented and exercised in two fresh guests. N14.1/.2/.5/.7 are partial;
+generated protocols, credentials, async notification, blocking/cancellation,
+sender/reply authority and automatic lifecycle cleanup are not complete.
+See [PKIPC1 scope](native-capability-ipc.md) and
+[Cycle250 evidence](checkpoints/cycle250-native-capability-ipc.md).
 
 Inherited sections: `039-041`, `163-164`. Added: `ADD-ABI-001`.  
 Goal: make service composition fast, bounded, cancellable, and least-authority.

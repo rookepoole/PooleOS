@@ -18,6 +18,7 @@ use poole_handoff::{
 pub mod acpi;
 pub mod active_virtual_memory;
 pub mod atomics;
+pub mod capability_ipc;
 pub mod interrupt_time;
 pub mod locks;
 pub mod physical_memory;

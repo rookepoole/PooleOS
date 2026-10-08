@@ -12150,7 +12150,7 @@ def apply_cycle248(roadmap: dict, test_count: int) -> dict:
 
 def apply_cycle249(roadmap: dict, test_count: int) -> dict:
     checkpoint = "docs/checkpoints/cycle249-unknown-runtime-recovery.md"
-    receipt_path = "runs/native-user-entry-readiness.json"
+    receipt_path = "tests/fixtures/cycle249-user-entry-readiness.json"
     raw = (ROOT / receipt_path).read_bytes()
     receipt = json.loads(raw)
     baseline = roadmap["baseline"]
@@ -12226,12 +12226,104 @@ def apply_cycle249(roadmap: dict, test_count: int) -> dict:
     flag["closure_condition"] += " PKUSER15 covers returned sample loss and termination-only retry, not physical clock failure or persistent generation audit. Bound stack composition and text capacity as native capability IPC is added; retain all production and interactive-ISO gates."
     roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle250(roadmap, test_count)
+
+
+def apply_cycle250(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle250-native-capability-ipc.md"
+    receipt_path = "runs/native-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle249_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle249_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=250, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=250,
+        selected_move_id="N13-CAPABILITY-IPC-001", immediate_next_move_id="N13-CAPABILITY-IPC-001",
+        owner_independent_next_move_id="N13-CAPABILITY-IPC-001")
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path, "docs/native-capability-ipc.md"]
+    gate["current_candidate_audit"]["cycle"] = 250
+    gate["current_focused_source_projection"]["cycle"] = 250
+    gate["qualification_status"] = "bounded_native_IPC_pass_wait_lifecycle_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=250, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="392_debug_kernel_plus126_repeated_user_release_plus11_IPC_release_plus24_VM_release_plus8_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=42, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=289.094, log_sha256="84D41938F527A8903D5DF231FF8BFC459E6DA8F1796A40FE185D82DF317A0206",
+        initial_attempts=[
+            dict(status="freestanding_adapter_compile_failed", elapsed_seconds=38.437,
+                reason="scheduler_SMP_TaskId_type_mismatch_and_unqualified_ImageAdmission_fixed",
+                log_sha256="D2043B1D2816DF3C76E317B219139B83854688F546E850680C3C602CDAC83AF6"),
+            dict(status="link_failed_before_guest", elapsed_seconds=71.516,
+                reason="text935FE_exceeded92000_RELRO_A2100_exceededA2000_repaired_within192page_cap",
+                log_sha256="BEAD887BC04E5E61AB8F34ED69E62B9C1F51876CB57F72330A9863C177321A97")],
+        qualification_guest_bound_seconds=120, qualification_bound_unchanged=True,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=250, status="pass",
+        tests_run=140, tests_passed=140, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=51.072, elapsed_seconds=51.922,
+        log_sha256="1A01D445708BE6876EF50417CFC788EF0CCA6AFF42BDAB19815A4EF7A406084E",
+        initial_attempts=[dict(status="fail", tests_run=140, tests_failed=1,
+            unittest_elapsed_seconds=53.020, elapsed_seconds=53.875,
+            reason="stale_detailed_N14_not_started_heading_after_native_IPC_fixed_to_partial",
+            log_sha256="037BB8E6DDB1332BED2106EDA734BBAFE19312F49F1EEE7C8E9F6DC5BCCB3C83")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=250, selected_stage="USI-2", receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_CPL3_capability_request_reply_with_native_denials_plus_default_denial",
+        capability_ipc_contract="PKIPC1", bounded_capability_ipc=True,
+        ipc_scope="single_BSP_endpoint_only_bounded_nonblocking_explicit_bootstrap_and_detach",
+        ipc_task_capacity=4, ipc_caps_per_task=4, ipc_endpoint_capacity=4, ipc_queue_depth=4, ipc_message_bytes=64,
+        ipc_blocking=False, ipc_general_lifecycle=False, ipc_sender_badges=False, ipc_reply_tokens=False,
+        ipc_user_delegation=False, ipc_derivation_tree_revocation=False, ipc_native_saturation_qualified=False,
+        ipc_native_dead_peer_qualified=False, ipc_concurrency_qualified=False,
+        released_pages_per_probe=616, scrubbed_data_pages_per_probe=283,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries],
+        measured_subtotal_all_peer_suites_per_probe=[s["runtime_ticks"] + s["unknown_peer_ticks"] + s["ipc_ticks"] for s in summaries],
+        runtime_statistics_scope="PKUSER13_measured_suite_PKUSER15_unknown_case_PKIPC1_exchange_no_global_total")
+    for field in ("runtime_samples", "runtime_terminal_samples", "runtime_duplicate_denials", "runtime_ticks",
+            "runtime_terminal_ticks", "runtime_failed_cleanup_ticks", "watchdog_recoveries", "watchdog_arms",
+            "watchdog_stops", "watchdog_restores", "watchdog_ticks", "peer_preemptions", "unknown_peer_ticks",
+            "unknown_recovery_dispatches", "ipc_dispatches", "ipc_preemptions", "ipc_ticks", "ipc_calls", "ipc_cr3_writes"):
+        lane[field + "_per_probe"] = [s[field] for s in summaries]
+    lane["stages"]["USI-1"] = "partial_live_bounded_unknown_recovery_general_admission_still_open"
+    lane["stages"]["USI-2"] = "partial_native_nonblocking_capability_IPC_wait_lifecycle_pending"
+    roadmap["immediate_next_move"].update(title="Integrate IPC wait/wakeup, cancellation and task-death revocation before native services",
+        entry_evidence=["docs/native-userspace-integration-iso.md", "docs/native-capability-ipc.md", receipt_path, checkpoint,
+            "native/kernel/src/capability_ipc.rs", "native/kernel/src/user_entry/task.rs", "native/kernel/src/scheduler.rs"],
+        exit_evidence=[
+            "owned endpoint waits atomically block and wake the correct task generation exactly once; cancellation cannot lose or replay a completion",
+            "task exit/fault/cancel/quarantine automatically revoke owned IPC state before root reuse, with retained retryable cleanup and explicit dead-peer results",
+            "authenticated sender and one-use reply ownership, native stale/revoked/dead-peer/saturation/partial-output controls with continued peer progress",
+            "preserve17 containment cases, native request/reply and ordinary denial; then init/services/shell/apps/optical acceptance without closing robust microkernel requirements"])
+    evidence = "Cycle250: PKIPC1 enforces kernel-owned endpoint handles, authenticated callers, generations, rights and bounded FIFO copy commits. Two fresh62-marker boots exchange actual transformed8-byte requests/replies and preserve17 survival cases;660 altered-evidence controls per boot reject.571 Rust executions,42 oracle tests and ordinary denial pass. " + checkpoint
+    gap = "Nonblocking single-BSP endpoint-only subset. Scheduler waits/cancellation, automatic lifecycle revocation, sender identity and one-use replies, transactional general bootstrap, derivation-tree revocation, user delegation, audit, wire layouts, shared memory, notifications, priorities, SMP and native saturation/stale/dead-peer/output-fault stress remain. Core host controls do not qualify native races.185-page image needs product-contract migration and full exact-candidate replay; no interactive shell/ISO or production promotion."
+    for phase_id in ("N13", "N14"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["status"] = "partial"
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+        for subphase in phase["subphases"]:
+            if subphase["id"] in ("N13.5", "N13.7", "N14.1", "N14.2", "N14.5", "N14.7"):
+                subphase["status"] = "partial"
+    roadmap["phase_summary"].update(partial=21, not_started=18)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " PKIPC1 is endpoint-only nonblocking IPC with explicit bootstrap teardown. Implement scheduler waits/cancel, automatic lifetime revocation, sender/reply authority, transactional bootstrap, derivation-tree revocation and native saturation/stale/dead-peer/output-fault tests before general services. Preserve all production/ISO gates and185page product-contract migration."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1292)
+    parser.add_argument("--test-count", type=int, default=1295)
     parser.add_argument("--status-date", default="2026-10-08")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

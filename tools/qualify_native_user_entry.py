@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run bounded host, freestanding and optional PKUSER15 unknown-runtime recovery guests."""
+"""Run bounded host, freestanding and optional PKIPC1 native request/reply guests."""
 
 from __future__ import annotations
 
@@ -32,6 +32,8 @@ def source_bindings() -> dict[str, str]:
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "runtime").glob("*.py"))
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "tools").glob("qualify_native_*.py"))
     paths.update({
+        "native/kernel/src/capability_ipc.rs", "native/kernel/src/capability_ipc/tests.rs",
+        "native/kernel/src/arch/x86_64/user_ipc.rs", "native/kernel/src/user_root_probe/peer_driver/ipc.rs",
         "native/kernel/src/user_entry.rs", "native/kernel/src/user_entry/tests.rs",
         "native/kernel/src/user_entry/prepared.rs", "native/kernel/src/user_entry/prepared_tests.rs",
         "native/kernel/src/user_entry/cpu.rs", "native/kernel/src/user_entry/cpu_tests.rs",
@@ -74,8 +76,8 @@ def main() -> int:
     owner_report = Path("C:/Users/rookp/PooleGlyph/tests/reports/conformance_report.json")
     owner_before = digest(owner_report) if owner_report.is_file() else None
     report: dict = {
-        "contract_id": "PKUSER15", "cycle": 249,
-        "scope": "host_and_optional_bounded_unknown_runtime_guest",
+        "contract_id": "PKIPC1", "cycle": 250,
+        "scope": "host_and_optional_bounded_nonblocking_capability_ipc_guest",
         "status": "fail", "source_bindings": before, "checks": [],
         "guest_runs": 0, "ring3_executed": False, "iso_built": False,
         "n13_exit_passed": False, "production_ready": False,
@@ -86,9 +88,11 @@ def main() -> int:
     commands = [
         ("format", [str(cargo), "fmt", *common, "--", "--check"], None),
         ("kernel_host_debug", [str(cargo), "test", *common, "--lib", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 379),
+            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 392),
         ("user_entry_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 124),
+            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 126),
+        ("ipc_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
+            "x86_64-pc-windows-msvc", *bounded, "capability_ipc::", "--", "--test-threads=1"], 11),
         ("vm_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
             "x86_64-pc-windows-msvc", *bounded, "virtual_memory::", "--", "--test-threads=1"], None),
         ("freestanding_library", [str(cargo), "check", *common, "--lib", "--target",
@@ -158,6 +162,7 @@ def main() -> int:
                 report["bounded_runtime_accounting"] = all(g["marker_summary"]["bounded_runtime_accounting"] for g in live["guest_runs"])
                 report["bounded_hpet_backup_recovery"] = all(g["marker_summary"]["bounded_hpet_backup_recovery"] for g in live["guest_runs"])
                 report["unknown_runtime_recovery"] = all(g["marker_summary"]["unknown_runtime_recovery"] for g in live["guest_runs"])
+                report["bounded_capability_ipc"] = all(g["marker_summary"]["bounded_capability_ipc"] for g in live["guest_runs"])
         report["source_unchanged"] = before == source_bindings()
         report["owner_report_unchanged"] = owner_before == (digest(owner_report) if owner_report.is_file() else None)
         if (len(report["checks"]) == len(commands) and all(c["passed"] for c in report["checks"])
@@ -169,7 +174,7 @@ def main() -> int:
     (work / "receipt.json").write_text(serialized, encoding="utf-8", newline="\n")
     if report["status"] == "pass":
         args.out.write_text(serialized, encoding="utf-8", newline="\n")
-    print(f"PKUSER15 {report['status'].upper()}; guest_runs={report['guest_runs']}; ring3={report['ring3_executed']}; production_ready=false", flush=True)
+    print(f"PKIPC1 {report['status'].upper()}; guest_runs={report['guest_runs']}; ring3={report['ring3_executed']}; production_ready=false", flush=True)
     return 0 if report["status"] == "pass" else 1
 
 

@@ -208,7 +208,8 @@ pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) {
     } else {
         if t.vector == syscall::VECTOR {
             if s.run.call(t).unwrap_or_else(|e| denied(13, e, t)) {
-                let Some(code) = super::super::user_syscall::dispatch(t, frame)
+                let caller = s.run.ipc_caller(t).unwrap_or_else(|e| denied(13, e, t));
+                let Some(code) = super::super::user_syscall::dispatch_owned(t, frame, Some(caller))
                     .unwrap_or_else(|e| denied(13, e, t))
                 else {
                     return;
@@ -267,6 +268,9 @@ unsafe extern "C" {
     static poole_peer_stack_fault_end: u8;
 }
 pub fn peer_payload(kind: usize) -> Result<&'static [u8], Error> {
+    if kind == 16 || kind == 17 {
+        return super::super::user_ipc::payload(kind == 17);
+    }
     let (s, e) = match kind {
         0 => (&raw const poole_peer_exit, &raw const poole_peer_exit_end),
         1 => (&raw const poole_peer_fault, &raw const poole_peer_fault_end),

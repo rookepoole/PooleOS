@@ -10,6 +10,7 @@ use poolekernel::{
 };
 use timer_driver::{PeerRun, Timer};
 
+pub(super) mod ipc;
 pub(super) mod unknown;
 
 // A constructor error carries its owner even if cleanup or slot commit failed.
@@ -32,6 +33,7 @@ struct Peer {
     handles: [AllocationHandle; 5],
     image: InitialImage,
     root: u64,
+    admission: poolekernel::user_entry::ImageAdmission,
 }
 impl Peer {
     #[inline(never)]
@@ -86,10 +88,10 @@ impl Peer {
             handles,
             image,
         } = built;
-        let root = prepared
+        let admission = prepared
             .admission()
-            .expect("successful construction admits its image")
-            .root_physical;
+            .expect("successful construction admits its image");
+        let root = admission.root_physical;
         let cpu = unsafe { arch::x86_64::UserRootCpu::new(core.page_table_root_physical, root) };
         let id = match slot.insert(CpuImage::new(prepared, cpu, core), PeerRun { entry, timer }) {
             Ok(id) => id,
@@ -108,6 +110,7 @@ impl Peer {
             handles,
             image,
             root,
+            admission,
         })
     }
     fn reap(

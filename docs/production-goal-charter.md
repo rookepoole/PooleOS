@@ -7,9 +7,17 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 249
+Last roadmap reconciliation: PooleOS Cycle 250
 
-Cycle249 adds termination-only unmeasured-dispatch recovery. Two fresh guests
+Cycle250 implements bounded capability-protected nonblocking IPC. Two fresh native
+guests exchange transformed request/reply bytes through granted handles while
+preserving17 containment cases and ordinary denial. USI-2/N14 are partial, not
+complete. Next: scheduler waits/cancellation/reply ownership and task-death
+revocation, then native services/shell/apps and optical ISO acceptance. All N0-N39
+production obligations remain; no phase exit, merge or promotion is implied.
+[Cycle250 evidence](checkpoints/cycle250-native-capability-ipc.md).
+
+Historical Cycle249 adds termination-only unmeasured-dispatch recovery. Two fresh guests
 each pass17 containment cases, including lost-sample accounting, retained cleanup
 and a surviving peer. Next: capability IPC, services, shell/apps and the usable
 ISO. General clock/quarantine/stack/hardware limits remain open. No phase exit,

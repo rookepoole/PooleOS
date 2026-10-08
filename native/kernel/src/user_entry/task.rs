@@ -168,6 +168,16 @@ impl Run {
     pub const fn calls(&self) -> u32 {
         self.calls
     }
+    pub fn ipc_caller(
+        &self,
+        trap: &privilege::Trap,
+    ) -> Result<crate::capability_ipc::Caller, privilege::Error> {
+        syscall::frame(self.image, trap)?;
+        if self.calls == 0 || self.outcome.is_some() {
+            return Err(privilege::Error::State);
+        }
+        Ok(crate::capability_ipc::Caller::new(self.id, self.image))
+    }
     pub fn matches(&self, image: ImageAdmission, id: TaskId) -> bool {
         self.image == image && self.id == id && self.outcome.is_none()
     }
@@ -608,6 +618,20 @@ mod tests {
     }
     fn run() -> Run {
         Run::new(image(), TaskId::new(0, 1).unwrap()).unwrap()
+    }
+    #[test]
+    fn ipc_caller_requires_live_authenticated_run_not_register_supplied_identity() {
+        let mut r = run();
+        assert!(r.ipc_caller(&trap()).is_err());
+        r.call(&trap()).unwrap();
+        let c = r.ipc_caller(&trap()).unwrap();
+        let mut t = trap();
+        t.registers.fill(u64::MAX);
+        assert_eq!(r.ipc_caller(&t), Ok(c));
+        t.root += 4096;
+        assert!(r.ipc_caller(&t).is_err());
+        r.exit(0).unwrap();
+        assert!(r.ipc_caller(&trap()).is_err());
     }
     #[test]
     fn watchdog_terminates_only_an_authenticated_user_frame_without_resuming_it() {

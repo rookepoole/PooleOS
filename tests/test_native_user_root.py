@@ -30,8 +30,8 @@ class UserRootTests(unittest.TestCase):
         self.markers.insert(34, f"POOLEOS:KERNEL:USER-CALL PASS contract=PKUSER7 abi=PSABI1 profile=development version=1 cr3={root} "
             "calls=12 ok=3 version_denied=1 unknown=1 arguments=4 faults=3 read_faults=1 write_faults=2 "
             "cpl=3 entry=syscall return=iretq max_copy=256 input_atomic=1 output_prefix=1 completion_traps=1 msrs_cleared=1 if=0 production=0")
-        self.markers[35] = self.markers[35].replace("cr3_writes=2", "cr3_writes=365").replace(
-            "released_pages=13 scrubbed_data_pages=6", "released_pages=590 scrubbed_data_pages=271")
+        self.markers[35] = self.markers[35].replace("cr3_writes=2", "cr3_writes=373").replace(
+            "released_pages=13 scrubbed_data_pages=6", "released_pages=616 scrubbed_data_pages=283")
         for index,(kind,value,calls) in enumerate((("exit",42,2),("fault",6,0),("fault",13,0),("fault",14,0))):
             self.markers.insert(35+index, f"POOLEOS:KERNEL:USER-TASK PASS contract=PKUSER8 slot=0 generation={index+1} "
                 f"root={root} reason={kind} value={value} syscalls={calls} cpl=3 stale_denials={int(index>0)} "
@@ -53,7 +53,26 @@ class UserRootTests(unittest.TestCase):
         self.markers.insert(57, "POOLEOS:KERNEL:USER-RUNTIME PASS contract=PKUSER13 samples=169 terminal_samples=30 duplicate_denials=169 ticks=15850 preempt_ticks=13800 terminal_ticks=1950 failed_cleanup_ticks=100 failed_cleanup_samples=1 scheduler_match=1 pending=0 unknown=0 clock=hpet charge_window=arm_to_event production=0")
         self.markers.insert(58, "POOLEOS:KERNEL:USER-WATCHDOG PASS contract=PKUSER14 source=hpet_msi local_masked=1 recoveries=1 arms=169 stops=169 restores=169 ticks=500 deadline_ns=50000000 peer_exit=84 shared_apic=1 requires_if=1 nmi=0 production=0")
         self.markers.insert(59, f"POOLEOS:KERNEL:USER-UNKNOWN PASS contract=PKUSER15 injection=returned_sample_loss unmeasured=1 measured0=0 total0=unknown pending=0 duplicate_denied=1 stale_denied=1 cpu_denied=1 zero_charge_denied=1 requeue_denied=1 outcome_denied=1 cleanup_retry=1 retained_pages=13 free_denials=5 root0={root} root1=0x0000000005000000 dispatches=8 peer_preemptions=6 peer_progress=200 peer_ticks=650 cr3_writes=16 peer_exit=84 scheduler_match=1 retired_unknown=1 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
+        self.markers.insert(60, f"POOLEOS:KERNEL:USER-IPC PASS contract=PKIPC1 abi=PSABI1 endpoints=2 handles=4 max_bytes=64 depth=4 request_bytes=8 reply_bytes=8 transformed=1 forged_denied=1 rights_denied=1 oversize_denied=1 copy_fault_denied=1 root0={root} root1=0x0000000005000000 dispatches=4 preemptions=2 ticks=100 calls0=8 calls1=3 cr3_writes=8 client_exit=91 server_exit=90 owners_detached=2 objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 blocking=0 production=0")
         self.summary = probe.validate_markers(self.markers)
+
+    def test_ipc_native_exchange_is_bounded_nonblocking_and_not_general_lifecycle(self):
+        self.assertTrue(self.summary["bounded_capability_ipc"])
+        self.assertFalse(self.summary["ipc_blocking"])
+        self.assertFalse(self.summary["ipc_general_lifecycle"])
+        for field in ("transformed", "forged_denied", "rights_denied", "oversize_denied", "copy_fault_denied",
+                      "client_exit", "server_exit", "owners_detached", "released_pages", "scrubbed_data_pages"):
+            self.reject(60, field, "0")
+        for field, value in (("root0", "0x0000000000000000"), ("root1", f"0x{self.summary['original_root']:016X}"),
+                ("dispatches", "65"), ("preemptions", "1"), ("ticks", "0"), ("calls0", "6"), ("calls1", "27"),
+                ("cr3_writes", "7"), ("blocking", "1"), ("objects_remaining", "1"), ("production", "1")):
+            self.reject(60, field, value)
+
+    def test_ipc_suite_does_not_nest_large_constructor_stacks(self):
+        parent = (ROOT/"native/kernel/src/user_root_probe.rs").read_text(encoding="utf-8")
+        self.assertLess(parent.index("peer_driver::unknown::run("), parent.index("peer_driver::ipc::run("))
+        child = (ROOT/"native/kernel/src/user_root_probe/peer_driver/ipc.rs").read_text(encoding="utf-8")
+        self.assertIn("#[inline(never)]\npub(crate) fn run(", child)
 
     def test_unknown_time_is_null_not_zero_and_recovery_requires_retired_debt(self):
         self.assertTrue(self.summary["unknown_runtime_recovery"])
@@ -130,7 +149,7 @@ class UserRootTests(unittest.TestCase):
 
     def test_synthetic_trace_has_only_bounded_user_entry_claims(self):
         self.assertEqual((self.summary["root_probe_cpl"], self.summary["cpl"]), (0, 3))
-        self.assertEqual(self.summary["cr3_writes"], 365)
+        self.assertEqual(self.summary["cr3_writes"], 373)
         self.assertTrue(self.summary["ring3_executed"])
         self.assertTrue(self.summary["user_timer_preemption"])
         self.assertFalse(self.summary["production_ready"])
@@ -188,7 +207,7 @@ class UserRootTests(unittest.TestCase):
         self.reject(30, "cr3", f"0x{self.summary['original_root']:016X}")
 
     def test_restoration_must_match_original(self):
-        self.reject(60, "restored", f"0x{self.summary['candidate_root']:016X}")
+        self.reject(61, "restored", f"0x{self.summary['candidate_root']:016X}")
 
     def test_sentinel_binds_candidate_and_generation(self):
         self.reject(30, "stack_probe", f"0x{self.summary['stack_probe'] ^ 1:016X}")
@@ -201,9 +220,9 @@ class UserRootTests(unittest.TestCase):
     def test_numeric_claims_cannot_be_promoted(self):
         for index, field, value in ((29, "pages", "14"), (29, "temporary_aliases", "1"),
                 (30, "cpl", "3"), (30, "if", "1"), (30, "ring3", "1"),
-                (60, "cr3_writes", "1"), (60, "allocated_pages", "0"),
-                (60, "released_pages", "12"), (60, "scrubbed_data_pages", "5"),
-                (60, "production", "1")):
+                (61, "cr3_writes", "1"), (61, "allocated_pages", "0"),
+                (61, "released_pages", "12"), (61, "scrubbed_data_pages", "5"),
+                (61, "production", "1")):
             self.reject(index, field, value)
 
     def test_timer_root_delivery_eoi_quiescence_and_mmio_claims_cannot_change(self):
@@ -214,7 +233,7 @@ class UserRootTests(unittest.TestCase):
 
     def test_retained_acpi_accounting_has_nonzero_bounded_equality(self):
         for value in ("0", "2", "20", str(1 << 64)):
-            self.reject(60, "retained_acpi_pages", value)
+            self.reject(61, "retained_acpi_pages", value)
 
     def test_user_entry_cpl_traps_state_cleanup_and_return_cannot_change(self):
         for field,value in (("cpl","0"),("traps","6"),("private_rsp0","0"),("gpr_zero","14"),
@@ -227,7 +246,7 @@ class UserRootTests(unittest.TestCase):
         self.reject(32,"cr3",f"0x{self.summary['original_root']:016X}")
 
     def test_missing_user_entry_and_old_cpl0_final_cannot_claim_execution(self):
-        self.reject(60,"ring3","0")
+        self.reject(61,"ring3","0")
         changed=self.markers[:32]+self.markers[33:]
         with self.assertRaises(ValueError): probe.validate_markers(changed)
 
@@ -319,7 +338,7 @@ class UserRootTests(unittest.TestCase):
                     ("ticks0","0"),("ticks1",str(1<<64))):
                 self.reject(index,field,value)
         self.reject(41,"preempt0","4")
-        self.reject(60,"cr3_writes","96")
+        self.reject(61,"cr3_writes","96")
 
     def test_invalid_return_reason_vector_and_peer_survival_are_bound(self):
         self.assertEqual(self.summary["invalid_return_terminations"], 6)

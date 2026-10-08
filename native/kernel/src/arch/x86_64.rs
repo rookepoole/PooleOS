@@ -49,6 +49,7 @@ const INTERRUPT_GATE_PRESENT_RING0: u8 = 0x8e;
 const TSS_AVAILABLE_PRESENT_RING0: u64 = 0x89;
 
 pub mod user;
+pub mod user_ipc;
 mod user_preempt;
 mod user_syscall;
 pub mod user_watchdog;

@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 249, 2026-10-08. No new ISO exists yet.
+Status: implementation started, Cycle 250, 2026-10-08. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -44,22 +44,27 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | Stage | Build Plan Binding | Exit Criterion | Current State |
 | --- | --- | --- | --- |
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
-| USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Not started |
+| USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Cycle250: real nonblocking CPL3 request/reply; bounded tables/rights/queues and explicit detach. Wait/wake/cancel/reply ownership, automatic lifecycle and native saturation/revocation/dead-peer stress remain |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Not started |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
 ### Immediate Next Move
 
-N13-CAPABILITY-IPC-001 starts USI-2 groundwork without declaring USI-1 complete:
+N13-CAPABILITY-IPC-001 continues USI-2 without declaring USI-1 complete:
 
 1. Add original kernel-owned typed objects and per-task capability tables. Resolve
    handles against authenticated caller identity; reject forged/stale generations,
    wrong object types, rights amplification and generation wrap. Bound allocation
    and handle counts; define destruction and revocation ownership before reuse.
+   Cycle250 implements endpoint-only tables, rights and generations with trusted
+   bootstrap delegation and object-wide destruction. Derivation-tree revocation,
+   user delegation, audit and general object classes remain open.
 2. Add bounded endpoint messages with explicit ABI versions, lengths and rights.
    Copy from owned user memory before publishing a message; define failure-atomic
    queue/charge updates. Do not treat a raw task ID or address as authority.
+   Cycle250 implements64-byte/four-message FIFOs with copy-in snapshot and
+   queue-preserving output faults. Receive may partially write user memory.
 3. Connect wait/wakeup, cancellation, dead-peer cleanup and reply ownership to the
    existing scheduler and retained task lifecycle. Test quota/queue exhaustion,
    duplicate wakeups, revoked endpoints and failure at every mutation boundary.
@@ -67,12 +72,17 @@ N13-CAPABILITY-IPC-001 starts USI-2 groundwork without declaring USI-1 complete:
    native denied-handle/oversize/dead-peer controls and surviving-peer progress.
    Preserve all17 containment cases and ordinary boot denial. Broader capability
    transfer, shared-memory IPC, concurrency and full N14 qualification stay explicit.
+   Cycle250 proves a real transformed request/reply and native invalid-handle,
+   rights, oversize and input-fault denial. Native stale/dead-peer/exhaustion and
+   output-fault controls remain; host coverage is not their native replacement.
 5. Only then build USI-3 services and USI-4 interaction. Optical packaging must
    boot the actual usable session and pass the acceptance script above.
 
-Cycle249 evidence is [here](checkpoints/cycle249-unknown-runtime-recovery.md).
+Cycle250 evidence is [here](checkpoints/cycle250-native-capability-ipc.md), with
+[IPC invariants and gaps](native-capability-ipc.md). Next is step3 and the remaining
+native controls in step4. Cycle249 evidence is [here](checkpoints/cycle249-unknown-runtime-recovery.md).
 Its sample-loss injection is not a real hardware-clock failure. Keep that limit,
-general stack bounds, persistent audit/quarantine and the current182-page product
+general stack bounds, persistent audit/quarantine and the current185-page product
 contract migration visible under FLAG-N13-USERSPACE-ISO-001.
 
 ### USI-1 Substeps
