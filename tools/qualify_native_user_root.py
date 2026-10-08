@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build exact development media and run two PKUSER11 probes plus ordinary denial."""
+"""Build exact development media and run two PKUSER12 probes plus ordinary denial."""
 from __future__ import annotations
 
 import argparse
@@ -22,7 +22,8 @@ def main() -> int:
     work = args.work_dir.resolve()
     if not work.is_relative_to(ROOT): p.error("work directory must be inside repository")
     work.mkdir(parents=True, exist_ok=False)
-    report = {"cycle": 245, "contract_id": "PKUSER11", "status": "fail", "guest_runs": [],
+    report = {"cycle": 246, "contract_id": "PKUSER12", "status": "fail", "guest_runs": [],
+              "guest_bound_seconds": 120,
               "ring3_executed": False, "iso_built": False, "production_ready": False}
     try:
         lock, profile = tier0.validate_contracts(ROOT)
@@ -55,9 +56,9 @@ def main() -> int:
         for i in (1, 2):
             run_dir = work / f"guest-{i}"
             run_dir.mkdir()
-            print(f"PKUSER11 guest {i}/2, 90-second bound", flush=True)
+            print(f"PKUSER12 guest {i}/2, 120-second bound", flush=True)
             run, _, handoff = boot._execute_once(f"user-root-{i}", lock, profile, qemu,
-                media_path, run_dir, 90, marker_validator=probe.validate_markers,
+                media_path, run_dir, 120, marker_validator=probe.validate_markers,
                 marker_extractor=transfer.extract_markers, completion_marker=probe.COMPLETION)
             prefix = run["marker_summary"]["transfer_prefix"]
             load.validate_oracle_binding(prefix["boot_prefix"], inspected, run["pbp1_transcript"])
@@ -83,7 +84,7 @@ def main() -> int:
         report["failure"] = f"{type(e).__name__}: {e}"
         print(report["failure"], flush=True)
     (work / "receipt.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
-    print(f"PKUSER11 live {report['status']}; ring3={report['ring3_executed']} production=0", flush=True)
+    print(f"PKUSER12 live {report['status']}; ring3={report['ring3_executed']} production=0", flush=True)
     return 0 if report["status"] == "pass" else 1
 
 

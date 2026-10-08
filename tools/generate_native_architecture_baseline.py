@@ -24,6 +24,12 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle246-owned-timer-shutdown.md",
+    "docs/native-user-timer-shutdown.md",
+    "tests/fixtures/cycle245-user-entry-readiness.json",
+    "native/kernel/src/user_entry/timer/drain.rs",
+    "native/kernel/src/user_entry/timer/drain/tests.rs",
+    "native/kernel/src/user_root_probe/timer_driver/drain.rs",
     "docs/checkpoints/cycle245-transactional-user-construction.md",
     "docs/native-user-construction.md",
     "tests/fixtures/cycle244-user-entry-readiness.json",

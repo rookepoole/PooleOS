@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle245 makes native task construction
+**Current development checkpoint:** Cycle246 adds bounded native timer shutdown
+and recovery while task memory remains owned. Two fresh boots each pass15 peer
+survival cases, including failed-cleanup quarantine/retry;514 Rust executions and
+35 Python oracle tests pass. Next: terminal/failed-cleanup runtime accounting,
+independent missing-IRQ recovery, IPC, services, shell/apps and the usable ISO.
+No interactive session or new ISO yet. The full robust microkernel remains the
+goal afterward. [Evidence](docs/checkpoints/cycle246-owned-timer-shutdown.md).
+
+**Historical development checkpoint:** Cycle245 makes native task construction
 transactional, retries failed cleanup and preserves healthy-peer execution.
 Two fresh boots,504 Rust test executions and34 Python oracle tests pass. Native
 testing also exposed and repaired a constructor stack overflow. Next: timer

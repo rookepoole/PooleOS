@@ -1,15 +1,44 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.148.0-native-user-construction
-Roadmap cycle: PooleOS Cycle 245
+Plan version: 2.149.0-native-timer-shutdown
+Roadmap cycle: PooleOS Cycle 246
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 245: Transactional User Construction
+## Cycle 246: Owned Timer Shutdown And Recovery
+
+USI-1 / N7-N9, N12 and N13: PKUSER12 stops the one-shot timer before releasing
+entry descriptors, roots or task pages. It checks all IRR/ISR/TMR banks and drains
+only its owned vector through a bounded, root/stack-checked kernel window.
+Failure retains exact ownership; a retry drains the pending request before
+detaching and releasing memory. Two fresh57-marker guests each prove pending and
+late-arrival cases, one13-page quarantine/retry,15 peer-survival cases,538 released
+pages and247 scrubbed data pages.514 Rust executions,35 Python oracle tests,
+548 altered-evidence rejections per guest and ordinary-boot denial pass.
+[Evidence](checkpoints/cycle246-owned-timer-shutdown.md),
+[mechanism and limits](native-user-timer-shutdown.md).
+
+The first link exceeded its text reservation; one page was added within the
+unchanged192-page cap. The expanded probe then exceeded90 seconds. An unchanged-
+media diagnostic completed in93.844 seconds; a120-second bound was fixed before
+the final two fresh qualifying boots. Both failed attempts remain recorded.
+The resulting image is178pages/entry0xB000, not a qualified production image.
+
+Next: account terminal partial quanta and consumed quanta whose cleanup fails
+exactly once. The119 accepted preemptions do not include one consumed failed-
+cleanup quantum. Then independent missing-IRQ recovery, capability IPC, confined
+services, shell/apps and an actual optical ISO. Arbitrary after-mask silicon
+races, partial timer configuration recovery, general quarantine/admission and
+full stack/exception qualification remain flagged, not waived. N12/N13 remain
+partial; all8996 requirements,59 additions,97 flags/42 open and20 gaps remain.
+No phase/flag closes, new ISO, merge or production promotion. Complete robust
+N0-N39 microkernel development continues after the usable integration ISO.
+
+## Historical Cycle 245: Transactional User Construction
 
 USI-1 / N9 and N13.1-2,6: both native task constructors now own partial allocations,
 roll back failed payload/mapping preparation, preserve exact retention through

@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 245, 2026-10-08. No new ISO exists yet.
+Status: implementation started, Cycle 246, 2026-10-08. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -43,7 +43,7 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 
 | Stage | Build Plan Binding | Exit Criterion | Current State |
 | --- | --- | --- | --- |
-| USI-1 User entry and containment | N7, N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle245: owned construction rollback/retry and14 peer-survival cases; timer races/accounting, general admission/quarantine and stack/exception qualification remain |
+| USI-1 User entry and containment | N7, N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle246: bounded pending/late timer draining, cleanup quarantine/retry and15 survival cases; complete accounting, missing-IRQ recovery, general admission/quarantine and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Not started |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Not started |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
@@ -101,11 +101,14 @@ Cycle243 connects substeps6-7 to PKSCHED1: two actual private-root tasks, timer
 suspension/resumption, cancellation, task-only call-limit termination and proven
 survivor progress. The syscall stack may move within its owned page. Historical
 statements above describe each earlier cycle, not current completion. Remaining
-USI-1 work now follows [PKUSER11 limits](native-user-construction.md):
-Cycle245 verifies bounded construction rollback, exact cleanup ownership/retry
-and surviving-peer progress. General spawn admission, persistent quarantine and
-slot-commit recovery, complete stack/exception/selector qualification, timer
-pending/late/missing-delivery cases and final-subquantum accounting remain.
+USI-1 work now follows [PKUSER12 limits](native-user-timer-shutdown.md):
+Cycle245 verifies bounded construction rollback and Cycle246 adds bounded owned
+timer draining, exact cleanup quarantine/retry and surviving-peer progress.
+General spawn admission, persistent quarantine/partial timer configuration and
+slot-commit recovery, complete stack/exception/selector qualification, arbitrary
+timer races, independent missing-delivery recovery and terminal/failed-cleanup
+quantum accounting remain. Zero committed ticks after cleanup failure do not
+mean the task consumed no CPU time.
 General admission stays disabled until these contracts are qualified.
 
 No unsafe user execution is permitted just because an admission function passes.
@@ -134,7 +137,19 @@ requirements, not items deferred until after the demo.
    products. Preserve the older demo separately; its receipts cannot qualify this
    image. Test the ISO itself, not only a disk image or host library.
 
-## Cycle 245 Transactional Construction
+## Cycle 246 Owned Timer Shutdown
+
+[Checkpoint](checkpoints/cycle246-owned-timer-shutdown.md) records two fresh
+57-marker guests with15 survival cases,148 dispatches,119 accepted preemptions
+and307 root writes each. Pending/late one-shot work drains only through an owned
+kernel window; injected cleanup failure retains13 pages until successful retry.
+The healthy peer continues to exit84.538 pages are released and247 data pages
+scrubbed; ordinary unsigned boot still denies execution. Next: terminal and
+failed-cleanup quantum accounting, independent missing-IRQ recovery, then IPC.
+The consumed failed-cleanup quantum is not yet included in the119 accepted
+preemptions. No broad timer-race or complete-accounting claim follows.
+
+## Historical Cycle 245 Transactional Construction
 
 [Checkpoint](checkpoints/cycle245-transactional-user-construction.md) records
 two fresh55-marker guests. Each rolls back one real quota failure and six

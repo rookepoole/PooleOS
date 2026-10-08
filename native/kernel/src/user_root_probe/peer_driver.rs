@@ -42,8 +42,11 @@ impl Peer {
         manager: &mut PhysicalMemoryManager,
         topology: interrupt_time::MadtTopology,
         hpet: interrupt_time::HpetDescription,
+        probe: timer_driver::Probe,
     ) -> Result<Self, PeerFailure> {
-        let timer = Timer::new(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
+        let mut timer =
+            Timer::new(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
+        timer.set_probe(probe);
         let bytes = arch::x86_64::user::peer_payload(kind).map_err(|_| PeerFailure::Setup)?;
         let identity = TaskId::new(index, 1).map_err(|_| PeerFailure::Setup)?;
         // SAFETY: exclusive BSP, IF0, before allocation or task activation.
@@ -107,13 +110,56 @@ impl Peer {
         if self.slot.run_slice(self.id).is_ok() {
             return Err(());
         }
-        let (mut parts, observed) = self
+        let (parts, observed) = self
             .slot
             .reap(self.id, manager, &mut self.memory)
             .map_err(|_| ())?;
         if observed != expected || self.slot.reap(self.id, manager, &mut self.memory).is_ok() {
             return Err(());
         }
+        self.release(manager, parts)
+    }
+    fn recover_timer(&mut self, manager: &mut PhysicalMemoryManager) -> Result<(), ()> {
+        if self.slot.state(self.id) != Ok(task::State::Quarantined)
+            || unsafe { arch::x86_64::read_cr3() } != self.root
+            || !arch::x86_64::user::active()
+            || arch::x86_64::read_rflags() & (1 << 9) != 0
+            || IRQ_APIC_VIRTUAL.load(Ordering::Acquire)
+                != poolekernel::user_entry::timer::APIC_VIRTUAL
+            || self.slot.run_slice(self.id).is_ok()
+            || self.slot.reap(self.id, manager, &mut self.memory).is_ok()
+            || self
+                .slot
+                .activate(self.id, manager, &mut self.memory)
+                .is_ok()
+        {
+            return Err(());
+        }
+        for h in self.handles {
+            if manager.free(h) != Err(PhysicalMemoryError::AllocationRetained) {
+                return Err(());
+            }
+        }
+        let parts = self
+            .slot
+            .abandon(self.id, manager, &mut self.memory)
+            .map_err(|_| ())?;
+        if self
+            .slot
+            .abandon(self.id, manager, &mut self.memory)
+            .is_ok()
+            || arch::x86_64::user::active()
+            || IRQ_APIC_VIRTUAL.load(Ordering::Acquire) != 0
+        {
+            return Err(());
+        }
+        self.release(manager, parts)
+    }
+    fn release(
+        &mut self,
+        manager: &mut PhysicalMemoryManager,
+        mut parts: DetachedImage,
+    ) -> Result<(), ()> {
         for h in [self.handles[1], self.handles[2], self.handles[3]] {
             self.memory.zero(h).map_err(|_| ())?;
         }
@@ -158,16 +204,41 @@ pub fn run_all(
     let baseline = manager.summary().allocated_pages;
     let mut spawn_rollbacks = 0;
     let mut quota_rollback = false;
-    for round in 0..14 {
-        let first_kind = if round >= 3 { round + 1 } else { round };
+    let mut timer_recovered = false;
+    for round in 0..15 {
+        let first_kind = if round == 14 {
+            0
+        } else if round >= 3 {
+            round + 1
+        } else {
+            round
+        };
+        let probe = match round {
+            0 => timer_driver::Probe::Pending,
+            1 => timer_driver::Probe::Late,
+            14 => timer_driver::Probe::FailOnce,
+            _ => timer_driver::Probe::None,
+        };
         let mut peers = [
             checked!(
                 100,
-                Peer::new(0, first_kind, handoff, core, bits, manager, topology, hpet)
+                Peer::new(
+                    0, first_kind, handoff, core, bits, manager, topology, hpet, probe
+                )
             ),
             checked!(
                 101,
-                Peer::new(1, 3, handoff, core, bits, manager, topology, hpet)
+                Peer::new(
+                    1,
+                    3,
+                    handoff,
+                    core,
+                    bits,
+                    manager,
+                    topology,
+                    hpet,
+                    timer_driver::Probe::None
+                )
             ),
         ];
         if peers[0].root == peers[1].root || manager.summary().allocated_pages != baseline + 26 {
@@ -203,7 +274,24 @@ pub fn run_all(
                 stop(105, serial, debugcon);
             }
             checked!(106, peer.slot.activate(peer.id, manager, &mut peer.memory));
-            let slice = checked!(107, peer.slot.run_slice(peer.id));
+            let result = peer.slot.run_slice(peer.id);
+            if result.is_err() && round == 14 && index == 0 && !timer_recovered {
+                if result
+                    != Err(task::Error::Cpu(
+                        poolekernel::user_entry::prepared::cpu::Error::User(
+                            poolekernel::user_entry::privilege::Error::Hardware,
+                        ),
+                    ))
+                {
+                    stop(123, serial, debugcon);
+                }
+                checked!(124, peer.recover_timer(manager));
+                checked!(124, scheduler.teardown(scheduled));
+                timer_recovered = true;
+                dead[0] = true;
+                continue;
+            }
+            let slice = checked!(107, result);
             let mut terminated = None;
             match slice.event {
                 Event::Preempted {
@@ -345,7 +433,8 @@ pub fn run_all(
         let summary = scheduler.summary();
         let writes = arch::x86_64::user_root_write_count() - before;
         if dead != [true; 2]
-            || preemptions[0] < 1
+            || (round != 14 && preemptions[0] < 1)
+            || (round == 14 && (!timer_recovered || preemptions[0] != 0))
             || preemptions[1] < 2
             || after_stop < 1
             || summary.running_count != 0
@@ -371,6 +460,7 @@ pub fn run_all(
             Some(Reason::Cancelled) => ("cancel", 0),
             Some(Reason::CallLimit) => ("limit", 64),
             Some(Reason::InvalidReturn { violation, .. }) => ("return", violation as u64),
+            None if round == 14 && timer_recovered => ("quarantine", 0),
             _ => stop(119, serial, debugcon),
         };
         let mut log = EarlyLogger::new(BootSink {
@@ -418,4 +508,18 @@ pub fn run_all(
         ring: &EARLY_RING,
     });
     log.write_str("POOLEOS:KERNEL:USER-SPAWN PASS contract=PKUSER11 quota_failures=1 quota_released_pages=5 quota_scrubbed_pages=5 after_effect_failures=6 cleanup_quarantines=6 cleanup_retries=6 retained_free_denials=30 released_pages=83 scrubbed_pages=83 peer_resumed=1 peer_exit=84 cpu_exposures=0 production=0\n");
+    let deliveries = match timer_driver::drain_proof() {
+        Ok(v) => v,
+        Err(_) => stop(125, serial, debugcon),
+    };
+    let mut log = EarlyLogger::new(BootSink {
+        serial,
+        debugcon,
+        ring: &EARLY_RING,
+    });
+    log.write_str("POOLEOS:KERNEL:USER-TIMER-DRAIN PASS contract=PKUSER12 pending=1 late=1 quarantines=1 retries=1 retained_pages=13 free_denials=5 restart_denials=2 reap_denials=1 peer_exit=84 deliveries=");
+    log.write_decimal_u64(u64::from(deliveries));
+    log.write_str(" eois=");
+    log.write_decimal_u64(u64::from(deliveries));
+    log.write_str(" empty_irr_isr=1 kernel_window=1 detached_after_shutdown=1 if=0 production=0\n");
 }

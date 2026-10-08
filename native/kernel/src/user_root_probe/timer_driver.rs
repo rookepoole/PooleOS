@@ -8,6 +8,9 @@ const MASK: u32 = 1 << 16;
 const LVT: [u64; 6] = [0x320, 0x330, 0x340, 0x350, 0x360, 0x370];
 const POLL_LIMIT: u32 = 2_000_000;
 
+mod drain;
+pub use drain::{Probe, dispatch as dispatch_drain, proof as drain_proof};
+
 fn hw<T>(result: Result<T, interrupt_time::Error>) -> Result<T, TimerError> {
     result.map_err(|_| TimerError::Hardware)
 }
@@ -21,6 +24,7 @@ pub struct Timer {
     configured: bool,
     cmci: bool,
     hpet_config: u64,
+    probe: Probe,
 }
 
 impl Timer {
@@ -59,11 +63,16 @@ impl Timer {
             configured: false,
             cmci: false,
             hpet_config: 0,
+            probe: Probe::None,
         })
     }
 
     pub fn mappings(&self) -> Mappings {
         self.mappings
+    }
+
+    pub fn set_probe(&mut self, probe: Probe) {
+        self.probe = probe;
     }
 
     fn context(&self, root: u64, mappings: Mappings) -> Result<LiveInterruptHardware, TimerError> {
@@ -267,12 +276,7 @@ impl Driver for Timer {
         if !self.configured {
             return Ok(());
         }
-        self.mask_sources(&mut hardware)?;
-        hw(hardware.apic_write(0x380, 0))?;
-        if hw(hardware.apic_read(0x380))? != 0 || hw(hardware.apic_read(0x390))? != 0 {
-            return Err(TimerError::Hardware);
-        }
-        Self::idle(&mut hardware)?;
+        drain::quiesce(self, root, &mut hardware)?;
         if TRAP_DEPTH.load(Ordering::Acquire) != 0
             || IRQ_TIMER_DELIVERIES.load(Ordering::Acquire) != IRQ_EOI_COUNT.load(Ordering::Acquire)
             || IRQ_ERROR_COUNT.load(Ordering::Acquire) != 0

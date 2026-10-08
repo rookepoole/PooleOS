@@ -12295,6 +12295,9 @@ extern "C" fn poole_kernel_trap_dispatch(frame_pointer: *mut TrapFrame) {
         return;
     }
     if scenario == DevelopmentTrapScenario::UserRoot {
+        if user_root_probe::dispatch_drain(frame, depth) {
+            return;
+        }
         if arch::x86_64::user::active() {
             arch::x86_64::user::dispatch(frame, depth);
             return;
