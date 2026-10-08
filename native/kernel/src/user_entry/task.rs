@@ -184,6 +184,7 @@ pub enum Event {
 pub struct Slice {
     pub id: TaskId,
     pub root: u64,
+    pub ticks: u64,
     pub event: Event,
 }
 impl Slice {
@@ -194,7 +195,7 @@ impl Slice {
         match self.event {
             Event::Preempted {
                 ticks, syscalls, ..
-            } if ticks > 0 && syscalls <= 64 => Ok(()),
+            } if ticks > 0 && ticks == self.ticks && syscalls <= 64 => Ok(()),
             Event::Terminated(o) => o.validate(id, root),
             _ => Err(privilege::Error::Hardware),
         }
@@ -226,6 +227,15 @@ pub enum Error {
     Missing,
     State,
     Cpu(super::prepared::cpu::Error),
+    Accounting(crate::scheduler::Error),
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct Runtime {
+    pub charged_slices: u32,
+    pub charged_ticks: u64,
+    pub pending_ticks: Option<u64>,
+    pub unknown: bool,
 }
 
 struct Owned<H: Cpu, D: Driver> {
@@ -235,6 +245,8 @@ struct Owned<H: Cpu, D: Driver> {
     state: State,
     outcome: Option<Outcome>,
     last_slice: Option<Slice>,
+    pending_charge: Option<Slice>,
+    runtime: Runtime,
 }
 
 /// A persistent slot owns the exact CPU image and its cleanup adapter. It
@@ -294,6 +306,8 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
             state: State::Prepared,
             outcome: None,
             last_slice: None,
+            pending_charge: None,
+            runtime: Runtime::default(),
         });
         Ok(id)
     }
@@ -311,6 +325,9 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
     pub fn state(&self, id: TaskId) -> Result<State, Error> {
         Ok(self.owned(id)?.state)
     }
+    pub fn runtime(&self, id: TaskId) -> Result<Runtime, Error> {
+        Ok(self.owned(id)?.runtime)
+    }
     pub fn outcome(&self, id: TaskId) -> Result<Outcome, Error> {
         let task = self.owned(id)?;
         if task.state != State::Terminated {
@@ -325,7 +342,10 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
         memory: &mut M,
     ) -> Result<(), Error> {
         let task = self.owned_mut(id)?;
-        if !matches!(task.state, State::Prepared | State::Suspended) {
+        if !matches!(task.state, State::Prepared | State::Suspended)
+            || task.pending_charge.is_some()
+            || task.runtime.unknown
+        {
             return Err(Error::State);
         }
         task.state = State::Quarantined;
@@ -372,7 +392,10 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
         memory: &mut M,
     ) -> Result<DetachedImage, Error> {
         let task = self.owned_mut(id)?;
-        if !matches!(task.state, State::Prepared | State::Quarantined) {
+        if !matches!(task.state, State::Prepared | State::Quarantined)
+            || task.pending_charge.is_some()
+            || task.runtime.unknown
+        {
             return Err(Error::State);
         }
         task.state = State::Quarantined;
@@ -390,6 +413,9 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
         memory: &mut M,
     ) -> Result<DetachedImage, Error> {
         let task = self.owned_mut(id)?;
+        if task.pending_charge.is_some() || task.runtime.unknown {
+            return Err(Error::State);
+        }
         let cpu = task.cpu.take().ok_or(Error::State)?;
         match cpu.retire(manager, memory) {
             Ok(parts) => {
@@ -405,16 +431,64 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
 }
 
 impl<H: Cpu, D: SliceDriver> Slot<H, D> {
+    /// Settle retained measurement, including after failed cleanup. No user
+    /// outcome is invented. The exclusive slot consumes the charge exactly once.
+    pub fn account_slice(
+        &mut self,
+        id: TaskId,
+        scheduler: &mut crate::scheduler::Scheduler,
+        cpu: crate::scheduler::CpuId,
+    ) -> Result<u64, Error> {
+        let task = self.owned_mut(id)?;
+        let slice = task.pending_charge.ok_or(Error::State)?;
+        if task.runtime.unknown {
+            return Err(Error::State);
+        }
+        let ordinal = task
+            .runtime
+            .charged_slices
+            .checked_add(1)
+            .ok_or(Error::Exhausted)?;
+        let total = task
+            .runtime
+            .charged_ticks
+            .checked_add(slice.ticks)
+            .ok_or(Error::Exhausted)?;
+        let scheduled =
+            crate::scheduler::TaskId::new(id.slot, id.generation).map_err(Error::Accounting)?;
+        scheduler
+            .account_dispatch(
+                cpu,
+                scheduled,
+                ordinal,
+                task.runtime.charged_ticks,
+                slice.ticks,
+            )
+            .map_err(Error::Accounting)?;
+        task.runtime = Runtime {
+            charged_slices: ordinal,
+            charged_ticks: total,
+            pending_ticks: None,
+            unknown: false,
+        };
+        task.pending_charge = None;
+        Ok(slice.ticks)
+    }
+
     pub fn run_slice(&mut self, id: TaskId) -> Result<Slice, Error> {
         let task = self.owned_mut(id)?;
-        if task.state != State::Active {
+        if task.state != State::Active || task.pending_charge.is_some() || task.runtime.unknown {
             return Err(Error::State);
         }
         task.state = State::Quarantined;
+        task.runtime.unknown = true;
         let cpu = task.cpu.as_mut().ok_or(Error::State)?;
-        let slice = cpu
-            .exercise_slice(id, &mut task.driver)
-            .map_err(Error::Cpu)?;
+        let result = cpu.exercise_slice(id, &mut task.driver, &mut task.pending_charge);
+        if let Some(slice) = task.pending_charge {
+            task.runtime.pending_ticks = Some(slice.ticks);
+            task.runtime.unknown = false;
+        }
+        let slice = result.map_err(Error::Cpu)?;
         match slice.event {
             Event::Preempted { .. } => {
                 cpu.suspend().map_err(Error::Cpu)?;
@@ -433,7 +507,7 @@ impl<H: Cpu, D: SliceDriver> Slot<H, D> {
     /// is identity only; a future user request still requires capability checks.
     pub fn cancel_suspended(&mut self, id: TaskId) -> Result<Outcome, Error> {
         let task = self.owned_mut(id)?;
-        if task.state != State::Suspended {
+        if task.state != State::Suspended || task.pending_charge.is_some() || task.runtime.unknown {
             return Err(Error::State);
         }
         let slice = task.last_slice.ok_or(Error::State)?;

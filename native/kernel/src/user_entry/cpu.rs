@@ -251,18 +251,22 @@ impl<H: Cpu> CpuImage<H> {
         &mut self,
         id: crate::scheduler_smp::TaskId,
         driver: &mut D,
+        pending: &mut Option<crate::user_entry::task::Slice>,
     ) -> Result<crate::user_entry::task::Slice, Error> {
         let image = self.user_context()?;
-        if !self.timer_quiescent || !self.user_quiescent {
+        if !self.timer_quiescent || !self.user_quiescent || pending.is_some() {
             return Err(Error::State);
         }
         self.user_quiescent = false;
-        let result = driver.execute_slice(image, id);
-        self.quiesce_task(driver)?;
+        let result = driver.execute_slice(image, id).and_then(|slice| {
+            slice.validate(id, image.root_physical)?;
+            *pending = Some(slice);
+            Ok(slice)
+        });
+        // Preserve an authenticated measurement before any fallible cleanup.
+        let stopped = self.quiesce_task(driver);
         let slice = result.map_err(Error::User)?;
-        slice
-            .validate(id, image.root_physical)
-            .map_err(Error::User)?;
+        stopped?;
         Ok(slice)
     }
 

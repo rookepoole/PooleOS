@@ -40,6 +40,7 @@ impl task::SliceDriver for StopDriver {
         Ok(task::Slice {
             id: o.id,
             root: o.root,
+            ticks: u64::from(!c.zero_ticks),
             event: if c.slice_terminal {
                 task::Event::Terminated(o)
             } else {
@@ -93,6 +94,132 @@ fn task_slot(
         .insert(owner, StopDriver(Rc::clone(&control)))
         .unwrap_or_else(|(e, _, _)| panic!("insert {e:?}"));
     (slot, control, id)
+}
+
+fn running_scheduler(id: TaskId) -> (crate::scheduler::Scheduler, crate::scheduler::CpuId) {
+    let mut scheduler = crate::scheduler::Scheduler::new(1).unwrap();
+    let cpu = crate::scheduler::CpuId::new(0).unwrap();
+    let sid = scheduler
+        .create_task(id.slot, id.generation, 16, 1)
+        .unwrap();
+    scheduler.activate(sid, cpu).unwrap();
+    scheduler.dispatch(cpu).unwrap();
+    (scheduler, cpu)
+}
+
+#[test]
+fn runtime_pending_charge_blocks_resume_cancel_and_release_until_settled_once() {
+    let mut s = setup();
+    let (mut slot, _, id) = task_slot(s.owner);
+    let (mut scheduler, cpu) = running_scheduler(id);
+    slot.activate(id, &s.manager, &mut s.memory).unwrap();
+    slot.run_slice(id).unwrap();
+    assert_eq!(slot.runtime(id).unwrap().pending_ticks, Some(1));
+    assert!(slot.activate(id, &s.manager, &mut s.memory).is_err());
+    assert!(slot.cancel_suspended(id).is_err());
+    assert!(slot.reap(id, &mut s.manager, &mut s.memory).is_err());
+    assert_eq!(slot.account_slice(id, &mut scheduler, cpu), Ok(1));
+    let charged = slot.runtime(id).unwrap();
+    assert_eq!(
+        (
+            charged.charged_slices,
+            charged.charged_ticks,
+            charged.pending_ticks
+        ),
+        (1, 1, None)
+    );
+    assert_eq!(
+        slot.account_slice(id, &mut scheduler, cpu),
+        Err(task::Error::State)
+    );
+    assert_eq!(slot.runtime(id).unwrap(), charged);
+    slot.cancel_suspended(id).unwrap();
+    slot.reap(id, &mut s.manager, &mut s.memory).unwrap();
+    assert_eq!(
+        scheduler
+            .task_snapshot(crate::scheduler::TaskId::new(0, 1).unwrap())
+            .unwrap()
+            .runtime_ticks,
+        1
+    );
+}
+
+#[test]
+fn runtime_terminal_and_cleanup_failure_keep_exact_charge_across_rejected_settlement_and_retry() {
+    for terminal in [false, true] {
+        for zero in [false, true] {
+            if zero && !terminal {
+                continue;
+            }
+            let mut s = setup();
+            let (mut slot, c, id) = task_slot(s.owner);
+            c.borrow_mut().slice_terminal = terminal;
+            c.borrow_mut().zero_ticks = zero;
+            c.borrow_mut().fail_quiesce = true;
+            let (mut scheduler, cpu) = running_scheduler(id);
+            slot.activate(id, &s.manager, &mut s.memory).unwrap();
+            assert!(slot.run_slice(id).is_err());
+            let pending = slot.runtime(id).unwrap();
+            assert!(!pending.unknown);
+            assert_eq!(pending.pending_ticks, Some(u64::from(!zero)));
+            assert!(slot.abandon(id, &mut s.manager, &mut s.memory).is_err());
+            assert!(
+                slot.account_slice(
+                    TaskId {
+                        generation: 2,
+                        ..id
+                    },
+                    &mut scheduler,
+                    cpu
+                )
+                .is_err()
+            );
+            let (mut foreign, _) = running_scheduler(TaskId::new(1, 1).unwrap());
+            assert!(slot.account_slice(id, &mut foreign, cpu).is_err());
+            assert!(
+                slot.account_slice(id, &mut scheduler, crate::scheduler::CpuId::new(1).unwrap())
+                    .is_err()
+            );
+            assert_eq!(slot.runtime(id).unwrap(), pending);
+            assert_eq!(
+                slot.account_slice(id, &mut scheduler, cpu),
+                Ok(u64::from(!zero))
+            );
+            assert!(slot.abandon(id, &mut s.manager, &mut s.memory).is_err());
+            assert!(slot.account_slice(id, &mut scheduler, cpu).is_err());
+            retained(&mut s.manager, &s.handles);
+            c.borrow_mut().fail_quiesce = false;
+            slot.abandon(id, &mut s.manager, &mut s.memory).unwrap();
+            assert_eq!(c.borrow().entries, 1);
+            assert_eq!(
+                scheduler
+                    .task_snapshot(crate::scheduler::TaskId::new(0, 1).unwrap())
+                    .unwrap()
+                    .runtime_ticks,
+                u64::from(!zero)
+            );
+        }
+    }
+}
+
+#[test]
+fn runtime_missing_measurement_is_unknown_not_zero_and_never_released() {
+    let mut s = setup();
+    let (mut slot, c, id) = task_slot(s.owner);
+    c.borrow_mut().fail_execute = true;
+    slot.activate(id, &s.manager, &mut s.memory).unwrap();
+    assert!(slot.run_slice(id).is_err());
+    assert_eq!(
+        slot.runtime(id).unwrap(),
+        task::Runtime {
+            unknown: true,
+            ..task::Runtime::default()
+        }
+    );
+    let (mut scheduler, cpu) = running_scheduler(id);
+    assert!(slot.account_slice(id, &mut scheduler, cpu).is_err());
+    assert!(slot.abandon(id, &mut s.manager, &mut s.memory).is_err());
+    retained(&mut s.manager, &s.handles);
 }
 
 #[test]
@@ -228,6 +355,7 @@ fn prepared_task_cancel_has_no_cpu_or_driver_effect() {
 fn task_quanta_retain_memory_across_suspension_and_restore_before_resuming() {
     let mut s = setup();
     let (mut slot, c, id) = task_slot(s.owner);
+    let (mut scheduler, cpu) = running_scheduler(id);
     assert!(slot.cancel_suspended(id).is_err());
     for n in 1..=3 {
         slot.activate(id, &s.manager, &mut s.memory).unwrap();
@@ -246,6 +374,9 @@ fn task_quanta_retain_memory_across_suspension_and_restore_before_resuming() {
         assert!(slot.run_slice(id).is_err());
         assert!(slot.reap(id, &mut s.manager, &mut s.memory).is_err());
         retained(&mut s.manager, &s.handles);
+        slot.account_slice(id, &mut scheduler, cpu).unwrap();
+        scheduler.yield_current(cpu).unwrap();
+        scheduler.dispatch(cpu).unwrap();
     }
     c.borrow_mut().slice_terminal = true;
     slot.activate(id, &s.manager, &mut s.memory).unwrap();
@@ -254,6 +385,7 @@ fn task_quanta_retain_memory_across_suspension_and_restore_before_resuming() {
         task::Event::Terminated(_)
     ));
     assert!(slot.activate(id, &s.manager, &mut s.memory).is_err());
+    slot.account_slice(id, &mut scheduler, cpu).unwrap();
     slot.reap(id, &mut s.manager, &mut s.memory).unwrap();
     assert_eq!(
         s.machine.borrow().writes,
@@ -277,6 +409,8 @@ fn cancellation_never_reenters_saved_state_and_stale_cancel_has_no_effect() {
     let (mut slot, c, id) = task_slot(s.owner);
     slot.activate(id, &s.manager, &mut s.memory).unwrap();
     slot.run_slice(id).unwrap();
+    let (mut scheduler, cpu) = running_scheduler(id);
+    slot.account_slice(id, &mut scheduler, cpu).unwrap();
     assert_eq!(
         slot.cancel_suspended(TaskId {
             generation: 2,
@@ -318,7 +452,14 @@ fn quantum_execute_quiesce_or_suspend_failure_cannot_resume_or_free() {
         c.borrow_mut().fail_execute = false;
         c.borrow_mut().fail_quiesce = false;
         s.machine.borrow_mut().write_error = false;
-        slot.abandon(id, &mut s.manager, &mut s.memory).unwrap();
+        if case == 0 {
+            assert!(slot.runtime(id).unwrap().unknown);
+            assert!(slot.abandon(id, &mut s.manager, &mut s.memory).is_err());
+        } else {
+            let (mut scheduler, cpu) = running_scheduler(id);
+            assert_eq!(slot.account_slice(id, &mut scheduler, cpu), Ok(1));
+            slot.abandon(id, &mut s.manager, &mut s.memory).unwrap();
+        }
         assert_eq!(c.borrow().entries, 1);
     }
 }
@@ -337,7 +478,8 @@ fn forged_quantum_observations_never_admit_suspended_state() {
         assert!(slot.run_slice(id).is_err());
         assert_eq!(slot.state(id), Ok(task::State::Quarantined));
         retained(&mut s.manager, &s.handles);
-        slot.abandon(id, &mut s.manager, &mut s.memory).unwrap();
+        assert!(slot.runtime(id).unwrap().unknown);
+        assert!(slot.abandon(id, &mut s.manager, &mut s.memory).is_err());
     }
 }
 
@@ -348,6 +490,8 @@ fn suspended_resume_revalidates_cpu_identity_and_root_mappings_before_effects() 
         let (mut slot, c, id) = task_slot(s.owner);
         slot.activate(id, &s.manager, &mut s.memory).unwrap();
         slot.run_slice(id).unwrap();
+        let (mut scheduler, cpu) = running_scheduler(id);
+        slot.account_slice(id, &mut scheduler, cpu).unwrap();
         if case == 0 {
             s.machine.borrow_mut().snapshot.cpu_id += 1;
         } else {

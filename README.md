@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle246 adds bounded native timer shutdown
+**Current development checkpoint:** Cycle247 accounts native peer quanta exactly
+once, including terminal execution and failed cleanup. Two fresh boots each
+settle148 dispatches, reject148 duplicate charges and preserve15 survival cases.
+525 Rust executions and36 Python oracle tests pass. Next: independent missing-IRQ
+and unknown-runtime recovery, IPC, services, shell/apps and the usable ISO.
+No interactive session or new ISO yet. Full robust microkernel development
+continues afterward. [Evidence](docs/checkpoints/cycle247-native-runtime-accounting.md).
+
+**Historical development checkpoint:** Cycle246 adds bounded native timer shutdown
 and recovery while task memory remains owned. Two fresh boots each pass15 peer
 survival cases, including failed-cleanup quarantine/retry;514 Rust executions and
 35 Python oracle tests pass. Next: terminal/failed-cleanup runtime accounting,

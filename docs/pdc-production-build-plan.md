@@ -1,15 +1,45 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.149.0-native-timer-shutdown
-Roadmap cycle: PooleOS Cycle 246
+Plan version: 2.150.0-native-runtime-accounting
+Roadmap cycle: PooleOS Cycle 247
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 246: Owned Timer Shutdown And Recovery
+## Cycle 247: Native Runtime Accounting
+
+USI-1 / N8, N12 and N13: PKUSER13 retains measured quanta before fallible cleanup
+and settles each into its running scheduler task exactly once. Terminal partial
+quanta, zero-resolution samples and failed-cleanup charges have explicit handling.
+Pending or unknown accounting blocks resume, cancellation and release. Invalid
+measurements remain unknown, not zero. Two fresh58-marker guests each prove148
+settled dispatches,28 terminal samples,148 duplicate denials and one positively
+charged failed-cleanup quantum. All15 survival cases, construction rollback and
+timer-drain recovery remain passing.525 Rust executions,36 Python oracle tests,
+563 altered-evidence rejections per guest and ordinary unsigned denial pass.
+[Evidence](checkpoints/cycle247-native-runtime-accounting.md),
+[mechanism and limits](native-user-runtime-accounting.md).
+
+The link first exceeded its read-only/text reservations. Moving those boundaries
+within the192-page cap exposed a stale entry-offset constant, rejected by native
+runtime continuity. Both failures remain recorded. The constant is repaired and
+a host linker/entry consistency regression added. Final image180pages/entry0xC000;
+the guarded36-page bootstrap stack and120-second guest bound are unchanged.
+
+Next: independent missing-IRQ recovery and an explicit unknown-measurement
+quarantine/recovery policy, then capability IPC, confined services, shell/apps
+and a usable optical ISO. HPET arm-to-event accounting includes in-quantum kernel
+work; it is not pure user time or complete accounting across all profiles/hardware.
+Coherent physical clock reads, reset/drift, general admission/quarantine and full
+stack/exception qualification remain flagged. N12/N13 and USI-1 stay partial;
+no phase or flag closes. All8996 requirements,59 additions,97 flags/42 open and20
+gaps remain. No new ISO, merge or promotion. Full robust microkernel development
+continues after the usable integration ISO, not instead of it.
+
+## Historical Cycle 246: Owned Timer Shutdown And Recovery
 
 USI-1 / N7-N9, N12 and N13: PKUSER12 stops the one-shot timer before releasing
 entry descriptors, roots or task pages. It checks all IRR/ISR/TMR banks and drains

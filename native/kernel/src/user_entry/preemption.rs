@@ -33,9 +33,18 @@ impl Budget {
     }
 
     pub fn elapsed(self, start: u64, now: u64) -> Result<u64, Error> {
+        let ticks = self.partial_elapsed(start, now)?;
+        if ticks == 0 {
+            return Err(Error::Hardware);
+        }
+        Ok(ticks)
+    }
+
+    /// Terminal work can finish within one counter tick; never invent a tick.
+    pub fn partial_elapsed(self, start: u64, now: u64) -> Result<u64, Error> {
         self.validate()?;
         let ticks = now.wrapping_sub(start) & self.counter_mask;
-        if ticks == 0 || ticks > 100_000_000_000_000u64.div_ceil(self.period_fs) {
+        if ticks > 100_000_000_000_000u64.div_ceil(self.period_fs) {
             return Err(Error::Hardware);
         }
         Ok(ticks)
@@ -148,6 +157,22 @@ impl Sequence {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn partial_quantum_allows_counter_resolution_zero_and_bounded_wrap_not_regression() {
+        for mask in [u64::from(u32::MAX), u64::MAX] {
+            let b = Budget {
+                count: 1,
+                period_fs: 10_000_000,
+                counter_mask: mask,
+            };
+            assert_eq!(b.partial_elapsed(9, 9), Ok(0));
+            assert!(b.elapsed(9, 9).is_err());
+            assert_eq!(b.partial_elapsed(mask - 3, 2), Ok(6));
+            assert!(b.partial_elapsed(10, 9).is_err());
+            assert!(b.partial_elapsed(0, 10_000_001).is_err());
+        }
+    }
     fn image() -> ImageAdmission {
         ImageAdmission {
             root_physical: 0x100000,

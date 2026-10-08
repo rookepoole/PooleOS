@@ -17,6 +17,7 @@ struct Session {
     start: u64,
     saved: Option<Saved>,
     event: Option<Event>,
+    ticks: Option<u64>,
 }
 static mut SLICE: Option<Session> = None;
 pub(super) fn active() -> bool {
@@ -109,6 +110,7 @@ impl task::SliceDriver for PeerEntry {
                     start: 0,
                     saved: None,
                     event: None,
+                    ticks: None,
                 }),
             );
         }
@@ -126,11 +128,13 @@ impl task::SliceDriver for PeerEntry {
         self.entry.context(image.root_physical)?;
         let session = unsafe { (&mut *(&raw mut SLICE)).take() }.ok_or(Error::State)?;
         let event = session.event.ok_or(Error::State)?;
+        let ticks = session.ticks.ok_or(Error::State)?;
         self.run = Some(session.run);
         self.saved = session.saved;
         Ok(Slice {
             id,
             root: image.root_physical,
+            ticks,
             event,
         })
     }
@@ -146,6 +150,7 @@ pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) {
         let resumable = s.run.preempt(t).unwrap_or_else(|e| denied(11, e, t));
         let ticks = super::super::user_preempt::finish_quantum(s.budget, s.start)
             .unwrap_or_else(|e| denied(12, e, t));
+        s.ticks = Some(ticks);
         if crate::IRQ_TIMER_DELIVERIES.fetch_add(1, Ordering::AcqRel) != 0
             || crate::IRQ_EOI_COUNT.fetch_add(1, Ordering::AcqRel) != 0
         {
@@ -184,6 +189,10 @@ pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) {
             s.run.fault(t).unwrap_or_else(|e| denied(14, e, t));
             acknowledge_user_fault(t).unwrap_or_else(|e| denied(14, e, t));
         }
+        s.ticks = Some(
+            super::super::user_preempt::terminal_ticks(s.budget, s.start)
+                .unwrap_or_else(|e| denied(14, e, t)),
+        );
         s.event = Some(Event::Terminated(
             s.run
                 .outcome()

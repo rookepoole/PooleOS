@@ -197,8 +197,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 246)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1284)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 247)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1286)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -238,8 +238,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "bounded_timer_shutdown_pass_accounting_and_full_candidate_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 246)
+        self.assertEqual(current["qualification_status"], "bounded_quantum_accounting_pass_unknown_recovery_and_full_candidate_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 247)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -4176,8 +4176,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(gate["canonical_full_replay_performed"] or gate["merge_qualified"])
 
     def test_cycle246_timer_shutdown_binds_pending_quarantine_retry_without_complete_accounting(self) -> None:
-        from runtime import native_user_root as probe
-        lane = self.roadmap["baseline"]["user_space_integration"]
+        lane = self.roadmap["baseline"]["historical_cycle246_user_space_integration"]
         self.assertEqual((lane["cycle"],lane["stages"]["USI-1"]),
             (246,"partial_live_bounded_timer_shutdown_no_general_admission_or_ipc"))
         for field in ("bounded_timer_shutdown_recovery", "timer_quarantine_peer_survived",
@@ -4198,8 +4197,6 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual((receipt["cycle"],receipt["contract_id"],receipt["status"]),(246,"PKUSER12","pass"))
         self.assertTrue(receipt["source_unchanged"] and receipt["owner_report_unchanged"] and receipt["timer_shutdown_recovery"])
         self.assertEqual(len(receipt["source_bindings"]),754)
-        for path, expected in receipt["source_bindings"].items():
-            self.assertEqual(hashlib.sha256((ROOT/path).read_bytes()).hexdigest().upper(),expected,path)
         checks = {c["name"]:c for c in receipt["checks"]}
         self.assertEqual(len(checks),14)
         self.assertTrue(all(c["passed"] for c in checks.values()))
@@ -4213,8 +4210,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         for run in live["guest_runs"]:
             self.assertTrue(run["fresh_vars_copy"] and run["media_read_only"] and run["serial_debugcon_exact_match"])
             self.assertFalse(run["guest_network"] or run["host_acceleration"])
-            summary = probe.validate_markers(run["markers"])
-            self.assertEqual(summary,run["marker_summary"])
+            summary = run["marker_summary"]
             self.assertEqual(len(run["markers"]),57)
             self.assertEqual((summary["timer_drain_deliveries"],summary["timer_drain_eois"]),(3,3))
             self.assertEqual((summary["timer_pending_cases"],summary["timer_late_cases"],summary["timer_quarantine_retries"]),(1,1,1))
@@ -4226,16 +4222,77 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertEqual((summary["released_pages"],summary["scrubbed_data_pages"]),(538,247))
             last = summary["peer_rounds"][14]
             self.assertEqual((last["first"],last["preemptions"][0],last["ticks"][0]),("quarantine",0,0))
-            self.assertEqual((probe.negative_controls(run["markers"]),run["hostile_marker_cases_rejected"]),(548,548))
+            self.assertEqual(run["hostile_marker_cases_rejected"],548)
             self.assertFalse(summary["production_ready"] or summary["architectural_stack_fault_qualified"])
         self.assertFalse(any("POOLEOS:KERNEL:ENTRY" in m or "USER-ROOT" in m for m in live["ordinary_denial"]["markers"]))
-        gate = self.roadmap["baseline"]["native_consistency_release_gate"]["current_closeout_regression"]
+        gate = self.roadmap["baseline"]["native_consistency_release_gate"]["historical_cycle246_closeout_regression"]
         self.assertEqual(gate["receipt_sha256"],hashlib.sha256(raw).hexdigest().upper())
         self.assertEqual((gate["tests_passed"],gate["guest_runs"],len(gate["initial_attempts"])),(514,3,2))
         self.assertEqual(gate["initial_attempts"][1]["guest_bound_seconds"],90)
         self.assertEqual(gate["diagnostic"]["status"],"pass_diagnostic_not_qualification")
         self.assertEqual(gate["qualification_guest_bound_seconds"],120)
         self.assertTrue(gate["bound_frozen_before_fresh_qualification"])
+        self.assertFalse(gate["canonical_full_replay_performed"] or gate["merge_qualified"])
+
+    def test_cycle247_runtime_accounting_binds_all_returned_quanta_without_unknown_recovery_claim(self) -> None:
+        from runtime import native_user_root as probe
+        lane = self.roadmap["baseline"]["user_space_integration"]
+        self.assertEqual((lane["cycle"],lane["stages"]["USI-1"]),
+            (247,"partial_live_bounded_quantum_accounting_no_general_admission_or_ipc"))
+        for field in ("bounded_runtime_accounting", "failed_cleanup_quantum_accounted",
+                "bounded_timer_shutdown_recovery", "timer_quarantine_peer_survived",
+                "bounded_transactional_construction", "continue_full_microkernel_after_iso"):
+            self.assertTrue(lane[field],field)
+        for field in ("complete_runtime_tick_accounting", "pure_user_instruction_time",
+                "unknown_runtime_recovery_qualified", "physical_clock_coherent_read_qualified",
+                "independent_missing_interrupt_watchdog", "general_user_program_admission",
+                "general_quarantine_recovery", "complete_kernel_stack_bound_qualified",
+                "architectural_stack_fault_qualified", "iso_built", "production_ready"):
+            self.assertFalse(lane[field],field)
+        self.assertEqual(lane["runtime_accounting_contract"],"PKUSER13")
+        raw = (ROOT/lane["receipt_path"]).read_bytes()
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),"A406DF5C9EE84C48DCEB9B560A05A33A96AAF19D847FF9B86E30D8583E82BB8B")
+        receipt = json.loads(raw)
+        self.assertEqual((receipt["cycle"],receipt["contract_id"],receipt["status"]),(247,"PKUSER13","pass"))
+        self.assertTrue(receipt["source_unchanged"] and receipt["owner_report_unchanged"] and receipt["bounded_runtime_accounting"])
+        self.assertEqual(len(receipt["source_bindings"]),754)
+        for path,expected in receipt["source_bindings"].items():
+            self.assertEqual(hashlib.sha256((ROOT/path).read_bytes()).hexdigest().upper(),expected,path)
+        checks = {c["name"]:c for c in receipt["checks"]}
+        self.assertEqual(len(checks),14)
+        self.assertTrue(all(c["passed"] for c in checks.values()))
+        for name,count in (("kernel_host_debug",368),("user_entry_host_release",115),("vm_host_release",24),
+                ("prepared_ownership_compile_fail",5),("task_ownership_compile_fail",2),("spawn_ownership_compile_fail",1),("boot_exit_host",10)):
+            self.assertEqual(checks[name]["tests_passed"],count)
+        live = receipt["live_user_root"]
+        self.assertEqual((live["status"],live["kernel"]["image_pages"],live["guest_bound_seconds"]),("pass",180,120))
+        self.assertEqual(live["kernel"]["sha256"],"5C999DC4AA3A23E470548C38082E4F3489324AD760A280C130CFDC8FF92C261D")
+        self.assertEqual(len(live["guest_runs"]),2)
+        for run in live["guest_runs"]:
+            self.assertTrue(run["fresh_vars_copy"] and run["media_read_only"] and run["serial_debugcon_exact_match"])
+            self.assertFalse(run["guest_network"] or run["host_acceleration"])
+            summary = probe.validate_markers(run["markers"])
+            self.assertEqual(summary,run["marker_summary"])
+            self.assertEqual(len(run["markers"]),58)
+            self.assertEqual((summary["runtime_samples"],summary["runtime_terminal_samples"],summary["runtime_duplicate_denials"]),(148,28,148))
+            self.assertEqual(summary["runtime_failed_cleanup_samples"],1)
+            self.assertEqual(summary["runtime_ticks"], sum(summary[k] for k in (
+                "runtime_preempt_ticks", "runtime_terminal_ticks", "runtime_failed_cleanup_ticks")))
+            self.assertGreater(summary["runtime_terminal_ticks"],0)
+            self.assertGreater(summary["runtime_failed_cleanup_ticks"],0)
+            self.assertEqual(summary["peer_rounds"][14]["ticks"][0],summary["runtime_failed_cleanup_ticks"])
+            self.assertTrue(summary["bounded_runtime_accounting"] and summary["timer_quarantine_peer_survived"])
+            self.assertEqual((summary["peer_preemptions"],summary["peer_survival_cases"],summary["cr3_writes"]),(119,15,307))
+            self.assertEqual((summary["released_pages"],summary["scrubbed_data_pages"]),(538,247))
+            self.assertEqual((summary["spawn_released_pages"],summary["spawn_scrubbed_pages"]),(83,83))
+            self.assertEqual((probe.negative_controls(run["markers"]),run["hostile_marker_cases_rejected"]),(563,563))
+            self.assertFalse(summary["pure_user_instruction_time"] or summary["production_ready"])
+        self.assertFalse(any("POOLEOS:KERNEL:ENTRY" in m or "USER-ROOT" in m for m in live["ordinary_denial"]["markers"]))
+        gate = self.roadmap["baseline"]["native_consistency_release_gate"]["current_closeout_regression"]
+        self.assertEqual(gate["receipt_sha256"],hashlib.sha256(raw).hexdigest().upper())
+        self.assertEqual((gate["tests_passed"],gate["guest_runs"],len(gate["initial_attempts"])),(525,3,2))
+        self.assertEqual(gate["qualification_guest_bound_seconds"],120)
+        self.assertTrue(gate["qualification_bound_unchanged"])
         self.assertFalse(gate["canonical_full_replay_performed"] or gate["merge_qualified"])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:

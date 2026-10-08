@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 246
+Last roadmap reconciliation: PooleOS Cycle 247
 
-Cycle246 proves bounded owned pending/late timer draining and cleanup-quarantine
+Cycle247 proves exactly-once runtime settlement for authenticated returned peer
+quanta, including terminal and failed-cleanup execution. Two fresh guests each
+settle148 dispatches and reject148 duplicate charges while preserving15 survival
+cases. Missing/invalid measurements remain unknown and retain ownership. Next:
+independent missing-IRQ and unknown-runtime recovery, IPC, services, shell/apps
+and the usable ISO. No normative requirement, phase exit, merge, release or
+promotion changes. Full robust N0-N39 development continues after that milestone.
+[Cycle247 evidence](checkpoints/cycle247-native-runtime-accounting.md).
+
+Historical Cycle246 proves bounded owned pending/late timer draining and cleanup-quarantine
 retry with a surviving native peer. Two fresh guests each pass15 survival cases.
 General timer races, terminal/failed-cleanup runtime accounting and independent
 missing-IRQ recovery remain open. Next: accounting/recovery, capability IPC,

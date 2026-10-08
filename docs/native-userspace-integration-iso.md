@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 246, 2026-10-08. No new ISO exists yet.
+Status: implementation started, Cycle 247, 2026-10-08. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -43,7 +43,7 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 
 | Stage | Build Plan Binding | Exit Criterion | Current State |
 | --- | --- | --- | --- |
-| USI-1 User entry and containment | N7, N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle246: bounded pending/late timer draining, cleanup quarantine/retry and15 survival cases; complete accounting, missing-IRQ recovery, general admission/quarantine and stack/exception qualification remain |
+| USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle247: exact returned-quantum accounting including terminal/failed cleanup and15 survival cases; unknown-runtime/missing-IRQ recovery, general admission/quarantine and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Not started |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Not started |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
@@ -101,14 +101,17 @@ Cycle243 connects substeps6-7 to PKSCHED1: two actual private-root tasks, timer
 suspension/resumption, cancellation, task-only call-limit termination and proven
 survivor progress. The syscall stack may move within its owned page. Historical
 statements above describe each earlier cycle, not current completion. Remaining
-USI-1 work now follows [PKUSER12 limits](native-user-timer-shutdown.md):
+USI-1 work now follows [PKUSER13 limits](native-user-runtime-accounting.md):
 Cycle245 verifies bounded construction rollback and Cycle246 adds bounded owned
 timer draining, exact cleanup quarantine/retry and surviving-peer progress.
+Cycle247 adds retained, exactly-once accounting for all authenticated returned
+peer quanta, including terminal and failed-cleanup samples. The arm-to-event
+charge includes in-quantum kernel overhead, not just user instructions.
 General spawn admission, persistent quarantine/partial timer configuration and
 slot-commit recovery, complete stack/exception/selector qualification, arbitrary
-timer races, independent missing-delivery recovery and terminal/failed-cleanup
-quantum accounting remain. Zero committed ticks after cleanup failure do not
-mean the task consumed no CPU time.
+timer races, independent missing-delivery recovery, unknown-measurement emergency
+recovery and coherent physical clock sampling remain. Missing measurements stay
+unknown with resources retained; legacy diagnostic paths remain unaccounted.
 General admission stays disabled until these contracts are qualified.
 
 No unsafe user execution is permitted just because an admission function passes.
@@ -137,7 +140,18 @@ requirements, not items deferred until after the demo.
    products. Preserve the older demo separately; its receipts cannot qualify this
    image. Test the ISO itself, not only a disk image or host library.
 
-## Cycle 246 Owned Timer Shutdown
+## Cycle 247 Native Runtime Accounting
+
+[Checkpoint](checkpoints/cycle247-native-runtime-accounting.md) records two fresh
+58-marker guests. Each settles148 dispatches,28 terminal samples and one failed-
+cleanup quantum;148 duplicate charges reject. Scheduler totals match retained
+slot and independent event-class totals. Existing15 survival cases,307 root
+writes,538 released pages,247 scrubbed data pages and unsigned denial remain.
+525 Rust executions and36 Python oracle tests pass. No interactive ISO yet.
+Next: independent missing-IRQ and unknown-runtime recovery, then capability IPC.
+This is bounded one-BSP peer accounting, not complete production CPU accounting.
+
+## Historical Cycle 246 Owned Timer Shutdown
 
 [Checkpoint](checkpoints/cycle246-owned-timer-shutdown.md) records two fresh
 57-marker guests with15 survival cases,148 dispatches,119 accepted preemptions

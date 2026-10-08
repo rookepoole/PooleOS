@@ -147,6 +147,7 @@ struct Task {
     bypass_count: u8,
     dispatch_count: u32,
     runtime_ticks: u64,
+    charged_dispatch: u32,
 }
 
 impl Task {
@@ -164,6 +165,7 @@ impl Task {
             bypass_count: 0,
             dispatch_count: 0,
             runtime_ticks: 0,
+            charged_dispatch: 0,
         }
     }
 
@@ -316,6 +318,7 @@ impl Scheduler {
             bypass_count: 0,
             dispatch_count: 0,
             runtime_ticks: 0,
+            charged_dispatch: 0,
         };
         self.bump_sequence();
         Ok(id)
@@ -384,6 +387,34 @@ impl Scheduler {
             .ok_or(Error::Invariant)?;
         self.bump_sequence();
         self.validate()
+    }
+
+    /// Atomic settlement for one owned dispatch. All fallible checks precede
+    /// mutation so a rejected charge can be retried without double accounting.
+    pub fn account_dispatch(
+        &mut self,
+        cpu: CpuId,
+        id: TaskId,
+        dispatch: u32,
+        previous_ticks: u64,
+        ticks: u64,
+    ) -> Result<(), Error> {
+        self.validate()?;
+        if self.current_id(cpu)? != id {
+            return Err(Error::OwnerToken);
+        }
+        let index = self.task_index(id)?;
+        if self.tasks[index].dispatch_count != dispatch
+            || self.tasks[index].runtime_ticks != previous_ticks
+            || self.tasks[index].charged_dispatch.checked_add(1) != Some(dispatch)
+        {
+            return Err(Error::Invariant);
+        }
+        let total = previous_ticks.checked_add(ticks).ok_or(Error::Invariant)?;
+        self.tasks[index].runtime_ticks = total;
+        self.tasks[index].charged_dispatch = dispatch;
+        self.bump_sequence();
+        Ok(())
     }
 
     pub fn yield_current(&mut self, cpu: CpuId) -> Result<TaskId, Error> {
@@ -1180,6 +1211,59 @@ pub fn validate_context_switch_contract(value: &ContextSwitchContract) -> Result
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn dispatch_accounting_rejects_replay_wrong_owner_sequence_and_overflow_atomically() {
+        for case in 0..6 {
+            let mut s = Scheduler::new(1).unwrap();
+            let cpu = CpuId::new(0).unwrap();
+            let id = s.create_task(0, 1, 16, 1).unwrap();
+            s.activate(id, cpu).unwrap();
+            s.dispatch(cpu).unwrap();
+            let mut owner = id;
+            let mut ordinal = 1;
+            let mut previous = 0;
+            match case {
+                0 => owner.generation += 1,
+                1 => owner.slot += 1,
+                2 => ordinal = 2,
+                3 => previous = 1,
+                4 => {
+                    s.tasks[0].runtime_ticks = u64::MAX;
+                    previous = u64::MAX;
+                }
+                _ => {
+                    s.account_dispatch(cpu, id, 1, 0, 0).unwrap();
+                }
+            }
+            let before = s.task_snapshot(id).unwrap();
+            let sequence = s.sequence;
+            assert!(
+                s.account_dispatch(cpu, owner, ordinal, previous, 1)
+                    .is_err()
+            );
+            assert_eq!(s.task_snapshot(id).unwrap(), before);
+            assert_eq!(s.sequence, sequence);
+        }
+    }
+
+    #[test]
+    fn dispatch_accounting_commits_zero_and_nonzero_quanta_once_across_dispatches() {
+        let mut s = Scheduler::new(1).unwrap();
+        let cpu = CpuId::new(0).unwrap();
+        let id = s.create_task(0, 1, 16, 1).unwrap();
+        s.activate(id, cpu).unwrap();
+        let mut total = 0;
+        for (i, ticks) in [0, 5, 0, 13].into_iter().enumerate() {
+            s.dispatch(cpu).unwrap();
+            let ordinal = i as u32 + 1;
+            s.account_dispatch(cpu, id, ordinal, total, ticks).unwrap();
+            assert!(s.account_dispatch(cpu, id, ordinal, total, ticks).is_err());
+            total += ticks;
+            assert_eq!(s.task_snapshot(id).unwrap().runtime_ticks, total);
+            s.yield_current(cpu).unwrap();
+        }
+    }
 
     fn cpu(value: u8) -> CpuId {
         CpuId::new(value).unwrap()

@@ -205,6 +205,13 @@ pub fn run_all(
     let mut spawn_rollbacks = 0;
     let mut quota_rollback = false;
     let mut timer_recovered = false;
+    let mut samples = 0u64;
+    let mut terminal_samples = 0u64;
+    let mut runtime_ticks = 0u64;
+    let mut terminal_ticks = 0u64;
+    let mut preempt_ticks = 0u64;
+    let mut failed_ticks = 0u64;
+    let mut duplicate_denials = 0u64;
     for round in 0..15 {
         let first_kind = if round == 14 {
             0
@@ -275,6 +282,22 @@ pub fn run_all(
             }
             checked!(106, peer.slot.activate(peer.id, manager, &mut peer.memory));
             let result = peer.slot.run_slice(peer.id);
+            let elapsed = checked!(126, peer.slot.account_slice(peer.id, &mut scheduler, cpu));
+            if peer.slot.account_slice(peer.id, &mut scheduler, cpu) != Err(task::Error::State) {
+                stop(126, serial, debugcon);
+            }
+            duplicate_denials += 1;
+            samples += 1;
+            ticks[index] = checked!(126, ticks[index].checked_add(elapsed).ok_or(()));
+            runtime_ticks = checked!(126, runtime_ticks.checked_add(elapsed).ok_or(()));
+            let accounting = checked!(126, peer.slot.runtime(peer.id));
+            if accounting.pending_ticks.is_some()
+                || accounting.unknown
+                || accounting.charged_ticks != ticks[index]
+                || checked!(126, scheduler.task_snapshot(scheduled)).runtime_ticks != ticks[index]
+            {
+                stop(126, serial, debugcon);
+            }
             if result.is_err() && round == 14 && index == 0 && !timer_recovered {
                 if result
                     != Err(task::Error::Cpu(
@@ -286,6 +309,7 @@ pub fn run_all(
                     stop(123, serial, debugcon);
                 }
                 checked!(124, peer.recover_timer(manager));
+                failed_ticks = elapsed;
                 checked!(124, scheduler.teardown(scheduled));
                 timer_recovered = true;
                 dead[0] = true;
@@ -295,11 +319,11 @@ pub fn run_all(
             let mut terminated = None;
             match slice.event {
                 Event::Preempted {
-                    ticks: elapsed,
+                    ticks: observed,
                     syscalls,
                     progress: now,
                 } => {
-                    if now <= progress[index] || syscalls != 0 {
+                    if now <= progress[index] || syscalls != 0 || observed != elapsed {
                         stop(108, serial, debugcon);
                     }
                     progress[index] = now;
@@ -327,8 +351,7 @@ pub fn run_all(
                             stop(120, serial, debugcon);
                         }
                     }
-                    ticks[index] = checked!(108, ticks[index].checked_add(elapsed).ok_or(()));
-                    checked!(109, scheduler.account_tick(cpu, elapsed));
+                    preempt_ticks = checked!(109, preempt_ticks.checked_add(elapsed).ok_or(()));
                     if index == 1 && dead[0] {
                         after_stop += 1;
                     }
@@ -344,6 +367,8 @@ pub fn run_all(
                     }
                 }
                 Event::Terminated(outcome) => {
+                    terminal_samples += 1;
+                    terminal_ticks = checked!(109, terminal_ticks.checked_add(elapsed).ok_or(()));
                     terminated = Some(outcome);
                 }
             }
@@ -522,4 +547,33 @@ pub fn run_all(
     log.write_str(" eois=");
     log.write_decimal_u64(u64::from(deliveries));
     log.write_str(" empty_irr_isr=1 kernel_window=1 detached_after_shutdown=1 if=0 production=0\n");
+    drop(log);
+    if samples != 148
+        || terminal_samples != 28
+        || duplicate_denials != samples
+        || failed_ticks == 0
+        || terminal_ticks == 0
+        || runtime_ticks != preempt_ticks + terminal_ticks + failed_ticks
+    {
+        stop(127, serial, debugcon);
+    }
+    let mut log = EarlyLogger::new(BootSink {
+        serial,
+        debugcon,
+        ring: &EARLY_RING,
+    });
+    log.write_str("POOLEOS:KERNEL:USER-RUNTIME PASS contract=PKUSER13");
+    for (label, value) in [
+        (" samples=", samples),
+        (" terminal_samples=", terminal_samples),
+        (" duplicate_denials=", duplicate_denials),
+        (" ticks=", runtime_ticks),
+        (" preempt_ticks=", preempt_ticks),
+        (" terminal_ticks=", terminal_ticks),
+        (" failed_cleanup_ticks=", failed_ticks),
+    ] {
+        log.write_str(label);
+        log.write_decimal_u64(value);
+    }
+    log.write_str(" failed_cleanup_samples=1 scheduler_match=1 pending=0 unknown=0 clock=hpet charge_window=arm_to_event production=0\n");
 }

@@ -1,10 +1,11 @@
-"""Independent marker checks for bounded PKUSER12 task/timer recovery."""
+"""Independent marker checks for bounded PKUSER13 quantum accounting."""
 from __future__ import annotations
 
 import re
 from runtime import native_kernel_transfer as transfer
 
 FEATURE = "development-user-root"
+RUNTIME = re.compile(r"POOLEOS:KERNEL:USER-RUNTIME PASS contract=PKUSER13 samples=([0-9]+) terminal_samples=([0-9]+) duplicate_denials=([0-9]+) ticks=([0-9]+) preempt_ticks=([0-9]+) terminal_ticks=([0-9]+) failed_cleanup_ticks=([0-9]+) failed_cleanup_samples=1 scheduler_match=1 pending=0 unknown=0 clock=hpet charge_window=arm_to_event production=0")
 SPAWN = re.compile(r"POOLEOS:KERNEL:USER-SPAWN PASS contract=PKUSER11 quota_failures=1 quota_released_pages=5 quota_scrubbed_pages=5 after_effect_failures=6 cleanup_quarantines=6 cleanup_retries=6 retained_free_denials=30 released_pages=83 scrubbed_pages=83 peer_resumed=1 peer_exit=84 cpu_exposures=0 production=0")
 DRAIN = re.compile(r"POOLEOS:KERNEL:USER-TIMER-DRAIN PASS contract=PKUSER12 pending=1 late=1 quarantines=1 retries=1 retained_pages=13 free_denials=5 restart_denials=2 reap_denials=1 peer_exit=84 deliveries=([0-9]+) eois=([0-9]+) empty_irr_isr=1 kernel_window=1 detached_after_shutdown=1 if=0 production=0")
 SELECTOR = 23
@@ -23,8 +24,8 @@ TASK = re.compile(r"POOLEOS:KERNEL:USER-TASK PASS contract=PKUSER8 slot=0 genera
 
 
 def validate_markers(markers: list[str]) -> dict:
-    if len(markers) != 57 or SPAWN.fullmatch(markers[54]) is None:
-        raise ValueError("PKUSER12 requires exactly 57 markers and transactional rollback")
+    if len(markers) != 58 or SPAWN.fullmatch(markers[54]) is None:
+        raise ValueError("PKUSER13 requires exactly 58 markers and transactional rollback")
     drain = DRAIN.fullmatch(markers[55])
     if drain is None or not 3 <= int(drain[1]) == int(drain[2]) <= 256:
         raise ValueError("PKUSER12 missing or inconsistent timer shutdown proof")
@@ -40,7 +41,7 @@ def validate_markers(markers: list[str]) -> dict:
     common.pop("kernel_terminal", None)
     common["synthetic_unsigned_terminal_used_for_prefix_parser_only"] = True
     prepared, active, timer, entry, preempt, call, result = [pattern.fullmatch(marker) for pattern, marker in
-                                zip((PREPARED, ACTIVE, TIMER, ENTRY, PREEMPT, CALL, RESULT), [*markers[29:35],markers[56]])]
+                                zip((PREPARED, ACTIVE, TIMER, ENTRY, PREEMPT, CALL, RESULT), [*markers[29:35],markers[57]])]
     if any(m is None for m in (prepared, active, timer, entry, preempt, call, result)):
         raise ValueError("PKUSER7 marker layout or bounded claims changed")
     original, candidate = (int(prepared[i], 16) for i in (1, 2))
@@ -80,10 +81,10 @@ def validate_markers(markers: list[str]) -> dict:
                 or int(row[15]) != return_vector
                 or roots[0] == roots[1] or any(r == original or r == 0 or r & 4095 or r >= 1<<32 for r in roots)
                 or (index != 14 and p0 < 1) or p1 < 2 or not 1 <= after <= p1 or (cancel and p0 != 3)
-                or (index == 14 and (p0 != 0 or progress0 != 0 or ticks0 != 0 or after != p1))
+                or (index == 14 and (p0 != 0 or progress0 != 0 or ticks0 <= 0 or after != p1))
                 or not 1 <= dispatches <= 64 or dispatches != p0+p1+2-cancel
                 or writes != 2*dispatches+cancel
-                or not all(0 < n < 1<<64 for n in ((progress1,ticks1) if index == 14 else (progress0,progress1,ticks0,ticks1)))):
+                or not all(0 < n < 1<<64 for n in ((progress1,ticks0,ticks1) if index == 14 else (progress0,progress1,ticks0,ticks1)))):
             raise ValueError("PKUSER10 peer isolation, schedule accounting, or survivor progress changed")
         peers.append(dict(round=index,first=reason,value=value,return_vector=return_vector,roots=roots,dispatches=dispatches,
             preemptions=[p0,p1],progress=[progress0,progress1],ticks=[ticks0,ticks1],
@@ -91,6 +92,18 @@ def validate_markers(markers: list[str]) -> dict:
     total_writes = 10 + sum(p["cr3_writes"] for p in peers)
     if int(result[2]) != total_writes:
         raise ValueError("PKUSER10 total root writes not conserved")
+    charge = RUNTIME.fullmatch(markers[56])
+    if charge is None:
+        raise ValueError("PKUSER13 missing runtime settlement evidence")
+    samples, terminal_samples, duplicates, total, preempt_ticks, terminal_ticks, failed_ticks = map(int, charge.groups())
+    preemptions = sum(sum(p["preemptions"]) for p in peers)
+    if (samples != sum(p["dispatches"] for p in peers) or duplicates != samples
+            or terminal_samples != samples - preemptions - 1 or terminal_samples != 28
+            or total != sum(sum(p["ticks"]) for p in peers)
+            or failed_ticks != peers[14]["ticks"][0]
+            or total != preempt_ticks + terminal_ticks + failed_ticks
+            or not all(0 < n < 1<<64 for n in (total,preempt_ticks,terminal_ticks,failed_ticks))):
+        raise ValueError("PKUSER13 lost, duplicated or inconsistent runtime charge")
     return {"transfer_prefix": common, "original_root": original, "candidate_root": candidate,
             "generation": generation, "stack_probe": probe, "root_probe_cpl": 0, "cpl": 3,
             "cr3_writes": total_writes, "timer_deliveries": 3, "timer_eois": 3,
@@ -113,6 +126,11 @@ def validate_markers(markers: list[str]) -> dict:
             "timer_pending_cases": 1, "timer_late_cases": 1, "timer_quarantine_retries": 1,
             "timer_quarantine_retained_pages": 13, "timer_quarantine_peer_survived": True,
             "peer_preemptions": sum(sum(p["preemptions"]) for p in peers),
+            "runtime_samples": samples, "runtime_terminal_samples": terminal_samples,
+            "runtime_duplicate_denials": duplicates, "runtime_ticks": total,
+            "runtime_preempt_ticks": preempt_ticks, "runtime_terminal_ticks": terminal_ticks,
+            "runtime_failed_cleanup_ticks": failed_ticks, "runtime_failed_cleanup_samples": 1,
+            "bounded_runtime_accounting": True, "pure_user_instruction_time": False,
             "production_ready": False}
 
 
@@ -124,7 +142,7 @@ def negative_controls(markers: list[str]) -> int:
     wrong = markers.copy()
     wrong[23] = wrong[23].replace("trap_scenario=23", "trap_scenario=0")
     candidates.append(wrong)
-    for i in range(29, 57):
+    for i in range(29, 58):
         for match in re.finditer(r"\b[a-zA-Z_0-9]+=[^ ]+", markers[i]):
             changed = markers.copy()
             changed[i] = markers[i][:match.start()] + "invalid=invalid" + markers[i][match.end():]

@@ -24,6 +24,9 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle247-native-runtime-accounting.md",
+    "docs/native-user-runtime-accounting.md",
+    "tests/fixtures/cycle246-user-entry-readiness.json",
     "docs/checkpoints/cycle246-owned-timer-shutdown.md",
     "docs/native-user-timer-shutdown.md",
     "tests/fixtures/cycle245-user-entry-readiness.json",

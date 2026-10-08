@@ -81,6 +81,14 @@ pub(super) fn finish_quantum(budget: Budget, start: u64) -> Result<u64, Error> {
     Ok(ticks)
 }
 
+pub(super) fn terminal_ticks(budget: Budget, start: u64) -> Result<u64, Error> {
+    let h = hardware()?;
+    if hw(h.hpet_read(0))? >> 32 != budget.period_fs {
+        return Err(Error::Hardware);
+    }
+    budget.partial_elapsed(start, hw(h.hpet_read(0xf0))?)
+}
+
 impl Session {
     pub(super) fn new(
         image: ImageAdmission,
