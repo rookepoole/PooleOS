@@ -24,6 +24,13 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle234-user-entry-foundation.md",
+    "docs/native-userspace-integration-iso.md",
+    "native/kernel/src/user_entry.rs",
+    "native/kernel/src/user_entry/tests.rs",
+    "tools/qualify_native_user_entry.py",
+    "runs/native-user-entry-readiness.json",
+    "runs/native-user-entry-gate-projection.json",
     "docs/checkpoints/cycle233-corrected-media-downstream-replay.md",
     "tests/fixtures/cycle229-execution-sources.json",
     "docs/checkpoints/cycle232-corrected-media-boot-and-cpu-replay.md",

@@ -1,15 +1,46 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-07
-Plan version: 2.136.0-corrected-media-downstream-replay
-Roadmap cycle: PooleOS Cycle 233
+Plan version: 2.137.0-userspace-integration
+Roadmap cycle: PooleOS Cycle 234
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 233: Corrected Media Downstream Replay
+## Cycle 234: User-Space Integration Foundation
+
+Owner-directed next deliverable: a usable native user-space integration ISO,
+followed by continued full robust microkernel development. The dependency-ordered
+milestone is [Native User-Space Integration ISO](native-userspace-integration-iso.md).
+It binds existing N7/N9/N12-N14/N16/N18-N22/N30/N36/N38-N39 requirements, not a
+replacement architecture or a shortcut to production completion. Keep general
+drivers, file services, shell and applications outside ring 0.
+
+N13.3 / `N13-USER-ENTRY-001`: PKUSER1 now admits a bounded inactive owned user
+image, verifies all four page tables and guard gaps, cross-checks PMM/mapping
+identity, and builds a fixed unprivileged IRETQ frame. The 260-test kernel host
+suite, 14 optimized focused tests, formatting and freestanding library compilation
+pass. Initial formatting failure is retained. No live GDT/CR3/IRETQ path, task,
+syscall, IPC, shell or ISO is claimed. N13/N13.3 become partial, not complete.
+
+`FLAG-N13-USERSPACE-ISO-001` tracks the still-open integration milestone. Existing
+requirements already cover this work, so no checklist item or research addition
+is discarded or invented. First add the kernel-half/stack/descriptor ownership
+and actual ring-3 entry/return/fault probe, then capabilities/IPC, services,
+shell/apps and optical qualification. Core privilege isolation and safe recovery
+are prerequisites to user execution, not deferred preview follow-ups.
+
+Cycle 233 merged via PR #80 at `507782d` after 106/106 canonical and 708/708 Doctor
+checks, exact tree verification and publication/review gates. Preserve those
+receipts as historical. New kernel source makes 25/27 retained component
+admissions stale; the separate static source-closure check still passes. New
+native execution qualification and exact-candidate gates precede main merge.
+Do not relabel old guest runs or repeat the full matrix after every small edit;
+requalify the assembled integration candidate and every affected dependency.
+
+## Historical Cycle 233: Corrected Media Downstream Replay
 
 N5.1/N5.8 / `N5-FAT32-PARENT-001` and existing addition/flag, with dependent
 N8/N9/N12 replay. All fourteen remaining memory, interrupt, SMP, scheduler,
@@ -2784,7 +2815,7 @@ The exact section titles, start/end lines, subheading counts, and checkbox count
 | N10 | Not started | `042-046,152` | 447 | 0 |
 | N11 | Not started | `030` | 42 | 0 |
 | N12 | Partial | `031-034` | 193 | 1 |
-| N13 | Not started | `035-038` | 183 | 1 |
+| N13 | Partial | `035-038` | 183 | 1 |
 | N14 | Not started | `039-041,163-164` | 261 | 1 |
 | N15 | Partial | `107-112,155` | 240 | 1 |
 | N16 | Not started | `150` | 96 | 3 |
@@ -3761,10 +3792,14 @@ integration remain distinct from live and production qualification.
 
 Exit gate: deterministic and randomized SMP schedule tests show no lost wakeup, duplicate runnable task, dead task, priority inversion violation, register leak, or starvation beyond declared bounds.
 
-### N13 - Tasks, Syscalls, Events, and Capability Object Model (`not_started`)
+### N13 - Tasks, Syscalls, Events, and Capability Object Model (`partial`)
 
 Inherited sections: `035-038`. Added: `ADD-CAP-001`.  
 Goal: enter user mode with an unforgeable authority model rather than Unix ambient privilege.
+
+Cycle 234 starts N13.3 with host-tested inactive user-image admission and a
+bounded initial IRETQ frame. No live user task, syscall, capability, exception
+delivery or phase exit is established. See `docs/native-userspace-integration-iso.md`.
 
 Subphases:
 
@@ -4350,6 +4385,7 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 | Flag | Class | State | Closure condition |
 |---|---|---|---|
+| `FLAG-N13-USERSPACE-ISO-001` | REQUIRED | Open | Complete USI-1 through USI-5 with actual isolated user tasks, input, fault containment and fresh optical evidence; retain all production gates |
 | `FLAG-NATIVE-SCM-001` | STOP_SHIP | Open | Put PooleOS under reviewed source control with immutable release revisions |
 | `FLAG-NATIVE-ADR-001` | BLOCKER | Open | Ratify kernel, reuse, language, TCB, ABI, driver, filesystem, and release ADRs |
 | `FLAG-N0-OBJECTIVES-001` | REQUIRED | Open | Owner-ratify the v1 profile and 38 target values, then bind passing native evidence to every target |
@@ -4446,6 +4482,13 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 | `FLAG-BUILDROOT-LEGACY-001` | SUPERSEDED | Closed by architecture reset | Buildroot remains historical reference and cannot promote native status |
 
 ## 12. Near-Term Execution Sequence
+
+Cycle 234 owner direction supersedes the older ordering below for the bounded
+development lane: follow USI-1 through USI-5 in
+`docs/native-userspace-integration-iso.md`, starting with
+`N13-USER-ENTRY-LIVE-001`. Retain the N0 custody blocker and all N0-N39 production
+requirements. Do not silently return to cosmetic boot work or treat a preview as
+microkernel completion.
 
 Cycle 221 current sequence: `N12-SCHED-SMP-PREEMPT-001`, including seventeen
 control groups and recorded admission, then atomics/locks and full exact-candidate

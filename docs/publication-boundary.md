@@ -41,6 +41,14 @@ counts, and explicit nonclaims. Differential corpora, ephemeral host probes,
 signing material, authenticated mutable state, raw boot logs, and private media
 remain unpublished.
 
+The two PKUSER1 ledgers `runs/native-user-entry-readiness.json` and
+`runs/native-user-entry-gate-projection.json` are explicitly public after content
+review. They contain relative public-source and command/log identities, hashes,
+bounded host-test results, and current admission diagnostics. They must not
+contain private absolute paths, raw logs, excluded inputs, or credentials. Their
+scope is inactive host admission and source consistency, not live user execution
+or ISO qualification. Other user-entry run artifacts remain excluded by default.
+
 ## Publication Gate
 
 Before every push or release:

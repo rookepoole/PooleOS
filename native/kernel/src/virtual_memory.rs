@@ -421,6 +421,20 @@ pub struct AddressSpace {
 }
 
 impl AddressSpace {
+    /// Owner-side mapping identity, independent of mutable page-table bytes.
+    pub(crate) fn owned_mapping(
+        &self,
+        address: u64,
+    ) -> Option<(AllocationHandle, Permissions, CachePolicy)> {
+        self.mappings.iter().flatten().find_map(|mapping| {
+            (mapping.virtual_address == address).then_some((
+                mapping.frame,
+                mapping.permissions,
+                mapping.cache,
+            ))
+        })
+    }
+
     /// Includes frames awaiting invalidation, not only currently mapped leaves.
     pub(crate) fn allocation_handles(&self) -> [Option<AllocationHandle>; MAX_FRAMES + 1] {
         let mut handles = [None; MAX_FRAMES + 1];

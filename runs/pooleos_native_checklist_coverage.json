@@ -255,7 +255,7 @@
     {
       "phase_id": "N13",
       "title": "Tasks, Syscalls, Events, and Capability Object Model",
-      "status": "not_started",
+      "status": "partial",
       "source_section_ids": [
         "035",
         "036",
@@ -1111,7 +1111,7 @@
       "subheading_count": 3,
       "checkbox_count": 73,
       "phase_id": "N13",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {
@@ -1123,7 +1123,7 @@
       "subheading_count": 3,
       "checkbox_count": 60,
       "phase_id": "N13",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {
@@ -1135,7 +1135,7 @@
       "subheading_count": 0,
       "checkbox_count": 27,
       "phase_id": "N13",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {
@@ -1147,7 +1147,7 @@
       "subheading_count": 0,
       "checkbox_count": 23,
       "phase_id": "N13",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {

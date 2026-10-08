@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 233
+Last roadmap reconciliation: PooleOS Cycle 234
 
-Cycle 233 completes fourteen downstream corrected-media profiles: 28 fresh guest
+Cycle 234 follows the owner's direction to pursue a usable native user-space
+integration ISO before continuing the complete robust microkernel. The bounded
+milestone and its dependencies are in `docs/native-userspace-integration-iso.md`.
+This sequencing direction changes no normative production requirement. Initial
+inactive user-image admission is host-tested; live user execution and the new ISO
+remain unimplemented. Cycle 233 passed exact qualification and merged as
+`507782d` through PR #80; that pass does not qualify this new kernel source.
+[Cycle 234 evidence](checkpoints/cycle234-user-entry-foundation.md).
+
+Historical Cycle 233 completes fourteen downstream corrected-media profiles: 28 fresh guest
 runs, 663 control groups and 2,863 hostile cases pass. All 27 component/source
 checks are current, projected from original captures. All 354 combined tests
 pass after reconciliation; the failed attempts remain historical. Full

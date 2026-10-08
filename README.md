@@ -4,14 +4,25 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
-**Qualified baseline:** checkpoints through Cycle 230 are merged into `main`
-at `bb5e43c` via [PR #79](https://github.com/rookepoole/PooleOS/pull/79).
+**Qualified baseline:** checkpoints through Cycle 233 are merged into `main`
+at `507782d` via [PR #80](https://github.com/rookepoole/PooleOS/pull/80).
 The exact candidate passed 106/106 runtime-inclusive canonical gates and 708/708
 Doctor checks, including bundle and replay inputs. The merged tree matches that
-candidate. All 63 source-branch commits remain cloud-backed; they are not pending
-main merges. This is a development baseline, not a production release.
+candidate. This is a development baseline, not a production release, and its
+qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle 233 completes all fourteen remaining
+**Current development checkpoint:** Cycle 234 starts the owner-directed
+[native user-space integration ISO](docs/native-userspace-integration-iso.md).
+PKUSER1 adds owned inactive user-image admission, strict page-table checks,
+guarded RX/RW-NX layout, and an initial unprivileged IRETQ frame. All 260 kernel
+host tests, 14 optimized focused tests, format and freestanding-library checks
+pass. No ring-3 task has run and no new ISO has been built. Changed kernel source
+invalidates 25 of 27 retained component admissions; fresh guest qualification and
+exact-candidate gates remain required before merge. The original full microkernel
+and N0-N39 production goals remain mandatory after preview delivery.
+[Cycle 234 evidence](docs/checkpoints/cycle234-user-entry-foundation.md).
+
+**Historical development checkpoint:** Cycle 233 completes all fourteen remaining
 corrected-media profile replays: 28 fresh guest runs, 663 control groups and
 2,863 hostile cases pass. All 27 component and source checks are current, with
 the aggregate reconstructed from original captures. All 354 combined regression

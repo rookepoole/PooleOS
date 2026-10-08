@@ -126,6 +126,7 @@ SUBPHASE_OVERRIDES = {
     "N12.5": "partial",
     "N12.6": "partial",
     "N12.7": "partial",
+    "N13.3": "partial",
     "N15.1": "partial",
     "N31.7": "partial",
     "N32.1": "complete",
@@ -11093,13 +11094,100 @@ def apply_cycle233(roadmap: dict, test_count: int) -> dict:
     next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N5-FAT32-PARENT-001")["evidence"].insert(0, checkpoint)
     roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle234(roadmap, test_count)
+
+
+def apply_cycle234(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle234-user-entry-foundation.md"
+    plan = "docs/native-userspace-integration-iso.md"
+    receipt_path = "runs/native-user-entry-readiness.json"
+    receipt = json.loads((ROOT / receipt_path).read_bytes())
+    projection = json.loads((ROOT / "runs/native-user-entry-gate-projection.json").read_bytes())
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for name in ("candidate_audit", "focused_source_projection", "closeout_regression",
+                 "dependency_qualification", "ownership_qualification", "boot_chain_qualification",
+                 "cpu_qualification", "corrected_media_replay", "entry_provenance_qualification"):
+        suffix = "source_projection" if name == "focused_source_projection" else name
+        gate["historical_cycle233_" + suffix] = copy.deepcopy(gate["current_" + name])
+    roadmap["baseline"]["pooleos_cycle"] = 234
+    roadmap["baseline"]["pooleos_test_count"] = test_count
+    roadmap["baseline"]["retained_production_owner_blocker"] = copy.deepcopy(roadmap["immediate_next_move"])
+    roadmap["execution_protocol"].update(last_updated_cycle=234,
+        selected_move_id="N13-USER-ENTRY-001", immediate_next_move_id="N13-USER-ENTRY-LIVE-001",
+        owner_independent_next_move_id="N13-USER-ENTRY-LIVE-001")
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, plan, receipt_path]
+    roadmap["immediate_next_move"] = dict(id="N13-USER-ENTRY-LIVE-001", phase_ids=["N7", "N9", "N12", "N13"],
+        title="Attach supervisor mappings and owned entry stacks, then prove a gated real ring-3 transition and contained fault",
+        entry_evidence=[plan, receipt_path, "native/kernel/src/user_entry.rs"],
+        exit_evidence=["fresh QEMU CPL3 observation with controlled kernel entry/return",
+            "user memory and privilege faults remain contained",
+            "exclusive ownership and supported architectural state validated; ordinary boot denial unchanged"],
+        blocked=False)
+    gate["qualification_status"] = "new_user_entry_host_pass_guest_source_requalification_pending"
+    gate["current_entry_provenance_qualification"] = dict(gate["current_entry_provenance_qualification"],
+        applies_to_current_source=False, historical_record="historical_cycle233_entry_provenance_qualification")
+    latest = dict(cycle=233, status="pass", pull_request=80,
+        url="https://github.com/rookepoole/PooleOS/pull/80",
+        source_commit="7f505ca2f1dbeeef51c96995e55b629926df7505",
+        main_commit="507782dfde4a554434173fdae7a1b25a170414ce",
+        tree="89e0575f31d074a3eb071cc93fda7cdfbd909f35", tree_equality_verified=True,
+        checks_passed=106, checks_total=106, doctor_checks_passed=708, doctor_checks_total=708,
+        elapsed_seconds=1157.0, tracked_files=1646, source_unchanged=True, owner_report_unchanged=True,
+        report_sha256="867A9E802442D124B2CCA6922BDFB04FDA023B43E0CE0F262C38B868D7775650",
+        log_sha256="D0DD8C2C17DCAD0F9A910E5A4D23E174E9DDC12CC8B59AA379105AE803E70613",
+        publication_violations=0, applies_to_later_source_edits=False, production_ready=False)
+    gate["current_candidate_audit"] = dict(cycle=234, status="not_run",
+        applies_to_current_source=False, aggregate_suite_passed=False,
+        merge_requires_runtime_inclusive_exact_final_qualification=True,
+        latest_completed_attempt=latest, production_ready=False)
+    gate["current_focused_source_projection"] = dict(cycle=234,
+        passed_checks=len(projection["passing_profiles"]), total_checks=len(projection["checks"]),
+        passing_profiles=projection["passing_profiles"], failed_profiles=projection["failed_profiles"],
+        pending_downstream_native_checks=len(projection["failed_profiles"]),
+        source_current_profiles=27, source_profiles_total=27, pending_source_profiles=[],
+        static_source_closure_is_not_native_admission=True, final_receipt_fresh_qemu_runs=0,
+        required_next_gate="new_native_image_and_affected_guest_requalification_then_full_candidate")
+    for name in ("dependency_qualification", "ownership_qualification", "boot_chain_qualification", "cpu_qualification"):
+        if "current_" + name in gate:
+            gate["current_" + name] = dict(cycle=234, status="source_requalification_pending",
+                applies_to_current_source=False, fresh_current_cycle_qemu_runs=0,
+                live_receipt_source_current=False, virtual_memory_live_receipt_source_current=False,
+                historical_record="historical_cycle233_" + name, production_ready=False)
+    gate["current_closeout_regression"] = dict(cycle=234, status="focused_native_pass_not_full_canonical",
+        tests_run=274, tests_passed=274, tests_failed=0, tests_skipped=0,
+        scope="260_debug_kernel_tests_plus14_repeated_release_user_entry_tests",
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256((ROOT / receipt_path).read_bytes()).hexdigest().upper(),
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=234, status="pass", tests_run=82,
+        tests_passed=82, tests_failed=0, tests_skipped=0, elapsed_seconds=67.934,
+        log_sha256="B151F969732A91C2152EADE786DA970759EA85E0B1C1DCC389B38C688E38A47A",
+        initial_attempts=[dict(failures=36, errors=4), dict(failures=8, errors=1), dict(failures=1, errors=0)],
+        current_native_admissions_passed=2, current_native_admissions_total=27,
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    roadmap["baseline"]["user_space_integration"] = dict(cycle=234, status="implementation_started",
+        plan_path=plan, selected_stage="USI-1", selected_requirement="N13-USER-ENTRY-001",
+        receipt_path=receipt_path, host_status=receipt["status"], guest_runs=0,
+        ring3_executed=False, iso_built=False, production_ready=False,
+        stages={"USI-1": "partial_host_admission_only", "USI-2": "not_started",
+                "USI-3": "not_started", "USI-4": "not_started", "USI-5": "not_started"},
+        continue_full_microkernel_after_iso=True,
+        required_next="N13-USER-ENTRY-LIVE-001")
+    evidence = "Cycle 234: PKUSER1 inactive user-image admission passes260 kernel host tests,14 optimized focused tests and freestanding-library check; no live user execution or ISO. " + checkpoint
+    gap = "User-space integration still needs owned kernel-half mappings/stacks, live ring3/return/fault containment, capabilities/IPC, services, shell/apps and ISO qualification. Production microkernel completion remains N0-N39."
+    phase = next(p for p in roadmap["phases"] if p["id"] == "N13")
+    phase["current_evidence"].insert(0, evidence)
+    phase["current_gaps"].insert(0, gap)
+    roadmap["implementation_flags"].append(dict(id="FLAG-N13-USERSPACE-ISO-001", **{"class": "REQUIRED"},
+        status="open", phase_id="N13", closure_condition="Pass all five native user-space ISO stages with actual isolated tasks, user input, fault containment and fresh optical evidence; do not close production gates", evidence=[checkpoint, plan]))
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap + " 25 retained component admissions are stale on changed native source; historical execution is not new qualification.")
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1236)
+    parser.add_argument("--test-count", type=int, default=1237)
     parser.add_argument("--status-date", default="2026-10-07")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

@@ -32,6 +32,7 @@ pub mod scheduler_smp_preempt;
 pub mod smp;
 pub mod smp_ipi;
 pub mod smp_runtime;
+pub mod user_entry;
 pub mod virtual_memory;
 pub mod xstate;
 pub mod xstate_exception;
