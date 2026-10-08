@@ -10,6 +10,19 @@ use poolekernel::{
 };
 use timer_driver::{PeerRun, Timer};
 
+// A constructor error carries its owner even if cleanup or slot commit failed.
+// This development harness halts on unanticipated quarantine; no owner is freed.
+#[allow(dead_code)]
+enum PeerFailure {
+    Setup,
+    Construction(spawn_driver::Failure),
+    Slot {
+        image: CpuImage<arch::x86_64::UserRootCpu>,
+        driver: PeerRun,
+        memory: Memory,
+    },
+}
+
 struct Peer {
     slot: Slot<arch::x86_64::UserRootCpu, PeerRun>,
     id: TaskId,
@@ -19,6 +32,7 @@ struct Peer {
     root: u64,
 }
 impl Peer {
+    #[inline(never)]
     fn new(
         index: u8,
         kind: usize,
@@ -28,103 +42,49 @@ impl Peer {
         manager: &mut PhysicalMemoryManager,
         topology: interrupt_time::MadtTopology,
         hpet: interrupt_time::HpetDescription,
-    ) -> Result<Self, ()> {
-        let tables = manager
-            .allocate(Zone::Dma32, 4, virtual_memory::TABLE_OWNER)
-            .map_err(|_| ())?;
-        let code = manager
-            .allocate(Zone::Dma32, 1, virtual_memory::DATA_OWNER)
-            .map_err(|_| ())?;
-        let stack = manager
-            .allocate(Zone::Dma32, 1, virtual_memory::DATA_OWNER)
-            .map_err(|_| ())?;
-        let entry_stack = manager
-            .allocate(Zone::Dma32, STACK_PAGE_COUNT, STACK_OWNER)
-            .map_err(|_| ())?;
-        let entry_tables = manager
-            .allocate(
-                Zone::Dma32,
-                prepared::STACK_TABLE_PAGES,
-                prepared::STACK_TABLE_OWNER,
-            )
-            .map_err(|_| ())?;
-        let handles = [tables, code, stack, entry_stack, entry_tables];
-        let mut memory = Memory {
-            access: Access::new(manager, core.page_table_root_physical, bits, handles)
-                .map_err(|_| ())?,
-            root: core.page_table_root_physical,
-            bits,
-            writes: 0,
-        };
-        for h in [code, stack, entry_stack] {
-            memory.zero(h).map_err(|_| ())?;
-        }
-        let bytes = arch::x86_64::user::peer_payload(kind).map_err(|_| ())?;
-        for (index, chunk) in bytes.chunks(8).enumerate() {
-            let mut word = [0; 8];
-            word[..chunk.len()].copy_from_slice(chunk);
-            let word = u64::from_le_bytes(word);
-            memory
-                .write_entry(code.start_page * PAGE_BYTES, index + 2, word)
-                .map_err(|_| ())?;
-            if memory
-                .read_entry(code.start_page * PAGE_BYTES, index + 2)
-                .map_err(|_| ())?
-                != word
-            {
-                return Err(());
-            }
-        }
-        let mut space = AddressSpace::initialize(manager, tables, &mut memory).map_err(|_| ())?;
-        let image = InitialImage {
-            code_page: USER_WINDOW_START,
-            entry: USER_WINDOW_START + 16,
-            stack_page: USER_WINDOW_START + 3 * PAGE_BYTES,
-        };
-        space
-            .map(
-                manager,
-                &mut memory,
-                image.code_page,
-                code,
-                Permissions::USER_RX,
-                CachePolicy::WriteBack,
-            )
-            .map_err(|_| ())?;
-        space
-            .map(
-                manager,
-                &mut memory,
-                image.stack_page,
-                stack,
-                Permissions::USER_RW,
-                CachePolicy::WriteBack,
-            )
-            .map_err(|_| ())?;
-        let timer = Timer::new(handoff, topology, hpet, bits).map_err(|_| ())?;
-        let prepared = PreparedImage::prepare_with_timer(
-            DetachedImage {
-                space,
-                stack: entry_stack,
-                stack_tables: entry_tables,
-            },
-            manager,
-            &mut memory,
-            image,
-            core,
-            bits,
-            timer.mappings(),
-        )
-        .map_err(|_| ())?;
-        let root = prepared.admission().ok_or(())?.root_physical;
-        // SAFETY: exclusive BSP, IF0, before any task activation; both roots remain owned.
+    ) -> Result<Self, PeerFailure> {
+        let timer = Timer::new(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
+        let bytes = arch::x86_64::user::peer_payload(kind).map_err(|_| PeerFailure::Setup)?;
+        let identity = TaskId::new(index, 1).map_err(|_| PeerFailure::Setup)?;
+        // SAFETY: exclusive BSP, IF0, before allocation or task activation.
         let entry = unsafe { arch::x86_64::user::PeerEntry::new(core.initial_stack_top_virtual) }
-            .map_err(|_| ())?;
+            .map_err(|_| PeerFailure::Setup)?;
+        let built = spawn_driver::build(manager, core, bits, bytes, Some(timer.mappings()))
+            .map_err(PeerFailure::Construction)?;
+        Self::install(identity, entry, timer, built, core)
+    }
+
+    // Keep slot/CPU-image temporaries off the deep mapping-validation call path.
+    #[inline(never)]
+    fn install(
+        identity: TaskId,
+        entry: arch::x86_64::user::PeerEntry,
+        timer: Timer,
+        built: spawn_driver::Built,
+        core: CoreRecord,
+    ) -> Result<Self, PeerFailure> {
+        let mut slot = Slot::new(identity.slot).expect("validated namespace-local task slot");
+        let spawn_driver::Built {
+            prepared,
+            memory,
+            handles,
+            image,
+        } = built;
+        let root = prepared
+            .admission()
+            .expect("successful construction admits its image")
+            .root_physical;
         let cpu = unsafe { arch::x86_64::UserRootCpu::new(core.page_table_root_physical, root) };
-        let mut slot = Slot::new(index).map_err(|_| ())?;
-        let id = slot
-            .insert(CpuImage::new(prepared, cpu, core), PeerRun { entry, timer })
-            .map_err(|_| ())?;
+        let id = match slot.insert(CpuImage::new(prepared, cpu, core), PeerRun { entry, timer }) {
+            Ok(id) => id,
+            Err((_, image, driver)) => {
+                return Err(PeerFailure::Slot {
+                    image,
+                    driver,
+                    memory,
+                });
+            }
+        };
         Ok(Self {
             slot,
             id,
@@ -196,6 +156,8 @@ pub fn run_all(
         };
     }
     let baseline = manager.summary().allocated_pages;
+    let mut spawn_rollbacks = 0;
+    let mut quota_rollback = false;
     for round in 0..14 {
         let first_kind = if round >= 3 { round + 1 } else { round };
         let mut peers = [
@@ -254,6 +216,29 @@ pub fn run_all(
                     }
                     progress[index] = now;
                     preemptions[index] += 1;
+                    if round == 0 && index == 1 && preemptions[index] == 1 {
+                        let timer = checked!(120, Timer::new(handoff, topology, hpet, bits));
+                        checked!(
+                            122,
+                            spawn_driver::quota_case(manager, core, bits, timer.mappings())
+                        );
+                        quota_rollback = true;
+                    }
+                    if round == 0 && index == 1 && dead[0] && spawn_rollbacks == 0 {
+                        let timer = checked!(120, Timer::new(handoff, topology, hpet, bits));
+                        spawn_rollbacks = match spawn_driver::fault_cases(
+                            manager,
+                            core,
+                            bits,
+                            timer.mappings(),
+                        ) {
+                            Ok(count) => count,
+                            Err(stage) => stop(12000 + stage, serial, debugcon),
+                        };
+                        if spawn_rollbacks != 6 {
+                            stop(120, serial, debugcon);
+                        }
+                    }
                     ticks[index] = checked!(108, ticks[index].checked_add(elapsed).ok_or(()));
                     checked!(109, scheduler.account_tick(cpu, elapsed));
                     if index == 1 && dead[0] {
@@ -424,4 +409,13 @@ pub fn run_all(
         });
         log.write_str(" survivor_exit=84 states_preserved=1 root_restored=1 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0\n");
     }
+    if spawn_rollbacks != 6 || !quota_rollback {
+        stop(121, serial, debugcon);
+    }
+    let mut log = EarlyLogger::new(BootSink {
+        serial,
+        debugcon,
+        ring: &EARLY_RING,
+    });
+    log.write_str("POOLEOS:KERNEL:USER-SPAWN PASS contract=PKUSER11 quota_failures=1 quota_released_pages=5 quota_scrubbed_pages=5 after_effect_failures=6 cleanup_quarantines=6 cleanup_retries=6 retained_free_denials=30 released_pages=83 scrubbed_pages=83 peer_resumed=1 peer_exit=84 cpu_exposures=0 production=0\n");
 }

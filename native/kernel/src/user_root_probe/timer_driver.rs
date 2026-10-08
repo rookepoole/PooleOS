@@ -339,6 +339,28 @@ pub fn dispatch_timer(frame: &TrapFrame, depth: u32) {
     // SAFETY: this dispatch is reached only by a CPL0 interrupt gate.
     let observed = unsafe { arch::x86_64::read_cr3() };
     if expected == 0 || observed != expected || frame.vector != u64::from(TIMER_VECTOR) {
+        // SAFETY: fatal sole-BSP diagnostic, IF0; no other serial writer resumes.
+        let mut serial = unsafe { Com1::initialize() };
+        let mut debugcon = DebugCon::new();
+        let mut log = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        log.write_str("POOLEOS:KERNEL:USER-ROOT-TRAP DENIED");
+        for (label, value) in [
+            (" vector=", frame.vector),
+            (" error=", frame.error_code),
+            (" rip=", frame.rip),
+            (" rsp=", frame.rsp),
+            (" cr2=", arch::x86_64::read_cr2()),
+            (" observed_root=", observed),
+            (" expected_root=", expected),
+        ] {
+            log.write_str(label);
+            log.write_hex_u64(value);
+        }
+        log.write_str("\n");
         poole_kernel_emergency_panic(PanicCode::UserRoot as u32);
     }
     OBSERVED_ROOT.store(observed, Ordering::Release);

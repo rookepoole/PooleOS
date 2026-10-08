@@ -27,7 +27,7 @@ const W: u64 = 1 << 1;
 const A: u64 = 1 << 5;
 const D: u64 = 1 << 6;
 const NX: u64 = 1 << 63;
-const OWNED_COUNT: usize = vm::MAX_FRAMES + 3;
+pub(super) const OWNED_COUNT: usize = vm::MAX_FRAMES + 3;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Error {
@@ -97,6 +97,39 @@ fn overlap(start: u64, pages: u64, handle: AllocationHandle) -> bool {
 }
 
 impl PreparedImage {
+    // Only spawn's never-exposed transaction can transfer this exact token set.
+    #[allow(clippy::too_many_arguments, clippy::result_large_err)]
+    pub(super) fn prepare_retained<M: TableMemory>(
+        parts: DetachedImage,
+        retained: [Option<RetainedAllocation>; OWNED_COUNT],
+        manager: &mut PhysicalMemoryManager,
+        memory: &mut M,
+        image: InitialImage,
+        core: CoreRecord,
+        bits: u8,
+        timer: Option<super::timer::Mappings>,
+    ) -> Result<Self, (Error, [Option<RetainedAllocation>; OWNED_COUNT])> {
+        let mut prepared = Self {
+            space: parts.space,
+            stack: parts.stack,
+            stack_tables: parts.stack_tables,
+            retained,
+            image,
+            bits,
+            admission: None,
+            timer,
+        };
+        match prepared.build(manager, memory, core) {
+            Ok(admission) => {
+                prepared.admission = Some(admission);
+                Ok(prepared)
+            }
+            // No CPU owner ever received this root. Discard the VM metadata, but
+            // keep every token so spawn can erase even partially written tables.
+            Err(error) => Err((error, prepared.retained)),
+        }
+    }
+
     /// The caller supplies a validated, boot-retained PKMAP2 core and serialized
     /// physical table access. Boot ownership/authentication is not created here.
     #[allow(clippy::result_large_err)]
@@ -178,13 +211,28 @@ impl PreparedImage {
         memory: &mut M,
         core: CoreRecord,
     ) -> Result<ImageAdmission, Error> {
+        let handles = self.handles();
+        let already_retained = self.retained.iter().any(Option::is_some);
+        if already_retained {
+            if self
+                .retained
+                .each_ref()
+                .map(|r| r.as_ref().map(RetainedAllocation::handle))
+                != handles
+            {
+                return Err(Error::Ownership);
+            }
+            manager
+                .validate_retentions(&self.retained)
+                .map_err(|_| Error::Ownership)?;
+        } else {
+            manager
+                .check_retainable_allocations(&handles)
+                .map_err(|_| Error::Ownership)?;
+        }
         let image = admit_initial_image(manager, &self.space, memory, self.image, self.bits)
             .map_err(Error::Image)?;
         let mask = physical_mask(self.bits).map_err(Error::Image)?;
-        let handles = self.handles();
-        manager
-            .check_retainable_allocations(&handles)
-            .map_err(|_| Error::Ownership)?;
         for handle in handles.iter().flatten() {
             let start = handle
                 .start_page
@@ -212,9 +260,11 @@ impl PreparedImage {
         let supervisor = audit_supervisor(memory, core, mask, &handles, self.timer)?;
         // Retain the entire set atomically before the first write. Every later
         // failure returns this quarantined owner, including a failed readback.
-        self.retained = manager
-            .retain_allocations(handles)
-            .map_err(|_| Error::Ownership)?;
+        if !already_retained {
+            self.retained = manager
+                .retain_allocations(handles)
+                .map_err(|_| Error::Ownership)?;
+        }
         let tables = self.stack_tables.start_page * PAGE_BYTES;
         for page in 0..STACK_TABLE_PAGES {
             let table = tables + page * PAGE_BYTES;

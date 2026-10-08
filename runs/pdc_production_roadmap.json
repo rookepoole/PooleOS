@@ -43,13 +43,16 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 244,
+    "last_updated_cycle": 245,
     "selected_move_id": "N13-USER-ENTRY-LIVE-001",
     "immediate_next_move_id": "N13-USER-ENTRY-LIVE-001",
     "owner_independent_next_move_id": "N13-USER-ENTRY-LIVE-001",
     "required_records": [
-      "docs/checkpoints/cycle244-user-state-containment.md",
+      "docs/checkpoints/cycle245-transactional-user-construction.md",
       "runs/native-user-entry-readiness.json",
+      "docs/native-user-construction.md",
+      "docs/checkpoints/cycle244-user-state-containment.md",
+      "tests/fixtures/cycle244-user-entry-readiness.json",
       "docs/native-user-state-containment.md",
       "docs/checkpoints/cycle243-native-user-peer-scheduling.md",
       "tests/fixtures/cycle243-user-entry-readiness.json",
@@ -226,9 +229,9 @@
     "added_requirement_count": 59
   },
   "baseline": {
-    "pooleos_cycle": 244,
+    "pooleos_cycle": 245,
     "entry_cycle": 79,
-    "pooleos_test_count": 1280,
+    "pooleos_test_count": 1282,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -244,13 +247,13 @@
       "explicit_gap_count": 20,
       "production_ready": false,
       "native_promotion_role": "partially_qualified_development_candidate_non_promoting",
-      "qualification_status": "bounded_user_state_containment_pass_spawn_timer_and_full_candidate_pending",
+      "qualification_status": "bounded_transactional_construction_pass_timer_and_full_candidate_pending",
       "passed_check_count_scope": "historical_cycle176_exact_final_canonical_audit",
       "current_cycle_full_canonical_audit_performed": false,
       "last_fully_qualified_cycle": 176,
       "last_fully_qualified_passed_checks": 105,
       "current_candidate_audit": {
-        "cycle": 244,
+        "cycle": 245,
         "status": "not_run",
         "applies_to_current_source": false,
         "aggregate_suite_passed": false,
@@ -369,7 +372,7 @@
         "production_ready": false
       },
       "current_focused_source_projection": {
-        "cycle": 244,
+        "cycle": 245,
         "passed_checks": 2,
         "total_checks": 27,
         "passing_profiles": [
@@ -3490,40 +3493,71 @@
         "production_ready": false
       },
       "current_closeout_regression": {
-        "cycle": 244,
+        "cycle": 245,
         "status": "focused_native_and_guest_pass_not_full_canonical",
-        "tests_run": 489,
-        "tests_passed": 489,
+        "tests_run": 504,
+        "tests_passed": 504,
         "tests_failed": 0,
         "tests_skipped": 0,
-        "scope": "349_debug_kernel_plus99_repeated_user_release_plus24_repeated_VM_release_plus7_compile_fail_plus10_boot_exit",
-        "additional_python_oracle_tests": 33,
+        "scope": "356_debug_kernel_plus106_repeated_user_release_plus24_repeated_VM_release_plus8_compile_fail_plus10_boot_exit",
+        "additional_python_oracle_tests": 34,
         "rejected_incompatible_feature_builds": 2,
         "guest_runs": 3,
         "user_root_guest_runs": 2,
         "ordinary_denial_guest_runs": 1,
         "receipt_path": "runs/native-user-entry-readiness.json",
-        "receipt_sha256": "3D6D3860572C99A08B6E0322D61C92BADBC9D0D71ED513D40DAB06AEE6891271",
-        "elapsed_seconds": 260.656,
-        "log_sha256": "93DE3CD234064943B0F0D6701E612D1229397CA0F2DE8BE764F52E148F763405",
+        "receipt_sha256": "AC96D028977F357C41318AB2CF33E761B0552E82FAB30B5637835681A6CE8346",
+        "elapsed_seconds": 253.593,
+        "log_sha256": "1A429C8BABE82D02E27D7623E76120CF00843E37E466C47C6162C07BE3333FF3",
         "initial_attempts": [
           {
-            "status": "host_regression_reproduced",
-            "elapsed_seconds": 7.687,
-            "reason": "bad_user_rsp_reached_kernel_fatal_frame_rejection",
-            "log_sha256": "96EBBE5D066DF82CD0B2FF3205B091F314CA56FED64D42A789BD61749EEBEDAC"
+            "tag": "nativefirst",
+            "status": "failed_preserved",
+            "elapsed_seconds": 58.172,
+            "reason": "text_exceeded_88000_reservation",
+            "log_sha256": "CFB19E15D9590472BA1FDBE431A752781C5274AB8B400865CF62AEF0F891C971"
           },
           {
-            "status": "native_probe_failed",
-            "elapsed_seconds": 174.359,
-            "reason": "last_case_required_architectural_SS_but_runner_delivered_GP",
-            "log_sha256": "CD4E67D1790051DEA8CC82D4A3E0D7688567FC29EFB21CB291296663A30E7ED7"
+            "tag": "nativesecond",
+            "status": "failed_preserved",
+            "elapsed_seconds": 107.719,
+            "reason": "kernel_user_root_panic_before_peer_completion",
+            "log_sha256": "8B11AF8A1275BBE8FEB84E368775060729B35615531D5902D2754918165491C9"
           },
           {
-            "status": "diagnostic_reproduced_emulator_deviation",
-            "elapsed_seconds": 114.375,
-            "reason": "TCG_GP_0_at_user_RIP_400000BF_native_SS_not_qualified",
-            "log_sha256": "6B9D407A402E93670F7D90FA8A56A9A17ADEE0AFC389DC32ED27D1A84A12B4BA"
+            "tag": "diagnostic",
+            "status": "failed_preserved",
+            "elapsed_seconds": 8.797,
+            "reason": "nonexistent_diagnostic_Com1_constructor_rejected_by_compiler",
+            "log_sha256": "94F527AC23BE0D19C5C78F671AD3CEC95CA8EC8E12FDC85C6A35A67DE153FA7A"
+          },
+          {
+            "tag": "diagnosticsecond",
+            "status": "failed_preserved",
+            "elapsed_seconds": 37.907,
+            "reason": "native_kernel_PF2_at_bootstrap_stack_guard",
+            "log_sha256": "456EF52C896113D09322D0FC3F70269477EF4FE00DE31DE42168529DB9A5D69C"
+          },
+          {
+            "tag": "nativethird",
+            "status": "failed_preserved",
+            "elapsed_seconds": 54.157,
+            "reason": "repaired_text_exceeded_8C000_reservation",
+            "log_sha256": "E5C5AA0E311CF37B80C34FB23A9A6BE3938323F1F62A60EE2A6023D4A984B583"
+          },
+          {
+            "tag": "nativefourth",
+            "status": "failed_preserved",
+            "elapsed_seconds": 79.25,
+            "reason": "rollback_probe_stage120",
+            "log_sha256": "8B11AF8A1275BBE8FEB84E368775060729B35615531D5902D2754918165491C9"
+          },
+          {
+            "tag": "diagnosticthird",
+            "status": "failed_preserved",
+            "elapsed_seconds": 39.0,
+            "reason": "probe_requested_three_tasks_within_32_page_quota_stage12001",
+            "log_sha256": "456EF52C896113D09322D0FC3F70269477EF4FE00DE31DE42168529DB9A5D69C"
           }
         ],
         "canonical_full_replay_performed": false,
@@ -51950,23 +51984,31 @@
         "inherited_shared_loader_input_count": 19
       },
       "current_user_entry_metadata": {
-        "cycle": 244,
+        "cycle": 245,
         "status": "pass",
-        "tests_run": 125,
-        "tests_passed": 125,
+        "tests_run": 127,
+        "tests_passed": 127,
         "tests_failed": 0,
         "tests_skipped": 0,
-        "elapsed_seconds": 50.505,
-        "runner_elapsed_seconds": 51.344,
-        "log_sha256": "0519929E37E9B41292BF97773DB5ED010F9226326F128634C08446A8BA84A12F",
+        "unittest_elapsed_seconds": 51.23,
+        "elapsed_seconds": 52.078,
+        "log_sha256": "709C0B1335F553D6C3267FC7DD194E0DE23A005DDF4D2C6DEFEC820F33D321BB",
         "initial_attempts": [
           {
-            "tests_run": 125,
-            "failures": 2,
-            "errors": 0,
-            "elapsed_seconds": 51.812,
-            "reason": "stale_cycle243_schema_constant_advanced_to244_without_weakening_validation",
-            "log_sha256": "4AE4F4B075610C9962C99532DE9A4BFE7BFFF9727AF4CE593F2FBDD07EF47A78"
+            "status": "fail",
+            "tests_run": 127,
+            "tests_failed": 2,
+            "elapsed_seconds": 52.297,
+            "reason": "stale_architecture_binding_and_kernel_source_counts",
+            "log_sha256": "DAA440C655B89A15B877A264B976091F38BEFEC39F3B8F5DEF2A5BC8D46F4561"
+          },
+          {
+            "status": "fail",
+            "tests_run": 127,
+            "tests_failed": 1,
+            "elapsed_seconds": 51.86,
+            "reason": "historical_entry_receipt_exact_unbound_source_set_needed_new_paths",
+            "log_sha256": "B7DE7EDD1E686A15EF0EDDAFEA25746D6D7AECAC5209C32D7DA7EE8D519347EC"
           }
         ],
         "historical_integrity_is_not_new_execution": true,
@@ -52483,6 +52525,70 @@
         ],
         "historical_integrity_is_not_new_execution": true,
         "production_ready": false
+      },
+      "historical_cycle244_closeout_regression": {
+        "cycle": 244,
+        "status": "focused_native_and_guest_pass_not_full_canonical",
+        "tests_run": 489,
+        "tests_passed": 489,
+        "tests_failed": 0,
+        "tests_skipped": 0,
+        "scope": "349_debug_kernel_plus99_repeated_user_release_plus24_repeated_VM_release_plus7_compile_fail_plus10_boot_exit",
+        "additional_python_oracle_tests": 33,
+        "rejected_incompatible_feature_builds": 2,
+        "guest_runs": 3,
+        "user_root_guest_runs": 2,
+        "ordinary_denial_guest_runs": 1,
+        "receipt_path": "tests/fixtures/cycle244-user-entry-readiness.json",
+        "receipt_sha256": "3D6D3860572C99A08B6E0322D61C92BADBC9D0D71ED513D40DAB06AEE6891271",
+        "elapsed_seconds": 260.656,
+        "log_sha256": "93DE3CD234064943B0F0D6701E612D1229397CA0F2DE8BE764F52E148F763405",
+        "initial_attempts": [
+          {
+            "status": "host_regression_reproduced",
+            "elapsed_seconds": 7.687,
+            "reason": "bad_user_rsp_reached_kernel_fatal_frame_rejection",
+            "log_sha256": "96EBBE5D066DF82CD0B2FF3205B091F314CA56FED64D42A789BD61749EEBEDAC"
+          },
+          {
+            "status": "native_probe_failed",
+            "elapsed_seconds": 174.359,
+            "reason": "last_case_required_architectural_SS_but_runner_delivered_GP",
+            "log_sha256": "CD4E67D1790051DEA8CC82D4A3E0D7688567FC29EFB21CB291296663A30E7ED7"
+          },
+          {
+            "status": "diagnostic_reproduced_emulator_deviation",
+            "elapsed_seconds": 114.375,
+            "reason": "TCG_GP_0_at_user_RIP_400000BF_native_SS_not_qualified",
+            "log_sha256": "6B9D407A402E93670F7D90FA8A56A9A17ADEE0AFC389DC32ED27D1A84A12B4BA"
+          }
+        ],
+        "canonical_full_replay_performed": false,
+        "merge_qualified": false,
+        "production_ready": false
+      },
+      "historical_cycle244_user_entry_metadata": {
+        "cycle": 244,
+        "status": "pass",
+        "tests_run": 125,
+        "tests_passed": 125,
+        "tests_failed": 0,
+        "tests_skipped": 0,
+        "elapsed_seconds": 50.505,
+        "runner_elapsed_seconds": 51.344,
+        "log_sha256": "0519929E37E9B41292BF97773DB5ED010F9226326F128634C08446A8BA84A12F",
+        "initial_attempts": [
+          {
+            "tests_run": 125,
+            "failures": 2,
+            "errors": 0,
+            "elapsed_seconds": 51.812,
+            "reason": "stale_cycle243_schema_constant_advanced_to244_without_weakening_validation",
+            "log_sha256": "4AE4F4B075610C9962C99532DE9A4BFE7BFFF9727AF4CE593F2FBDD07EF47A78"
+          }
+        ],
+        "historical_integrity_is_not_new_execution": true,
+        "production_ready": false
       }
     },
     "native": {
@@ -52612,7 +52718,7 @@
       "blocked": true
     },
     "user_space_integration": {
-      "cycle": 244,
+      "cycle": 245,
       "status": "implementation_started",
       "plan_path": "docs/native-userspace-integration-iso.md",
       "selected_stage": "USI-1",
@@ -52624,7 +52730,7 @@
       "iso_built": false,
       "production_ready": false,
       "stages": {
-        "USI-1": "partial_live_invalid_return_containment_no_general_admission_or_ipc",
+        "USI-1": "partial_live_transactional_construction_no_general_admission_or_ipc",
         "USI-2": "not_started",
         "USI-3": "not_started",
         "USI-4": "not_started",
@@ -52636,7 +52742,7 @@
       "owned_inactive_supervisor_attachment": true,
       "entry_stack_bytes": 16384,
       "live_adapter_wired": true,
-      "privileged_adapter_verification": "two_fresh_qemu_CPL3_hostile_state_peer_survival_probes_plus_default_denial",
+      "privileged_adapter_verification": "two_fresh_qemu_native_construction_rollback_retry_peer_continuation_plus_default_denial",
       "cpu_exposure_lifecycle_implemented": true,
       "actual_cr3_switch_executed": true,
       "user_root_guest_runs": 2,
@@ -52674,8 +52780,8 @@
       "normal_task_exits_per_probe": 1,
       "fatal_user_faults_per_probe": 3,
       "task_identity_scope": "persistent_slot_local_generation_not_capability",
-      "released_pages_per_probe": 429,
-      "scrubbed_data_pages_per_probe": 198,
+      "released_pages_per_probe": 512,
+      "scrubbed_data_pages_per_probe": 235,
       "actual_root_writes_per_probe": [
         291,
         291
@@ -52725,7 +52831,19 @@
       "observed_stack_access_vector": 13,
       "emulator_deviation": "QEMU_TCG_issue928_issue4205_GP_instead_of_SS_for_noncanonical_stack_access",
       "kernel_entry_ac_cleared": true,
-      "general_user_exception_delivery_qualified": false
+      "general_user_exception_delivery_qualified": false,
+      "construction_contract": "PKUSER11",
+      "bounded_transactional_construction": true,
+      "construction_quota_failures_per_probe": 1,
+      "construction_after_effect_failures_per_probe": 6,
+      "construction_cleanup_quarantines_per_probe": 6,
+      "construction_cleanup_retries_per_probe": 6,
+      "construction_scrubbed_released_pages_per_probe": 83,
+      "construction_peer_continuation": true,
+      "construction_scope": "fixed_five_allocation_never_exposed_image_not_general_executable_or_slot_recovery",
+      "general_quarantine_recovery": false,
+      "complete_kernel_stack_bound_qualified": false,
+      "kernel_stack_guard_regression_repaired": true
     },
     "historical_cycle234_user_space_integration": {
       "cycle": 234,
@@ -53175,6 +53293,122 @@
       "invalid_user_frame_containment": false,
       "timer_pending_race_qualification": false,
       "complete_runtime_tick_accounting": false
+    },
+    "historical_cycle244_user_space_integration": {
+      "cycle": 244,
+      "status": "implementation_started",
+      "plan_path": "docs/native-userspace-integration-iso.md",
+      "selected_stage": "USI-1",
+      "selected_requirement": "N13-USER-ENTRY-LIVE-001",
+      "receipt_path": "tests/fixtures/cycle244-user-entry-readiness.json",
+      "host_status": "pass",
+      "guest_runs": 3,
+      "ring3_executed": true,
+      "iso_built": false,
+      "production_ready": false,
+      "stages": {
+        "USI-1": "partial_live_invalid_return_containment_no_general_admission_or_ipc",
+        "USI-2": "not_started",
+        "USI-3": "not_started",
+        "USI-4": "not_started",
+        "USI-5": "not_started"
+      },
+      "continue_full_microkernel_after_iso": true,
+      "required_next": "N13-USER-ENTRY-LIVE-001",
+      "live_adapter_implemented": true,
+      "owned_inactive_supervisor_attachment": true,
+      "entry_stack_bytes": 16384,
+      "live_adapter_wired": true,
+      "privileged_adapter_verification": "two_fresh_qemu_CPL3_hostile_state_peer_survival_probes_plus_default_denial",
+      "cpu_exposure_lifecycle_implemented": true,
+      "actual_cr3_switch_executed": true,
+      "user_root_guest_runs": 2,
+      "ordinary_denial_guest_runs": 1,
+      "timer_under_candidate_root_executed": true,
+      "verified_timer_shutdown_before_retirement": true,
+      "interrupts_per_probe": 3,
+      "mmio_pages": 2,
+      "retained_acpi_snapshot_pages": 1,
+      "user_faults_per_probe": 7,
+      "private_tss_rsp0_executed": true,
+      "user_timer_preemption": true,
+      "architectural_state_profile": "single_BSP_legacy_x87_SSE_no_enabled_XSAVE",
+      "general_user_program_admission": false,
+      "syscall_abi": true,
+      "user_timer_interrupts_per_probe": 3,
+      "user_resumes_per_probe": 2,
+      "timer_shutdown_precedes_descriptor_detachment": true,
+      "independent_missing_interrupt_watchdog": false,
+      "multi_application_scheduling": false,
+      "development_syscall_abi": "PSABI1",
+      "production_syscall_abi_frozen": false,
+      "bounded_user_copy": true,
+      "maximum_user_copy_bytes": 256,
+      "user_calls_per_probe": 12,
+      "copy_faults_per_probe": 3,
+      "copy_input_failure_atomic": true,
+      "copy_output_failure_reports_prefix": true,
+      "syscall_msrs_cleared_before_retirement": true,
+      "general_smap_qualification": false,
+      "concurrent_user_copy_pinning": false,
+      "task_exit_and_reaping": true,
+      "task_termination_contract": "PKUSER8",
+      "sequential_task_lifetimes_per_probe": 4,
+      "normal_task_exits_per_probe": 1,
+      "fatal_user_faults_per_probe": 3,
+      "task_identity_scope": "persistent_slot_local_generation_not_capability",
+      "released_pages_per_probe": 429,
+      "scrubbed_data_pages_per_probe": 198,
+      "actual_root_writes_per_probe": [
+        291,
+        291
+      ],
+      "failed_cleanup_retains_memory": true,
+      "complete_spawn_allocation_rollback": false,
+      "peer_scheduling_contract": "PKUSER10",
+      "bounded_peer_scheduling": true,
+      "peer_scheduler": "PKSCHED1_single_CPU",
+      "private_roots_per_round": 2,
+      "peer_rounds_per_probe": 14,
+      "peer_preemptions_per_probe": [
+        113,
+        113
+      ],
+      "peer_survival_cases_per_probe": 14,
+      "legacy_user_state_saved_restored": true,
+      "suspended_owner_retains_memory": true,
+      "syscall_stack_within_owned_page": true,
+      "syscall_budget_terminates_only_task": true,
+      "invalid_user_frame_containment": true,
+      "timer_pending_race_qualification": false,
+      "complete_runtime_tick_accounting": false,
+      "invalid_user_frame_scope": "fixed_admitted_RIP_RSP_RFLAGS_on_owned_syscall_and_timer_entry_not_general_programs",
+      "invalid_return_terminations_per_probe": 6,
+      "new_native_user_exception_vectors": [
+        0,
+        1,
+        3
+      ],
+      "user_exception_policy_vectors": [
+        0,
+        1,
+        3,
+        4,
+        5,
+        6,
+        11,
+        12,
+        13,
+        14,
+        16,
+        17,
+        19
+      ],
+      "architectural_stack_fault_qualified": false,
+      "observed_stack_access_vector": 13,
+      "emulator_deviation": "QEMU_TCG_issue928_issue4205_GP_instead_of_SS_for_noncanonical_stack_access",
+      "kernel_entry_ac_cleared": true,
+      "general_user_exception_delivery_qualified": false
     }
   },
   "source_set": [
@@ -53527,6 +53761,7 @@
       "source_checkbox_count": 200,
       "added_requirement_ids": [],
       "current_evidence": [
+        "Cycle245: PKUSER11 owns all partial construction allocations and transfers exact retention into PreparedImage. Two fresh55-marker guests each prove one quota failure, six after-effect failures, six cleanup quarantines/retries,83 scrubbed/released construction pages and healthy-peer continuation;14 prior survival cases and507 evidence rejections remain.504 Rust executions and34 Python oracle tests pass. Constructor stack-guard regression repaired by frame separation, not larger stacks. docs/checkpoints/cycle245-transactional-user-construction.md",
         "Cycle 185: docs/checkpoints/cycle185-cpu-recorded-evidence.md repairs typed recorded execution across five CPU profiles. Fourteen final virtual boots and 225 marker controls pass on unchanged kernel bytes. All 50 focused tests pass, including 98 exit, 112 run-coverage and 161 record-evidence mutations through both the runtime validators and actual release gates. Two malformed CPU gate exceptions are repaired. Genuine generated positive receipts are never rebound.",
         "Cycle 184: docs/checkpoints/cycle184-boot-host-provenance.md pins six host qualifiers and admits eight actual generated boot-chain/prerequisite receipts. Six final headless boots include two kernel entries; 109 focused Python tests pass. Typed host evidence, source bindings, invalid-output preservation, exact schema counts and twelve forged PooleBoot host-test-count rejections are verified. Repeated roadmap generation no longer mutates earlier results. Kernel bytes are unchanged.",
         "Cycle 183: docs/checkpoints/cycle183-elf-loader-provenance.md qualifies the shared ELF loader with 12 Rust tests, 129 negative controls and 16384 differential cases. Typed host-profile evidence is validated before receipt output, and entry inherits all 19 loader inputs in 72 total bindings. All 59 focused hostile-environment Python tests pass, including exact ELF, entry and fixture reproduction. Entry passes 245 host tests and 43 controls with unchanged product bytes. Five new test methods bring the discovered inventory to 986; discovery is not execution.",
@@ -53539,6 +53774,7 @@
         "format-aware inspection, zero host-leakage hits, and three passing negative controls"
       ],
       "current_gaps": [
+        "Bounded one-BSP fixed construction only. General executable admission, persistent quarantine/slot-commit recovery, N3.7 complete stack-depth/high-water and trap nesting, pending/late timer recovery, terminal accounting, independent missing-IRQ recovery, general exception/selector delivery including native SS, XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/optical ISO and hardware remain open. Image177pages/entry0xB000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion.",
         "Selected readiness is 13/27; fourteen memory-through-lock profiles need replay beginning N9-PMM-ACPI-CONSUMER-001. At least 65 scheduler controls still lack individually bound rejection execution before full exact-candidate canonical/Doctor/publication/review and PR78 merge. The 42 accepted pre-repair exit counterexamples, initial test error, two gate exceptions and six superseded initial trap boots remain preserved. Recorded consistency is not freshness or authentication. No phase/flag closure, independent builder, target hardware, new kernel feature, new ISO or production readiness is claimed.",
         "Selected readiness is 8/27, with nineteen CPU/memory checks pending from N7-TRAP-001. At least 65 scheduler controls still need individually bound rejection execution before full exact-candidate canonical/Doctor/publication/review qualification and PR78 merge. Thirteen failed runner attempts, including the first metadata closeout, and eight superseded successful boots remain preserved. No complete host attestation, independent builder, phase/flag closure, new native feature, new ISO or production readiness is claimed.",
         "The separate ELF readiness check passes; the 27-check projection remains 3/27. N5-SYMBOLS-SEMANTICS-001 and ordered N5/CPU/memory replay precede final scheduler evidence, the existing 65 per-control execution gaps, exact canonical/Doctor/publication/review and PR78 merge. Historical failures remain. No guest boot, new native feature, complete host attestation, independent builder, phase/flag closure, ISO or production readiness is claimed.",
@@ -53954,6 +54190,7 @@
         "ADD-N7-XSTATE-001"
       ],
       "current_evidence": [
+        "Cycle245: PKUSER11 owns all partial construction allocations and transfers exact retention into PreparedImage. Two fresh55-marker guests each prove one quota failure, six after-effect failures, six cleanup quarantines/retries,83 scrubbed/released construction pages and healthy-peer continuation;14 prior survival cases and507 evidence rejections remain.504 Rust executions and34 Python oracle tests pass. Constructor stack-guard regression repaired by frame separation, not larger stacks. docs/checkpoints/cycle245-transactional-user-construction.md",
         "Cycle 244: PKUSER10 separates trusted entry from user RIP/RSP/RFLAGS violations; contains invalid syscall/timer returns and additional exceptions with private stacks, AC cleanup and checked debug-status cleanup. Two fresh54-marker guests each pass140 dispatches/113 preemptions/14 survival cases/493 evidence controls; ordinary denial passes.349 debug,99 user-release,24 VM-release,7 compile-fail,10 boot-exit and33 Python oracle tests pass. docs/checkpoints/cycle244-user-state-containment.md",
         "Cycle 243: PKUSER9 joins actual private-root CPL3 tasks to PKSCHED1; preserves GPR/IRET/legacy FP state across quanta; retains suspended memory and proves peer survival after exit/fault/cancel/quota. Two fresh44-marker guests each pass40 dispatches/33 preemptions/249 evidence controls; ordinary denial passes.345 debug,95 user-release,24 VM-release,7 compile-fail,10 boot-exit and29 Python oracle tests pass. docs/checkpoints/cycle243-native-user-peer-scheduling.md",
         "Cycle 242: PKUSER8 owns four sequential task lifetimes, records Exit42 and user UD/GP/PF termination, rejects stale generations and restart/reap repetition, and quiesces entry before root restoration and memory release. Two fresh40-marker guests/157 evidence controls each and ordinary denial pass.336 debug,86 user-release,24 VM-release,7 compile-fail,10 boot-exit and26 Python oracle tests pass. docs/checkpoints/cycle242-user-task-termination.md",
@@ -53995,6 +54232,7 @@
         "runs/native-kernel-privilege-msr-policy-readiness.json: two exact fresh-vars TCG QEMU/OVMF runs, 35 markers, 47/47 hostile controls, 11 support-gated MSR reads, ten observed MCA banks, zero bank reads, zero runtime writes, and an exact linked-image audit of 43 RDMSR and three WRMSR sites that isolates PKSMP1, PKSMP2, PKSMP5/PKSCHED4, PKSCHED1, PKSCHED2, PKSCHED3, and PKIRQ1 accesses from the read-only PKMSR1 profile, with zero authority and explicit emulator/target/production nonclaims"
       ],
       "current_gaps": [
+        "Bounded one-BSP fixed construction only. General executable admission, persistent quarantine/slot-commit recovery, N3.7 complete stack-depth/high-water and trap nesting, pending/late timer recovery, terminal accounting, independent missing-IRQ recovery, general exception/selector delivery including native SS, XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/optical ISO and hardware remain open. Image177pages/entry0xB000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion.",
         "Bounded one-BSP fixed payloads only. TCG stack access delivers GP rather than architectural SS; native SS and general exception/selector delivery remain unqualified, not waived. Full spawn rollback, pending/late timer recovery, terminal-quantum accounting, independent missing-IRQ recovery, XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 still requires product-contract migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "Bounded one-BSP fixed tasks only. Full spawn rollback, invalid-return-frame containment, pending/late timer recovery, final-sub-quantum accounting, independent missing-IRQ watchdog, general XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "No peer scheduling or arbitrary-program admission: fixed task payloads have no armed timer, strict initial syscall RSP and a64-call budget still fail fatally, and construction allocation failures are not fully rolled back. Task IDs are slot-local, not capabilities. SMAP/concurrent copy, async/SMP entry, full XSAVE, missing-IRQ watchdog, IPC/services/shell/apps/optical ISO and hardware remain open. Image168pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
@@ -54181,6 +54419,7 @@
         "ADD-MEM-002"
       ],
       "current_evidence": [
+        "Cycle245: PKUSER11 owns all partial construction allocations and transfers exact retention into PreparedImage. Two fresh55-marker guests each prove one quota failure, six after-effect failures, six cleanup quarantines/retries,83 scrubbed/released construction pages and healthy-peer continuation;14 prior survival cases and507 evidence rejections remain.504 Rust executions and34 Python oracle tests pass. Constructor stack-guard regression repaired by frame separation, not larger stacks. docs/checkpoints/cycle245-transactional-user-construction.md",
         "Cycle 244: PKUSER10 separates trusted entry from user RIP/RSP/RFLAGS violations; contains invalid syscall/timer returns and additional exceptions with private stacks, AC cleanup and checked debug-status cleanup. Two fresh54-marker guests each pass140 dispatches/113 preemptions/14 survival cases/493 evidence controls; ordinary denial passes.349 debug,99 user-release,24 VM-release,7 compile-fail,10 boot-exit and33 Python oracle tests pass. docs/checkpoints/cycle244-user-state-containment.md",
         "Cycle 243: PKUSER9 joins actual private-root CPL3 tasks to PKSCHED1; preserves GPR/IRET/legacy FP state across quanta; retains suspended memory and proves peer survival after exit/fault/cancel/quota. Two fresh44-marker guests each pass40 dispatches/33 preemptions/249 evidence controls; ordinary denial passes.345 debug,95 user-release,24 VM-release,7 compile-fail,10 boot-exit and29 Python oracle tests pass. docs/checkpoints/cycle243-native-user-peer-scheduling.md",
         "Cycle 242: PKUSER8 owns four sequential task lifetimes, records Exit42 and user UD/GP/PF termination, rejects stale generations and restart/reap repetition, and quiesces entry before root restoration and memory release. Two fresh40-marker guests/157 evidence controls each and ordinary denial pass.336 debug,86 user-release,24 VM-release,7 compile-fail,10 boot-exit and26 Python oracle tests pass. docs/checkpoints/cycle242-user-task-termination.md",
@@ -54222,6 +54461,7 @@
         "ADD-MEM-002: replace the bounded nine-page PKVM2 mapping with one complete generation-owned sparse physical direct map that excludes holes and forbidden ranges, prevents incompatible cache aliases, preserves retained bootstrap and ACPI snapshot exclusions, switches transactionally, records local invalidation and future SMP-shootdown dependencies, and defers reclamation until exact generation receipts permit it"
       ],
       "current_gaps": [
+        "Bounded one-BSP fixed construction only. General executable admission, persistent quarantine/slot-commit recovery, N3.7 complete stack-depth/high-water and trap nesting, pending/late timer recovery, terminal accounting, independent missing-IRQ recovery, general exception/selector delivery including native SS, XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/optical ISO and hardware remain open. Image177pages/entry0xB000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion.",
         "Bounded one-BSP fixed payloads only. TCG stack access delivers GP rather than architectural SS; native SS and general exception/selector delivery remain unqualified, not waived. Full spawn rollback, pending/late timer recovery, terminal-quantum accounting, independent missing-IRQ recovery, XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 still requires product-contract migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "Bounded one-BSP fixed tasks only. Full spawn rollback, invalid-return-frame containment, pending/late timer recovery, final-sub-quantum accounting, independent missing-IRQ watchdog, general XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "No peer scheduling or arbitrary-program admission: fixed task payloads have no armed timer, strict initial syscall RSP and a64-call budget still fail fatally, and construction allocation failures are not fully rolled back. Task IDs are slot-local, not capabilities. SMAP/concurrent copy, async/SMP entry, full XSAVE, missing-IRQ watchdog, IPC/services/shell/apps/optical ISO and hardware remain open. Image168pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
@@ -54436,6 +54676,7 @@
         "ADD-N12-CONCURRENCY-RECLAMATION-001"
       ],
       "current_evidence": [
+        "Cycle245: PKUSER11 owns all partial construction allocations and transfers exact retention into PreparedImage. Two fresh55-marker guests each prove one quota failure, six after-effect failures, six cleanup quarantines/retries,83 scrubbed/released construction pages and healthy-peer continuation;14 prior survival cases and507 evidence rejections remain.504 Rust executions and34 Python oracle tests pass. Constructor stack-guard regression repaired by frame separation, not larger stacks. docs/checkpoints/cycle245-transactional-user-construction.md",
         "Cycle 244: PKUSER10 separates trusted entry from user RIP/RSP/RFLAGS violations; contains invalid syscall/timer returns and additional exceptions with private stacks, AC cleanup and checked debug-status cleanup. Two fresh54-marker guests each pass140 dispatches/113 preemptions/14 survival cases/493 evidence controls; ordinary denial passes.349 debug,99 user-release,24 VM-release,7 compile-fail,10 boot-exit and33 Python oracle tests pass. docs/checkpoints/cycle244-user-state-containment.md",
         "Cycle 243: PKUSER9 joins actual private-root CPL3 tasks to PKSCHED1; preserves GPR/IRET/legacy FP state across quanta; retains suspended memory and proves peer survival after exit/fault/cancel/quota. Two fresh44-marker guests each pass40 dispatches/33 preemptions/249 evidence controls; ordinary denial passes.345 debug,95 user-release,24 VM-release,7 compile-fail,10 boot-exit and29 Python oracle tests pass. docs/checkpoints/cycle243-native-user-peer-scheduling.md",
         "Cycle 242: PKUSER8 owns four sequential task lifetimes, records Exit42 and user UD/GP/PF termination, rejects stale generations and restart/reap repetition, and quiesces entry before root restoration and memory release. Two fresh40-marker guests/157 evidence controls each and ordinary denial pass.336 debug,86 user-release,24 VM-release,7 compile-fail,10 boot-exit and26 Python oracle tests pass. docs/checkpoints/cycle242-user-task-termination.md",
@@ -54520,6 +54761,7 @@
         "ADD-N12-CONCURRENCY-RECLAMATION-001: Cycle 162 qualifies mandatory active PKVM3 table/data ownership. Replay changed-image N5-through-N12 prerequisites, then implement execution-stack ownership, acknowledged cross-CPU quiescence, live timeout/offline/death/pressure/shutdown rollback, an independent oracle and exact-topology live evidence before closing N12.3"
       ],
       "current_gaps": [
+        "Bounded one-BSP fixed construction only. General executable admission, persistent quarantine/slot-commit recovery, N3.7 complete stack-depth/high-water and trap nesting, pending/late timer recovery, terminal accounting, independent missing-IRQ recovery, general exception/selector delivery including native SS, XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/optical ISO and hardware remain open. Image177pages/entry0xB000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion.",
         "Bounded one-BSP fixed payloads only. TCG stack access delivers GP rather than architectural SS; native SS and general exception/selector delivery remain unqualified, not waived. Full spawn rollback, pending/late timer recovery, terminal-quantum accounting, independent missing-IRQ recovery, XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 still requires product-contract migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "Bounded one-BSP fixed tasks only. Full spawn rollback, invalid-return-frame containment, pending/late timer recovery, final-sub-quantum accounting, independent missing-IRQ watchdog, general XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "No peer scheduling or arbitrary-program admission: fixed task payloads have no armed timer, strict initial syscall RSP and a64-call budget still fail fatally, and construction allocation failures are not fully rolled back. Task IDs are slot-local, not capabilities. SMAP/concurrent copy, async/SMP entry, full XSAVE, missing-IRQ watchdog, IPC/services/shell/apps/optical ISO and hardware remain open. Image168pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
@@ -54622,6 +54864,7 @@
         "ADD-CAP-001"
       ],
       "current_evidence": [
+        "Cycle245: PKUSER11 owns all partial construction allocations and transfers exact retention into PreparedImage. Two fresh55-marker guests each prove one quota failure, six after-effect failures, six cleanup quarantines/retries,83 scrubbed/released construction pages and healthy-peer continuation;14 prior survival cases and507 evidence rejections remain.504 Rust executions and34 Python oracle tests pass. Constructor stack-guard regression repaired by frame separation, not larger stacks. docs/checkpoints/cycle245-transactional-user-construction.md",
         "Cycle 244: PKUSER10 separates trusted entry from user RIP/RSP/RFLAGS violations; contains invalid syscall/timer returns and additional exceptions with private stacks, AC cleanup and checked debug-status cleanup. Two fresh54-marker guests each pass140 dispatches/113 preemptions/14 survival cases/493 evidence controls; ordinary denial passes.349 debug,99 user-release,24 VM-release,7 compile-fail,10 boot-exit and33 Python oracle tests pass. docs/checkpoints/cycle244-user-state-containment.md",
         "Cycle 243: PKUSER9 joins actual private-root CPL3 tasks to PKSCHED1; preserves GPR/IRET/legacy FP state across quanta; retains suspended memory and proves peer survival after exit/fault/cancel/quota. Two fresh44-marker guests each pass40 dispatches/33 preemptions/249 evidence controls; ordinary denial passes.345 debug,95 user-release,24 VM-release,7 compile-fail,10 boot-exit and29 Python oracle tests pass. docs/checkpoints/cycle243-native-user-peer-scheduling.md",
         "Cycle 242: PKUSER8 owns four sequential task lifetimes, records Exit42 and user UD/GP/PF termination, rejects stale generations and restart/reap repetition, and quiesces entry before root restoration and memory release. Two fresh40-marker guests/157 evidence controls each and ordinary denial pass.336 debug,86 user-release,24 VM-release,7 compile-fail,10 boot-exit and26 Python oracle tests pass. docs/checkpoints/cycle242-user-task-termination.md",
@@ -54635,6 +54878,7 @@
         "Cycle 234: PKUSER1 inactive user-image admission passes260 kernel host tests,14 optimized focused tests and freestanding-library check; no live user execution or ISO. docs/checkpoints/cycle234-user-entry-foundation.md"
       ],
       "current_gaps": [
+        "Bounded one-BSP fixed construction only. General executable admission, persistent quarantine/slot-commit recovery, N3.7 complete stack-depth/high-water and trap nesting, pending/late timer recovery, terminal accounting, independent missing-IRQ recovery, general exception/selector delivery including native SS, XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/optical ISO and hardware remain open. Image177pages/entry0xB000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion.",
         "Bounded one-BSP fixed payloads only. TCG stack access delivers GP rather than architectural SS; native SS and general exception/selector delivery remain unqualified, not waived. Full spawn rollback, pending/late timer recovery, terminal-quantum accounting, independent missing-IRQ recovery, XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 still requires product-contract migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "Bounded one-BSP fixed tasks only. Full spawn rollback, invalid-return-frame containment, pending/late timer recovery, final-sub-quantum accounting, independent missing-IRQ watchdog, general XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
         "No peer scheduling or arbitrary-program admission: fixed task payloads have no armed timer, strict initial syscall RSP and a64-call budget still fail fatally, and construction allocation failures are not fully rolled back. Task IDs are slot-local, not capabilities. SMAP/concurrent copy, async/SMP entry, full XSAVE, missing-IRQ watchdog, IPC/services/shell/apps/optical ISO and hardware remain open. Image168pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
@@ -60816,7 +61060,7 @@
       "class": "REQUIRED",
       "status": "open",
       "phase_id": "N13",
-      "closure_condition": "Pass all five native user-space ISO stages with actual isolated tasks, user input, fault containment and fresh optical evidence; do not close production gates",
+      "closure_condition": "Pass all five native user-space ISO stages with actual isolated tasks, user input, fault containment and fresh optical evidence; do not close production gates Include N3.7 constructor/cleanup/trap stack-depth and high-water qualification, general persistent construction quarantine and final slot-commit recovery.",
       "evidence": [
         "docs/checkpoints/cycle234-user-entry-foundation.md",
         "docs/native-userspace-integration-iso.md",
@@ -60829,7 +61073,8 @@
         "docs/checkpoints/cycle241-native-syscall-usercopy.md",
         "docs/checkpoints/cycle242-user-task-termination.md",
         "docs/checkpoints/cycle243-native-user-peer-scheduling.md",
-        "docs/checkpoints/cycle244-user-state-containment.md"
+        "docs/checkpoints/cycle244-user-state-containment.md",
+        "docs/checkpoints/cycle245-transactional-user-construction.md"
       ]
     }
   ],
@@ -60844,7 +61089,7 @@
       "PKERR1 freezes a pure exact-target CPU/errata rejection policy, PKXSTATE1 proves bounded x87/SSE standard-XSAVE ownership, PKXEXC1 proves deliberate #MF/#XM recovery plus terminal test-only #NM rejection with a linked scope audit under WHPX, and PKMSR1 proves only a read-only qemu64 BSP system-linkage/global-MCA/unsupported-PMU observation. PKPMM7 supplies bounded physical ownership, scrubbed lifecycle transactions, a stable guarded five-page manager, external generation-owned active ledgers, checked automatic growth with retirement, bounded-window fallback and pre-effect rejection, streamed lifecycle-gated Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation and retained copy/readback; PKVM1 supplies inactive page-table transactions; PKVM3 proves one-BSP activation/restoration of a complete-profile PMM-owned sparse direct map; PKIRQ1 proves one bounded local timer transaction; PKSMP1 proves one first-AP start/quiesce/park lifecycle; PKSMP2 proves one AP-local GDT/TSS/IDT, guarded-stack, x87/SSE-owner, and interrupt-vector runtime transaction; and PKSMP5 proves three simultaneous AP-local runtimes, partial-start rollback with fresh retry, six fixed IPI classes per AP, three AP-side one-page INVLPG operations, aggregate acknowledgement, and one deferred generation retirement. No target-qualified complete native CPU policy, applicable Model 40h-4Fh errata authority, direct numeric client microcode floor or ratified replacement, target-specific privileged-MSR semantics, syscall/MCE/PMU activation, AVX/extended state, user-task exception delivery, scheduler or migration integration, general interrupt routing/time services, production capability authority, general topology or SMP shootdown, AML or complete ACPI resource-graph execution, complete kernel/user address spaces, heap, MMIO/PAT/MTRR qualification, interrupt-context or concurrent allocator, general pressure, or OOM implementation exists",
       "The exact Tier 1 identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records are captured with zero public raw registers, but seven required channels remain non-complete in total, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification also remain open",
       "No native DMA/IOMMU/interrupt-remapping confinement",
-      "Bounded one-BSP fixed payloads only. TCG stack access delivers GP rather than architectural SS; native SS and general exception/selector delivery remain unqualified, not waived. Full spawn rollback, pending/late timer recovery, terminal-quantum accounting, independent missing-IRQ recovery, XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 still requires product-contract migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. Bounded one-BSP fixed tasks only. Full spawn rollback, invalid-return-frame containment, pending/late timer recovery, final-sub-quantum accounting, independent missing-IRQ watchdog, general XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. No peer scheduling or arbitrary-program admission: fixed task payloads have no armed timer, strict initial syscall RSP and a64-call budget still fail fatally, and construction allocation failures are not fully rolled back. Task IDs are slot-local, not capabilities. SMAP/concurrent copy, async/SMP entry, full XSAVE, missing-IRQ watchdog, IPC/services/shell/apps/optical ISO and hardware remain open. Image168pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. PSABI1 is a development subset, not a complete frozen production ABI. General SMAP/concurrent pinning, async/SMP entry, arbitrary programs, task exit/reaping/accounting, fault termination and peer scheduling remain open. Syscalls are tested before the timer is armed, not concurrently with it. No native independent missing-IRQ watchdog, IPC/services/shell/apps/optical ISO or hardware qualification.25 native admissions/22 Python closures and full candidate gates remain stale or pending; no merge, phase exit or production promotion. This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion. Timer delivery is CPL0 on the existing kernel IST, not ring3 or use of the private entry stack as RSP0. User GDT/TSS/IRETQ, GPR/segment/base/debug/extended-state initialization and contained user faults/preemption remain next. Hardware error shutdown is host fault-tested, not guest fault-injected. Capability IPC, services, shell/apps and optical ISO qualification follow; all production and exact-candidate merge gates remain open. CPL0 switching is not user-mode execution. Owned timer/MMIO recovery, user GDT/TSS/IRETQ, architectural-state initialization and contained fault/preemption remain before ring3. Capability IPC, services, shell/apps and optical ISO qualification follow. Full production and exact-candidate merge gates remain open. The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open. Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion. User-space integration still needs owned kernel-half mappings/stacks, live ring3/return/fault containment, capabilities/IPC, services, shell/apps and ISO qualification. Production microkernel completion remains N0-N39. PKPMM7 supplies bounded one-BSP physical-page ownership, scrub-before-allocation and scrub-before-reuse with full readback and fault rollback, a stable guarded five-page manager, external generation-owned guarded ledgers, checked automatic repeated growth, verified retirement, bounded-window fallback and pre-effect rejection, exact post-ExitBootServices Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation plus retained snapshot copy/readback. PKVM1 supplies inactive four-level 4 KiB transactions, PKVM3 supplies a complete-profile PMM-owned sparse direct map, cache-alias rejection, exact CR3 restoration, three local invalidation receipts, and generation-retirement gating, and PKSMP5 proves exactly three AP-side INVLPG operations and deferred reclaim for three AP-owned roots, one page per root, one generation, and aggregate target/ack mask 0xE. General topology, address-space-wide shootdown, multiple concurrent generations, production capability authority, incremental concurrent map replacement, huge pages, PCID, COW, user faults, pager IPC, cache/MMIO qualification, heaps/object caches, interrupt-context allocation, concurrent allocation, general pressure and OOM policy, scheduler, task, syscall, capability, IPC, isolation, and asynchronous I/O remain open",
+      "Bounded one-BSP fixed construction only. General executable admission, persistent quarantine/slot-commit recovery, N3.7 complete stack-depth/high-water and trap nesting, pending/late timer recovery, terminal accounting, independent missing-IRQ recovery, general exception/selector delivery including native SS, XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/optical ISO and hardware remain open. Image177pages/entry0xB000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion. Bounded one-BSP fixed payloads only. TCG stack access delivers GP rather than architectural SS; native SS and general exception/selector delivery remain unqualified, not waived. Full spawn rollback, pending/late timer recovery, terminal-quantum accounting, independent missing-IRQ recovery, XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 still requires product-contract migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. Bounded one-BSP fixed tasks only. Full spawn rollback, invalid-return-frame containment, pending/late timer recovery, final-sub-quantum accounting, independent missing-IRQ watchdog, general XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. No peer scheduling or arbitrary-program admission: fixed task payloads have no armed timer, strict initial syscall RSP and a64-call budget still fail fatally, and construction allocation failures are not fully rolled back. Task IDs are slot-local, not capabilities. SMAP/concurrent copy, async/SMP entry, full XSAVE, missing-IRQ watchdog, IPC/services/shell/apps/optical ISO and hardware remain open. Image168pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. PSABI1 is a development subset, not a complete frozen production ABI. General SMAP/concurrent pinning, async/SMP entry, arbitrary programs, task exit/reaping/accounting, fault termination and peer scheduling remain open. Syscalls are tested before the timer is armed, not concurrently with it. No native independent missing-IRQ watchdog, IPC/services/shell/apps/optical ISO or hardware qualification.25 native admissions/22 Python closures and full candidate gates remain stale or pending; no merge, phase exit or production promotion. This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion. Timer delivery is CPL0 on the existing kernel IST, not ring3 or use of the private entry stack as RSP0. User GDT/TSS/IRETQ, GPR/segment/base/debug/extended-state initialization and contained user faults/preemption remain next. Hardware error shutdown is host fault-tested, not guest fault-injected. Capability IPC, services, shell/apps and optical ISO qualification follow; all production and exact-candidate merge gates remain open. CPL0 switching is not user-mode execution. Owned timer/MMIO recovery, user GDT/TSS/IRETQ, architectural-state initialization and contained fault/preemption remain before ring3. Capability IPC, services, shell/apps and optical ISO qualification follow. Full production and exact-candidate merge gates remain open. The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open. Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion. User-space integration still needs owned kernel-half mappings/stacks, live ring3/return/fault containment, capabilities/IPC, services, shell/apps and ISO qualification. Production microkernel completion remains N0-N39. PKPMM7 supplies bounded one-BSP physical-page ownership, scrub-before-allocation and scrub-before-reuse with full readback and fault rollback, a stable guarded five-page manager, external generation-owned guarded ledgers, checked automatic repeated growth, verified retirement, bounded-window fallback and pre-effect rejection, exact post-ExitBootServices Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation plus retained snapshot copy/readback. PKVM1 supplies inactive four-level 4 KiB transactions, PKVM3 supplies a complete-profile PMM-owned sparse direct map, cache-alias rejection, exact CR3 restoration, three local invalidation receipts, and generation-retirement gating, and PKSMP5 proves exactly three AP-side INVLPG operations and deferred reclaim for three AP-owned roots, one page per root, one generation, and aggregate target/ack mask 0xE. General topology, address-space-wide shootdown, multiple concurrent generations, production capability authority, incremental concurrent map replacement, huge pages, PCID, COW, user faults, pager IPC, cache/MMIO qualification, heaps/object caches, interrupt-context allocation, concurrent allocation, general pressure and OOM policy, scheduler, task, syscall, capability, IPC, isolation, and asynchronous I/O remain open",
       "No native security/crypto/TPM/secrets/MAC/privacy implementation or external review",
       "No isolated native driver domains or virtio reference drivers",
       "No native block/NVMe/USB/input/VFS/PooleFS persistent path",
@@ -60868,26 +61113,27 @@
       "N12",
       "N13"
     ],
-    "title": "Make USI-1 spawn transactional, then qualify pending-timer teardown and accounting before capability IPC",
+    "title": "Qualify pending and late timer teardown, then terminal accounting before capability IPC",
     "entry_evidence": [
       "docs/native-userspace-integration-iso.md",
-      "docs/native-user-state-containment.md",
+      "docs/native-user-construction.md",
       "runs/native-user-entry-readiness.json",
-      "docs/checkpoints/cycle244-user-state-containment.md",
-      "native/kernel/src/user_root_probe/peer_driver.rs",
-      "native/kernel/src/user_entry/prepared.rs",
+      "docs/checkpoints/cycle245-transactional-user-construction.md",
+      "native/kernel/src/user_root_probe/timer_driver.rs",
+      "native/kernel/src/user_entry/cpu.rs",
       "native/kernel/src/user_entry/task.rs",
-      "native/kernel/src/user_root_probe/timer_driver.rs"
+      "native/kernel/src/arch/x86_64/user_slice.rs"
     ],
     "exit_evidence": [
-      "every failed spawn allocation/mapping step rolls back or retains an explicit exact quarantined owner",
-      "healthy peer and PMM accounting survive failed construction without stale handles or released references",
-      "pending and late timer teardown has bounded recovery before complete terminal-quantum accounting",
-      "preserve 14 live peer-survival cases, explicit TCG stack-fault limitation and ordinary-boot denial"
+      "owned pending or late timer work is drained or exactly quarantined before descriptor/root/page teardown",
+      "healthy peers continue after bounded teardown recovery with no late IRQ reaching released memory",
+      "measure terminal subquantum runtime without double accounting and keep missing-IRQ recovery explicit",
+      "preserve construction rollback/retry,14 peer-survival cases and ordinary unsigned-boot denial"
     ],
     "blocked": false
   },
   "claim_boundaries": [
+    "Cycle245: PKUSER11 owns all partial construction allocations and transfers exact retention into PreparedImage. Two fresh55-marker guests each prove one quota failure, six after-effect failures, six cleanup quarantines/retries,83 scrubbed/released construction pages and healthy-peer continuation;14 prior survival cases and507 evidence rejections remain.504 Rust executions and34 Python oracle tests pass. Constructor stack-guard regression repaired by frame separation, not larger stacks. docs/checkpoints/cycle245-transactional-user-construction.md Bounded one-BSP fixed construction only. General executable admission, persistent quarantine/slot-commit recovery, N3.7 complete stack-depth/high-water and trap nesting, pending/late timer recovery, terminal accounting, independent missing-IRQ recovery, general exception/selector delivery including native SS, XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/optical ISO and hardware remain open. Image177pages/entry0xB000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion.",
     "Cycle 244: PKUSER10 separates trusted entry from user RIP/RSP/RFLAGS violations; contains invalid syscall/timer returns and additional exceptions with private stacks, AC cleanup and checked debug-status cleanup. Two fresh54-marker guests each pass140 dispatches/113 preemptions/14 survival cases/493 evidence controls; ordinary denial passes.349 debug,99 user-release,24 VM-release,7 compile-fail,10 boot-exit and33 Python oracle tests pass. docs/checkpoints/cycle244-user-state-containment.md Bounded one-BSP fixed payloads only. TCG stack access delivers GP rather than architectural SS; native SS and general exception/selector delivery remain unqualified, not waived. Full spawn rollback, pending/late timer recovery, terminal-quantum accounting, independent missing-IRQ recovery, XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 still requires product-contract migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
     "Cycle 243: PKUSER9 joins actual private-root CPL3 tasks to PKSCHED1; preserves GPR/IRET/legacy FP state across quanta; retains suspended memory and proves peer survival after exit/fault/cancel/quota. Two fresh44-marker guests each pass40 dispatches/33 preemptions/249 evidence controls; ordinary denial passes.345 debug,95 user-release,24 VM-release,7 compile-fail,10 boot-exit and29 Python oracle tests pass. docs/checkpoints/cycle243-native-user-peer-scheduling.md Bounded one-BSP fixed tasks only. Full spawn rollback, invalid-return-frame containment, pending/late timer recovery, final-sub-quantum accounting, independent missing-IRQ watchdog, general XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",
     "Cycle 242: PKUSER8 owns four sequential task lifetimes, records Exit42 and user UD/GP/PF termination, rejects stale generations and restart/reap repetition, and quiesces entry before root restoration and memory release. Two fresh40-marker guests/157 evidence controls each and ordinary denial pass.336 debug,86 user-release,24 VM-release,7 compile-fail,10 boot-exit and26 Python oracle tests pass. docs/checkpoints/cycle242-user-task-termination.md No peer scheduling or arbitrary-program admission: fixed task payloads have no armed timer, strict initial syscall RSP and a64-call budget still fail fatally, and construction allocation failures are not fully rolled back. Task IDs are slot-local, not capabilities. SMAP/concurrent copy, async/SMP entry, full XSAVE, missing-IRQ watchdog, IPC/services/shell/apps/optical ISO and hardware remain open. Image168pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion.",

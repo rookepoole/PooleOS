@@ -21,108 +21,18 @@ pub fn run_all(
     let mut slot = checked!(60, Slot::new(0));
     let mut previous = None;
     for case in 0..4 {
-        let tables = checked!(
-            61,
-            manager.allocate(Zone::Dma32, 4, virtual_memory::TABLE_OWNER)
-        );
-        let code = checked!(
-            62,
-            manager.allocate(Zone::Dma32, 1, virtual_memory::DATA_OWNER)
-        );
-        let stack = checked!(
-            63,
-            manager.allocate(Zone::Dma32, 1, virtual_memory::DATA_OWNER)
-        );
-        let entry_stack = checked!(
-            64,
-            manager.allocate(Zone::Dma32, STACK_PAGE_COUNT, STACK_OWNER)
-        );
-        let entry_tables = checked!(
-            65,
-            manager.allocate(
-                Zone::Dma32,
-                prepared::STACK_TABLE_PAGES,
-                prepared::STACK_TABLE_OWNER
-            )
-        );
-        let handles = [tables, code, stack, entry_stack, entry_tables];
-        let mut memory = Memory {
-            access: checked!(
-                66,
-                Access::new(manager, core.page_table_root_physical, bits, handles)
-            ),
-            root: core.page_table_root_physical,
-            bits,
-            writes: 0,
-        };
-        for h in [code, stack, entry_stack] {
-            checked!(67, memory.zero(h));
-        }
-        let payload = checked!(68, arch::x86_64::user::task_payload(case));
-        for (index, bytes) in payload.chunks(8).enumerate() {
-            let mut word = [0; 8];
-            word[..bytes.len()].copy_from_slice(bytes);
-            let word = u64::from_le_bytes(word);
-            checked!(
-                68,
-                memory.write_entry(code.start_page * PAGE_BYTES, index + 2, word)
-            );
-            if checked!(
-                68,
-                memory.read_entry(code.start_page * PAGE_BYTES, index + 2)
-            ) != word
-            {
-                stop(68, serial, debugcon);
-            }
-        }
-        let mut space = checked!(69, AddressSpace::initialize(manager, tables, &mut memory));
-        let image = InitialImage {
-            code_page: USER_WINDOW_START,
-            entry: USER_WINDOW_START + 16,
-            stack_page: USER_WINDOW_START + 3 * PAGE_BYTES,
-        };
-        checked!(
-            70,
-            space.map(
-                manager,
-                &mut memory,
-                image.code_page,
-                code,
-                Permissions::USER_RX,
-                CachePolicy::WriteBack
-            )
-        );
-        checked!(
-            71,
-            space.map(
-                manager,
-                &mut memory,
-                image.stack_page,
-                stack,
-                Permissions::USER_RW,
-                CachePolicy::WriteBack
-            )
-        );
-        let prepared = checked!(
-            72,
-            PreparedImage::prepare(
-                DetachedImage {
-                    space,
-                    stack: entry_stack,
-                    stack_tables: entry_tables
-                },
-                manager,
-                &mut memory,
-                image,
-                core,
-                bits
-            )
-        );
-        let root = checked!(73, prepared.admission().ok_or(())).root_physical;
-        // SAFETY: same sole-BSP profile; previous task was fully quiesced and released.
+        // SAFETY: sole BSP; the preceding task was fully quiesced and released.
         let entry = checked!(74, unsafe {
             arch::x86_64::user::Entry::prepare(core.initial_stack_top_virtual)
         });
+        let payload = checked!(68, arch::x86_64::user::task_payload(case));
+        let spawn_driver::Built {
+            prepared,
+            mut memory,
+            handles,
+            image,
+        } = checked!(72, spawn_driver::build(manager, core, bits, payload, None));
+        let root = checked!(73, prepared.admission().ok_or(())).root_physical;
         let hardware =
             unsafe { arch::x86_64::UserRootCpu::new(core.page_table_root_physical, root) };
         let id = checked!(
@@ -169,7 +79,7 @@ pub fn run_all(
         {
             stop(83, serial, debugcon);
         }
-        for h in [code, stack, entry_stack] {
+        for h in [handles[1], handles[2], handles[3]] {
             checked!(84, memory.zero(h));
         }
         for address in [image.code_page, image.stack_page] {

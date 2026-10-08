@@ -11725,7 +11725,7 @@ def apply_cycle243(roadmap: dict, test_count: int) -> dict:
 
 def apply_cycle244(roadmap: dict, test_count: int) -> dict:
     checkpoint = "docs/checkpoints/cycle244-user-state-containment.md"
-    receipt_path = "runs/native-user-entry-readiness.json"
+    receipt_path = "tests/fixtures/cycle244-user-entry-readiness.json"
     raw = (ROOT / receipt_path).read_bytes()
     receipt = json.loads(raw)
     baseline = roadmap["baseline"]
@@ -11803,13 +11803,99 @@ def apply_cycle244(roadmap: dict, test_count: int) -> dict:
     flag["evidence"].append(checkpoint)
     roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle245(roadmap, test_count)
+
+
+def apply_cycle245(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle245-transactional-user-construction.md"
+    receipt_path = "runs/native-user-entry-readiness.json"
+    raw = (ROOT / receipt_path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle244_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle244_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=245, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=245)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path, "docs/native-user-construction.md"]
+    gate["current_candidate_audit"]["cycle"] = 245
+    gate["current_focused_source_projection"]["cycle"] = 245
+    gate["qualification_status"] = "bounded_transactional_construction_pass_timer_and_full_candidate_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=245, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="356_debug_kernel_plus106_repeated_user_release_plus24_repeated_VM_release_plus8_compile_fail_plus10_boot_exit",
+        additional_python_oracle_tests=34, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=253.593,
+        log_sha256="1A429C8BABE82D02E27D7623E76120CF00843E37E466C47C6162C07BE3333FF3",
+        initial_attempts=[dict(tag=tag, status="failed_preserved", elapsed_seconds=elapsed, reason=reason, log_sha256=digest)
+            for tag,elapsed,reason,digest in [
+                ("nativefirst",58.172,"text_exceeded_88000_reservation","CFB19E15D9590472BA1FDBE431A752781C5274AB8B400865CF62AEF0F891C971"),
+                ("nativesecond",107.719,"kernel_user_root_panic_before_peer_completion","8B11AF8A1275BBE8FEB84E368775060729B35615531D5902D2754918165491C9"),
+                ("diagnostic",8.797,"nonexistent_diagnostic_Com1_constructor_rejected_by_compiler","94F527AC23BE0D19C5C78F671AD3CEC95CA8EC8E12FDC85C6A35A67DE153FA7A"),
+                ("diagnosticsecond",37.907,"native_kernel_PF2_at_bootstrap_stack_guard","456EF52C896113D09322D0FC3F70269477EF4FE00DE31DE42168529DB9A5D69C"),
+                ("nativethird",54.157,"repaired_text_exceeded_8C000_reservation","E5C5AA0E311CF37B80C34FB23A9A6BE3938323F1F62A60EE2A6023D4A984B583"),
+                ("nativefourth",79.250,"rollback_probe_stage120","8B11AF8A1275BBE8FEB84E368775060729B35615531D5902D2754918165491C9"),
+                ("diagnosticthird",39.000,"probe_requested_three_tasks_within_32_page_quota_stage12001","456EF52C896113D09322D0FC3F70269477EF4FE00DE31DE42168529DB9A5D69C")]],
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=245, status="pass",
+        tests_run=127, tests_passed=127, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=51.230, elapsed_seconds=52.078,
+        log_sha256="709C0B1335F553D6C3267FC7DD194E0DE23A005DDF4D2C6DEFEC820F33D321BB",
+        initial_attempts=[
+            dict(status="fail", tests_run=127, tests_failed=2, elapsed_seconds=52.297,
+                reason="stale_architecture_binding_and_kernel_source_counts",
+                log_sha256="DAA440C655B89A15B877A264B976091F38BEFEC39F3B8F5DEF2A5BC8D46F4561"),
+            dict(status="fail", tests_run=127, tests_failed=1, elapsed_seconds=51.860,
+                reason="historical_entry_receipt_exact_unbound_source_set_needed_new_paths",
+                log_sha256="B7DE7EDD1E686A15EF0EDDAFEA25746D6D7AECAC5209C32D7DA7EE8D519347EC")],
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=245, receipt_path=receipt_path, host_status=receipt["status"],
+        privileged_adapter_verification="two_fresh_qemu_native_construction_rollback_retry_peer_continuation_plus_default_denial",
+        construction_contract="PKUSER11", bounded_transactional_construction=True,
+        construction_quota_failures_per_probe=1, construction_after_effect_failures_per_probe=6,
+        construction_cleanup_quarantines_per_probe=6, construction_cleanup_retries_per_probe=6,
+        construction_scrubbed_released_pages_per_probe=83, construction_peer_continuation=True,
+        construction_scope="fixed_five_allocation_never_exposed_image_not_general_executable_or_slot_recovery",
+        general_quarantine_recovery=False, complete_kernel_stack_bound_qualified=False,
+        kernel_stack_guard_regression_repaired=True,
+        released_pages_per_probe=512, scrubbed_data_pages_per_probe=235,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries],
+        peer_preemptions_per_probe=[s["peer_preemptions"] for s in summaries])
+    lane["stages"]["USI-1"] = "partial_live_transactional_construction_no_general_admission_or_ipc"
+    roadmap["immediate_next_move"]["title"] = "Qualify pending and late timer teardown, then terminal accounting before capability IPC"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", "docs/native-user-construction.md", receipt_path, checkpoint,
+        "native/kernel/src/user_root_probe/timer_driver.rs", "native/kernel/src/user_entry/cpu.rs",
+        "native/kernel/src/user_entry/task.rs", "native/kernel/src/arch/x86_64/user_slice.rs"]
+    roadmap["immediate_next_move"]["exit_evidence"] = [
+        "owned pending or late timer work is drained or exactly quarantined before descriptor/root/page teardown",
+        "healthy peers continue after bounded teardown recovery with no late IRQ reaching released memory",
+        "measure terminal subquantum runtime without double accounting and keep missing-IRQ recovery explicit",
+        "preserve construction rollback/retry,14 peer-survival cases and ordinary unsigned-boot denial"]
+    evidence = "Cycle245: PKUSER11 owns all partial construction allocations and transfers exact retention into PreparedImage. Two fresh55-marker guests each prove one quota failure, six after-effect failures, six cleanup quarantines/retries,83 scrubbed/released construction pages and healthy-peer continuation;14 prior survival cases and507 evidence rejections remain.504 Rust executions and34 Python oracle tests pass. Constructor stack-guard regression repaired by frame separation, not larger stacks. " + checkpoint
+    gap = "Bounded one-BSP fixed construction only. General executable admission, persistent quarantine/slot-commit recovery, N3.7 complete stack-depth/high-water and trap nesting, pending/late timer recovery, terminal accounting, independent missing-IRQ recovery, general exception/selector delivery including native SS, XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/optical ISO and hardware remain open. Image177pages/entry0xB000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion."
+    for phase_id in ("N3", "N7", "N9", "N12", "N13"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " Include N3.7 constructor/cleanup/trap stack-depth and high-water qualification, general persistent construction quarantine and final slot-commit recovery."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1280)
+    parser.add_argument("--test-count", type=int, default=1282)
     parser.add_argument("--status-date", default="2026-10-08")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

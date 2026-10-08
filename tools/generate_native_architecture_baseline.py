@@ -24,6 +24,12 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle245-transactional-user-construction.md",
+    "docs/native-user-construction.md",
+    "tests/fixtures/cycle244-user-entry-readiness.json",
+    "native/kernel/src/user_entry/spawn.rs",
+    "native/kernel/src/user_entry/spawn_tests.rs",
+    "native/kernel/src/user_root_probe/spawn_driver.rs",
     "docs/checkpoints/cycle244-user-state-containment.md",
     "docs/native-user-state-containment.md",
     "tests/fixtures/cycle243-user-entry-readiness.json",

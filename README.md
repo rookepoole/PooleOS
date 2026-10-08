@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle244 stops malformed user tasks without
+**Current development checkpoint:** Cycle245 makes native task construction
+transactional, retries failed cleanup and preserves healthy-peer execution.
+Two fresh boots,504 Rust test executions and34 Python oracle tests pass. Native
+testing also exposed and repaired a constructor stack overflow. Next: timer
+teardown/accounting, IPC, services, shell/apps and the usable user-space ISO.
+No interactive session or new ISO yet; full robust microkernel development
+continues afterward. [Evidence](docs/checkpoints/cycle245-transactional-user-construction.md).
+
+**Historical development checkpoint:** Cycle244 stops malformed user tasks without
 stopping their healthy peers. Two fresh native boots each pass14 survival cases,
 140 dispatches and113 preemptions;489 Rust test executions and33 Python oracle
 tests pass. A reproduced emulator stack-fault deviation remains explicitly

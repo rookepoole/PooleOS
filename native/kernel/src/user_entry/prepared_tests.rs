@@ -7,6 +7,9 @@ use std::collections::BTreeMap;
 #[path = "cpu_tests.rs"]
 mod cpu_tests;
 
+#[path = "spawn_tests.rs"]
+mod spawn_tests;
+
 #[derive(Clone)]
 struct Memory {
     pages: BTreeMap<u64, [u64; 512]>,

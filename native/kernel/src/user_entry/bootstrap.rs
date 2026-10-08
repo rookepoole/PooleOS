@@ -9,7 +9,7 @@ use poole_handoff::PAGE_BYTES;
 
 pub struct Access {
     root: u64,
-    owned: [AllocationHandle; 5],
+    owned: [Option<AllocationHandle>; 5],
 }
 
 impl Access {
@@ -18,6 +18,17 @@ impl Access {
         root: u64,
         bits: u8,
         owned: [AllocationHandle; 5],
+    ) -> Result<Self, Error> {
+        Self::partial(manager, root, bits, owned.map(Some))
+    }
+
+    /// Access for rollback of an incompletely allocated construction. Missing
+    /// members grant no access; the caller still owns the retention tokens.
+    pub fn partial(
+        manager: &PhysicalMemoryManager,
+        root: u64,
+        bits: u8,
+        owned: [Option<AllocationHandle>; 5],
     ) -> Result<Self, Error> {
         let mask = physical_mask(bits).map_err(|_| Error::MemoryAccess)?;
         let boot_end = root
@@ -34,6 +45,7 @@ impl Access {
             (prepared::STACK_TABLE_OWNER, prepared::STACK_TABLE_PAGES),
         ];
         for (i, h) in owned.iter().enumerate() {
+            let Some(h) = h else { continue };
             manager
                 .validate_allocation(*h)
                 .map_err(|_| Error::Ownership)?;
@@ -55,7 +67,7 @@ impl Access {
             {
                 return Err(Error::Ownership);
             }
-            for prior in &owned[..i] {
+            for prior in owned[..i].iter().flatten() {
                 if h.start_page < prior.start_page + prior.page_count
                     && prior.start_page < h.start_page + h.page_count
                 {
@@ -81,7 +93,7 @@ impl Access {
         {
             return Err(Error::MemoryAccess);
         }
-        let owned = self.owned.iter().any(|h| {
+        let owned = self.owned.iter().flatten().any(|h| {
             let start = h.start_page * PAGE_BYTES;
             (start..start + h.page_count * PAGE_BYTES).contains(&table)
         });

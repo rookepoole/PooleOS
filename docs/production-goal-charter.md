@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 244
+Last roadmap reconciliation: PooleOS Cycle 245
 
-Cycle244 contains invalid user return state and additional exceptions without
+Cycle245 proves transactional task construction, explicit cleanup retry and
+healthy-peer continuation in two fresh native guests. Testing also found and
+repaired a constructor stack overflow. General admission, complete stack bounds
+and persistent-quarantine recovery remain open. Next: timer teardown/accounting,
+then capability IPC, confined services, shell/apps and the usable ISO. No normative
+requirement, phase completion, merge, release or promotion changes. Full robust
+N0-N39 development remains required after the ISO milestone.
+[Cycle245 evidence](checkpoints/cycle245-transactional-user-construction.md).
+
+Historical Cycle244 contains invalid user return state and additional exceptions without
 stopping a healthy peer. Two fresh guests each pass14 survival cases. The TCG
 stack-access deviation is explicit; native #SS remains unqualified. N12/N13
 remain partial. Next: transactional spawn and timer/accounting hardening, then

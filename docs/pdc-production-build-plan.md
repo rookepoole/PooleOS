@@ -1,15 +1,39 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-08
-Plan version: 2.147.0-native-user-state-containment
-Roadmap cycle: PooleOS Cycle 244
+Plan version: 2.148.0-native-user-construction
+Roadmap cycle: PooleOS Cycle 245
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 244: Task-Only Invalid State Containment
+## Cycle 245: Transactional User Construction
+
+USI-1 / N9 and N13.1-2,6: both native task constructors now own partial allocations,
+roll back failed payload/mapping preparation, preserve exact retention through
+cleanup failure and transfer ownership without an unretained interval. Two fresh
+guests each prove one quota rollback, six post-write failures, six cleanup retries,
+83 scrubbed/released construction pages and continued healthy-peer execution.
+504 Rust test executions,34 Python oracle tests and ordinary-boot denial pass.
+[Evidence](checkpoints/cycle245-transactional-user-construction.md),
+[mechanism and limits](native-user-construction.md).
+
+Native testing found a stack-guard overflow in nested construction validation;
+separating construction/installation frames repairs the exercised paths. N3.7
+complete stack-depth/high-water and trap-nesting qualification remains required
+under the open N13 integration flag. Quotas and stack guards remain unchanged.
+The image is177pages within the existing192-page cap; old image gates remain stale.
+
+Next: pending/late timer teardown and terminal accounting, then capability IPC,
+confined services, shell/apps and actual optical ISO. Persistent quarantine and
+slot-commit recovery, general executable admission and independent missing-IRQ
+recovery remain open. N12/N13 stay partial; no phase/flag closes. All8996 requirements,
+59 additions,97 flags/42 open and20 gaps remain. No new ISO, merge or production
+promotion. The complete robust N0-N39 microkernel remains the goal after the ISO.
+
+## Historical Cycle 244: Task-Only Invalid State Containment
 
 USI-1 / N12.5-7 and N13.3,6: PKUSER10 distinguishes kernel-owned entry
 invariants from invalid user RIP/RSP/RFLAGS. Invalid syscall/timer return state
