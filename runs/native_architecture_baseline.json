@@ -358,6 +358,30 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle236-user-root-cpu-lifecycle.md",
+      "sha256": "30DDEF8C7DBCED575D39DA83955A43FDE229213EB97E9A661B11ECCEE05394AF",
+      "byte_count": 7625,
+      "line_count": 123
+    },
+    {
+      "path": "native/kernel/src/user_entry/cpu.rs",
+      "sha256": "F3F7A03B7EAD39D25646D307BDF9B7699172E4B68525A3F5E025AC4A12842AD8",
+      "byte_count": 7123,
+      "line_count": 199
+    },
+    {
+      "path": "native/kernel/src/user_entry/cpu_tests.rs",
+      "sha256": "9DAF6012BAE8C28F6F1A88AEBEC193B782D554A474D42D6FE51B2688EFC72FFF",
+      "byte_count": 11377,
+      "line_count": 336
+    },
+    {
+      "path": "tests/fixtures/cycle235-user-entry-readiness.json",
+      "sha256": "967233D0AFDAD3B8485A93EE74AB759E2BC6E2E1EEA6690499F8DF97E5B22EFD",
+      "byte_count": 76526,
+      "line_count": 714
+    },
+    {
       "path": "docs/checkpoints/cycle235-owned-user-root.md",
       "sha256": "4ED9EBA5C629D1B40467D79960EF45DE77A292031A0885A35BB488EEA8840CCE",
       "byte_count": 6249,
@@ -365,15 +389,15 @@
     },
     {
       "path": "native/kernel/src/user_entry/prepared.rs",
-      "sha256": "F1C38D5FB0C3535F05987953AB44D12FCC8EC52808A341A5B2B3A99110CAC7D9",
-      "byte_count": 17280,
-      "line_count": 459
+      "sha256": "924CA02AAB4E1FF0514F34A475460256661259A1D6CD76617B8F3F6D1E35281A",
+      "byte_count": 18493,
+      "line_count": 501
     },
     {
       "path": "native/kernel/src/user_entry/prepared_tests.rs",
-      "sha256": "83D5155B74A8D2C6E34D6C3EFE037E9C9D754CE5A7883D92D3C0DF2D9911E52F",
-      "byte_count": 18468,
-      "line_count": 535
+      "sha256": "41D130AD254DA1F4F7E5048A7B73C6236C3778A2F50499A1DE330340F3E0A809",
+      "byte_count": 18509,
+      "line_count": 538
     },
     {
       "path": "tests/fixtures/cycle234-user-entry-readiness.json",
@@ -389,9 +413,9 @@
     },
     {
       "path": "docs/native-userspace-integration-iso.md",
-      "sha256": "224CEB2146ECF92C1022F3DE3FCFF2D58BCC38BA05F5F1335D74162777FCA6C3",
-      "byte_count": 9534,
-      "line_count": 145
+      "sha256": "D8FAD898D0E09F2F052C4090FD13BDB42934CB92FD4F648327D602A656286A2C",
+      "byte_count": 9774,
+      "line_count": 148
     },
     {
       "path": "native/kernel/src/user_entry.rs",
@@ -407,19 +431,19 @@
     },
     {
       "path": "tools/qualify_native_user_entry.py",
-      "sha256": "899D7B72275DCF9C52AB75E74AFAC12D9BC5E5E13D0A563C9FABEC3A604D79F7",
-      "byte_count": 5593,
-      "line_count": 110
+      "sha256": "B947B68E7C8D9886B62CDC41BF3F5AD39ACD23A1324C836F985EA2B2B461CA37",
+      "byte_count": 5862,
+      "line_count": 113
     },
     {
       "path": "runs/native-user-entry-readiness.json",
-      "sha256": "967233D0AFDAD3B8485A93EE74AB759E2BC6E2E1EEA6690499F8DF97E5B22EFD",
-      "byte_count": 76526,
-      "line_count": 714
+      "sha256": "0CE9612DEF69AA63110F6E5A6D4D016DDE8D8F2D7E62A95E36938930D873CAE8",
+      "byte_count": 77623,
+      "line_count": 741
     },
     {
       "path": "runs/native-user-entry-gate-projection.json",
-      "sha256": "AC3904AF13BD3320545D953CBBB19FFDA35EAD24877901FE3C6E2D01E411CDB6",
+      "sha256": "EF6EF070D1105E94F3FC0D132A7A147CF03A742E3A44D476E93576A4911BB7E6",
       "byte_count": 7019,
       "line_count": 180
     },
@@ -1733,15 +1757,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "87631DF865D90C87CC9F1C11D8598AE140E42CA51C623090ED0D9A106AA72BD5",
-      "byte_count": 132602,
-      "line_count": 1790
+      "sha256": "F68D08FDD12EFE76937F8B275116F3BCEDB08E09F49B4044471B49D606BD283D",
+      "byte_count": 133050,
+      "line_count": 1797
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "64C50D79CEEBBECB9BED089D89CE9170ED0FC416C501AF9D618BE82CFBFCA557",
-      "byte_count": 519596,
-      "line_count": 4772
+      "sha256": "D960ED5E85B5F7407AAF517C03F4E0AFC80ECA29C15E6C7993ADC0CABA2D5B15",
+      "byte_count": 520778,
+      "line_count": 4791
     },
     {
       "path": "docs/publication-boundary.md",

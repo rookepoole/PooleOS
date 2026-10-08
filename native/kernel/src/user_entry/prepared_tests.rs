@@ -3,6 +3,9 @@ use crate::physical_memory::PhysicalMemoryError;
 use crate::virtual_memory::{CachePolicy, Permissions, USER_WINDOW_START};
 use std::collections::BTreeMap;
 
+#[path = "cpu_tests.rs"]
+mod cpu_tests;
+
 #[derive(Clone)]
 struct Memory {
     pages: BTreeMap<u64, [u64; 512]>,

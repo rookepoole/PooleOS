@@ -1,7 +1,7 @@
 {
-  "contract_id": "PKUSER3",
-  "cycle": 236,
-  "scope": "host_executed_cpu_lifecycle_privileged_adapter_compile_only",
+  "contract_id": "PKUSER2",
+  "cycle": 235,
+  "scope": "host_executed_inactive_user_image_preparation",
   "status": "pass",
   "source_bindings": {
     "native/.cargo/config.toml": "7983881C5CAD2B909CCA64BFA7F5895EC56377B0E52967444CB2818A69FA4FE1",
@@ -50,7 +50,7 @@
     "native/kernel/linker.ld": "01FD262DEAD5729E7EE446D2997D0BE3462C979764CAEFE66DE078EFD71FDEE3",
     "native/kernel/src/acpi.rs": "E018A4DED4146791A2F88374B49CADD7356C8187807EDFBDD6FEAAA4527EB58F",
     "native/kernel/src/active_virtual_memory.rs": "A922E790E573B9D92A9882DB7498CB9017487FAB933B83B4B7BFCBEE11AA9DED",
-    "native/kernel/src/arch/x86_64.rs": "76F434E488B242358D45EAECDC52D5ECC8C777EAF678981CCD38425ED811C974",
+    "native/kernel/src/arch/x86_64.rs": "F39BB4327F83BC44AE4E38DDFA0F46793209F30D7CA3B7A0A44342FC1BBDC058",
     "native/kernel/src/atomics.rs": "1B4228C921F0746C101B307A20E34DCF7D7D859895A440D027005FADE48D0B90",
     "native/kernel/src/bin/pkatom1_probe.rs": "ADDCEAFF0E3C24DFCD3A29169EB41B30B1A0831D327D6BCAEAE4787F4A1EF6F2",
     "native/kernel/src/bin/pklock1_probe.rs": "412335E97CA92749CE6CF2DB090B0ACA19F088E2DB05C149E49E8C08F2AE691B",
@@ -85,10 +85,8 @@
     "native/kernel/src/smp_ipi.rs": "724C599CDD61841245AE8705A110F6E809E30BBC88840AE0789E6A4C56E41F96",
     "native/kernel/src/smp_runtime.rs": "D3F08E444104C04A66CDC057483AE0945AE30E0105C5604296B408ED3092B4E0",
     "native/kernel/src/user_entry.rs": "6861CF5CBC30BB28E097815D3C80337E6E66B396B567B73DF96D912262B71A9C",
-    "native/kernel/src/user_entry/cpu.rs": "F3F7A03B7EAD39D25646D307BDF9B7699172E4B68525A3F5E025AC4A12842AD8",
-    "native/kernel/src/user_entry/cpu_tests.rs": "9DAF6012BAE8C28F6F1A88AEBEC193B782D554A474D42D6FE51B2688EFC72FFF",
-    "native/kernel/src/user_entry/prepared.rs": "924CA02AAB4E1FF0514F34A475460256661259A1D6CD76617B8F3F6D1E35281A",
-    "native/kernel/src/user_entry/prepared_tests.rs": "41D130AD254DA1F4F7E5048A7B73C6236C3778A2F50499A1DE330340F3E0A809",
+    "native/kernel/src/user_entry/prepared.rs": "F1C38D5FB0C3535F05987953AB44D12FCC8EC52808A341A5B2B3A99110CAC7D9",
+    "native/kernel/src/user_entry/prepared_tests.rs": "83D5155B74A8D2C6E34D6C3EFE037E9C9D754CE5A7883D92D3C0DF2D9911E52F",
     "native/kernel/src/user_entry/tests.rs": "86DF7E54EFAE38E074087B19A7706853C004B89E1048E05535D702169563020D",
     "native/kernel/src/virtual_memory.rs": "49CE219382F3D2A49BE5BFB115B83CC41BA6103F159E222F4F8D96AEAF43F89B",
     "native/kernel/src/xstate.rs": "B5BAD6DFFDFEB99FEB769DB6F227BA5F7B2C5131BE3AC3CB5B31EC377401DB78",
@@ -578,7 +576,7 @@
     "native/vendor/typenum-1.20.1/tests/generated.rs": "3034EC2BCE8ABE6C70D1D0AA87BEC56F6C5F95DB16DDE365377973F7D8F3911D",
     "specs/native-toolchain-lock.json": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E",
     "tools/qualify_native_elf_loader.py": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B",
-    "tools/qualify_native_user_entry.py": "B947B68E7C8D9886B62CDC41BF3F5AD39ACD23A1324C836F985EA2B2B461CA37"
+    "tools/qualify_native_user_entry.py": "899D7B72275DCF9C52AB75E74AFAC12D9BC5E5E13D0A563C9FABEC3A604D79F7"
   },
   "checks": [
     {
@@ -596,8 +594,8 @@
       "passed": true,
       "returncode": 0,
       "tests_passed": null,
-      "elapsed_seconds": 0.406,
-      "log_path": "outputs/cycle236-user-entry-owned-adapter/format.log",
+      "elapsed_seconds": 0.375,
+      "log_path": "outputs/cycle235-user-entry-replayed/format.log",
       "log_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
     },
     {
@@ -615,16 +613,16 @@
         "--locked",
         "--offline",
         "--target-dir",
-        "outputs/cycle236-user-entry-owned-adapter/target",
+        "outputs/cycle235-user-entry-replayed/target",
         "--",
         "--test-threads=1"
       ],
       "passed": true,
       "returncode": 0,
-      "tests_passed": 284,
-      "elapsed_seconds": 17.594,
-      "log_path": "outputs/cycle236-user-entry-owned-adapter/kernel_host_debug.log",
-      "log_sha256": "29DC04D3BCF5AAADCE75E32C314744837BDB2DF2CCF6608C1271FB60D53B3D2C"
+      "tests_passed": 272,
+      "elapsed_seconds": 17.437,
+      "log_path": "outputs/cycle235-user-entry-replayed/kernel_host_debug.log",
+      "log_sha256": "B60B466EED970C24A8B0347F391E9E0E9E5D4123128FC2741B02B66B606CC8E9"
     },
     {
       "name": "user_entry_host_release",
@@ -642,17 +640,17 @@
         "--locked",
         "--offline",
         "--target-dir",
-        "outputs/cycle236-user-entry-owned-adapter/target",
+        "outputs/cycle235-user-entry-replayed/target",
         "user_entry::",
         "--",
         "--test-threads=1"
       ],
       "passed": true,
       "returncode": 0,
-      "tests_passed": 38,
-      "elapsed_seconds": 10.406,
-      "log_path": "outputs/cycle236-user-entry-owned-adapter/user_entry_host_release.log",
-      "log_sha256": "4737E9DC996DB2AE23A374A5ACB8E5177DFCFC9FCBDDCDDC06BEB2F1BA710AE6"
+      "tests_passed": 26,
+      "elapsed_seconds": 10.235,
+      "log_path": "outputs/cycle235-user-entry-replayed/user_entry_host_release.log",
+      "log_sha256": "FBB81B90F9065C92DE09A7240B68FA7D5E572ADD6000B08A6CFAF24889B63829"
     },
     {
       "name": "freestanding_library",
@@ -669,39 +667,14 @@
         "--locked",
         "--offline",
         "--target-dir",
-        "outputs/cycle236-user-entry-owned-adapter/target"
+        "outputs/cycle235-user-entry-replayed/target"
       ],
       "passed": true,
       "returncode": 0,
       "tests_passed": null,
-      "elapsed_seconds": 2.344,
-      "log_path": "outputs/cycle236-user-entry-owned-adapter/freestanding_library.log",
-      "log_sha256": "91A6C6B27212AEFF07C15FC687C07C7F85C231ECDAC67D1CB4654556A0DFCF1A"
-    },
-    {
-      "name": "freestanding_kernel_adapter",
-      "command": [
-        ".toolchains/rust-1.97.0/rustup/toolchains/1.97.0-x86_64-pc-windows-msvc/bin/cargo.exe",
-        "check",
-        "--manifest-path",
-        "native/Cargo.toml",
-        "--package",
-        "poolekernel",
-        "--bin",
-        "PooleKernelLinked",
-        "--target",
-        "x86_64-unknown-none",
-        "--locked",
-        "--offline",
-        "--target-dir",
-        "outputs/cycle236-user-entry-owned-adapter/target"
-      ],
-      "passed": true,
-      "returncode": 0,
-      "tests_passed": null,
-      "elapsed_seconds": 0.516,
-      "log_path": "outputs/cycle236-user-entry-owned-adapter/freestanding_kernel_adapter.log",
-      "log_sha256": "A29392F3D34C267D4762052F1B08D26F7D74FDC73CF6171450916D2BF49B5553"
+      "elapsed_seconds": 2.297,
+      "log_path": "outputs/cycle235-user-entry-replayed/freestanding_library.log",
+      "log_sha256": "A431E0126465E0DBBC2FC5918DA1F545D6A0CB9A5C56CCADE975BCC39D80C20B"
     },
     {
       "name": "prepared_ownership_compile_fail",
@@ -718,17 +691,17 @@
         "--locked",
         "--offline",
         "--target-dir",
-        "outputs/cycle236-user-entry-owned-adapter/target",
+        "outputs/cycle235-user-entry-replayed/target",
         "user_entry::prepared",
         "--",
         "--test-threads=1"
       ],
       "passed": true,
       "returncode": 0,
-      "tests_passed": 5,
-      "elapsed_seconds": 1.625,
-      "log_path": "outputs/cycle236-user-entry-owned-adapter/prepared_ownership_compile_fail.log",
-      "log_sha256": "B1981C87059345DCB13E8E9C54345205729D7C17BF080E6E60685FEF445E27BD"
+      "tests_passed": 2,
+      "elapsed_seconds": 1.5,
+      "log_path": "outputs/cycle235-user-entry-replayed/prepared_ownership_compile_fail.log",
+      "log_sha256": "6A898F4326E37BF985130D0828BDEBE2D28A9CD519603430CC9C60BFF52CC6F4"
     }
   ],
   "guest_runs": 0,

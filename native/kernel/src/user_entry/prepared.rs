@@ -1,6 +1,6 @@
 //! Owned, still-inactive user root with a guarded supervisor entry stack.
 //! Boot mappings must remain retained and serialized by their boot-lifetime
-//! owner. This object neither installs CPU state nor permits CR3 activation.
+//! owner. CPU exposure consumes this object through the separate CPU lifecycle.
 
 #![forbid(unsafe_code)]
 
@@ -11,6 +11,9 @@ use super::{ImageAdmission, InitialImage, admit_initial_image, physical_mask};
 use crate::physical_memory::{AllocationHandle, PhysicalMemoryManager, RetainedAllocation, Zone};
 use crate::reclamation::task_lifetimes::{STACK_OWNER, STACK_PAGE_COUNT};
 use crate::virtual_memory::{self as vm, AddressSpace, TableMemory};
+
+#[path = "cpu.rs"]
+pub mod cpu;
 
 pub const CONTRACT_ID: &str = "PKUSER2";
 pub const STACK_TABLE_OWNER: u16 = 0x1301;
@@ -256,6 +259,45 @@ impl PreparedImage {
     /// current mappings/state; this copied snapshot cannot authorize execution.
     pub const fn admission(&self) -> Option<ImageAdmission> {
         self.admission
+    }
+
+    fn revalidate<M: TableMemory>(
+        &self,
+        manager: &PhysicalMemoryManager,
+        memory: &mut M,
+        core: CoreRecord,
+    ) -> Result<ImageAdmission, Error> {
+        let image = self.admission.ok_or(Error::Ownership)?;
+        manager
+            .validate_retentions(&self.retained)
+            .map_err(|_| Error::Ownership)?;
+        let supervisor = audit_supervisor(
+            memory,
+            core,
+            physical_mask(self.bits).map_err(Error::Image)?,
+            &self.handles(),
+        )?;
+        self.audit_attached(memory, image, supervisor)?;
+        let replay = super::admit_image_with_roots(
+            manager,
+            &self.space,
+            memory,
+            self.image,
+            self.bits,
+            &[
+                (
+                    STACK_SLOT,
+                    self.stack_tables.start_page * PAGE_BYTES | P | W | NX,
+                ),
+                (KERNEL_SLOT, supervisor),
+            ],
+        )
+        .map_err(Error::Image)?;
+        if replay != image {
+            return Err(Error::Readback);
+        }
+        memory.finish().map_err(|_| Error::Memory)?;
+        Ok(image)
     }
 
     /// Only inactive objects exist in this API. Detach both root edges and verify

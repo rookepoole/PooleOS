@@ -43,13 +43,15 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 235,
+    "last_updated_cycle": 236,
     "selected_move_id": "N13-USER-ENTRY-LIVE-001",
     "immediate_next_move_id": "N13-USER-ENTRY-LIVE-001",
     "owner_independent_next_move_id": "N13-USER-ENTRY-LIVE-001",
     "required_records": [
-      "docs/checkpoints/cycle235-owned-user-root.md",
+      "docs/checkpoints/cycle236-user-root-cpu-lifecycle.md",
       "runs/native-user-entry-readiness.json",
+      "docs/checkpoints/cycle235-owned-user-root.md",
+      "tests/fixtures/cycle235-user-entry-readiness.json",
       "docs/checkpoints/cycle234-user-entry-foundation.md",
       "docs/native-userspace-integration-iso.md",
       "tests/fixtures/cycle234-user-entry-readiness.json",
@@ -204,9 +206,9 @@
     "added_requirement_count": 59
   },
   "baseline": {
-    "pooleos_cycle": 235,
+    "pooleos_cycle": 236,
     "entry_cycle": 79,
-    "pooleos_test_count": 1238,
+    "pooleos_test_count": 1239,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -222,13 +224,13 @@
       "explicit_gap_count": 20,
       "production_ready": false,
       "native_promotion_role": "partially_qualified_development_candidate_non_promoting",
-      "qualification_status": "owned_inactive_user_root_host_pass_live_adapter_and_guest_pending",
+      "qualification_status": "cpu_lifecycle_host_pass_privileged_adapter_compile_only_guest_pending",
       "passed_check_count_scope": "historical_cycle176_exact_final_canonical_audit",
       "current_cycle_full_canonical_audit_performed": false,
       "last_fully_qualified_cycle": 176,
       "last_fully_qualified_passed_checks": 105,
       "current_candidate_audit": {
-        "cycle": 235,
+        "cycle": 236,
         "status": "not_run",
         "applies_to_current_source": false,
         "aggregate_suite_passed": false,
@@ -347,7 +349,7 @@
         "production_ready": false
       },
       "current_focused_source_projection": {
-        "cycle": 235,
+        "cycle": 236,
         "passed_checks": 2,
         "total_checks": 27,
         "passing_profiles": [
@@ -3427,15 +3429,15 @@
         "production_ready": false
       },
       "current_closeout_regression": {
-        "cycle": 235,
+        "cycle": 236,
         "status": "focused_native_pass_not_full_canonical",
-        "tests_run": 300,
-        "tests_passed": 300,
+        "tests_run": 327,
+        "tests_passed": 327,
         "tests_failed": 0,
         "tests_skipped": 0,
-        "scope": "272_debug_kernel_tests_plus26_repeated_release_user_entry_tests_plus2_compile_fail_checks",
+        "scope": "284_debug_kernel_tests_plus38_repeated_release_user_entry_tests_plus5_compile_fail_checks",
         "receipt_path": "runs/native-user-entry-readiness.json",
-        "receipt_sha256": "967233D0AFDAD3B8485A93EE74AB759E2BC6E2E1EEA6690499F8DF97E5B22EFD",
+        "receipt_sha256": "0CE9612DEF69AA63110F6E5A6D4D016DDE8D8F2D7E62A95E36938930D873CAE8",
         "canonical_full_replay_performed": false,
         "merge_qualified": false,
         "production_ready": false
@@ -51902,21 +51904,27 @@
         "inherited_shared_loader_input_count": 19
       },
       "current_user_entry_metadata": {
-        "cycle": 235,
+        "cycle": 236,
         "status": "pass",
-        "tests_run": 83,
-        "tests_passed": 83,
+        "tests_run": 84,
+        "tests_passed": 84,
         "tests_failed": 0,
         "tests_skipped": 0,
-        "elapsed_seconds": 68.951,
-        "log_sha256": "00FB0B10C6609DB7628D6F9612E7D1EC394BE869B3B47600650AB5637F825914",
+        "elapsed_seconds": 67.572,
+        "runner_elapsed_seconds": 68.39,
+        "log_sha256": "5E261AF830B86EC8130F00909D2B0A136A0ED0306EAC06F613AC1F328550D03D",
         "initial_attempts": [
           {
             "failures": 1,
             "errors": 0,
-            "log_sha256": "58B74451D885355953C1583C6144627899EB34E105050BFADA77DE7092FBAE6C"
+            "log_sha256": "3493A8978F9CCAED492BB6799E9FBA43763CB858257B60C5315383FE5C2F4AF2"
           }
         ],
+        "pre_final_review_pass": {
+          "tests_passed": 84,
+          "elapsed_seconds": 68.473,
+          "log_sha256": "5D2ECE4A17B06E07AF72F8DDFCF54949EA783D2E4EC387A513C813E32FCB3CBB"
+        },
         "historical_integrity_is_not_new_execution": true,
         "production_ready": false
       },
@@ -51959,6 +51967,39 @@
         ],
         "current_native_admissions_passed": 2,
         "current_native_admissions_total": 27,
+        "historical_integrity_is_not_new_execution": true,
+        "production_ready": false
+      },
+      "historical_cycle235_closeout_regression": {
+        "cycle": 235,
+        "status": "focused_native_pass_not_full_canonical",
+        "tests_run": 300,
+        "tests_passed": 300,
+        "tests_failed": 0,
+        "tests_skipped": 0,
+        "scope": "272_debug_kernel_tests_plus26_repeated_release_user_entry_tests_plus2_compile_fail_checks",
+        "receipt_path": "tests/fixtures/cycle235-user-entry-readiness.json",
+        "receipt_sha256": "967233D0AFDAD3B8485A93EE74AB759E2BC6E2E1EEA6690499F8DF97E5B22EFD",
+        "canonical_full_replay_performed": false,
+        "merge_qualified": false,
+        "production_ready": false
+      },
+      "historical_cycle235_user_entry_metadata": {
+        "cycle": 235,
+        "status": "pass",
+        "tests_run": 83,
+        "tests_passed": 83,
+        "tests_failed": 0,
+        "tests_skipped": 0,
+        "elapsed_seconds": 68.951,
+        "log_sha256": "00FB0B10C6609DB7628D6F9612E7D1EC394BE869B3B47600650AB5637F825914",
+        "initial_attempts": [
+          {
+            "failures": 1,
+            "errors": 0,
+            "log_sha256": "58B74451D885355953C1583C6144627899EB34E105050BFADA77DE7092FBAE6C"
+          }
+        ],
         "historical_integrity_is_not_new_execution": true,
         "production_ready": false
       }
@@ -52090,7 +52131,7 @@
       "blocked": true
     },
     "user_space_integration": {
-      "cycle": 235,
+      "cycle": 236,
       "status": "implementation_started",
       "plan_path": "docs/native-userspace-integration-iso.md",
       "selected_stage": "USI-1",
@@ -52102,7 +52143,7 @@
       "iso_built": false,
       "production_ready": false,
       "stages": {
-        "USI-1": "partial_host_prepared_root_only",
+        "USI-1": "partial_host_cpu_lifecycle_adapter_compile_only",
         "USI-2": "not_started",
         "USI-3": "not_started",
         "USI-4": "not_started",
@@ -52110,9 +52151,13 @@
       },
       "continue_full_microkernel_after_iso": true,
       "required_next": "N13-USER-ENTRY-LIVE-001",
-      "live_adapter_implemented": false,
+      "live_adapter_implemented": true,
       "owned_inactive_supervisor_attachment": true,
-      "entry_stack_bytes": 16384
+      "entry_stack_bytes": 16384,
+      "live_adapter_wired": false,
+      "privileged_adapter_verification": "freestanding_kernel_compile_only",
+      "cpu_exposure_lifecycle_implemented": true,
+      "actual_cr3_switch_executed": false
     },
     "historical_cycle234_user_space_integration": {
       "cycle": 234,
@@ -52135,6 +52180,31 @@
       },
       "continue_full_microkernel_after_iso": true,
       "required_next": "N13-USER-ENTRY-LIVE-001"
+    },
+    "historical_cycle235_user_space_integration": {
+      "cycle": 235,
+      "status": "implementation_started",
+      "plan_path": "docs/native-userspace-integration-iso.md",
+      "selected_stage": "USI-1",
+      "selected_requirement": "N13-USER-ENTRY-LIVE-001",
+      "receipt_path": "tests/fixtures/cycle235-user-entry-readiness.json",
+      "host_status": "pass",
+      "guest_runs": 0,
+      "ring3_executed": false,
+      "iso_built": false,
+      "production_ready": false,
+      "stages": {
+        "USI-1": "partial_host_prepared_root_only",
+        "USI-2": "not_started",
+        "USI-3": "not_started",
+        "USI-4": "not_started",
+        "USI-5": "not_started"
+      },
+      "continue_full_microkernel_after_iso": true,
+      "required_next": "N13-USER-ENTRY-LIVE-001",
+      "live_adapter_implemented": false,
+      "owned_inactive_supervisor_attachment": true,
+      "entry_stack_bytes": 16384
     }
   },
   "source_set": [
@@ -53548,11 +53618,12 @@
         "ADD-CAP-001"
       ],
       "current_evidence": [
+        "Cycle 236: PKUSER3 consumes owned roots into a failure-quarantined CPU lifecycle; fresh context/mapping checks precede exposure and flushing restoration precedes detach.284 host tests,38 repeated optimized tests,5 compile-fail checks and freestanding kernel/library compilation pass. docs/checkpoints/cycle236-user-root-cpu-lifecycle.md",
         "Cycle 235: PKUSER2 constructs retained inactive supervisor and guarded entry-stack mappings; read/write/cleanup failures retain ownership; host/freestanding checks only. docs/checkpoints/cycle235-owned-user-root.md",
         "Cycle 234: PKUSER1 inactive user-image admission passes260 kernel host tests,14 optimized focused tests and freestanding-library check; no live user execution or ISO. docs/checkpoints/cycle234-user-entry-foundation.md"
       ],
       "current_gaps": [
-        "Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion.",
+        "The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open.",
         "No ring-3 task, syscall, or capability object implementation exists"
       ],
       "exit_gate": "a static user task enters ring 3, performs capability-mediated syscalls, receives exceptions, exits cleanly, and cannot access any ungranted kernel object or memory."
@@ -59731,7 +59802,8 @@
       "evidence": [
         "docs/checkpoints/cycle234-user-entry-foundation.md",
         "docs/native-userspace-integration-iso.md",
-        "docs/checkpoints/cycle235-owned-user-root.md"
+        "docs/checkpoints/cycle235-owned-user-root.md",
+        "docs/checkpoints/cycle236-user-root-cpu-lifecycle.md"
       ]
     }
   ],
@@ -59746,7 +59818,7 @@
       "PKERR1 freezes a pure exact-target CPU/errata rejection policy, PKXSTATE1 proves bounded x87/SSE standard-XSAVE ownership, PKXEXC1 proves deliberate #MF/#XM recovery plus terminal test-only #NM rejection with a linked scope audit under WHPX, and PKMSR1 proves only a read-only qemu64 BSP system-linkage/global-MCA/unsupported-PMU observation. PKPMM7 supplies bounded physical ownership, scrubbed lifecycle transactions, a stable guarded five-page manager, external generation-owned active ledgers, checked automatic growth with retirement, bounded-window fallback and pre-effect rejection, streamed lifecycle-gated Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation and retained copy/readback; PKVM1 supplies inactive page-table transactions; PKVM3 proves one-BSP activation/restoration of a complete-profile PMM-owned sparse direct map; PKIRQ1 proves one bounded local timer transaction; PKSMP1 proves one first-AP start/quiesce/park lifecycle; PKSMP2 proves one AP-local GDT/TSS/IDT, guarded-stack, x87/SSE-owner, and interrupt-vector runtime transaction; and PKSMP5 proves three simultaneous AP-local runtimes, partial-start rollback with fresh retry, six fixed IPI classes per AP, three AP-side one-page INVLPG operations, aggregate acknowledgement, and one deferred generation retirement. No target-qualified complete native CPU policy, applicable Model 40h-4Fh errata authority, direct numeric client microcode floor or ratified replacement, target-specific privileged-MSR semantics, syscall/MCE/PMU activation, AVX/extended state, user-task exception delivery, scheduler or migration integration, general interrupt routing/time services, production capability authority, general topology or SMP shootdown, AML or complete ACPI resource-graph execution, complete kernel/user address spaces, heap, MMIO/PAT/MTRR qualification, interrupt-context or concurrent allocator, general pressure, or OOM implementation exists",
       "The exact Tier 1 identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records are captured with zero public raw registers, but seven required channels remain non-complete in total, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification also remain open",
       "No native DMA/IOMMU/interrupt-remapping confinement",
-      "Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion. User-space integration still needs owned kernel-half mappings/stacks, live ring3/return/fault containment, capabilities/IPC, services, shell/apps and ISO qualification. Production microkernel completion remains N0-N39. PKPMM7 supplies bounded one-BSP physical-page ownership, scrub-before-allocation and scrub-before-reuse with full readback and fault rollback, a stable guarded five-page manager, external generation-owned guarded ledgers, checked automatic repeated growth, verified retirement, bounded-window fallback and pre-effect rejection, exact post-ExitBootServices Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation plus retained snapshot copy/readback. PKVM1 supplies inactive four-level 4 KiB transactions, PKVM3 supplies a complete-profile PMM-owned sparse direct map, cache-alias rejection, exact CR3 restoration, three local invalidation receipts, and generation-retirement gating, and PKSMP5 proves exactly three AP-side INVLPG operations and deferred reclaim for three AP-owned roots, one page per root, one generation, and aggregate target/ack mask 0xE. General topology, address-space-wide shootdown, multiple concurrent generations, production capability authority, incremental concurrent map replacement, huge pages, PCID, COW, user faults, pager IPC, cache/MMIO qualification, heaps/object caches, interrupt-context allocation, concurrent allocation, general pressure and OOM policy, scheduler, task, syscall, capability, IPC, isolation, and asynchronous I/O remain open",
+      "The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open. Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion. User-space integration still needs owned kernel-half mappings/stacks, live ring3/return/fault containment, capabilities/IPC, services, shell/apps and ISO qualification. Production microkernel completion remains N0-N39. PKPMM7 supplies bounded one-BSP physical-page ownership, scrub-before-allocation and scrub-before-reuse with full readback and fault rollback, a stable guarded five-page manager, external generation-owned guarded ledgers, checked automatic repeated growth, verified retirement, bounded-window fallback and pre-effect rejection, exact post-ExitBootServices Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation plus retained snapshot copy/readback. PKVM1 supplies inactive four-level 4 KiB transactions, PKVM3 supplies a complete-profile PMM-owned sparse direct map, cache-alias rejection, exact CR3 restoration, three local invalidation receipts, and generation-retirement gating, and PKSMP5 proves exactly three AP-side INVLPG operations and deferred reclaim for three AP-owned roots, one page per root, one generation, and aggregate target/ack mask 0xE. General topology, address-space-wide shootdown, multiple concurrent generations, production capability authority, incremental concurrent map replacement, huge pages, PCID, COW, user faults, pager IPC, cache/MMIO qualification, heaps/object caches, interrupt-context allocation, concurrent allocation, general pressure and OOM policy, scheduler, task, syscall, capability, IPC, isolation, and asynchronous I/O remain open",
       "No native security/crypto/TPM/secrets/MAC/privacy implementation or external review",
       "No isolated native driver domains or virtio reference drivers",
       "No native block/NVMe/USB/input/VFS/PooleFS persistent path",
@@ -59770,12 +59842,13 @@
       "N12",
       "N13"
     ],
-    "title": "Transfer owned prepared root into a CPU-exposed lifecycle, connect bootstrap/timer mappings and prove actual ring-3 entry/return/fault containment",
+    "title": "Connect bootstrap access and owned timer mappings, then execute a bounded native CR3 and ring-3 return/fault probe",
     "entry_evidence": [
       "docs/native-userspace-integration-iso.md",
-      "tests/fixtures/cycle234-user-entry-readiness.json",
-      "native/kernel/src/user_entry.rs",
-      "docs/checkpoints/cycle235-owned-user-root.md"
+      "runs/native-user-entry-readiness.json",
+      "docs/checkpoints/cycle236-user-root-cpu-lifecycle.md",
+      "native/kernel/src/user_entry/cpu.rs",
+      "native/kernel/src/arch/x86_64.rs"
     ],
     "exit_evidence": [
       "fresh QEMU CPL3 observation with controlled kernel entry/return",
@@ -59785,6 +59858,7 @@
     "blocked": false
   },
   "claim_boundaries": [
+    "Cycle 236: PKUSER3 consumes owned roots into a failure-quarantined CPU lifecycle; fresh context/mapping checks precede exposure and flushing restoration precedes detach.284 host tests,38 repeated optimized tests,5 compile-fail checks and freestanding kernel/library compilation pass. docs/checkpoints/cycle236-user-root-cpu-lifecycle.md The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open.",
     "Cycle 235: PKUSER2 constructs retained inactive supervisor and guarded entry-stack mappings; read/write/cleanup failures retain ownership; host/freestanding checks only. docs/checkpoints/cycle235-owned-user-root.md Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion.",
     "Cycle 234: PKUSER1 inactive user-image admission passes260 kernel host tests,14 optimized focused tests and freestanding-library check; no live user execution or ISO. docs/checkpoints/cycle234-user-entry-foundation.md User-space integration still needs owned kernel-half mappings/stacks, live ring3/return/fault containment, capabilities/IPC, services, shell/apps and ISO qualification. Production microkernel completion remains N0-N39. 25 retained component admissions are stale on changed native source; historical execution is not new qualification.",
     "Cycle 233: docs/checkpoints/cycle233-corrected-media-downstream-replay.md replays all fourteen remaining memory, IRQ, SMP, scheduler, atomic and lock profiles on corrected FAT media:28 fresh guest runs,663 control groups and2863 hostile cases pass. All27 component checks and source profiles are current. The aggregate is reconstructed from27 original captures; four unaffected rows are identical and23 affected profiles were replayed across Cycles231-233. Original kernel and native EFI products are unchanged. The corrected354-test regression passes with zero failures/skips; initial273-test and81-test failures remain preserved. Historical assertions use frozen evidence and current validators. Qualify the exact committed candidate with runtime, bundle, replay, publication and GitHub/review gates before PR80 merge. No phase, flag, authentication, independent-builder, signed-ISO, hardware or production gate closes; the old demo is not rebuilt or promoted.",

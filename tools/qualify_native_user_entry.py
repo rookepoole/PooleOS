@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run bounded host and freestanding checks for inactive PKUSER2 preparation."""
+"""Run bounded host and freestanding checks for the PKUSER3 CPU lifecycle."""
 
 from __future__ import annotations
 
@@ -31,6 +31,7 @@ def source_bindings() -> dict[str, str]:
     paths.update({
         "native/kernel/src/user_entry.rs", "native/kernel/src/user_entry/tests.rs",
         "native/kernel/src/user_entry/prepared.rs", "native/kernel/src/user_entry/prepared_tests.rs",
+        "native/kernel/src/user_entry/cpu.rs", "native/kernel/src/user_entry/cpu_tests.rs",
         "tools/qualify_native_user_entry.py", "tools/qualify_native_elf_loader.py",
         "specs/native-toolchain-lock.json",
     })
@@ -50,8 +51,8 @@ def main() -> int:
     owner_report = Path("C:/Users/rookp/PooleGlyph/tests/reports/conformance_report.json")
     owner_before = digest(owner_report) if owner_report.is_file() else None
     report: dict = {
-        "contract_id": "PKUSER2", "cycle": 235,
-        "scope": "host_executed_inactive_user_image_preparation",
+        "contract_id": "PKUSER3", "cycle": 236,
+        "scope": "host_executed_cpu_lifecycle_privileged_adapter_compile_only",
         "status": "fail", "source_bindings": before, "checks": [],
         "guest_runs": 0, "ring3_executed": False, "iso_built": False,
         "n13_exit_passed": False, "production_ready": False,
@@ -62,13 +63,15 @@ def main() -> int:
     commands = [
         ("format", [str(cargo), "fmt", *common, "--", "--check"], None),
         ("kernel_host_debug", [str(cargo), "test", *common, "--lib", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 272),
+            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 284),
         ("user_entry_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 26),
+            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 38),
         ("freestanding_library", [str(cargo), "check", *common, "--lib", "--target",
             "x86_64-unknown-none", *bounded], None),
+        ("freestanding_kernel_adapter", [str(cargo), "check", *common, "--bin",
+            "PooleKernelLinked", "--target", "x86_64-unknown-none", *bounded], None),
         ("prepared_ownership_compile_fail", [str(cargo), "test", *common, "--doc", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "user_entry::prepared", "--", "--test-threads=1"], 2),
+            "x86_64-pc-windows-msvc", *bounded, "user_entry::prepared", "--", "--test-threads=1"], 5),
     ]
     try:
         for name, command, expected in commands:
@@ -102,7 +105,7 @@ def main() -> int:
     (work / "receipt.json").write_text(serialized, encoding="utf-8", newline="\n")
     if report["status"] == "pass":
         args.out.write_text(serialized, encoding="utf-8", newline="\n")
-    print(f"PKUSER2 {report['status'].upper()}; guest_runs=0; production_ready=false", flush=True)
+    print(f"PKUSER3 {report['status'].upper()}; guest_runs=0; production_ready=false", flush=True)
     return 0 if report["status"] == "pass" else 1
 
 

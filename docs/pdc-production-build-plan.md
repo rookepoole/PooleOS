@@ -1,15 +1,34 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-07
-Plan version: 2.138.0-owned-user-root
-Roadmap cycle: PooleOS Cycle 235
+Plan version: 2.139.0-user-root-cpu-lifecycle
+Roadmap cycle: PooleOS Cycle 236
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 235: Owned User Root And Entry Stack
+## Cycle 236: User Root CPU Lifecycle
+
+USI-1 / N9/N12/N13.3, `N13-USER-ENTRY-LIVE-001`: PKUSER3 now owns the
+transition from prepared mappings to potential CPU exposure. Fresh ownership,
+mapping and CPU-state checks precede CR3 writes. Every possibly exposed failure
+retains pages until a new verified flushing restoration and successful detach.
+The privileged x86-64 adapter is implemented and compiled, but not boot-wired.
+See [Cycle 236 evidence](checkpoints/cycle236-user-root-cpu-lifecycle.md).
+
+284 host kernel tests, 38 repeated optimized tests, five compile-fail checks,
+formatting and freestanding kernel/library checks pass. All 84 metadata and
+coverage tests pass after correcting one stale source count; failures remain
+retained. No actual CR3 switch,
+ring-3 execution or ISO is claimed. Bootstrap temporary-alias access and owned
+timer/MMIO attachment remain immediate prerequisites; then wire a bounded guest
+probe, descriptor/stack/state initialization and actual user return/fault/timer
+recovery. Existing integration flag stays open, all requirements are retained,
+and full N0-N39 microkernel development continues after the user-space preview.
+
+## Historical Cycle 235: Owned User Root And Entry Stack
 
 USI-1 / N9/N12/N13.3, `N13-USER-ENTRY-LIVE-001`: PKUSER2 now constructs a
 retained inactive task root with the validated supervisor subtree and a private

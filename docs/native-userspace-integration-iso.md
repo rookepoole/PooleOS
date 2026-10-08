@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 235, 2026-10-07. No new ISO exists yet.
+Status: implementation started, Cycle 236, 2026-10-07. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -43,7 +43,7 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 
 | Stage | Build Plan Binding | Exit Criterion | Current State |
 | --- | --- | --- | --- |
-| USI-1 User entry and containment | N7, N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Inactive image admission, owned supervisor attachment and guarded entry stack implemented; live adapter/transition not implemented |
+| USI-1 User entry and containment | N7, N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Owned root/stack and CPU-exposure lifecycle host-tested; privileged adapter compiled but not boot-wired; no actual user entry |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Not started |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Not started |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
@@ -57,7 +57,8 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
    preserve supervisor-only mappings, lifetime holds and invalidation discipline.
    Cycle 235 implements an owned inactive attachment and guarded entry stack.
    Before activation, adapt bootstrap temporary mappings and timer/MMIO ownership,
-   verify scrubbed contents, and transfer into a CPU-exposed retirement lifecycle.
+   verify scrubbed contents, and connect the Cycle 236 CPU-exposure/retirement
+   lifecycle to a real bounded guest probe. That lifecycle is currently host-tested.
 3. Install user descriptors and a valid kernel-entry stack/TSS; add a minimal
    reviewed IRETQ entry/return path. Clear non-argument registers and initialize
    segment/base, debug, and supported extended state without leaking kernel data.
@@ -124,10 +125,12 @@ python -B tools/qualify_native_user_entry.py --work-dir outputs/a-new-user-entry
 
 ## Follow-On Microkernel Work
 
-Cycle 235 evidence: [Owned User Root And Entry Stack](checkpoints/cycle235-owned-user-root.md).
-PKUSER2 is an inactive owner, not a CPU execution permit. Its abort operation is
-only valid before activation, and the inherited supervisor source remains owned
-by the boot-lifetime provider. A live adapter must preserve that invariant.
+Cycle 236 evidence: [User Root CPU Lifecycle](checkpoints/cycle236-user-root-cpu-lifecycle.md).
+PKUSER3 consumes PKUSER2 ownership and retains pages across uncertain CPU writes,
+restoration and failed detach. Its compiled privileged adapter is not wired into
+boot and has no fresh guest evidence. Inherited supervisor ownership, serialized
+physical access, current stack/code preservation and the one-BSP lease remain
+explicit trusted-adapter preconditions, not facts established by a host model.
 
 After preview acceptance, continue N0-N39: generalized task/address-space
 lifecycle, robust SMP and architectural-state switching, concurrency/teardown,

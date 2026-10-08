@@ -11186,7 +11186,7 @@ def apply_cycle234(roadmap: dict, test_count: int) -> dict:
 
 def apply_cycle235(roadmap: dict, test_count: int) -> dict:
     checkpoint = "docs/checkpoints/cycle235-owned-user-root.md"
-    receipt_path = "runs/native-user-entry-readiness.json"
+    receipt_path = "tests/fixtures/cycle235-user-entry-readiness.json"
     receipt = json.loads((ROOT / receipt_path).read_bytes())
     gate = roadmap["baseline"]["native_consistency_release_gate"]
     for name in ("closeout_regression", "user_entry_metadata"):
@@ -11226,13 +11226,63 @@ def apply_cycle235(roadmap: dict, test_count: int) -> dict:
     flag["evidence"].append(checkpoint)
     roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle236(roadmap, test_count)
+
+
+def apply_cycle236(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle236-user-root-cpu-lifecycle.md"
+    receipt_path = "runs/native-user-entry-readiness.json"
+    receipt = json.loads((ROOT / receipt_path).read_bytes())
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle235_" + name] = copy.deepcopy(gate["current_" + name])
+    roadmap["baseline"]["historical_cycle235_user_space_integration"] = copy.deepcopy(roadmap["baseline"]["user_space_integration"])
+    roadmap["baseline"].update(pooleos_cycle=236, pooleos_test_count=test_count)
+    roadmap["execution_protocol"].update(last_updated_cycle=236)
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, receipt_path]
+    gate["current_candidate_audit"]["cycle"] = 236
+    gate["current_focused_source_projection"]["cycle"] = 236
+    gate["qualification_status"] = "cpu_lifecycle_host_pass_privileged_adapter_compile_only_guest_pending"
+    counts = [c["tests_passed"] for c in receipt["checks"] if c["tests_passed"] is not None]
+    gate["current_closeout_regression"] = dict(cycle=236, status="focused_native_pass_not_full_canonical",
+        tests_run=sum(counts), tests_passed=sum(counts), tests_failed=0, tests_skipped=0,
+        scope="284_debug_kernel_tests_plus38_repeated_release_user_entry_tests_plus5_compile_fail_checks",
+        receipt_path=receipt_path, receipt_sha256=hashlib.sha256((ROOT / receipt_path).read_bytes()).hexdigest().upper(),
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=236, status="pass", tests_run=84,
+        tests_passed=84, tests_failed=0, tests_skipped=0, elapsed_seconds=67.572,
+        runner_elapsed_seconds=68.390,
+        log_sha256="5E261AF830B86EC8130F00909D2B0A136A0ED0306EAC06F613AC1F328550D03D",
+        initial_attempts=[dict(failures=1, errors=0,
+            log_sha256="3493A8978F9CCAED492BB6799E9FBA43763CB858257B60C5315383FE5C2F4AF2")],
+        pre_final_review_pass=dict(tests_passed=84, elapsed_seconds=68.473,
+            log_sha256="5D2ECE4A17B06E07AF72F8DDFCF54949EA783D2E4EC387A513C813E32FCB3CBB"),
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    lane = roadmap["baseline"]["user_space_integration"]
+    lane.update(cycle=236, receipt_path=receipt_path, host_status=receipt["status"],
+        live_adapter_implemented=True, live_adapter_wired=False,
+        privileged_adapter_verification="freestanding_kernel_compile_only",
+        cpu_exposure_lifecycle_implemented=True, actual_cr3_switch_executed=False)
+    lane["stages"]["USI-1"] = "partial_host_cpu_lifecycle_adapter_compile_only"
+    roadmap["immediate_next_move"]["title"] = "Connect bootstrap access and owned timer mappings, then execute a bounded native CR3 and ring-3 return/fault probe"
+    roadmap["immediate_next_move"]["entry_evidence"] = [
+        "docs/native-userspace-integration-iso.md", receipt_path, checkpoint,
+        "native/kernel/src/user_entry/cpu.rs", "native/kernel/src/arch/x86_64.rs"]
+    evidence = "Cycle 236: PKUSER3 consumes owned roots into a failure-quarantined CPU lifecycle; fresh context/mapping checks precede exposure and flushing restoration precedes detach.284 host tests,38 repeated optimized tests,5 compile-fail checks and freestanding kernel/library compilation pass. " + checkpoint
+    gap = "The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open."
+    phase = next(p for p in roadmap["phases"] if p["id"] == "N13")
+    phase["current_evidence"].insert(0, evidence)
+    phase["current_gaps"][0] = gap
+    next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")["evidence"].append(checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1238)
+    parser.add_argument("--test-count", type=int, default=1239)
     parser.add_argument("--status-date", default="2026-10-07")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

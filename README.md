@@ -11,7 +11,16 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle 235 adds an owned inactive user root,
+**Current development checkpoint:** Cycle 236 adds the kernel's owning user-root
+CPU lifecycle and a privileged x86-64 adapter. Failed switches/restoration keep
+memory retained until verified recovery and detach. All 284 host kernel tests,
+38 optimized focused tests, five compile-fail checks and freestanding kernel/
+library checks pass, as do 84 roadmap/coverage checks. The adapter is not
+boot-wired: no user-mode task or new ISO
+exists yet. Next is bootstrap/timer integration and a bounded real guest probe.
+[Evidence](docs/checkpoints/cycle236-user-root-cpu-lifecycle.md).
+
+**Historical development checkpoint:** Cycle 235 adds an owned inactive user root,
 validated supervisor mappings, and a guarded 16-KiB kernel-entry stack. Failed
 preparation/cleanup preserves physical ownership until verified detach. This
 advances the native user-space integration ISO; no ring-3 execution or new ISO

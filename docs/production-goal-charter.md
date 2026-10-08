@@ -7,9 +7,16 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 235
+Last roadmap reconciliation: PooleOS Cycle 236
 
-Cycle 235 adds an owned inactive user root and guarded kernel-entry stack under
+Cycle 236 adds the owning CPU-exposure/restoration lifecycle and compiles its
+privileged x86-64 adapter. Fresh host tests cover failure quarantine and retained
+ownership through restoration and cleanup. The adapter is not boot-wired; actual
+ring-3/fault/timer execution and the user-space ISO remain pending. All normative
+production requirements remain unchanged.
+[Cycle 236 evidence](checkpoints/cycle236-user-root-cpu-lifecycle.md).
+
+Historical Cycle 235 adds an owned inactive user root and guarded kernel-entry stack under
 the existing user-space ISO milestone. Retention, failed construction/cleanup,
 supervisor permission and ownership boundaries receive host tests. CPU activation,
 fault containment and the new ISO remain pending. Normative production scope is

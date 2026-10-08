@@ -3841,6 +3841,81 @@ pub unsafe fn write_cr3(value: u64) {
     unsafe { asm!("mov cr3, {}", in(reg) value, options(nostack, preserves_flags)) };
 }
 
+/// Privileged PKUSER3 adapter, not wired into any boot scenario yet.
+/// The private construction boundary preserves the single-BSP execution lease.
+#[allow(dead_code)]
+pub struct UserRootCpu {
+    original: u64,
+    candidate: u64,
+    _local: core::marker::PhantomData<*mut ()>,
+}
+
+#[allow(dead_code)]
+impl UserRootCpu {
+    /// # Safety
+    /// Caller owns the sole BSP execution/CR3 lease at CPL0 with IF clear and
+    /// all APs offline for the entire adapter lifetime. Both audited roots must
+    /// preserve current code, stack, data and exception/NMI paths. Boot mappings,
+    /// owned pages and their aliases must remain retained and serialized; neither
+    /// DMA nor another actor may edit them. No other actor may install either
+    /// root or change paging controls while this adapter is owned. PCIDE, PGE
+    /// and LA57 must stay disabled. This is not a user-entry permission.
+    pub unsafe fn new(original: u64, candidate: u64) -> Self {
+        Self {
+            original,
+            candidate,
+            _local: core::marker::PhantomData,
+        }
+    }
+}
+
+impl poolekernel::user_entry::prepared::cpu::Cpu for UserRootCpu {
+    fn snapshot(
+        &mut self,
+    ) -> Result<
+        poolekernel::user_entry::prepared::cpu::Snapshot,
+        poolekernel::user_entry::prepared::cpu::Error,
+    > {
+        use poolekernel::user_entry::prepared::cpu::{Error, Snapshot};
+        // SAFETY: the constructor requires CPL0 and an exclusive single-BSP lease.
+        let (cr0, cr3, cr4, efer, apic_base) = unsafe {
+            (
+                read_cr0(),
+                read_cr3(),
+                read_cr4(),
+                read_efer(),
+                read_msr(CPU_MSR_APIC_BASE),
+            )
+        };
+        if apic_base & (1 << 8) == 0 {
+            return Err(Error::Context);
+        }
+        Ok(Snapshot {
+            cpu_id: cpuid(1, 0).ebx >> 24,
+            active_cpus: 1,
+            cr0,
+            cr3,
+            cr4,
+            efer,
+            rflags: read_rflags(),
+        })
+    }
+
+    fn write_root(
+        &mut self,
+        root: u64,
+    ) -> Result<(), poolekernel::user_entry::prepared::cpu::Error> {
+        use poolekernel::user_entry::prepared::cpu::Error;
+        if root == 0 || root & 0xfff != 0 || (root != self.original && root != self.candidate) {
+            return Err(Error::Root);
+        }
+        // SAFETY: the constructor and owning PKUSER3 lifecycle preserve both
+        // mappings and the serialized PCIDE/PGE-disabled flushing context.
+        unsafe { write_cr3(root) };
+        Ok(())
+    }
+}
+
 /// Invalidates one canonical virtual address in the current address space.
 ///
 /// # Safety
