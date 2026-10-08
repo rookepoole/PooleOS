@@ -24,6 +24,11 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle233-corrected-media-downstream-replay.md",
+    "tests/fixtures/cycle229-execution-sources.json",
+    "docs/checkpoints/cycle232-corrected-media-boot-and-cpu-replay.md",
+    "docs/checkpoints/cycle231-fat32-directory-links.md",
+    "tests/test_native_fat_directory.py",
     "docs/checkpoints/cycle230-native-iso-inspection.md",
     "docs/native-iso-inspection.md",
     "runtime/native_iso_media.py",

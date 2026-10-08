@@ -1020,7 +1020,7 @@
       "canonical_byte_count": 538264,
       "canonical_sha256": "FD6C2A0C709957B9EDFFC0647D534E060ED68215C075F07D70AB2AEBCA6C81D1",
       "disassembly_byte_count": 4857965,
-      "disassembly_sha256": "D801C65F9B197EC1B7541632D9E5B29CD1817DCE764C55C296E94BD74D9AB7AB",
+      "disassembly_sha256": "78ED7B11F2BD8088492F36E0D26BF069D7912BA4721204695B4CD7757D6D52AA",
       "instruction_counts": {
         "rdmsr": 43,
         "rdpmc": 0,
@@ -3973,12 +3973,12 @@
       {
         "byte_count": 17997,
         "path": "runs/native-kernel-revalidation-readiness.json",
-        "sha256": "8D35EAC9C8B39857ADC6A2B9596F698D628219996FF4C531176252930A8EC88E"
+        "sha256": "5DB8426D14B81635427FECB0EE49B8D163C3EC3152808146D47EEA73784B7AF9"
       },
       {
         "byte_count": 190245,
         "path": "runs/native_kernel_load_readiness.json",
-        "sha256": "CD0F9CFBA4472AE5F6BB98EE20D244447A4E50C276C39E9D81581132989C4B68"
+        "sha256": "D8285B4D2395D6F7A84E955752C2AEDA1FE705CF6EF4AB72BBAE6B2C7BB59A9F"
       }
     ],
     "tier0_lock": {
@@ -4349,7 +4349,7 @@
         "protective_mbr_valid": true,
         "sector_bytes": 512,
         "sector_count": 131072,
-        "sha256": "BD03EFA755BAC9D134D5CBF9DCD3E49E910B03A5E9DD72B65CDF5C4FD5B11D2C"
+        "sha256": "D8D1E2575CCDB7C60AF693A874B4228C2953222DC4664EFBC43135B6C3AB1058"
       },
       "initial_system": {
         "activation_allowed": false,
@@ -4764,7 +4764,7 @@
     },
     "ordinary_workspace_file_only": true,
     "physical_media_write_performed": false,
-    "sha256": "BD03EFA755BAC9D134D5CBF9DCD3E49E910B03A5E9DD72B65CDF5C4FD5B11D2C"
+    "sha256": "D8D1E2575CCDB7C60AF693A874B4228C2953222DC4664EFBC43135B6C3AB1058"
   },
   "n7_exit_gate_satisfied": false,
   "negative_controls": [
@@ -5030,7 +5030,7 @@
   "schema_version": "1.0",
   "selected_move_id": "N7-PRIVILEGE-MSR-POLICY-001",
   "status": "pass_single_host_two_run_qemu64_read_only_non_promoting",
-  "status_date": "2026-10-04",
+  "status_date": "2026-10-07",
   "summary": {
     "actions_authorized": 0,
     "authority_grants": 0,

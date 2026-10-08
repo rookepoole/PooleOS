@@ -261,15 +261,20 @@ class NativeExecutionSourcesTests(unittest.TestCase):
         with self.assertRaises(sources.SourceEvidenceError):
             sources.reviewed_data_bindings(self.root, "unknown")
 
-    def test_current_record_preserves_original_source_and_capture_fields(self):
+    def test_reviewed_input_migration_preserves_original_source_and_capture_fields(self):
         old = json.loads((ROOT / "tests/fixtures/cycle228-execution-sources.json").read_bytes())
-        new = json.loads((ROOT / sources.RECEIPT).read_bytes())
+        raw = (ROOT / "tests/fixtures/cycle229-execution-sources.json").read_bytes()
+        self.assertEqual(sources.digest(raw), "9C64EC020BD4D98182DAB38EF65EA7ABBFC15EC3EFD98BA188D6E005C2AE5295")
+        new = json.loads(raw)
         self.assertEqual(len(new["profiles"]), len(old["profiles"]))
         for before, after in zip(old["profiles"], new["profiles"], strict=True):
             self.assertEqual(before, {k: v for k, v in after.items() if k != "reviewed_data"})
         self.assertEqual(sum(len(r["reviewed_data"]) for r in new["profiles"]), 18)
         self.assertEqual(len({b["path"] for r in new["profiles"] for b in r["reviewed_data"]}), 13)
         self.assertTrue(sources.evidence_errors(old, ROOT))
+        self.assertTrue(sources.evidence_errors(new, ROOT))
+        current = json.loads((ROOT / sources.RECEIPT).read_bytes())
+        self.assertEqual(sources.evidence_errors(current, ROOT), [])
 
     def test_missing_and_malformed_aggregate_artifact_fail(self):
         path = self.root / "missing.json"

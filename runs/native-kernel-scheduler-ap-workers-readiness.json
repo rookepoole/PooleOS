@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_kernel_scheduler_ap_workers_readiness",
-  "status_date": "2026-10-04",
+  "status_date": "2026-10-07",
   "status": "pass_single_host_two_run_sandybridge_four_vcpu_typed_ap_workers_non_promoting",
   "contract_id": "PKSCHED5",
   "selected_move_id": "N12-SCHED-AP-WORKERS-001",
@@ -1301,7 +1301,7 @@
         "PKSCHED5:CONTROL PASS group=STALE-ID verified=4"
       ],
       "output_sha256": "4563BF2B57C96ADE801B7DF5076E2D509C3FA3E3B000C24A511379FA0F2E69F3",
-      "executable_sha256": "6C02CAFA57314FCDF91B22C1E22D225DEE48882FE691B593C5254A71151EDA8B",
+      "executable_sha256": "F528A28AE20EF8DACC50E07C69B211FD87505BFF01A9086E51771F276A5A69AD",
       "controls": [
         {
           "id": "NEG-N12-PKSCHED5-TYPED-CALL-ALLOWLIST",
@@ -1545,11 +1545,11 @@
   "media": {
     "clean_generation_count": 2,
     "exact_clean_generation_match": true,
-    "sha256": "EA331B580E40DD78B62C60BD60FF2FDA94FF9C359BECA051F2855ACF9C8DF4C8",
+    "sha256": "33276841C8C739D4BA1263950F9D0D3E02D6180092F9282D7AB0471FE7C161FA",
     "byte_count": 67108864,
     "inspection": {
       "image": {
-        "sha256": "EA331B580E40DD78B62C60BD60FF2FDA94FF9C359BECA051F2855ACF9C8DF4C8",
+        "sha256": "33276841C8C739D4BA1263950F9D0D3E02D6180092F9282D7AB0471FE7C161FA",
         "byte_count": 67108864,
         "sector_bytes": 512,
         "sector_count": 131072,

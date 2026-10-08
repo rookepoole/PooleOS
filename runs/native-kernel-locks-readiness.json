@@ -3835,9 +3835,9 @@
         "sha256": "516A25590505C5E3C6850BE6DDA8F80673F2D3B2F1A7CC00C181B12C33C60AC7"
       },
       {
-        "byte_count": 65869,
+        "byte_count": 66467,
         "path": "runtime/native_pooleboot.py",
-        "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        "sha256": "90AC0DF5286FBFC9BE463C56928518BF3E4D85679DE37F82592CD5A81E56C9D3"
       },
       {
         "byte_count": 2963,
@@ -3847,7 +3847,7 @@
       {
         "byte_count": 187929,
         "path": "runs/native_pooleboot_readiness.json",
-        "sha256": "AE2223ED615B076835A28BCD003618B2E89213B4A4E2DB8BA10D0D4394F4EBB9"
+        "sha256": "6EF67ABC56F0E71E69E8796DB8D12781CDA24CF3B097D5E4F1097AC0E659AB0A"
       },
       {
         "byte_count": 5641,
@@ -4348,7 +4348,7 @@
         "protective_mbr_valid": true,
         "sector_bytes": 512,
         "sector_count": 131072,
-        "sha256": "C5FBED340DBF63DBCA3A7607FA0F51713D193D7D6EDB4383FB2D4D6C3EBBD727"
+        "sha256": "FE8E3A026CCF85BA72E94C748B36F8DF69833777E52C06560C62DC86C39C2BC0"
       },
       "initial_system": {
         "activation_allowed": false,
@@ -4763,7 +4763,7 @@
     },
     "ordinary_workspace_file_only": true,
     "physical_media_write_performed": false,
-    "sha256": "C5FBED340DBF63DBCA3A7607FA0F51713D193D7D6EDB4383FB2D4D6C3EBBD727"
+    "sha256": "FE8E3A026CCF85BA72E94C748B36F8DF69833777E52C06560C62DC86C39C2BC0"
   },
   "n12_exit_gate_satisfied": false,
   "negative_controls": [

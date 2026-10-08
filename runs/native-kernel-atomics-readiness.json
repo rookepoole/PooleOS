@@ -384,7 +384,7 @@
           "protective_mbr_valid": true,
           "sector_bytes": 512,
           "sector_count": 131072,
-          "sha256": "6B9503E488E9F500C4D9BD4469694A4E682E02B6A245B665D718AE7829FE4965"
+          "sha256": "2794074D725235B7C3BB9ED0B3FF9705789F160FD89145BF896B0F5FB245CE29"
         },
         "initial_system": {
           "activation_allowed": false,
@@ -797,7 +797,7 @@
           "state_writes": 0
         }
       },
-      "sha256": "6B9503E488E9F500C4D9BD4469694A4E682E02B6A245B665D718AE7829FE4965"
+      "sha256": "2794074D725235B7C3BB9ED0B3FF9705789F160FD89145BF896B0F5FB245CE29"
     },
     "media_read_only": true,
     "observation": {
@@ -4607,7 +4607,7 @@
       {
         "byte_count": 187929,
         "path": "runs/native_pooleboot_readiness.json",
-        "sha256": "AE2223ED615B076835A28BCD003618B2E89213B4A4E2DB8BA10D0D4394F4EBB9"
+        "sha256": "6EF67ABC56F0E71E69E8796DB8D12781CDA24CF3B097D5E4F1097AC0E659AB0A"
       },
       {
         "byte_count": 5641,
@@ -4615,9 +4615,9 @@
         "sha256": "E6E126A5EC683FC1A73B82B8C889F4212BE507BAA52EA43548B23C938093499F"
       },
       {
-        "byte_count": 65869,
+        "byte_count": 66467,
         "path": "runtime/native_pooleboot.py",
-        "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        "sha256": "90AC0DF5286FBFC9BE463C56928518BF3E4D85679DE37F82592CD5A81E56C9D3"
       },
       {
         "byte_count": 118563,
@@ -6177,5 +6177,5 @@
   "schema_version": "1.0",
   "selected_move_id": "N12-CONCURRENCY-ATOMICS-001",
   "status": "pass_single_host_typed_x86_64_atomics_bsp_interrupt_non_promoting",
-  "status_date": "2026-10-04"
+  "status_date": "2026-10-07"
 }

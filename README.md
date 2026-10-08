@@ -4,14 +4,42 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
-**Qualified baseline:** checkpoints through Cycle 229 are merged into `main`
-at `08d4dbe` via [PR #78](https://github.com/rookepoole/PooleOS/pull/78).
+**Qualified baseline:** checkpoints through Cycle 230 are merged into `main`
+at `bb5e43c` via [PR #79](https://github.com/rookepoole/PooleOS/pull/79).
 The exact candidate passed 106/106 runtime-inclusive canonical gates and 708/708
 Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. All 63 source-branch commits remain cloud-backed; they are not pending
 main merges. This is a development baseline, not a production release.
 
-**Current development checkpoint:** Cycle 230 adds inspection of actual ISO and
+**Current development checkpoint:** Cycle 233 completes all fourteen remaining
+corrected-media profile replays: 28 fresh guest runs, 663 control groups and
+2,863 hostile cases pass. All 27 component and source checks are current, with
+the aggregate reconstructed from original captures. All 354 combined regression
+tests pass with zero skips after historical-assertion and schema reconciliation;
+the failed attempts remain recorded. Exact-candidate gates still precede PR #80 merge.
+The kernel and retained demo ISO are unchanged; this is not a production release.
+[Evidence](docs/checkpoints/cycle233-corrected-media-downstream-replay.md).
+
+**Historical development checkpoint:** Cycle 232 replays kernel revalidation,
+boot-to-kernel transfer and five CPU profiles on the corrected FAT32 media.
+All 16 fresh guest runs, 319 control groups and 77 focused regression tests pass.
+Source-current coverage is 13/27 profiles; 14 memory, interrupt, SMP, scheduling,
+atomic and lock profiles still require replay. Component checks pass 22/27;
+the aggregate source guard correctly remains blocked. Next: physical memory,
+then virtual memory and the remaining dependencies. Native executable bytes and
+the retained demo ISO are unchanged. [Evidence](docs/checkpoints/cycle232-corrected-media-boot-and-cpu-replay.md).
+
+**Historical development checkpoint:** Cycle 231 repairs the generated EFI FAT32
+root-parent link and validates directory dot entries. All 26 focused tests and
+four fresh loader/PooleBoot QEMU runs pass. Twenty-one dependent profiles still
+need replay: the aggregate source guard correctly rejects the stale evidence.
+This work can be backed up in a draft PR but is not yet eligible for main merge.
+[Cycle 231 evidence](docs/checkpoints/cycle231-fat32-directory-links.md).
+Next: kernel revalidation, then transfer and remaining dependent profiles.
+Native executable bytes and the retained demo ISO are unchanged; no production
+or N5 completion claim is made.
+
+**Historical development checkpoint:** Cycle 230 adds inspection of actual ISO and
 embedded EFI FAT32 bytes. All 19 new tests pass; the combined architecture suite
 has 27 passes and one expected Windows symlink-permission skip. The unchanged demo
 has 17 inventoried files but fails production architecture policy: a FAT root-parent

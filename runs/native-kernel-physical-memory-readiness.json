@@ -4730,7 +4730,7 @@
       {
         "byte_count": 180141,
         "path": "runs/native-kernel-transfer-readiness.json",
-        "sha256": "B0B3AE877F3EE222FB19E50CD2891A955B8C9B1E3A3E42267FE0A15092D9D1B2"
+        "sha256": "C7D5317A580F02373D29E9CCFEB7914BE2F296B929E4F7A0A08C3BC1DC8B5528"
       }
     ],
     "tier0_lock": {
@@ -5101,7 +5101,7 @@
         "protective_mbr_valid": true,
         "sector_bytes": 512,
         "sector_count": 131072,
-        "sha256": "360D7DAC5D2B1594FF61DDF398243F2BA23A0265CC4B1970D1DD2953B9DED4D5"
+        "sha256": "A67EABD40EDE2C6085150A7DD1736DC5D05D62A54F165A2400C3CF1FA87EBF81"
       },
       "initial_system": {
         "activation_allowed": false,
@@ -5516,7 +5516,7 @@
     },
     "ordinary_workspace_file_only": true,
     "physical_media_write_performed": false,
-    "sha256": "360D7DAC5D2B1594FF61DDF398243F2BA23A0265CC4B1970D1DD2953B9DED4D5"
+    "sha256": "A67EABD40EDE2C6085150A7DD1736DC5D05D62A54F165A2400C3CF1FA87EBF81"
   },
   "n9_exit_gate_satisfied": false,
   "negative_controls": [
@@ -6501,7 +6501,7 @@
   "schema_version": "1.0",
   "selected_move_id": "N9-PMM-ACPI-CONSUMER-001",
   "status": "pass_single_host_two_run_qemu64_acpi_snapshot_gated_dual_reclaim_non_promoting",
-  "status_date": "2026-10-04",
+  "status_date": "2026-10-07",
   "summary": {
     "acpi_early_reclaim_rejected": true,
     "acpi_reclaim_idempotent": true,

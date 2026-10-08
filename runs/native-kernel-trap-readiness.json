@@ -8815,9 +8815,9 @@
         "sha256": "516A25590505C5E3C6850BE6DDA8F80673F2D3B2F1A7CC00C181B12C33C60AC7"
       },
       {
-        "byte_count": 65869,
+        "byte_count": 66467,
         "path": "runtime/native_pooleboot.py",
-        "sha256": "513EB7A6437CF39EF6EBA8682DA75E00EB0B84A1652EB5965B7798A5D61A0B32"
+        "sha256": "90AC0DF5286FBFC9BE463C56928518BF3E4D85679DE37F82592CD5A81E56C9D3"
       },
       {
         "byte_count": 22409,
@@ -9223,7 +9223,7 @@
             "protective_mbr_valid": true,
             "sector_bytes": 512,
             "sector_count": 131072,
-            "sha256": "531721EF824FD2BD42ED3A2B968FDF129A4110B1B81E34CA85EE383171AD0CDD"
+            "sha256": "41E4B7847403CD2D3DE6446F08C4611AF8D0D38E8D704E2EBCC426C4302F3533"
           },
           "initial_system": {
             "activation_allowed": false,
@@ -9639,7 +9639,7 @@
         "ordinary_workspace_file_only": true,
         "physical_media_write_performed": false,
         "scenario": "returning",
-        "sha256": "531721EF824FD2BD42ED3A2B968FDF129A4110B1B81E34CA85EE383171AD0CDD"
+        "sha256": "41E4B7847403CD2D3DE6446F08C4611AF8D0D38E8D704E2EBCC426C4302F3533"
       },
       {
         "byte_count": 67108864,
@@ -9993,7 +9993,7 @@
             "protective_mbr_valid": true,
             "sector_bytes": 512,
             "sector_count": 131072,
-            "sha256": "16861EECC5DFE13FEEEE681FA3C6847217BAAAE4BFB134D56D7C2B030B900F80"
+            "sha256": "4AAD87F0BDA1233E8734B28209FFFC7778105B978A30B48EC441E9F9069DE7F8"
           },
           "initial_system": {
             "activation_allowed": false,
@@ -10409,7 +10409,7 @@
         "ordinary_workspace_file_only": true,
         "physical_media_write_performed": false,
         "scenario": "double_fault",
-        "sha256": "16861EECC5DFE13FEEEE681FA3C6847217BAAAE4BFB134D56D7C2B030B900F80"
+        "sha256": "4AAD87F0BDA1233E8734B28209FFFC7778105B978A30B48EC441E9F9069DE7F8"
       },
       {
         "byte_count": 67108864,
@@ -10763,7 +10763,7 @@
             "protective_mbr_valid": true,
             "sector_bytes": 512,
             "sector_count": 131072,
-            "sha256": "4B014A1132CBE432E7A17CF064D94A016D4EA9A684FB4D937B2D452DF7E224AD"
+            "sha256": "D6C3FCDD65CAFB277971BFB4D31218AD711475A1A3C7F51AC6A88273BE915A3E"
           },
           "initial_system": {
             "activation_allowed": false,
@@ -11179,7 +11179,7 @@
         "ordinary_workspace_file_only": true,
         "physical_media_write_performed": false,
         "scenario": "malformed_frame",
-        "sha256": "4B014A1132CBE432E7A17CF064D94A016D4EA9A684FB4D937B2D452DF7E224AD"
+        "sha256": "D6C3FCDD65CAFB277971BFB4D31218AD711475A1A3C7F51AC6A88273BE915A3E"
       }
     ]
   },
@@ -11570,7 +11570,7 @@
   "schema_version": "1.0",
   "selected_move_id": "N7-TRAP-001",
   "status": "pass_single_host_six_run_qemu_only_bsp_non_promoting",
-  "status_date": "2026-10-04",
+  "status_date": "2026-10-07",
   "summary": {
     "actions_authorized": 0,
     "authority_grants": 0,

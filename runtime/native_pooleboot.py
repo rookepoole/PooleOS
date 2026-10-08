@@ -826,7 +826,7 @@ def build_media_bytes(efi_data: bytes) -> bytes:
     _write_cluster(image, data_start_lba, 2, root)
     efi_directory = bytearray(SECTOR_BYTES)
     efi_directory[0:32] = _directory_entry(b".          ", 0x10, 3)
-    efi_directory[32:64] = _directory_entry(b"..         ", 0x10, 2)
+    efi_directory[32:64] = _directory_entry(b"..         ", 0x10, 0)
     efi_directory[64:96] = _directory_entry(b"BOOT       ", 0x10, 4)
     _write_cluster(image, data_start_lba, 3, efi_directory)
     boot_directory = bytearray(SECTOR_BYTES)
@@ -1032,12 +1032,20 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
     if set(root_entries) != {VOLUME_LABEL, b"EFI        "}:
         raise PooleBootError("unexpected root-directory entry")
 
-    efi_entries = _directory_entries(_cluster_bytes(data, data_start_lba, 3))
+    efi_raw = _cluster_bytes(data, data_start_lba, 3)
+    efi_entries = _directory_entries(efi_raw)
     if efi_entries.get(b"BOOT       ") != {"attributes": 0x10, "cluster": 4, "size": 0}:
         raise PooleBootError("EFI/BOOT directory entry is missing or malformed")
     if set(efi_entries) != {b".          ", b"..         ", b"BOOT       "}:
         raise PooleBootError("unexpected EFI directory entry")
-    boot_entries = _directory_entries(_cluster_bytes(data, data_start_lba, 4))
+    boot_raw = _cluster_bytes(data, data_start_lba, 4)
+    boot_entries = _directory_entries(boot_raw)
+    for raw, entries, current, parent in ((efi_raw, efi_entries, 3, 0), (boot_raw, boot_entries, 4, 3)):
+        if raw[:11] != b".          " or raw[32:43] != b"..         ":
+            raise PooleBootError("FAT dot entries must occupy the first two directory slots")
+        for dot_name, dot_cluster in ((b".          ", current), (b"..         ", parent)):
+            if entries.get(dot_name) != {"attributes": 0x10, "cluster": dot_cluster, "size": 0}:
+                raise PooleBootError("FAT dot-entry attributes, cluster or size is invalid")
     fallback = boot_entries.get(b"BOOTX64 EFI")
     if fallback is None or fallback["attributes"] != 0x20:
         raise PooleBootError("UEFI removable-media fallback file is missing")
