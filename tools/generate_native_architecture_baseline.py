@@ -24,6 +24,17 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle262-native-user-console.md",
+    "docs/native-user-console.md",
+    "runs/native-console-readiness.json",
+    "native/kernel/src/capability_ipc/console.rs",
+    "native/kernel/src/capability_ipc/console/tests.rs",
+    "native/kernel/src/arch/x86_64/user_ipc/console.rs",
+    "native/userspace/src/console.rs",
+    "native/userspace/src/bin/console.rs",
+    "runtime/native_console.py",
+    "tools/qualify_native_console.py",
+    "tests/test_native_console.py",
     "docs/checkpoints/cycle261-native-service-session.md",
     "docs/native-service-session.md",
     "runs/native-session-readiness.json",

@@ -45,6 +45,12 @@ pub enum Status {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Request {
+    #[cfg(feature = "development-console")]
+    Console {
+        handle: u64,
+        offset: u64,
+        value: Option<u64>,
+    },
     Version,
     Exit(u32),
     RequestWait(u64),
@@ -218,6 +224,23 @@ pub fn request(
         }),
         13 if destination == 0 && bytes == 0 => Ok(Request::RequestWait(source)),
         12 | 13 => Err(Status::Arguments),
+        #[cfg(feature = "development-console")]
+        15 | 16
+            if destination <= 7
+                && (if number == 15 {
+                    bytes == 0
+                } else {
+                    bytes <= 255
+                }) =>
+        {
+            Ok(Request::Console {
+                handle: source,
+                offset: destination,
+                value: if number == 16 { Some(bytes) } else { None },
+            })
+        }
+        #[cfg(feature = "development-console")]
+        15 | 16 => Err(Status::Arguments),
         _ => Err(Status::Unknown),
     }
 }

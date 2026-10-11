@@ -40,6 +40,41 @@ unsafe fn call(number: u64, handle: u64, address: u64, bytes: u64) -> (u64, u64)
     (status, value)
 }
 
+pub struct Console(u64);
+/// SAFETY: same live, kernel-owned PSTART1 block requirement as boot().
+#[inline(always)]
+pub unsafe fn console_boot(
+    address: u64,
+    bytes: u64,
+    version: u64,
+) -> Result<Console, startup::Error> {
+    if address != 0x40003000 || !(96..=512).contains(&bytes) {
+        return Err(startup::Error::Header);
+    }
+    let block = unsafe { core::slice::from_raw_parts(address as *const u8, bytes as usize) };
+    startup::console(block, version).map(Console)
+}
+impl crate::console::Registers for Console {
+    #[inline(always)]
+    fn read(&mut self, offset: u8) -> Result<u8, crate::console::Error> {
+        let (status, byte) = unsafe { call(15, self.0, u64::from(offset), 0) };
+        if status == 0 {
+            u8::try_from(byte).map_err(|_| crate::console::Error::Transport)
+        } else {
+            Err(crate::console::Error::Transport)
+        }
+    }
+    #[inline(always)]
+    fn write(&mut self, offset: u8, value: u8) -> Result<(), crate::console::Error> {
+        let result = unsafe { call(16, self.0, u64::from(offset), u64::from(value)) };
+        if result == (0, 0) {
+            Ok(())
+        } else {
+            Err(crate::console::Error::Transport)
+        }
+    }
+}
+
 #[inline]
 pub fn exit(code: u32) -> ! {
     // SAFETY: PSABI1 Exit copies no user buffer and has no capability side effect.

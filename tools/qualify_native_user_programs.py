@@ -1,4 +1,4 @@
-"""Compile independent PooleInit/PooleCounter artifacts; never infer native execution."""
+"""Compile independent native user programs; never infer native execution."""
 from __future__ import annotations
 import argparse
 import hashlib
@@ -49,7 +49,7 @@ def build(cargo: Path, env: dict, target: Path, log: Path) -> dict:
         "--bins", "--release", "--target", TARGET, "--target-dir", str(target), "--locked", "--offline"]
     run(command, env, log)
     result = {}
-    for name in ("PooleInit", "PooleCounter"):
+    for name, source in (("PooleInit", "init"), ("PooleCounter", "counter"), ("PooleConsole", "console")):
         path = target / TARGET / "release" / name
         blob = path.read_bytes()
         code, record = extract(blob)
@@ -66,7 +66,7 @@ def build(cargo: Path, env: dict, target: Path, log: Path) -> dict:
         record["object_relocation_count"] = len(relocs)
         record["object_relocation_kinds"] = sorted({r["Type"]["Name"] for r in relocs})
         (target.parent / f"{target.name}-{name}.bin").write_bytes(code)
-        result[name] = dict(record, source_binary=f"native/userspace/src/bin/{'init' if name == 'PooleInit' else 'counter'}.rs")
+        result[name] = dict(record, source_binary=f"native/userspace/src/bin/{source}.rs")
     return result
 
 def main() -> int:
@@ -78,7 +78,7 @@ def main() -> int:
         parser.error("work directory must be under workspace outputs")
     work.mkdir(parents=True, exist_ok=False)
     before = bindings()
-    report = dict(cycle=260, contract_id="PUSERBIN1", status="fail", source_bindings=before,
+    report = dict(cycle=262, contract_id="PUSERBIN1", status="fail", source_bindings=before,
         source_unchanged=False, native_execution_verified=False, actual_init_service=False,
         normal_session_boot=False, iso_built=False, production_ready=False)
     try:
@@ -106,7 +106,7 @@ def main() -> int:
             if release: command.append("--release")
             output=run(command,env,work / ("release.log" if release else "debug.log"))
             match=re.search(r"test result: ok\. (\d+) passed; 0 failed; 0 ignored;",output)
-            if not match or int(match[1]) != 15: raise ValueError("expected15 Rust host tests")
+            if not match or int(match[1]) != 21: raise ValueError("expected21 Rust host tests")
             report["host_tests"].append(dict(profile="release" if release else "debug", tests_passed=int(match[1])))
         first=build(cargo,env,work / "build1",work / "build1.log")
         second=build(cargo,env,work / "build2",work / "build2.log")

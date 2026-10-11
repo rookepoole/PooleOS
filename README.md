@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle261 launches the independently built
+**Current development checkpoint:** Cycle262 adds PooleConsole, a separate user-mode
+driver with confined COM2 authority. Two fresh guests echo actual host input;
+normal exit and invalid authority reclaim the console while init/counter keep
+running. Three private address spaces, reproducible builds and the default native
+regression pass. This is console I/O, not a shell or a usable ISO yet. Next: console
+IPC, shell/files/apps, then optical ISO acceptance. The full robust microkernel
+remains required afterward. [Evidence](docs/checkpoints/cycle262-native-user-console.md).
+
+**Historical development checkpoint:** Cycle261 launches the independently built
 PooleInit and PooleCounter programs in isolated user address spaces. Two fresh
 development boots pass 512 scheduler dispatches and 1023/1024 syscalls; malformed
 startup retires both dependent tasks and returns their memory without a kernel

@@ -32,6 +32,11 @@ def source_bindings() -> dict[str, str]:
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "runtime").glob("*.py"))
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "tools").glob("qualify_native_*.py"))
     paths.update({
+        "native/kernel/src/capability_ipc/console.rs",
+        "native/kernel/src/capability_ipc/console/tests.rs",
+        "native/kernel/src/arch/x86_64/user_ipc/console.rs",
+        "native/userspace/src/console.rs", "native/userspace/src/bin/console.rs",
+        "tests/test_native_console.py",
         "native/kernel/src/user_root_probe/peer_driver/session.rs",
         "native/kernel/src/user_entry/timer/calibration.rs",
         "tests/test_native_session.py",
@@ -103,7 +108,7 @@ def main() -> int:
     owner_report = Path("C:/Users/rookp/PooleGlyph/tests/reports/conformance_report.json")
     owner_before = digest(owner_report) if owner_report.is_file() else None
     report: dict = {
-        "contract_id": "PSTART1", "cycle": 261,
+        "contract_id": "PSTART1", "cycle": 262,
         "scope": "host_and_native_owned_builtin_program_and_copied_argument_startup",
         "status": "fail", "source_bindings": before, "checks": [],
         "guest_runs": 0, "ring3_executed": False, "iso_built": False,
@@ -157,6 +162,12 @@ def main() -> int:
     ]
     commands.append(("clock_ownership_compile_fail", [str(cargo), "test", *common, "--doc", "--target",
         "x86_64-pc-windows-msvc", *bounded, "user_entry::timer::clock::", "--", "--test-threads=1"], 1))
+    for release in (False, True):
+        commands.append(("console_kernel_" + ("release" if release else "debug"),
+            [str(cargo), "test", *common, "--lib", "--features", "development-console",
+             "--target", "x86_64-pc-windows-msvc", *bounded, *(["--release"] if release else []),
+             "--", "--test-threads=1"], 477))
+    commands.append(("console_oracle", [sys.executable, "-B", "-m", "unittest", "tests.test_native_console", "-v"], None))
     for feature in ("development-trap-returning", "development-locks"):
         commands.append(("reject_" + feature, [str(cargo), "check", "--manifest-path",
             str(ROOT / "native/Cargo.toml"), "--package", "pooleboot", "--bin", "PooleBoot",

@@ -68,7 +68,16 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 569)
+        self.assertEqual(len(self.artifact["bound_sources"]), 580)
+        paths = {item["path"] for item in self.artifact["bound_sources"]}
+        self.assertTrue({"docs/checkpoints/cycle262-native-user-console.md",
+            "docs/native-user-console.md", "runs/native-console-readiness.json",
+            "native/kernel/src/capability_ipc/console.rs",
+            "native/kernel/src/capability_ipc/console/tests.rs",
+            "native/kernel/src/arch/x86_64/user_ipc/console.rs",
+            "native/userspace/src/console.rs", "native/userspace/src/bin/console.rs",
+            "runtime/native_console.py", "tools/qualify_native_console.py",
+            "tests/test_native_console.py"}.issubset(paths))
         for path in ("docs/checkpoints/cycle221-current-kernel-smp-and-ap-worker-replay.md",
                      "docs/checkpoints/cycle220-current-kernel-scheduler-replay.md",
                      "docs/checkpoints/cycle219-current-kernel-memory-replay.md",

@@ -10,6 +10,12 @@ use poolekernel::{
 };
 
 static mut IPC: Space = Space::new();
+#[cfg(feature = "development-console")]
+mod console;
+#[cfg(feature = "development-console")]
+pub use console::bootstrap as bootstrap_console;
+#[cfg(feature = "development-console")]
+pub(super) use console::byte as console_byte;
 /// SAFETY: the clock adapter authenticates the exclusive BSP/root/IF0 before
 /// borrowing this owner, including during a suspended authenticated syscall.
 pub unsafe fn with_clock<T>(
@@ -73,9 +79,15 @@ pub unsafe fn bootstrap(
 /// SAFETY: exclusive BSP and stopped task; detach before freeing its image.
 pub unsafe fn detach(id: TaskId) -> Result<(), Error> {
     idle()?;
-    unsafe { &mut *(&raw mut IPC) }
-        .detach_if_attached(id)
-        .map_err(|_| Error::State)
+    let s = unsafe { &mut *(&raw mut IPC) };
+    #[cfg(feature = "development-console")]
+    let console_owner = s.owns_console(id);
+    s.detach_if_attached(id).map_err(|_| Error::State)?;
+    #[cfg(feature = "development-console")]
+    if console_owner {
+        console::quiesce()?;
+    }
+    Ok(())
 }
 
 pub(super) fn prepare_wait(

@@ -7,9 +7,19 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 261
+Last roadmap reconciliation: PooleOS Cycle 262
 
-Cycle261 executes separately built PooleInit/PooleCounter under the native kernel
+Cycle262 adds an independently compiled user-space console driver with confined
+COM2 authority. Two fresh guests echo actual host input; console exit/bad authority
+reclaims its memory while the separate init/counter pair continues. Default native
+diagnostics and ordinary unsigned-boot denial still pass. Next: console IPC and a
+real shell, bundled files/two usable apps and optical ISO acceptance. No usable ISO
+yet; complete robust microkernel, N0-N39, PooleGlyph/PDC, accessible PooleGlass and
+production-trust obligations remain. Disk preflight/evidence retention is a new
+open risk; exact-candidate canonical gates still block main.
+[Cycle262 evidence](checkpoints/cycle262-native-user-console.md).
+
+Historical Cycle261 executes separately built PooleInit/PooleCounter under the native kernel
 in an explicit development session, separated from diagnostic startup. Two fresh
 boots pass sustained IPC progress; malformed startup retires both dependent tasks
 without a kernel panic. No console, shell or integration ISO exists yet. Next:

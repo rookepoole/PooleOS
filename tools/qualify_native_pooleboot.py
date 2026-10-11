@@ -339,7 +339,12 @@ def _execute_once(
     completion_marker: bytes = b"POOLEBOOT/0.1 STOP BEFORE TRANSFER",
     hpet_msi: bool = False,
     pause_on_completion: bool = False,
+    console_port: int | None = None,
+    console_poll: Callable[[bytes], bool] | None = None,
 ) -> tuple[dict[str, Any], bytes, bytes]:
+    if (console_port is None) != (console_poll is None) or (console_port is not None and
+            (type(console_port) is not int or not 1 <= console_port <= 65535 or not pause_on_completion)):
+        raise ValueError("console capture requires a bounded loopback port, observer and paused snapshot")
     timer_options = _hpet_msi_options(hpet_msi)
     firmware = {item["role"]: item for item in lock["firmware"]["files"]}
     vars_source = qemu_root / firmware["vars_template_copy_only"]["relative_path"]
@@ -354,6 +359,10 @@ def _execute_once(
     )
     port = _available_port()
     command.extend(timer_options)
+    if console_port is not None:
+        command.extend(["-chardev",
+            f"socket,id=pooleconsole,host=127.0.0.1,port={console_port},server=on,wait=off,nodelay=on",
+            "-device", "isa-serial,index=1,chardev=pooleconsole"])
     command.extend(
         [
             "-device",
@@ -390,7 +399,7 @@ def _execute_once(
                 raise QualificationError("PooleBoot emitted an error or panic marker")
             if b"POOLEBOOT/0.1 FRAME READY" in raw_debug:
                 frame_ready_observed = True
-            if completion_marker in raw_debug:
+            if (console_poll(raw_debug) if console_poll is not None else completion_marker in raw_debug):
                 completion_marker_observed = True
                 break
             if process.poll() is not None:
@@ -446,6 +455,8 @@ def _execute_once(
                 "host_acceleration": False,
                 "hpet_msi": hpet_msi,
                 "qmp_loopback_only": True,
+                **({"console_loopback_only": True, "console_port_name": "COM2",
+                    "console_output_is_not_kernel_evidence": True} if console_port is not None else {}),
                 "qmp_greeting": greeting,
                 "timestamped_qmp_events_excluded_from_equality": True,
                 "qmp_quit_requested": True,

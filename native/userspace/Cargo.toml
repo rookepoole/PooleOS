@@ -31,3 +31,9 @@ incremental = false
 overflow-checks = true
 panic = "abort"
 strip = "symbols"
+
+[[bin]]
+name = "PooleConsole"
+path = "src/bin/console.rs"
+test = false
+bench = false

@@ -15,6 +15,10 @@ pub struct Member {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Step {
+    #[cfg(feature = "development-console")]
+    Console {
+        member: u8,
+    },
     Endpoint {
         member: u8,
     },
@@ -82,6 +86,11 @@ impl Space {
             }
             for (index, step) in steps.iter().enumerate() {
                 result.handles[index] = match *step {
+                    #[cfg(feature = "development-console")]
+                    Step::Console { member } => {
+                        let id = members.get(usize::from(member)).ok_or(Error::Plan)?.id;
+                        self.grant_console(id).map_err(Error::Ipc)?
+                    }
                     Step::Endpoint { member } => {
                         let id = members.get(usize::from(member)).ok_or(Error::Plan)?.id;
                         self.create_endpoint(id).map_err(Error::Ipc)?

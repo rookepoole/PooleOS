@@ -55,19 +55,20 @@ fn handle(bytes: &[u8]) -> Result<u64, Error> {
 }
 
 #[inline(always)]
-pub fn decode(bytes: &[u8], version: u64, expected: Role) -> Result<Boot, Error> {
+fn arguments<const N: usize>(bytes: &[u8], version: u64) -> Result<[&[u8]; N], Error> {
     if version != 1
         || !(96..=512).contains(&bytes.len())
         || bytes.len() % 8 != 0
         || bytes.get(..8) != Some(b"PSTART1\0")
         || word(bytes, 8)? != bytes.len() as u64
-        || word(bytes, 16)? != 3
+        || N > 8
+        || word(bytes, 16)? != N as u64
         || word(bytes, 24)? != 0
-        || bytes[56..96].iter().any(|&b| b != 0)
+        || bytes[32 + N * 8..96].iter().any(|&b| b != 0)
     {
         return Err(Error::Header);
     }
-    let mut args = [&[][..]; 3];
+    let mut args = [&[][..]; N];
     let mut cursor = 96;
     for (index, arg) in args.iter_mut().enumerate() {
         if word(bytes, 32 + index * 8)? != cursor as u64 {
@@ -90,6 +91,21 @@ pub fn decode(bytes: &[u8], version: u64, expected: Role) -> Result<Boot, Error>
     {
         return Err(Error::Layout);
     }
+    Ok(args)
+}
+
+#[inline(always)]
+pub fn console(bytes: &[u8], version: u64) -> Result<u64, Error> {
+    let args = arguments::<2>(bytes, version)?;
+    if args[0] != b"console" {
+        return Err(Error::Role);
+    }
+    handle(args[1])
+}
+
+#[inline(always)]
+pub fn decode(bytes: &[u8], version: u64, expected: Role) -> Result<Boot, Error> {
+    let args = arguments::<3>(bytes, version)?;
     let role = match args[0] {
         b"init" => Role::Init,
         b"counter" => Role::Counter,

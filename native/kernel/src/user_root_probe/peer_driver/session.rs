@@ -4,6 +4,13 @@ use poolekernel::user_entry::startup::{Arguments, Program};
 
 static INIT: &[u8] = include_bytes!(env!("POOLEOS_INIT_CODE"));
 static COUNTER: &[u8] = include_bytes!(env!("POOLEOS_COUNTER_CODE"));
+#[cfg(feature = "development-console")]
+static CONSOLE: &[u8] = include_bytes!(env!("POOLEOS_CONSOLE_CODE"));
+const TASK_COUNT: usize = if cfg!(feature = "development-console") {
+    3
+} else {
+    2
+};
 
 #[inline(never)]
 pub(crate) fn run(
@@ -28,6 +35,17 @@ pub(crate) fn run(
     let before = arch::x86_64::user_root_write_count();
     let init = checked!(Program::new(INIT, 0));
     let counter = checked!(Program::new(COUNTER, 0));
+    #[cfg(feature = "development-console")]
+    let console = checked!(Program::new(CONSOLE, 0));
+    #[cfg(feature = "development-console")]
+    let args2 = checked!(Arguments::new(&[
+        b"console",
+        if cfg!(feature = "development-console-bad-handle") {
+            b"0000000100040002"
+        } else {
+            b"0000000100040001"
+        }
+    ]));
     let args0 = checked!(Arguments::new(&[
         b"init",
         b"0000000100010001",
@@ -50,9 +68,14 @@ pub(crate) fn run(
         checked!(Peer::new_program(
             1, &counter, &args1, handoff, core, bits, manager, topology, hpet
         )),
+        #[cfg(feature = "development-console")]
+        checked!(Peer::new_program(
+            2, &console, &args2, handoff, core, bits, manager, topology, hpet
+        )),
     ];
     let mut scheduler = checked!(scheduler::Scheduler::new(1));
     let cpu = checked!(scheduler::CpuId::new(0));
+    #[cfg(not(feature = "development-console"))]
     let grants = checked!(unsafe {
         arch::x86_64::user_ipc::bootstrap(
             [
@@ -62,13 +85,25 @@ pub(crate) fn run(
             &mut scheduler,
         )
     });
+    #[cfg(feature = "development-console")]
+    let grants = checked!(unsafe {
+        arch::x86_64::user_ipc::bootstrap_console(
+            core::array::from_fn(|i| (peers[i].id, peers[i].admission)),
+            &mut scheduler,
+        )
+    });
     // Prepared strings are only locators. Authenticate the actual granted handles
     // before either task can run; never manufacture authority from argument text.
-    if grants != [0x100010001, 0x100010001, 0x100010002, 0x100010002]
+    if grants[..4] != [0x100010001, 0x100010001, 0x100010002, 0x100010002]
         || peers[0].root == peers[1].root
-        || manager.summary().allocated_pages != baseline + 26
+        || manager.summary().allocated_pages != baseline + 13 * TASK_COUNT as u64
     {
         stop(20001, serial, debugcon);
+    }
+    #[cfg(feature = "development-console")]
+    if grants[4] != 0x100040001 || peers[2].root == peers[0].root || peers[2].root == peers[1].root
+    {
+        stop(20005, serial, debugcon);
     }
     {
         let mut log = EarlyLogger::new(BootSink {
@@ -76,20 +111,35 @@ pub(crate) fn run(
             debugcon,
             ring: &EARLY_RING,
         });
+        #[cfg(not(feature = "development-console"))]
         log.write_str("POOLEOS:SESSION START contract=PSESSION1 programs=2 bootstrap=PSTART1 abi=PSABI1 init_bytes=");
+        #[cfg(feature = "development-console")]
+        log.write_str("POOLEOS:SESSION START contract=PSESSION2 programs=3 bootstrap=PSTART1 abi=PSABI1 init_bytes=");
         log.write_decimal_u64(INIT.len() as u64);
         log.write_str(" counter_bytes=");
         log.write_decimal_u64(COUNTER.len() as u64);
+        #[cfg(feature = "development-console")]
+        {
+            log.write_str(" console_bytes=");
+            log.write_decimal_u64(CONSOLE.len() as u64);
+        }
         for (label, value) in [(" root0=", peers[0].root), (" root1=", peers[1].root)] {
             log.write_str(label);
             log.write_hex_u64(value);
         }
+        #[cfg(not(feature = "development-console"))]
         log.write_str(" granted_handles=4 diagnostics=0 production=0\n");
+        #[cfg(feature = "development-console")]
+        {
+            log.write_str(" root2=");
+            log.write_hex_u64(peers[2].root);
+            log.write_str(" granted_handles=5 port=COM2 irq=0 diagnostics=0 production=0\n");
+        }
     }
-    let mut waiting = [None; 2];
-    let mut dead = [false; 2];
-    let mut calls = [0u64; 2];
-    let mut ticks = [0u64; 2];
+    let mut waiting = [None; TASK_COUNT];
+    let mut dead = [false; TASK_COUNT];
+    let mut calls = [0u64; TASK_COUNT];
+    let mut ticks = [0u64; TASK_COUNT];
     let mut waits = 0u64;
     let mut wakes = 0u64;
     let mut preemptions = 0u64;
@@ -97,7 +147,7 @@ pub(crate) fn run(
     loop {
         let id = checked!(scheduler.dispatch(cpu));
         let index = usize::from(id.slot);
-        if index >= 2 || dead[index] || peers[index].id.generation != id.generation {
+        if index >= TASK_COUNT || dead[index] || peers[index].id.generation != id.generation {
             stop(20002, serial, debugcon);
         }
         let p = &mut peers[index];
@@ -208,10 +258,10 @@ pub(crate) fn run(
         {
             stop(20003, serial, debugcon);
         }
-        if dead == [true; 2] {
+        if dead == [true; TASK_COUNT] {
             if manager.summary().allocated_pages != baseline
                 || !checked!(unsafe { arch::x86_64::user_ipc::empty() })
-                || waiting != [None; 2]
+                || waiting != [None; TASK_COUNT]
             {
                 stop(20004, serial, debugcon);
             }
@@ -220,7 +270,9 @@ pub(crate) fn run(
                 debugcon,
                 ring: &EARLY_RING,
             });
-            log.write_str("POOLEOS:SESSION EMPTY tasks=0 objects=0 released_pages=26 kernel_alive=1 production=0\n");
+            log.write_str("POOLEOS:SESSION EMPTY tasks=0 objects=0 released_pages=");
+            log.write_decimal_u64(13 * TASK_COUNT as u64);
+            log.write_str(" kernel_alive=1 production=0\n");
             // No restart/supervision policy exists yet. Keep the quiescent kernel
             // resident; this is not a usable shell or a healthy service session.
             halt_forever();
@@ -246,6 +298,19 @@ pub(crate) fn run(
                 (
                     " cr3_writes=",
                     arch::x86_64::user_root_write_count() - before,
+                ),
+            ] {
+                log.write_str(label);
+                log.write_decimal_u64(value);
+            }
+            #[cfg(feature = "development-console")]
+            for (label, value) in [
+                (" calls2=", calls[2]),
+                (" ticks2=", ticks[2]),
+                (" console_dead=", u64::from(dead[2])),
+                (
+                    " allocated_pages=",
+                    manager.summary().allocated_pages - baseline,
                 ),
             ] {
                 log.write_str(label);

@@ -1,5 +1,6 @@
 #![no_std]
 
+pub mod console;
 pub mod protocol;
 pub mod service;
 pub mod startup;

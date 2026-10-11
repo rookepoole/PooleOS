@@ -1,15 +1,49 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-11
-Plan version: 2.164.0-native-service-session
-Roadmap cycle: PooleOS Cycle 261
+Plan version: 2.165.0-native-user-console
+Roadmap cycle: PooleOS Cycle 262
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 261: Native Service Session
+## Cycle 262: Native User Console
+
+PooleConsole is now a separately compiled CPL3 driver beside PooleInit and
+PooleCounter. The kernel grants an exclusive generation-bound COM2 byte-port
+capability; UART configuration, polling and echo buffering live in user space.
+Register filtering forbids interrupt/DMA enabling, unrelated ports and status
+writes. Revocation and quiescence precede freeing the console's private memory.
+
+Two fresh guests echo different 55/53-byte host inputs exactly, including binary
+and log-like data on an untrusted channel separate from kernel diagnostics. EOT
+exits the console with code0 and returns13 pages; a bad startup handle exits131
+without application UART output. Init/counter continue in all three guests through
+512 dispatches. Independent builds reproduce exactly. The default regression
+passes22 checks,1698 overlapping Rust test executions and99 Python oracle tests,
+including two79-marker diagnostic boots and ordinary unsigned-boot denial.
+[Evidence and retained failures](checkpoints/cycle262-native-user-console.md).
+
+USI-3 is partial. Next: bounded console IPC and a real input-driven user-space
+shell, read-only bundled files, two usable applications, fault/survivor interaction
+and corrected optical ISO packaging. Console echo is not a shell or a usable ISO.
+Polled idle, general init supervision, restarts/loading, native clock recovery,
+resource policy and signed PXABI1/PINIT1 remain open. Kernel layout stays205/208
+pages with the36-page guarded stack; the console-only PMM quota rises32 to48 for
+three private images, not kernel image/stack bounds. Default quota remains32.
+
+The first default-regression capture failed from host disk exhaustion; it remains
+failed evidence. Hash-verified compression of this cycle's generated artifacts
+recovered about825MB before a fresh passing retry. New open risk
+`FLAG-N36-EVIDENCE-STORAGE-001` requires free-space preflight and evidence retention/
+restore policy. No phases or existing flags close:40 phases301 subphases8996
+requirements59 additions98 flags43 open20 gap groups. Three product-readiness
+failures and full exact-candidate canonical gates still block main. Complete robust
+microkernel, PooleGlyph/PDC and accessible PooleGlass remain required after the ISO.
+
+## Historical Cycle 261: Native Service Session
 
 PooleKernel now launches the exact independently built PooleInit and PooleCounter
 programs under an explicit development-session feature. Owned startup, distinct

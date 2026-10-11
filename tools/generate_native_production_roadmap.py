@@ -13267,14 +13267,110 @@ def apply_cycle261(roadmap: dict, test_count: int) -> dict:
     flag["closure_condition"] += " Cycle261 adds native session execution, not interactive ISO acceptance. " + gap
     roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
-    return roadmap
+    return apply_cycle262(roadmap, test_count)
 
+
+def apply_cycle262(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle262-native-user-console.md"
+    path = "runs/native-console-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    console, regression = receipt["console"], receipt["default_regression"]
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    historical = copy.deepcopy(baseline["user_space_integration"])
+    baseline["historical_cycle261_user_space_integration"] = historical
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle261_" + name] = copy.deepcopy(gate["current_" + name])
+    for name in ("user_program_integration", "native_session_integration"):
+        baseline[name]["evidence_status"] = "historical_after_cycle262_source_changes"
+    baseline.update(pooleos_cycle=262, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 262
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-user-console.md"]
+    gate["current_candidate_audit"]["cycle"] = 262
+    gate["current_focused_source_projection"]["cycle"] = 262
+    gate["qualification_status"] = "native_console_pass_shell_ISO_and_canonical_gates_pending"
+    count = sum(c["tests_passed"] or 0 for c in regression["checks"])
+    gate["current_closeout_regression"] = dict(cycle=262,
+        status=regression["status"], checks=len(regression["checks"]),
+        checks_passed=sum(c["passed"] for c in regression["checks"]),
+        tests_run=count, tests_passed=count, tests_skipped=0,
+        rust_counts_overlap=True, additional_python_oracle_tests=99,
+        source_binding_count=len(regression["source_bindings"]),
+        receipt_path=path, receipt_section="default_regression",
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        guest_runs=regression["guest_runs"], qualification_guest_bound_seconds=150,
+        qualification_bound_unchanged=True,
+        known_unresolved_readiness_tests=regression["known_unresolved_readiness_tests"],
+        failed_attempts_retained_in=checkpoint,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=262, status="pass",
+        tests_run=196, tests_passed=196, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=51.861, elapsed_seconds=52.843,
+        log_sha256="C8C754AC7D15C317DCA3251C9703EF89AD28210BCEA80F6C34E825DF0C8EE1F6",
+        source_unchanged=True, owner_report_unchanged=True,
+        conservation_tests=132, conservation_test_seconds=8.882,
+        conservation_capture_seconds=10.359,
+        conservation_log_sha256="A6B89BB0F678BE2223559CBDA98A0F71062AC381A24D3C19C6720978FFFF30AE",
+        scope="pre_closeout_metadata_and_conservation_not_final_commit_or_canonical_gate",
+        counts_overlap=True, historical_integrity_is_not_new_execution=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    lane = copy.deepcopy(historical)
+    lane.update(cycle=262, receipt_path=path, receipt_section="console", session_contract="PSESSION2",
+        user_console=True, native_console_program=True, console_capability_contract="PKPORT1",
+        console_polled_only=True, console_ipc_service=False, shell=False)
+    lane["stages"]["USI-3"] = "partial_native_init_counter_console_echo_console_IPC_supervision_loading_and_trust_pending"
+    baseline["user_space_integration"] = lane
+    baseline["native_console_integration"] = dict(cycle=262, contract_id="PCONSOLE1", status=console["status"],
+        receipt_path=path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        source_binding_count=len(console["source_bindings"]),
+        program_source_binding_count=len(console["program_build"]["source_bindings"]),
+        independent_kernel_builds_equal=console["independent_kernel_builds_equal"],
+        kernel_sha256=console["kernels"]["console"]["sha256"],
+        positive_guests=2, bad_handle_guests=1, console_rust_tests=6,
+        user_program_rust_tests=21, oracle_tests=7,
+        final_progress=[g["marker_summary"]["samples"][-1] for g in console["guest_runs"]],
+        input_bytes=[g["interaction"]["input_bytes"] for g in console["guest_runs"]],
+        native_execution_verified=True, native_preemption_observed=False,
+        user_console=True, console_ipc_service=False, init_supervision=False,
+        shell=False, iso_built=False, production_ready=False)
+    evidence = "Cycle262: independently built PooleConsole runs at CPL3 with an exclusive generation-bound COM2 lease. Two fresh guests echo55/53 exact host bytes, then exit0 and release13 pages; bad handle exits131 with no application UART output. Init/counter survive to512 dispatches. " + checkpoint
+    gap = "No console IPC, shell, files/two useful apps, efficient idle, supervision or integration ISO yet. General loading, native clock recovery and signed PXABI1/PINIT1 remain open.205_of208 fixed image and three product-readiness failures/full canonical replay still gate main."
+    for phase_id in ("N13", "N14", "N16", "N20", "N21", "N22", "N36"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    n36 = next(p for p in roadmap["phases"] if p["id"] == "N36")
+    n36["current_evidence"].insert(0, f"Cycle 262 source inventory: {test_count} Python tests discovered; full qualification pending")
+    storage = "Preflight free disk space before bounded builds/captures and implement hash-verified evidence retention, compression and restore without discarding failures or changing acceptance bounds."
+    n36["current_gaps"].insert(0, storage)
+    roadmap["implementation_flags"].append(dict(id="FLAG-N36-EVIDENCE-STORAGE-001",
+        **{"class": "RISK"}, status="open", phase_id="N36", closure_condition=storage, evidence=[checkpoint]))
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N13-USERSPACE-ISO-001", "FLAG-NATIVE-DRIVER-001"):
+            flag["evidence"].append(checkpoint)
+            flag["closure_condition"] += " Cycle262 adds confined native console echo, not a console IPC service or ISO. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(
+        title="Connect user-space console IPC to a native shell, then files/apps and optical ISO",
+        phase_ids=["N13", "N14", "N16", "N22"],
+        entry_evidence=[checkpoint, path, "docs/native-user-console.md", "docs/native-userspace-integration-iso.md"],
+        exit_evidence=[
+            "bounded user-space console IPC with input/output queues, backpressure and authenticated sender authority",
+            "real native input-driven shell, read-only bundled files and two useful applications",
+            "fault/survivor interaction, resource exhaustion and supervised cleanup",
+            "fresh corrected optical ISO boots, no kernel-shell or scripted-transcript substitute",
+            "efficient idle, restart/loading/trust policy and complete robust microkernel remain explicit",
+            storage,
+            "resolve205_of208 image margin and product-readiness/canonical gates before main"])
+    return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1343)
+    parser.add_argument("--test-count", type=int, default=1351)
     parser.add_argument("--status-date", default="2026-10-11")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

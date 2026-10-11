@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 261, 2026-10-11. No new ISO exists yet.
+Status: implementation started, Cycle 262, 2026-10-11. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -45,13 +45,22 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | --- | --- | --- | --- |
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
-| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle261 partial: independent init/counter programs execute in isolated CPL3 roots with real IPC under a separate development-session profile. Full init supervision, executable trust, restarts and console/input remain |
+| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle262 partial: independent init/counter/console programs execute in three CPL3 roots; confined COM2 echo and console cleanup pass. Console IPC, efficient idle, full init supervision, executable trust and restarts remain |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
 ### Immediate Next Move
 
-Current: [Cycle261 native session](checkpoints/cycle261-native-service-session.md).
+Current: [Cycle262 native console](checkpoints/cycle262-native-user-console.md).
+PooleConsole performs UART configuration/polling and exact echo in a private CPL3
+root. Two distinct host inputs pass; console exit0 or bad-handle exit131 reclaims13
+pages while init/counter survive to512 dispatches. User bytes cannot qualify kernel
+markers. Next: console IPC with bounded queues/backpressure and authenticated
+clients, then a real shell, bundled read-only files, two usable apps and optical
+ISO acceptance. Polled echo does not close service supervision or efficient idle.
+Preflight free space and preserve failed evidence before new long captures.
+
+Historical: [Cycle261 native session](checkpoints/cycle261-native-service-session.md).
 The exact separately compiled PooleInit and PooleCounter programs now execute
 through actual CPL3 entry and PSABI1 calls. Two fresh development guests each pass
 512 dispatches and 1023/1024 syscalls. Bad-role startup retires both dependent tasks
@@ -70,8 +79,8 @@ Retained kernel evidence: [Cycle259 startup](checkpoints/cycle259-owned-program-
 Trusted built-in code and arguments are copied before mapping; initial registers
 bind to the complete owned image. Two isolated tasks validate copied arguments.
 Sustained dispatch, IPC, deadlines, atomic admission and failed-cleanup ownership
-remain required. Native program launch is now implemented; full init supervision,
-confined console/input and interrupt-driven idle remain. PSTART1 is not executable trust,
+remain required. Native program launch and confined console echo are implemented;
+full init supervision, console IPC and interrupt-driven idle remain. PSTART1 is not executable trust,
 signed PXABI1/PINIT1 activation, general loading policy or user spawn authority.
 Native clock failure recovery remains open; current idle is bounded polling.
 Per-dispatch CPU ticks remain distinct from the service clock.

@@ -257,6 +257,14 @@ pub(super) fn dispatch_owned(
         frame.rax, frame.rdi, frame.rsi, frame.rdx, frame.r10, frame.r8, frame.r9,
     ) {
         Ok(Request::Version) => (Status::Ok, syscall::VERSION),
+        #[cfg(feature = "development-console")]
+        Ok(Request::Console {
+            handle,
+            offset,
+            value,
+        }) => caller.map_or((Status::Denied, 0), |caller| {
+            super::user_ipc::console_byte(caller, handle, offset, value)
+        }),
         Ok(Request::Exit(code)) => {
             s.counts[Status::Ok as usize] += 1;
             return Ok(Action::Exit(code));

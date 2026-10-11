@@ -137,7 +137,12 @@ pub fn run(
     IST1_TOP.store(descriptors.ist1_top, Ordering::Release);
     IST2_BOTTOM.store(descriptors.ist2_bottom, Ordering::Release);
     IST2_TOP.store(descriptors.ist2_top, Ordering::Release);
-    let mut manager = checked!(3, PhysicalMemoryManager::from_handoff(handoff, core, 32));
+    let quota = if cfg!(feature = "development-console") {
+        48
+    } else {
+        32
+    };
+    let mut manager = checked!(3, PhysicalMemoryManager::from_handoff(handoff, core, quota));
     checked!(
         32,
         manager.advance_reclaim_stage(ReclaimStage::PostExitBootServices)

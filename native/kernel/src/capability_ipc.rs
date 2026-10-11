@@ -18,6 +18,8 @@ pub const DEPTH: usize = 4;
 pub const MAX_BYTES: usize = 64;
 const ENDPOINT_TAG: u64 = 1 << 16;
 pub mod admission;
+#[cfg(feature = "development-console")]
+pub mod console;
 pub mod deadline;
 pub mod reply;
 pub mod request;
@@ -143,6 +145,8 @@ pub struct Space {
     tables: [Table; TASKS],
     objects: [ObjectSlot; ENDPOINTS],
     clock: deadline::Clock,
+    #[cfg(feature = "development-console")]
+    console: console::Lease,
 }
 impl Default for Space {
     fn default() -> Self {
@@ -155,6 +159,8 @@ impl Space {
             tables: [Table::EMPTY; TASKS],
             objects: [ObjectSlot::EMPTY; ENDPOINTS],
             clock: deadline::Clock::EMPTY,
+            #[cfg(feature = "development-console")]
+            console: console::Lease::EMPTY,
         }
     }
     pub fn attach(&mut self, id: TaskId, image: ImageAdmission) -> Result<(), Error> {
@@ -319,6 +325,10 @@ impl Space {
     }
     // The admission transaction already owns these exact, never-dispatched tables.
     fn detach_table(&mut self, t: usize, owner: TaskId) {
+        #[cfg(feature = "development-console")]
+        if self.owns_console(owner) {
+            self.console.owner = None;
+        }
         self.retire_requests(owner);
         for i in 0..ENDPOINTS {
             if self.objects[i].value.is_some_and(|e| e.owner == owner) {
@@ -350,6 +360,10 @@ impl Space {
         self.detach(owner)
     }
     pub fn is_empty(&self) -> bool {
+        #[cfg(feature = "development-console")]
+        if self.console.owner.is_some() {
+            return false;
+        }
         self.tables.iter().all(|t| {
             t.caller.is_none()
                 && t.wait.is_none()
