@@ -12,8 +12,13 @@ use poolekernel::{
 static mut IPC: Space = Space::new();
 #[cfg(feature = "development-console")]
 mod console;
-#[cfg(feature = "development-console")]
+#[cfg(all(
+    feature = "development-console",
+    not(feature = "development-console-ipc")
+))]
 pub use console::bootstrap as bootstrap_console;
+#[cfg(feature = "development-console-ipc")]
+pub use console::bootstrap_ipc as bootstrap_console_ipc;
 #[cfg(feature = "development-console")]
 pub(super) use console::byte as console_byte;
 /// SAFETY: the clock adapter authenticates the exclusive BSP/root/IF0 before

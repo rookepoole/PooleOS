@@ -7,17 +7,17 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 263
+Last roadmap reconciliation: PooleOS Cycle 264
 
-Cycle263 builds separate console IPC service/client programs with authenticated
-kernel-envelope decoding, bounded operations and retained backpressure.33 host
-tests pass debug/release; both programs reproduce exactly within one RX page each.
-This is not new native execution or an ISO. Next: four-process native admission
-and input/IPC/cleanup qualification, then shell/files/apps/optical ISO. The full
+Cycle264 executes four isolated native programs with console service/client IPC,
+exact host-input echo, normal close/reap and wrong-peer rejection. All23 default
+regression checks pass. The rejected peer's client still polls: bounded peer-death
+recovery and capacity for init/console/shell/two apps precede shell/files/optical ISO.
+This is development evidence, not a usable ISO or production promotion. The full
 robust microkernel and all N0-N39, PooleGlyph/PDC, accessible PooleGlass and signed
-production requirements remain. User-build disk preflight is partial risk repair;
-main remains gated by exact-candidate canonical qualification.
-[Cycle263 evidence](checkpoints/cycle263-console-ipc-programs.md).
+production requirements remain. Main remains gated by exact-candidate canonical
+qualification; a focused regression is not the full gate.
+[Cycle264 evidence](checkpoints/cycle264-native-console-ipc.md).
 
 Historical Cycle262 adds an independently compiled user-space console driver with confined
 COM2 authority. Two fresh guests echo actual host input; console exit/bad authority

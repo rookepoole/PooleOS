@@ -1,7 +1,7 @@
 //! Exclusive BSP adapter; no untrusted device output enters the kernel logger.
 use super::*;
 use poolekernel::capability_ipc::{
-    admission::{Member, Step},
+    admission::Member,
     console::{BASE, BytePorts},
 };
 
@@ -36,10 +36,12 @@ pub(super) fn quiesce() -> Result<(), Error> {
 }
 
 /// SAFETY: exclusive BSP, IF0, prepared owned roots, no dispatched task or AP.
+#[cfg(not(feature = "development-console-ipc"))]
 pub unsafe fn bootstrap(
     tasks: [(TaskId, ImageAdmission); 3],
     scheduler: &mut poolekernel::scheduler::Scheduler,
 ) -> Result<[u64; 5], Error> {
+    use poolekernel::capability_ipc::admission::Step;
     idle()?;
     let s = unsafe { &mut *(&raw mut IPC) };
     if !s.is_empty() {
@@ -79,4 +81,27 @@ pub unsafe fn bootstrap(
 pub(crate) fn byte(caller: Caller, handle: u64, offset: u64, value: Option<u64>) -> (Status, u64) {
     // dispatch_owned has authenticated CPL3, saved Run identity, root/depth and IF0.
     unsafe { &mut *(&raw mut IPC) }.console_byte(caller, handle, offset, value, &mut Ports)
+}
+
+/// SAFETY: exclusive BSP, IF0, four owned prepared roots, no dispatched task/AP.
+#[cfg(feature = "development-console-ipc")]
+pub unsafe fn bootstrap_ipc(
+    tasks: [(TaskId, ImageAdmission); 4],
+    scheduler: &mut poolekernel::scheduler::Scheduler,
+) -> Result<[u64; 9], Error> {
+    idle()?;
+    let s = unsafe { &mut *(&raw mut IPC) };
+    if !s.is_empty() {
+        return Err(Error::State);
+    }
+    let members = tasks.map(|(id, image)| Member {
+        id,
+        image,
+        priority: 16,
+    });
+    let admitted = s
+        .admit_console_session(scheduler, &members)
+        .map_err(|_| Error::State)?;
+    quiesce()?;
+    admitted.handles[..9].try_into().map_err(|_| Error::State)
 }

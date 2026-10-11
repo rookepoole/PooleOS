@@ -1,15 +1,51 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-11
-Plan version: 2.166.0-console-ipc-programs
-Roadmap cycle: PooleOS Cycle 263
+Plan version: 2.167.0-native-console-ipc
+Roadmap cycle: PooleOS Cycle 264
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 263: Console IPC Programs
+## Cycle 264: Native Console IPC
+
+Four separately compiled user programs now execute in private CPL3 roots:
+PooleInit, PooleCounter, PooleConsoleService and PooleConsoleClient. Failure-atomic
+admission installs nine explicit grants; only the service owns the COM2 device.
+Fresh host inputs of45 and52 bytes traverse actual PCS1 IPC and echo exactly.
+Both console programs exit0 and release26 pages while init/counter continue to512
+dispatches. A wrong-peer control rejects with service exit152, no application
+output,13 reclaimed pages and surviving init/counter. The client keeps polling in
+this case; bounded peer-death recovery is an explicit next prerequisite.
+
+The first four-task build exposed an allocator-accounting error:52 task-image
+pages excluded retained ACPI pages. The repaired profile separately bounds52 task
+pages plus at most12 firmware snapshot pages. These guests use one firmware page.
+Kernel image205/208 pages and guarded stack36 pages remain unchanged. Four new
+admission tests pass in481-test debug/release console profiles; new native-oracle
+tests reject false progress, broken ownership and UART-as-kernel-evidence.
+All23 default regression checks pass, including two native containment boots and
+ordinary unsigned-boot denial. Historical receipts stay immutable.
+[Evidence, repaired failures and limits](checkpoints/cycle264-native-console-ipc.md).
+
+Next in USI-3: bounded peer-death recovery, native PCS1 pressure/malformed-request
+controls, and reviewed admission/capacity/lifecycle for the minimum five demo roles
+(init, console, shell, two applications). Then USI-4 actual shell, read-only bundled
+files and usable applications, followed by USI-5 fresh optical ISO acceptance.
+General supervision/restart/loading/trust, efficient idle and native clock recovery
+remain. The complete robust microkernel, PDC/PooleGlyph, signed production trust
+and accessible PooleGlass continue after this intermediate milestone.
+
+No phase or flag closes:40 phases301 subphases8996 requirements59 additions98
+flags43 open20 gap groups.1365 discovered Python tests and595 architecture bindings
+are inventory, not full-suite execution. Three known product-readiness failures
+and the full exact-candidate canonical gates still block main. Console qualification
+adds512MiB storage preflight;29 explicit generated archives preserve failed evidence
+with member-hash verification. This does not reserve space or prove full restoration.
+
+## Historical Cycle 263: Console IPC Programs
 
 PooleConsoleService and PooleConsoleClient now compile independently as original
 user programs. PCS1 provides bounded Read/Input, Write/Written and Close/Closed

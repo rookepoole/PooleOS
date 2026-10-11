@@ -1,10 +1,12 @@
 # Native Console IPC
 
-Cycle263, 2026-10-11. Host tests and independent executable builds pass; native
-admission remains pending. The invariants below were frozen before implementation.
-See the [checkpoint](checkpoints/cycle263-console-ipc-programs.md). No native execution
-evidence exists until separately admitted programs run in a fresh guest. Keep Cycle262
-console echo as historical evidence, never relabel it as interprocess console I/O.
+Cycle264, 2026-10-11. Native four-process admission, exact IPC echo, close/reap and
+wrong-peer rejection pass in fresh guests. The rejected peer's client still polls;
+bounded peer-death recovery, shell and optical ISO remain open. See the
+[current checkpoint](checkpoints/cycle264-native-console-ipc.md).
+The CI invariants below were frozen before Cycle263 executable implementation;
+its [build-only checkpoint](checkpoints/cycle263-console-ipc-programs.md) and Cycle262
+non-IPC echo evidence remain historical, not newly executed evidence.
 
 ## Decision
 
@@ -58,3 +60,29 @@ execution claim follows from this build-only step.
 User-space shell, file service/two useful applications, supervision/loading,
 efficient idle, clock recovery, optical ISO, full robust microkernel, signed trust,
 PooleGlyph/PDC and accessible PooleGlass remain required.
+## Native Admission Qualification (Cycle264)
+
+NI1: PSESSION3 admits four distinct owned CPL3 roots and nine actual grants before
+dispatch: init/counter endpoints, service/client endpoints, service-only COM2.
+The task-image allowance is exactly 52 pages, with at most 12 separately accounted
+retained ACPI pages (64 total allocator quota); fixed kernel image/stack bounds
+remain. The first 52-total-page attempt failed at the fourth image because the
+allocator also owns the firmware snapshot; that failure remains in Cycle264 logs.
+NI2: Independently built service/client program bytes are embedded exactly once;
+two separately built kernel images match. Boot prefix, media, retained inputs and
+transcript remain independently bound to the exact candidate.
+NI3: Two fresh guests must echo different host-supplied binary/log-like input
+through PCS1 with exact bytes, then service/client exit0 on EOT. Both 13-page
+images are reaped, counters freeze, and init/counter continue past512 dispatches.
+NI4: A distinct wrong-expected-peer guest must reject the genuine kernel sender
+with service exit152 and zero application output. Its polling client remains
+live: this is an explicit unresolved peer-death notification/supervision gap,
+not recovered or gracefully closed. The independent pair must keep progressing.
+NI5: Host admission tests exercise all four members, cross-pair authority denial,
+message pressure, rollback, stale generations, queued acknowledgement surviving
+sender retirement, and full object cleanup. Host tests are not native pressure
+or fault-recovery qualification.
+NI6: Strict observation parsing rejects missing/replayed/mutated roots, counts,
+ownership and retirement. UART bytes never become trusted kernel observations.
+NI7: Keep earlier receipts immutable/historical; record every failure and source
+change; do not promote shell, ISO, general supervision, signed trust or production.

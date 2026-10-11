@@ -198,7 +198,8 @@ def _host_checks(cargo: Path, env: dict[str, str], temporary_root: Path) -> dict
 
 def _build_product(cargo: Path, env: dict[str, str], target_dir: Path, *, features: tuple[str, ...] = ()) -> tuple[bytes, bytes, kernel_image.LinkedImagePlan]:
     if features not in ((), ("development-session",), ("development-session-bad-startup",),
-                        ("development-console",), ("development-console-bad-handle",)):
+                        ("development-console",), ("development-console-bad-handle",),
+                        ("development-console-ipc",), ("development-console-ipc-bad-peer",)):
         raise QualificationError("unreviewed kernel build feature set")
     _run(
         [

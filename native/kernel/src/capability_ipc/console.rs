@@ -26,6 +26,47 @@ pub trait BytePorts {
 }
 
 impl Space {
+    /// Trusted four-image launch: two separate endpoint pairs, one device owner.
+    /// No caller may dispatch until this transaction and hardware quiescence pass.
+    pub fn admit_console_session(
+        &mut self,
+        scheduler: &mut crate::scheduler::Scheduler,
+        members: &[admission::Member; 4],
+    ) -> Result<admission::Admitted, admission::Error> {
+        use admission::Step;
+        self.admit(
+            scheduler,
+            members,
+            &[
+                Step::Endpoint { member: 0 },
+                Step::Endpoint { member: 1 },
+                Step::Grant {
+                    endpoint: 1,
+                    target: members[0].id,
+                    rights: Rights::SEND,
+                },
+                Step::Grant {
+                    endpoint: 0,
+                    target: members[1].id,
+                    rights: Rights::SEND,
+                },
+                Step::Endpoint { member: 2 },
+                Step::Endpoint { member: 3 },
+                Step::Grant {
+                    endpoint: 5,
+                    target: members[2].id,
+                    rights: Rights::SEND,
+                },
+                Step::Grant {
+                    endpoint: 4,
+                    target: members[3].id,
+                    rights: Rights::SEND,
+                },
+                Step::Console { member: 2 },
+            ],
+        )
+    }
+
     /// Trusted prepared-task admission only. No hardware operation occurs here.
     pub fn grant_console(&mut self, id: TaskId) -> Result<u64, Error> {
         let t = self.table(id)?;
@@ -86,5 +127,7 @@ impl Space {
     }
 }
 
+#[cfg(test)]
+mod session_tests;
 #[cfg(test)]
 mod tests;

@@ -6,7 +6,11 @@ static INIT: &[u8] = include_bytes!(env!("POOLEOS_INIT_CODE"));
 static COUNTER: &[u8] = include_bytes!(env!("POOLEOS_COUNTER_CODE"));
 #[cfg(feature = "development-console")]
 static CONSOLE: &[u8] = include_bytes!(env!("POOLEOS_CONSOLE_CODE"));
-const TASK_COUNT: usize = if cfg!(feature = "development-console") {
+#[cfg(feature = "development-console-ipc")]
+static CLIENT: &[u8] = include_bytes!(env!("POOLEOS_CONSOLE_CLIENT_CODE"));
+const TASK_COUNT: usize = if cfg!(feature = "development-console-ipc") {
+    4
+} else if cfg!(feature = "development-console") {
     3
 } else {
     2
@@ -37,7 +41,10 @@ pub(crate) fn run(
     let counter = checked!(Program::new(COUNTER, 0));
     #[cfg(feature = "development-console")]
     let console = checked!(Program::new(CONSOLE, 0));
-    #[cfg(feature = "development-console")]
+    #[cfg(all(
+        feature = "development-console",
+        not(feature = "development-console-ipc")
+    ))]
     let args2 = checked!(Arguments::new(&[
         b"console",
         if cfg!(feature = "development-console-bad-handle") {
@@ -45,6 +52,27 @@ pub(crate) fn run(
         } else {
             b"0000000100040001"
         }
+    ]));
+    #[cfg(feature = "development-console-ipc")]
+    let args2 = checked!(Arguments::new(&[
+        b"console-service",
+        b"0000000100040001",
+        b"0000000100010001",
+        b"0000000100010002",
+        if cfg!(feature = "development-console-ipc-bad-peer") {
+            b"0000000100000000"
+        } else {
+            b"0000000100000003"
+        },
+    ]));
+    #[cfg(feature = "development-console-ipc")]
+    let client = checked!(Program::new(CLIENT, 0));
+    #[cfg(feature = "development-console-ipc")]
+    let args3 = checked!(Arguments::new(&[
+        b"console-client",
+        b"0000000100010001",
+        b"0000000100010002",
+        b"0000000100000002",
     ]));
     let args0 = checked!(Arguments::new(&[
         b"init",
@@ -72,6 +100,10 @@ pub(crate) fn run(
         checked!(Peer::new_program(
             2, &console, &args2, handoff, core, bits, manager, topology, hpet
         )),
+        #[cfg(feature = "development-console-ipc")]
+        checked!(Peer::new_program(
+            3, &client, &args3, handoff, core, bits, manager, topology, hpet
+        )),
     ];
     let mut scheduler = checked!(scheduler::Scheduler::new(1));
     let cpu = checked!(scheduler::CpuId::new(0));
@@ -85,9 +117,19 @@ pub(crate) fn run(
             &mut scheduler,
         )
     });
-    #[cfg(feature = "development-console")]
+    #[cfg(all(
+        feature = "development-console",
+        not(feature = "development-console-ipc")
+    ))]
     let grants = checked!(unsafe {
         arch::x86_64::user_ipc::bootstrap_console(
+            core::array::from_fn(|i| (peers[i].id, peers[i].admission)),
+            &mut scheduler,
+        )
+    });
+    #[cfg(feature = "development-console-ipc")]
+    let grants = checked!(unsafe {
+        arch::x86_64::user_ipc::bootstrap_console_ipc(
             core::array::from_fn(|i| (peers[i].id, peers[i].admission)),
             &mut scheduler,
         )
@@ -100,10 +142,33 @@ pub(crate) fn run(
     {
         stop(20001, serial, debugcon);
     }
-    #[cfg(feature = "development-console")]
+    #[cfg(all(
+        feature = "development-console",
+        not(feature = "development-console-ipc")
+    ))]
     if grants[4] != 0x100040001 || peers[2].root == peers[0].root || peers[2].root == peers[1].root
     {
         stop(20005, serial, debugcon);
+    }
+    #[cfg(feature = "development-console-ipc")]
+    if grants[4..]
+        != [
+            0x100010001,
+            0x100010001,
+            0x100010002,
+            0x100010002,
+            0x100040001,
+        ]
+        || peers
+            .iter()
+            .enumerate()
+            .any(|(i, p)| peers[..i].iter().any(|q| p.root == q.root))
+        || peers
+            .iter()
+            .enumerate()
+            .any(|(i, p)| usize::from(p.id.slot) != i || p.id.generation != 1)
+    {
+        stop(20006, serial, debugcon);
     }
     {
         let mut log = EarlyLogger::new(BootSink {
@@ -113,8 +178,10 @@ pub(crate) fn run(
         });
         #[cfg(not(feature = "development-console"))]
         log.write_str("POOLEOS:SESSION START contract=PSESSION1 programs=2 bootstrap=PSTART1 abi=PSABI1 init_bytes=");
-        #[cfg(feature = "development-console")]
+        #[cfg(all(feature = "development-console", not(feature = "development-console-ipc")))]
         log.write_str("POOLEOS:SESSION START contract=PSESSION2 programs=3 bootstrap=PSTART1 abi=PSABI1 init_bytes=");
+        #[cfg(feature = "development-console-ipc")]
+        log.write_str("POOLEOS:SESSION START contract=PSESSION3 programs=4 bootstrap=PSTART1 abi=PSABI1 init_bytes=");
         log.write_decimal_u64(INIT.len() as u64);
         log.write_str(" counter_bytes=");
         log.write_decimal_u64(COUNTER.len() as u64);
@@ -122,6 +189,11 @@ pub(crate) fn run(
         {
             log.write_str(" console_bytes=");
             log.write_decimal_u64(CONSOLE.len() as u64);
+        }
+        #[cfg(feature = "development-console-ipc")]
+        {
+            log.write_str(" client_bytes=");
+            log.write_decimal_u64(CLIENT.len() as u64);
         }
         for (label, value) in [(" root0=", peers[0].root), (" root1=", peers[1].root)] {
             log.write_str(label);
@@ -133,7 +205,18 @@ pub(crate) fn run(
         {
             log.write_str(" root2=");
             log.write_hex_u64(peers[2].root);
+            #[cfg(not(feature = "development-console-ipc"))]
             log.write_str(" granted_handles=5 port=COM2 irq=0 diagnostics=0 production=0\n");
+            #[cfg(feature = "development-console-ipc")]
+            {
+                log.write_str(" root3=");
+                log.write_hex_u64(peers[3].root);
+                log.write_str(" task_image_pages=52 firmware_pages=");
+                log.write_decimal_u64(baseline);
+                log.write_str(
+                    " granted_handles=9 protocol=PCS1 port=COM2 irq=0 diagnostics=0 production=0\n",
+                );
+            }
         }
     }
     let mut waiting = [None; TASK_COUNT];
@@ -312,6 +395,15 @@ pub(crate) fn run(
                     " allocated_pages=",
                     manager.summary().allocated_pages - baseline,
                 ),
+            ] {
+                log.write_str(label);
+                log.write_decimal_u64(value);
+            }
+            #[cfg(feature = "development-console-ipc")]
+            for (label, value) in [
+                (" calls3=", calls[3]),
+                (" ticks3=", ticks[3]),
+                (" client_dead=", u64::from(dead[3])),
             ] {
                 log.write_str(label);
                 log.write_decimal_u64(value);

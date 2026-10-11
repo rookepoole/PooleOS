@@ -13440,13 +13440,102 @@ def apply_cycle263(roadmap: dict, test_count: int) -> dict:
             "preserve fixed kernel image/stack geometry or separately review any required layout repair",
             "then real shell/read-only files/two usable apps and fresh optical ISO acceptance",
             "extend storage preflight/retention without dropping failed evidence; full canonical gates before main"])
+    return apply_cycle264(roadmap, test_count)
+
+
+def apply_cycle264(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle264-native-console-ipc.md"
+    path = "runs/native-console-ipc-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    ipc, regression = receipt["console_ipc"], receipt["default_regression"]
+    digest = hashlib.sha256(raw).hexdigest().upper()
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle263_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle263_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline["native_console_integration"]["evidence_status"] = "historical_after_cycle264_kernel_changes"
+    baseline.update(pooleos_cycle=264, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 264
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path]
+    gate["current_candidate_audit"]["cycle"] = 264
+    gate["current_focused_source_projection"]["cycle"] = 264
+    gate["qualification_status"] = "native_console_ipc_pass_peer_recovery_shell_ISO_and_canonical_gates_pending"
+    gate["current_closeout_regression"] = dict(cycle=264, status="pass",
+        receipt_path=path, receipt_section="default_regression", receipt_sha256=digest,
+        source_binding_count=len(regression["source_bindings"]), checks_passed=23,
+        rust_test_executions=1706, additional_python_oracle_tests=105, guest_runs=3,
+        elapsed_seconds=399.344,
+        log_sha256="C70B13C8FBA7B81519B455479085AEDAA8125C37193DBECECDED4725CE51020A",
+        source_unchanged=True, owner_report_unchanged=True,
+        known_unresolved_readiness_tests=regression["known_unresolved_readiness_tests"],
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=264, status="pass",
+        tests_run=210, tests_passed=210, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=51.541, elapsed_seconds=52.547,
+        log_sha256="7F759096E0012B16F21B6FA3C6F8F9122AE727DD5410FE9EE421B8BA8565D4ED",
+        source_unchanged=True, owner_report_unchanged=True,
+        conservation_tests=146, conservation_test_seconds=9.092,
+        conservation_capture_seconds=10.563,
+        conservation_log_sha256="FC6FE4B138FD06F6DC9759A0D0A83C5B2FB07F7A1985CFD29AD9C096A676609D",
+        scope="pre_closeout_metadata_and_conservation_not_final_commit_or_canonical_gate",
+        counts_overlap=True, historical_integrity_is_not_new_execution=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=264, session_contract="PSESSION3", receipt_path=path, receipt_section="console_ipc",
+        console_ipc_service=True, native_console_ipc_execution=True,
+        native_execution_evidence_cycle=264, native_execution_replayed_this_cycle=True,
+        native_execution_status="four_private_roots_console_IPC_echo_close_reap_and_wrong_peer_rejection_pass",
+        retained_kernel_sources_unchanged=False, polling_peer_death_recovery=False,
+        service_restart=False, native_preemption_observed=False,
+        fixed_bootstrap_process_slots=4, usable_iso_minimum_roles=5)
+    lane["stages"]["USI-3"] = "partial_native_four_task_console_IPC_pass_lifecycle_loading_and_trust_pending"
+    baseline["native_console_ipc_integration"] = dict(cycle=264, contract_id="PSESSION3",
+        status=receipt["status"], receipt_path=path, receipt_sha256=digest,
+        source_binding_count=len(ipc["source_bindings"]), kernel_sha256=ipc["kernels"]["ipc"]["sha256"],
+        independent_kernel_builds_equal=ipc["independent_kernel_builds_equal"], guest_runs=3,
+        input_bytes=[r["interaction"]["input_bytes"] for r in ipc["guest_runs"]],
+        final_progress=[r["marker_summary"]["samples"][-1] for r in ipc["guest_runs"]],
+        hostile_marker_cases=[r["hostile_marker_cases_rejected"] for r in ipc["guest_runs"]],
+        console_kernel_tests_per_profile=481, new_admission_tests=4, focused_python_tests=36,
+        new_oracle_tests=6, firmware_page_quota=12, task_image_pages=52,
+        native_console_ipc=True, polling_peer_death_recovery=False, service_restart=False,
+        native_preemption_observed=False, shell=False, iso_built=False, production_ready=False)
+    evidence = "Cycle264: four private CPL3 roots admit init/counter/console-service/client with9 explicit grants. Two fresh native inputs45/52 bytes echo exactly through PCS1; service/client exit0 reclaims26 pages while init/counter survive512 dispatches. Wrong-peer service exits152, reclaims13 pages and emits no application output.23 default regression checks pass including two containment boots and unsigned denial. " + checkpoint
+    gap = "Wrong-peer service death leaves its polling client alive: add authenticated bounded peer-death notification/recovery before shell integration. Four fixed slots cannot host all five minimum demo roles (init, console, shell, two apps): review admission/capacity/lifecycle and resource bounds. Native PCS1 pressure/malformed-request controls, user supervision/restart/loading/trust, efficient idle, shell/files/apps and optical ISO remain.205/208 kernel pages and36-page stack unchanged; canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open."
+    for phase_id in ("N13", "N14", "N16", "N21", "N22", "N36"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    next(p for p in roadmap["phases"] if p["id"] == "N36")["current_evidence"].insert(
+        0, f"Cycle 264 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N13-USERSPACE-ISO-001", "FLAG-NATIVE-DRIVER-001", "FLAG-N36-EVIDENCE-STORAGE-001"):
+            flag["evidence"].append(checkpoint)
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["closure_condition"] += " Cycle264: " + gap
+        if flag["id"] == "FLAG-N36-EVIDENCE-STORAGE-001":
+            flag["closure_condition"] += " Cycle264 extends512MiB preflight to console IPC qualification and verifies29 explicit archives; broader build reservation and reproducible restore remain open."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(
+        title="Close console peer-death recovery and process-capacity prerequisites, then shell/files/apps and ISO",
+        entry_evidence=[checkpoint, path, "docs/native-console-ipc.md", "docs/native-userspace-integration-iso.md"],
+        exit_evidence=[
+            "bounded authenticated peer-death handling terminates or recovers client without indefinite polling",
+            "native PCS1 pressure and malformed-request controls retain independent peer progress and owned cleanup",
+            "review capacity and lifecycle admission for init/console/shell/two actual applications",
+            "preserve image/stack bounds or separately qualify required layout migration",
+            "real user shell, bundled read-only files, two apps and observable contained fault before optical ISO acceptance",
+            "preserve ordinary trust denial, failed evidence, and full canonical qualification before main"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1358)
+    parser.add_argument("--test-count", type=int, default=1365)
     parser.add_argument("--status-date", default="2026-10-11")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

@@ -32,6 +32,8 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-console-readiness-raw.json",
             "runs/native-console-private.json",
             "runs/native-console-ipc-program-readiness-raw.json",
+            "runs/native-console-ipc-readiness-raw.json",
+            "runs/native-console-ipc-readiness-private.json",
             "runs/native-console-ipc-private.json",
             "firmware/private/device.bin",
         )
@@ -47,7 +49,8 @@ class PublicationBoundaryTests(unittest.TestCase):
         path_violations = publication.inspect_public_blob("docs/example.md", user_path)
         self.assertTrue(any(item["type"] == "absolute_user_path" for item in path_violations))
         self.assertFalse(any(item["type"] == "absolute_user_path" for item in publication.inspect_public_blob("tests/example.py", user_path)))
-        for path in ("runs/native-console-readiness.json", "runs/native-console-ipc-program-readiness.json"):
+        for path in ("runs/native-console-readiness.json", "runs/native-console-ipc-program-readiness.json",
+                     "runs/native-console-ipc-readiness.json"):
             for data, kind in ((fake_token, "secret_pattern"), (user_path, "absolute_user_path")):
                 self.assertTrue(any(item["type"] == kind for item in publication.inspect_public_blob(path, data)))
 
@@ -105,6 +108,7 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-session-readiness.json",
             "runs/native-console-readiness.json",
             "runs/native-console-ipc-program-readiness.json",
+            "runs/native-console-ipc-readiness.json",
             "runs/native_microcode_readiness.json",
             "runs/native_recovery_readiness.json",
             "runs/native_system_manifest_readiness.json",

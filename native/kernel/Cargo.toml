@@ -12,6 +12,8 @@ development-session = []
 development-session-bad-startup = ["development-session"]
 development-console = ["development-session"]
 development-console-bad-handle = ["development-console"]
+development-console-ipc = ["development-console"]
+development-console-ipc-bad-peer = ["development-console-ipc"]
 
 [[bin]]
 name = "PooleKernelLinked"

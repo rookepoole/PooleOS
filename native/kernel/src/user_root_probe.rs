@@ -137,7 +137,10 @@ pub fn run(
     IST1_TOP.store(descriptors.ist1_top, Ordering::Release);
     IST2_BOTTOM.store(descriptors.ist2_bottom, Ordering::Release);
     IST2_TOP.store(descriptors.ist2_top, Ordering::Release);
-    let quota = if cfg!(feature = "development-console") {
+    let quota = if cfg!(feature = "development-console-ipc") {
+        // Four 13-page images plus at most 12 retained ACPI snapshot pages.
+        52 + 12
+    } else if cfg!(feature = "development-console") {
         48
     } else {
         32
@@ -155,6 +158,12 @@ pub fn run(
         34,
         acpi::consume_required_tables(handoff, &mut manager, &mut bootstrap)
     );
+    #[cfg(feature = "development-console-ipc")]
+    if acpi.snapshot_page_count > 12
+        || manager.summary().allocated_pages != acpi.snapshot_page_count
+    {
+        stop(20007, serial, debugcon);
+    }
     let madt = acpi.required_tables[0];
     let hpet = acpi.required_tables[2];
     let topology = checked!(
