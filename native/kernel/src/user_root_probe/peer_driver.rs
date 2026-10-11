@@ -17,6 +17,7 @@ pub(super) mod ipc_pressure;
 mod ipc_reply;
 mod ipc_request;
 mod service;
+mod startup;
 pub(super) mod unknown;
 
 // A constructor error carries its owner even if cleanup or slot commit failed.
@@ -24,6 +25,7 @@ pub(super) mod unknown;
 #[allow(dead_code)]
 enum PeerFailure {
     Setup,
+    Prepared(spawn_driver::Built),
     Construction(spawn_driver::Failure),
     Slot {
         image: CpuImage<arch::x86_64::UserRootCpu>,
@@ -231,6 +233,39 @@ impl Peer {
         self.root = root;
         self.admission = admission;
         Ok(())
+    }
+    #[inline(never)]
+    fn restart_program(
+        &mut self,
+        program: &poolekernel::user_entry::startup::Program<'_>,
+        arguments: &poolekernel::user_entry::startup::Arguments,
+        handoff: &Handoff<'_>,
+        core: CoreRecord,
+        bits: u8,
+        manager: &mut PhysicalMemoryManager,
+        topology: interrupt_time::MadtTopology,
+        hpet: interrupt_time::HpetDescription,
+    ) -> Result<(), PeerFailure> {
+        if self.slot.state(self.id) != Err(task::Error::Missing) {
+            return Err(PeerFailure::Setup);
+        }
+        let timer = Timer::new(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
+        let mut entry =
+            unsafe { arch::x86_64::user::PeerEntry::new(core.initial_stack_top_virtual) }
+                .map_err(|_| PeerFailure::Setup)?;
+        let (built, startup) = spawn_driver::build_program(
+            manager,
+            core,
+            bits,
+            program,
+            arguments,
+            Some(timer.mappings()),
+        )
+        .map_err(PeerFailure::Construction)?;
+        if entry.set_startup(startup).is_err() {
+            return Err(PeerFailure::Prepared(built));
+        }
+        self.reinstall(entry, timer, built, core)
     }
     fn reap(
         &mut self,

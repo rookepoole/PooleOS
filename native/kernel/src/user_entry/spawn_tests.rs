@@ -1,5 +1,6 @@
 use super::*;
 use crate::user_entry::spawn::{Construction, Error as SpawnError};
+use std::vec::Vec;
 
 fn setup() -> (Fixture, Construction) {
     let mut f = Fixture::new();
@@ -11,6 +12,179 @@ fn setup() -> (Fixture, Construction) {
         owner.allocate_next(&mut f.manager).unwrap();
     }
     (f, owner)
+}
+
+#[test]
+fn program_construction_copies_full_code_and_arguments_before_admission() {
+    use crate::user_entry::startup::{Arguments, Program};
+    let (mut f, mut c) = setup();
+    let code = [0xcc, 0x90, 0x0f, 0x0b, 0x55, 0x66, 0x77, 0x88, 0x99];
+    let program = Program::new(&code, 1).unwrap();
+    let args = Arguments::new(&[b"init", b"0", b"--verify"]).unwrap();
+    let handles = c.handles();
+    let (p, startup) = c
+        .build_program(
+            &mut f.manager,
+            &mut f.memory,
+            &program,
+            &args,
+            f.image.code_page,
+            f.image.stack_page,
+            f.core,
+            36,
+            None,
+        )
+        .ok()
+        .unwrap();
+    let admission = p.admission().unwrap();
+    assert_eq!(admission.initial_frame.rip, f.image.code_page + 1);
+    let copied: Vec<u8> = f.memory.pages[&admission.code_physical]
+        .iter()
+        .flat_map(|v| v.to_le_bytes())
+        .collect();
+    assert_eq!(&copied[..code.len()], &code);
+    assert!(copied[code.len()..].iter().all(|&b| b == 0));
+    let stack: Vec<u8> = f.memory.pages[&admission.stack_physical]
+        .iter()
+        .flat_map(|v| v.to_le_bytes())
+        .collect();
+    assert_eq!(&stack[..args.bytes().len()], args.bytes());
+    assert!(stack[args.bytes().len()..].iter().all(|&b| b == 0));
+    assert_eq!(
+        startup.registers(admission).unwrap(),
+        [f.image.stack_page, 112, 1, 0, 0, 0]
+    );
+    assert!(c.handles().iter().all(Option::is_none));
+    for h in handles.into_iter().flatten() {
+        assert_eq!(
+            f.manager.free(h),
+            Err(PhysicalMemoryError::AllocationRetained)
+        );
+    }
+    let _ = p.abort(&mut f.manager, &mut f.memory).ok().unwrap();
+    for h in handles.into_iter().flatten() {
+        f.manager.free(h).unwrap();
+    }
+}
+
+#[test]
+fn startup_metadata_rejects_every_changed_admission_field() {
+    use crate::user_entry::startup::{Arguments, Program};
+    let (mut f, mut c) = setup();
+    let p = Program::new(&[0x90], 0).unwrap();
+    let args = Arguments::new(&[]).unwrap();
+    let (prepared, startup) = c
+        .build_program(
+            &mut f.manager,
+            &mut f.memory,
+            &p,
+            &args,
+            f.image.code_page,
+            f.image.stack_page,
+            f.core,
+            36,
+            None,
+        )
+        .ok()
+        .unwrap();
+    let image = prepared.admission().unwrap();
+    for case in 0..9 {
+        let mut bad = image;
+        match case {
+            0 => bad.root_physical += PAGE_BYTES,
+            1 => bad.root_generation += 1,
+            2 => bad.code_physical += PAGE_BYTES,
+            3 => bad.stack_physical += PAGE_BYTES,
+            4 => bad.initial_frame.rip += 1,
+            5 => bad.initial_frame.cs ^= 1,
+            6 => bad.initial_frame.ss ^= 1,
+            7 => bad.initial_frame.rsp -= 16,
+            _ => bad.initial_frame.rflags ^= 1,
+        }
+        assert!(startup.registers(bad).is_err());
+    }
+    assert!(startup.registers(image).is_ok());
+}
+
+#[test]
+fn argument_write_failures_retain_whole_owner_and_allow_scrub_retry() {
+    use crate::user_entry::startup::{Arguments, Program};
+    let code = [0x90; 9];
+    let p = Program::new(&code, 1).unwrap();
+    let args = Arguments::new(&[b"init", b"0", b"--verify"]).unwrap();
+    // Six erased data pages, two code words, then fourteen argument words.
+    for at in [3074, 3080, 3087] {
+        for corrupt in [false, true] {
+            let (mut f, mut c) = setup();
+            if corrupt {
+                f.memory.corrupt_write = Some(at);
+            } else {
+                f.memory.fail_write = Some(at);
+            }
+            assert!(
+                c.build_program(
+                    &mut f.manager,
+                    &mut f.memory,
+                    &p,
+                    &args,
+                    f.image.code_page,
+                    f.image.stack_page,
+                    f.core,
+                    36,
+                    None
+                )
+                .is_err()
+            );
+            retained(&mut f, &c);
+            assert_eq!(f.manager.summary().allocated_pages, 13);
+            f.memory.corrupt_write = None;
+            f.memory.fail_write = Some(f.memory.writes);
+            assert!(c.abort(&mut f.manager, &mut f.memory).is_err());
+            retained(&mut f, &c);
+            f.memory.fail_write = None;
+            rollback(&mut f, &mut c);
+        }
+    }
+}
+
+#[test]
+fn program_geometry_and_foreign_owner_reject_before_any_copy() {
+    use crate::user_entry::startup::{Arguments, Program};
+    let (mut f, mut c) = setup();
+    let (mut foreign, _) = setup();
+    let p = Program::new(&[0x90], 0).unwrap();
+    let args = Arguments::new(&[]).unwrap();
+    let before = f.memory.writes;
+    assert!(
+        c.build_program(
+            &mut f.manager,
+            &mut f.memory,
+            &p,
+            &args,
+            f.image.code_page,
+            f.image.code_page,
+            f.core,
+            36,
+            None
+        )
+        .is_err()
+    );
+    assert!(
+        c.build_program(
+            &mut foreign.manager,
+            &mut f.memory,
+            &p,
+            &args,
+            f.image.code_page,
+            f.image.stack_page,
+            f.core,
+            36,
+            None
+        )
+        .is_err()
+    );
+    assert_eq!(f.memory.writes, before);
+    rollback(&mut f, &mut c);
 }
 fn retained(f: &mut Fixture, c: &Construction) {
     for h in c.handles().into_iter().flatten() {

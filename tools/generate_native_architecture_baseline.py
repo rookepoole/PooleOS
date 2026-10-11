@@ -25,6 +25,11 @@ ADR_NAMES = (
 )
 BOUND_SOURCE_PATHS = (
     "docs/checkpoints/cycle258-sustained-service-dispatch.md",
+    "docs/checkpoints/cycle259-owned-program-startup.md",
+    "docs/native-owned-program-startup.md",
+    "tests/fixtures/cycle258-user-entry-readiness.json",
+    "native/kernel/src/user_entry/startup.rs",
+    "native/kernel/src/user_root_probe/peer_driver/startup.rs",
     "docs/native-sustained-service-dispatch.md",
     "tests/fixtures/cycle257-user-entry-readiness.json",
     "native/kernel/src/user_root_probe/peer_driver/service.rs",

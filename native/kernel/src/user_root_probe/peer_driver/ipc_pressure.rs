@@ -170,6 +170,19 @@ pub(crate) fn run(
         ));
     }
     super::service::run(&mut peers, baseline, manager, serial, debugcon);
+    let bytes = checked!(arch::x86_64::user::peer_payload(27));
+    let program = checked!(poolekernel::user_entry::startup::Program::new(bytes, 16));
+    for (index, p) in peers.iter_mut().enumerate() {
+        let arguments = checked!(poolekernel::user_entry::startup::Arguments::new(&[
+            b"init",
+            if index == 0 { b"0" } else { b"1" },
+            b"--verify"
+        ]));
+        checked!(p.restart_program(
+            &program, &arguments, handoff, core, bits, manager, topology, hpet
+        ));
+    }
+    super::startup::run(&mut peers, baseline, bytes.len(), manager, serial, debugcon);
 }
 
 #[inline(never)]

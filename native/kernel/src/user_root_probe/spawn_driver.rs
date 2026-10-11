@@ -2,6 +2,7 @@
 use super::*;
 use poolekernel::user_entry::{
     spawn::{Construction, Error},
+    startup::{Arguments, Program, Startup},
     timer::Mappings,
 };
 
@@ -53,6 +54,38 @@ pub fn build(
     payload: &[u8],
     timer: Option<Mappings>,
 ) -> Result<Built, Failure> {
+    build_input(manager, core, bits, payload, None, timer).map(|(built, _)| built)
+}
+
+#[allow(clippy::result_large_err)]
+pub fn build_program(
+    manager: &mut PhysicalMemoryManager,
+    core: CoreRecord,
+    bits: u8,
+    program: &Program<'_>,
+    arguments: &Arguments,
+    timer: Option<Mappings>,
+) -> Result<(Built, Startup), Failure> {
+    build_input(
+        manager,
+        core,
+        bits,
+        program.code(),
+        Some((program, arguments)),
+        timer,
+    )
+    .map(|(built, startup)| (built, startup.expect("program startup")))
+}
+
+#[allow(clippy::result_large_err)]
+fn build_input(
+    manager: &mut PhysicalMemoryManager,
+    core: CoreRecord,
+    bits: u8,
+    payload: &[u8],
+    program: Option<(&Program<'_>, &Arguments)>,
+    timer: Option<Mappings>,
+) -> Result<(Built, Option<Startup>), Failure> {
     let mut failed = Failure {
         error: Error::State,
         allocated_pages: 0,
@@ -65,29 +98,53 @@ pub fn build(
         }
         let handles = failed.owner.handles().map(Option::unwrap);
         failed.memory = Some(memory(manager, core, bits, handles.map(Some))?);
-        let image = InitialImage {
+        let mut image = InitialImage {
             code_page: USER_WINDOW_START,
             entry: USER_WINDOW_START + 16,
             stack_page: USER_WINDOW_START + 3 * PAGE_BYTES,
         };
-        let prepared = failed.owner.build(
-            manager,
-            failed.memory.as_mut().ok_or(Error::Memory)?,
-            payload,
-            image,
-            core,
-            bits,
-            timer,
-        )?;
-        Ok((prepared, handles, image))
+        let (prepared, startup) = if let Some((program, args)) = program {
+            image = program
+                .image(image.code_page, image.stack_page)
+                .map_err(|_| Error::Layout)?;
+            let (prepared, startup) = failed.owner.build_program(
+                manager,
+                failed.memory.as_mut().ok_or(Error::Memory)?,
+                program,
+                args,
+                image.code_page,
+                image.stack_page,
+                core,
+                bits,
+                timer,
+            )?;
+            (prepared, Some(startup))
+        } else {
+            (
+                failed.owner.build(
+                    manager,
+                    failed.memory.as_mut().ok_or(Error::Memory)?,
+                    payload,
+                    image,
+                    core,
+                    bits,
+                    timer,
+                )?,
+                None,
+            )
+        };
+        Ok((prepared, handles, image, startup))
     })();
     match result {
-        Ok((prepared, handles, image)) => Ok(Built {
-            prepared,
-            handles,
-            image,
-            memory: failed.memory.take().unwrap(),
-        }),
+        Ok((prepared, handles, image, startup)) => Ok((
+            Built {
+                prepared,
+                handles,
+                image,
+                memory: failed.memory.take().unwrap(),
+            },
+            startup,
+        )),
         Err(error) => {
             failed.error = error;
             failed.allocated_pages = failed

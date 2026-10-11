@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+STARTUP = re.compile(r"POOLEOS:KERNEL:USER-STARTUP PASS contract=PSTART1 generation=16 program_bytes=([0-9]+) entry_offset=16 argument_bytes=112 argc=3 copied_arguments=1 bound_image=1 malformed_programs=2 malformed_images=1 exit0=102 exit1=103 calls0=1 calls1=1 dispatches=2 root0=(0x[0-9A-F]{16}) root1=(0x[0-9A-F]{16}) ticks0=([0-9]+) ticks1=([0-9]+) cr3_writes=4 scheduler_match=1 objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
 SERVICE = re.compile(r"POOLEOS:KERNEL:USER-SERVICE PASS contract=PKSERVICE1 generation=15 calls_per_dispatch=64 calls0=256 calls1=513 yields0=4 yields1=8 dispatches=14 timer_preemptions=0 fault_vector=6 survivor_exit=100 survivor_after_fault=4 completed_copy_bytes=8 return_state_preserved=1 allowance_replenished=1 root0=(0x[0-9A-F]{16}) root1=(0x[0-9A-F]{16}) ticks0=([0-9]+) ticks1=([0-9]+) cr3_writes=28 scheduler_match=1 objects_remaining=0 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
 from runtime import native_kernel_transfer as transfer
 
@@ -26,7 +27,7 @@ ACTIVE = re.compile(r"POOLEOS:KERNEL:USER-ROOT-ACTIVE PASS cr3=(0x[0-9A-F]{16}) 
 TIMER = re.compile(r"POOLEOS:KERNEL:USER-ROOT-TIMER PASS contract=PKUSER4 cr3=(0x[0-9A-F]{16}) deliveries=3 eois=3 mmio_pages=2 quiesced=1 if=0 ring3=0")
 ENTRY = re.compile(r"POOLEOS:KERNEL:USER-ENTRY PASS contract=PKUSER5 cr3=(0x[0-9A-F]{16}) cpl=3 traps=7 private_rsp0=1 gpr_zero=15 fp_cleared=1 cli_denied=1 io_denied=1 syscall_denied=1 supervisor_fault=1 nx_fault=1 kernel_return=1 descriptors_detached=1 if=0 production=0")
 PREEMPT = re.compile(r"POOLEOS:KERNEL:USER-PREEMPT PASS contract=PKUSER6 cr3=(0x[0-9A-F]{16}) cpl=3 deliveries=3 eois=3 resumes=2 first_progress=([0-9]+) last_progress=([0-9]+) private_rsp0=1 gpr_preserved=14 fp_preserved=1 timer_quiesced=1 forced_return=1 if=0 production=0")
-RESULT = re.compile(r"POOLEOS:KERNEL:USER-ROOT-RESULT PASS restored=(0x[0-9A-F]{16}) cr3_writes=([0-9]+) allocated_pages=([0-9]+) retained_acpi_pages=([0-9]+) released_pages=1006 scrubbed_data_pages=463 ring3=1 production=0 terminal=halt")
+RESULT = re.compile(r"POOLEOS:KERNEL:USER-ROOT-RESULT PASS restored=(0x[0-9A-F]{16}) cr3_writes=([0-9]+) allocated_pages=([0-9]+) retained_acpi_pages=([0-9]+) released_pages=1032 scrubbed_data_pages=475 ring3=1 production=0 terminal=halt")
 PEERS = re.compile(r"POOLEOS:KERNEL:USER-PEERS PASS contract=PKUSER10 scheduler=PKSCHED1 round=([0-9]+) first=(exit|fault|cancel|limit|return|quarantine|watchdog) value=([0-9]+) root0=(0x[0-9A-F]{16}) root1=(0x[0-9A-F]{16}) dispatches=([0-9]+) preempt0=([0-9]+) preempt1=([0-9]+) progress0=([0-9]+) progress1=([0-9]+) ticks0=([0-9]+) ticks1=([0-9]+) survivor_after_stop=([0-9]+) cr3_writes=([0-9]+) return_vector=([0-9]+) survivor_exit=84 states_preserved=1 root_restored=1 released_pages=26 scrubbed_data_pages=12 cpl=3 production=0")
 
 
@@ -35,8 +36,8 @@ TASK = re.compile(r"POOLEOS:KERNEL:USER-TASK PASS contract=PKUSER8 slot=0 genera
 
 
 def validate_markers(markers: list[str]) -> dict:
-    if len(markers) != 78 or SPAWN.fullmatch(markers[55]) is None:
-        raise ValueError("PKSERVICE1 requires exactly 78 markers and sustained user execution")
+    if len(markers) != 79 or SPAWN.fullmatch(markers[55]) is None:
+        raise ValueError("PSTART1 requires exactly 79 markers and copied native startup")
     drain = DRAIN.fullmatch(markers[56])
     if drain is None or not 3 <= int(drain[1]) == int(drain[2]) <= 256:
         raise ValueError("PKUSER12 missing or inconsistent timer shutdown proof")
@@ -52,7 +53,7 @@ def validate_markers(markers: list[str]) -> dict:
     common.pop("kernel_terminal", None)
     common["synthetic_unsigned_terminal_used_for_prefix_parser_only"] = True
     prepared, active, timer, entry, preempt, call, result = [pattern.fullmatch(marker) for pattern, marker in
-                                zip((PREPARED, ACTIVE, TIMER, ENTRY, PREEMPT, CALL, RESULT), [*markers[29:35],markers[77]])]
+                                zip((PREPARED, ACTIVE, TIMER, ENTRY, PREEMPT, CALL, RESULT), [*markers[29:35],markers[78]])]
     if any(m is None for m in (prepared, active, timer, entry, preempt, call, result)):
         raise ValueError("PKUSER7 marker layout or bounded claims changed")
     original, candidate = (int(prepared[i], 16) for i in (1, 2))
@@ -220,6 +221,16 @@ def validate_markers(markers: list[str]) -> dict:
     if service_roots != admission_roots or not all(0 < n < 1 << 64 for n in service_ticks):
         raise ValueError("PKSERVICE1 reused roots or measured runtime invalid")
     total_writes += 28
+    startup = STARTUP.fullmatch(markers[77])
+    if startup is None:
+        raise ValueError("PSTART1 missing copied argument and program entry proof")
+    program_bytes = int(startup[1])
+    startup_roots = [int(startup[i], 16) for i in (2, 3)]
+    startup_ticks = [int(startup[i]) for i in (4, 5)]
+    if (not 16 < program_bytes <= 4096 or startup_roots != service_roots
+            or not all(0 < n < 1 << 64 for n in startup_ticks)):
+        raise ValueError("PSTART1 program bounds, root reuse or runtime charge invalid")
+    total_writes += 4
     if int(result[2]) != total_writes:
         raise ValueError("PKUSER10 total root writes not conserved")
     charge = RUNTIME.fullmatch(markers[57])
@@ -250,7 +261,12 @@ def validate_markers(markers: list[str]) -> dict:
             "syscall_abi": "PSABI1_development", "user_calls": 12, "copy_faults": 3,
             "copy_read_faults": 1, "copy_write_faults": 2, "syscall_msrs_cleared": True,
             "terminated_tasks": tasks, "normal_exits": 1, "fault_terminations": 3,
-            "task_stale_denials": 3, "released_pages": 1006, "scrubbed_data_pages": 463,
+            "task_stale_denials": 3, "released_pages": 1032, "scrubbed_data_pages": 475,
+            "owned_program_startup": True,
+            "program_startup": dict(generation=16, program_bytes=program_bytes, entry_offset=16,
+                argument_bytes=112, argc=3, exits=[102, 103], calls=[1, 1], dispatches=2,
+                roots=startup_roots, ticks=startup_ticks, cr3_writes=4,
+                malformed_programs=2, malformed_images=1, released_pages=26, scrubbed_data_pages=12),
             "sustained_service_execution": True,
             "service_dispatch": dict(generation=15, calls_per_dispatch=64, calls=[256, 513],
                 budget_yields=[4, 8], dispatches=14, timer_preemptions=0,
@@ -325,7 +341,7 @@ def negative_controls(markers: list[str]) -> int:
     wrong = markers.copy()
     wrong[23] = wrong[23].replace("trap_scenario=23", "trap_scenario=0")
     candidates.append(wrong)
-    for i in range(29, 78):
+    for i in range(29, 79):
         for match in re.finditer(r"\b[a-zA-Z_0-9]+=[^ ]+", markers[i]):
             changed = markers.copy()
             changed[i] = markers[i][:match.start()] + "invalid=invalid" + markers[i][match.end():]

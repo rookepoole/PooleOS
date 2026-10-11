@@ -1,15 +1,24 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-10-08
+Status date: 2026-10-11
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 258
+Last roadmap reconciliation: PooleOS Cycle 259
 
-Cycle258 adds bounded replenished user-task dispatch allowances, preserving
+Cycle259 adds owned program/argument startup with complete-image binding and
+retained failure cleanup. Two fresh native boots prove copied arguments read by
+isolated tasks. Next: normal boot/diagnostic separation and separately built actual
+init, then confined console/input, efficient idle, shell/files/apps and optical ISO
+interaction. The image uses205/208 pages; full canonical migration/replay still
+gates main. USI-3 is partial, not a usable session. No ISO or production promotion.
+Full N0-N39, PooleGlyph/PDC and accessible PooleGlass remain required.
+[Cycle259 evidence](checkpoints/cycle259-owned-program-startup.md).
+
+Historical Cycle258 adds bounded replenished user-task dispatch allowances, preserving
 completed syscall results and measured-runtime settlement. Two fresh native boots
 prove sustained task execution and surviving-peer progress after a fault. Next:
 owned executable/argument startup, normal boot separation and init/console/input,

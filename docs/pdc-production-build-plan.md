@@ -1,15 +1,42 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-10-08
-Plan version: 2.161.0-sustained-service-dispatch
-Roadmap cycle: PooleOS Cycle 258
+Status date: 2026-10-11
+Plan version: 2.162.0-owned-program-startup
+Roadmap cycle: PooleOS Cycle 259
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 258: Sustained Service Dispatch
+## Cycle 259: Owned Program Startup
+
+PSTART1 validates trusted built-in program bytes and entry geometry, snapshots up
+to eight arguments, and copies both into owned memory before mapping/publication.
+Startup registers bind to the complete prepared image. Partial-copy/setup failures
+retain cleanup ownership. This is bootstrap data, not executable trust or authority.
+
+Two fresh79-marker boots read their own copied arguments and exit102/103, retain
+all17 earlier containment cases and reject1111 altered-evidence controls each.
+466 kernel tests,734 overlapping Rust executions,84 Python oracle tests and
+ordinary unsigned-boot denial pass.
+[Evidence and retained failures](checkpoints/cycle259-owned-program-startup.md).
+
+Next N13-CAPABILITY-IPC-001: separate normal startup from exhaustive qualification
+and add a separately built real init, then confined console/input. Efficient idle,
+general resource policy and native clock-fault recovery remain open. USI-4 adds
+shell/read-only files/two apps; USI-5 qualifies actual optical ISO interaction and
+a sustained session. Signed PXABI1/PINIT1 activation remains closed.
+
+The image uses205/208 pages, leaving3; the36-page guarded stack is unchanged.
+Resolve layout/profile pressure without deleting checks. Three product-readiness
+failures and full exact-candidate canonical replay still block main. No usable ISO
+yet: USI-1/2 partial, USI-3 now partial (owned bootstrap, not actual init),4/5 not
+started. No phase/flag closure:40 phases301 subphases8996 requirements59 additions,
+97 flags42 open20 gaps. Full microkernel, PooleGlyph/PDC and accessible PooleGlass
+remain required after the bounded ISO milestone.
+
+## Historical Cycle 258: Sustained Service Dispatch
 
 PKSERVICE1 replaces the normal native task's64-call lifetime kill with a64-attempt
 per-dispatch allowance. A completed boundary syscall preserves its result and

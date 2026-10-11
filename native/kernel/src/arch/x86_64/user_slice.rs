@@ -33,6 +33,7 @@ pub struct PeerEntry {
     lose_sample: bool,
     arguments: [u64; 6],
     diagnostic_call_limit: bool,
+    startup: Option<user_entry::startup::Startup>,
 }
 impl PeerEntry {
     /// Same sole-BSP, IF0 and state-ownership preconditions as Entry::prepare.
@@ -46,6 +47,7 @@ impl PeerEntry {
             lose_sample: false,
             arguments: [0; 6],
             diagnostic_call_limit: false,
+            startup: None,
         })
     }
     /// Explicit bounded diagnostic only; normal peers use replenished dispatches.
@@ -65,6 +67,7 @@ impl PeerEntry {
     }
     pub fn set_initial_arguments(&mut self, arguments: [u64; 6]) -> Result<(), Error> {
         if self.entry.installed
+            || self.startup.is_some()
             || self.run.is_some()
             || self.saved.is_some()
             || super::active()
@@ -73,6 +76,20 @@ impl PeerEntry {
             return Err(Error::State);
         }
         self.arguments = arguments;
+        Ok(())
+    }
+    pub fn set_startup(&mut self, startup: user_entry::startup::Startup) -> Result<(), Error> {
+        if self.entry.installed
+            || self.run.is_some()
+            || self.saved.is_some()
+            || self.startup.is_some()
+            || self.arguments != [0; 6]
+            || super::active()
+            || active()
+        {
+            return Err(Error::State);
+        }
+        self.startup = Some(startup);
         Ok(())
     }
     pub fn inject_missing_local_timer(&mut self) -> Result<(), Error> {
@@ -162,11 +179,15 @@ impl task::SliceDriver for PeerEntry {
         if self.run.as_ref().is_some_and(|r| !r.matches(image, id)) {
             return Err(Error::State);
         }
+        let arguments = match &self.startup {
+            Some(startup) => startup.registers(image).map_err(|_| Error::State)?,
+            None => self.arguments,
+        };
         let context = self
             .saved
             .as_ref()
             .map(|s| s.context)
-            .unwrap_or_else(|| Context::initial_with_arguments(image, self.arguments));
+            .unwrap_or_else(|| Context::initial_with_arguments(image, arguments));
         context.validate(image)?;
         let mut run = match self.run.take() {
             Some(r) => r,
@@ -387,6 +408,8 @@ unsafe extern "C" {
     static poole_peer_stack_fault_end: u8;
     static poole_peer_service: u8;
     static poole_peer_service_end: u8;
+    static poole_peer_startup: u8;
+    static poole_peer_startup_end: u8;
 }
 pub fn peer_payload(kind: usize) -> Result<&'static [u8], Error> {
     if kind == 24 || kind == 25 {
@@ -447,6 +470,10 @@ pub fn peer_payload(kind: usize) -> Result<&'static [u8], Error> {
         26 => (
             &raw const poole_peer_service,
             &raw const poole_peer_service_end,
+        ),
+        27 => (
+            &raw const poole_peer_startup,
+            &raw const poole_peer_startup_end,
         ),
         _ => return Err(Error::Layout),
     };
@@ -699,5 +726,67 @@ poole_peer_service:
     ud2
     .global poole_peer_service_end
 poole_peer_service_end:
+
+    .global poole_peer_startup
+poole_peer_startup:
+    .space 16, 0xcc
+    cmp rdi, 0x40003000
+    jne 9f
+    cmp rsi, 112
+    jne 9f
+    cmp rdx, 1
+    jne 9f
+    or rcx, r8
+    or rcx, r9
+    jnz 9f
+    movabs rax, 0x0031545241545350
+    cmp qword ptr [rdi], rax
+    jne 9f
+    cmp qword ptr [rdi + 8], 112
+    jne 9f
+    cmp qword ptr [rdi + 16], 3
+    jne 9f
+    cmp qword ptr [rdi + 24], 0
+    jne 9f
+    cmp qword ptr [rdi + 32], 96
+    jne 9f
+    cmp qword ptr [rdi + 40], 101
+    jne 9f
+    cmp qword ptr [rdi + 48], 103
+    jne 9f
+    mov ecx, 56
+1:  cmp qword ptr [rdi + rcx], 0
+    jne 9f
+    add ecx, 8
+    cmp ecx, 96
+    jb 1b
+    cmp dword ptr [rdi + 96], 0x74696e69
+    jne 9f
+    cmp byte ptr [rdi + 100], 0
+    jne 9f
+    cmp byte ptr [rdi + 102], 0
+    jne 9f
+    movabs rax, 0x7966697265762d2d
+    cmp qword ptr [rdi + 103], rax
+    jne 9f
+    cmp byte ptr [rdi + 111], 0
+    jne 9f
+    movzx esi, byte ptr [rdi + 101]
+    sub esi, 48
+    cmp esi, 1
+    ja 9f
+    add esi, 102
+    jmp 2f
+9:  mov esi, 255
+2:  mov eax, 2
+    mov edi, 1
+    xor edx, edx
+    xor r10d, r10d
+    xor r8d, r8d
+    xor r9d, r9d
+    syscall
+    ud2
+    .global poole_peer_startup_end
+poole_peer_startup_end:
 "#
 );

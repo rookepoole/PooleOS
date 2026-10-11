@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 258, 2026-10-08. No new ISO exists yet.
+Status: implementation started, Cycle 259, 2026-10-11. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -44,30 +44,31 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | Stage | Build Plan Binding | Exit Criterion | Current State |
 | --- | --- | --- | --- |
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
-| USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Cycle258: sustained bounded dispatch with native post-call preservation and peer survival; atomic admission and epoch-bound expiry preserved. Owned service bootstrap, efficient idle and general resource policy remain |
-| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Not started |
+| USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
+| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle259 partial: owned trusted built-in startup and copied arguments pass; actual init, normal boot, executable trust and console/input remain |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
 ### Immediate Next Move
 
-Current: [Cycle258 dispatch evidence](checkpoints/cycle258-sustained-service-dispatch.md).
-Normal user tasks now continue across bounded, replenished syscall dispatches.
-Native result/data preservation, measured settlement and surviving-peer progress
-after a fault pass. Atomic startup and failed-cleanup ownership remain intact.
-Next: owned executable/argument bootstrap and init, then confined console/input
-and interrupt-driven idle. Trusted admission is not general image policy.
+Current: [Cycle259 startup evidence](checkpoints/cycle259-owned-program-startup.md).
+Trusted built-in code and arguments are copied before mapping; initial registers
+bind to the complete owned image. Two isolated tasks validate copied arguments.
+Sustained dispatch, IPC, deadlines, atomic admission and failed-cleanup ownership
+remain intact. Next: separate normal boot and build actual init, then confined
+console/input and interrupt-driven idle. PSTART1 is not executable trust,
+signed PXABI1/PINIT1 activation, general loading policy or user spawn authority.
 Native clock failure recovery remains open; current idle is bounded polling.
 Per-dispatch CPU ticks remain distinct from the service clock.
-The202-page kernel has208 reserved pages;36-page guarded stack remains unchanged.
+The205-page kernel has208 reserved pages;36-page guarded stack remains unchanged.
 Separate exhaustive qualification workloads from normal demo/session startup.
-Resolve the remaining6-page capacity margin through profile/layout work or reviewed
+Resolve the remaining3-page capacity margin through profile/layout work or reviewed
 capacity migration before exhaustion, without deleting qualification checks.
 Migrate old product receipts and replay exact-candidate canonical gates before main.
 Then USI-3 init/confined console/input, USI-4 shell/files/two apps, USI-5 optical ISO.
 The completed substeps below are retained as history, not the current next action.
 
-N13-CAPABILITY-IPC-001 continues USI-2 without declaring USI-1 complete:
+N13-CAPABILITY-IPC-001 continues USI-2/3 without declaring USI-1 complete:
 
 1. Add original kernel-owned typed objects and per-task capability tables. Resolve
    handles against authenticated caller identity; reject forged/stale generations,
@@ -109,11 +110,12 @@ on service death or explicit discard. Cycle255 supplies the continuous clock.
 Cycle256 supplies epoch-bound request expiry, including all-blocked idle wakeup.
 Cycle257 supplies bounded atomic IPC/scheduler admission and native retained cleanup
 retry. Cycle258 supplies bounded sustained dispatch and preserved post-call results.
-Next in step3: owned service bootstrap, efficient idle and general resource policy.
+Cycle259 supplies bounded trusted built-in startup with owned argument copies.
+Next: normal boot separation, actual init, efficient idle and general resource policy.
 General quotas, arbitrary revocation races and supervision remain unfinished.
 Cycle249 evidence is [here](checkpoints/cycle249-unknown-runtime-recovery.md).
 Its sample-loss injection is not a real hardware-clock failure. Keep that limit,
-general stack bounds, persistent audit/quarantine and the current202-page product
+general stack bounds, persistent audit/quarantine and the current205-page product
 contract migration visible under FLAG-N13-USERSPACE-ISO-001.
 
 ### USI-1 Substeps

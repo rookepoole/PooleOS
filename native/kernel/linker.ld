@@ -37,11 +37,11 @@ SECTIONS
     KEEP(*(.text.poole_entry))
     *(.text .text.*)
     FILL(0)
-    . = 0xA2000;
+    . = 0xA5000;
   } :text
   __poole_text_end = .;
 
-  . = 0xA2000;
+  . = 0xA5000;
   __poole_data_start = .;
   .dynamic : { *(.dynamic) } :data :dynamic :relro
   .rela.dyn : { *(.rela.dyn) } :data :relro
@@ -53,17 +53,17 @@ SECTIONS
   .relro.pad :
   {
     FILL(0)
-    . = 0xB4000;
+    . = 0xB7000;
   } :data :relro
   __poole_relro_end = .;
 
-  . = 0xB4000;
+  . = 0xB7000;
   .data : { *(.data .data.*) } :data
   .bss (NOLOAD) :
   {
     *(.bss .bss.*)
     *(COMMON)
-    . = 0xCA000;
+    . = 0xCD000;
   } :data
   __poole_image_end = .;
 

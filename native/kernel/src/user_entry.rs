@@ -18,6 +18,7 @@ pub mod preemption;
 pub mod prepared;
 pub mod privilege;
 pub mod spawn;
+pub mod startup;
 pub mod syscall;
 pub mod task;
 pub mod timer;

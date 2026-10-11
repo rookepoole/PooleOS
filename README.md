@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle258 replaces the normal user-task lifetime
+**Current development checkpoint:** Cycle259 adds owned program/argument startup.
+Two fresh native boots prove isolated tasks read copied arguments and return
+distinct results;466 kernel tests pass. Next: separate normal boot from diagnostics,
+build real init and console/input, then shell/files/apps and the interactive ISO.
+The kernel uses205/208 reserved pages. No usable ISO yet; full microkernel work
+continues afterward and canonical gates still block main.
+[Evidence](docs/checkpoints/cycle259-owned-program-startup.md).
+
+**Historical development checkpoint:** Cycle258 replaces the normal user-task lifetime
 syscall limit with bounded, replenished dispatch allowances. Two fresh native boots
 prove repeated user-mode execution, preserved syscall results and a surviving
 peer after an application fault;459 kernel tests pass. Next: owned program/argument

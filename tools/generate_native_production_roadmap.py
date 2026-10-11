@@ -12924,7 +12924,7 @@ def apply_cycle257(roadmap: dict, test_count: int) -> dict:
 
 def apply_cycle258(roadmap: dict, test_count: int) -> dict:
     checkpoint = "docs/checkpoints/cycle258-sustained-service-dispatch.md"
-    path = "runs/native-user-entry-readiness.json"
+    path = "tests/fixtures/cycle258-user-entry-readiness.json"
     raw = (ROOT / path).read_bytes()
     receipt = json.loads(raw)
     baseline = roadmap["baseline"]
@@ -13012,14 +13012,110 @@ def apply_cycle258(roadmap: dict, test_count: int) -> dict:
     flag["closure_condition"] += " Cycle258 adds sustained dispatch, not complete services. " + gap
     roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle259(roadmap, test_count)
+
+
+def apply_cycle259(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle259-owned-program-startup.md"
+    path = "runs/native-user-entry-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle258_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle258_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline.update(pooleos_cycle=259, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 259
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-owned-program-startup.md"]
+    gate["current_candidate_audit"]["cycle"] = 259
+    gate["current_focused_source_projection"]["cycle"] = 259
+    gate["qualification_status"] = "bounded_owned_program_startup_pass_init_and_canonical_gates_pending"
+    count = sum(c["tests_passed"] or 0 for c in receipt["checks"])
+    attempts = [
+        ("hostfirst", 6.219, "test_Vec_import_and_slice_coercions_repaired", "E74A88DA2F9649D33DCDFE4FEF1B27143C873195CDED8257AD91F81544B2A59F"),
+        ("oraclefirst", 0.984, "old_raw_argument_source_assertion_repaired_with_bound_startup_control", "4E322C9A0F52DB7EE94715D0CA0AA14938840320F397F6464C943A4809AABCAC"),
+        ("nativefirst", 39.219, "probe_scheduler_ID_types_compared_by_slot_and_generation", "1154549D01271E7F0F6A0470F5F9288A8BFC1D9C55793EE4D96CBB36BD97CE94"),
+        ("nativesecond", 95.031, "text_A46EE_exceeded_A2000_added_three_pages_within208", "B9E73CCE8F04D25E529A5F404A4586ECB642B0BC9937EA261318432271E4B436"),
+    ]
+    gate["current_closeout_regression"] = dict(cycle=259, status="focused_native_and_guest_pass_not_full_canonical",
+        tests_run=count, tests_passed=count, tests_failed=0, tests_skipped=0,
+        scope="466_debug_kernel_153_user_release_57_IPC_release_24_VM_release_9_compile_fail_10_boot_exit_15_kmap",
+        additional_python_oracle_tests=84, rejected_incompatible_feature_builds=2,
+        guest_runs=3, user_root_guest_runs=2, ordinary_denial_guest_runs=1,
+        receipt_path=path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        elapsed_seconds=364.672, log_sha256="ABAEA47878F567C44ED54ADBB6BBD7EBDA7E4A65F2892C80E9F74FA859CFF87B",
+        initial_attempts=[dict(attempt=a, status="fail", elapsed_seconds=e, reason=r, log_sha256=h) for a,e,r,h in attempts],
+        known_unresolved_readiness_tests=receipt["known_unresolved_readiness_tests"],
+        qualification_guest_bound_seconds=150, qualification_bound_unchanged=True,
+        kernel_task_timer_dispatch_bounds_unchanged=True,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=259, status="pass",
+        tests_run=169, tests_passed=169, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=52.303, elapsed_seconds=53.172,
+        log_sha256="AEAF22A74965029024FEEE45DED9276ACAB533364707D9AD6B4F7E6B74568CCC",
+        source_unchanged=True, owner_report_unchanged=True,
+        historical_integrity_is_not_new_execution=True, production_ready=False)
+    summaries = [g["marker_summary"] for g in receipt["live_user_root"]["guest_runs"]]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=259, receipt_path=path, host_status=receipt["status"], selected_stage="USI-3",
+        privileged_adapter_verification="two_fresh_CPL3_owned_program_and_copied_startup_arguments_plus_default_denial",
+        program_startup_contract="PSTART1", owned_builtin_program_startup=True,
+        copied_startup_arguments=True, startup_bound_to_complete_admission=True,
+        executable_trust_policy=False, signed_init_activation=False, actual_init_service=False,
+        service_owned_executable_policy=False, general_user_program_admission=False,
+        kernel_image_pages=205, kernel_capacity_pages=208, kernel_remaining_capacity_pages=3,
+        normal_demo_boot_separated_from_qualification=False,
+        released_pages_per_probe=1032, scrubbed_data_pages_per_probe=475,
+        actual_root_writes_per_probe=[s["cr3_writes"] for s in summaries],
+        measured_subtotal_all_peer_suites_per_probe=[s["runtime_ticks"] + s["unknown_peer_ticks"] + s["ipc_ticks"]
+            + sum(sum(p["ticks"]) for p in s["ipc_pressure_rounds"]) + sum(s["ipc_reply_ticks"])
+            + sum(sum(p["ticks"]) for p in s["ipc_request_lifetimes"])
+            + sum(sum(p["ticks"]) for p in s["ipc_deadline_lifetimes"])
+            + sum(s["admission_rollback"]["ticks"]) + sum(s["service_dispatch"]["ticks"])
+            + sum(s["program_startup"]["ticks"]) for s in summaries],
+        runtime_statistics_scope="measured_peer_suites_through_PSTART1_subtotal_excludes_one_unknown_dispatch")
+    for field in ("runtime_samples", "runtime_terminal_samples", "runtime_duplicate_denials", "runtime_ticks",
+            "runtime_terminal_ticks", "runtime_failed_cleanup_ticks", "watchdog_recoveries", "watchdog_arms",
+            "watchdog_stops", "watchdog_restores", "watchdog_ticks", "peer_preemptions", "unknown_peer_ticks",
+            "unknown_recovery_dispatches", "ipc_dispatches", "ipc_preemptions", "ipc_ticks", "ipc_calls", "ipc_cr3_writes",
+            "ipc_waits", "ipc_readiness_wakes", "ipc_cancellations", "ipc_pressure_rounds", "ipc_reply_dispatches",
+            "ipc_reply_preemptions", "ipc_reply_ticks", "ipc_reply_cr3_writes", "ipc_reply_calls", "ipc_request_lifetimes",
+            "continuous_clock", "deadline_clock", "ipc_deadline_lifetimes", "admission_rollback", "service_dispatch",
+            "program_startup"):
+        lane[field + "_per_probe"] = [s[field] for s in summaries]
+    lane["stages"]["USI-2"] = "partial_bounded_IPC_and_dispatch_general_resource_policy_and_efficient_idle_pending"
+    lane["stages"]["USI-3"] = "partial_owned_builtin_startup_actual_init_normal_boot_and_console_pending"
+    roadmap["immediate_next_move"].update(title="Separate normal service boot and build actual init, then interactive session and ISO",
+        entry_evidence=["docs/native-userspace-integration-iso.md", "docs/native-owned-program-startup.md",
+            path, checkpoint, "native/kernel/src/user_entry/startup.rs", "native/kernel/src/user_entry/spawn.rs"],
+        exit_evidence=[
+            "separate normal session startup from exhaustive diagnostics without dropping qualification",
+            "separately built real init and confined console/input services use owned startup and IPC",
+            "general executable trust and signed PXABI1/PINIT1 activation remain closed until verified",
+            "interrupt-driven idle preserves deadlines; general resource policy and native clock-fault recovery remain",
+            "shell/read-only files/two apps and fresh optical ISO interaction with sustained-session fault containment",
+            "resolve205_of208_page pressure and migrate product contracts before full exact-candidate canonical gates and main"])
+    evidence = "Cycle259: PSTART1 copies validated built-in PIC code and owned bounded arguments before mapping, binds startup to the full prepared image, and retains failed construction ownership. Native tasks read their own argument block and exit102/103. Two fresh79-marker boots;466 kernel tests/734 overlapping Rust executions/84 Python oracle tests and ordinary denial pass. " + checkpoint
+    gap = "Actual init, normal boot separation, console/input, efficient idle and shell/files/apps/ISO remain. One-page trusted built-in startup is not PXABI1 loading, signed PINIT1 activation, user spawn authority or full service supervision.205_of208 pages leaves3; resolve profile/layout pressure without deleting checks. Three readiness failures and full canonical replay still block main. No ISO or production claim."
+    for phase_id in ("N13", "N16"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " Cycle259 adds copied bootstrap, not a complete service runtime. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
+
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1320)
-    parser.add_argument("--status-date", default="2026-10-08")
+    parser.add_argument("--test-count", type=int, default=1324)
+    parser.add_argument("--status-date", default="2026-10-11")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
     args.out.write_text(json.dumps(roadmap, indent=2, ensure_ascii=True) + "\n", encoding="utf-8", newline="\n")

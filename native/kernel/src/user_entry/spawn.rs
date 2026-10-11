@@ -4,6 +4,7 @@
 use super::{
     InitialImage,
     prepared::{self, DetachedImage, PreparedImage},
+    startup::{Arguments, Program, Startup},
     timer,
 };
 use crate::{
@@ -110,6 +111,72 @@ impl Construction {
         bits: u8,
         timer: Option<timer::Mappings>,
     ) -> Result<PreparedImage, Error> {
+        let offset = image
+            .entry
+            .checked_sub(image.code_page)
+            .ok_or(Error::Layout)?;
+        if !offset.is_multiple_of(8) || offset >= PAGE_BYTES {
+            return Err(Error::Layout);
+        }
+        self.build_inner(
+            manager,
+            memory,
+            payload,
+            offset as usize,
+            &[],
+            image,
+            core,
+            bits,
+            timer,
+        )
+    }
+
+    /// Copy validated code and an owned argument block before the root is exposed.
+    #[allow(clippy::too_many_arguments)]
+    pub fn build_program<M: TableMemory>(
+        &mut self,
+        manager: &mut PhysicalMemoryManager,
+        memory: &mut M,
+        program: &Program<'_>,
+        arguments: &Arguments,
+        code_page: u64,
+        stack_page: u64,
+        core: CoreRecord,
+        bits: u8,
+        timer: Option<timer::Mappings>,
+    ) -> Result<(PreparedImage, Startup), Error> {
+        let image = program
+            .image(code_page, stack_page)
+            .map_err(|_| Error::Layout)?;
+        let prepared = self.build_inner(
+            manager,
+            memory,
+            program.code(),
+            0,
+            arguments.bytes(),
+            image,
+            core,
+            bits,
+            timer,
+        )?;
+        // Success always carries the admission from the same retained preparation.
+        let startup = Startup::bind(prepared.admission().expect("prepared admission"), arguments);
+        Ok((prepared, startup))
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn build_inner<M: TableMemory>(
+        &mut self,
+        manager: &mut PhysicalMemoryManager,
+        memory: &mut M,
+        payload: &[u8],
+        offset: usize,
+        arguments: &[u8],
+        image: InitialImage,
+        core: CoreRecord,
+        bits: u8,
+        timer: Option<timer::Mappings>,
+    ) -> Result<PreparedImage, Error> {
         if self.state != State::Allocating || self.retained.iter().any(Option::is_none) {
             return Err(Error::State);
         }
@@ -119,7 +186,6 @@ impl Construction {
         self.state = State::Building;
         let [tables, code, stack, entry_stack, entry_tables] = self.handles().map(Option::unwrap);
         image.validate().map_err(|_| Error::Layout)?;
-        let offset = usize::try_from(image.entry - image.code_page).map_err(|_| Error::Layout)?;
         if payload.is_empty() || offset % 8 != 0 || payload.len() > PAGE_BYTES as usize - offset {
             return Err(Error::Layout);
         }
@@ -134,6 +200,14 @@ impl Construction {
                 code.start_page * PAGE_BYTES,
                 offset / 8 + index,
                 u64::from_le_bytes(word),
+            )?;
+        }
+        for (index, chunk) in arguments.chunks_exact(8).enumerate() {
+            checked_write(
+                memory,
+                stack.start_page * PAGE_BYTES,
+                index,
+                u64::from_le_bytes(chunk.try_into().map_err(|_| Error::Layout)?),
             )?;
         }
         let mut space =
