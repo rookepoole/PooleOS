@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle262 adds PooleConsole, a separate user-mode
+**Current development checkpoint:** Cycle263 builds separate console IPC service
+and client executables.33 host tests pass debug/release; both reproduce exactly,
+with bounded messaging, sender-envelope validation and retained backpressure.
+They are not yet admitted to native boot. Next: four-process native integration
+and input/cleanup tests, then shell/files/apps and optical ISO. No usable ISO yet;
+the complete robust microkernel remains required afterward.
+[Evidence](docs/checkpoints/cycle263-console-ipc-programs.md).
+
+**Historical development checkpoint:** Cycle262 adds PooleConsole, a separate user-mode
 driver with confined COM2 authority. Two fresh guests echo actual host input;
 normal exit and invalid authority reclaim the console while init/counter keep
 running. Three private address spaces, reproducible builds and the default native

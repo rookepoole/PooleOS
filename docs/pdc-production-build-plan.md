@@ -1,15 +1,48 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-11
-Plan version: 2.165.0-native-user-console
-Roadmap cycle: PooleOS Cycle 262
+Plan version: 2.166.0-console-ipc-programs
+Roadmap cycle: PooleOS Cycle 263
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 262: Native User Console
+## Cycle 263: Console IPC Programs
+
+PooleConsoleService and PooleConsoleClient now compile independently as original
+user programs. PCS1 provides bounded Read/Input, Write/Written and Close/Closed
+messages, strict sequences and a kernel-supplied sender envelope. UART operations
+and one pending request/response live in user space; backpressure preserves the
+write cursor and consumed input instead of duplicating side effects. The client
+is a qualification echo client, not a shell or a second useful application.
+
+All33 user-library tests pass in debug and release, including12 new protocol,
+identity, startup, backpressure, failure and end-to-end state-machine tests. Two
+independent builds match: service3032/client1813 code bytes, one RX page each,
+no imports/writable segments/remaining relocations. Existing init/counter/console
+binary bytes still match Cycle262. Thirty focused Python tests pass.
+[Evidence and failures](checkpoints/cycle263-console-ipc-programs.md).
+
+No new native execution occurred and kernel sources are unchanged. Next: admit
+service/client alongside init/counter in four private roots, verify four endpoint
+grants and52-page ownership within reviewed resource bounds, then prove serial
+input traverses real IPC and malformed requests/termination preserve the independent
+pair. Shell/files/two useful apps and optical ISO follow. Fixed205/208 kernel image
+and36-page guarded stack remain unchanged; no future enlargement is preapproved.
+
+User-program builds now reject insufficient free space before creating outputs
+(512MiB floor, an observation rather than reservation). Twelve cycle-owned build
+directories were archived and member-hash verified before removal of uncompressed
+copies, recovering about610MB while preserving receipts/logs. Storage risk remains
+open until broader kernel/guest preflight and reproducible restore are covered.
+No phase or flag closure:40 phases301 subphases8996 requirements59 additions98
+flags43 open20 gap groups.1358 Python tests discovered is inventory, not full-suite
+execution. Full canonical gates still block main. Complete robust microkernel,
+PooleGlyph/PDC, signed production trust and accessible PooleGlass remain required.
+
+## Historical Cycle 262: Native User Console
 
 PooleConsole is now a separately compiled CPL3 driver beside PooleInit and
 PooleCounter. The kernel grants an exclusive generation-bound COM2 byte-port

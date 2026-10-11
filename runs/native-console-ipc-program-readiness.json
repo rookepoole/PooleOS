@@ -1,0 +1,186 @@
+{
+  "cycle": 263,
+  "contract_id": "PUSERBIN1",
+  "status": "pass",
+  "source_bindings": {
+    "native/.cargo/config.toml": "7983881C5CAD2B909CCA64BFA7F5895EC56377B0E52967444CB2818A69FA4FE1",
+    "native/userspace/Cargo.lock": "5D1DE2881C0B666B41DF5C5AD188AF18C3F27F0F58B7C288201D8AD2A4F9699A",
+    "native/userspace/Cargo.toml": "B020F006D63128C4A29416DF4A9FDD8FD7581EAB2248AC09D1E9E7535584A8BF",
+    "native/userspace/linker.ld": "61BABE59AF15DF901CF4CAC9C2AAF18E6539CD81A0EEB3EA54604D8644AB4686",
+    "native/userspace/src/bin/console.rs": "53275126DF73F5A2C83B61E07F522D0676FBF233AE41523D4FD59AD86747AA97",
+    "native/userspace/src/bin/console_client.rs": "0020820C1F41097EF1BCE929D7B70B06DDD0A3F7522DF1F6EF43679F556F3AD2",
+    "native/userspace/src/bin/console_service.rs": "EDB9D22EC956E751D3A846260CCA5D8DFA0459400268873F655B33E1013B25C5",
+    "native/userspace/src/bin/counter.rs": "ADBF65F08AFAC3226E82D224EA1B1F0C9BB8B9EB68EFE693F3AE7ABFBF15B149",
+    "native/userspace/src/bin/init.rs": "D608A2707096E5524A0E90F0DCB00A4C8EDDDBD8A5A52DC71F3F883436BF9FEB",
+    "native/userspace/src/console.rs": "AD83C77A8694B9178587885A6607F080F792E97B02E5CC4F677A8ED1C5998C6C",
+    "native/userspace/src/console_ipc/tests.rs": "55E2794BEABA82008779D1049FE74826E58DEED9A27528153A5161609D7E99FF",
+    "native/userspace/src/console_ipc.rs": "33A2D5CEDB00D52A47DC0A26E056A5060E1FB0EC1E86C1897CE7A9C5F6AA3D27",
+    "native/userspace/src/lib.rs": "D55BE2822A850ADE1E80D4231C8D3821734FA7AD79B25B89D73FD484971CFA47",
+    "native/userspace/src/process.rs": "BBB89A1BD8F3B9B12438F20909DAAC2D23F1DE7E2C737B2CA5E5D1B7E949F37A",
+    "native/userspace/src/protocol.rs": "A4FD37E4844E18804B314107CBFB3E883586EBFAEFB7DBD96A8370C362590BE5",
+    "native/userspace/src/service.rs": "AB1A71C8D554DCE7963F9847A808EB2A8296B31AF644A2A2C860487E08BB6837",
+    "native/userspace/src/startup.rs": "642F9E680ABBB89090CE6E4E755E0481FB36772C033340A3F49E6F27A6AE42A5",
+    "runtime/native_user_program.py": "FB636AAA4464159F8A7D5085FFCAE1F55BEED48DA575BE699C1307FE3BB75181",
+    "specs/native-host-msvc-profile.json": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+    "specs/native-toolchain-lock.json": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E",
+    "tests/test_native_build_space.py": "0EFC5483F84CFD131A5A51BB8B02C4F1A4E310F0CDF286BF710847360D6E5658",
+    "tests/test_native_user_program.py": "255889890E73D6F3CBC4EA3D041732B7A0950D0C42513B48AE76665B986B1827",
+    "tools/native_build_space.py": "DF9CA2F255D7F1F4F623076AB6DD4434281EBD2EFE29BE44F5FA230BD1314B6A",
+    "tools/native_host_toolchain.py": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F",
+    "tools/qualify_native_elf_loader.py": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B",
+    "tools/qualify_native_toolchain.py": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50",
+    "tools/qualify_native_user_programs.py": "C82155ABBAA090BED7A82D9571ABEEA25B6214681A49A323D579E07B2FEDE6B7"
+  },
+  "storage_preflight": {
+    "minimum_bytes": 536870912,
+    "available_bytes": 914894848,
+    "checked_before_output_creation": true,
+    "space_reserved": false,
+    "retention_performed": false
+  },
+  "source_unchanged": true,
+  "native_execution_verified": false,
+  "actual_init_service": false,
+  "normal_session_boot": false,
+  "iso_built": false,
+  "production_ready": false,
+  "toolchain": {
+    "rustc_sha256": "6D1C5543ED3A45CFBC1C1332D42D6550D883C14D3C2E323427E631C331CEBEEB",
+    "cargo_sha256": "3CD119FE81DFEDB9DCE4573696BF65058F16B57C9E5BABE415B71624315CBB7D",
+    "lock_path": "specs/native-toolchain-lock.json",
+    "host_msvc_verified": true,
+    "builds_offline_locked": true,
+    "conventional_compilation": true,
+    "kernel_dependency": false,
+    "input_hashes": {
+      "rustc.exe": "6D1C5543ED3A45CFBC1C1332D42D6550D883C14D3C2E323427E631C331CEBEEB",
+      "cargo.exe": "3CD119FE81DFEDB9DCE4573696BF65058F16B57C9E5BABE415B71624315CBB7D",
+      "rust-lld.exe": "55BD23CEE94C73C87DE51106F60B63AD8981390AA7079C435C27FB5B04E283AD",
+      "llvm-readobj.exe": "4C19B0875A8C6367CA589DEC2B75D5F8788B6C53F115679FFAC40C22D82814D5",
+      "libcore-05b8190f7da9d31a.rlib": "6B75C5188DCA46C917A67ADE52DDDEA81460F96DC4732003CEBEA2E22A5B1B09",
+      "libcompiler_builtins-163c2d8ca13074f6.rlib": "CC9B5D38CDE5A0D840A9DC207A1B46872803DDAEB9EB0E2823B731E756D9F94C"
+    },
+    "inputs_unchanged": true
+  },
+  "host_tests": [
+    {
+      "profile": "debug",
+      "tests_passed": 33
+    },
+    {
+      "profile": "release",
+      "tests_passed": 33
+    }
+  ],
+  "programs": {
+    "PooleInit": {
+      "contract_id": "PUSERBIN1",
+      "elf_bytes": 5384,
+      "elf_sha256": "F40091A50305F3B9C5B7EC1C48C2CC57FD12518FECBEC67C84BBF180A525BD5D",
+      "code_offset": 4096,
+      "code_bytes": 1073,
+      "code_sha256": "C18D6E5D0D66F11ED9DCB0018B196E0D442BC21F2CE51C92430756CDEA6F13C0",
+      "entry_offset": 0,
+      "load_pages": 1,
+      "writable_segments": 0,
+      "relocations": 0,
+      "imports": 0,
+      "position_independent_source_and_flags_required": true,
+      "native_execution_verified": false,
+      "production_ready": false,
+      "object_relocation_count": 4,
+      "object_relocation_kinds": [
+        "R_X86_64_PLT32"
+      ],
+      "source_binary": "native/userspace/src/bin/init.rs"
+    },
+    "PooleCounter": {
+      "contract_id": "PUSERBIN1",
+      "elf_bytes": 5424,
+      "elf_sha256": "33D08D944CC0320CB6194DC18AA8C0195365A87F15E5A8575AE29A15B2DAE51B",
+      "code_offset": 4096,
+      "code_bytes": 1113,
+      "code_sha256": "CA8EEC284AA0E65FC462439B2594313ABC1F7F7CBD01CF85667C78324AEE7A12",
+      "entry_offset": 0,
+      "load_pages": 1,
+      "writable_segments": 0,
+      "relocations": 0,
+      "imports": 0,
+      "position_independent_source_and_flags_required": true,
+      "native_execution_verified": false,
+      "production_ready": false,
+      "object_relocation_count": 4,
+      "object_relocation_kinds": [
+        "R_X86_64_PLT32"
+      ],
+      "source_binary": "native/userspace/src/bin/counter.rs"
+    },
+    "PooleConsole": {
+      "contract_id": "PUSERBIN1",
+      "elf_bytes": 5600,
+      "elf_sha256": "9CD54F09A60726AF18B6851C27C70F9F96827028E7F11AEF6A515F78A48C1468",
+      "code_offset": 4096,
+      "code_bytes": 1288,
+      "code_sha256": "91C9B3747E73DE9612D13222A6F2D13B4657A53C40E806DC9358245573507583",
+      "entry_offset": 0,
+      "load_pages": 1,
+      "writable_segments": 0,
+      "relocations": 0,
+      "imports": 0,
+      "position_independent_source_and_flags_required": true,
+      "native_execution_verified": false,
+      "production_ready": false,
+      "object_relocation_count": 13,
+      "object_relocation_kinds": [
+        "R_X86_64_PC32",
+        "R_X86_64_PLT32"
+      ],
+      "source_binary": "native/userspace/src/bin/console.rs"
+    },
+    "PooleConsoleService": {
+      "contract_id": "PUSERBIN1",
+      "elf_bytes": 7344,
+      "elf_sha256": "D0A961BB96064120B10E1D324E8CE97D5CCC9706AF4AE986C2152868115FD74C",
+      "code_offset": 4096,
+      "code_bytes": 3032,
+      "code_sha256": "FE75D2A7C5D4DD6F39D0652645FDE81AE072108477D7BF61F4B96028F9040F4E",
+      "entry_offset": 0,
+      "load_pages": 1,
+      "writable_segments": 0,
+      "relocations": 0,
+      "imports": 0,
+      "position_independent_source_and_flags_required": true,
+      "native_execution_verified": false,
+      "production_ready": false,
+      "object_relocation_count": 18,
+      "object_relocation_kinds": [
+        "R_X86_64_PC32",
+        "R_X86_64_PLT32"
+      ],
+      "source_binary": "native/userspace/src/bin/console_service.rs"
+    },
+    "PooleConsoleClient": {
+      "contract_id": "PUSERBIN1",
+      "elf_bytes": 6120,
+      "elf_sha256": "E0BAE7FFE7EC9D59E330D9286BBE2EE272A8BA4E658D0B5C62EFBE5F04809579",
+      "code_offset": 4096,
+      "code_bytes": 1813,
+      "code_sha256": "DF9024F847386B40CFBC7D32D60663BA90CD758875DECAE775B937114D9F0441",
+      "entry_offset": 0,
+      "load_pages": 1,
+      "writable_segments": 0,
+      "relocations": 0,
+      "imports": 0,
+      "position_independent_source_and_flags_required": true,
+      "native_execution_verified": false,
+      "production_ready": false,
+      "object_relocation_count": 5,
+      "object_relocation_kinds": [
+        "R_X86_64_PLT32"
+      ],
+      "source_binary": "native/userspace/src/bin/console_client.rs"
+    }
+  },
+  "independent_builds": 2,
+  "direct_byte_equality": true
+}

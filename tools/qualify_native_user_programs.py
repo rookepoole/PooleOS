@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from runtime.native_user_program import extract
 from tools.qualify_native_elf_loader import _toolchain
+from tools.native_build_space import require_space
 
 USER = ROOT / "native/userspace"
 TARGET = "x86_64-unknown-none"
@@ -22,7 +23,8 @@ def bindings() -> dict[str, str]:
         "tools/qualify_native_user_programs.py", "tests/test_native_user_program.py",
         "native/.cargo/config.toml", "tools/qualify_native_elf_loader.py",
         "tools/qualify_native_toolchain.py", "tools/native_host_toolchain.py",
-        "specs/native-toolchain-lock.json", "specs/native-host-msvc-profile.json")]
+        "specs/native-toolchain-lock.json", "specs/native-host-msvc-profile.json",
+        "tools/native_build_space.py", "tests/test_native_build_space.py")]
     return {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest().upper()
             for p in sorted(paths)}
 
@@ -34,6 +36,13 @@ def run(command: list[str], env: dict, log: Path) -> str:
     if result.returncode:
         raise ValueError(f"command failed ({result.returncode}): {log.name}\n{text[-5000:]}")
     return text
+
+def codegen_object(deps: Path, name: str) -> Path:
+    objects = list(deps.glob(name + "-*.rcgu.o"))
+    if len(objects) != 1:
+        raise ValueError("expected one program codegen object")
+    return objects[0]
+
 
 def build(cargo: Path, env: dict, target: Path, log: Path) -> dict:
     flags = ["-Cpanic=abort", "-Crelocation-model=pic", "-Ccode-model=small",
@@ -49,14 +58,14 @@ def build(cargo: Path, env: dict, target: Path, log: Path) -> dict:
         "--bins", "--release", "--target", TARGET, "--target-dir", str(target), "--locked", "--offline"]
     run(command, env, log)
     result = {}
-    for name, source in (("PooleInit", "init"), ("PooleCounter", "counter"), ("PooleConsole", "console")):
+    for name, source in (("PooleInit", "init"), ("PooleCounter", "counter"), ("PooleConsole", "console"),
+                         ("PooleConsoleService", "console_service"), ("PooleConsoleClient", "console_client")):
         path = target / TARGET / "release" / name
         blob = path.read_bytes()
         code, record = extract(blob)
-        objects = list((path.parent / "deps").glob(name + "*.rcgu.o"))
-        if len(objects) != 1: raise ValueError("expected one program codegen object")
+        object_path = codegen_object(path.parent / "deps", name)
         readobj = cargo.parent.parent / "lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-readobj.exe"
-        audit = json.loads(run([str(readobj), "--elf-output-style=JSON", "--relocations", str(objects[0])],
+        audit = json.loads(run([str(readobj), "--elf-output-style=JSON", "--relocations", str(object_path)],
             env, target.parent / f"{target.name}-{name}-relocations.json"))
         if len(audit) != 1: raise ValueError("ambiguous object audit")
         relocs = [item["Relocation"] for group in audit[0]["Relocations"] for item in group["Relocs"]]
@@ -76,9 +85,10 @@ def main() -> int:
     work = args.work_dir.resolve()
     if not work.is_relative_to(ROOT / "outputs"):
         parser.error("work directory must be under workspace outputs")
+    storage = require_space(work)
     work.mkdir(parents=True, exist_ok=False)
     before = bindings()
-    report = dict(cycle=262, contract_id="PUSERBIN1", status="fail", source_bindings=before,
+    report = dict(cycle=263, contract_id="PUSERBIN1", status="fail", source_bindings=before, storage_preflight=storage,
         source_unchanged=False, native_execution_verified=False, actual_init_service=False,
         normal_session_boot=False, iso_built=False, production_ready=False)
     try:
@@ -106,7 +116,7 @@ def main() -> int:
             if release: command.append("--release")
             output=run(command,env,work / ("release.log" if release else "debug.log"))
             match=re.search(r"test result: ok\. (\d+) passed; 0 failed; 0 ignored;",output)
-            if not match or int(match[1]) != 21: raise ValueError("expected21 Rust host tests")
+            if not match or int(match[1]) != 33: raise ValueError("expected33 Rust host tests")
             report["host_tests"].append(dict(profile="release" if release else "debug", tests_passed=int(match[1])))
         first=build(cargo,env,work / "build1",work / "build1.log")
         second=build(cargo,env,work / "build2",work / "build2.log")

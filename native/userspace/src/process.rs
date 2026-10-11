@@ -41,6 +41,62 @@ unsafe fn call(number: u64, handle: u64, address: u64, bytes: u64) -> (u64, u64)
 }
 
 pub struct Console(u64);
+pub struct ConsoleIpc {
+    receive: u64,
+    send: u64,
+    peer: crate::console_ipc::Peer,
+}
+/// SAFETY: live kernel-owned PSTART1 block, as for boot().
+#[inline(always)]
+pub unsafe fn console_ipc_boot(
+    address: u64,
+    bytes: u64,
+    version: u64,
+    server: bool,
+) -> Result<(Option<Console>, ConsoleIpc), startup::Error> {
+    if address != 0x40003000 || !(96..=512).contains(&bytes) {
+        return Err(startup::Error::Header);
+    }
+    let block = unsafe { core::slice::from_raw_parts(address as *const u8, bytes as usize) };
+    let boot = startup::console_ipc(block, version, server)?;
+    Ok((
+        boot.port.map(Console),
+        ConsoleIpc {
+            receive: boot.receive,
+            send: boot.send,
+            peer: boot.peer,
+        },
+    ))
+}
+impl crate::console_ipc::Channel for ConsoleIpc {
+    #[inline(always)]
+    fn send(
+        &mut self,
+        message: crate::console_ipc::Message,
+    ) -> Result<bool, crate::console_ipc::Error> {
+        let wire = message.encode();
+        // Synchronous kernel copy; the stack object stays live for the whole call.
+        match unsafe { call(3, self.send, wire.as_ptr() as u64, wire.len() as u64) } {
+            (0, n) if n == crate::console_ipc::BYTES as u64 => Ok(true),
+            (6, 0) => Ok(false),
+            _ => Err(crate::console_ipc::Error::Transport),
+        }
+    }
+    #[inline(always)]
+    fn receive(
+        &mut self,
+    ) -> Result<Option<crate::console_ipc::Message>, crate::console_ipc::Error> {
+        let mut wire = [0; crate::console_ipc::ENVELOPE_BYTES];
+        // receive7 copies authenticated sender metadata plus the payload, not receive4's raw bytes.
+        match unsafe { call(7, self.receive, wire.as_mut_ptr() as u64, wire.len() as u64) } {
+            (0, n) if n == crate::console_ipc::ENVELOPE_BYTES as u64 => {
+                self.peer.decode(&wire).map(Some)
+            }
+            (6, 0) => Ok(None),
+            _ => Err(crate::console_ipc::Error::Transport),
+        }
+    }
+}
 /// SAFETY: same live, kernel-owned PSTART1 block requirement as boot().
 #[inline(always)]
 pub unsafe fn console_boot(

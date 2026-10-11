@@ -1,6 +1,7 @@
 #![no_std]
 
 pub mod console;
+pub mod console_ipc;
 pub mod protocol;
 pub mod service;
 pub mod startup;

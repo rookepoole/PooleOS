@@ -65,6 +65,7 @@ ALLOWED_RUNS = {
     "runs/native-user-program-readiness.json",
     "runs/native-session-readiness.json",
     "runs/native-console-readiness.json",
+    "runs/native-console-ipc-program-readiness.json",
     "runs/native-kernel-virtual-memory-readiness.json",
     "runs/native_model_readiness.json",
     "runs/native_microcode_readiness.json",

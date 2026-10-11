@@ -103,6 +103,44 @@ pub fn console(bytes: &[u8], version: u64) -> Result<u64, Error> {
     handle(args[1])
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ConsoleIpcBoot {
+    pub port: Option<u64>,
+    pub receive: u64,
+    pub send: u64,
+    pub peer: crate::console_ipc::Peer,
+}
+#[inline(always)]
+pub fn console_ipc(bytes: &[u8], version: u64, server: bool) -> Result<ConsoleIpcBoot, Error> {
+    let (port, receive, send, peer) = if server {
+        let args = arguments::<5>(bytes, version)?;
+        if args[0] != b"console-service" {
+            return Err(Error::Role);
+        }
+        (
+            Some(handle(args[1])?),
+            handle(args[2])?,
+            handle(args[3])?,
+            handle(args[4])?,
+        )
+    } else {
+        let args = arguments::<4>(bytes, version)?;
+        if args[0] != b"console-client" {
+            return Err(Error::Role);
+        }
+        (None, handle(args[1])?, handle(args[2])?, handle(args[3])?)
+    };
+    if receive == send {
+        return Err(Error::Handle);
+    }
+    Ok(ConsoleIpcBoot {
+        port,
+        receive,
+        send,
+        peer: crate::console_ipc::Peer::from_packed(peer).map_err(|_| Error::Handle)?,
+    })
+}
+
 #[inline(always)]
 pub fn decode(bytes: &[u8], version: u64, expected: Role) -> Result<Boot, Error> {
     let args = arguments::<3>(bytes, version)?;

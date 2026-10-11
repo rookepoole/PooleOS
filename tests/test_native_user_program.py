@@ -1,6 +1,7 @@
 import copy
 import hashlib
 import struct
+import tempfile
 import unittest
 from pathlib import Path
 from runtime import native_user_program as program
@@ -22,6 +23,18 @@ def fixture():
     return bytes(blob)
 
 class NativeUserProgramTests(unittest.TestCase):
+    def test_object_lookup_separates_shared_prefix_and_rejects_missing_or_duplicate_objects(self):
+        from tools.qualify_native_user_programs import codegen_object
+        with tempfile.TemporaryDirectory() as temp:
+            deps = Path(temp)
+            for name in ("PooleConsole", "PooleConsoleClient", "PooleConsoleService"):
+                (deps / (name + "-123.rcgu.o")).touch()
+            self.assertEqual(codegen_object(deps, "PooleConsole"), deps / "PooleConsole-123.rcgu.o")
+            with self.assertRaises(ValueError):
+                codegen_object(deps, "Missing")
+            (deps / "PooleConsole-456.rcgu.o").touch()
+            with self.assertRaises(ValueError):
+                codegen_object(deps, "PooleConsole")
     def mutate(self,offset,fmt,value):
         blob=bytearray(fixture()); struct.pack_into(fmt,blob,offset,value); return bytes(blob)
     def test_extracts_exact_single_page_without_execution_claim(self):
@@ -86,7 +99,16 @@ class NativeUserProgramTests(unittest.TestCase):
         for text in [kernel,user]: self.assertIn('PSTART1\\0',text)
         for required in ["VERSION: u64 = 1", "3 | 4 =>", "send: number == 3", "5 if destination <= 1"]:
             self.assertIn(required,abi)
-        for name in ("init","counter"):
+        envelope=(ROOT/"native/kernel/src/capability_ipc/reply.rs").read_text()
+        console=(ROOT/"native/userspace/src/console_ipc.rs").read_text()
+        adapter=(ROOT/"native/userspace/src/process.rs").read_text()
+        self.assertIn("HEADER_BYTES: usize = 32",envelope)
+        self.assertIn("7 => Operation::Receive",abi)
+        self.assertIn("BYTES: usize = 32",console)
+        self.assertIn("ENVELOPE_BYTES: usize = 64",console)
+        self.assertIn("call(7, self.receive,",adapter)
+        self.assertIn("self.peer.decode(&wire)",adapter)
+        for name in ("init","counter","console_service","console_client"):
             main=(ROOT/f"native/userspace/src/bin/{name}.rs").read_text()
             self.assertIn("entry!(main)",main)
             self.assertIn("loop {",main)

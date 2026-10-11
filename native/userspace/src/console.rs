@@ -37,7 +37,7 @@ pub fn configure(port: &mut impl Registers) -> Result<(), Error> {
     Ok(())
 }
 
-fn status(port: &mut impl Registers) -> Result<u8, Error> {
+pub(crate) fn status(port: &mut impl Registers) -> Result<u8, Error> {
     let value = port.read(5)?;
     if value & 0x9e != 0 {
         return Err(Error::Hardware);

@@ -37,3 +37,15 @@ name = "PooleConsole"
 path = "src/bin/console.rs"
 test = false
 bench = false
+
+[[bin]]
+name = "PooleConsoleService"
+path = "src/bin/console_service.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleConsoleClient"
+path = "src/bin/console_client.rs"
+test = false
+bench = false
