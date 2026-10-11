@@ -44,6 +44,74 @@ fn caller(m: admission::Member) -> Caller {
     Caller::new(m.id, m.image)
 }
 
+fn capacity_members() -> [admission::Member; 6] {
+    core::array::from_fn(|i| {
+        let mut m = members()[0];
+        m.id = TaskId::new(i as u8, 1).unwrap();
+        m.image.root_physical += i as u64 * 4096;
+        m.image.code_physical += i as u64 * 4096;
+        m.image.stack_physical += i as u64 * 4096;
+        m
+    })
+}
+
+#[test]
+fn six_member_capacity_preserves_pair_and_device_authority() {
+    let (mut s, mut scheduler, m) = (Space::new(), Scheduler::new(1).unwrap(), capacity_members());
+    let a = s.admit_console_capacity(&mut scheduler, &m).unwrap();
+    assert_eq!(a.count, 13);
+    assert_eq!(
+        &a.handles[9..13],
+        &[0x100010001, 0x100010001, 0x100010002, 0x100010002]
+    );
+    assert_eq!(scheduler.summary().runnable_count, 6);
+    for i in 0..6 {
+        assert_eq!(s.owns_console(m[i].id), i == 2);
+        let own = s.resolve(i, 0x100010001, Rights::RECEIVE).unwrap();
+        let send = s.resolve(i, 0x100010002, Rights::SEND).unwrap();
+        assert_eq!(s.objects[own.object.slot].value.unwrap().owner, m[i].id);
+        assert_eq!(
+            s.objects[send.object.slot].value.unwrap().owner,
+            m[i ^ 1].id
+        );
+        assert!(s.resolve(i, 0x100010002, Rights::RECEIVE).is_err());
+        assert!(
+            s.derive(m[i].id, 0x100010002, m[(i + 2) % 6].id, Rights::SEND)
+                .is_err()
+        );
+    }
+    let mut wire = Bytes([37; 96]);
+    assert_eq!(
+        s.transfer(caller(m[4]), a.handles[11], ADDRESS, 32, true, &mut wire),
+        (Status::Ok, 32)
+    );
+    assert_eq!(
+        s.transfer(caller(m[5]), a.handles[10], ADDRESS, 32, false, &mut wire),
+        (Status::Ok, 32)
+    );
+    for member in m {
+        s.detach(member.id).unwrap();
+    }
+    assert!(s.is_empty());
+}
+
+#[test]
+fn six_member_capacity_rollback_covers_every_endpoint_slot_and_device_lease() {
+    let m = capacity_members();
+    for start in 0..ENDPOINTS {
+        let (mut s, mut scheduler) = (Space::new(), Scheduler::new(1).unwrap());
+        for offset in 0..3 {
+            s.objects[(start + offset) % ENDPOINTS].generation = u32::MAX;
+        }
+        let before = scheduler.summary();
+        assert!(s.admit_console_capacity(&mut scheduler, &m).is_err());
+        assert_eq!(scheduler.summary(), before);
+        assert!(s.is_empty());
+        assert!(m.iter().all(|v| !s.owns_console(v.id)));
+        assert!(m.iter().all(|v| s.attach(v.id, v.image).is_err()));
+    }
+}
+
 #[test]
 fn four_member_grants_are_separate_pairs_and_only_service_owns_device() {
     let (mut s, mut scheduler, m) = (Space::new(), Scheduler::new(1).unwrap(), members());
@@ -158,9 +226,12 @@ fn queued_plain_ack_survives_sender_retirement_but_new_sends_do_not() {
 #[test]
 fn four_member_admission_failure_does_not_publish_partial_scheduler_or_objects() {
     let m = members();
-    for exhausted in 0..ENDPOINTS {
+    for exhausted in 0..4 {
         let (mut s, mut scheduler) = (Space::new(), Scheduler::new(1).unwrap());
         // Leave too few allocatable endpoint slots for the final pair.
+        for slot in &mut s.objects[4..] {
+            slot.generation = u32::MAX;
+        }
         s.objects[exhausted].generation = u32::MAX;
         let before = scheduler.summary();
         assert!(s.admit_console_session(&mut scheduler, &m).is_err());

@@ -8,7 +8,9 @@ static COUNTER: &[u8] = include_bytes!(env!("POOLEOS_COUNTER_CODE"));
 static CONSOLE: &[u8] = include_bytes!(env!("POOLEOS_CONSOLE_CODE"));
 #[cfg(feature = "development-console-ipc")]
 static CLIENT: &[u8] = include_bytes!(env!("POOLEOS_CONSOLE_CLIENT_CODE"));
-const TASK_COUNT: usize = if cfg!(feature = "development-console-ipc") {
+const TASK_COUNT: usize = if cfg!(feature = "development-session-capacity") {
+    6
+} else if cfg!(feature = "development-console-ipc") {
     4
 } else if cfg!(feature = "development-console") {
     3
@@ -89,6 +91,16 @@ pub(crate) fn run(
         b"0000000100010001",
         b"0000000100010002"
     ]));
+    #[cfg(feature = "development-session-capacity")]
+    let args5 = checked!(Arguments::new(&[
+        if cfg!(feature = "development-session-capacity-bad-startup") {
+            &b"invalid"[..]
+        } else {
+            &b"counter"[..]
+        },
+        b"0000000100010001",
+        b"0000000100010002",
+    ]));
     let mut peers = [
         checked!(Peer::new_program(
             0, &init, &args0, handoff, core, bits, manager, topology, hpet
@@ -103,6 +115,14 @@ pub(crate) fn run(
         #[cfg(feature = "development-console-ipc")]
         checked!(Peer::new_program(
             3, &client, &args3, handoff, core, bits, manager, topology, hpet
+        )),
+        #[cfg(feature = "development-session-capacity")]
+        checked!(Peer::new_program(
+            4, &init, &args0, handoff, core, bits, manager, topology, hpet
+        )),
+        #[cfg(feature = "development-session-capacity")]
+        checked!(Peer::new_program(
+            5, &counter, &args5, handoff, core, bits, manager, topology, hpet
         )),
     ];
     let mut scheduler = checked!(scheduler::Scheduler::new(1));
@@ -127,9 +147,19 @@ pub(crate) fn run(
             &mut scheduler,
         )
     });
-    #[cfg(feature = "development-console-ipc")]
+    #[cfg(all(
+        feature = "development-console-ipc",
+        not(feature = "development-session-capacity")
+    ))]
     let grants = checked!(unsafe {
         arch::x86_64::user_ipc::bootstrap_console_ipc(
+            core::array::from_fn(|i| (peers[i].id, peers[i].admission)),
+            &mut scheduler,
+        )
+    });
+    #[cfg(feature = "development-session-capacity")]
+    let grants = checked!(unsafe {
+        arch::x86_64::user_ipc::bootstrap_console_capacity(
             core::array::from_fn(|i| (peers[i].id, peers[i].admission)),
             &mut scheduler,
         )
@@ -151,7 +181,7 @@ pub(crate) fn run(
         stop(20005, serial, debugcon);
     }
     #[cfg(feature = "development-console-ipc")]
-    if grants[4..]
+    if grants[4..9]
         != [
             0x100010001,
             0x100010001,
@@ -170,6 +200,10 @@ pub(crate) fn run(
     {
         stop(20006, serial, debugcon);
     }
+    #[cfg(feature = "development-session-capacity")]
+    if grants[9..] != [0x100010001, 0x100010001, 0x100010002, 0x100010002] {
+        stop(20008, serial, debugcon);
+    }
     {
         let mut log = EarlyLogger::new(BootSink {
             serial,
@@ -180,8 +214,10 @@ pub(crate) fn run(
         log.write_str("POOLEOS:SESSION START contract=PSESSION1 programs=2 bootstrap=PSTART1 abi=PSABI1 init_bytes=");
         #[cfg(all(feature = "development-console", not(feature = "development-console-ipc")))]
         log.write_str("POOLEOS:SESSION START contract=PSESSION2 programs=3 bootstrap=PSTART1 abi=PSABI1 init_bytes=");
-        #[cfg(feature = "development-console-ipc")]
+        #[cfg(all(feature = "development-console-ipc", not(feature = "development-session-capacity")))]
         log.write_str("POOLEOS:SESSION START contract=PSESSION4 programs=4 bootstrap=PSTART1 abi=PSABI1 init_bytes=");
+        #[cfg(feature = "development-session-capacity")]
+        log.write_str("POOLEOS:SESSION START contract=PSESSION5 programs=6 bootstrap=PSTART1 abi=PSABI1 init_bytes=");
         log.write_decimal_u64(INIT.len() as u64);
         log.write_str(" counter_bytes=");
         log.write_decimal_u64(COUNTER.len() as u64);
@@ -211,10 +247,22 @@ pub(crate) fn run(
             {
                 log.write_str(" root3=");
                 log.write_hex_u64(peers[3].root);
-                log.write_str(" task_image_pages=52 firmware_pages=");
+                #[cfg(feature = "development-session-capacity")]
+                for p in &peers[4..] {
+                    log.write_str(if p.id.slot == 4 { " root4=" } else { " root5=" });
+                    log.write_hex_u64(p.root);
+                }
+                log.write_str(" task_image_pages=");
+                log.write_decimal_u64(13 * TASK_COUNT as u64);
+                log.write_str(" firmware_pages=");
                 log.write_decimal_u64(baseline);
+                #[cfg(not(feature = "development-session-capacity"))]
                 log.write_str(
                     " granted_handles=9 protocol=PCS1 transport=PRPC1 port=COM2 irq=0 diagnostics=0 production=0\n",
+                );
+                #[cfg(feature = "development-session-capacity")]
+                log.write_str(
+                    " granted_handles=13 protocol=PCS1 transport=PRPC1 capacity=PCAP8 port=COM2 irq=0 diagnostics=0 production=0\n",
                 );
             }
         }
@@ -311,8 +359,11 @@ pub(crate) fn run(
         // receive endpoint can remain valid after its only service peer dies;
         // cancel that dependent wait instead of pretending readiness implies EOF.
         // General service supervision belongs in user space and is not provided here.
-        for dependent in 0..2 {
-            if dead[1 - dependent] && !dead[dependent] {
+        for dependent in 0..TASK_COUNT {
+            if matches!(dependent, 2 | 3) {
+                continue;
+            }
+            if dead[dependent ^ 1] && !dead[dependent] {
                 if let Some(ticket) = waiting[dependent] {
                     let task = checked!(scheduler::TaskId::new(
                         peers[dependent].id.slot,
@@ -410,6 +461,18 @@ pub(crate) fn run(
                 (" calls3=", calls[3]),
                 (" ticks3=", ticks[3]),
                 (" client_dead=", u64::from(dead[3])),
+            ] {
+                log.write_str(label);
+                log.write_decimal_u64(value);
+            }
+            #[cfg(feature = "development-session-capacity")]
+            for (label, value) in [
+                (" calls4=", calls[4]),
+                (" ticks4=", ticks[4]),
+                (" worker0_dead=", u64::from(dead[4])),
+                (" calls5=", calls[5]),
+                (" ticks5=", ticks[5]),
+                (" worker1_dead=", u64::from(dead[5])),
             ] {
                 log.write_str(label);
                 log.write_decimal_u64(value);

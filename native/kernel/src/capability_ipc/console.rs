@@ -33,38 +33,75 @@ impl Space {
         scheduler: &mut crate::scheduler::Scheduler,
         members: &[admission::Member; 4],
     ) -> Result<admission::Admitted, admission::Error> {
+        self.admit_console_members(scheduler, members)
+    }
+
+    /// Same console authority, plus one isolated endpoint pair in slots four/five.
+    pub fn admit_console_capacity(
+        &mut self,
+        scheduler: &mut crate::scheduler::Scheduler,
+        members: &[admission::Member; 6],
+    ) -> Result<admission::Admitted, admission::Error> {
+        self.admit_console_members(scheduler, members)
+    }
+
+    fn admit_console_members(
+        &mut self,
+        scheduler: &mut crate::scheduler::Scheduler,
+        members: &[admission::Member],
+    ) -> Result<admission::Admitted, admission::Error> {
         use admission::Step;
-        self.admit(
-            scheduler,
-            members,
-            &[
-                Step::Endpoint { member: 0 },
-                Step::Endpoint { member: 1 },
+        if !matches!(members.len(), 4 | 6) {
+            return Err(admission::Error::Plan);
+        }
+        let mut steps = [Step::Endpoint { member: 0 }; 13];
+        steps[..9].copy_from_slice(&[
+            Step::Endpoint { member: 0 },
+            Step::Endpoint { member: 1 },
+            Step::Grant {
+                endpoint: 1,
+                target: members[0].id,
+                rights: Rights::SEND,
+            },
+            Step::Grant {
+                endpoint: 0,
+                target: members[1].id,
+                rights: Rights::SEND,
+            },
+            Step::Endpoint { member: 2 },
+            Step::Endpoint { member: 3 },
+            Step::Grant {
+                endpoint: 5,
+                target: members[2].id,
+                rights: Rights::SEND,
+            },
+            Step::Grant {
+                endpoint: 4,
+                target: members[3].id,
+                rights: Rights::SEND,
+            },
+            Step::Console { member: 2 },
+        ]);
+        let count = if members.len() == 6 {
+            steps[9..].copy_from_slice(&[
+                Step::Endpoint { member: 4 },
+                Step::Endpoint { member: 5 },
                 Step::Grant {
-                    endpoint: 1,
-                    target: members[0].id,
+                    endpoint: 10,
+                    target: members[4].id,
                     rights: Rights::SEND,
                 },
                 Step::Grant {
-                    endpoint: 0,
-                    target: members[1].id,
+                    endpoint: 9,
+                    target: members[5].id,
                     rights: Rights::SEND,
                 },
-                Step::Endpoint { member: 2 },
-                Step::Endpoint { member: 3 },
-                Step::Grant {
-                    endpoint: 5,
-                    target: members[2].id,
-                    rights: Rights::SEND,
-                },
-                Step::Grant {
-                    endpoint: 4,
-                    target: members[3].id,
-                    rights: Rights::SEND,
-                },
-                Step::Console { member: 2 },
-            ],
-        )
+            ]);
+            13
+        } else {
+            9
+        };
+        self.admit(scheduler, members, &steps[..count])
     }
 
     /// Trusted prepared-task admission only. No hardware operation occurs here.

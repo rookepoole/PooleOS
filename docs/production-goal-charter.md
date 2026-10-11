@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 265
+Last roadmap reconciliation: PooleOS Cycle 266
 
-Cycle265 replaces console mailbox polling with tracked requests and one-use replies.
+Cycle266 qualifies six private user-space roots with eight IPC table/endpoint
+slots, bounded admission and independent worker-failure cleanup. Console input
+continues across worker failure; four-process compatibility and all25 default
+regression checks pass after a reviewed207/208-page image repair. Next: narrow
+process lifecycle authority/user supervision, shell/files/two useful apps, then
+optical ISO. Capacity workloads are not applications. No usable ISO or production
+promotion yet; full robust microkernel, N0-N39, PooleGlyph/PDC, accessible PooleGlass
+and signed production gates remain. [Evidence](checkpoints/cycle266-native-session-capacity.md).
+
+Historical Cycle265 replaces console mailbox polling with tracked requests and one-use replies.
 Native service death delivers authenticated revocation and terminates its client;
 normal echo/close and all24 default regression checks pass. Capacity/lifecycle for
 init/console/shell/two apps precede shell/files/optical ISO. Restart is not yet built.

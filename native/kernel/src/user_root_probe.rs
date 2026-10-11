@@ -137,7 +137,10 @@ pub fn run(
     IST1_TOP.store(descriptors.ist1_top, Ordering::Release);
     IST2_BOTTOM.store(descriptors.ist2_bottom, Ordering::Release);
     IST2_TOP.store(descriptors.ist2_top, Ordering::Release);
-    let quota = if cfg!(feature = "development-console-ipc") {
+    let quota = if cfg!(feature = "development-session-capacity") {
+        // Six owned images; firmware is charged independently, not hidden in78.
+        78 + 12
+    } else if cfg!(feature = "development-console-ipc") {
         // Four 13-page images plus at most 12 retained ACPI snapshot pages.
         52 + 12
     } else if cfg!(feature = "development-console") {

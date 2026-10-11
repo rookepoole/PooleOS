@@ -1,15 +1,49 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-11
-Plan version: 2.168.0-native-console-rpc
-Roadmap cycle: PooleOS Cycle 265
+Plan version: 2.169.0-native-session-capacity
+Roadmap cycle: PooleOS Cycle 266
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 265: Tracked Console Requests
+## Cycle 266: Six-Process Capacity
+
+Eight IPC task tables/endpoints now match scheduler capacity; per-task limits4,
+queue depth4 and message size64 are unchanged. Six private CPL3 images use13
+explicit grants and78 owned pages. Two fresh46/49-byte inputs echo/close/reap26
+pages while both independent pairs reach576 dispatches. A malformed extra worker
+exits120 at6 and its dependent partner111 at10; the original pair and console
+continue, reclaiming52 pages by the end of512 dispatches. Extra copies are capacity
+workloads, not the two useful applications. User program sources/builds are reused
+from independently verified Cycle265 evidence, not newly compiled this cycle.
+[Evidence and limits](checkpoints/cycle266-native-session-capacity.md).
+
+The default regression exposed BSS growth past205 pages. Reviewed repair:207
+mapped image pages within the unchanged208-page capacity and36-page guarded stack.
+Nine fresh final guests pass: three six-process, three four-process compatibility,
+two default containment and unsigned denial. All25 default checks pass, with1730
+Rust executions and116 Python oracle tests. Initial205-page successes and the
+failed default build remain historical, not final-image qualification.
+
+USI-3 remains partial. Next: narrow generation-bound process start/stop authority
+and real user-space supervision, then USI-4 shell/read-only bundled files/two useful
+apps and USI-5 optical integration. Keep native console pressure/malformed-request,
+restart/loading/trust, efficient idle and clock recovery open. Eight IPC slots do
+not qualify eight images: six require30 PMM allocation records plus firmware
+against32 total. One image page remains; full call-chain stack bounds still need
+verification before further growth. The complete robust microkernel, PooleGlyph,
+PDC and accessible PooleGlass remain required after the integration ISO.
+
+No phase/flag closes:40 phases301 subphases8996 requirements59 additions98 flags43
+open20 gap groups.1378 Python tests and608 architecture bindings are inventory,
+not a full-suite pass. Three known readiness tests and exact-candidate canonical
+qualification still gate main. Evidence archives preserve failures and generated
+objects; full disk-space reservation and reproducible restore remain open.
+
+## Historical Cycle 265: Tracked Console Requests
 
 The client now uses existing PSABI1 tracked Begin/Take operations; the console
 service receives authenticated sender envelopes and replies through one-use tokens.

@@ -93,7 +93,7 @@ class NativeConsoleIpcTests(unittest.TestCase):
         root=Path(__file__).resolve().parents[1]
         code=(root/"native/kernel/src/user_root_probe/peer_driver/session.rs").read_text()
         self.assertIn("bootstrap_console_ipc",code)
-        self.assertIn("grants[4..]",code)
+        self.assertIn("grants[4..9]",code)
         self.assertIn("p.id.generation != 1",code)
         self.assertIn('feature = "development-console-ipc"',code)
         self.assertIn('52 + 12\n    } else if cfg!(feature = "development-console")',

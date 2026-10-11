@@ -24,6 +24,13 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle266-native-session-capacity.md",
+    "docs/native-session-capacity.md",
+    "runs/native-session-capacity-readiness.json",
+    "native/kernel/src/capability_ipc/tests/admission/capacity.rs",
+    "runtime/native_session_capacity.py",
+    "tools/qualify_native_session_capacity.py",
+    "tests/test_native_session_capacity.py",
     "docs/checkpoints/cycle265-native-console-rpc.md",
     "docs/native-console-rpc.md",
     "runs/native-console-rpc-readiness.json",

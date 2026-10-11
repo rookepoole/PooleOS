@@ -2,6 +2,8 @@ use super::*;
 use crate::capability_ipc::admission::{Error as AdmitError, MAX_STEPS, Member, Step};
 use std::vec;
 
+mod capacity;
+
 fn member(slot: u8, generation: u32) -> Member {
     Member {
         id: TaskId::new(slot, generation).unwrap(),
@@ -89,6 +91,11 @@ fn admission_every_plan_prefix_failure_removes_live_authority_without_generation
 fn admission_endpoint_and_table_exhaustion_are_atomic() {
     for table_full in [false, true] {
         let mut s = Space::new();
+        if !table_full {
+            for slot in &mut s.objects[4..] {
+                slot.generation = u32::MAX;
+            }
+        }
         let mut scheduler = Scheduler::new(1).unwrap();
         let steps = if table_full {
             let mut p = vec![Step::Endpoint { member: 0 }];

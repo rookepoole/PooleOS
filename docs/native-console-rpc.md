@@ -1,5 +1,10 @@
 # Native Console Tracked Requests
 
+Cycle266 replays the unchanged user transport on the expanded IPC core and
+reviewed207/208-page layout, preserving the original36-page guarded stack.
+See [current evidence](checkpoints/cycle266-native-session-capacity.md).
+The Cycle265 image sizes and executions below remain historical.
+
 Cycle265, 2026-10-11. The invariants below were frozen before implementation.
 Three fresh native guests now pass exact echo/close and bounded peer-death
 termination; all24 default regression checks pass. See the

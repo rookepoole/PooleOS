@@ -11,9 +11,9 @@ use crate::{
 };
 
 pub const CONTRACT_ID: &str = "PKIPC1";
-pub const TASKS: usize = 4;
+pub const TASKS: usize = crate::scheduler::MAX_TASKS;
 pub const CAPS: usize = 4;
-pub const ENDPOINTS: usize = 4;
+pub const ENDPOINTS: usize = TASKS;
 pub const DEPTH: usize = 4;
 pub const MAX_BYTES: usize = 64;
 const ENDPOINT_TAG: u64 = 1 << 16;

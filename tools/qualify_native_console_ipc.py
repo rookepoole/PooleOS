@@ -35,6 +35,8 @@ def program_inputs(directory, env):
 
 
 class Interaction(previous.Interaction):
+    run_pattern = ipc.RUN
+
     def poll(self, debug: bytes) -> bool:
         if self.sock is None:
             self.sock=socket.create_connection(("127.0.0.1",self.port),timeout=2)
@@ -47,7 +49,7 @@ class Interaction(previous.Interaction):
             if len(self.received)>console.CONTROL_PREFIX_LIMIT+len(self.payload): raise ValueError("unbounded COM2")
         _,application=console.split_output(bytes(self.received),partial=True)
         markers=session.extract_markers(debug)
-        runs=[ipc.RUN.fullmatch(m) for m in markers if m.startswith("POOLEOS:SESSION RUN ")]
+        runs=[self.run_pattern.fullmatch(m) for m in markers if m.startswith("POOLEOS:SESSION RUN ")]
         runs=[m for m in runs if m is not None]
         if self.bad:
             if application: raise ValueError("wrong peer produced output")
@@ -73,7 +75,7 @@ def main():
     storage=require_space(work)
     work.mkdir(parents=True,exist_ok=False)
     before=sources()
-    report=dict(cycle=265,contract_id="PSESSION4",status="fail",source_bindings=before,
+    report=dict(cycle=266,contract_id="PSESSION4",status="fail",source_bindings=before,
         storage_preflight=storage,guest_runs=[],native_console_ipc=False,peer_death_termination=False,polling_peer_death_recovery=False,
         shell=False,iso_built=False,production_ready=False)
     try:

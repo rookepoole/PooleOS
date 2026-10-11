@@ -84,7 +84,10 @@ pub(crate) fn byte(caller: Caller, handle: u64, offset: u64, value: Option<u64>)
 }
 
 /// SAFETY: exclusive BSP, IF0, four owned prepared roots, no dispatched task/AP.
-#[cfg(feature = "development-console-ipc")]
+#[cfg(all(
+    feature = "development-console-ipc",
+    not(feature = "development-session-capacity")
+))]
 pub unsafe fn bootstrap_ipc(
     tasks: [(TaskId, ImageAdmission); 4],
     scheduler: &mut poolekernel::scheduler::Scheduler,
@@ -104,4 +107,27 @@ pub unsafe fn bootstrap_ipc(
         .map_err(|_| Error::State)?;
     quiesce()?;
     admitted.handles[..9].try_into().map_err(|_| Error::State)
+}
+
+/// SAFETY: exclusive BSP/IF0, six owned prepared roots, no dispatched task/AP.
+#[cfg(feature = "development-session-capacity")]
+pub unsafe fn bootstrap_capacity(
+    tasks: [(TaskId, ImageAdmission); 6],
+    scheduler: &mut poolekernel::scheduler::Scheduler,
+) -> Result<[u64; 13], Error> {
+    idle()?;
+    let s = unsafe { &mut *(&raw mut IPC) };
+    if !s.is_empty() {
+        return Err(Error::State);
+    }
+    let members = tasks.map(|(id, image)| Member {
+        id,
+        image,
+        priority: 16,
+    });
+    let admitted = s
+        .admit_console_capacity(scheduler, &members)
+        .map_err(|_| Error::State)?;
+    quiesce()?;
+    admitted.handles[..13].try_into().map_err(|_| Error::State)
 }

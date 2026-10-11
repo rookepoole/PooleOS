@@ -577,8 +577,9 @@ fn cap_and_object_quota_failure_has_no_allocation_or_generation_effect() {
     assert_eq!(s.create_endpoint(id(1)), Err(Error::Quota));
     assert_eq!(s.tables, tables);
     assert_eq!(s.objects, objects);
-    for _ in 1..ENDPOINTS {
-        s.create_endpoint(id(0)).unwrap();
+    for i in 1..ENDPOINTS {
+        // Keep per-table quota pressure separate from the global object limit.
+        s.create_endpoint(id(((i + 1) % TASKS) as u8)).unwrap();
     }
     let tables = s.tables;
     let objects = s.objects;

@@ -490,8 +490,9 @@ fn server_retirement_revokes_tokens_and_same_slot_new_task_cannot_replay() {
             (Status::Denied, 0)
         );
     }
-    for slot in [id(0), next, id(2), id(3)] {
-        s.detach(slot).unwrap();
+    for slot in 0..TASKS {
+        s.detach(if slot == 1 { next } else { id(slot as u8) })
+            .unwrap();
     }
     assert!(s.is_empty());
 }

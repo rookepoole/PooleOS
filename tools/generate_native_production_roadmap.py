@@ -13623,13 +13623,110 @@ def apply_cycle265(roadmap: dict, test_count: int) -> dict:
             "native PCS1 pressure/malformed-request controls preserve tracked completion and independent progress",
             "real shell, bundled read-only files, two useful apps, then fresh optical ISO interaction and sustained-session acceptance",
             "retain ordinary trust denial, failed evidence, full canonical gates before main and complete robust microkernel afterward"])
+    return apply_cycle266(roadmap, test_count)
+
+
+def apply_cycle266(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle266-native-session-capacity.md"
+    path = "runs/native-session-capacity-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    capacity, regression = receipt["session_capacity"], receipt["default_regression"]
+    digest = hashlib.sha256(raw).hexdigest().upper()
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle265_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle265_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline["native_console_rpc_integration"]["evidence_status"] = "historical_after_cycle266_capacity_changes"
+    baseline.update(pooleos_cycle=266, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 266
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-session-capacity.md"]
+    gate["current_candidate_audit"]["cycle"] = 266
+    gate["current_focused_source_projection"]["cycle"] = 266
+    gate["qualification_status"] = "native_six_process_capacity_pass_lifecycle_shell_ISO_and_canonical_gates_pending"
+    gate["current_closeout_regression"] = dict(cycle=266, status="pass",
+        receipt_path=path, receipt_section="default_regression", receipt_sha256=digest,
+        source_binding_count=len(regression["source_bindings"]), checks_passed=25,
+        rust_test_executions=1730, additional_python_oracle_tests=116, guest_runs=3,
+        elapsed_seconds=411.453,
+        log_sha256="1097F08AC97556DA0784DC4E39788500F02127E1D43E380A0D4979154CD993E9",
+        source_unchanged=True, owner_report_unchanged=True,
+        known_unresolved_readiness_tests=regression["known_unresolved_readiness_tests"],
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=266, status="pass",
+        tests_run=223, tests_passed=223, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=52.927, elapsed_seconds=53.985,
+        log_sha256="ABD91A41F3A6F92D7A62591BFCB56E9FF8184B81CE8AA622491394F51ACA3D72",
+        source_unchanged=True, owner_report_unchanged=True,
+        conservation_tests=159, conservation_test_seconds=9.763,
+        conservation_capture_seconds=11.235,
+        conservation_log_sha256="978246C5FCB0211642427044DC5CB45C0F573BE5F21F6E55EF4D7BD5EFE3A25C",
+        scope="pre_closeout_metadata_and_conservation_not_final_commit_or_canonical_gate",
+        counts_overlap=True, historical_integrity_is_not_new_execution=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=266, session_contract="PSESSION5", receipt_path=path,
+        receipt_section="session_capacity", native_execution_evidence_cycle=266,
+        native_execution_replayed_this_cycle=True,
+        native_execution_status="six_private_roots_console_echo_and_independent_worker_failure_pass",
+        kernel_image_pages=207, kernel_capacity_pages=208, kernel_remaining_capacity_pages=1,
+        ipc_task_slots=8, endpoint_slots=8, fixed_bootstrap_process_slots=6,
+        native_qualified_processes=6, physical_allocation_record_capacity=32,
+        user_lifecycle_authority=False, useful_application_count=0, full_stack_bound_proven=False)
+    lane["stages"]["USI-3"] = "partial_six_process_capacity_lifecycle_loading_supervision_and_trust_pending"
+    baseline["native_session_capacity_integration"] = dict(cycle=266, contract_id="PSESSION5",
+        capacity_contract="PCAP8", status=receipt["status"], receipt_path=path, receipt_sha256=digest,
+        source_binding_count=len(capacity["source_bindings"]),
+        program_source_binding_count=len(capacity["program_build"]["source_bindings"]),
+        kernel_sha256=capacity["kernels"]["capacity"]["sha256"],
+        independent_kernel_builds_equal=capacity["independent_kernel_builds_equal"], guest_runs=3,
+        input_bytes=[r["interaction"]["input_bytes"] for r in capacity["guest_runs"]],
+        final_progress=[r["marker_summary"]["samples"][-1] for r in capacity["guest_runs"]],
+        stop_dispatches=[r["marker_summary"]["stop_dispatches"] for r in capacity["guest_runs"]],
+        hostile_marker_cases=[r["hostile_marker_cases_rejected"] for r in capacity["guest_runs"]],
+        console_kernel_tests_per_profile=489, default_kernel_tests=475,
+        new_kernel_tests=6, new_oracle_tests=6, focused_python_tests=25,
+        user_program_sources_unchanged=True, user_programs_rebuilt_this_cycle=False,
+        ipc_task_slots=8, endpoint_slots=8, native_qualified_processes=6,
+        firmware_page_quota=12, task_image_pages=78, kernel_image_pages=207,
+        kernel_reserved_pages=208, guarded_stack_pages=36, ipc_static_bytes=19264,
+        full_stack_bound_proven=False, user_lifecycle_authority=False, useful_application_count=0,
+        native_preemption_observed=False, shell=False, iso_built=False, production_ready=False)
+    evidence = "Cycle266: eight IPC tables/endpoints align with the existing scheduler; per-task limits remain4 and messages64 bytes. Six private CPL3 roots admit13 explicit grants and78 image pages. Two fresh inputs46/49 bytes echo and close/reap26 pages; two isolated pairs progress. Malformed extra worker exits120 then its partner111 within8 dispatches; the original pair and console survive and total52 pages return. Four-process PRPC1 and all25 default regression checks pass after a measured207/208-page layout repair. " + checkpoint
+    gap = "Capacity is not user-space lifecycle authority: next implement narrow start/stop mechanisms and supervisor policy, then a real shell, bundled read-only files/two useful apps and optical ISO. Eight IPC slots do not qualify eight native images: six use30 allocation records plus firmware against32 total. Full call-chain stack bound and remaining single image-page headroom need continued review. Native PCS1 pressure/malformed-request controls, executable loading/trust, restart, efficient idle and clock recovery remain. Full canonical gates and the complete robust microkernel/PDC/PooleGlyph/PooleGlass remain required."
+    for phase_id in ("N13", "N14", "N16", "N21", "N22", "N36"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    next(p for p in roadmap["phases"] if p["id"] == "N36")["current_evidence"].insert(
+        0, f"Cycle 266 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N13-USERSPACE-ISO-001", "FLAG-NATIVE-DRIVER-001", "FLAG-N36-EVIDENCE-STORAGE-001"):
+            flag["evidence"].append(checkpoint)
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["closure_condition"] += " Cycle266: " + gap
+        if flag["id"] == "FLAG-N36-EVIDENCE-STORAGE-001":
+            flag["closure_condition"] += " Cycle266 preserves failed/superseded builds and media in verified scoped D-drive archives; complete reservation/restore remains open."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(
+        title="Add narrow process lifecycle authority and user-space supervision, then shell/apps and optical ISO",
+        entry_evidence=[checkpoint, path, "docs/native-session-capacity.md", "docs/native-userspace-integration-iso.md"],
+        exit_evidence=[
+            "generation-bound start/stop authority cannot control unrelated tasks or bypass quiescent owned cleanup",
+            "user-space supervisor and real applications use explicit grants without a kernel command shell",
+            "qualify PMM records, image headroom and call-chain stack use before further process growth",
+            "native console pressure/malformed-request controls preserve tracked completion and independent progress",
+            "real shell, read-only files/two useful apps, then fresh optical ISO interaction and sustained-session acceptance",
+            "retain failed evidence, ordinary trust denial, canonical gates before main and complete robust microkernel afterward"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1371)
+    parser.add_argument("--test-count", type=int, default=1378)
     parser.add_argument("--status-date", default="2026-10-11")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

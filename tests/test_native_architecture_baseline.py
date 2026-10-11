@@ -68,8 +68,13 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 601)
+        self.assertEqual(len(self.artifact["bound_sources"]), 608)
         paths = {item["path"] for item in self.artifact["bound_sources"]}
+        self.assertTrue({"docs/checkpoints/cycle266-native-session-capacity.md",
+            "docs/native-session-capacity.md", "runs/native-session-capacity-readiness.json",
+            "native/kernel/src/capability_ipc/tests/admission/capacity.rs",
+            "runtime/native_session_capacity.py", "tools/qualify_native_session_capacity.py",
+            "tests/test_native_session_capacity.py"}.issubset(paths))
         self.assertTrue({"docs/checkpoints/cycle263-console-ipc-programs.md",
             "docs/native-console-ipc.md", "runs/native-console-ipc-program-readiness.json",
             "native/userspace/src/console_ipc.rs", "native/userspace/src/console_ipc/tests.rs",

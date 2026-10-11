@@ -63,7 +63,7 @@ SECTIONS
   {
     *(.bss .bss.*)
     *(COMMON)
-    . = 0xCD000;
+    . = 0xCF000;
   } :data
   __poole_image_end = .;
 

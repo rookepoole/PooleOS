@@ -11,7 +11,16 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle265 fixes the console client's endless
+**Current development checkpoint:** Cycle266 runs six isolated user processes,
+with eight IPC task/endpoint slots and unchanged per-task limits. Real console
+input works while independent worker pairs run; a malformed worker and its partner
+retire without stopping the console or surviving pair. Nine final guest runs and
+all25 default regression checks pass after a measured207/208-page layout repair.
+Next: user-space lifecycle/supervision, shell/files/two useful apps, then optical
+ISO. No usable integration ISO yet; complete robust microkernel work continues
+afterward. [Evidence](docs/checkpoints/cycle266-native-session-capacity.md).
+
+**Historical development checkpoint:** Cycle265 fixes the console client's endless
 polling after service death. Tracked kernel requests deliver authenticated revocation;
 both programs terminate and release memory while init/counter keep running.
 Two normal input/echo sessions and all24 default regression checks also pass.

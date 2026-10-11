@@ -1,12 +1,15 @@
 # Native Capability IPC
 
-Cycle254 / PKIPC1 (native lifecycle PKIPC2, replies PKIPC3 and requests PKIPC4) is an original, bounded PooleKernel mechanism, not a complete
+Cycle266 / PKIPC1 (native lifecycle PKIPC2, replies PKIPC3 and requests PKIPC4) is an original, bounded PooleKernel mechanism, not a complete
 N13/N14 implementation. It advances USI-2 toward the native user-space ISO.
 
 ## Authority And Lifetime
 
-The exclusive BSP owns one `Space`: four task tables, four capability slots per
-table, four endpoint objects, four messages per endpoint, and 64 bytes per message.
+The exclusive BSP owns one `Space`: eight task tables, four capability slots per
+table, eight endpoint objects, four messages per endpoint, and 64 bytes per message.
+Cycle266 expands the original four-table/four-object capacity, preserving per-task
+limits. Six native images are qualified; eight IPC slots do not qualify eight
+images. See [PCAP8](native-session-capacity.md) for resource and lifecycle gaps.
 No heap, user object pointer, ambient task-ID authority or metadata permission is
 used. `Run::ipc_caller` authenticates the live syscall trap before constructing a
 caller from its kernel-owned TaskId, root and root generation. Registers cannot

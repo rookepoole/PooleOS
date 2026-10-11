@@ -92,6 +92,7 @@ runs/*
 !runs/native-console-ipc-program-readiness.json
 !runs/native-console-ipc-readiness.json
 !runs/native-console-rpc-readiness.json
+!runs/native-session-capacity-readiness.json
 !runs/native_initial_system_readiness.json
 !runs/native_microcode_readiness.json
 !runs/native_recovery_readiness.json
