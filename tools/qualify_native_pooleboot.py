@@ -338,6 +338,7 @@ def _execute_once(
     marker_extractor: Callable[[bytes], list[str]] = native_pooleboot.extract_markers,
     completion_marker: bytes = b"POOLEBOOT/0.1 STOP BEFORE TRANSFER",
     hpet_msi: bool = False,
+    pause_on_completion: bool = False,
 ) -> tuple[dict[str, Any], bytes, bytes]:
     timer_options = _hpet_msi_options(hpet_msi)
     firmware = {item["role"]: item for item in lock["firmware"]["files"]}
@@ -396,8 +397,17 @@ def _execute_once(
                 raise QualificationError(f"QEMU exited before the completion marker: {process.returncode}")
             time.sleep(0.02)
         if not frame_ready_observed or not completion_marker_observed:
+            if pause_on_completion:
+                diagnostic = {"status": client.execute("query-status"),
+                    "registers": client.execute("human-monitor-command", {"command-line": "info registers"})}
+                (run_dir / "timeout-state.json").write_text(
+                    json.dumps(diagnostic, indent=2) + "\n", encoding="utf-8")
             raise QualificationError("PooleBoot frame or completion marker timed out")
         time.sleep(0.05)
+        if pause_on_completion:
+            # A running session must be quiescent while both observation streams
+            # and its framebuffer are captured at the same guest state.
+            client.execute("stop")
         debug_raw = debug_path.read_bytes()
         serial_raw = serial_path.read_bytes()
         debug_markers = marker_extractor(debug_raw)
@@ -439,6 +449,7 @@ def _execute_once(
                 "qmp_greeting": greeting,
                 "timestamped_qmp_events_excluded_from_equality": True,
                 "qmp_quit_requested": True,
+                **({"guest_paused_for_snapshot": True} if pause_on_completion else {}),
                 "qemu_exit_code": process.returncode,
                 "markers": debug_markers,
                 "marker_sha256": native_pooleboot.sha256_bytes(marker_bytes),

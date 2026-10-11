@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 260
+Last roadmap reconciliation: PooleOS Cycle 261
 
-Cycle260 adds independently compiled PooleInit/PooleCounter programs and user-side
+Cycle261 executes separately built PooleInit/PooleCounter under the native kernel
+in an explicit development session, separated from diagnostic startup. Two fresh
+boots pass sustained IPC progress; malformed startup retires both dependent tasks
+without a kernel panic. No console, shell or integration ISO exists yet. Next:
+confined console/input, shell/files/apps and optical acceptance, then continue the
+complete robust microkernel. No N0-N39, PooleGlyph/PDC, accessible PooleGlass or
+production-trust obligation is removed. Canonical gates still block main.
+[Cycle261 evidence](checkpoints/cycle261-native-service-session.md).
+
+Historical Cycle260 adds independently compiled PooleInit/PooleCounter programs and user-side
 startup/IPC service-control code. Host tests and byte-identical builds pass; native
 launch is not yet implemented. Next: integrate them into normal session boot and
 qualify CPL3 behavior, then console/input, shell/files/apps and the optical ISO.

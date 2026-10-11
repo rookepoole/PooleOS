@@ -196,7 +196,9 @@ def _host_checks(cargo: Path, env: dict[str, str], temporary_root: Path) -> dict
     }
 
 
-def _build_product(cargo: Path, env: dict[str, str], target_dir: Path) -> tuple[bytes, bytes, kernel_image.LinkedImagePlan]:
+def _build_product(cargo: Path, env: dict[str, str], target_dir: Path, *, features: tuple[str, ...] = ()) -> tuple[bytes, bytes, kernel_image.LinkedImagePlan]:
+    if features not in ((), ("development-session",), ("development-session-bad-startup",)):
+        raise QualificationError("unreviewed kernel build feature set")
     _run(
         [
             str(cargo),
@@ -214,6 +216,7 @@ def _build_product(cargo: Path, env: dict[str, str], target_dir: Path) -> tuple[
             "--offline",
             "--target-dir",
             str(target_dir),
+            *(["--features", ",".join(features)] if features else []),
         ],
         cwd=NATIVE_ROOT,
         env=_product_environment(env),

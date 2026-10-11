@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 260, 2026-10-11. No new ISO exists yet.
+Status: implementation started, Cycle 261, 2026-10-11. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -45,29 +45,38 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | --- | --- | --- | --- |
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
-| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle260 partial: independent init/counter programs compile and host policy tests pass; Cycle259 owned startup remains verified. Native launch, normal boot, executable trust, restarts and console/input remain |
+| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle261 partial: independent init/counter programs execute in isolated CPL3 roots with real IPC under a separate development-session profile. Full init supervision, executable trust, restarts and console/input remain |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
 ### Immediate Next Move
 
-Current: [Cycle260 user-program builds](checkpoints/cycle260-separate-user-programs.md).
-PooleInit and PooleCounter are independently compiled, byte-reproducible programs
-with a user-side startup decoder and IPC control loop. These build/host results
-are not native launch evidence. Connect the exact programs to normal session boot
-next, retaining the separate diagnostic suite and authentic capability grants.
+Current: [Cycle261 native session](checkpoints/cycle261-native-service-session.md).
+The exact separately compiled PooleInit and PooleCounter programs now execute
+through actual CPL3 entry and PSABI1 calls. Two fresh development guests each pass
+512 dispatches and 1023/1024 syscalls. Bad-role startup retires both dependent tasks
+with all 26 pages returned; the kernel stays resident. There is no interactive
+console yet. Native session startup omits diagnostic workloads; the full diagnostic
+profile remains separately built and tested, with results in the checkpoint.
+
+Next: confined console/input with bounded authority, then a real user-space shell,
+read-only bundled files and two usable applications. Preserve fault containment
+and real input-driven acceptance before optical ISO packaging. Replace the fixed
+kernel bootstrap-pair dependency policy with user-space service supervision as
+that capability is built. Timer calibration reuse is limited to the same owner,
+CPU/root/device context; it does not qualify drift, hotplug, suspend or hardware.
 
 Retained kernel evidence: [Cycle259 startup](checkpoints/cycle259-owned-program-startup.md).
 Trusted built-in code and arguments are copied before mapping; initial registers
 bind to the complete owned image. Two isolated tasks validate copied arguments.
 Sustained dispatch, IPC, deadlines, atomic admission and failed-cleanup ownership
-remain intact. Next: separate normal boot and build actual init, then confined
-console/input and interrupt-driven idle. PSTART1 is not executable trust,
+remain required. Native program launch is now implemented; full init supervision,
+confined console/input and interrupt-driven idle remain. PSTART1 is not executable trust,
 signed PXABI1/PINIT1 activation, general loading policy or user spawn authority.
 Native clock failure recovery remains open; current idle is bounded polling.
 Per-dispatch CPU ticks remain distinct from the service clock.
 The205-page kernel has208 reserved pages;36-page guarded stack remains unchanged.
-Separate exhaustive qualification workloads from normal demo/session startup.
+Cycle261 separates exhaustive qualification workloads from development-session startup.
 Resolve the remaining3-page capacity margin through profile/layout work or reviewed
 capacity migration before exhaustion, without deleting qualification checks.
 Migrate old product receipts and replay exact-candidate canonical gates before main.
@@ -118,7 +127,8 @@ Cycle257 supplies bounded atomic IPC/scheduler admission and native retained cle
 retry. Cycle258 supplies bounded sustained dispatch and preserved post-call results.
 Cycle259 supplies bounded trusted built-in startup with owned argument copies.
 Cycle260 supplies separate user-program builds and host service-policy tests.
-Next: normal boot separation, native init/counter launch, efficient idle and general resource policy.
+Cycle261 supplies native init/counter execution and separate session startup.
+Next: confined console/input, efficient idle and general resource policy.
 General quotas, arbitrary revocation races and supervision remain unfinished.
 Cycle249 evidence is [here](checkpoints/cycle249-unknown-runtime-recovery.md).
 Its sample-loss injection is not a real hardware-clock failure. Keep that limit,

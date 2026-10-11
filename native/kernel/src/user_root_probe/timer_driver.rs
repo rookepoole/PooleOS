@@ -25,9 +25,19 @@ pub struct Timer {
     cmci: bool,
     hpet_config: u64,
     probe: Probe,
+    #[cfg(feature = "development-session")]
+    calibration: Option<timer::calibration::Cache>,
 }
 
 impl Timer {
+    #[cfg(feature = "development-session")]
+    pub fn reuse_session_calibration(&mut self) -> Result<(), TimerError> {
+        if self.configured || self.calibration.is_some() {
+            return Err(TimerError::State);
+        }
+        self.calibration = Some(timer::calibration::Cache::new());
+        Ok(())
+    }
     pub fn new(
         handoff: &Handoff<'_>,
         topology: interrupt_time::MadtTopology,
@@ -64,6 +74,8 @@ impl Timer {
             cmci: false,
             hpet_config: 0,
             probe: Probe::None,
+            #[cfg(feature = "development-session")]
+            calibration: None,
         })
     }
 
@@ -191,27 +203,53 @@ impl Timer {
         } else {
             u64::from(u32::MAX)
         };
-        let start = hw(hardware.hpet_read(0xf0))? & counter_mask;
-        hw(hardware.apic_write(0x380, u32::MAX))?;
-        let target = 10_000_000_000_000u64.div_ceil(period);
-        let mut elapsed = 0;
-        for _ in 0..POLL_LIMIT {
-            elapsed = hw(hardware.hpet_read(0xf0))?.wrapping_sub(start) & counter_mask;
-            if elapsed >= target {
-                break;
+        #[cfg(feature = "development-session")]
+        let key = timer::calibration::Key {
+            root,
+            apic_id: id,
+            apic_version: version,
+            hpet_capabilities: capabilities,
+        };
+        #[cfg(feature = "development-session")]
+        let cached = match &self.calibration {
+            Some(cache) => cache.lookup(key)?,
+            None => None,
+        };
+        #[cfg(not(feature = "development-session"))]
+        let cached: Option<u64> = None;
+        let frequency = if let Some(frequency) = cached {
+            frequency
+        } else {
+            let start = hw(hardware.hpet_read(0xf0))? & counter_mask;
+            hw(hardware.apic_write(0x380, u32::MAX))?;
+            let target = 10_000_000_000_000u64.div_ceil(period);
+            let mut elapsed = 0;
+            for _ in 0..POLL_LIMIT {
+                elapsed = hw(hardware.hpet_read(0xf0))?.wrapping_sub(start) & counter_mask;
+                if elapsed >= target {
+                    break;
+                }
+                core::hint::spin_loop();
             }
-            core::hint::spin_loop();
-        }
-        if elapsed < target {
-            return Err(TimerError::Hardware);
-        }
-        let current = hw(hardware.apic_read(0x390))?;
-        hw(hardware.apic_write(0x380, 0))?;
-        let calibration = hw(calibrate_apic_timer(u32::MAX, current, elapsed, period))?;
-        let count = hw(timer_initial_count(
-            calibration.apic_ticks_per_second,
-            interval_ns,
-        ))?;
+            if elapsed < target {
+                return Err(TimerError::Hardware);
+            }
+            let current = hw(hardware.apic_read(0x390))?;
+            hw(hardware.apic_write(0x380, 0))?;
+            #[cfg(feature = "development-session")]
+            let measured = match &mut self.calibration {
+                Some(cache) => cache.record(key, u32::MAX, current, elapsed)?,
+                None => {
+                    hw(calibrate_apic_timer(u32::MAX, current, elapsed, period))?
+                        .apic_ticks_per_second
+                }
+            };
+            #[cfg(not(feature = "development-session"))]
+            let measured =
+                hw(calibrate_apic_timer(u32::MAX, current, elapsed, period))?.apic_ticks_per_second;
+            measured
+        };
+        let count = hw(timer_initial_count(frequency, interval_ns))?;
         IRQ_TIMER_DELIVERIES.store(0, Ordering::Release);
         IRQ_EOI_COUNT.store(0, Ordering::Release);
         IRQ_ERROR_COUNT.store(0, Ordering::Release);

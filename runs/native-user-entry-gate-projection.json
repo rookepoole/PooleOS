@@ -1,5 +1,5 @@
 {
-  "cycle": 260,
+  "cycle": 261,
   "scope": "read_only_recorded_source_consistency_not_new_guest_execution",
   "checks": [
     {
@@ -10,7 +10,7 @@
     {
       "name": "native_symbol_readiness",
       "ok": false,
-      "detail": "PSYM1 kernel entry evidence: readiness input bindings are stale; PSYM1 recorded bindings evidence changed; PSYM1 stale implementation input native/kernel/linker.ld"
+      "detail": "PSYM1 kernel entry evidence: readiness input bindings are stale; PSYM1 recorded bindings evidence changed; PSYM1 stale implementation input native/kernel/Cargo.toml; PSYM1 stale implementation input native/kernel/linker.ld"
     },
     {
       "name": "native_policy_readiness",
@@ -20,12 +20,12 @@
     {
       "name": "native_kernel_load_readiness",
       "ok": false,
-      "detail": "stale implementation input native/boot/Cargo.toml; stale implementation input native/boot/src/exit.rs; stale implementation input native/kernel/linker.ld; stale implementation input native/kernel/src/lib.rs; stale implementation input native/kernel/src/main.rs; stale implementation input native/kmap/src/lib.rs; stale implementation input native/bootexit/src/lib.rs; stale implementation input runtime/native_kernel_map.py"
+      "detail": "stale implementation input native/boot/Cargo.toml; stale implementation input native/boot/src/exit.rs; stale implementation input native/kernel/Cargo.toml; stale implementation input native/kernel/linker.ld; stale implementation input native/kernel/src/lib.rs; stale implementation input native/kernel/src/main.rs; stale implementation input native/kmap/src/lib.rs; stale implementation input native/bootexit/src/lib.rs"
     },
     {
       "name": "native_pooleboot_readiness",
       "ok": false,
-      "detail": "stale implementation input native/boot/Cargo.toml binding; stale implementation input native/boot/src/exit.rs binding; stale implementation input native/kernel/linker.ld binding; stale implementation input native/kernel/src/lib.rs binding; stale implementation input native/kernel/src/main.rs binding; stale implementation input native/kmap/src/lib.rs binding; stale implementation input native/bootexit/src/lib.rs binding; stale implementation input runtime/native_kernel_map.py binding"
+      "detail": "stale implementation input native/boot/Cargo.toml binding; stale implementation input native/boot/src/exit.rs binding; stale implementation input native/kernel/Cargo.toml binding; stale implementation input native/kernel/linker.ld binding; stale implementation input native/kernel/src/lib.rs binding; stale implementation input native/kernel/src/main.rs binding; stale implementation input native/kmap/src/lib.rs binding; stale implementation input native/bootexit/src/lib.rs binding"
     },
     {
       "name": "native_kernel_revalidation_readiness",
@@ -143,7 +143,7 @@
     "ok": false,
     "detail": "27 static source closures and 18 reviewed data bindings; not fresh execution, complete tool closure or authentication",
     "errors": [
-      "execution source evidence invalid: load static dependency closure changed"
+      "execution source evidence invalid: entry static dependency closure changed"
     ]
   },
   "passing_profiles": [
@@ -180,12 +180,12 @@
   "guest_runs": 0,
   "production_ready": false,
   "static_source_current_profiles": [
-    "entry",
     "symbols",
     "policy",
     "errata_policy"
   ],
   "stale_static_source_profiles": [
+    "entry",
     "load",
     "pooleboot",
     "revalidation",

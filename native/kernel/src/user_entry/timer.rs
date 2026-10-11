@@ -5,6 +5,7 @@ use crate::physical_memory::PhysicalMemoryManager;
 use crate::virtual_memory::KERNEL_START;
 use poole_handoff::{Handoff, MEMORY_ENTRY_BYTES, MEMORY_MMIO, PAGE_BYTES, RECORD_MEMORY_MAP};
 
+pub mod calibration;
 pub mod clock;
 pub mod drain;
 pub mod watchdog;

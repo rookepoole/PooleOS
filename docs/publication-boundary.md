@@ -57,6 +57,15 @@ excluded inputs or credentials. Repeated-build equality and format audits are no
 native execution, executable trust or ISO acceptance. All other user-program run
 artifacts remain excluded by default; normal content scanning still applies.
 
+The PSESSION1 ledger `runs/native-session-readiness.json` is explicitly public
+after content review. It contains relative source/tool/media hashes, bounded
+test results, structured emulator boot observations and explicit nonclaims.
+Only public canonical boot inputs and simulated guest addresses are recorded;
+no private paths, credentials, executable bytes, raw logs, host memory or owner
+documents are permitted. Native session evidence is not ISO or production
+acceptance. All neighboring session run artifacts remain excluded by default,
+and normal content/secret scanning remains mandatory.
+
 ## Publication Gate
 
 Before every push or release:

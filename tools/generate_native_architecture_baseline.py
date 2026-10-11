@@ -24,6 +24,14 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle261-native-service-session.md",
+    "docs/native-service-session.md",
+    "runs/native-session-readiness.json",
+    "native/kernel/src/user_root_probe/peer_driver/session.rs",
+    "native/kernel/src/user_entry/timer/calibration.rs",
+    "runtime/native_session.py",
+    "tools/qualify_native_session.py",
+    "tests/test_native_session.py",
     "docs/checkpoints/cycle260-separate-user-programs.md",
     "docs/native-user-programs.md",
     "runs/native-user-program-readiness.json",

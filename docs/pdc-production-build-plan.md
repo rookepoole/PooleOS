@@ -1,15 +1,47 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-11
-Plan version: 2.163.0-separate-user-programs
-Roadmap cycle: PooleOS Cycle 260
+Plan version: 2.164.0-native-service-session
+Roadmap cycle: PooleOS Cycle 261
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 260: Separately Built User Programs
+## Cycle 261: Native Service Session
+
+PooleKernel now launches the exact independently built PooleInit and PooleCounter
+programs under an explicit development-session feature. Owned startup, distinct
+private roots and authenticated capability grants precede actual CPL3 execution.
+The session does not run the diagnostic fault-injection sequence. Two independent
+session-kernel builds reproduce exactly; two fresh guests each complete 512
+dispatches, 1023/1024 syscalls, 512 waits and 511 wakes. The runner continues until
+the external bounded qualification harness stops the VM; this is not an uptime claim.
+
+Malformed counter startup exits in the user decoder. The fixed bootstrap-pair
+dependency rule cancels init's blocked receive; both tasks retire, authority is
+revoked and all 26 pages return. General service supervision remains user-space
+work, not a claimed kernel implementation. Owner-bound timer calibration reuse
+removes repeated measurement from the session's dispatch path; device/root/CPU
+identity is checked on reuse. Migration, frequency drift and suspend are unqualified.
+[Evidence, failures and regression status](checkpoints/cycle261-native-service-session.md).
+
+USI-3 remains partial. Next, implement a confined console/input service and genuine
+interactive user-space shell, then read-only bundled files, two usable applications,
+fault/survivor interaction and corrected optical ISO packaging. No shell or new ISO
+exists yet. Efficient idle, restart supervision, executable trust, general loading
+and signed PXABI1/PINIT1 activation remain open. Normal session execution is an
+unsigned emulator-only development profile; ordinary boot denial remains intact.
+
+Fixed kernel layout remains 205/208 pages with the 36-page guarded stack. Diagnostic
+startup is separated, but layout capacity is not enlarged or reclaimed. Three
+product-readiness failures and exact-candidate canonical gates still block main.
+No phase/flag closure: 40 phases, 301 subphases, 8996 requirements, 59 additions,
+97 flags, 42 open and 20 gaps. Full robust microkernel, PooleGlyph/PDC and accessible
+PooleGlass development continue after the integration ISO, not instead of it.
+
+## Historical Cycle 260: Separately Built User Programs
 
 PooleInit and PooleCounter now compile independently of the kernel from original
 user-space Rust. PSTART1 arguments are decoded into owned values; PSABI1 wrappers

@@ -32,6 +32,9 @@ def source_bindings() -> dict[str, str]:
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "runtime").glob("*.py"))
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "tools").glob("qualify_native_*.py"))
     paths.update({
+        "native/kernel/src/user_root_probe/peer_driver/session.rs",
+        "native/kernel/src/user_entry/timer/calibration.rs",
+        "tests/test_native_session.py",
         "native/kernel/src/user_entry/startup.rs",
         "native/kernel/src/user_root_probe/peer_driver/startup.rs",
         "native/kernel/src/user_root_probe/peer_driver/service.rs",
@@ -100,7 +103,7 @@ def main() -> int:
     owner_report = Path("C:/Users/rookp/PooleGlyph/tests/reports/conformance_report.json")
     owner_before = digest(owner_report) if owner_report.is_file() else None
     report: dict = {
-        "contract_id": "PSTART1", "cycle": 259,
+        "contract_id": "PSTART1", "cycle": 261,
         "scope": "host_and_native_owned_builtin_program_and_copied_argument_startup",
         "status": "fail", "source_bindings": before, "checks": [],
         "guest_runs": 0, "ring3_executed": False, "iso_built": False,
@@ -118,9 +121,9 @@ def main() -> int:
     commands = [
         ("format", [str(cargo), "fmt", *common, "--", "--check"], None),
         ("kernel_host_debug", [str(cargo), "test", *common, "--lib", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 466),
+            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 471),
         ("user_entry_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 153),
+            "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 158),
         ("ipc_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
             "x86_64-pc-windows-msvc", *bounded, "capability_ipc::", "--", "--test-threads=1"], 57),
         ("vm_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
@@ -139,6 +142,7 @@ def main() -> int:
             "--package", "poole-boot-exit", "--lib", "--target", "x86_64-pc-windows-msvc",
             *bounded, "--", "--test-threads=1"], None),
         ("user_root_oracle", [sys.executable, "-B", "-m", "unittest", "tests.test_native_user_root", "-v"], None),
+        ("session_oracle", [sys.executable, "-B", "-m", "unittest", "tests.test_native_session", "-v"], None),
         ("kernel_map_host", [str(cargo), "test", "--manifest-path", str(ROOT / "native/Cargo.toml"),
             "--package", "poole-kmap", "--lib", "--target", "x86_64-pc-windows-msvc",
             *bounded, "--", "--test-threads=1"], None),

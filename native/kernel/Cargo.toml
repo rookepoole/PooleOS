@@ -8,6 +8,8 @@ publish.workspace = true
 [features]
 default = []
 host-probe = []
+development-session = []
+development-session-bad-startup = ["development-session"]
 
 [[bin]]
 name = "PooleKernelLinked"

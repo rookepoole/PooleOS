@@ -28,6 +28,7 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-user-entry-private.json",
             "runs/native-user-program-private.json",
             "runs/native-user-program-readiness-raw.json",
+            "runs/native-session-readiness-raw.json",
             "firmware/private/device.bin",
         )
         for path in examples:
@@ -94,6 +95,7 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-user-entry-readiness.json",
             "runs/native-user-entry-gate-projection.json",
             "runs/native-user-program-readiness.json",
+            "runs/native-session-readiness.json",
             "runs/native_microcode_readiness.json",
             "runs/native_recovery_readiness.json",
             "runs/native_system_manifest_readiness.json",

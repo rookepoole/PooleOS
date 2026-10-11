@@ -116,6 +116,7 @@ pub fn run(
     core: CoreRecord,
     serial: &mut Com1,
     debugcon: &mut DebugCon,
+    session: bool,
 ) -> ! {
     macro_rules! checked {
         ($stage:expr, $operation:expr) => {
@@ -168,6 +169,21 @@ pub fn run(
         )
     );
     checked!(37, bootstrap.finish());
+    if session {
+        #[cfg(feature = "development-session")]
+        peer_driver::session::run(
+            handoff,
+            core,
+            bits,
+            &mut manager,
+            topology,
+            hpet,
+            serial,
+            debugcon,
+        );
+        #[cfg(not(feature = "development-session"))]
+        stop(20000, serial, debugcon);
+    }
     let mut timer = checked!(38, timer_driver::Timer::new(handoff, topology, hpet, bits));
     let tables = checked!(
         4,

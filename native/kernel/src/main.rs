@@ -8438,8 +8438,19 @@ extern "C" fn poole_kernel_rust_entry(
         halt_forever()
     }
 
+    // A session image may not fall through into another development experiment.
+    #[cfg(feature = "development-session")]
+    if trap_scenario != DevelopmentTrapScenario::UserRoot {
+        poole_kernel_emergency_panic(PanicCode::UserRoot as u32);
+    }
     if trap_scenario == DevelopmentTrapScenario::UserRoot {
-        user_root_probe::run(&decoded, validated.core, &mut serial, &mut debugcon);
+        user_root_probe::run(
+            &decoded,
+            validated.core,
+            &mut serial,
+            &mut debugcon,
+            cfg!(feature = "development-session"),
+        );
     }
 
     if trap_scenario == DevelopmentTrapScenario::CpuPolicy {

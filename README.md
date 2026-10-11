@@ -11,7 +11,16 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle260 adds independently built PooleInit
+**Current development checkpoint:** Cycle261 launches the independently built
+PooleInit and PooleCounter programs in isolated user address spaces. Two fresh
+development boots pass 512 scheduler dispatches and 1023/1024 syscalls; malformed
+startup retires both dependent tasks and returns their memory without a kernel
+panic. This is real user-mode IPC, not an interactive console or a usable ISO yet.
+Next: confined console/input, shell/files/apps, then optical ISO acceptance.
+The full robust microkernel remains required afterward.
+[Evidence](docs/checkpoints/cycle261-native-service-session.md).
+
+**Historical development checkpoint:** Cycle260 adds independently built PooleInit
 and PooleCounter user programs, a startup decoder and IPC service-control loop.
 Both reproduce byte-for-byte and fit one executable page;15 host tests pass in
 debug and release. They are not yet launched by PooleKernel. Next: connect them

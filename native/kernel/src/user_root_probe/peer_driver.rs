@@ -17,6 +17,8 @@ pub(super) mod ipc_pressure;
 mod ipc_reply;
 mod ipc_request;
 mod service;
+#[cfg(feature = "development-session")]
+pub(super) mod session;
 mod startup;
 pub(super) mod unknown;
 
@@ -44,6 +46,42 @@ struct Peer {
     admission: poolekernel::user_entry::ImageAdmission,
 }
 impl Peer {
+    #[cfg(feature = "development-session")]
+    #[inline(never)]
+    fn new_program(
+        index: u8,
+        program: &poolekernel::user_entry::startup::Program<'_>,
+        arguments: &poolekernel::user_entry::startup::Arguments,
+        handoff: &Handoff<'_>,
+        core: CoreRecord,
+        bits: u8,
+        manager: &mut PhysicalMemoryManager,
+        topology: interrupt_time::MadtTopology,
+        hpet: interrupt_time::HpetDescription,
+    ) -> Result<Self, PeerFailure> {
+        let mut timer =
+            Timer::new(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
+        timer
+            .reuse_session_calibration()
+            .map_err(|_| PeerFailure::Setup)?;
+        // SAFETY: exclusive BSP, IF0, before this slot or image is published.
+        let mut entry =
+            unsafe { arch::x86_64::user::PeerEntry::new(core.initial_stack_top_virtual) }
+                .map_err(|_| PeerFailure::Setup)?;
+        let (built, startup) = spawn_driver::build_program(
+            manager,
+            core,
+            bits,
+            program,
+            arguments,
+            Some(timer.mappings()),
+        )
+        .map_err(PeerFailure::Construction)?;
+        if entry.set_startup(startup).is_err() {
+            return Err(PeerFailure::Prepared(built));
+        }
+        Self::install(index, entry, timer, built, core)
+    }
     #[inline(never)]
     fn new(
         index: u8,
