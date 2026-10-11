@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle259 adds owned program/argument startup.
+**Current development checkpoint:** Cycle260 adds independently built PooleInit
+and PooleCounter user programs, a startup decoder and IPC service-control loop.
+Both reproduce byte-for-byte and fit one executable page;15 host tests pass in
+debug and release. They are not yet launched by PooleKernel. Next: connect them
+to normal session boot, qualify CPL3 execution, then console/input and the usable
+ISO. Full microkernel work remains required afterward.
+[Evidence](docs/checkpoints/cycle260-separate-user-programs.md).
+
+**Historical development checkpoint:** Cycle259 adds owned program/argument startup.
 Two fresh native boots prove isolated tasks read copied arguments and return
 distinct results;466 kernel tests pass. Next: separate normal boot from diagnostics,
 build real init and console/input, then shell/files/apps and the interactive ISO.

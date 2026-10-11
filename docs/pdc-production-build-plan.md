@@ -1,15 +1,42 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-11
-Plan version: 2.162.0-owned-program-startup
-Roadmap cycle: PooleOS Cycle 259
+Plan version: 2.163.0-separate-user-programs
+Roadmap cycle: PooleOS Cycle 260
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 259: Owned Program Startup
+## Cycle 260: Separately Built User Programs
+
+PooleInit and PooleCounter now compile independently of the kernel from original
+user-space Rust. PSTART1 arguments are decoded into owned values; PSABI1 wrappers
+use granted IPC handles. PSVC1 makes init request service startup and strictly
+ordered counter work, with state committed only after a response is sent.
+
+Fifteen host tests pass in debug/release. Two independent builds are byte-identical;
+1054/1094 code bytes fit one RX page each, with no writable segment, import or
+remaining relocation. Object references are local PC-relative. Compiler/linker/
+sysroot and source hashes remain unchanged during qualification.
+[Evidence and retained failures](checkpoints/cycle260-separate-user-programs.md).
+
+This establishes executable build inputs, not native init execution. Normal boot
+separation is still unfinished. Next: launch these exact programs through owned
+PSTART1 construction and atomic IPC admission in the session path; prove real CPL3
+exchange, preemption, malformed startup denial and peer fault/recovery. Then add
+confined console/input, efficient idle, shell/read-only files/two apps and optical
+ISO interaction. General loading, service restarts and signed PXABI1/PINIT1 remain.
+
+The kernel was not changed or re-executed: Cycle259 evidence remains bound to its
+own790 sources, not relabeled as new guest execution.205/208 image pages still
+requires profile/layout work. Three readiness failures and full exact-candidate
+canonical replay block main. USI-1/2/3 partial;4/5 not started. No phase/flag closure:
+40 phases301 subphases8996 requirements59 additions97 flags42 open20 gaps.
+Full microkernel, PooleGlyph/PDC and accessible PooleGlass remain after the ISO.
+
+## Historical Cycle 259: Owned Program Startup
 
 PSTART1 validates trusted built-in program bytes and entry geometry, snapshots up
 to eight arguments, and copies both into owned memory before mapping/publication.

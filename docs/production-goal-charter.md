@@ -7,9 +7,17 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 259
+Last roadmap reconciliation: PooleOS Cycle 260
 
-Cycle259 adds owned program/argument startup with complete-image binding and
+Cycle260 adds independently compiled PooleInit/PooleCounter programs and user-side
+startup/IPC service-control code. Host tests and byte-identical builds pass; native
+launch is not yet implemented. Next: integrate them into normal session boot and
+qualify CPL3 behavior, then console/input, shell/files/apps and the optical ISO.
+Cycle259 kernel evidence is unchanged, not re-executed. Full N0-N39, PooleGlyph/PDC,
+accessible PooleGlass and production trust gates remain. No ISO or promotion.
+[Cycle260 evidence](checkpoints/cycle260-separate-user-programs.md).
+
+Historical Cycle259 adds owned program/argument startup with complete-image binding and
 retained failure cleanup. Two fresh native boots prove copied arguments read by
 isolated tasks. Next: normal boot/diagnostic separation and separately built actual
 init, then confined console/input, efficient idle, shell/files/apps and optical ISO

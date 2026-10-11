@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 259, 2026-10-11. No new ISO exists yet.
+Status: implementation started, Cycle 260, 2026-10-11. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -45,13 +45,19 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | --- | --- | --- | --- |
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
-| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle259 partial: owned trusted built-in startup and copied arguments pass; actual init, normal boot, executable trust and console/input remain |
+| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle260 partial: independent init/counter programs compile and host policy tests pass; Cycle259 owned startup remains verified. Native launch, normal boot, executable trust, restarts and console/input remain |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
 ### Immediate Next Move
 
-Current: [Cycle259 startup evidence](checkpoints/cycle259-owned-program-startup.md).
+Current: [Cycle260 user-program builds](checkpoints/cycle260-separate-user-programs.md).
+PooleInit and PooleCounter are independently compiled, byte-reproducible programs
+with a user-side startup decoder and IPC control loop. These build/host results
+are not native launch evidence. Connect the exact programs to normal session boot
+next, retaining the separate diagnostic suite and authentic capability grants.
+
+Retained kernel evidence: [Cycle259 startup](checkpoints/cycle259-owned-program-startup.md).
 Trusted built-in code and arguments are copied before mapping; initial registers
 bind to the complete owned image. Two isolated tasks validate copied arguments.
 Sustained dispatch, IPC, deadlines, atomic admission and failed-cleanup ownership
@@ -111,7 +117,8 @@ Cycle256 supplies epoch-bound request expiry, including all-blocked idle wakeup.
 Cycle257 supplies bounded atomic IPC/scheduler admission and native retained cleanup
 retry. Cycle258 supplies bounded sustained dispatch and preserved post-call results.
 Cycle259 supplies bounded trusted built-in startup with owned argument copies.
-Next: normal boot separation, actual init, efficient idle and general resource policy.
+Cycle260 supplies separate user-program builds and host service-policy tests.
+Next: normal boot separation, native init/counter launch, efficient idle and general resource policy.
 General quotas, arbitrary revocation races and supervision remain unfinished.
 Cycle249 evidence is [here](checkpoints/cycle249-unknown-runtime-recovery.md).
 Its sample-loss injection is not a real hardware-clock failure. Keep that limit,

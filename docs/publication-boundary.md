@@ -49,6 +49,14 @@ contain private absolute paths, raw logs, excluded inputs, or credentials. Their
 scope is inactive host admission and source consistency, not live user execution
 or ISO qualification. Other user-entry run artifacts remain excluded by default.
 
+The PUSERBIN1 ledger `runs/native-user-program-readiness.json` is explicitly public
+after content review. Its permitted contents are relative public-source bindings,
+compiler/linker/sysroot and output hashes, bounded host-test/build results, and
+explicit nonclaims. It must not include private paths, raw logs, executable bytes,
+excluded inputs or credentials. Repeated-build equality and format audits are not
+native execution, executable trust or ISO acceptance. All other user-program run
+artifacts remain excluded by default; normal content scanning still applies.
+
 ## Publication Gate
 
 Before every push or release:

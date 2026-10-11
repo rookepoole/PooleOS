@@ -198,8 +198,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 259)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1324)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 260)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1334)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -239,8 +239,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "bounded_owned_program_startup_pass_init_and_canonical_gates_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 259)
+        self.assertEqual(current["qualification_status"], "bounded_user_program_build_pass_native_session_and_canonical_gates_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 260)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -4962,6 +4962,42 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(gate["receipt_sha256"], digest)
         self.assertTrue(gate["qualification_bound_unchanged"] and gate["kernel_task_timer_dispatch_bounds_unchanged"])
         self.assertFalse(gate["canonical_full_replay_performed"] or gate["merge_qualified"] or gate["production_ready"])
+
+
+    def test_cycle260_separate_program_builds_are_not_native_session_evidence(self) -> None:
+        b = self.roadmap["baseline"]
+        program = b["user_program_integration"]
+        self.assertEqual((program["cycle"], program["status"], program["selected_stage"]), (260, "pass", "USI-3"))
+        raw = (ROOT / program["receipt_path"]).read_bytes()
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), program["receipt_sha256"])
+        self.assertEqual(program["receipt_sha256"], "880B7F588AB683E3AC2D317D231BF5D821525CB63343D10EC953C39FFD6DDFD8")
+        receipt = json.loads(raw)
+        self.assertEqual(receipt["cycle"], 260)
+        self.assertTrue(receipt["source_unchanged"] and receipt["direct_byte_equality"])
+        self.assertEqual(len(receipt["source_bindings"]), 19)
+        for path, expected in receipt["source_bindings"].items():
+            self.assertEqual(hashlib.sha256((ROOT / path).read_bytes()).hexdigest().upper(), expected, path)
+        self.assertEqual(sum(t["tests_passed"] for t in receipt["host_tests"]), 30)
+        self.assertEqual((program["rust_unique_tests"], program["python_oracle_tests"], receipt["independent_builds"]), (15, 9, 2))
+        self.assertEqual((program["failed_qualification_attempts"], program["diagnostic_failed_replays"]), (6, 2))
+        self.assertEqual(len(receipt["toolchain"]["input_hashes"]), 6)
+        self.assertTrue(receipt["toolchain"]["inputs_unchanged"] and receipt["toolchain"]["builds_offline_locked"])
+        self.assertFalse(receipt["toolchain"]["kernel_dependency"])
+        self.assertEqual(program["programs"], receipt["programs"])
+        for name, size, digest in [
+            ("PooleInit", 1054, "652744F7106618D27399FC985BDAB42E0BEE3FDF0033B14AFE11F1E8D66C5E87"),
+            ("PooleCounter", 1094, "78E45268BBEA7EC8D4985DECEB54A7E5F88E27961941C533C926EF2F2722A7C5")]:
+            item = receipt["programs"][name]
+            self.assertEqual((item["code_bytes"], item["code_sha256"]), (size, digest))
+            self.assertEqual((item["entry_offset"], item["load_pages"], item["writable_segments"], item["relocations"], item["imports"]), (0, 1, 0, 0, 0))
+            self.assertEqual((item["object_relocation_count"], item["object_relocation_kinds"]), (4, ["R_X86_64_PLT32"]))
+            self.assertFalse(item["native_execution_verified"] or item["production_ready"])
+        for field in ("native_execution_verified", "actual_init_service", "normal_session_boot", "iso_built", "production_ready"):
+            self.assertFalse(receipt[field] or program[field], field)
+        for field in ("init_restarts_services", "executable_trust_policy", "signed_init_activation", "canonical_full_replay_performed"):
+            self.assertFalse(program[field], field)
+        self.assertEqual(b["user_space_integration"]["cycle"], 259)
+        self.assertEqual(b["native_consistency_release_gate"]["current_closeout_regression"]["cycle"], 259)
 
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:

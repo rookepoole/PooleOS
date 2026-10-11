@@ -1,0 +1,33 @@
+[package]
+name = "poole-userspace"
+version = "0.0.0"
+edition = "2024"
+license-file = "../../LICENSE"
+publish = false
+
+[workspace]
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "PooleInit"
+path = "src/bin/init.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleCounter"
+path = "src/bin/counter.rs"
+test = false
+bench = false
+
+[profile.release]
+opt-level = "s"
+codegen-units = 1
+lto = false
+debug = 0
+incremental = false
+overflow-checks = true
+panic = "abort"
+strip = "symbols"

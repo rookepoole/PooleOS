@@ -13107,6 +13107,72 @@ def apply_cycle259(roadmap: dict, test_count: int) -> dict:
     flag["closure_condition"] += " Cycle259 adds copied bootstrap, not a complete service runtime. " + gap
     roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle260(roadmap, test_count)
+
+
+def apply_cycle260(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle260-separate-user-programs.md"
+    path = "runs/native-user-program-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline.update(pooleos_cycle=260, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 260
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-user-programs.md"]
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 260
+    gate["current_focused_source_projection"]["cycle"] = 260
+    gate["qualification_status"] = "bounded_user_program_build_pass_native_session_and_canonical_gates_pending"
+    # The kernel did not change. Keep its cycle259 execution receipt, not a new replay claim.
+    baseline["user_program_integration"] = dict(cycle=260, contract_id="PUSERBIN1",
+        receipt_path=path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        status=receipt["status"], programs=receipt["programs"], selected_stage="USI-3",
+        separate_userspace_workspace=True, no_kernel_dependency=True,
+        original_service_control_protocol="PSVC1", original_startup_decoder="PSTART1",
+        service_start_and_ordered_progress_host_verified=True,
+        independent_builds=receipt["independent_builds"],
+        direct_byte_equality=receipt["direct_byte_equality"],
+        source_binding_count=len(receipt["source_bindings"]), rust_host_tests=30,
+        rust_unique_tests=15, python_oracle_tests=9,
+        elapsed_seconds=4.172, log_sha256="F129707865C067468F361928774DCD44B27127F4ED2E0CF0B1BF38E9AB507B3E",
+        failed_qualification_attempts=6, diagnostic_failed_replays=2,
+        failed_attempts_retained_in=checkpoint,
+        native_execution_verified=False, actual_init_service=False,
+        normal_session_boot=False, init_restarts_services=False,
+        executable_trust_policy=False, signed_init_activation=False,
+        canonical_full_replay_performed=False, iso_built=False, production_ready=False)
+    gate["current_user_program_metadata"] = dict(
+        cycle=260, status="pass", tests=179, test_seconds=53.111,
+        capture_seconds=53.968,
+        log_sha256="480233E6944BD51CB0C5B61DD4C1B8764F91AB17FBEC749A47608045EAAA516D",
+        source_unchanged=True, owner_report_unchanged=True,
+        conservation_tests=115, conservation_test_seconds=8.345,
+        conservation_capture_seconds=9.672,
+        conservation_log_sha256="B02565DA862CE933DBC0D8DB915C1499A0CF506E7FC19FC5A10314AC60E61155",
+        canonical_full_replay_performed=False, production_ready=False)
+    roadmap["immediate_next_move"].update(
+        title="Connect separately built init and counter to normal session boot, then interactive ISO",
+        entry_evidence=[checkpoint, path, "docs/native-user-programs.md",
+            "docs/native-userspace-integration-iso.md", "native/userspace/src/bin/init.rs",
+            "native/userspace/src/bin/counter.rs", "native/kernel/src/user_entry/spawn.rs"],
+        exit_evidence=[
+            "separate normal session startup from exhaustive diagnostics without dropping qualification",
+            "launch exact independently built user programs with owned arguments and authenticated IPC handles",
+            "fresh CPL3 IPC and preemption progress, malformed startup denial and peer fault/recovery evidence",
+            "confined console/input, efficient idle, shell/read-only files/two apps and fresh optical ISO interaction",
+            "retain signed PXABI1/PINIT1 gates, supervision/general resource and native clock-fault gaps",
+            "resolve205_of208 image pressure and migrate product contracts/full exact-candidate canonical gates before main"])
+    evidence = "Cycle260: independent PooleInit/PooleCounter source and build pipeline, PSTART1 decoder, PSABI1 wrappers and PSVC1 control loop.15 host tests pass debug/release; two byte-identical builds,1054/1094 code bytes and local-relative object relocations. No kernel source change or fresh native execution. " + checkpoint
+    gap = "These compiled user programs are not yet launched by PooleKernel. Normal session boot, real CPL3 ABI/stack qualification, console/input, supervision, efficient idle and interactive ISO remain. Kernel remains205_of208 pages; canonical migration/three readiness failures still gate main. No executable trust or production promotion."
+    for phase_id in ("N13", "N16"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    flag = next(f for f in roadmap["implementation_flags"] if f["id"] == "FLAG-N13-USERSPACE-ISO-001")
+    flag["evidence"].append(checkpoint)
+    flag["closure_condition"] += " Cycle260 adds independently compiled programs, not native session acceptance. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
 
@@ -13114,7 +13180,7 @@ def apply_cycle259(roadmap: dict, test_count: int) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1324)
+    parser.add_argument("--test-count", type=int, default=1334)
     parser.add_argument("--status-date", default="2026-10-11")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
