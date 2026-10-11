@@ -7,17 +7,17 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 264
+Last roadmap reconciliation: PooleOS Cycle 265
 
-Cycle264 executes four isolated native programs with console service/client IPC,
-exact host-input echo, normal close/reap and wrong-peer rejection. All23 default
-regression checks pass. The rejected peer's client still polls: bounded peer-death
-recovery and capacity for init/console/shell/two apps precede shell/files/optical ISO.
+Cycle265 replaces console mailbox polling with tracked requests and one-use replies.
+Native service death delivers authenticated revocation and terminates its client;
+normal echo/close and all24 default regression checks pass. Capacity/lifecycle for
+init/console/shell/two apps precede shell/files/optical ISO. Restart is not yet built.
 This is development evidence, not a usable ISO or production promotion. The full
 robust microkernel and all N0-N39, PooleGlyph/PDC, accessible PooleGlass and signed
 production requirements remain. Main remains gated by exact-candidate canonical
 qualification; a focused regression is not the full gate.
-[Cycle264 evidence](checkpoints/cycle264-native-console-ipc.md).
+[Cycle265 evidence](checkpoints/cycle265-native-console-rpc.md).
 
 Historical Cycle262 adds an independently compiled user-space console driver with confined
 COM2 authority. Two fresh guests echo actual host input; console exit/bad authority

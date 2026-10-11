@@ -5,10 +5,12 @@ use crate::console::{self, Registers};
 pub const BYTES: usize = 32;
 pub const ENVELOPE_BYTES: usize = 64;
 pub const PAYLOAD: usize = 16;
+pub mod rpc;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Error {
     Transport,
+    Revoked,
     Wire,
     Peer,
     Sequence,

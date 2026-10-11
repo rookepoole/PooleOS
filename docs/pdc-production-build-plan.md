@@ -1,15 +1,50 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-11
-Plan version: 2.167.0-native-console-ipc
-Roadmap cycle: PooleOS Cycle 264
+Plan version: 2.168.0-native-console-rpc
+Roadmap cycle: PooleOS Cycle 265
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 264: Native Console IPC
+## Cycle 265: Tracked Console Requests
+
+The client now uses existing PSABI1 tracked Begin/Take operations; the console
+service receives authenticated sender envelopes and replies through one-use tokens.
+A committed close reply survives service retirement. An unfinished request becomes
+revoked when its peer dies, even with a full caller mailbox. Native wrong-peer
+control now service-exits152 at dispatch6 and client-exits163 at dispatch7, returning
+all26 pages. This satisfies the predeclared64-dispatch/8-dispatch-delay bounds.
+Init/counter continue to512 dispatches. Two positive native guests echo45/52 bytes
+exactly and both programs exit0. This is bounded termination, not service restart.
+[Evidence and limits](checkpoints/cycle265-native-console-rpc.md).
+
+Two independent builds match service3096/client1900 code bytes. All39 user tests
+pass debug/release; console kernel profiles pass483 tests each. All24 default
+regression checks pass, including two containment guests and ordinary unsigned
+denial. Historical receipts remain immutable; PRPC1/PSESSION4 identifies the new
+transport. Kernel image205/208 pages and36-page stack limits remain unchanged.
+
+Next in USI-3: review four-slot IPC/endpoint/bootstrap capacity, resource bounds
+and lifecycle authority for at least init, console, shell and two actual apps.
+The scheduler's eight slots alone do not supply that capacity. Measure before
+changing any image/stack geometry. Keep native PCS1 pressure/malformed-request
+controls and unused legacy bootstrap-grant review visible. Then USI-4 real shell,
+read-only bundled files/two useful apps and USI-5 optical ISO acceptance.
+User supervision/restart/loading/trust, efficient idle and native clock recovery
+remain open; the complete robust microkernel, PDC/PooleGlyph and accessible
+PooleGlass continue after the integration ISO.
+
+No production phase or flag closes:40 phases301 subphases8996 requirements59
+additions98 flags43 open20 gap groups.1371 discovered Python tests and601
+architecture bindings are inventory, not full-suite execution. Three known
+product-readiness failures/full exact-candidate canonical gates still block main.
+Twenty additional scoped generated archives preserve evidence (49 across264/265);
+raw logs, failures and receipts remain. Full reservation/restore remains unqualified.
+
+## Historical Cycle 264: Native Console IPC
 
 Four separately compiled user programs now execute in private CPL3 roots:
 PooleInit, PooleCounter, PooleConsoleService and PooleConsoleClient. Failure-atomic

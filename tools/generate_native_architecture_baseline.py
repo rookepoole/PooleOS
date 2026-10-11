@@ -24,6 +24,12 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle265-native-console-rpc.md",
+    "docs/native-console-rpc.md",
+    "runs/native-console-rpc-readiness.json",
+    "native/userspace/src/console_ipc/rpc.rs",
+    "native/userspace/src/console_ipc/rpc/tests.rs",
+    "tests/test_native_console_rpc.py",
     "docs/checkpoints/cycle264-native-console-ipc.md",
     "runs/native-console-ipc-readiness.json",
     "native/kernel/src/capability_ipc/console/session_tests.rs",

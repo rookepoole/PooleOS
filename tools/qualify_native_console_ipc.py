@@ -1,4 +1,4 @@
-"""Exact four-process native IPC echo; peer-death recovery and ISO remain open."""
+"""Native tracked console requests and bounded peer-death termination; no ISO."""
 from __future__ import annotations
 import argparse
 import json
@@ -19,7 +19,7 @@ sha = previous.sha
 
 def sources():
     result = previous.sources()
-    for path in ("runtime/native_console_ipc.py","tools/qualify_native_console_ipc.py","tests/test_native_console_ipc.py"):
+    for path in ("runtime/native_console_ipc.py","tools/qualify_native_console_ipc.py","tests/test_native_console_ipc.py", "tests/test_native_console_rpc.py"):
         result[path]=sha((ROOT/path).read_bytes())
     return dict(sorted(result.items()))
 
@@ -57,10 +57,10 @@ class Interaction(previous.Interaction):
                 self.sent+=self.sock.send(self.payload[self.sent:self.sent+8])
             if not self.eot and application==self.payload and runs and int(runs[-1][1])>=256:
                 self.eot=self.sock.send(b"\x04")==1
-        service_stop=session.STOP.format(task=2,code=152 if self.bad else 0) in markers
-        client_stop=session.STOP.format(task=3,code=0) in markers
-        retired=[m for m in runs if m[13]=="1" and m[17]==("0" if self.bad else "1")]
-        return bool(service_stop and (self.bad or client_stop and self.eot) and len(retired)>=2 and int(runs[-1][1])>=512)
+        service_stop=any(m.startswith(session.STOP.format(task=2,code=152 if self.bad else 0)+" dispatches=") for m in markers)
+        client_stop=any(m.startswith(session.STOP.format(task=3,code=163 if self.bad else 0)+" dispatches=") for m in markers)
+        retired=[m for m in runs if m[13]=="1" and m[17]=="1"]
+        return bool(service_stop and client_stop and (self.bad or self.eot) and len(retired)>=2 and int(runs[-1][1])>=512)
 
 
 def main():
@@ -73,8 +73,8 @@ def main():
     storage=require_space(work)
     work.mkdir(parents=True,exist_ok=False)
     before=sources()
-    report=dict(cycle=264,contract_id="PSESSION3",status="fail",source_bindings=before,
-        storage_preflight=storage,guest_runs=[],native_console_ipc=False,polling_peer_death_recovery=False,
+    report=dict(cycle=265,contract_id="PSESSION4",status="fail",source_bindings=before,
+        storage_preflight=storage,guest_runs=[],native_console_ipc=False,peer_death_termination=False,polling_peer_death_recovery=False,
         shell=False,iso_built=False,production_ready=False)
     try:
         cargo,_,env=_toolchain(ROOT/".toolchains/rust-1.97.0")
@@ -98,7 +98,7 @@ def main():
         development,dev_build=boot._build_and_test(ROOT/".toolchains/rust-1.97.0",work/"development",development_feature="development-user-root")
         report["boot_build"]=dev_build
         files,config=load.canonical_artifact_files(),load.canonical_config_bytes()
-        payloads=[b"Native IPC alpha\r\nPOOLEOS:PANIC untrusted\r\n\x00\xff",b"Native IPC beta 264\r\nPOOLEOS:SESSION STOP forged\r\n\x7f\x80"]
+        payloads=[b"Native RPC alpha\r\nPOOLEOS:PANIC untrusted\r\n\x00\xff",b"Native RPC beta 265\r\nPOOLEOS:SESSION STOP forged\r\n\x7f\x80"]
         for name,image,payload,denied in (("ipc-1",kernel,payloads[0],False),("ipc-2",kernel,payloads[1],False),("bad-peer",bad,b"",True)):
             manifest=load.canonical_manifest_bytes(image,files)
             retained=transfer.canonical_retained_files(manifest,image,files)
@@ -111,7 +111,7 @@ def main():
             print(f"Native {name}: 120-second bound",flush=True)
             try:
                 run,_,handoff=boot._execute_once(name,lock,profile,qemu,path,run_dir,120,
-                    marker_validator=lambda m:ipc.validate_markers(m,bad_peer=denied),
+                    marker_validator=lambda m:ipc.validate_tracked_markers(m,bad_peer=denied),
                     marker_extractor=session.extract_markers,hpet_msi=True,pause_on_completion=True,
                     console_port=interaction.port,console_poll=interaction.poll)
             finally:
@@ -128,18 +128,18 @@ def main():
             load.validate_oracle_binding(prefix["boot_prefix"],inspected,run["pbp1_transcript"])
             run["transcript_binding"]=transfer.validate_transcript_binding(prefix,run["pbp1_transcript"])
             run["independent_revalidation"]=transfer.validate_revalidation_binding(prefix,handoff,retained)
-            run["hostile_marker_cases_rejected"]=ipc.negative_controls(run["markers"],bad_peer=denied)
+            run["hostile_marker_cases_rejected"]=ipc.negative_controls(run["markers"],bad_peer=denied,tracked=True)
             run.update(media_sha256=sha(media),kernel_sha256=sha(image))
             report["guest_runs"].append(run)
         if program_inputs(program_dir,env)!=report["program_build"]: raise ValueError("program receipt drift")
         if before!=sources(): raise ValueError("source drift")
-        report.update(status="pass",native_console_ipc=True)
+        report.update(status="pass",native_console_ipc=True,peer_death_termination=True)
     except Exception as exc:
         report["failure"]=f"{type(exc).__name__}: {exc}"
         print(report["failure"],flush=True)
     report["source_unchanged"]=before==sources()
     (work/"receipt.json").write_text(json.dumps(report,indent=2)+"\n",encoding="utf-8",newline="\n")
-    print(f"PSESSION3 {report['status']}; shell=0 ISO=0 production=0",flush=True)
+    print(f"PSESSION4 {report['status']}; shell=0 ISO=0 production=0",flush=True)
     return int(report["status"]!="pass")
 
 if __name__=="__main__": raise SystemExit(main())

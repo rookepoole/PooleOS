@@ -43,11 +43,14 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 264,
+    "last_updated_cycle": 265,
     "selected_move_id": "N13-CAPABILITY-IPC-001",
     "immediate_next_move_id": "N13-CAPABILITY-IPC-001",
     "owner_independent_next_move_id": "N13-CAPABILITY-IPC-001",
     "required_records": [
+      "docs/checkpoints/cycle265-native-console-rpc.md",
+      "runs/native-console-rpc-readiness.json",
+      "docs/native-console-rpc.md",
       "docs/checkpoints/cycle264-native-console-ipc.md",
       "runs/native-console-ipc-readiness.json",
       "docs/checkpoints/cycle263-console-ipc-programs.md",
@@ -282,9 +285,9 @@
     "added_requirement_count": 59
   },
   "baseline": {
-    "pooleos_cycle": 264,
+    "pooleos_cycle": 265,
     "entry_cycle": 79,
-    "pooleos_test_count": 1365,
+    "pooleos_test_count": 1371,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -300,13 +303,13 @@
       "explicit_gap_count": 20,
       "production_ready": false,
       "native_promotion_role": "partially_qualified_development_candidate_non_promoting",
-      "qualification_status": "native_console_ipc_pass_peer_recovery_shell_ISO_and_canonical_gates_pending",
+      "qualification_status": "native_console_rpc_pass_capacity_lifecycle_shell_ISO_and_canonical_gates_pending",
       "passed_check_count_scope": "historical_cycle176_exact_final_canonical_audit",
       "current_cycle_full_canonical_audit_performed": false,
       "last_fully_qualified_cycle": 176,
       "last_fully_qualified_passed_checks": 105,
       "current_candidate_audit": {
-        "cycle": 264,
+        "cycle": 265,
         "status": "not_run",
         "applies_to_current_source": false,
         "aggregate_suite_passed": false,
@@ -425,7 +428,7 @@
         "production_ready": false
       },
       "current_focused_source_projection": {
-        "cycle": 264,
+        "cycle": 265,
         "passed_checks": 2,
         "total_checks": 27,
         "passing_profiles": [
@@ -3548,18 +3551,18 @@
         "production_ready": false
       },
       "current_closeout_regression": {
-        "cycle": 264,
+        "cycle": 265,
         "status": "pass",
-        "receipt_path": "runs/native-console-ipc-readiness.json",
+        "receipt_path": "runs/native-console-rpc-readiness.json",
         "receipt_section": "default_regression",
-        "receipt_sha256": "AD5BBAF2354CFB90F2FA1ABDF337C7DC76AA06006B407E0712FD125E05EC4101",
-        "source_binding_count": 823,
-        "checks_passed": 23,
-        "rust_test_executions": 1706,
-        "additional_python_oracle_tests": 105,
+        "receipt_sha256": "6271FC899C9D4E6AF575D1CB2E1DE98AC012AFD898CB88DBFCAAD79D6CBA0260",
+        "source_binding_count": 826,
+        "checks_passed": 24,
+        "rust_test_executions": 1710,
+        "additional_python_oracle_tests": 110,
         "guest_runs": 3,
-        "elapsed_seconds": 399.344,
-        "log_sha256": "C70B13C8FBA7B81519B455479085AEDAA8125C37193DBECECDED4725CE51020A",
+        "elapsed_seconds": 397.828,
+        "log_sha256": "F04931359069B0D4EC53FC36D769392B8BAC3C41C3C7F69EDE89282371E01211",
         "source_unchanged": true,
         "owner_report_unchanged": true,
         "known_unresolved_readiness_tests": [
@@ -51993,21 +51996,21 @@
         "inherited_shared_loader_input_count": 19
       },
       "current_user_entry_metadata": {
-        "cycle": 264,
+        "cycle": 265,
         "status": "pass",
-        "tests_run": 210,
-        "tests_passed": 210,
+        "tests_run": 216,
+        "tests_passed": 216,
         "tests_failed": 0,
         "tests_skipped": 0,
-        "unittest_elapsed_seconds": 51.541,
-        "elapsed_seconds": 52.547,
-        "log_sha256": "7F759096E0012B16F21B6FA3C6F8F9122AE727DD5410FE9EE421B8BA8565D4ED",
+        "unittest_elapsed_seconds": 52.265,
+        "elapsed_seconds": 53.265,
+        "log_sha256": "92161305BD7873507FDF11145CE0BC85326244BAB9DBCAF5FE5787902C278A3C",
         "source_unchanged": true,
         "owner_report_unchanged": true,
-        "conservation_tests": 146,
-        "conservation_test_seconds": 9.092,
-        "conservation_capture_seconds": 10.563,
-        "conservation_log_sha256": "FC6FE4B138FD06F6DC9759A0D0A83C5B2FB07F7A1985CFD29AD9C096A676609D",
+        "conservation_tests": 152,
+        "conservation_test_seconds": 9.316,
+        "conservation_capture_seconds": 10.781,
+        "conservation_log_sha256": "85EB06589A51998C452F83ED3057C1E05707D422A9C318A38F98D23213E82D12",
         "scope": "pre_closeout_metadata_and_conservation_not_final_commit_or_canonical_gate",
         "counts_overlap": true,
         "historical_integrity_is_not_new_execution": true,
@@ -53796,6 +53799,52 @@
         "historical_integrity_is_not_new_execution": true,
         "canonical_full_replay_performed": false,
         "production_ready": false
+      },
+      "historical_cycle264_closeout_regression": {
+        "cycle": 264,
+        "status": "pass",
+        "receipt_path": "runs/native-console-ipc-readiness.json",
+        "receipt_section": "default_regression",
+        "receipt_sha256": "AD5BBAF2354CFB90F2FA1ABDF337C7DC76AA06006B407E0712FD125E05EC4101",
+        "source_binding_count": 823,
+        "checks_passed": 23,
+        "rust_test_executions": 1706,
+        "additional_python_oracle_tests": 105,
+        "guest_runs": 3,
+        "elapsed_seconds": 399.344,
+        "log_sha256": "C70B13C8FBA7B81519B455479085AEDAA8125C37193DBECECDED4725CE51020A",
+        "source_unchanged": true,
+        "owner_report_unchanged": true,
+        "known_unresolved_readiness_tests": [
+          "tests.test_native_kernel_load.NativeKernelLoadTests.test_contract_and_readiness_pass_semantic_validation",
+          "tests.test_native_kernel_load.NativeKernelLoadTests.test_readiness_detects_stale_input_and_oracle_divergence",
+          "tests.test_native_kernel_transfer.NativeKernelTransferTests.test_contract_and_generated_readiness_are_current"
+        ],
+        "canonical_full_replay_performed": false,
+        "merge_qualified": false,
+        "production_ready": false
+      },
+      "historical_cycle264_user_entry_metadata": {
+        "cycle": 264,
+        "status": "pass",
+        "tests_run": 210,
+        "tests_passed": 210,
+        "tests_failed": 0,
+        "tests_skipped": 0,
+        "unittest_elapsed_seconds": 51.541,
+        "elapsed_seconds": 52.547,
+        "log_sha256": "7F759096E0012B16F21B6FA3C6F8F9122AE727DD5410FE9EE421B8BA8565D4ED",
+        "source_unchanged": true,
+        "owner_report_unchanged": true,
+        "conservation_tests": 146,
+        "conservation_test_seconds": 9.092,
+        "conservation_capture_seconds": 10.563,
+        "conservation_log_sha256": "FC6FE4B138FD06F6DC9759A0D0A83C5B2FB07F7A1985CFD29AD9C096A676609D",
+        "scope": "pre_closeout_metadata_and_conservation_not_final_commit_or_canonical_gate",
+        "counts_overlap": true,
+        "historical_integrity_is_not_new_execution": true,
+        "canonical_full_replay_performed": false,
+        "production_ready": false
       }
     },
     "native": {
@@ -53925,12 +53974,12 @@
       "blocked": true
     },
     "user_space_integration": {
-      "cycle": 264,
+      "cycle": 265,
       "selected_stage": "USI-3",
-      "receipt_path": "runs/native-console-ipc-readiness.json",
-      "receipt_section": "console_ipc",
+      "receipt_path": "runs/native-console-rpc-readiness.json",
+      "receipt_section": "console_rpc",
       "host_status": "pass",
-      "session_contract": "PSESSION3",
+      "session_contract": "PSESSION4",
       "program_startup_contract": "PSTART1",
       "continue_full_microkernel_after_iso": true,
       "normal_demo_boot_separated_from_qualification": true,
@@ -53954,7 +54003,7 @@
       "stages": {
         "USI-1": "partial_live_bounded_unknown_recovery_general_admission_still_open",
         "USI-2": "partial_bounded_IPC_and_dispatch_general_resource_policy_and_efficient_idle_pending",
-        "USI-3": "partial_native_four_task_console_IPC_pass_lifecycle_loading_and_trust_pending",
+        "USI-3": "partial_bounded_console_revocation_capacity_lifecycle_loading_and_trust_pending",
         "USI-4": "not_started",
         "USI-5": "not_started"
       },
@@ -53968,15 +54017,19 @@
       "console_ipc_contract": "PCS1",
       "console_ipc_programs_built": true,
       "native_console_ipc_execution": true,
-      "native_execution_evidence_cycle": 264,
+      "native_execution_evidence_cycle": 265,
       "native_execution_replayed_this_cycle": true,
-      "native_execution_status": "four_private_roots_console_IPC_echo_close_reap_and_wrong_peer_rejection_pass",
+      "native_execution_status": "tracked_console_reply_and_bounded_peer_death_termination_pass",
       "retained_kernel_sources_unchanged": false,
       "polling_peer_death_recovery": false,
       "service_restart": false,
       "native_preemption_observed": false,
       "fixed_bootstrap_process_slots": 4,
-      "usable_iso_minimum_roles": 5
+      "usable_iso_minimum_roles": 5,
+      "console_rpc_transport": "PRPC1",
+      "console_rpc_service": true,
+      "polling_client_hang_after_peer_death": false,
+      "peer_death_termination": true
     },
     "historical_cycle234_user_space_integration": {
       "cycle": 234,
@@ -62975,7 +63028,8 @@
       "console_ipc_service": false,
       "shell": false,
       "iso_built": false,
-      "production_ready": false
+      "production_ready": false,
+      "evidence_status": "historical_after_cycle265_user_program_changes"
     },
     "historical_cycle263_user_space_integration": {
       "cycle": 263,
@@ -63112,6 +63166,175 @@
       "firmware_page_quota": 12,
       "task_image_pages": 52,
       "native_console_ipc": true,
+      "polling_peer_death_recovery": false,
+      "service_restart": false,
+      "native_preemption_observed": false,
+      "shell": false,
+      "iso_built": false,
+      "production_ready": false,
+      "evidence_status": "historical_after_cycle265_tracked_transport"
+    },
+    "historical_cycle264_user_space_integration": {
+      "cycle": 264,
+      "selected_stage": "USI-3",
+      "receipt_path": "runs/native-console-ipc-readiness.json",
+      "receipt_section": "console_ipc",
+      "host_status": "pass",
+      "session_contract": "PSESSION3",
+      "program_startup_contract": "PSTART1",
+      "continue_full_microkernel_after_iso": true,
+      "normal_demo_boot_separated_from_qualification": true,
+      "native_init_program": true,
+      "native_counter_program": true,
+      "native_session_execution": true,
+      "actual_init_service": false,
+      "init_supervision": false,
+      "user_console": true,
+      "general_user_program_admission": false,
+      "executable_trust_policy": false,
+      "signed_init_activation": false,
+      "power_efficient_idle": false,
+      "native_clock_fault_recovery": false,
+      "general_resource_policy": false,
+      "kernel_image_pages": 205,
+      "kernel_capacity_pages": 208,
+      "kernel_remaining_capacity_pages": 3,
+      "fixed_bootstrap_pair_dependency_cancellation": true,
+      "calibration_scope": "one_owner_BSP_root_APIC_HPET_context_no_migration_suspend_or_drift_claim",
+      "stages": {
+        "USI-1": "partial_live_bounded_unknown_recovery_general_admission_still_open",
+        "USI-2": "partial_bounded_IPC_and_dispatch_general_resource_policy_and_efficient_idle_pending",
+        "USI-3": "partial_native_four_task_console_IPC_pass_lifecycle_loading_and_trust_pending",
+        "USI-4": "not_started",
+        "USI-5": "not_started"
+      },
+      "iso_built": false,
+      "production_ready": false,
+      "native_console_program": true,
+      "console_capability_contract": "PKPORT1",
+      "console_polled_only": true,
+      "console_ipc_service": true,
+      "shell": false,
+      "console_ipc_contract": "PCS1",
+      "console_ipc_programs_built": true,
+      "native_console_ipc_execution": true,
+      "native_execution_evidence_cycle": 264,
+      "native_execution_replayed_this_cycle": true,
+      "native_execution_status": "four_private_roots_console_IPC_echo_close_reap_and_wrong_peer_rejection_pass",
+      "retained_kernel_sources_unchanged": false,
+      "polling_peer_death_recovery": false,
+      "service_restart": false,
+      "native_preemption_observed": false,
+      "fixed_bootstrap_process_slots": 4,
+      "usable_iso_minimum_roles": 5
+    },
+    "native_console_rpc_integration": {
+      "cycle": 265,
+      "contract_id": "PSESSION4",
+      "transport": "PRPC1",
+      "status": "pass",
+      "receipt_path": "runs/native-console-rpc-readiness.json",
+      "receipt_sha256": "6271FC899C9D4E6AF575D1CB2E1DE98AC012AFD898CB88DBFCAAD79D6CBA0260",
+      "source_binding_count": 833,
+      "program_source_binding_count": 29,
+      "kernel_sha256": "BF64CE3E828C855ACF4D08927DF47CC6A7962207B91C75422AB86AE092BC9A9F",
+      "independent_kernel_builds_equal": true,
+      "guest_runs": 3,
+      "input_bytes": [
+        45,
+        52,
+        0
+      ],
+      "final_progress": [
+        [
+          512,
+          547,
+          548,
+          153928,
+          154232,
+          274,
+          273,
+          0,
+          236,
+          1024,
+          7556,
+          904125,
+          1,
+          26,
+          7554,
+          989895,
+          1
+        ],
+        [
+          512,
+          487,
+          488,
+          137038,
+          137357,
+          244,
+          243,
+          0,
+          266,
+          1024,
+          8516,
+          1022917,
+          1,
+          26,
+          8514,
+          1117986,
+          1
+        ],
+        [
+          512,
+          1015,
+          1016,
+          285670,
+          285857,
+          508,
+          507,
+          0,
+          2,
+          1024,
+          66,
+          7916,
+          1,
+          26,
+          66,
+          8312,
+          1
+        ]
+      ],
+      "stop_dispatches": [
+        {
+          "2": 357,
+          "3": 358
+        },
+        {
+          "2": 402,
+          "3": 403
+        },
+        {
+          "2": 6,
+          "3": 7
+        }
+      ],
+      "hostile_marker_cases": [
+        64,
+        64,
+        64
+      ],
+      "console_kernel_tests_per_profile": 483,
+      "user_program_tests_per_profile": 39,
+      "new_kernel_tests": 2,
+      "new_user_transport_tests": 6,
+      "new_oracle_tests": 5,
+      "focused_python_tests": 41,
+      "firmware_page_quota": 12,
+      "task_image_pages": 52,
+      "kernel_image_pages": 205,
+      "kernel_reserved_pages": 208,
+      "guarded_stack_pages": 36,
+      "peer_death_termination": true,
       "polling_peer_death_recovery": false,
       "service_restart": false,
       "native_preemption_observed": false,
@@ -64593,6 +64816,7 @@
         "ADD-CAP-001"
       ],
       "current_evidence": [
+        "Cycle265: PRPC1 uses existing tracked Begin/Take and one-use Reply. Two fresh45/52-byte native echoes close both programs and reclaim26 pages. Wrong-peer service exits152 at dispatch6; client consumes authenticated revocation and exits163 at dispatch7. Both retire within frozen64-dispatch/8-dispatch-delay bounds; init/counter survive512 dispatches. All24 default regression checks pass. docs/checkpoints/cycle265-native-console-rpc.md",
         "Cycle264: four private CPL3 roots admit init/counter/console-service/client with9 explicit grants. Two fresh native inputs45/52 bytes echo exactly through PCS1; service/client exit0 reclaims26 pages while init/counter survive512 dispatches. Wrong-peer service exits152, reclaims13 pages and emits no application output.23 default regression checks pass including two containment boots and unsigned denial. docs/checkpoints/cycle264-native-console-ipc.md",
         "Cycle263: separately compiled PooleConsoleService/PooleConsoleClient implement PCS1 bounded read/write/close, authenticated kernel sender envelope, strict sequences and retained backpressure.33 host tests pass debug/release, including12 IPC tests; two builds reproduce3032/1813 code bytes. Prior init/counter/echo program bytes match Cycle262. No new native execution. docs/checkpoints/cycle263-console-ipc-programs.md",
         "Cycle262: independently built PooleConsole runs at CPL3 with an exclusive generation-bound COM2 lease. Two fresh guests echo55/53 exact host bytes, then exit0 and release13 pages; bad handle exits131 with no application UART output. Init/counter survive to512 dispatches. docs/checkpoints/cycle262-native-user-console.md",
@@ -64626,6 +64850,7 @@
         "Cycle 234: PKUSER1 inactive user-image admission passes260 kernel host tests,14 optimized focused tests and freestanding-library check; no live user execution or ISO. docs/checkpoints/cycle234-user-entry-foundation.md"
       ],
       "current_gaps": [
+        "Bounded peer-death termination is not service restart or live-but-stalled recovery. Four bootstrap slots still cannot host five minimum demo roles: review IPC/endpoint/admission capacity and user-space lifecycle authority, then shell/read-only files/two actual apps and optical ISO. Native PCS1 pressure/malformed-request controls, init supervision/loading/trust, efficient idle and native clock recovery remain.205/208 image and36-page stack bounds are unchanged; full canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open.",
         "Wrong-peer service death leaves its polling client alive: add authenticated bounded peer-death notification/recovery before shell integration. Four fixed slots cannot host all five minimum demo roles (init, console, shell, two apps): review admission/capacity/lifecycle and resource bounds. Native PCS1 pressure/malformed-request controls, user supervision/restart/loading/trust, efficient idle, shell/files/apps and optical ISO remain.205/208 kernel pages and36-page stack unchanged; canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open.",
         "Admit these service/client binaries with init/counter in four private roots, verify endpoint grants and52-page image ownership, then fresh native input/output, pressure, malformed authority and peer-survival tests. No shell, optical ISO, general init/restart/loading, efficient idle or production promotion yet. Full microkernel/PDC/PooleGlyph/PooleGlass remain.",
         "No console IPC, shell, files/two useful apps, efficient idle, supervision or integration ISO yet. General loading, native clock recovery and signed PXABI1/PINIT1 remain open.205_of208 fixed image and three product-readiness failures/full canonical replay still gate main.",
@@ -64713,6 +64938,7 @@
         "ADD-ABI-001"
       ],
       "current_evidence": [
+        "Cycle265: PRPC1 uses existing tracked Begin/Take and one-use Reply. Two fresh45/52-byte native echoes close both programs and reclaim26 pages. Wrong-peer service exits152 at dispatch6; client consumes authenticated revocation and exits163 at dispatch7. Both retire within frozen64-dispatch/8-dispatch-delay bounds; init/counter survive512 dispatches. All24 default regression checks pass. docs/checkpoints/cycle265-native-console-rpc.md",
         "Cycle264: four private CPL3 roots admit init/counter/console-service/client with9 explicit grants. Two fresh native inputs45/52 bytes echo exactly through PCS1; service/client exit0 reclaims26 pages while init/counter survive512 dispatches. Wrong-peer service exits152, reclaims13 pages and emits no application output.23 default regression checks pass including two containment boots and unsigned denial. docs/checkpoints/cycle264-native-console-ipc.md",
         "Cycle263: separately compiled PooleConsoleService/PooleConsoleClient implement PCS1 bounded read/write/close, authenticated kernel sender envelope, strict sequences and retained backpressure.33 host tests pass debug/release, including12 IPC tests; two builds reproduce3032/1813 code bytes. Prior init/counter/echo program bytes match Cycle262. No new native execution. docs/checkpoints/cycle263-console-ipc-programs.md",
         "Cycle262: independently built PooleConsole runs at CPL3 with an exclusive generation-bound COM2 lease. Two fresh guests echo55/53 exact host bytes, then exit0 and release13 pages; bad handle exits131 with no application UART output. Init/counter survive to512 dispatches. docs/checkpoints/cycle262-native-user-console.md",
@@ -64727,6 +64953,7 @@
         "Cycle250: PKIPC1 enforces kernel-owned endpoint handles, authenticated callers, generations, rights and bounded FIFO copy commits. Two fresh62-marker boots exchange actual transformed8-byte requests/replies and preserve17 survival cases;660 altered-evidence controls per boot reject.571 Rust executions,42 oracle tests and ordinary denial pass. docs/checkpoints/cycle250-native-capability-ipc.md"
       ],
       "current_gaps": [
+        "Bounded peer-death termination is not service restart or live-but-stalled recovery. Four bootstrap slots still cannot host five minimum demo roles: review IPC/endpoint/admission capacity and user-space lifecycle authority, then shell/read-only files/two actual apps and optical ISO. Native PCS1 pressure/malformed-request controls, init supervision/loading/trust, efficient idle and native clock recovery remain.205/208 image and36-page stack bounds are unchanged; full canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open.",
         "Wrong-peer service death leaves its polling client alive: add authenticated bounded peer-death notification/recovery before shell integration. Four fixed slots cannot host all five minimum demo roles (init, console, shell, two apps): review admission/capacity/lifecycle and resource bounds. Native PCS1 pressure/malformed-request controls, user supervision/restart/loading/trust, efficient idle, shell/files/apps and optical ISO remain.205/208 kernel pages and36-page stack unchanged; canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open.",
         "Admit these service/client binaries with init/counter in four private roots, verify endpoint grants and52-page image ownership, then fresh native input/output, pressure, malformed authority and peer-survival tests. No shell, optical ISO, general init/restart/loading, efficient idle or production promotion yet. Full microkernel/PDC/PooleGlyph/PooleGlass remain.",
         "No console IPC, shell, files/two useful apps, efficient idle, supervision or integration ISO yet. General loading, native clock recovery and signed PXABI1/PINIT1 remain open.205_of208 fixed image and three product-readiness failures/full canonical replay still gate main.",
@@ -64879,6 +65106,7 @@
         "ADD-MODULE-001"
       ],
       "current_evidence": [
+        "Cycle265: PRPC1 uses existing tracked Begin/Take and one-use Reply. Two fresh45/52-byte native echoes close both programs and reclaim26 pages. Wrong-peer service exits152 at dispatch6; client consumes authenticated revocation and exits163 at dispatch7. Both retire within frozen64-dispatch/8-dispatch-delay bounds; init/counter survive512 dispatches. All24 default regression checks pass. docs/checkpoints/cycle265-native-console-rpc.md",
         "Cycle264: four private CPL3 roots admit init/counter/console-service/client with9 explicit grants. Two fresh native inputs45/52 bytes echo exactly through PCS1; service/client exit0 reclaims26 pages while init/counter survive512 dispatches. Wrong-peer service exits152, reclaims13 pages and emits no application output.23 default regression checks pass including two containment boots and unsigned denial. docs/checkpoints/cycle264-native-console-ipc.md",
         "Cycle263: separately compiled PooleConsoleService/PooleConsoleClient implement PCS1 bounded read/write/close, authenticated kernel sender envelope, strict sequences and retained backpressure.33 host tests pass debug/release, including12 IPC tests; two builds reproduce3032/1813 code bytes. Prior init/counter/echo program bytes match Cycle262. No new native execution. docs/checkpoints/cycle263-console-ipc-programs.md",
         "Cycle262: independently built PooleConsole runs at CPL3 with an exclusive generation-bound COM2 lease. Two fresh guests echo55/53 exact host bytes, then exit0 and release13 pages; bad handle exits131 with no application UART output. Init/counter survive to512 dispatches. docs/checkpoints/cycle262-native-user-console.md",
@@ -64887,6 +65115,7 @@
         "Cycle259: PSTART1 copies validated built-in PIC code and owned bounded arguments before mapping, binds startup to the full prepared image, and retains failed construction ownership. Native tasks read their own argument block and exit102/103. Two fresh79-marker boots;466 kernel tests/734 overlapping Rust executions/84 Python oracle tests and ordinary denial pass. docs/checkpoints/cycle259-owned-program-startup.md"
       ],
       "current_gaps": [
+        "Bounded peer-death termination is not service restart or live-but-stalled recovery. Four bootstrap slots still cannot host five minimum demo roles: review IPC/endpoint/admission capacity and user-space lifecycle authority, then shell/read-only files/two actual apps and optical ISO. Native PCS1 pressure/malformed-request controls, init supervision/loading/trust, efficient idle and native clock recovery remain.205/208 image and36-page stack bounds are unchanged; full canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open.",
         "Wrong-peer service death leaves its polling client alive: add authenticated bounded peer-death notification/recovery before shell integration. Four fixed slots cannot host all five minimum demo roles (init, console, shell, two apps): review admission/capacity/lifecycle and resource bounds. Native PCS1 pressure/malformed-request controls, user supervision/restart/loading/trust, efficient idle, shell/files/apps and optical ISO remain.205/208 kernel pages and36-page stack unchanged; canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open.",
         "Admit these service/client binaries with init/counter in four private roots, verify endpoint grants and52-page image ownership, then fresh native input/output, pressure, malformed authority and peer-survival tests. No shell, optical ISO, general init/restart/loading, efficient idle or production promotion yet. Full microkernel/PDC/PooleGlyph/PooleGlass remain.",
         "No console IPC, shell, files/two useful apps, efficient idle, supervision or integration ISO yet. General loading, native clock recovery and signed PXABI1/PINIT1 remain open.205_of208 fixed image and three product-readiness failures/full canonical replay still gate main.",
@@ -65206,12 +65435,14 @@
       "source_checkbox_count": 467,
       "added_requirement_ids": [],
       "current_evidence": [
+        "Cycle265: PRPC1 uses existing tracked Begin/Take and one-use Reply. Two fresh45/52-byte native echoes close both programs and reclaim26 pages. Wrong-peer service exits152 at dispatch6; client consumes authenticated revocation and exits163 at dispatch7. Both retire within frozen64-dispatch/8-dispatch-delay bounds; init/counter survive512 dispatches. All24 default regression checks pass. docs/checkpoints/cycle265-native-console-rpc.md",
         "Cycle264: four private CPL3 roots admit init/counter/console-service/client with9 explicit grants. Two fresh native inputs45/52 bytes echo exactly through PCS1; service/client exit0 reclaims26 pages while init/counter survive512 dispatches. Wrong-peer service exits152, reclaims13 pages and emits no application output.23 default regression checks pass including two containment boots and unsigned denial. docs/checkpoints/cycle264-native-console-ipc.md",
         "Cycle263: separately compiled PooleConsoleService/PooleConsoleClient implement PCS1 bounded read/write/close, authenticated kernel sender envelope, strict sequences and retained backpressure.33 host tests pass debug/release, including12 IPC tests; two builds reproduce3032/1813 code bytes. Prior init/counter/echo program bytes match Cycle262. No new native execution. docs/checkpoints/cycle263-console-ipc-programs.md",
         "Cycle262: independently built PooleConsole runs at CPL3 with an exclusive generation-bound COM2 lease. Two fresh guests echo55/53 exact host bytes, then exit0 and release13 pages; bad handle exits131 with no application UART output. Init/counter survive to512 dispatches. docs/checkpoints/cycle262-native-user-console.md",
         "Cycle261: exact separate PooleInit/PooleCounter programs run in private CPL3 roots under a distinct development session. Two fresh guests pass512 dispatches and1023/1024 syscalls, with512 waits/511 wakes; bad-role startup cancels the dependent and reaps26 pages. Ordinary unsigned denial remains. docs/checkpoints/cycle261-native-service-session.md"
       ],
       "current_gaps": [
+        "Bounded peer-death termination is not service restart or live-but-stalled recovery. Four bootstrap slots still cannot host five minimum demo roles: review IPC/endpoint/admission capacity and user-space lifecycle authority, then shell/read-only files/two actual apps and optical ISO. Native PCS1 pressure/malformed-request controls, init supervision/loading/trust, efficient idle and native clock recovery remain.205/208 image and36-page stack bounds are unchanged; full canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open.",
         "Wrong-peer service death leaves its polling client alive: add authenticated bounded peer-death notification/recovery before shell integration. Four fixed slots cannot host all five minimum demo roles (init, console, shell, two apps): review admission/capacity/lifecycle and resource bounds. Native PCS1 pressure/malformed-request controls, user supervision/restart/loading/trust, efficient idle, shell/files/apps and optical ISO remain.205/208 kernel pages and36-page stack unchanged; canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open.",
         "Admit these service/client binaries with init/counter in four private roots, verify endpoint grants and52-page image ownership, then fresh native input/output, pressure, malformed authority and peer-survival tests. No shell, optical ISO, general init/restart/loading, efficient idle or production promotion yet. Full microkernel/PDC/PooleGlyph/PooleGlass remain.",
         "No console IPC, shell, files/two useful apps, efficient idle, supervision or integration ISO yet. General loading, native clock recovery and signed PXABI1/PINIT1 remain open.205_of208 fixed image and three product-readiness failures/full canonical replay still gate main.",
@@ -65270,11 +65501,13 @@
       "source_checkbox_count": 308,
       "added_requirement_ids": [],
       "current_evidence": [
+        "Cycle265: PRPC1 uses existing tracked Begin/Take and one-use Reply. Two fresh45/52-byte native echoes close both programs and reclaim26 pages. Wrong-peer service exits152 at dispatch6; client consumes authenticated revocation and exits163 at dispatch7. Both retire within frozen64-dispatch/8-dispatch-delay bounds; init/counter survive512 dispatches. All24 default regression checks pass. docs/checkpoints/cycle265-native-console-rpc.md",
         "Cycle264: four private CPL3 roots admit init/counter/console-service/client with9 explicit grants. Two fresh native inputs45/52 bytes echo exactly through PCS1; service/client exit0 reclaims26 pages while init/counter survive512 dispatches. Wrong-peer service exits152, reclaims13 pages and emits no application output.23 default regression checks pass including two containment boots and unsigned denial. docs/checkpoints/cycle264-native-console-ipc.md",
         "Cycle263: separately compiled PooleConsoleService/PooleConsoleClient implement PCS1 bounded read/write/close, authenticated kernel sender envelope, strict sequences and retained backpressure.33 host tests pass debug/release, including12 IPC tests; two builds reproduce3032/1813 code bytes. Prior init/counter/echo program bytes match Cycle262. No new native execution. docs/checkpoints/cycle263-console-ipc-programs.md",
         "Cycle262: independently built PooleConsole runs at CPL3 with an exclusive generation-bound COM2 lease. Two fresh guests echo55/53 exact host bytes, then exit0 and release13 pages; bad handle exits131 with no application UART output. Init/counter survive to512 dispatches. docs/checkpoints/cycle262-native-user-console.md"
       ],
       "current_gaps": [
+        "Bounded peer-death termination is not service restart or live-but-stalled recovery. Four bootstrap slots still cannot host five minimum demo roles: review IPC/endpoint/admission capacity and user-space lifecycle authority, then shell/read-only files/two actual apps and optical ISO. Native PCS1 pressure/malformed-request controls, init supervision/loading/trust, efficient idle and native clock recovery remain.205/208 image and36-page stack bounds are unchanged; full canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open.",
         "Wrong-peer service death leaves its polling client alive: add authenticated bounded peer-death notification/recovery before shell integration. Four fixed slots cannot host all five minimum demo roles (init, console, shell, two apps): review admission/capacity/lifecycle and resource bounds. Native PCS1 pressure/malformed-request controls, user supervision/restart/loading/trust, efficient idle, shell/files/apps and optical ISO remain.205/208 kernel pages and36-page stack unchanged; canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open.",
         "Admit these service/client binaries with init/counter in four private roots, verify endpoint grants and52-page image ownership, then fresh native input/output, pressure, malformed authority and peer-survival tests. No shell, optical ISO, general init/restart/loading, efficient idle or production promotion yet. Full microkernel/PDC/PooleGlyph/PooleGlass remain.",
         "No console IPC, shell, files/two useful apps, efficient idle, supervision or integration ISO yet. General loading, native clock recovery and signed PXABI1/PINIT1 remain open.205_of208 fixed image and three product-readiness failures/full canonical replay still gate main.",
@@ -66241,11 +66474,13 @@
         "ADD-TEST-001"
       ],
       "current_evidence": [
-        "Cycle 264 source inventory: 1365 Python tests discovered; full qualification pending",
+        "Cycle 265 source inventory: 1371 Python tests discovered; full qualification pending",
+        "Cycle265: PRPC1 uses existing tracked Begin/Take and one-use Reply. Two fresh45/52-byte native echoes close both programs and reclaim26 pages. Wrong-peer service exits152 at dispatch6; client consumes authenticated revocation and exits163 at dispatch7. Both retire within frozen64-dispatch/8-dispatch-delay bounds; init/counter survive512 dispatches. All24 default regression checks pass. docs/checkpoints/cycle265-native-console-rpc.md",
+        "Cycle 264 source inventory: 1371 Python tests discovered; full qualification pending",
         "Cycle264: four private CPL3 roots admit init/counter/console-service/client with9 explicit grants. Two fresh native inputs45/52 bytes echo exactly through PCS1; service/client exit0 reclaims26 pages while init/counter survive512 dispatches. Wrong-peer service exits152, reclaims13 pages and emits no application output.23 default regression checks pass including two containment boots and unsigned denial. docs/checkpoints/cycle264-native-console-ipc.md",
-        "Cycle 263 source inventory: 1365 Python tests discovered; full qualification pending",
+        "Cycle 263 source inventory: 1371 Python tests discovered; full qualification pending",
         "Cycle263: separately compiled PooleConsoleService/PooleConsoleClient implement PCS1 bounded read/write/close, authenticated kernel sender envelope, strict sequences and retained backpressure.33 host tests pass debug/release, including12 IPC tests; two builds reproduce3032/1813 code bytes. Prior init/counter/echo program bytes match Cycle262. No new native execution. docs/checkpoints/cycle263-console-ipc-programs.md",
-        "Cycle 262 source inventory: 1365 Python tests discovered; full qualification pending",
+        "Cycle 262 source inventory: 1371 Python tests discovered; full qualification pending",
         "Cycle262: independently built PooleConsole runs at CPL3 with an exclusive generation-bound COM2 lease. Two fresh guests echo55/53 exact host bytes, then exit0 and release13 pages; bad handle exits131 with no application UART output. Init/counter survive to512 dispatches. docs/checkpoints/cycle262-native-user-console.md",
         "Cycle 229 source inventory: 1207 tests discovered; new exact-candidate qualification pending",
         "Cycle 229: docs/checkpoints/cycle229-reviewed-execution-inputs.md binds 18 reviewed data inputs across 13 specification files to original successful captures while preserving all 27 profile/receipt/source/capture core records. Nineteen focused tests pass. Bounded development data/media/tool review is complete; the specific review hold is removed, not the broader N36 flag or any production gate. The preceding exact293383d passed106/106 canonical and708/708 Doctor checks; later edits are unqualified.",
@@ -66372,6 +66607,7 @@
         "native binary parser, reproduction, leakage, malformed, substitution, governance, hardware, Tier 0, bounded-model, deterministic boot-media, PBP1/PBC1/PSM1/PBART1, six inner-format, PBTRUST1/PBSTATE1, PKELF1, PKENTRY1, PKLOAD6/PBLIVE4/PKMAP2/PBEXIT1, PKREVAL1, PKXFER1, PKTRAP1, PKCPU1, PKERR1, PKXSTATE1, PKXEXC1, PKMSR1, PKPMM7/PKACPI1, PKVM1, PKVM3, PKIRQ1, PKSMP1, PKSMP2, PKSMP5, PKSCHED1 through PKSCHED6, PKATOM1, and PKLOCK1 source/live/zero-authority controls, PKRECLAIM1-CORE host-only evidence and source-freshness controls, canonical-LF readiness regression controls, PooleGlyph roadmap bindings, Doctor external-report nonmutation, and collector-smoke negatives"
       ],
       "current_gaps": [
+        "Bounded peer-death termination is not service restart or live-but-stalled recovery. Four bootstrap slots still cannot host five minimum demo roles: review IPC/endpoint/admission capacity and user-space lifecycle authority, then shell/read-only files/two actual apps and optical ISO. Native PCS1 pressure/malformed-request controls, init supervision/loading/trust, efficient idle and native clock recovery remain.205/208 image and36-page stack bounds are unchanged; full canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open.",
         "Wrong-peer service death leaves its polling client alive: add authenticated bounded peer-death notification/recovery before shell integration. Four fixed slots cannot host all five minimum demo roles (init, console, shell, two apps): review admission/capacity/lifecycle and resource bounds. Native PCS1 pressure/malformed-request controls, user supervision/restart/loading/trust, efficient idle, shell/files/apps and optical ISO remain.205/208 kernel pages and36-page stack unchanged; canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open.",
         "Admit these service/client binaries with init/counter in four private roots, verify endpoint grants and52-page image ownership, then fresh native input/output, pressure, malformed authority and peer-survival tests. No shell, optical ISO, general init/restart/loading, efficient idle or production promotion yet. Full microkernel/PDC/PooleGlyph/PooleGlass remain.",
         "Preflight free disk space before bounded builds/captures and implement hash-verified evidence retention, compression and restore without discarding failures or changing acceptance bounds.",
@@ -70399,7 +70635,8 @@
         "docs/pdc-production-build-plan.md",
         "runs/pooleos_native_checklist_coverage.json",
         "docs/checkpoints/cycle262-native-user-console.md",
-        "docs/checkpoints/cycle264-native-console-ipc.md"
+        "docs/checkpoints/cycle264-native-console-ipc.md",
+        "docs/checkpoints/cycle265-native-console-rpc.md"
       ]
     },
     {
@@ -70898,7 +71135,7 @@
       "class": "REQUIRED",
       "status": "open",
       "phase_id": "N13",
-      "closure_condition": "Pass all five native user-space ISO stages with actual isolated tasks, user input, fault containment and fresh optical evidence; do not close production gates Include N3.7 constructor/cleanup/trap stack-depth and high-water qualification, general persistent construction quarantine and final slot-commit recovery. Account terminal and failed-cleanup consumed quanta exactly once through retry/abandonment; qualify independent missing-IRQ recovery and keep broad timer-race/partial-configuration recovery distinct from bounded PKUSER12 evidence. PKUSER13 covers authenticated returned peer quanta only; qualify unknown-measurement emergency recovery, independent missing-IRQ recovery, coherent physical counter reads/reset/drift and accounting of all admitted profiles without weakening retained ownership. PKUSER14 qualifies only local-timer suppression with working HPET/MSI/APIC/IF; implement and qualify unknown-runtime recovery, IOAPIC/nonMSI/32bit fallback, NMI/shared-controller failure and simultaneous-source shutdown without broadening the bounded claim. PKUSER15 covers returned sample loss and termination-only retry, not physical clock failure or persistent generation audit. Bound stack composition and text capacity as native capability IPC is added; retain all production and interactive-ISO gates. PKIPC1 is endpoint-only nonblocking IPC with explicit bootstrap teardown. Implement scheduler waits/cancel, automatic lifetime revocation, sender/reply authority, transactional bootstrap, derivation-tree revocation and native saturation/stale/dead-peer/output-fault tests before general services. Preserve all production/ISO gates and185page product-contract migration. Cycle251 now implements bounded readiness wait/cancel and automatic retirement hooks; do not treat that as general lifecycle. Single-BSP advisory readiness is not RPC or general service lifecycle. Native enrolled-owner fault/cancel/quarantine/dead-peer/revocation/stale/writable-wait/saturation/output-fault and persistent-generation tests remain. Add pending-wait termination, sender identity, one-use replies, deadlines, wait-many, transactional admission, sustained budgets, audit and SMP. Quarantine retains authority until stopped cleanup succeeds.186-page product-contract migration and full exact-candidate replay remain; no interactive ISO or production promotion. Cycle252 qualifies five bounded native peer lifetimes and blocked-wait termination, not general service supervision. Bounded single-BSP fixed lifetimes only. Sender identity, one-use reply ownership, deadlines, transactional general bootstrap/admission, sustained budgets, persistent supervision, arbitrary close/destroy/wake/kill races, derivation-tree revocation, quota recovery, concurrency and SMP remain. Guarded constructor stack overflow was repaired with in-place persistent-slot reuse; general stack/hardware proof remains.188-page product-contract migration and full exact-candidate replay are pending; no interactive ISO or production promotion. Cycle253 adds bounded sender/reply authority but requires request failure notification before services. Asynchronous request/reply is not synchronous Call, correlation, donation, guaranteed reply capacity or caller notification on discard/service death. Request/deadline/cancellation ownership, transactional admission, sustained budgets, persistent supervision, arbitrary races and SMP remain.191-page image leaves one bootstrap page; product-contract/capacity migration and full exact-candidate replay remain. No interactive ISO or production promotion. Cycle254 qualifies bounded tracked outcomes, not deadlines or services. Owned monotonic deadlines, transactional service admission and sustained budgets remain before init/console/shell/apps/ISO.196-page image/208 capacity requires canonical product migration; three old readiness assertions still fail. Cancellation is not side-effect rollback; no SMP/general supervision or interactive ISO claim. Cycle255 clock continuity alone does not implement deadline expiry. Timed request expiry, all-blocked wakeup and poisoned-epoch handling remain, then transactional admission/sustained budgets and init/console/shell/apps/ISO.197-page image requires canonical product migration; three old readiness assertions still fail. No SMP/physical-clock failure recovery/32-bit wrap/suspend or general recovery claim. Cycle256 adds bounded request deadlines, not general services. Transactional service admission, sustained budgets, interrupt-driven idle and init/console/shell/apps/ISO remain. Current idle polls HPET; live unexpected clock failure halts retaining ownership, not native recovery.198-page image requires canonical product migration; three readiness assertions and full exact-candidate replay block main. No SMP, hard-real-time deadline, side-effect rollback or production claim. Cycle257 adds bounded atomic admission, not general services. Sustained budgets, owned service-image/argument bootstrap, efficient idle and init/console/shell/apps/ISO remain. Trusted admission is not user authority, a signed loader or general supervisor. Native clock error still halts;201_of208 pages leaves7 and requires diagnostic/profile separation or reviewed capacity migration. Three readiness assertions and full canonical replay block main. No SMP or production claim. Cycle258 adds sustained dispatch, not complete services. Owned executable/argument service bootstrap, init/console/input, efficient idle and shell/files/apps/ISO remain. Dispatch-based allowance is not full CPU-share policy, priority starvation freedom or indefinite uptime. Native clock error still halts;202_of208 pages leaves6 and requires diagnostic/profile separation or reviewed migration. Three readiness assertions and full canonical replay block main. No SMP or production claim. Cycle259 adds copied bootstrap, not a complete service runtime. Actual init, normal boot separation, console/input, efficient idle and shell/files/apps/ISO remain. One-page trusted built-in startup is not PXABI1 loading, signed PINIT1 activation, user spawn authority or full service supervision.205_of208 pages leaves3; resolve profile/layout pressure without deleting checks. Three readiness failures and full canonical replay still block main. No ISO or production claim. Cycle260 adds independently compiled programs, not native session acceptance. These compiled user programs are not yet launched by PooleKernel. Normal session boot, real CPL3 ABI/stack qualification, console/input, supervision, efficient idle and interactive ISO remain. Kernel remains205_of208 pages; canonical migration/three readiness failures still gate main. No executable trust or production promotion. Cycle261 adds native session execution, not interactive ISO acceptance. No user console, shell or interactive ISO yet. Fixed bootstrap-pair dependency cancellation is not general init supervision. Timer cache is owner/context-bound, not drift/migration/suspend qualification. Efficient idle, restart/loading/resource policy, native clock recovery and signed activation remain.205_of208 fixed layout and three product-readiness failures/full canonical replay still gate main. Cycle262 adds confined native console echo, not a console IPC service or ISO. No console IPC, shell, files/two useful apps, efficient idle, supervision or integration ISO yet. General loading, native clock recovery and signed PXABI1/PINIT1 remain open.205_of208 fixed image and three product-readiness failures/full canonical replay still gate main. Cycle264: Wrong-peer service death leaves its polling client alive: add authenticated bounded peer-death notification/recovery before shell integration. Four fixed slots cannot host all five minimum demo roles (init, console, shell, two apps): review admission/capacity/lifecycle and resource bounds. Native PCS1 pressure/malformed-request controls, user supervision/restart/loading/trust, efficient idle, shell/files/apps and optical ISO remain.205/208 kernel pages and36-page stack unchanged; canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open.",
+      "closure_condition": "Pass all five native user-space ISO stages with actual isolated tasks, user input, fault containment and fresh optical evidence; do not close production gates Include N3.7 constructor/cleanup/trap stack-depth and high-water qualification, general persistent construction quarantine and final slot-commit recovery. Account terminal and failed-cleanup consumed quanta exactly once through retry/abandonment; qualify independent missing-IRQ recovery and keep broad timer-race/partial-configuration recovery distinct from bounded PKUSER12 evidence. PKUSER13 covers authenticated returned peer quanta only; qualify unknown-measurement emergency recovery, independent missing-IRQ recovery, coherent physical counter reads/reset/drift and accounting of all admitted profiles without weakening retained ownership. PKUSER14 qualifies only local-timer suppression with working HPET/MSI/APIC/IF; implement and qualify unknown-runtime recovery, IOAPIC/nonMSI/32bit fallback, NMI/shared-controller failure and simultaneous-source shutdown without broadening the bounded claim. PKUSER15 covers returned sample loss and termination-only retry, not physical clock failure or persistent generation audit. Bound stack composition and text capacity as native capability IPC is added; retain all production and interactive-ISO gates. PKIPC1 is endpoint-only nonblocking IPC with explicit bootstrap teardown. Implement scheduler waits/cancel, automatic lifetime revocation, sender/reply authority, transactional bootstrap, derivation-tree revocation and native saturation/stale/dead-peer/output-fault tests before general services. Preserve all production/ISO gates and185page product-contract migration. Cycle251 now implements bounded readiness wait/cancel and automatic retirement hooks; do not treat that as general lifecycle. Single-BSP advisory readiness is not RPC or general service lifecycle. Native enrolled-owner fault/cancel/quarantine/dead-peer/revocation/stale/writable-wait/saturation/output-fault and persistent-generation tests remain. Add pending-wait termination, sender identity, one-use replies, deadlines, wait-many, transactional admission, sustained budgets, audit and SMP. Quarantine retains authority until stopped cleanup succeeds.186-page product-contract migration and full exact-candidate replay remain; no interactive ISO or production promotion. Cycle252 qualifies five bounded native peer lifetimes and blocked-wait termination, not general service supervision. Bounded single-BSP fixed lifetimes only. Sender identity, one-use reply ownership, deadlines, transactional general bootstrap/admission, sustained budgets, persistent supervision, arbitrary close/destroy/wake/kill races, derivation-tree revocation, quota recovery, concurrency and SMP remain. Guarded constructor stack overflow was repaired with in-place persistent-slot reuse; general stack/hardware proof remains.188-page product-contract migration and full exact-candidate replay are pending; no interactive ISO or production promotion. Cycle253 adds bounded sender/reply authority but requires request failure notification before services. Asynchronous request/reply is not synchronous Call, correlation, donation, guaranteed reply capacity or caller notification on discard/service death. Request/deadline/cancellation ownership, transactional admission, sustained budgets, persistent supervision, arbitrary races and SMP remain.191-page image leaves one bootstrap page; product-contract/capacity migration and full exact-candidate replay remain. No interactive ISO or production promotion. Cycle254 qualifies bounded tracked outcomes, not deadlines or services. Owned monotonic deadlines, transactional service admission and sustained budgets remain before init/console/shell/apps/ISO.196-page image/208 capacity requires canonical product migration; three old readiness assertions still fail. Cancellation is not side-effect rollback; no SMP/general supervision or interactive ISO claim. Cycle255 clock continuity alone does not implement deadline expiry. Timed request expiry, all-blocked wakeup and poisoned-epoch handling remain, then transactional admission/sustained budgets and init/console/shell/apps/ISO.197-page image requires canonical product migration; three old readiness assertions still fail. No SMP/physical-clock failure recovery/32-bit wrap/suspend or general recovery claim. Cycle256 adds bounded request deadlines, not general services. Transactional service admission, sustained budgets, interrupt-driven idle and init/console/shell/apps/ISO remain. Current idle polls HPET; live unexpected clock failure halts retaining ownership, not native recovery.198-page image requires canonical product migration; three readiness assertions and full exact-candidate replay block main. No SMP, hard-real-time deadline, side-effect rollback or production claim. Cycle257 adds bounded atomic admission, not general services. Sustained budgets, owned service-image/argument bootstrap, efficient idle and init/console/shell/apps/ISO remain. Trusted admission is not user authority, a signed loader or general supervisor. Native clock error still halts;201_of208 pages leaves7 and requires diagnostic/profile separation or reviewed capacity migration. Three readiness assertions and full canonical replay block main. No SMP or production claim. Cycle258 adds sustained dispatch, not complete services. Owned executable/argument service bootstrap, init/console/input, efficient idle and shell/files/apps/ISO remain. Dispatch-based allowance is not full CPU-share policy, priority starvation freedom or indefinite uptime. Native clock error still halts;202_of208 pages leaves6 and requires diagnostic/profile separation or reviewed migration. Three readiness assertions and full canonical replay block main. No SMP or production claim. Cycle259 adds copied bootstrap, not a complete service runtime. Actual init, normal boot separation, console/input, efficient idle and shell/files/apps/ISO remain. One-page trusted built-in startup is not PXABI1 loading, signed PINIT1 activation, user spawn authority or full service supervision.205_of208 pages leaves3; resolve profile/layout pressure without deleting checks. Three readiness failures and full canonical replay still block main. No ISO or production claim. Cycle260 adds independently compiled programs, not native session acceptance. These compiled user programs are not yet launched by PooleKernel. Normal session boot, real CPL3 ABI/stack qualification, console/input, supervision, efficient idle and interactive ISO remain. Kernel remains205_of208 pages; canonical migration/three readiness failures still gate main. No executable trust or production promotion. Cycle261 adds native session execution, not interactive ISO acceptance. No user console, shell or interactive ISO yet. Fixed bootstrap-pair dependency cancellation is not general init supervision. Timer cache is owner/context-bound, not drift/migration/suspend qualification. Efficient idle, restart/loading/resource policy, native clock recovery and signed activation remain.205_of208 fixed layout and three product-readiness failures/full canonical replay still gate main. Cycle262 adds confined native console echo, not a console IPC service or ISO. No console IPC, shell, files/two useful apps, efficient idle, supervision or integration ISO yet. General loading, native clock recovery and signed PXABI1/PINIT1 remain open.205_of208 fixed image and three product-readiness failures/full canonical replay still gate main. Cycle264: Wrong-peer service death leaves its polling client alive: add authenticated bounded peer-death notification/recovery before shell integration. Four fixed slots cannot host all five minimum demo roles (init, console, shell, two apps): review admission/capacity/lifecycle and resource bounds. Native PCS1 pressure/malformed-request controls, user supervision/restart/loading/trust, efficient idle, shell/files/apps and optical ISO remain.205/208 kernel pages and36-page stack unchanged; canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open. Cycle265: Bounded peer-death termination is not service restart or live-but-stalled recovery. Four bootstrap slots still cannot host five minimum demo roles: review IPC/endpoint/admission capacity and user-space lifecycle authority, then shell/read-only files/two actual apps and optical ISO. Native PCS1 pressure/malformed-request controls, init supervision/loading/trust, efficient idle and native clock recovery remain.205/208 image and36-page stack bounds are unchanged; full canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open.",
       "evidence": [
         "docs/checkpoints/cycle234-user-entry-foundation.md",
         "docs/native-userspace-integration-iso.md",
@@ -70931,7 +71168,8 @@
         "docs/checkpoints/cycle261-native-service-session.md",
         "docs/checkpoints/cycle262-native-user-console.md",
         "docs/checkpoints/cycle263-console-ipc-programs.md",
-        "docs/checkpoints/cycle264-native-console-ipc.md"
+        "docs/checkpoints/cycle264-native-console-ipc.md",
+        "docs/checkpoints/cycle265-native-console-rpc.md"
       ]
     },
     {
@@ -70939,11 +71177,12 @@
       "class": "RISK",
       "status": "open",
       "phase_id": "N36",
-      "closure_condition": "Preflight free disk space before bounded builds/captures and implement hash-verified evidence retention, compression and restore without discarding failures or changing acceptance bounds. Cycle263 adds512MiB read-only user-program build preflight and verifies12 generated-directory archives; broader kernel/guest preflight and reproducible restore remain open. Cycle264 extends512MiB preflight to console IPC qualification and verifies29 explicit archives; broader build reservation and reproducible restore remain open.",
+      "closure_condition": "Preflight free disk space before bounded builds/captures and implement hash-verified evidence retention, compression and restore without discarding failures or changing acceptance bounds. Cycle263 adds512MiB read-only user-program build preflight and verifies12 generated-directory archives; broader kernel/guest preflight and reproducible restore remain open. Cycle264 extends512MiB preflight to console IPC qualification and verifies29 explicit archives; broader build reservation and reproducible restore remain open. Cycle265 verifies20 additional explicitly scoped generated archives (49 across264/265); raw failures remain. Full reservation/restore qualification remains open.",
       "evidence": [
         "docs/checkpoints/cycle262-native-user-console.md",
         "docs/checkpoints/cycle263-console-ipc-programs.md",
-        "docs/checkpoints/cycle264-native-console-ipc.md"
+        "docs/checkpoints/cycle264-native-console-ipc.md",
+        "docs/checkpoints/cycle265-native-console-rpc.md"
       ]
     }
   ],
@@ -70958,7 +71197,7 @@
       "PKERR1 freezes a pure exact-target CPU/errata rejection policy, PKXSTATE1 proves bounded x87/SSE standard-XSAVE ownership, PKXEXC1 proves deliberate #MF/#XM recovery plus terminal test-only #NM rejection with a linked scope audit under WHPX, and PKMSR1 proves only a read-only qemu64 BSP system-linkage/global-MCA/unsupported-PMU observation. PKPMM7 supplies bounded physical ownership, scrubbed lifecycle transactions, a stable guarded five-page manager, external generation-owned active ledgers, checked automatic growth with retirement, bounded-window fallback and pre-effect rejection, streamed lifecycle-gated Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation and retained copy/readback; PKVM1 supplies inactive page-table transactions; PKVM3 proves one-BSP activation/restoration of a complete-profile PMM-owned sparse direct map; PKIRQ1 proves one bounded local timer transaction; PKSMP1 proves one first-AP start/quiesce/park lifecycle; PKSMP2 proves one AP-local GDT/TSS/IDT, guarded-stack, x87/SSE-owner, and interrupt-vector runtime transaction; and PKSMP5 proves three simultaneous AP-local runtimes, partial-start rollback with fresh retry, six fixed IPI classes per AP, three AP-side one-page INVLPG operations, aggregate acknowledgement, and one deferred generation retirement. No target-qualified complete native CPU policy, applicable Model 40h-4Fh errata authority, direct numeric client microcode floor or ratified replacement, target-specific privileged-MSR semantics, syscall/MCE/PMU activation, AVX/extended state, user-task exception delivery, scheduler or migration integration, general interrupt routing/time services, production capability authority, general topology or SMP shootdown, AML or complete ACPI resource-graph execution, complete kernel/user address spaces, heap, MMIO/PAT/MTRR qualification, interrupt-context or concurrent allocator, general pressure, or OOM implementation exists",
       "The exact Tier 1 identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records are captured with zero public raw registers, but seven required channels remain non-complete in total, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification also remain open",
       "No native DMA/IOMMU/interrupt-remapping confinement",
-      "Wrong-peer service death leaves its polling client alive: add authenticated bounded peer-death notification/recovery before shell integration. Four fixed slots cannot host all five minimum demo roles (init, console, shell, two apps): review admission/capacity/lifecycle and resource bounds. Native PCS1 pressure/malformed-request controls, user supervision/restart/loading/trust, efficient idle, shell/files/apps and optical ISO remain.205/208 kernel pages and36-page stack unchanged; canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open. Admit these service/client binaries with init/counter in four private roots, verify endpoint grants and52-page image ownership, then fresh native input/output, pressure, malformed authority and peer-survival tests. No shell, optical ISO, general init/restart/loading, efficient idle or production promotion yet. Full microkernel/PDC/PooleGlyph/PooleGlass remain. No console IPC, shell, files/two useful apps, efficient idle, supervision or integration ISO yet. General loading, native clock recovery and signed PXABI1/PINIT1 remain open.205_of208 fixed image and three product-readiness failures/full canonical replay still gate main. No user console, shell or interactive ISO yet. Fixed bootstrap-pair dependency cancellation is not general init supervision. Timer cache is owner/context-bound, not drift/migration/suspend qualification. Efficient idle, restart/loading/resource policy, native clock recovery and signed activation remain.205_of208 fixed layout and three product-readiness failures/full canonical replay still gate main. These compiled user programs are not yet launched by PooleKernel. Normal session boot, real CPL3 ABI/stack qualification, console/input, supervision, efficient idle and interactive ISO remain. Kernel remains205_of208 pages; canonical migration/three readiness failures still gate main. No executable trust or production promotion. Actual init, normal boot separation, console/input, efficient idle and shell/files/apps/ISO remain. One-page trusted built-in startup is not PXABI1 loading, signed PINIT1 activation, user spawn authority or full service supervision.205_of208 pages leaves3; resolve profile/layout pressure without deleting checks. Three readiness failures and full canonical replay still block main. No ISO or production claim. Owned executable/argument service bootstrap, init/console/input, efficient idle and shell/files/apps/ISO remain. Dispatch-based allowance is not full CPU-share policy, priority starvation freedom or indefinite uptime. Native clock error still halts;202_of208 pages leaves6 and requires diagnostic/profile separation or reviewed migration. Three readiness assertions and full canonical replay block main. No SMP or production claim. Sustained budgets, owned service-image/argument bootstrap, efficient idle and init/console/shell/apps/ISO remain. Trusted admission is not user authority, a signed loader or general supervisor. Native clock error still halts;201_of208 pages leaves7 and requires diagnostic/profile separation or reviewed capacity migration. Three readiness assertions and full canonical replay block main. No SMP or production claim. Transactional service admission, sustained budgets, interrupt-driven idle and init/console/shell/apps/ISO remain. Current idle polls HPET; live unexpected clock failure halts retaining ownership, not native recovery.198-page image requires canonical product migration; three readiness assertions and full exact-candidate replay block main. No SMP, hard-real-time deadline, side-effect rollback or production claim. Timed request expiry, all-blocked wakeup and poisoned-epoch handling remain, then transactional admission/sustained budgets and init/console/shell/apps/ISO.197-page image requires canonical product migration; three old readiness assertions still fail. No SMP/physical-clock failure recovery/32-bit wrap/suspend or general recovery claim. Owned monotonic deadlines, transactional service admission and sustained budgets remain before init/console/shell/apps/ISO.196-page image/208 capacity requires canonical product migration; three old readiness assertions still fail. Cancellation is not side-effect rollback; no SMP/general supervision or interactive ISO claim. Asynchronous request/reply is not synchronous Call, correlation, donation, guaranteed reply capacity or caller notification on discard/service death. Request/deadline/cancellation ownership, transactional admission, sustained budgets, persistent supervision, arbitrary races and SMP remain.191-page image leaves one bootstrap page; product-contract/capacity migration and full exact-candidate replay remain. No interactive ISO or production promotion. Bounded single-BSP fixed lifetimes only. Sender identity, one-use reply ownership, deadlines, transactional general bootstrap/admission, sustained budgets, persistent supervision, arbitrary close/destroy/wake/kill races, derivation-tree revocation, quota recovery, concurrency and SMP remain. Guarded constructor stack overflow was repaired with in-place persistent-slot reuse; general stack/hardware proof remains.188-page product-contract migration and full exact-candidate replay are pending; no interactive ISO or production promotion. Single-BSP advisory readiness is not RPC or general service lifecycle. Native enrolled-owner fault/cancel/quarantine/dead-peer/revocation/stale/writable-wait/saturation/output-fault and persistent-generation tests remain. Add pending-wait termination, sender identity, one-use replies, deadlines, wait-many, transactional admission, sustained budgets, audit and SMP. Quarantine retains authority until stopped cleanup succeeds.186-page product-contract migration and full exact-candidate replay remain; no interactive ISO or production promotion. Nonblocking single-BSP endpoint-only subset. Scheduler waits/cancellation, automatic lifecycle revocation, sender identity and one-use replies, transactional general bootstrap, derivation-tree revocation, user delegation, audit, wire layouts, shared memory, notifications, priorities, SMP and native saturation/stale/dead-peer/output-fault stress remain. Core host controls do not qualify native races.185-page image needs product-contract migration and full exact-candidate replay; no interactive shell/ISO or production promotion. Bounded returned-sample loss only; physical clock failure, unsafe entry, persistent generation audit/quarantine, partial timer configuration, shared APIC/IF0/NMI failure, hardware races, general admission, full stack/exception/XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/ISO remain open. Image182pages/entry0xC000 needs product-contract migration; diagnostic text capacity and stack composition remain monitored under the existing integration flag. Full exact-candidate replay remains pending. No phase exit, merge or production promotion. HPET MSI backup is independent of the local timer, not of HPET clock, APIC delivery or IF. IOAPIC/nonMSI/32bit fallback, NMI recovery, live simultaneous pending sources, physical coherent clock reads/reset/drift, unknown-measurement emergency recovery, partial timer configuration, general quarantine/admission, full stack/exception/XSAVE/SMAP/SMP/async, IPC/services/shell/apps/optical ISO and hardware remain open. Image181pages/entry0xC000 needs product-contract migration and full exact-candidate replay. No phase exit, merge or promotion. Bounded one-BSP authenticated returned peer quanta only. Legacy diagnostics remain unaccounted; unknown/malformed measurements pin ownership and need explicit emergency recovery. Independent missing-IRQ recovery, physical coherent counter reads/reset/drift, pure user/kernel attribution, broad timer races, general quarantine/admission, full stack/exception/selector qualification, XSAVE/SMAP/SMP/async, IPC/services/shell/apps/optical ISO and hardware remain open. Image180pages/entry0xC000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion. Bounded one-BSP fixed payloads only. Terminal/failed-cleanup quantum accounting remains incomplete:119 accepted preemptions exclude one consumed quantum discarded by failed cleanup. Arbitrary after-mask silicon races, ambiguous ISR and partial-configuration quarantine recovery, independent missing-IRQ recovery, general executable admission, complete stack/exception/selector qualification including native SS, XSAVE/SMAP/SMP/async, IPC/services/shell/apps/optical ISO and hardware remain open. Image178pages/entry0xB000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion. Bounded one-BSP fixed construction only. General executable admission, persistent quarantine/slot-commit recovery, N3.7 complete stack-depth/high-water and trap nesting, pending/late timer recovery, terminal accounting, independent missing-IRQ recovery, general exception/selector delivery including native SS, XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/optical ISO and hardware remain open. Image177pages/entry0xB000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion. Bounded one-BSP fixed payloads only. TCG stack access delivers GP rather than architectural SS; native SS and general exception/selector delivery remain unqualified, not waived. Full spawn rollback, pending/late timer recovery, terminal-quantum accounting, independent missing-IRQ recovery, XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 still requires product-contract migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. Bounded one-BSP fixed tasks only. Full spawn rollback, invalid-return-frame containment, pending/late timer recovery, final-sub-quantum accounting, independent missing-IRQ watchdog, general XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. No peer scheduling or arbitrary-program admission: fixed task payloads have no armed timer, strict initial syscall RSP and a64-call budget still fail fatally, and construction allocation failures are not fully rolled back. Task IDs are slot-local, not capabilities. SMAP/concurrent copy, async/SMP entry, full XSAVE, missing-IRQ watchdog, IPC/services/shell/apps/optical ISO and hardware remain open. Image168pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. PSABI1 is a development subset, not a complete frozen production ABI. General SMAP/concurrent pinning, async/SMP entry, arbitrary programs, task exit/reaping/accounting, fault termination and peer scheduling remain open. Syscalls are tested before the timer is armed, not concurrently with it. No native independent missing-IRQ watchdog, IPC/services/shell/apps/optical ISO or hardware qualification.25 native admissions/22 Python closures and full candidate gates remain stale or pending; no merge, phase exit or production promotion. This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion. Timer delivery is CPL0 on the existing kernel IST, not ring3 or use of the private entry stack as RSP0. User GDT/TSS/IRETQ, GPR/segment/base/debug/extended-state initialization and contained user faults/preemption remain next. Hardware error shutdown is host fault-tested, not guest fault-injected. Capability IPC, services, shell/apps and optical ISO qualification follow; all production and exact-candidate merge gates remain open. CPL0 switching is not user-mode execution. Owned timer/MMIO recovery, user GDT/TSS/IRETQ, architectural-state initialization and contained fault/preemption remain before ring3. Capability IPC, services, shell/apps and optical ISO qualification follow. Full production and exact-candidate merge gates remain open. The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open. Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion. User-space integration still needs owned kernel-half mappings/stacks, live ring3/return/fault containment, capabilities/IPC, services, shell/apps and ISO qualification. Production microkernel completion remains N0-N39. PKPMM7 supplies bounded one-BSP physical-page ownership, scrub-before-allocation and scrub-before-reuse with full readback and fault rollback, a stable guarded five-page manager, external generation-owned guarded ledgers, checked automatic repeated growth, verified retirement, bounded-window fallback and pre-effect rejection, exact post-ExitBootServices Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation plus retained snapshot copy/readback. PKVM1 supplies inactive four-level 4 KiB transactions, PKVM3 supplies a complete-profile PMM-owned sparse direct map, cache-alias rejection, exact CR3 restoration, three local invalidation receipts, and generation-retirement gating, and PKSMP5 proves exactly three AP-side INVLPG operations and deferred reclaim for three AP-owned roots, one page per root, one generation, and aggregate target/ack mask 0xE. General topology, address-space-wide shootdown, multiple concurrent generations, production capability authority, incremental concurrent map replacement, huge pages, PCID, COW, user faults, pager IPC, cache/MMIO qualification, heaps/object caches, interrupt-context allocation, concurrent allocation, general pressure and OOM policy, scheduler, task, syscall, capability, IPC, isolation, and asynchronous I/O remain open",
+      "Bounded peer-death termination is not service restart or live-but-stalled recovery. Four bootstrap slots still cannot host five minimum demo roles: review IPC/endpoint/admission capacity and user-space lifecycle authority, then shell/read-only files/two actual apps and optical ISO. Native PCS1 pressure/malformed-request controls, init supervision/loading/trust, efficient idle and native clock recovery remain.205/208 image and36-page stack bounds are unchanged; full canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open. Wrong-peer service death leaves its polling client alive: add authenticated bounded peer-death notification/recovery before shell integration. Four fixed slots cannot host all five minimum demo roles (init, console, shell, two apps): review admission/capacity/lifecycle and resource bounds. Native PCS1 pressure/malformed-request controls, user supervision/restart/loading/trust, efficient idle, shell/files/apps and optical ISO remain.205/208 kernel pages and36-page stack unchanged; canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open. Admit these service/client binaries with init/counter in four private roots, verify endpoint grants and52-page image ownership, then fresh native input/output, pressure, malformed authority and peer-survival tests. No shell, optical ISO, general init/restart/loading, efficient idle or production promotion yet. Full microkernel/PDC/PooleGlyph/PooleGlass remain. No console IPC, shell, files/two useful apps, efficient idle, supervision or integration ISO yet. General loading, native clock recovery and signed PXABI1/PINIT1 remain open.205_of208 fixed image and three product-readiness failures/full canonical replay still gate main. No user console, shell or interactive ISO yet. Fixed bootstrap-pair dependency cancellation is not general init supervision. Timer cache is owner/context-bound, not drift/migration/suspend qualification. Efficient idle, restart/loading/resource policy, native clock recovery and signed activation remain.205_of208 fixed layout and three product-readiness failures/full canonical replay still gate main. These compiled user programs are not yet launched by PooleKernel. Normal session boot, real CPL3 ABI/stack qualification, console/input, supervision, efficient idle and interactive ISO remain. Kernel remains205_of208 pages; canonical migration/three readiness failures still gate main. No executable trust or production promotion. Actual init, normal boot separation, console/input, efficient idle and shell/files/apps/ISO remain. One-page trusted built-in startup is not PXABI1 loading, signed PINIT1 activation, user spawn authority or full service supervision.205_of208 pages leaves3; resolve profile/layout pressure without deleting checks. Three readiness failures and full canonical replay still block main. No ISO or production claim. Owned executable/argument service bootstrap, init/console/input, efficient idle and shell/files/apps/ISO remain. Dispatch-based allowance is not full CPU-share policy, priority starvation freedom or indefinite uptime. Native clock error still halts;202_of208 pages leaves6 and requires diagnostic/profile separation or reviewed migration. Three readiness assertions and full canonical replay block main. No SMP or production claim. Sustained budgets, owned service-image/argument bootstrap, efficient idle and init/console/shell/apps/ISO remain. Trusted admission is not user authority, a signed loader or general supervisor. Native clock error still halts;201_of208 pages leaves7 and requires diagnostic/profile separation or reviewed capacity migration. Three readiness assertions and full canonical replay block main. No SMP or production claim. Transactional service admission, sustained budgets, interrupt-driven idle and init/console/shell/apps/ISO remain. Current idle polls HPET; live unexpected clock failure halts retaining ownership, not native recovery.198-page image requires canonical product migration; three readiness assertions and full exact-candidate replay block main. No SMP, hard-real-time deadline, side-effect rollback or production claim. Timed request expiry, all-blocked wakeup and poisoned-epoch handling remain, then transactional admission/sustained budgets and init/console/shell/apps/ISO.197-page image requires canonical product migration; three old readiness assertions still fail. No SMP/physical-clock failure recovery/32-bit wrap/suspend or general recovery claim. Owned monotonic deadlines, transactional service admission and sustained budgets remain before init/console/shell/apps/ISO.196-page image/208 capacity requires canonical product migration; three old readiness assertions still fail. Cancellation is not side-effect rollback; no SMP/general supervision or interactive ISO claim. Asynchronous request/reply is not synchronous Call, correlation, donation, guaranteed reply capacity or caller notification on discard/service death. Request/deadline/cancellation ownership, transactional admission, sustained budgets, persistent supervision, arbitrary races and SMP remain.191-page image leaves one bootstrap page; product-contract/capacity migration and full exact-candidate replay remain. No interactive ISO or production promotion. Bounded single-BSP fixed lifetimes only. Sender identity, one-use reply ownership, deadlines, transactional general bootstrap/admission, sustained budgets, persistent supervision, arbitrary close/destroy/wake/kill races, derivation-tree revocation, quota recovery, concurrency and SMP remain. Guarded constructor stack overflow was repaired with in-place persistent-slot reuse; general stack/hardware proof remains.188-page product-contract migration and full exact-candidate replay are pending; no interactive ISO or production promotion. Single-BSP advisory readiness is not RPC or general service lifecycle. Native enrolled-owner fault/cancel/quarantine/dead-peer/revocation/stale/writable-wait/saturation/output-fault and persistent-generation tests remain. Add pending-wait termination, sender identity, one-use replies, deadlines, wait-many, transactional admission, sustained budgets, audit and SMP. Quarantine retains authority until stopped cleanup succeeds.186-page product-contract migration and full exact-candidate replay remain; no interactive ISO or production promotion. Nonblocking single-BSP endpoint-only subset. Scheduler waits/cancellation, automatic lifecycle revocation, sender identity and one-use replies, transactional general bootstrap, derivation-tree revocation, user delegation, audit, wire layouts, shared memory, notifications, priorities, SMP and native saturation/stale/dead-peer/output-fault stress remain. Core host controls do not qualify native races.185-page image needs product-contract migration and full exact-candidate replay; no interactive shell/ISO or production promotion. Bounded returned-sample loss only; physical clock failure, unsafe entry, persistent generation audit/quarantine, partial timer configuration, shared APIC/IF0/NMI failure, hardware races, general admission, full stack/exception/XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/ISO remain open. Image182pages/entry0xC000 needs product-contract migration; diagnostic text capacity and stack composition remain monitored under the existing integration flag. Full exact-candidate replay remains pending. No phase exit, merge or production promotion. HPET MSI backup is independent of the local timer, not of HPET clock, APIC delivery or IF. IOAPIC/nonMSI/32bit fallback, NMI recovery, live simultaneous pending sources, physical coherent clock reads/reset/drift, unknown-measurement emergency recovery, partial timer configuration, general quarantine/admission, full stack/exception/XSAVE/SMAP/SMP/async, IPC/services/shell/apps/optical ISO and hardware remain open. Image181pages/entry0xC000 needs product-contract migration and full exact-candidate replay. No phase exit, merge or promotion. Bounded one-BSP authenticated returned peer quanta only. Legacy diagnostics remain unaccounted; unknown/malformed measurements pin ownership and need explicit emergency recovery. Independent missing-IRQ recovery, physical coherent counter reads/reset/drift, pure user/kernel attribution, broad timer races, general quarantine/admission, full stack/exception/selector qualification, XSAVE/SMAP/SMP/async, IPC/services/shell/apps/optical ISO and hardware remain open. Image180pages/entry0xC000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion. Bounded one-BSP fixed payloads only. Terminal/failed-cleanup quantum accounting remains incomplete:119 accepted preemptions exclude one consumed quantum discarded by failed cleanup. Arbitrary after-mask silicon races, ambiguous ISR and partial-configuration quarantine recovery, independent missing-IRQ recovery, general executable admission, complete stack/exception/selector qualification including native SS, XSAVE/SMAP/SMP/async, IPC/services/shell/apps/optical ISO and hardware remain open. Image178pages/entry0xB000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion. Bounded one-BSP fixed construction only. General executable admission, persistent quarantine/slot-commit recovery, N3.7 complete stack-depth/high-water and trap nesting, pending/late timer recovery, terminal accounting, independent missing-IRQ recovery, general exception/selector delivery including native SS, XSAVE/SMAP/SMP/async, capability IPC/services/shell/apps/optical ISO and hardware remain open. Image177pages/entry0xB000 requires product-contract migration and fresh replay; full candidate gates remain pending. No phase exit, merge or promotion. Bounded one-BSP fixed payloads only. TCG stack access delivers GP rather than architectural SS; native SS and general exception/selector delivery remain unqualified, not waived. Full spawn rollback, pending/late timer recovery, terminal-quantum accounting, independent missing-IRQ recovery, XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 still requires product-contract migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. Bounded one-BSP fixed tasks only. Full spawn rollback, invalid-return-frame containment, pending/late timer recovery, final-sub-quantum accounting, independent missing-IRQ watchdog, general XSAVE/SMAP/SMP/async state, capabilities/IPC/services/shell/apps/optical ISO and hardware remain open. Image172pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. No peer scheduling or arbitrary-program admission: fixed task payloads have no armed timer, strict initial syscall RSP and a64-call budget still fail fatally, and construction allocation failures are not fully rolled back. Task IDs are slot-local, not capabilities. SMAP/concurrent copy, async/SMP entry, full XSAVE, missing-IRQ watchdog, IPC/services/shell/apps/optical ISO and hardware remain open. Image168pages/entry0xB000 requires explicit product-contract migration/fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. PSABI1 is a development subset, not a complete frozen production ABI. General SMAP/concurrent pinning, async/SMP entry, arbitrary programs, task exit/reaping/accounting, fault termination and peer scheduling remain open. Syscalls are tested before the timer is armed, not concurrently with it. No native independent missing-IRQ watchdog, IPC/services/shell/apps/optical ISO or hardware qualification.25 native admissions/22 Python closures and full candidate gates remain stale or pending; no merge, phase exit or production promotion. This is healthy-timer recovery for one fixed task, not peer scheduling or arbitrary application admission. Missing timer delivery is externally QEMU-bounded, not handled by an independent native watchdog. Syscall ABI/recoverable user copy, complete task state/XSAVE switching, IPC, services, shell/apps, optical ISO and target hardware remain open. Historical product contracts require explicit0xB000 migration and fresh replay;25 native admissions/22 Python closures and full candidate gates remain stale or pending. No phase exit, merge or production promotion. No timer is armed during the fixed CPL3 payload; arbitrary user programs, spinning-task recovery, general XSAVE/state switching, syscall ABI/user copying, capability IPC, services, shell/apps and optical ISO remain open. The linked entry is now0xB000 in164pages; historical0xA000 product contracts/receipts require fresh migration/requalification, not rebinding.25 native admissions and22 retained Python closures remain stale. No full candidate suite, merge, phase exit or production promotion. Timer delivery is CPL0 on the existing kernel IST, not ring3 or use of the private entry stack as RSP0. User GDT/TSS/IRETQ, GPR/segment/base/debug/extended-state initialization and contained user faults/preemption remain next. Hardware error shutdown is host fault-tested, not guest fault-injected. Capability IPC, services, shell/apps and optical ISO qualification follow; all production and exact-candidate merge gates remain open. CPL0 switching is not user-mode execution. Owned timer/MMIO recovery, user GDT/TSS/IRETQ, architectural-state initialization and contained fault/preemption remain before ring3. Capability IPC, services, shell/apps and optical ISO qualification follow. Full production and exact-candidate merge gates remain open. The privileged adapter is compiled but not connected to a boot scenario. Bootstrap temporary aliases, timer/MMIO ownership, scrubbed contents, GDT/TSS/IRETQ and supported architectural state still precede actual ring3/fault/timer execution. No guest or ISO exists from this cycle; production and fresh exact-candidate qualification remain open. Live bootstrap temporary mappings, timer/MMIO lifetime, scrubbed image/stack contents, CPU-exposed retirement, GDT/TSS/IRETQ, architectural-state isolation and fault/timer recovery remain required before ring3; no new ISO or production promotion. User-space integration still needs owned kernel-half mappings/stacks, live ring3/return/fault containment, capabilities/IPC, services, shell/apps and ISO qualification. Production microkernel completion remains N0-N39. PKPMM7 supplies bounded one-BSP physical-page ownership, scrub-before-allocation and scrub-before-reuse with full readback and fault rollback, a stable guarded five-page manager, external generation-owned guarded ledgers, checked automatic repeated growth, verified retirement, bounded-window fallback and pre-effect rejection, exact post-ExitBootServices Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation plus retained snapshot copy/readback. PKVM1 supplies inactive four-level 4 KiB transactions, PKVM3 supplies a complete-profile PMM-owned sparse direct map, cache-alias rejection, exact CR3 restoration, three local invalidation receipts, and generation-retirement gating, and PKSMP5 proves exactly three AP-side INVLPG operations and deferred reclaim for three AP-owned roots, one page per root, one generation, and aggregate target/ack mask 0xE. General topology, address-space-wide shootdown, multiple concurrent generations, production capability authority, incremental concurrent map replacement, huge pages, PCID, COW, user faults, pager IPC, cache/MMIO qualification, heaps/object caches, interrupt-context allocation, concurrent allocation, general pressure and OOM policy, scheduler, task, syscall, capability, IPC, isolation, and asynchronous I/O remain open",
       "No native security/crypto/TPM/secrets/MAC/privacy implementation or external review",
       "No isolated native driver domains or virtio reference drivers",
       "No native block/NVMe/USB/input/VFS/PooleFS persistent path",
@@ -70982,24 +71221,25 @@
       "N16",
       "N22"
     ],
-    "title": "Close console peer-death recovery and process-capacity prerequisites, then shell/files/apps and ISO",
+    "title": "Extend bounded process capacity and lifecycle for shell/apps, then usable optical ISO",
     "entry_evidence": [
-      "docs/checkpoints/cycle264-native-console-ipc.md",
-      "runs/native-console-ipc-readiness.json",
-      "docs/native-console-ipc.md",
+      "docs/checkpoints/cycle265-native-console-rpc.md",
+      "runs/native-console-rpc-readiness.json",
+      "docs/native-console-rpc.md",
       "docs/native-userspace-integration-iso.md"
     ],
     "exit_evidence": [
-      "bounded authenticated peer-death handling terminates or recovers client without indefinite polling",
-      "native PCS1 pressure and malformed-request controls retain independent peer progress and owned cleanup",
-      "review capacity and lifecycle admission for init/console/shell/two actual applications",
-      "preserve image/stack bounds or separately qualify required layout migration",
-      "real user shell, bundled read-only files, two apps and observable contained fault before optical ISO acceptance",
-      "preserve ordinary trust denial, failed evidence, and full canonical qualification before main"
+      "review scheduler8 versus IPC/endpoint/bootstrap4 limits and all ownership/rollback quotas for five minimum demo roles",
+      "measure image and stack before any separately qualified capacity/layout migration",
+      "user-space lifecycle policy and narrow kernel authority support real application start/stop and survivor faults",
+      "native PCS1 pressure/malformed-request controls preserve tracked completion and independent progress",
+      "real shell, bundled read-only files, two useful apps, then fresh optical ISO interaction and sustained-session acceptance",
+      "retain ordinary trust denial, failed evidence, full canonical gates before main and complete robust microkernel afterward"
     ],
     "blocked": false
   },
   "claim_boundaries": [
+    "Cycle265: PRPC1 uses existing tracked Begin/Take and one-use Reply. Two fresh45/52-byte native echoes close both programs and reclaim26 pages. Wrong-peer service exits152 at dispatch6; client consumes authenticated revocation and exits163 at dispatch7. Both retire within frozen64-dispatch/8-dispatch-delay bounds; init/counter survive512 dispatches. All24 default regression checks pass. docs/checkpoints/cycle265-native-console-rpc.md Bounded peer-death termination is not service restart or live-but-stalled recovery. Four bootstrap slots still cannot host five minimum demo roles: review IPC/endpoint/admission capacity and user-space lifecycle authority, then shell/read-only files/two actual apps and optical ISO. Native PCS1 pressure/malformed-request controls, init supervision/loading/trust, efficient idle and native clock recovery remain.205/208 image and36-page stack bounds are unchanged; full canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open.",
     "Cycle264: four private CPL3 roots admit init/counter/console-service/client with9 explicit grants. Two fresh native inputs45/52 bytes echo exactly through PCS1; service/client exit0 reclaims26 pages while init/counter survive512 dispatches. Wrong-peer service exits152, reclaims13 pages and emits no application output.23 default regression checks pass including two containment boots and unsigned denial. docs/checkpoints/cycle264-native-console-ipc.md Wrong-peer service death leaves its polling client alive: add authenticated bounded peer-death notification/recovery before shell integration. Four fixed slots cannot host all five minimum demo roles (init, console, shell, two apps): review admission/capacity/lifecycle and resource bounds. Native PCS1 pressure/malformed-request controls, user supervision/restart/loading/trust, efficient idle, shell/files/apps and optical ISO remain.205/208 kernel pages and36-page stack unchanged; canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open.",
     "Cycle263: separately compiled PooleConsoleService/PooleConsoleClient implement PCS1 bounded read/write/close, authenticated kernel sender envelope, strict sequences and retained backpressure.33 host tests pass debug/release, including12 IPC tests; two builds reproduce3032/1813 code bytes. Prior init/counter/echo program bytes match Cycle262. No new native execution. docs/checkpoints/cycle263-console-ipc-programs.md Admit these service/client binaries with init/counter in four private roots, verify endpoint grants and52-page image ownership, then fresh native input/output, pressure, malformed authority and peer-survival tests. No shell, optical ISO, general init/restart/loading, efficient idle or production promotion yet. Full microkernel/PDC/PooleGlyph/PooleGlass remain.",
     "Cycle262: independently built PooleConsole runs at CPL3 with an exclusive generation-bound COM2 lease. Two fresh guests echo55/53 exact host bytes, then exit0 and release13 pages; bad handle exits131 with no application UART output. Init/counter survive to512 dispatches. docs/checkpoints/cycle262-native-user-console.md No console IPC, shell, files/two useful apps, efficient idle, supervision or integration ISO yet. General loading, native clock recovery and signed PXABI1/PINIT1 remain open.205_of208 fixed image and three product-readiness failures/full canonical replay still gate main.",

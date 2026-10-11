@@ -12,6 +12,7 @@ extern "C" fn main(address: u64, bytes: u64, version: u64) -> ! {
         match client.poll(&mut channel) {
             Ok(false) => {}
             Ok(true) => process::exit(0),
+            Err(poole_userspace::console_ipc::Error::Revoked) => process::exit(163),
             Err(_) => process::exit(161),
         }
     }

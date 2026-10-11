@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 264, 2026-10-11. No new ISO exists yet.
+Status: implementation started, Cycle 265, 2026-10-11. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -45,13 +45,23 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | --- | --- | --- | --- |
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
-| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle264 partial: four-process native console IPC, exact echo, close/reap and wrong-peer rejection pass. Client polling after peer death, five-role capacity, efficient idle, init supervision, executable trust and restarts remain |
+| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle265 partial: tracked console requests, exact echo/close/reap and bounded authenticated peer-death termination pass. Five-role capacity, lifecycle authority, efficient idle, init supervision, executable trust and restarts remain |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
 ### Immediate Next Move
 
-Current: [Cycle264 native console IPC](checkpoints/cycle264-native-console-ipc.md).
+Current: [Cycle265 tracked console requests](checkpoints/cycle265-native-console-rpc.md).
+Both normal echo sessions close/reap26 pages. Wrong-peer service exits152 at
+dispatch6; client consumes revoked completion and exits163 at dispatch7. Init and
+counter survive to512 dispatches. This closes the polling-client failure, not
+service restart or live-but-stalled recovery. Next: review process/endpoint/admission
+capacity and lifecycle authority for init, console, shell and two useful apps.
+Scheduler capacity8 does not expand the fixed four-slot IPC/bootstrap structures.
+Measure image/stack bounds before any reviewed capacity migration; retain native
+pressure/malformed-request testing. Then shell/files/apps and optical ISO.
+
+Historical: [Cycle264 native console IPC](checkpoints/cycle264-native-console-ipc.md).
 Four private roots and nine explicit grants bind init/counter/service/client.
 Two real inputs echo through IPC, followed by service/client exit0 and26-page
 reclaim while init/counter continue. Wrong-peer service exits152/no application

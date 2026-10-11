@@ -36,6 +36,9 @@ def source_bindings() -> dict[str, str]:
         "native/kernel/src/capability_ipc/console/tests.rs",
         "native/kernel/src/capability_ipc/console/session_tests.rs",
         "tests/test_native_console_ipc.py",
+        "tests/test_native_console_rpc.py",
+        "native/userspace/src/console_ipc/rpc.rs",
+        "native/userspace/src/console_ipc/rpc/tests.rs",
         "native/kernel/src/arch/x86_64/user_ipc/console.rs",
         "native/userspace/src/console.rs", "native/userspace/src/bin/console.rs",
         "tests/test_native_console.py",
@@ -110,7 +113,7 @@ def main() -> int:
     owner_report = Path("C:/Users/rookp/PooleGlyph/tests/reports/conformance_report.json")
     owner_before = digest(owner_report) if owner_report.is_file() else None
     report: dict = {
-        "contract_id": "PSTART1", "cycle": 264,
+        "contract_id": "PSTART1", "cycle": 265,
         "scope": "host_and_native_owned_builtin_program_and_copied_argument_startup",
         "status": "fail", "source_bindings": before, "checks": [],
         "guest_runs": 0, "ring3_executed": False, "iso_built": False,
@@ -168,9 +171,10 @@ def main() -> int:
         commands.append(("console_kernel_" + ("release" if release else "debug"),
             [str(cargo), "test", *common, "--lib", "--features", "development-console",
              "--target", "x86_64-pc-windows-msvc", *bounded, *(["--release"] if release else []),
-             "--", "--test-threads=1"], 481))
+             "--", "--test-threads=1"], 483))
     commands.append(("console_oracle", [sys.executable, "-B", "-m", "unittest", "tests.test_native_console", "-v"], None))
     commands.append(("console_ipc_oracle", [sys.executable, "-B", "-m", "unittest", "tests.test_native_console_ipc", "-v"], None))
+    commands.append(("console_rpc_oracle", [sys.executable, "-B", "-m", "unittest", "tests.test_native_console_rpc", "-v"], None))
     for feature in ("development-trap-returning", "development-locks"):
         commands.append(("reject_" + feature, [str(cargo), "check", "--manifest-path",
             str(ROOT / "native/Cargo.toml"), "--package", "pooleboot", "--bin", "PooleBoot",

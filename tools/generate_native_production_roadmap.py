@@ -13529,13 +13529,107 @@ def apply_cycle264(roadmap: dict, test_count: int) -> dict:
             "preserve image/stack bounds or separately qualify required layout migration",
             "real user shell, bundled read-only files, two apps and observable contained fault before optical ISO acceptance",
             "preserve ordinary trust denial, failed evidence, and full canonical qualification before main"])
+    return apply_cycle265(roadmap, test_count)
+
+
+def apply_cycle265(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle265-native-console-rpc.md"
+    path = "runs/native-console-rpc-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    rpc, regression = receipt["console_rpc"], receipt["default_regression"]
+    digest = hashlib.sha256(raw).hexdigest().upper()
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle264_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle264_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline["native_console_ipc_integration"]["evidence_status"] = "historical_after_cycle265_tracked_transport"
+    baseline["console_ipc_programs"]["evidence_status"] = "historical_after_cycle265_user_program_changes"
+    baseline.update(pooleos_cycle=265, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 265
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-console-rpc.md"]
+    gate["current_candidate_audit"]["cycle"] = 265
+    gate["current_focused_source_projection"]["cycle"] = 265
+    gate["qualification_status"] = "native_console_rpc_pass_capacity_lifecycle_shell_ISO_and_canonical_gates_pending"
+    gate["current_closeout_regression"] = dict(cycle=265, status="pass",
+        receipt_path=path, receipt_section="default_regression", receipt_sha256=digest,
+        source_binding_count=len(regression["source_bindings"]), checks_passed=24,
+        rust_test_executions=1710, additional_python_oracle_tests=110, guest_runs=3,
+        elapsed_seconds=397.828,
+        log_sha256="F04931359069B0D4EC53FC36D769392B8BAC3C41C3C7F69EDE89282371E01211",
+        source_unchanged=True, owner_report_unchanged=True,
+        known_unresolved_readiness_tests=regression["known_unresolved_readiness_tests"],
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=265, status="pass",
+        tests_run=216, tests_passed=216, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=52.265, elapsed_seconds=53.265,
+        log_sha256="92161305BD7873507FDF11145CE0BC85326244BAB9DBCAF5FE5787902C278A3C",
+        source_unchanged=True, owner_report_unchanged=True,
+        conservation_tests=152, conservation_test_seconds=9.316,
+        conservation_capture_seconds=10.781,
+        conservation_log_sha256="85EB06589A51998C452F83ED3057C1E05707D422A9C318A38F98D23213E82D12",
+        scope="pre_closeout_metadata_and_conservation_not_final_commit_or_canonical_gate",
+        counts_overlap=True, historical_integrity_is_not_new_execution=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=265, session_contract="PSESSION4", console_rpc_transport="PRPC1",
+        receipt_path=path, receipt_section="console_rpc", console_rpc_service=True,
+        native_execution_evidence_cycle=265, native_execution_replayed_this_cycle=True,
+        native_execution_status="tracked_console_reply_and_bounded_peer_death_termination_pass",
+        polling_client_hang_after_peer_death=False, peer_death_termination=True,
+        polling_peer_death_recovery=False, service_restart=False)
+    lane["stages"]["USI-3"] = "partial_bounded_console_revocation_capacity_lifecycle_loading_and_trust_pending"
+    baseline["native_console_rpc_integration"] = dict(cycle=265, contract_id="PSESSION4", transport="PRPC1",
+        status=receipt["status"], receipt_path=path, receipt_sha256=digest,
+        source_binding_count=len(rpc["source_bindings"]),
+        program_source_binding_count=len(rpc["program_build"]["source_bindings"]),
+        kernel_sha256=rpc["kernels"]["ipc"]["sha256"],
+        independent_kernel_builds_equal=rpc["independent_kernel_builds_equal"], guest_runs=3,
+        input_bytes=[r["interaction"]["input_bytes"] for r in rpc["guest_runs"]],
+        final_progress=[r["marker_summary"]["samples"][-1] for r in rpc["guest_runs"]],
+        stop_dispatches=[r["marker_summary"]["stop_dispatches"] for r in rpc["guest_runs"]],
+        hostile_marker_cases=[r["hostile_marker_cases_rejected"] for r in rpc["guest_runs"]],
+        console_kernel_tests_per_profile=483, user_program_tests_per_profile=39,
+        new_kernel_tests=2, new_user_transport_tests=6, new_oracle_tests=5, focused_python_tests=41,
+        firmware_page_quota=12, task_image_pages=52, kernel_image_pages=205,
+        kernel_reserved_pages=208, guarded_stack_pages=36,
+        peer_death_termination=True, polling_peer_death_recovery=False, service_restart=False,
+        native_preemption_observed=False, shell=False, iso_built=False, production_ready=False)
+    evidence = "Cycle265: PRPC1 uses existing tracked Begin/Take and one-use Reply. Two fresh45/52-byte native echoes close both programs and reclaim26 pages. Wrong-peer service exits152 at dispatch6; client consumes authenticated revocation and exits163 at dispatch7. Both retire within frozen64-dispatch/8-dispatch-delay bounds; init/counter survive512 dispatches. All24 default regression checks pass. " + checkpoint
+    gap = "Bounded peer-death termination is not service restart or live-but-stalled recovery. Four bootstrap slots still cannot host five minimum demo roles: review IPC/endpoint/admission capacity and user-space lifecycle authority, then shell/read-only files/two actual apps and optical ISO. Native PCS1 pressure/malformed-request controls, init supervision/loading/trust, efficient idle and native clock recovery remain.205/208 image and36-page stack bounds are unchanged; full canonical gates and complete robust microkernel/PDC/PooleGlyph/PooleGlass remain open."
+    for phase_id in ("N13", "N14", "N16", "N21", "N22", "N36"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    next(p for p in roadmap["phases"] if p["id"] == "N36")["current_evidence"].insert(
+        0, f"Cycle 265 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N13-USERSPACE-ISO-001", "FLAG-NATIVE-DRIVER-001", "FLAG-N36-EVIDENCE-STORAGE-001"):
+            flag["evidence"].append(checkpoint)
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["closure_condition"] += " Cycle265: " + gap
+        if flag["id"] == "FLAG-N36-EVIDENCE-STORAGE-001":
+            flag["closure_condition"] += " Cycle265 verifies20 additional explicitly scoped generated archives (49 across264/265); raw failures remain. Full reservation/restore qualification remains open."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(
+        title="Extend bounded process capacity and lifecycle for shell/apps, then usable optical ISO",
+        entry_evidence=[checkpoint, path, "docs/native-console-rpc.md", "docs/native-userspace-integration-iso.md"],
+        exit_evidence=[
+            "review scheduler8 versus IPC/endpoint/bootstrap4 limits and all ownership/rollback quotas for five minimum demo roles",
+            "measure image and stack before any separately qualified capacity/layout migration",
+            "user-space lifecycle policy and narrow kernel authority support real application start/stop and survivor faults",
+            "native PCS1 pressure/malformed-request controls preserve tracked completion and independent progress",
+            "real shell, bundled read-only files, two useful apps, then fresh optical ISO interaction and sustained-session acceptance",
+            "retain ordinary trust denial, failed evidence, full canonical gates before main and complete robust microkernel afterward"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1365)
+    parser.add_argument("--test-count", type=int, default=1371)
     parser.add_argument("--status-date", default="2026-10-11")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

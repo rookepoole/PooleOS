@@ -88,7 +88,7 @@ def main() -> int:
     storage = require_space(work)
     work.mkdir(parents=True, exist_ok=False)
     before = bindings()
-    report = dict(cycle=263, contract_id="PUSERBIN1", status="fail", source_bindings=before, storage_preflight=storage,
+    report = dict(cycle=265, contract_id="PUSERBIN1", status="fail", source_bindings=before, storage_preflight=storage,
         source_unchanged=False, native_execution_verified=False, actual_init_service=False,
         normal_session_boot=False, iso_built=False, production_ready=False)
     try:
@@ -116,7 +116,7 @@ def main() -> int:
             if release: command.append("--release")
             output=run(command,env,work / ("release.log" if release else "debug.log"))
             match=re.search(r"test result: ok\. (\d+) passed; 0 failed; 0 ignored;",output)
-            if not match or int(match[1]) != 33: raise ValueError("expected33 Rust host tests")
+            if not match or int(match[1]) != 39: raise ValueError("expected39 Rust host tests")
             report["host_tests"].append(dict(profile="release" if release else "debug", tests_passed=int(match[1])))
         first=build(cargo,env,work / "build1",work / "build1.log")
         second=build(cargo,env,work / "build2",work / "build2.log")

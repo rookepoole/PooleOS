@@ -181,7 +181,7 @@ pub(crate) fn run(
         #[cfg(all(feature = "development-console", not(feature = "development-console-ipc")))]
         log.write_str("POOLEOS:SESSION START contract=PSESSION2 programs=3 bootstrap=PSTART1 abi=PSABI1 init_bytes=");
         #[cfg(feature = "development-console-ipc")]
-        log.write_str("POOLEOS:SESSION START contract=PSESSION3 programs=4 bootstrap=PSTART1 abi=PSABI1 init_bytes=");
+        log.write_str("POOLEOS:SESSION START contract=PSESSION4 programs=4 bootstrap=PSTART1 abi=PSABI1 init_bytes=");
         log.write_decimal_u64(INIT.len() as u64);
         log.write_str(" counter_bytes=");
         log.write_decimal_u64(COUNTER.len() as u64);
@@ -214,7 +214,7 @@ pub(crate) fn run(
                 log.write_str(" task_image_pages=52 firmware_pages=");
                 log.write_decimal_u64(baseline);
                 log.write_str(
-                    " granted_handles=9 protocol=PCS1 port=COM2 irq=0 diagnostics=0 production=0\n",
+                    " granted_handles=9 protocol=PCS1 transport=PRPC1 port=COM2 irq=0 diagnostics=0 production=0\n",
                 );
             }
         }
@@ -298,7 +298,13 @@ pub(crate) fn run(
                     }
                     _ => log.write_str(" reason=other value=0"),
                 }
-                log.write_str(" authority_revoked=1 image_reaped=1 production=0\n");
+                log.write_str(" authority_revoked=1 image_reaped=1 production=0");
+                #[cfg(feature = "development-console-ipc")]
+                {
+                    log.write_str(" dispatches=");
+                    log.write_decimal_u64(u64::from(scheduler.summary().dispatch_count));
+                }
+                log.write_str("\n");
             }
         }
         // This fixed bootstrap pair has an explicit mutual dependency. An owned

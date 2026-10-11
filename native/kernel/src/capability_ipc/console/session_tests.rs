@@ -189,3 +189,145 @@ fn four_member_duplicate_identity_and_retired_generations_cannot_readmit() {
     assert!(s.admit_console_session(&mut fresh, &m).is_err());
     assert!(s.is_empty());
 }
+
+#[test]
+fn tracked_console_completion_survives_service_retirement_and_full_client_mailbox() {
+    use crate::capability_ipc::{reply::Operation as Reply, request::Operation as Request};
+    let (mut s, mut scheduler, m) = (Space::new(), Scheduler::new(1).unwrap(), members());
+    let a = s.admit_console_session(&mut scheduler, &m).unwrap();
+    let mut bytes = Bytes([7; 96]);
+    let (status, request) = s.request_operation(
+        caller(m[3]),
+        a.handles[7],
+        ADDRESS,
+        32,
+        Request::Begin,
+        &mut bytes,
+    );
+    assert_eq!(status, Status::Ok);
+    assert_eq!(
+        s.message(
+            caller(m[2]),
+            a.handles[4],
+            ADDRESS,
+            64,
+            Reply::Receive,
+            &mut bytes
+        ),
+        (Status::Ok, 64)
+    );
+    let token = u64::from_le_bytes(bytes.0[16..24].try_into().unwrap());
+    for _ in 0..DEPTH {
+        assert_eq!(
+            s.transfer(caller(m[2]), a.handles[6], ADDRESS, 32, true, &mut bytes),
+            (Status::Ok, 32)
+        );
+    }
+    bytes.0[..32].fill(42);
+    assert_eq!(
+        s.message(caller(m[2]), token, ADDRESS, 32, Reply::Reply, &mut bytes),
+        (Status::Ok, 32)
+    );
+    s.detach(m[2].id).unwrap();
+    assert_eq!(
+        s.request_operation(
+            caller(m[3]),
+            request,
+            ADDRESS,
+            64,
+            Request::Take,
+            &mut bytes
+        ),
+        (Status::Ok, 64)
+    );
+    assert_eq!(&bytes.0[..8], &2u64.to_le_bytes());
+    assert_eq!(&bytes.0[8..16], &1u64.to_le_bytes());
+    assert_eq!(&bytes.0[16..24], &[0; 8]);
+    assert_eq!(&bytes.0[32..64], &[42; 32]);
+    assert_eq!(
+        s.request_operation(
+            caller(m[3]),
+            request,
+            ADDRESS,
+            64,
+            Request::Take,
+            &mut bytes
+        ),
+        (Status::Denied, 0)
+    );
+}
+
+#[test]
+fn tracked_console_death_is_durable_before_or_after_delivery_without_mailbox_space() {
+    use crate::capability_ipc::{reply::Operation as Reply, request::Operation as Request};
+    for delivered in [false, true] {
+        let (mut s, mut scheduler, m) = (Space::new(), Scheduler::new(1).unwrap(), members());
+        let a = s.admit_console_session(&mut scheduler, &m).unwrap();
+        let mut bytes = Bytes([7; 96]);
+        let (status, request) = s.request_operation(
+            caller(m[3]),
+            a.handles[7],
+            ADDRESS,
+            32,
+            Request::Begin,
+            &mut bytes,
+        );
+        assert_eq!(status, Status::Ok);
+        if delivered {
+            assert_eq!(
+                s.message(
+                    caller(m[2]),
+                    a.handles[4],
+                    ADDRESS,
+                    64,
+                    Reply::Receive,
+                    &mut bytes
+                ),
+                (Status::Ok, 64)
+            );
+        }
+        for _ in 0..DEPTH {
+            assert_eq!(
+                s.transfer(caller(m[2]), a.handles[6], ADDRESS, 32, true, &mut bytes),
+                (Status::Ok, 32)
+            );
+        }
+        s.detach(m[2].id).unwrap();
+        let before = bytes.0;
+        assert_eq!(
+            s.request_operation(
+                caller(m[3]),
+                request,
+                ADDRESS,
+                64,
+                Request::Take,
+                &mut bytes
+            ),
+            (Status::Revoked, 0)
+        );
+        assert_eq!(bytes.0, before);
+        assert_eq!(
+            s.request_operation(
+                caller(m[3]),
+                request,
+                ADDRESS,
+                64,
+                Request::Take,
+                &mut bytes
+            ),
+            (Status::Denied, 0)
+        );
+        assert_eq!(
+            s.transfer(caller(m[0]), a.handles[2], ADDRESS, 32, true, &mut bytes),
+            (Status::Ok, 32)
+        );
+        assert_eq!(
+            s.transfer(caller(m[1]), a.handles[1], ADDRESS, 32, false, &mut bytes),
+            (Status::Ok, 32)
+        );
+        for i in [3, 0, 1] {
+            s.detach(m[i].id).unwrap();
+        }
+        assert!(s.is_empty());
+    }
+}

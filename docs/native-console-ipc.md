@@ -1,14 +1,15 @@
 # Native Console IPC
 
-Cycle264, 2026-10-11. Native four-process admission, exact IPC echo, close/reap and
-wrong-peer rejection pass in fresh guests. The rejected peer's client still polls;
-bounded peer-death recovery, shell and optical ISO remain open. See the
-[current checkpoint](checkpoints/cycle264-native-console-ipc.md).
+Current transport: [PRPC1 tracked requests](native-console-rpc.md), Cycle265.
+Native echo/close and bounded authenticated peer-death termination now pass.
+Restart, shell and optical ISO remain open. See the
+[current checkpoint](checkpoints/cycle265-native-console-rpc.md).
+Cycle264 below records the previous mailbox transport and its polling-client gap.
 The CI invariants below were frozen before Cycle263 executable implementation;
 its [build-only checkpoint](checkpoints/cycle263-console-ipc-programs.md) and Cycle262
 non-IPC echo evidence remain historical, not newly executed evidence.
 
-## Decision
+## Historical Transport Decision (Cycle263)
 
 Build PooleConsoleService and PooleConsoleClient as separate freestanding user
 programs. The service owns UART policy, the client exercises real IPC wrappers;
@@ -19,7 +20,10 @@ payload-asserted sender identity, broad port authority and shared-memory shortcu
 are rejected. A general multiplexer, reply-token RPC, virtio driver and interrupts
 remain later work, not silently claimed by this single-client boundary.
 
-## Frozen Invariants
+## Frozen Historical Invariants (Cycle263)
+
+PRPC1 supersedes CI2's zero-token Receive and the send3 transport; its CR1-CR7
+contract governs current execution. PCS1 payload, sequence and device rules remain.
 
 - CI1: PCS1 is32 bytes: magicPCS1, kind byte, length byte, two zero reserved bytes,
   LE sequence u64,16 payload bytes with zero unused tail. Read/Close/Written/Closed
@@ -46,7 +50,7 @@ remain later work, not silently claimed by this single-client boundary.
   failed evidence to satisfy acceptance. Explicitly scoped generated-directory
   archives must match original member counts/hashes before originals are removed.
 
-## Next Native Integration
+## Historical Native Integration Plan (Cycle263)
 
 Admit service/client in addition to init/counter, using four private roots and
 four bounded endpoints. Authenticate granted handles before dispatch, set an
@@ -60,7 +64,7 @@ execution claim follows from this build-only step.
 User-space shell, file service/two useful applications, supervision/loading,
 efficient idle, clock recovery, optical ISO, full robust microkernel, signed trust,
 PooleGlyph/PDC and accessible PooleGlass remain required.
-## Native Admission Qualification (Cycle264)
+## Historical Native Admission Qualification (Cycle264)
 
 NI1: PSESSION3 admits four distinct owned CPL3 roots and nine actual grants before
 dispatch: init/counter endpoints, service/client endpoints, service-only COM2.

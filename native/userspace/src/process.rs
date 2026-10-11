@@ -41,10 +41,14 @@ unsafe fn call(number: u64, handle: u64, address: u64, bytes: u64) -> (u64, u64)
 }
 
 pub struct Console(u64);
-pub struct ConsoleIpc {
-    receive: u64,
-    send: u64,
-    peer: crate::console_ipc::Peer,
+pub struct ConsoleIpc(crate::console_ipc::rpc::Transport);
+struct ConsoleCalls;
+impl crate::console_ipc::rpc::Calls for ConsoleCalls {
+    #[inline(always)]
+    fn invoke(&mut self, number: u64, handle: u64, wire: &mut [u8]) -> (u64, u64) {
+        // SAFETY: each bounded wire stays live and exclusively borrowed during the kernel copy.
+        unsafe { call(number, handle, wire.as_mut_ptr() as u64, wire.len() as u64) }
+    }
 }
 /// SAFETY: live kernel-owned PSTART1 block, as for boot().
 #[inline(always)]
@@ -61,11 +65,11 @@ pub unsafe fn console_ipc_boot(
     let boot = startup::console_ipc(block, version, server)?;
     Ok((
         boot.port.map(Console),
-        ConsoleIpc {
-            receive: boot.receive,
-            send: boot.send,
-            peer: boot.peer,
-        },
+        ConsoleIpc(crate::console_ipc::rpc::Transport::new(
+            if server { boot.receive } else { boot.send },
+            boot.peer,
+            server,
+        )),
     ))
 }
 impl crate::console_ipc::Channel for ConsoleIpc {
@@ -74,27 +78,13 @@ impl crate::console_ipc::Channel for ConsoleIpc {
         &mut self,
         message: crate::console_ipc::Message,
     ) -> Result<bool, crate::console_ipc::Error> {
-        let wire = message.encode();
-        // Synchronous kernel copy; the stack object stays live for the whole call.
-        match unsafe { call(3, self.send, wire.as_ptr() as u64, wire.len() as u64) } {
-            (0, n) if n == crate::console_ipc::BYTES as u64 => Ok(true),
-            (6, 0) => Ok(false),
-            _ => Err(crate::console_ipc::Error::Transport),
-        }
+        self.0.send(message, &mut ConsoleCalls)
     }
     #[inline(always)]
     fn receive(
         &mut self,
     ) -> Result<Option<crate::console_ipc::Message>, crate::console_ipc::Error> {
-        let mut wire = [0; crate::console_ipc::ENVELOPE_BYTES];
-        // receive7 copies authenticated sender metadata plus the payload, not receive4's raw bytes.
-        match unsafe { call(7, self.receive, wire.as_mut_ptr() as u64, wire.len() as u64) } {
-            (0, n) if n == crate::console_ipc::ENVELOPE_BYTES as u64 => {
-                self.peer.decode(&wire).map(Some)
-            }
-            (6, 0) => Ok(None),
-            _ => Err(crate::console_ipc::Error::Transport),
-        }
+        self.0.receive(&mut ConsoleCalls)
     }
 }
 /// SAFETY: same live, kernel-owned PSTART1 block requirement as boot().
