@@ -55,7 +55,7 @@ fn abi_has_no_user_pointer_task_id_or_extra_argument() {
         }
         assert_eq!(request(number, 2, 123, 0, 0, 0, 0), Err(Status::Version));
     }
-    assert_eq!(request(19, 1, 0, 0, 0, 0, 0), Err(Status::Unknown));
+    assert_eq!(request(20, 1, 0, 0, 0, 0, 0), Err(Status::Unknown));
 }
 
 #[test]

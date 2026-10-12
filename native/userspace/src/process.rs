@@ -41,6 +41,27 @@ unsafe fn call(number: u64, handle: u64, address: u64, bytes: u64) -> (u64, u64)
 }
 
 pub struct Console(u64);
+pub struct ProcessCalls;
+impl crate::supervisor::Calls for ProcessCalls {
+    #[inline(always)]
+    fn invoke(&mut self, number: u64, handle: u64, argument: u64) -> (u64, u64) {
+        // SAFETY: supervisor operations pass only handles and integer sequence IDs.
+        unsafe { call(number, handle, argument, 0) }
+    }
+}
+/// SAFETY: same live kernel-owned PSTART1 block requirement as boot().
+#[inline(always)]
+pub unsafe fn supervisor_boot(
+    address: u64,
+    bytes: u64,
+    version: u64,
+) -> Result<(u64, u32), startup::Error> {
+    if address != 0x40003000 || !(96..=512).contains(&bytes) {
+        return Err(startup::Error::Header);
+    }
+    let block = unsafe { core::slice::from_raw_parts(address as *const u8, bytes as usize) };
+    startup::supervisor(block, version)
+}
 pub struct ConsoleIpc(crate::console_ipc::rpc::Transport);
 struct ConsoleCalls;
 impl crate::console_ipc::rpc::Calls for ConsoleCalls {

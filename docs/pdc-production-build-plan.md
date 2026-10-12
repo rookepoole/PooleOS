@@ -1,15 +1,46 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-11
-Plan version: 2.170.0-native-process-authority
-Roadmap cycle: PooleOS Cycle 267
+Plan version: 2.171.0-native-process-launch
+Roadmap cycle: PooleOS Cycle 268
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 267: Process Stop Authority
+## Cycle 268: User-Space Launch And Restart
+
+PLAUNCH1 adds generation-bound launch grants, numbered requests and atomic child,
+scheduler, IPC and process-handle admission. Separately compiled PooleSupervisor
+owns a bounded restart policy in actual CPL3 user space. Two fresh guests start
+and retire two worker lifetimes while an independent process continues. Invalid
+launch authority causes no child execution and safely cancels its prepared image.
+This is a limited supervisor, not a general loader or interactive service manager.
+[Evidence and failures](checkpoints/cycle268-native-process-launch.md).
+
+Six user-program builds reproduce independently;44 runtime tests pass per profile.
+All27 default checks pass with1794 overlapping Rust executions/125 Python oracle
+tests. Two process-stop and three six-process interaction regressions also pass:
+11 final-layout guests total. The earlier207-page launch success is superseded:
+default text overflow required a reviewed208-page image within the existing208-page
+reservation. Guarded stack36 pages and W^X remain unchanged. Default RELRO padding
+is152 bytes; image/profile capacity review is mandatory before further growth.
+
+USI-3 remains partial. Next integrate start/stop and console into the actual shell
+path, with truthful exit results and retained cleanup ownership. Native owner-death
+races, general cleanup retry, code-page limits,32 PMM records and full stack bounds
+remain. Then USI-4 shell/read-only bundled files/two useful applications and USI-5
+optical ISO interaction. The complete robust microkernel, PooleGlyph/PDC and
+accessible PooleGlass remain required afterward. No production phase/flag closes.
+
+Counts remain40 phases301 subphases8996 requirements59 additions98 flags43 open20
+gap groups.1389 Python tests and629 architecture bindings are inventory only.
+45 verified archive additions preserve generated evidence; full reservation/restore
+remains open. PooleGlyph Phase65/next66 and owner inputs are unchanged. Full
+canonical gates still block main; no usable ISO exists yet.
+
+## Historical Cycle 267: Process Stop Authority
 
 PPROC1 adds explicit generation-bound process inspection/termination capabilities
 and PSABI1 calls17/18. Requests do not free memory or confer raw task-ID authority.

@@ -116,6 +116,10 @@ pub(super) fn process_operation(caller: Caller, handle: u64, terminate: bool) ->
     unsafe { &mut *(&raw mut IPC) }.process_operation(caller, handle, terminate)
 }
 
+pub(super) fn request_launch(caller: Caller, handle: u64, sequence: u32) -> (Status, u64) {
+    unsafe { &mut *(&raw mut IPC) }.request_launch(caller, handle, sequence)
+}
+
 pub(super) fn prepare_request_wait(
     caller: Caller,
     handle: u64,

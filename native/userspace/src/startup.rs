@@ -103,6 +103,19 @@ pub fn console(bytes: &[u8], version: u64) -> Result<u64, Error> {
     handle(args[1])
 }
 
+#[inline(always)]
+pub fn supervisor(bytes: &[u8], version: u64) -> Result<(u64, u32), Error> {
+    let args = arguments::<3>(bytes, version)?;
+    if args[0] != b"supervisor" {
+        return Err(Error::Role);
+    }
+    let limit = handle(args[2])?;
+    if !(1..=16).contains(&limit) {
+        return Err(Error::Layout);
+    }
+    Ok((handle(args[1])?, limit as u32))
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ConsoleIpcBoot {
     pub port: Option<u64>,
@@ -184,6 +197,21 @@ mod tests {
     }
     fn valid() -> Vec<u8> {
         block([b"init", b"0000000100010001", b"0000000100010002"])
+    }
+    #[test]
+    fn supervisor_policy_is_copied_and_bounded_without_minting_authority() {
+        let mut bytes = block([b"supervisor", b"0000000100060001", b"0000000000000002"]);
+        assert_eq!(supervisor(&bytes, 1), Ok((0x100060001, 2)));
+        bytes.fill(0);
+        assert!(supervisor(&bytes, 1).is_err());
+        for n in [
+            b"0000000000000000",
+            b"0000000000000011",
+            b"FFFFFFFFFFFFFFFF",
+        ] {
+            assert!(supervisor(&block([b"supervisor", b"0000000100060001", n]), 1).is_err());
+        }
+        assert!(supervisor(&valid(), 1).is_err());
     }
     #[test]
     fn canonical_snapshot_owns_values_not_argument_references() {

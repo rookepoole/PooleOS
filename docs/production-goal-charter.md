@@ -7,9 +7,17 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 267
+Last roadmap reconciliation: PooleOS Cycle 268
 
-Cycle267 adds narrow capability-authorized stop/inspection, with two fresh native
+Cycle268 adds atomic, generation-bound launch/restart and a separately compiled
+user-space supervisor. Eleven final-layout guests and all27 default checks pass.
+Image208/208 pages and152-byte default RELRO padding require capacity review before
+growth. Next integrate real shell/files/two useful apps and optical ISO, retaining
+cleanup/exit/owner-death gaps. No usable ISO or production promotion. Complete
+robust microkernel, N0-N39, PooleGlyph/PDC, accessible PooleGlass and signing gates
+remain required. [Evidence](checkpoints/cycle268-native-process-launch.md).
+
+Historical Cycle267 adds narrow capability-authorized stop/inspection, with two fresh native
 guests covering suspended and waiting targets plus independent process survival.
 All26 default checks and three six-process interaction guests pass. Next: bounded
 start/restart and real user-space supervisor policy, then shell/files/two useful

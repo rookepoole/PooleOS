@@ -32,6 +32,12 @@ def source_bindings() -> dict[str, str]:
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "runtime").glob("*.py"))
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "tools").glob("qualify_native_*.py"))
     paths.update({
+        "native/kernel/src/capability_ipc/launch.rs",
+        "native/kernel/src/capability_ipc/launch/tests.rs",
+        "native/kernel/src/user_root_probe/peer_driver/launch.rs",
+        "native/userspace/src/supervisor.rs",
+        "native/userspace/src/bin/supervisor.rs",
+        "tests/test_native_process_launch.py",
         "native/kernel/src/capability_ipc/process.rs",
         "native/kernel/src/capability_ipc/process/tests.rs",
         "native/kernel/src/arch/x86_64/user_ipc/process.rs",
@@ -120,7 +126,7 @@ def main() -> int:
     owner_report = Path("C:/Users/rookp/PooleGlyph/tests/reports/conformance_report.json")
     owner_before = digest(owner_report) if owner_report.is_file() else None
     report: dict = {
-        "contract_id": "PSTART1", "cycle": 267,
+        "contract_id": "PSTART1", "cycle": 268,
         "scope": "host_and_native_owned_builtin_program_and_copied_argument_startup",
         "status": "fail", "source_bindings": before, "checks": [],
         "guest_runs": 0, "ring3_executed": False, "iso_built": False,
@@ -138,11 +144,11 @@ def main() -> int:
     commands = [
         ("format", [str(cargo), "fmt", *common, "--", "--check"], None),
         ("kernel_host_debug", [str(cargo), "test", *common, "--lib", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 483),
+            "x86_64-pc-windows-msvc", *bounded, "--", "--test-threads=1"], 491),
         ("user_entry_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
             "x86_64-pc-windows-msvc", *bounded, "user_entry::", "--", "--test-threads=1"], 158),
         ("ipc_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
-            "x86_64-pc-windows-msvc", *bounded, "capability_ipc::", "--", "--test-threads=1"], 69),
+            "x86_64-pc-windows-msvc", *bounded, "capability_ipc::", "--", "--test-threads=1"], 77),
         ("vm_host_release", [str(cargo), "test", *common, "--lib", "--release", "--target",
             "x86_64-pc-windows-msvc", *bounded, "virtual_memory::", "--", "--test-threads=1"], None),
         ("freestanding_library", [str(cargo), "check", *common, "--lib", "--target",
@@ -178,12 +184,13 @@ def main() -> int:
         commands.append(("console_kernel_" + ("release" if release else "debug"),
             [str(cargo), "test", *common, "--lib", "--features", "development-console",
              "--target", "x86_64-pc-windows-msvc", *bounded, *(["--release"] if release else []),
-             "--", "--test-threads=1"], 497))
+             "--", "--test-threads=1"], 505))
     commands.append(("console_oracle", [sys.executable, "-B", "-m", "unittest", "tests.test_native_console", "-v"], None))
     commands.append(("console_ipc_oracle", [sys.executable, "-B", "-m", "unittest", "tests.test_native_console_ipc", "-v"], None))
     commands.append(("console_rpc_oracle", [sys.executable, "-B", "-m", "unittest", "tests.test_native_console_rpc", "-v"], None))
     commands.append(("session_capacity_oracle", [sys.executable, "-B", "-m", "unittest", "tests.test_native_session_capacity", "-v"], None))
     commands.append(("process_authority_oracle", [sys.executable, "-B", "-m", "unittest", "tests.test_native_process_authority", "-v"], None))
+    commands.append(("process_launch_oracle", [sys.executable, "-B", "-m", "unittest", "tests.test_native_process_launch", "-v"], None))
     for feature in ("development-trap-returning", "development-locks"):
         commands.append(("reject_" + feature, [str(cargo), "check", "--manifest-path",
             str(ROOT / "native/Cargo.toml"), "--package", "pooleboot", "--bin", "PooleBoot",

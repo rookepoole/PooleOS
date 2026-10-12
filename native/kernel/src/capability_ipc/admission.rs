@@ -15,6 +15,11 @@ pub struct Member {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Step {
+    Process {
+        member: u8,
+        owner: TaskId,
+        rights: process::Rights,
+    },
     #[cfg(feature = "development-console")]
     Console {
         member: u8,
@@ -86,6 +91,15 @@ impl Space {
             }
             for (index, step) in steps.iter().enumerate() {
                 result.handles[index] = match *step {
+                    Step::Process {
+                        member,
+                        owner,
+                        rights,
+                    } => {
+                        let target = members.get(usize::from(member)).ok_or(Error::Plan)?.id;
+                        self.grant_process(owner, target, rights)
+                            .map_err(Error::Ipc)?
+                    }
                     #[cfg(feature = "development-console")]
                     Step::Console { member } => {
                         let id = members.get(usize::from(member)).ok_or(Error::Plan)?.id;
@@ -126,6 +140,16 @@ impl Space {
             Ok(())
         })();
         if let Err(error) = installed {
+            // New process grants to existing owners must not remain as charged
+            // revoked leases after an admission rollback. Generations stay spent.
+            for (index, step) in steps.iter().enumerate().rev() {
+                if let Step::Process { owner, .. } = step {
+                    if result.handles[index] != 0 {
+                        self.revoke_process(*owner, result.handles[index])
+                            .expect("installed process grant rollback");
+                    }
+                }
+            }
             // Only newly attached tables and their new endpoints may be removed.
             // Exported new endpoints are revoked everywhere; inherited grants
             // disappear with their new recipient, not their existing source.

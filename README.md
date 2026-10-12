@@ -11,7 +11,16 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle267 adds capability-authorized process
+**Current development checkpoint:** Cycle268 adds atomic launch/restart authority
+and a separately compiled user-space supervisor. Eleven final-layout VM runs and
+all27 default regression checks pass, including invalid authority, process stop,
+console interaction and independent-process survival. Image208/208 pages now needs
+capacity review before growth. Next: real shell/files/two useful apps and optical
+ISO, with lifecycle recovery gaps retained. No usable ISO yet; the complete robust
+microkernel remains required afterward.
+[Evidence](docs/checkpoints/cycle268-native-process-launch.md).
+
+**Historical development checkpoint:** Cycle267 adds capability-authorized process
 termination. Two fresh native boots stop suspended/waiting targets while another
 user process continues; cleanup and hostile authority checks pass. All26 default
 regression checks and three six-process console guests also pass. Next: start/restart

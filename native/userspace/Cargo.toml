@@ -11,6 +11,12 @@ publish = false
 path = "src/lib.rs"
 
 [[bin]]
+name = "PooleSupervisor"
+path = "src/bin/supervisor.rs"
+test = false
+bench = false
+
+[[bin]]
 name = "PooleInit"
 path = "src/bin/init.rs"
 test = false

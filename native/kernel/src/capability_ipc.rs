@@ -21,6 +21,7 @@ pub mod admission;
 #[cfg(feature = "development-console")]
 pub mod console;
 pub mod deadline;
+pub mod launch;
 pub mod process;
 pub mod reply;
 pub mod request;
@@ -147,6 +148,7 @@ pub struct Space {
     objects: [ObjectSlot; ENDPOINTS],
     clock: deadline::Clock,
     processes: [process::Slot; process::LEASES],
+    launches: [launch::Slot; launch::LEASES],
     #[cfg(feature = "development-console")]
     console: console::Lease,
 }
@@ -162,6 +164,7 @@ impl Space {
             objects: [ObjectSlot::EMPTY; ENDPOINTS],
             clock: deadline::Clock::EMPTY,
             processes: [process::Slot::EMPTY; process::LEASES],
+            launches: [launch::Slot::EMPTY; launch::LEASES],
             #[cfg(feature = "development-console")]
             console: console::Lease::EMPTY,
         }
@@ -328,6 +331,7 @@ impl Space {
     }
     // The admission transaction already owns these exact, never-dispatched tables.
     fn detach_table(&mut self, t: usize, owner: TaskId) {
+        self.retire_launches(owner);
         self.retire_processes(owner);
         #[cfg(feature = "development-console")]
         if self.owns_console(owner) {
@@ -364,6 +368,9 @@ impl Space {
         self.detach(owner)
     }
     pub fn is_empty(&self) -> bool {
+        if self.launches.iter().any(|p| p.value.is_some()) {
+            return false;
+        }
         if self.processes.iter().any(|p| p.value.is_some()) {
             return false;
         }

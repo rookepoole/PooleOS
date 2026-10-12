@@ -45,6 +45,10 @@ pub enum Status {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Request {
+    Launch {
+        handle: u64,
+        sequence: u32,
+    },
     Process {
         handle: u64,
         terminate: bool,
@@ -250,6 +254,13 @@ pub fn request(
             terminate: number == 18,
         }),
         17 | 18 => Err(Status::Arguments),
+        19 if destination != 0 && destination <= u32::MAX as u64 && bytes == 0 => {
+            Ok(Request::Launch {
+                handle: source,
+                sequence: destination as u32,
+            })
+        }
+        19 => Err(Status::Arguments),
         _ => Err(Status::Unknown),
     }
 }
