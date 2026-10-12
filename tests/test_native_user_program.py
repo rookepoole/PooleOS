@@ -23,6 +23,27 @@ def fixture():
     return bytes(blob)
 
 class NativeUserProgramTests(unittest.TestCase):
+    def test_object_relocations_require_defined_local_readonly_symbols_not_name_prefixes(self):
+        from tools.qualify_native_user_programs import local_relocations
+        def audit():
+            return {"Sections":[{"Section":{"Index":3,"Name":{"Name":".rodata.cst4"},
+                "Type":{"Value":1},"Flags":{"Value":0x12},"Size":4}}],
+                "Symbols":[{"Symbol":{}},{"Symbol":{"Name":{"Name":".Lanon.123"},
+                    "Binding":{"Name":"Local","Value":0},"Section":{"Name":".rodata.cst4","Value":3},"Value":0}}],
+                "Relocations":[{"Relocs":[{"Relocation":{"Type":{"Name":"R_X86_64_PC32","Value":2},
+                    "Symbol":{"Name":".Lanon.123","Value":1}}}]}]}
+        self.assertEqual(len(local_relocations(audit())),1)
+        for mutate in (
+            lambda a:a["Symbols"][1]["Symbol"]["Section"].update(Value=0),
+            lambda a:a["Symbols"][1]["Symbol"]["Binding"].update(Name="Global",Value=1),
+            lambda a:a["Sections"][0]["Section"]["Flags"].update(Value=3),
+            lambda a:a["Symbols"][1]["Symbol"].update(Value=4),
+            lambda a:a["Symbols"][1]["Symbol"]["Name"].update(Name=".text.forged"),
+            lambda a:a["Relocations"][0]["Relocs"][0]["Relocation"]["Type"].update(Name="R_X86_64_64",Value=1),
+            lambda a:a["Relocations"][0]["Relocs"][0]["Relocation"]["Symbol"].update(Value=9),
+        ):
+            candidate=audit(); mutate(candidate)
+            with self.assertRaises(ValueError): local_relocations(candidate)
     def test_object_lookup_separates_shared_prefix_and_rejects_missing_or_duplicate_objects(self):
         from tools.qualify_native_user_programs import codegen_object
         with tempfile.TemporaryDirectory() as temp:
@@ -76,6 +97,18 @@ class NativeUserProgramTests(unittest.TestCase):
         record=program.inspect(blob)
         self.assertNotEqual(record["code_sha256"],program.inspect(fixture())["code_sha256"])
         self.assertFalse(record["native_execution_verified"])
+    def test_merge_metadata_does_not_grant_write_or_other_section_permissions(self):
+        self.assertEqual(program.inspect(self.mutate(4192,"Q",0x16))["code_section_flags"],0x16)
+        for flags in (0x12,0x17,0x26,0x36,0x46,0x86,0x106,0x206,0x806):
+            with self.subTest(flags=flags), self.assertRaises(ValueError):
+                program.inspect(self.mutate(4192,"Q",flags))
+        # Table semantics and the independent RX program header remain strict.
+        blob=bytearray(self.mutate(4192,"Q",0x16))
+        struct.pack_into("<Q",blob,4240,1)
+        with self.assertRaises(ValueError): program.inspect(bytes(blob))
+        blob=bytearray(self.mutate(4192,"Q",0x16))
+        struct.pack_into("<I",blob,68,7)
+        with self.assertRaises(ValueError): program.inspect(bytes(blob))
     def test_linker_source_rejects_got_data_relocations_and_oversize(self):
         text=(ROOT/"native/userspace/linker.ld").read_text()
         for required in [".text.start","FLAGS(5)","*(.data", ".got", ".dynamic", ".rela.*",

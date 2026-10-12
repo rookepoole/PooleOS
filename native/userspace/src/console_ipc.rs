@@ -37,6 +37,18 @@ pub struct Message {
 }
 impl Message {
     #[inline]
+    pub fn kind(&self) -> Kind {
+        self.kind
+    }
+    #[inline]
+    pub fn sequence(&self) -> u64 {
+        self.sequence
+    }
+    #[inline]
+    pub fn payload(&self) -> &[u8] {
+        &self.data[..usize::from(self.len).min(PAYLOAD)]
+    }
+    #[inline]
     pub fn new(kind: Kind, sequence: u64, data: &[u8]) -> Result<Self, Error> {
         if sequence == 0 || sequence == u64::MAX {
             return Err(Error::Sequence);

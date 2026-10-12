@@ -49,7 +49,9 @@ def inspect(blob: bytes) -> dict:
         require(align in (0, 1, 2, 4, 8, 16, 32, 64, 4096), "section alignment")
         require(start <= len(blob) and length <= len(blob) - start, "section range")
         if sflags & 2:
-            require(label == b".text" and stype == 1 and sflags == 6 and addr == 0
+            # LLD propagates SHF_MERGE when constant input sections join .text.
+            # It grants no runtime permission; all other flags remain forbidden.
+            require(label == b".text" and stype == 1 and sflags in (6, 0x16) and addr == 0
                     and start == offset and length == size, "allocated section contract")
             allocated.append(section)
         else:
@@ -61,7 +63,7 @@ def inspect(blob: bytes) -> dict:
             "elf_sha256": hashlib.sha256(blob).hexdigest().upper(),
             "code_offset": offset, "code_bytes": size,
             "code_sha256": hashlib.sha256(code).hexdigest().upper(),
-            "entry_offset": entry, "load_pages": 1,
+            "entry_offset": entry, "load_pages": 1, "code_section_flags": allocated[0][2],
             "writable_segments": 0, "relocations": 0, "imports": 0,
             "position_independent_source_and_flags_required": True,
             "native_execution_verified": False, "production_ready": False}

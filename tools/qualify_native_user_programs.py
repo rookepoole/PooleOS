@@ -44,6 +44,32 @@ def codegen_object(deps: Path, name: str) -> Path:
     return objects[0]
 
 
+def local_relocations(audit: dict) -> list[dict]:
+    """Verify symbol definitions, not a compiler-specific spelling of locals."""
+    sections = {s["Section"]["Index"]: s["Section"] for s in audit["Sections"]}
+    symbols = [s["Symbol"] for s in audit["Symbols"]]
+    relocs = [r["Relocation"] for group in audit["Relocations"] for r in group["Relocs"]]
+    if not relocs:
+        raise ValueError("program object has no relocation audit")
+    for r in relocs:
+        index = r["Symbol"]["Value"]
+        if not 0 < index < len(symbols):
+            raise ValueError("invalid relocation symbol index")
+        symbol = symbols[index]
+        section = sections.get(symbol["Section"]["Value"])
+        if (r["Type"]["Name"] not in ("R_X86_64_PC32", "R_X86_64_PLT32")
+                or r["Type"]["Value"] not in (2, 4)
+                or symbol["Name"]["Name"] != r["Symbol"]["Name"]
+                or symbol["Binding"]["Name"] != "Local" or symbol["Binding"]["Value"] != 0
+                or section is None or section["Type"]["Value"] != 1
+                or not section["Name"]["Name"].startswith((".text.", ".rodata."))
+                or section["Name"]["Name"] != symbol["Section"]["Name"]
+                or section["Flags"]["Value"] not in (2, 6, 0x12, 0x32)
+                or not 0 <= symbol["Value"] < section["Size"]):
+            raise ValueError("program object needs non-local or non-relative relocation")
+    return relocs
+
+
 def build(cargo: Path, env: dict, target: Path, log: Path) -> dict:
     flags = ["-Cpanic=abort", "-Crelocation-model=pic", "-Ccode-model=small",
         "-Cno-redzone=yes", "-Csave-temps=yes", "-Clink-arg=-static", "-Clink-arg=--no-pie",
@@ -60,19 +86,16 @@ def build(cargo: Path, env: dict, target: Path, log: Path) -> dict:
     result = {}
     for name, source in (("PooleInit", "init"), ("PooleCounter", "counter"), ("PooleConsole", "console"),
                          ("PooleConsoleService", "console_service"), ("PooleConsoleClient", "console_client"),
-                         ("PooleSupervisor", "supervisor")):
+                         ("PooleSupervisor", "supervisor"), ("PooleShell", "shell")):
         path = target / TARGET / "release" / name
         blob = path.read_bytes()
         code, record = extract(blob)
         object_path = codegen_object(path.parent / "deps", name)
         readobj = cargo.parent.parent / "lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-readobj.exe"
-        audit = json.loads(run([str(readobj), "--elf-output-style=JSON", "--relocations", str(object_path)],
+        audit = json.loads(run([str(readobj), "--elf-output-style=JSON", "--relocations", "--symbols", "--sections", str(object_path)],
             env, target.parent / f"{target.name}-{name}-relocations.json"))
         if len(audit) != 1: raise ValueError("ambiguous object audit")
-        relocs = [item["Relocation"] for group in audit[0]["Relocations"] for item in group["Relocs"]]
-        if not relocs or any(r["Type"]["Name"] not in ("R_X86_64_PC32", "R_X86_64_PLT32")
-                or not r["Symbol"]["Name"].startswith((".text.", ".rodata.")) for r in relocs):
-            raise ValueError("program object needs non-local or non-relative relocation")
+        relocs = local_relocations(audit[0])
         record["object_relocation_count"] = len(relocs)
         record["object_relocation_kinds"] = sorted({r["Type"]["Name"] for r in relocs})
         (target.parent / f"{target.name}-{name}.bin").write_bytes(code)
@@ -89,7 +112,7 @@ def main() -> int:
     storage = require_space(work)
     work.mkdir(parents=True, exist_ok=False)
     before = bindings()
-    report = dict(cycle=268, contract_id="PUSERBIN1", status="fail", source_bindings=before, storage_preflight=storage,
+    report = dict(cycle=270, contract_id="PUSERBIN1", status="fail", source_bindings=before, storage_preflight=storage,
         source_unchanged=False, native_execution_verified=False, actual_init_service=False,
         normal_session_boot=False, iso_built=False, production_ready=False)
     try:
@@ -117,7 +140,7 @@ def main() -> int:
             if release: command.append("--release")
             output=run(command,env,work / ("release.log" if release else "debug.log"))
             match=re.search(r"test result: ok\. (\d+) passed; 0 failed; 0 ignored;",output)
-            if not match or int(match[1]) != 44: raise ValueError("expected44 Rust host tests")
+            if not match or int(match[1]) != 58: raise ValueError("expected58 Rust host tests")
             report["host_tests"].append(dict(profile="release" if release else "debug", tests_passed=int(match[1])))
         first=build(cargo,env,work / "build1",work / "build1.log")
         second=build(cargo,env,work / "build2",work / "build2.log")

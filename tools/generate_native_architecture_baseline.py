@@ -24,6 +24,15 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle270-native-command-shell.md",
+    "docs/native-shell.md",
+    "runs/native-shell-readiness.json",
+    "native/userspace/src/shell.rs",
+    "native/userspace/src/shell/tests.rs",
+    "native/userspace/src/bin/shell.rs",
+    "runtime/native_shell.py",
+    "tools/qualify_native_shell.py",
+    "tests/test_native_shell.py",
     "docs/checkpoints/cycle269-native-kernel-budget.md",
     "docs/native-kernel-budget.md",
     "runs/native-kernel-budget-readiness.json",

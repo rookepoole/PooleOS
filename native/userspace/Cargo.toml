@@ -7,6 +7,12 @@ publish = false
 
 [workspace]
 
+[[bin]]
+name = "PooleShell"
+path = "src/bin/shell.rs"
+test = false
+bench = false
+
 [lib]
 path = "src/lib.rs"
 

@@ -13991,13 +13991,83 @@ def apply_cycle269(roadmap: dict, test_count: int) -> dict:
             "per-profile image budget, code-page, PMM-record and stack reviews before growth",
             "read-only files/two useful apps, then optical ISO interaction and sustained-session acceptance",
             "retain failed evidence, ordinary denial, canonical gates before main and complete robust microkernel afterward"])
+    return apply_cycle270(roadmap, test_count)
+
+
+def apply_cycle270(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle270-native-command-shell.md"
+    path = "runs/native-shell-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    digest = hashlib.sha256(raw).hexdigest().upper()
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle269_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline["native_kernel_budget_integration"]["evidence_status"] = "historical_after_cycle270_user_program_and_build_audit_changes"
+    baseline.update(pooleos_cycle=270, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 270
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-shell.md"]
+    gate["current_candidate_audit"]["cycle"] = 270
+    gate["current_focused_source_projection"]["cycle"] = 270
+    gate["qualification_status"] = "native_command_shell_pass_files_apps_ISO_and_canonical_gates_pending"
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["current_" + name]["evidence_status"] = "historical_cycle269_not_replayed_for_cycle270"
+    gate["current_shell_qualification"] = dict(cycle=270, status="pass", receipt_path=path,
+        receipt_sha256=digest, guest_runs=3, host_tests_per_profile=58, focused_python_tests=71,
+        source_binding_count=len(receipt["shell_session"]["source_bindings"]),
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_shell_metadata"] = dict(cycle=270, status="pass", tests_passed=251,
+        unittest_elapsed_seconds=52.967, capture_elapsed_seconds=54.031,
+        log_sha256="2DA0859A55540D35DB476DAD473DF83FCB2E5EDA51CF617A60B376D6E1E2117C",
+        conservation_tests=187, conservation_test_seconds=10.125, conservation_capture_seconds=11.625,
+        conservation_log_sha256="A90C2EDFA3B5A147AB9524452BB7BF0B163A38CF1D5A87F52A1CEDC374EFA5C5",
+        scope="pre_closeout_metadata_and_conservation_not_final_commit_or_canonical_gate",
+        counts_overlap=True, canonical_full_replay_performed=False, production_ready=False)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=270, selected_stage="USI-4", session_contract="PSHELL1", receipt_path=path,
+        receipt_section="shell_session", native_execution_evidence_cycle=270,
+        native_execution_replayed_this_cycle=True, native_execution_status="native_serial_command_shell_and_denied_console_peer_pass",
+        shell=True, shell_application_launch=False, shell_process_status=False, bundled_files=False,
+        retained_kernel_sources_unchanged=True, current_shell_processes=4,
+        historical_capacity_evidence_cycle=269, useful_application_count=0,
+        kernel_image_pages=113, kernel_remaining_capacity_pages=95,
+        default_profile_evidence_cycle=269, default_profile_pages=207,
+        default_profile_replayed_this_cycle=False, local_keyboard_display=False)
+    lane["stages"]["USI-4"] = "partial_native_serial_command_shell_lifecycle_files_apps_and_display_pending"
+    baseline["native_shell_integration"] = dict(cycle=270, contract_id="PSHELL1", status="pass",
+        receipt_path=path, receipt_sha256=digest, guest_runs=3, native_command_shell=True,
+        shell_code_bytes=3569, programs_reproduced=7, unchanged_legacy_programs=6,
+        host_tests_per_profile=58, focused_python_tests=71,
+        application_launch=False, bundled_files=False, iso_built=False, production_ready=False)
+    evidence = "Cycle270: actual isolated PooleShell commands/editing execute through the separate console service; three fresh guests prove clean close and denied-peer termination with survivor progress. Seven independent programs reproduce, six prior binaries unchanged;58 Rust tests per profile and71 focused Python tests pass. Shell3569 bytes and113-page kernel profiles retain one-page user code,208 reserved image pages and36 guarded stack pages. " + checkpoint
+    gap = "Connect genuine shell start/stop/status/completion and retained cleanup with the user-space supervisor; add read-only bundled-file service and two useful separate applications, then optical ISO/sustained interaction. Builtins are not separate apps. Multipage admission, local keyboard/display, executable trust, owner-death/cleanup recovery, efficient idle,32 PMM records and full stack bounds remain. Full canonical gates precede main; complete robust microkernel/PDC/PooleGlyph/PooleGlass continue after usable ISO."
+    for phase_id in ("N14", "N16", "N18", "N19", "N21", "N22", "N30", "N36"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    next(p for p in roadmap["phases"] if p["id"] == "N36")["current_evidence"].insert(
+        0, f"Cycle 270 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N13-USERSPACE-ISO-001", "FLAG-NATIVE-DRIVER-001", "FLAG-N36-EVIDENCE-STORAGE-001"):
+            flag["evidence"].append(checkpoint)
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["closure_condition"] += " Cycle270: " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Integrate shell application lifecycle and bundled files, then useful apps and optical ISO",
+        entry_evidence=[checkpoint, path, "docs/native-shell.md", "docs/native-userspace-integration-iso.md"],
+        exit_evidence=["actual shell start/stop/status and truthful completion over granted service authority",
+            "retained cleanup ownership and native invalid-request/owner-death/fault controls",
+            "read-only files and two useful separate apps; builtins and duplicated counters do not qualify",
+            "review multipage programs, PMM records, full stack bounds and local input/display needs",
+            "optical ISO sustained acceptance, canonical gates before main, complete robust microkernel afterward"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1398)
+    parser.add_argument("--test-count", type=int, default=1406)
     parser.add_argument("--status-date", default="2026-10-11")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

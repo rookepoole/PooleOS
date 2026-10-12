@@ -1,15 +1,41 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-11
-Plan version: 2.172.0-native-kernel-budget
-Roadmap cycle: PooleOS Cycle 269
+Plan version: 2.173.0-native-command-shell
+Roadmap cycle: PooleOS Cycle 270
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 269: Kernel Capacity And Entry Stack
+## Cycle 270: Native Command Shell
+
+USI-4 now has a real isolated serial PooleShell using the user-space console
+service. Typed help/version/echo/exit, line editing, CRLF, interrupts, invalid and
+overlong lines, empty-line EOF and authenticated peer death pass in three fresh
+VM boots. Commands run in CPL3; the kernel does not parse them. Seven independently
+built programs reproduce exactly; the earlier six remain byte-identical.58 Rust
+tests pass in each profile and71 focused Python tests pass. Shell3569-byte code
+fits one page; shell kernel profiles use113/208 pages with36 guarded stack pages.
+[Evidence and retained build failures](checkpoints/cycle270-native-command-shell.md).
+
+Next connect real start/stop/status/completion and retained cleanup to this shell,
+add a user-space read-only bundled-file service and two useful separate apps, then
+optical ISO and sustained user-driven acceptance. Builtins do not count as those
+apps. Local keyboard/display, executable loading/trust, supervisor owner-death,
+cleanup retry, efficient idle, multipage programs,32 PMM records and full stack
+bounds remain explicit work. Complete robust microkernel, PooleGlyph/PDC and
+accessible PooleGlass remain required after the usable integration ISO.
+
+No phase/flag closes:40 phases301 subphases8996 requirements59 additions98 flags43
+open20 gap groups.1406 Python tests and643 architecture bindings are inventory.
+Owner checklist and live PooleGlyph Phase65 inputs remain unchanged; Phase66 audit
+is still pending. Cycle269 default regressions are retained historical evidence,
+not newly executed here. Full canonical gates and three tracked readiness failures
+still block main qualification. No new ISO, release or production promotion.
+
+## Historical Cycle 269: Kernel Capacity And Entry Stack
 
 PKBUDGET1 page-rounds actual text/RELRO/BSS use and checks every linked product.
 The existing208-page reservation,36-page guarded stack,0xD000 entry, W^X and

@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 269
+Last roadmap reconciliation: PooleOS Cycle 270
 
-Cycle269 separates diagnostic storage from user-space entry and enforces measured
+Cycle270 adds a real CPL3 serial command shell over the isolated console service.
+Three fresh guests prove typed commands/editing, clean shutdown and denied-peer
+termination. Seven user programs reproduce; six earlier binaries are unchanged.
+Next connect actual lifecycle/status, read-only files and two useful separate apps,
+then optical ISO acceptance. No kernel interpreter, scripted transcript or splash
+substitution is accepted. Complete robust microkernel, N0-N39, PooleGlyph/PDC and
+accessible PooleGlass remain required afterward. No production or main qualification.
+[Evidence](checkpoints/cycle270-native-command-shell.md).
+
+Historical Cycle269 separates diagnostic storage from user-space entry and enforces measured
 kernel image budgets. Launch/console profiles use110/113 of208 reserved pages;
 default207/208 and full stack bounds still require care. All28 default checks and
 13 VM runs pass, without a new shell or ISO. Next integrate the shell/files/two

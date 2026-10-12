@@ -4,6 +4,7 @@ pub mod console;
 pub mod console_ipc;
 pub mod protocol;
 pub mod service;
+pub mod shell;
 pub mod startup;
 pub mod supervisor;
 

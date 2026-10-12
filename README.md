@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle269 separates diagnostic stack storage
+**Current development checkpoint:** Cycle270 runs an actual isolated user-space
+serial shell with commands and line editing. Three fresh VM boots pass commands,
+clean close and denied-peer handling; seven binaries reproduce independently.
+Next: shell application control/status, bundled files and two useful separate apps,
+then a usable optical ISO. Full robust microkernel development continues afterward.
+No usable integration ISO or new main qualification yet.
+[Evidence](docs/checkpoints/cycle270-native-command-shell.md).
+
+**Historical development checkpoint:** Cycle269 separates diagnostic stack storage
 from user-space entry and measures actual image layout. Launch and six-process
 console profiles now use110/113 pages instead of208; the default entry frame is840
 bytes instead of29656. All28 default checks and13 fresh VM runs pass. Next: actual
