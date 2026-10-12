@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle266 runs six isolated user processes,
+**Current development checkpoint:** Cycle267 adds capability-authorized process
+termination. Two fresh native boots stop suspended/waiting targets while another
+user process continues; cleanup and hostile authority checks pass. All26 default
+regression checks and three six-process console guests also pass. Next: start/restart
+and a real user-space supervisor, then shell/files/two useful apps and optical ISO.
+No usable ISO yet; complete robust microkernel work continues afterward.
+[Evidence](docs/checkpoints/cycle267-native-process-authority.md).
+
+**Historical development checkpoint:** Cycle266 runs six isolated user processes,
 with eight IPC task/endpoint slots and unchanged per-task limits. Real console
 input works while independent worker pairs run; a malformed worker and its partner
 retire without stopping the console or surviving pair. Nine final guest runs and

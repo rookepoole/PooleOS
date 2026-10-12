@@ -1,15 +1,46 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-11
-Plan version: 2.169.0-native-session-capacity
-Roadmap cycle: PooleOS Cycle 266
+Plan version: 2.170.0-native-process-authority
+Roadmap cycle: PooleOS Cycle 267
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 266: Six-Process Capacity
+## Cycle 267: Process Stop Authority
+
+PPROC1 adds explicit generation-bound process inspection/termination capabilities
+and PSABI1 calls17/18. Requests do not free memory or confer raw task-ID authority.
+An exclusive quiescent dispatcher applies them through existing owned cancellation
+and retirement after runtime accounting. Owner death, revocation and target reuse
+invalidate pending/claimed authority; quotas remain bounded.
+
+Two fresh native guests each stop a timer-suspended target and an IPC waiter while
+a separate user process completes1024 checked copies. Each round returns39 pages,
+scrubs18 and verifies41 CR3 writes including the required retirement flush.
+The controller observes revocation and exits104; the survivor exits100.87 hostile
+marker controls reject per guest. All26 default checks pass:1762 Rust executions,
+120 Python oracle tests, two containment boots and unsigned denial. Three current
+six-process interaction/failure guests pass. [Evidence](checkpoints/cycle267-native-process-authority.md).
+
+This is a native kernel mechanism qualification, not a real supervisor or shell.
+Next in USI-3: bounded start/restart, atomic child/handle admission, retained cleanup
+retry/completion semantics, and separately compiled user-space supervisor policy.
+Prepared-task stop and owner-death/cleanup races need native evidence. Review code
+page limits,32 PMM allocation records,207/208 image pages and full call-chain stack
+bounds before program growth. Then USI-4 shell/read-only bundled files/two useful
+apps, followed by USI-5 optical integration and actual user-driven acceptance.
+
+The complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass remain
+required afterward. No phase/flag closes:40 phases301 subphases8996 requirements,
+59 additions98 flags43 open20 gap groups.1383 Python tests and618 architecture
+bindings are inventory only. Full canonical gates still block main.31 new scoped,
+hash-verified archives preserve failed and final builds; general reservation and
+restore remain open. PooleGlyph Phase65/next66 and owner inputs are unchanged.
+
+## Historical Cycle 266: Six-Process Capacity
 
 Eight IPC task tables/endpoints now match scheduler capacity; per-task limits4,
 queue depth4 and message size64 are unchanged. Six private CPL3 images use13

@@ -16,6 +16,8 @@ mod ipc_deadline;
 pub(super) mod ipc_pressure;
 mod ipc_reply;
 mod ipc_request;
+#[cfg(feature = "development-process-control")]
+pub(super) mod process_control;
 mod service;
 #[cfg(feature = "development-session")]
 pub(super) mod session;

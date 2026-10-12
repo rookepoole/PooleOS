@@ -45,6 +45,10 @@ pub enum Status {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Request {
+    Process {
+        handle: u64,
+        terminate: bool,
+    },
     #[cfg(feature = "development-console")]
     Console {
         handle: u64,
@@ -241,6 +245,11 @@ pub fn request(
         }
         #[cfg(feature = "development-console")]
         15 | 16 => Err(Status::Arguments),
+        17 | 18 if destination == 0 && bytes == 0 => Ok(Request::Process {
+            handle: source,
+            terminate: number == 18,
+        }),
+        17 | 18 => Err(Status::Arguments),
         _ => Err(Status::Unknown),
     }
 }

@@ -412,6 +412,10 @@ unsafe extern "C" {
     static poole_peer_startup_end: u8;
 }
 pub fn peer_payload(kind: usize) -> Result<&'static [u8], Error> {
+    #[cfg(feature = "development-process-control")]
+    if kind == 28 || kind == 29 {
+        return super::super::user_ipc::process_payload(kind == 29);
+    }
     if kind == 24 || kind == 25 {
         return super::super::user_ipc::deadline_payload(kind == 25);
     }

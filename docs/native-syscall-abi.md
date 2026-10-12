@@ -1,6 +1,15 @@
 # PSABI1 Development Syscall Profile
 
-Current extension, Cycle253: calls6-9 add asynchronous request, metadata receive,
+Current extension, Cycle267: call17 inspects a granted process authority attachment;
+call18 requests termination. RSI is the typed generation-bound handle; RDX/R10/R8/R9
+must be zero. An authenticated owned caller is mandatory. Inspect returns OK/1
+while attached and REVOKED/0 after detach, not scheduler or memory-reaped status.
+Stop returns AGAIN/0 while pending or claimed. Wrong owner, type, generation or
+rights denies. No user pointer, raw task ID, spawn or delegation is accepted.
+See [PPROC1](native-process-authority.md). These calls are not a complete lifecycle
+API or frozen production ABI; unrelated operations retain their existing semantics.
+
+Historical extension, Cycle253: calls6-9 add asynchronous request, metadata receive,
 one-use reply and discard. Call6 uses R8 for an owned reply endpoint; the other
 calls still require R8=0. Metadata receive returns a32-byte LE header plus payload,
 with kernel-authenticated sender identity and a task-local reply token. Existing

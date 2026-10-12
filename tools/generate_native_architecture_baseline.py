@@ -24,6 +24,16 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle267-native-process-authority.md",
+    "docs/native-process-authority.md",
+    "runs/native-process-authority-readiness.json",
+    "native/kernel/src/capability_ipc/process.rs",
+    "native/kernel/src/capability_ipc/process/tests.rs",
+    "native/kernel/src/arch/x86_64/user_ipc/process.rs",
+    "native/kernel/src/user_root_probe/peer_driver/process_control.rs",
+    "runtime/native_process_authority.py",
+    "tools/qualify_native_process_authority.py",
+    "tests/test_native_process_authority.py",
     "docs/checkpoints/cycle266-native-session-capacity.md",
     "docs/native-session-capacity.md",
     "runs/native-session-capacity-readiness.json",

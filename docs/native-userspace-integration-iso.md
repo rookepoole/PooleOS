@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 266, 2026-10-11. No new ISO exists yet.
+Status: implementation started, Cycle 267, 2026-10-11. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -45,13 +45,23 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | --- | --- | --- | --- |
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
-| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle266 partial: six private processes, eight IPC slots, console echo/close and independent worker cleanup pass. Narrow lifecycle authority, real supervision/loading/trust, restart and efficient idle remain |
+| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle267 partial: generation-bound user stop/inspection qualifies suspended/waiting targets; six-process console regression passes. Start/restart, real supervisor/loading/trust, general cleanup retry and efficient idle remain |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Not started |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
 ### Immediate Next Move
 
-Current: [Cycle266 six-process capacity](checkpoints/cycle266-native-session-capacity.md).
+Current: [Cycle267 process authority](checkpoints/cycle267-native-process-authority.md).
+Native stop requests now require explicit generation-bound grants. Two fresh
+guests reclaim suspended/waiting targets while another user process continues.
+Next: bounded start/restart, atomic child/handle admission, truthful completion
+and retained cleanup retry, and actual user-space supervisor policy. The current
+native controller is a diagnostic payload, not that supervisor. Prepared-task
+stop and owner-death/cleanup races remain. Keep code-page limits, PMM records,
+image headroom and stack bounds visible before growth. Then shell/read-only
+files/two useful apps and optical ISO, followed by complete robust microkernel work.
+
+Historical: [Cycle266 six-process capacity](checkpoints/cycle266-native-session-capacity.md).
 Six private images and13 grants pass console echo and worker-failure isolation.
 Eight IPC slots do not establish eight native images: six use30 PMM allocation
 records plus firmware against32 total. Image207/208 pages and36-page guarded stack

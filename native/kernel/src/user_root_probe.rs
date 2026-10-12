@@ -137,7 +137,9 @@ pub fn run(
     IST1_TOP.store(descriptors.ist1_top, Ordering::Release);
     IST2_BOTTOM.store(descriptors.ist2_bottom, Ordering::Release);
     IST2_TOP.store(descriptors.ist2_top, Ordering::Release);
-    let quota = if cfg!(feature = "development-session-capacity") {
+    let quota = if cfg!(feature = "development-process-control") {
+        39 + 12
+    } else if cfg!(feature = "development-session-capacity") {
         // Six owned images; firmware is charged independently, not hidden in78.
         78 + 12
     } else if cfg!(feature = "development-console-ipc") {
@@ -186,6 +188,19 @@ pub fn run(
         )
     );
     checked!(37, bootstrap.finish());
+    #[cfg(feature = "development-process-control")]
+    if !session {
+        peer_driver::process_control::run(
+            handoff,
+            core,
+            bits,
+            &mut manager,
+            topology,
+            hpet,
+            serial,
+            debugcon,
+        );
+    }
     if session {
         #[cfg(feature = "development-session")]
         peer_driver::session::run(

@@ -40,7 +40,11 @@ pub(super) use reply::payload as reply_payload;
 mod request;
 pub(super) use request::payload as request_payload;
 mod deadline;
+#[cfg(feature = "development-process-control")]
+mod process;
 pub(super) use deadline::payload as deadline_payload;
+#[cfg(feature = "development-process-control")]
+pub(super) use process::payload as process_payload;
 
 fn idle() -> Result<(), Error> {
     if super::user::active() || super::read_rflags() & ((1 << 9) | (1 << 10) | (1 << 18)) != 0 {
@@ -106,6 +110,10 @@ pub(super) fn prepare_wait(
     readiness: poolekernel::capability_ipc::wait::Readiness,
 ) -> Result<poolekernel::capability_ipc::wait::Admission, Status> {
     unsafe { &mut *(&raw mut IPC) }.prepare_wait(caller, handle, readiness)
+}
+
+pub(super) fn process_operation(caller: Caller, handle: u64, terminate: bool) -> (Status, u64) {
+    unsafe { &mut *(&raw mut IPC) }.process_operation(caller, handle, terminate)
 }
 
 pub(super) fn prepare_request_wait(
