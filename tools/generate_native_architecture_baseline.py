@@ -24,6 +24,11 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle269-native-kernel-budget.md",
+    "docs/native-kernel-budget.md",
+    "runs/native-kernel-budget-readiness.json",
+    "runtime/native_kernel_budget.py",
+    "tests/test_native_kernel_budget.py",
     "docs/checkpoints/cycle268-native-process-launch.md",
     "docs/native-process-launch.md",
     "runs/native-process-launch-readiness.json",

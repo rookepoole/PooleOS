@@ -7,9 +7,17 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 268
+Last roadmap reconciliation: PooleOS Cycle 269
 
-Cycle268 adds atomic, generation-bound launch/restart and a separately compiled
+Cycle269 separates diagnostic storage from user-space entry and enforces measured
+kernel image budgets. Launch/console profiles use110/113 of208 reserved pages;
+default207/208 and full stack bounds still require care. All28 default checks and
+13 VM runs pass, without a new shell or ISO. Next integrate the shell/files/two
+useful apps and optical ISO; complete robust microkernel work continues afterward.
+No phase closure or canonical qualification is implied.
+[Evidence](checkpoints/cycle269-native-kernel-budget.md).
+
+Historical Cycle268 adds atomic, generation-bound launch/restart and a separately compiled
 user-space supervisor. Eleven final-layout guests and all27 default checks pass.
 Image208/208 pages and152-byte default RELRO padding require capacity review before
 growth. Next integrate real shell/files/two useful apps and optical ISO, retaining

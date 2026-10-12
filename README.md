@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle268 adds atomic launch/restart authority
+**Current development checkpoint:** Cycle269 separates diagnostic stack storage
+from user-space entry and measures actual image layout. Launch and six-process
+console profiles now use110/113 pages instead of208; the default entry frame is840
+bytes instead of29656. All28 default checks and13 fresh VM runs pass. Next: actual
+shell/files/two useful apps and optical ISO, then the complete robust microkernel.
+No usable ISO yet; full canonical qualification remains open.
+[Evidence](docs/checkpoints/cycle269-native-kernel-budget.md).
+
+**Historical development checkpoint:** Cycle268 adds atomic launch/restart authority
 and a separately compiled user-space supervisor. Eleven final-layout VM runs and
 all27 default regression checks pass, including invalid authority, process stop,
 console interaction and independent-process survival. Image208/208 pages now needs

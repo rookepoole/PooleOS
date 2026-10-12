@@ -21,6 +21,7 @@ sys.path.insert(0, str(ROOT))
 from runtime import native_elf_loader as elf  # noqa: E402
 from runtime import native_kernel_entry as entry  # noqa: E402
 from runtime import native_kernel_image as kernel_image  # noqa: E402
+from runtime import native_kernel_budget as kernel_budget  # noqa: E402
 from runtime.native_binary import scan_forbidden_markers  # noqa: E402
 from tools.qualify_native_elf_loader import (  # noqa: E402
     _build_loader,
@@ -230,6 +231,8 @@ def _build_product(cargo: Path, env: dict[str, str], target_dir: Path, *, featur
         raise QualificationError("linked PooleKernel artifact is missing")
     linked = artifact.read_bytes()
     canonical, plan = kernel_image.canonicalize_linked_image(linked)
+    budget = kernel_budget.inspect(linked)
+    (target_dir / "kernel-budget.json").write_text(json.dumps(budget, indent=2) + "\n", encoding="utf-8", newline="\n")
     return linked, canonical, plan
 
 

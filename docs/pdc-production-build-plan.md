@@ -1,15 +1,48 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-11
-Plan version: 2.171.0-native-process-launch
-Roadmap cycle: PooleOS Cycle 268
+Plan version: 2.172.0-native-kernel-budget
+Roadmap cycle: PooleOS Cycle 269
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 268: User-Space Launch And Restart
+## Cycle 269: Kernel Capacity And Entry Stack
+
+PKBUDGET1 page-rounds actual text/RELRO/BSS use and checks every linked product.
+The existing208-page reservation,36-page guarded stack,0xD000 entry, W^X and
+compiler settings remain. Diagnostic-only locals now have a separate non-inlined
+function boundary. Default entry local frame falls from29656 to840 bytes, excluding
+saved registers/callees. This is not a complete call-chain bound.
+
+Final images:207 pages default,110 launch,109 denied launch,184 stop and113
+six-process console. The integration profiles have room to proceed; all-diagnostic
+default growth still needs review. All28 default checks pass with1794 overlapping
+Rust executions/133 Python oracle tests. Thirteen fresh VM runs cover containment,
+ordinary denial, launch/restart, invalid authority, stop, console/worker failure
+and PMM diagnostics. Six retained user programs are reverified, not rebuilt.
+The smaller `z` compiler experiment's real stack-guard fault is retained; that
+optimization was not adopted. [Evidence](checkpoints/cycle269-native-kernel-budget.md).
+
+Next integrate the actual user-space shell with existing console and launch/stop,
+then read-only files/two useful apps and optical ISO acceptance. Truthful exit,
+retained cleanup/owner-death recovery, code pages,32 PMM records, full stack bounds,
+executable trust/loading, efficient idle and general supervision remain open.
+Complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass follow the
+usable ISO. All other diagnostic profiles and canonical gates still need replay.
+
+No phase/flag closes:40 phases301 subphases8996 requirements59 additions98 flags43
+open20 gap groups.1398 Python tests and634 architecture bindings are inventory.
+After removing one accidental manifest LF, all six kernel/three bootloader profiles
+and ten guest media inputs reconstruct to the exact tested bytes. Original capture
+source records and failed metadata checks are retained; no gate is relaxed.
+46 verified archive additions preserve the cycle,209 total across264-269; storage
+reservation/restore remains open. Owner inputs and PooleGlyph Phase65/next66 are
+unchanged. No new ISO, release or main-merge qualification.
+
+## Historical Cycle 268: User-Space Launch And Restart
 
 PLAUNCH1 adds generation-bound launch grants, numbered requests and atomic child,
 scheduler, IPC and process-handle admission. Separately compiled PooleSupervisor

@@ -8453,6 +8453,28 @@ extern "C" fn poole_kernel_rust_entry(
         );
     }
 
+    run_development_diagnostics(
+        trap_scenario,
+        decoded,
+        validated,
+        stack_top,
+        observed_cr3,
+        serial,
+        debugcon,
+    )
+}
+
+// Keep diagnostic-only local storage off the user-space bootstrap call chain.
+#[inline(never)]
+fn run_development_diagnostics(
+    trap_scenario: DevelopmentTrapScenario,
+    decoded: poole_handoff::Handoff<'_>,
+    validated: poolekernel::ValidatedEntry,
+    stack_top: usize,
+    observed_cr3: u64,
+    mut serial: Com1,
+    mut debugcon: DebugCon,
+) -> ! {
     if trap_scenario == DevelopmentTrapScenario::CpuPolicy {
         // SAFETY: PKXFER1 has transferred once at CPL0 with IF/DF clear. PKCPU1 performs
         // only support-gated CPUID, control-register, XCR0, and MSR reads.

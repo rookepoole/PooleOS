@@ -13887,7 +13887,7 @@ def apply_cycle268(roadmap: dict, test_count: int) -> dict:
         phase["current_evidence"].insert(0, evidence)
         phase["current_gaps"].insert(0, gap)
     next(p for p in roadmap["phases"] if p["id"] == "N36")["current_evidence"].insert(
-        0, f"Cycle 268 source inventory: {test_count} Python tests discovered; full qualification pending")
+        0, "Cycle 268 source inventory: 1389 Python tests discovered; full qualification pending")
     for flag in roadmap["implementation_flags"]:
         if flag["id"] in ("FLAG-N13-USERSPACE-ISO-001", "FLAG-NATIVE-DRIVER-001", "FLAG-N36-EVIDENCE-STORAGE-001"):
             flag["evidence"].append(checkpoint)
@@ -13907,13 +13907,97 @@ def apply_cycle268(roadmap: dict, test_count: int) -> dict:
             "review code-page capacity, PMM records and complete stack bounds before process growth",
             "read-only files/two useful apps, then fresh optical ISO interaction and sustained-session acceptance",
             "retain failed evidence, ordinary trust denial, canonical gates before main and complete robust microkernel afterward"])
+    return apply_cycle269(roadmap, test_count)
+
+
+def apply_cycle269(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle269-native-kernel-budget.md"
+    path = "runs/native-kernel-budget-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    digest = hashlib.sha256(raw).hexdigest().upper()
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle268_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    for name in ("closeout_regression", "user_entry_metadata"):
+        gate["historical_cycle268_" + name] = copy.deepcopy(gate["current_" + name])
+    baseline["native_process_launch_integration"]["evidence_status"] = "historical_after_cycle269_layout_and_stack_separation"
+    baseline.update(pooleos_cycle=269, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 269
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-kernel-budget.md"]
+    gate["current_candidate_audit"]["cycle"] = 269
+    gate["current_focused_source_projection"]["cycle"] = 269
+    gate["qualification_status"] = "measured_kernel_budgets_and_stack_separation_pass_shell_ISO_and_canonical_gates_pending"
+    regression = receipt["default_regression"]
+    capture = {k:v for k,v in receipt["captures"]["regressionrepaired"].items() if k != "return_code"}
+    gate["current_closeout_regression"] = dict(cycle=269, status="pass",
+        receipt_path=path, receipt_section="default_regression", receipt_sha256=digest,
+        source_binding_count=len(regression["source_bindings"]), checks_passed=len(regression["checks"]),
+        rust_test_executions=receipt["rust_test_executions"], additional_python_oracle_tests=receipt["python_oracle_tests"],
+        guest_runs=3, **capture, known_unresolved_readiness_tests=regression["known_unresolved_readiness_tests"],
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_user_entry_metadata"] = dict(cycle=269, status="pass",
+        tests_run=243, tests_passed=243, tests_failed=0, tests_skipped=0,
+        unittest_elapsed_seconds=53.277, elapsed_seconds=54.329,
+        log_sha256="CB04D82FB8EBF36A70035E6F8DED02C56F8A641E05257D2385FAA1054626CB68",
+        source_unchanged=True, owner_report_unchanged=True,
+        conservation_tests=179, conservation_test_seconds=10.149,
+        conservation_capture_seconds=11.657,
+        conservation_log_sha256="28772727A558084BAAAC7756C79C2BC13A3E7E74F4CE594D95E4C2DEE57CDB8E",
+        scope="pre_closeout_metadata_and_conservation_not_final_commit_or_canonical_gate",
+        counts_overlap=True, historical_integrity_is_not_new_execution=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    budget = receipt["budgets"]["default"]["kernel"]
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=269, receipt_path=path, receipt_section="process_launch",
+        native_execution_evidence_cycle=269, native_execution_replayed_this_cycle=True,
+        native_execution_status="measured_layout_launch_stop_console_containment_and_PMM_diagnostics_pass",
+        kernel_image_pages=budget["image_pages"], kernel_remaining_capacity_pages=budget["remaining_pages"],
+        launch_profile_pages=110, session_profile_pages=113,
+        default_relro_padding_bytes=budget["relro_padding_bytes"], capacity_review_required_before_growth=True,
+        full_stack_bound_proven=False)
+    baseline["native_kernel_budget_integration"] = dict(cycle=269, contract_id="PKBUDGET1", status="pass",
+        receipt_path=path, receipt_sha256=digest, guest_runs=13, new_oracle_tests=8,
+        image_pages={name:{profile:value["image_pages"] for profile,value in values.items()}
+                     for name,values in receipt["budgets"].items()},
+        default_entry_local_frame_bytes=840, previous_default_entry_local_frame_bytes=29656,
+        guarded_stack_pages=36, kernel_reserved_pages=208, rejected_z_optimization=True,
+        exact_manifest_lf_identity_rebuild=True, current_source_rebuilt_kernel_profiles=6,
+        current_source_rebuilt_boot_profiles=3, exact_media_reconstructions=10,
+        user_programs_rebuilt_this_cycle=False, retained_user_programs_reverified=True,
+        all_diagnostic_profiles_replayed=False, full_stack_bound_proven=False,
+        shell=False, iso_built=False, production_ready=False)
+    evidence = "Cycle269: PKBUDGET1 measures actual page-rounded text/RELRO/BSS while retaining208-page reservation,36-page guarded stack and compiler settings. Diagnostic separation reduces default entry local frame29656->840 bytes. Default/launch/stop/console images207/110/184/113 pages;28 default checks and13 native guests pass, including PMM diagnostics. Rejected compiler optimization's stack-guard fault remains recorded. " + checkpoint
+    gap = "Integrate actual user-space shell with console and generation-bound launch/stop, then read-only files/two useful apps and optical ISO acceptance. Preserve truthful exit, retained cleanup and native owner-death recovery. Per-profile budgets, default207/208, code pages,32 PMM records, full stack bounds, efficient idle, executable trust and general supervision remain. Other diagnostic profiles and full canonical gates require current-candidate replay; complete robust microkernel/PDC/PooleGlyph/PooleGlass remain required after ISO."
+    for phase_id in ("N6", "N9", "N13", "N14", "N16", "N21", "N22", "N36"):
+        phase = next(p for p in roadmap["phases"] if p["id"] == phase_id)
+        phase["current_evidence"].insert(0, evidence)
+        phase["current_gaps"].insert(0, gap)
+    next(p for p in roadmap["phases"] if p["id"] == "N36")["current_evidence"].insert(
+        0, f"Cycle 269 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N13-USERSPACE-ISO-001", "FLAG-NATIVE-DRIVER-001", "FLAG-N36-EVIDENCE-STORAGE-001"):
+            flag["evidence"].append(checkpoint)
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["closure_condition"] += " Cycle269: " + gap
+        if flag["id"] == "FLAG-N36-EVIDENCE-STORAGE-001":
+            flag["closure_condition"] += " Cycle269 adds46 verified archives; storage reservation/restore remains open."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Integrate actual user-space shell, files and apps, then optical ISO",
+        entry_evidence=[checkpoint, path, "docs/native-kernel-budget.md", "docs/native-userspace-integration-iso.md"],
+        exit_evidence=["actual isolated user shell using existing console and launch/stop authority",
+            "truthful completion, retained cleanup ownership and native failure/owner-death controls",
+            "per-profile image budget, code-page, PMM-record and stack reviews before growth",
+            "read-only files/two useful apps, then optical ISO interaction and sustained-session acceptance",
+            "retain failed evidence, ordinary denial, canonical gates before main and complete robust microkernel afterward"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1389)
+    parser.add_argument("--test-count", type=int, default=1398)
     parser.add_argument("--status-date", default="2026-10-11")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 268, 2026-10-11. No new ISO exists yet.
+Status: implementation started, Cycle 269, 2026-10-11. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -51,7 +51,17 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 
 ### Immediate Next Move
 
-Current: [Cycle268 launch/restart](checkpoints/cycle268-native-process-launch.md).
+Current: [Cycle269 kernel capacity](checkpoints/cycle269-native-kernel-budget.md).
+Measured layouts reduce launch/console profiles to110/113 pages within208 reserved.
+Diagnostic-only locals are separated from user-space entry; default entry local
+frame840 bytes. All28 default checks and13 fresh guests pass, including PMM
+diagnostics. The failed `z` compiler experiment is retained and not adopted.
+Integrate the real shell with existing console and generation-bound launch/stop,
+then bundled read-only files/two useful apps and optical ISO acceptance. Per-profile
+growth checks, default207/208, full stack bounds, truthful exit/cleanup and owner
+death remain explicit. Complete robust microkernel development continues afterward.
+
+Historical: [Cycle268 launch/restart](checkpoints/cycle268-native-process-launch.md).
 PooleSupervisor now executes user-owned bounded policy through call19 and PPROC1
 inspection. Two worker lifetimes and denied-authority prepared cancellation pass
 alongside an independent survivor. All27 default checks, two stop guests and three
