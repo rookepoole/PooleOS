@@ -1,15 +1,44 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-13
-Plan version: 2.178.0-native-retained-terminal-cleanup
-Roadmap cycle: PooleOS Cycle 275
+Plan version: 2.179.0-native-prepared-cancellation
+Roadmap cycle: PooleOS Cycle 276
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 275: Retained Terminal Cleanup
+## Cycle 276: Owned Prepared Cancellation
+
+A child stopped before its first instruction now derives cancellation from its
+owned image, retains memory across failed reclamation, and cannot be reused or
+reported complete until cleanup succeeds. Both admitted and unused prepared
+children in the interactive integration use this path. Six new tests include78
+page-boundary failures;526 kernel and78 user tests pass per profile. Three native
+prepared-stop guests prove zero child entry and next-generation execution; three
+ordinary shell guests and two default diagnostics plus unsigned denial also pass.
+[Evidence and retained failures](checkpoints/cycle276-prepared-cancellation.md).
+
+Nine earlier pre-format VM runs remain separate history; all nine were replayed
+after the test-module formatting correction. They are not18 final-source boots.
+Normal/prepared profiles use111/112 pages; default208 with120 RELRO padding bytes.
+Stack36 pages unchanged; measured local frames50136/49336 are not full stack proof.
+
+USI-3/4 remain partial. Next implement durable ownership and cleanup of children
+after parent death, including prepared/runnable/waiting/reclaiming states, stale
+generations, pending launches/stops, and unrelated-task survival. Asynchronous
+retry, partial allocator-commit fault injection and full stack bounds remain open.
+Then implement the read-only bundled-file service, two useful separate apps and
+sustained optical ISO acceptance. Replace diagnostic roles within the reviewed
+six-process capacity before proposing capacity growth. The complete robust
+microkernel, PDC, PooleGlyph and accessible PooleGlass continue afterward.
+
+No phase/flag closes:40 phases301 subphases8996 requirements59 additions98 flags43
+open20 gap groups.1425 Python tests and679 architecture bindings are inventories,
+not full canonical qualification. No usable integration ISO or main merge yet.
+
+## Historical Cycle 275: Retained Terminal Cleanup
 
 Terminal slots now retain original allocation ownership through erase/readback,
 finish and release, preserve failed cleanup for retry, and prevent reentry/reuse

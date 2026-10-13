@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle275 retains terminal-process memory
+**Current development checkpoint:** Cycle276 adds owned cancellation for children
+that have never executed and migrates their interactive cleanup to retained
+reclamation. Nine final-source VM runs pass, including real shell stop/restart,
+fault survival and default boot regressions. Next: owner-death/orphan handling,
+read-only files, two useful apps, then sustained optical ISO acceptance. No usable
+integration ISO or new main qualification yet. Full robust microkernel development
+continues afterward. [Evidence](docs/checkpoints/cycle276-prepared-cancellation.md).
+
+**Historical development checkpoint:** Cycle275 retains terminal-process memory
 ownership through failed cleanup and verifies controlled native retries. Nine VM
 runs pass, including ordinary shell interaction and default boot regressions.
 Next: prepared/owner-death recovery, read-only files, two useful apps, then optical

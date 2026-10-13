@@ -14403,13 +14403,96 @@ def apply_cycle275(roadmap: dict, test_count: int) -> dict:
             "asynchronous cleanup retry and partial allocator-commit controls; complete stack/resource bounds",
             "read-only bundled files and two useful separately launched apps, not diagnostic counters",
             "optical ISO sustained interaction; canonical gates before main; full robust microkernel afterward"])
+    return apply_cycle276(roadmap, test_count)
+
+
+def apply_cycle276(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle276-prepared-cancellation.md"
+    path = "runs/native-prepared-cleanup-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle275_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=276, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 276
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-prepared-cleanup.md"]
+    gate["current_candidate_audit"]["cycle"] = 276
+    gate["current_focused_source_projection"]["cycle"] = 276
+    gate["qualification_status"] = "prepared_cancellation_native_pass_owner_death_files_apps_and_ISO_gates_pending"
+    for name in ("current_retained_cleanup_qualification", "current_retained_cleanup_metadata"):
+        gate[name]["evidence_status"] = "historical_cycle275_not_current_candidate_qualification"
+    baseline["native_retained_cleanup"]["evidence_status"] = "historical_cycle275_not_current_candidate_qualification"
+    record = dict(cycle=276, contract_id="PCANCEL1", status="pass", receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), kernel_tests_per_profile=526,
+        new_kernel_tests=6, user_tests_per_profile=78, initial_python_tests=17,
+        independent_program_pairs_reverified=10, retained_program_build_cycle=274,
+        source_binding_count=len(receipt["native_execution"]["normal"]["source_bindings"]),
+        guest_runs=9, prepared_stop_guests=3, ordinary_shell_guests=3,
+        default_diagnostic_guests=2, ordinary_denial_guests=1,
+        superseded_preformat_guests=9, total_guest_runs_this_cycle=18,
+        prepared_native_stops=3, prepared_child_entries=0, prepared_page_boundary_failure_cases=78,
+        prepared_outcome_derived_from_owned_admission=True, original_retention_tokens_transferred=True,
+        prepared_child_stop_native_tested=True, prepared_child_cleanup_migrated=True,
+        native_injected_failures=10, ordinary_free_denials=50, early_completion_denials=10,
+        useful_application_count=0, owner_death_recovery=False, asynchronous_cleanup_recovery=False,
+        general_cleanup_retry=False, general_prepared_cleanup_migration=False,
+        partial_allocator_commit_failure_injected=False, full_stack_bound_proven=False,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_prepared_cleanup_qualification"] = record
+    gate["current_prepared_cleanup_metadata"] = dict(cycle=276, status="pass", tests_passed=270,
+        unittest_elapsed_seconds=55.563, capture_elapsed_seconds=56.656,
+        log_sha256="BEE08B084B7CFA808E4C9800F12C3209759D265067B2EE5E06E9D978C2F76E7D",
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_prepared_cleanup"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=276, selected_stage="USI-3", session_contract="PCANCEL1", receipt_path=path,
+        receipt_section="native_execution", native_execution_evidence_cycle=276,
+        native_execution_replayed_this_cycle=True, native_execution_status="prepared_cancellation_retained_retry_shell_control_and_default_regression_pass",
+        shell_native_execution_evidence_cycle=276, shell_native_execution_replayed_this_cycle=True,
+        shell_application_launch=True, shell_launch_catalogue_is_diagnostic=True, useful_application_count=0,
+        terminal_slot_reclamation=True, controlled_native_cleanup_retry=True,
+        prepared_child_cleanup_migrated=True, prepared_child_stop_native_tested=True,
+        asynchronous_cleanup_recovery=False, owner_death_recovery=False, general_cleanup_retry=False,
+        general_prepared_cleanup_migration=False, retained_kernel_sources_unchanged=False,
+        kernel_image_pages=111, kernel_remaining_capacity_pages=97, prepared_profile_pages=112,
+        default_profile_build_cycle=276, default_profile_pages=208, default_profile_replayed_this_cycle=True,
+        default_relro_padding_bytes=120, integration_dispatcher_local_bytes=50136,
+        prepared_dispatcher_local_bytes=49336, bundled_files=False, full_stack_bound_proven=False,
+        local_keyboard_display=False)
+    lane["stages"]["USI-3"] = "partial_terminal_and_prepared_cleanup_verified_owner_death_and_async_recovery_pending"
+    lane["stages"]["USI-4"] = "partial_native_shell_process_controls_files_useful_apps_and_local_input_pending"
+    evidence = "Cycle276: owned pre-entry cancellation derives the exact root/outcome, and both admitted and unused interactive prepared children use retained cleanup. Six new tests include78 page-boundary failures;526 kernel and78 user tests pass per profile. Three prepared-stop guests prove zero first-child entry, three failed prepared erases and execution of generation2. Ten total injected failures retain ownership, with50 free and10 early-completion denials. Three ordinary shell guests plus two default diagnostics and unsigned denial pass. Nine pre-format guests remain superseded history, not final-source evidence. Ten retained Cycle274 program pairs reverified, not rebuilt. Normal111/prepared112/default208 pages,36 stack pages,local frames50136/49336 not full proof. " + checkpoint
+    gap = "Implement durable child ownership after parent lease detachment, explicit supervised-child cancellation versus independent service policy, owner-death recovery for prepared/runnable/waiting/reclaiming children and pending/claimed launch/stop requests, stale-generation rejection and unrelated-task survival. Current shell-exit/live-child halts are not recovery. Asynchronous cleanup retry, partial allocator-commit fault injection and full stack bounds remain. Then read-only bundled files and two useful separately launched applications, replacing diagnostic roles within six processes before proposing capacity growth; sustained optical ISO acceptance follows. Preserve16384-byte RX cap,8 mappings/4 frame bindings,32 PMM records and208-page default capacity (120 RELRO padding bytes). General executable trust, writable data/heap, local input/display, efficient idle and exact-candidate canonical gates remain open. Complete robust microkernel/PDC/PooleGlyph/PooleGlass work continues after usable ISO."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N9", "N13", "N14", "N16", "N18", "N20", "N36"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 276 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N13-USERSPACE-ISO-001", "FLAG-N36-EVIDENCE-STORAGE-001"):
+            flag["evidence"].append(checkpoint)
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["closure_condition"] += " Cycle276: " + gap
+        if flag["id"] == "FLAG-N36-EVIDENCE-STORAGE-001":
+            flag["closure_condition"] += " Cycle276 preserves38 generated build/media archives including pre-format history, verified member-by-member; automatic reservation and restore remain open."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Implement owner-death cleanup, then bundled files, useful apps and ISO",
+        entry_evidence=[checkpoint, path, "docs/native-prepared-cleanup.md", "docs/native-userspace-integration-iso.md"],
+        exit_evidence=["durable child ownership and native parent-death/orphan recovery across prepared, waiting, running and reclaiming states",
+            "pending/claimed request retirement, stale-generation rejection, unrelated-task survival and bounded asynchronous cleanup retry",
+            "read-only bundled files and two useful separately launched apps within reviewed capacity, not diagnostic counters",
+            "optical ISO sustained interaction; canonical gates before main; full robust microkernel afterward"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1422)
+    parser.add_argument("--test-count", type=int, default=1425)
     parser.add_argument("--status-date", default="2026-10-13")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

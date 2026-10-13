@@ -24,6 +24,12 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle276-prepared-cancellation.md",
+    "docs/native-prepared-cleanup.md",
+    "runs/native-prepared-cleanup-readiness.json",
+    "native/kernel/src/user_entry/prepared_cancel_tests.rs",
+    "runtime/native_prepared_cleanup.py",
+    "tests/test_native_prepared_cleanup.py",
     "docs/checkpoints/cycle274-native-shell-process-control.md",
     "docs/checkpoints/cycle275-retained-terminal-cleanup.md",
     "docs/native-retained-cleanup.md",

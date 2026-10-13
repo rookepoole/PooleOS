@@ -1,7 +1,11 @@
 # Retained Terminal Cleanup
 
-Contract: `PRECLAIM1`. Cycle 275, 2026-10-13. Development-only, single-BSP
+Historical contract checkpoint: `PRECLAIM1`. Cycle 275, 2026-10-13. Development-only, single-BSP
 terminal-task reclamation; not general asynchronous recovery or SMP retirement.
+
+Cycle276 subsequently migrates the interactive prepared-child paths. See
+[owned prepared cancellation](native-prepared-cleanup.md); the Cycle275 evidence
+and its remaining-boundary statements below are preserved as historical scope.
 
 ## Ownership And Ordering
 

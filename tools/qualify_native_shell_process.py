@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from runtime import native_shell_process as probe, native_user_program, native_shell, native_console, native_session
 from runtime import native_shell_cleanup as cleanup
+from runtime import native_prepared_cleanup as prepared
 from tools import qualify_native_console_ipc as shared, qualify_native_user_entry as source
 from tools.qualify_native_user_programs import bindings as program_bindings
 from tools.native_build_space import require_space
@@ -61,17 +62,22 @@ def main():
     parser.add_argument('--work-dir', type=Path, required=True)
     parser.add_argument('--program-dir', type=Path, required=True)
     parser.add_argument('--cleanup-retry', action='store_true')
+    parser.add_argument('--prepared-stop', action='store_true')
     args = parser.parse_args(); work, programs = args.work_dir.resolve(), args.program_dir.resolve()
     if not work.is_relative_to(ROOT/'outputs') or not programs.is_relative_to(ROOT/'outputs'):
         parser.error('workspace output paths required')
     storage = require_space(work); work.mkdir(parents=True, exist_ok=False)
     before = source.source_bindings()
-    report = dict(cycle=275, contract_id='PRECLAIM1' if args.cleanup_retry else 'PSHELLPROC1', status='fail', source_bindings=before,
+    report = dict(cycle=276, contract_id='PCANCEL1' if args.prepared_stop else 'PRECLAIM1' if args.cleanup_retry else 'PSHELLPROC1', status='fail', source_bindings=before,
         storage_preflight=storage, guest_bound_seconds=180, guest_runs=[], useful_applications=0,
         bundled_files=False, iso_built=False, production_ready=False)
     oracle = cleanup if args.cleanup_retry else probe
     features = ('development-shell-cleanup-retry',) if args.cleanup_retry else ('development-shell-process',)
     bad_features = ('development-shell-cleanup-retry','development-shell-process-bad-owner') if args.cleanup_retry else ('development-shell-process-bad-owner',)
+    if args.prepared_stop:
+        oracle = prepared
+        features = ('development-shell-prepared-stop',)
+        bad_features = ('development-shell-prepared-stop', 'development-shell-process-bad-owner')
     try:
         cargo, _, env = shared._toolchain(ROOT/'.toolchains/rust-1.97.0')
         report['program_build'] = program_inputs(programs, env)

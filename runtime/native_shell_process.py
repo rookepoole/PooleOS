@@ -20,7 +20,9 @@ def parse(line: str, event: str) -> dict:
     if any(v >= 1 << 64 for v in values): raise ValueError('observation overflow')
     return dict(zip(names, values))
 
-def validate_markers(markers: list[str], *, bad_owner: bool = False) -> dict:
+def validate_markers(markers: list[str], *, bad_owner: bool = False, prepared_dispatch: int | None = None) -> dict:
+    if prepared_dispatch is not None and (type(prepared_dispatch) is not int or not 0 < prepared_dispatch < 1 << 64):
+        raise ValueError('invalid prepared dispatch')
     if len(markers) < 40: raise ValueError('incomplete process session')
     arm = transfer.TRANSFER_ARM.fullmatch(markers[23])
     if arm is None or int(arm.group(10)) != 23: raise ValueError('session selector required')
@@ -74,7 +76,8 @@ def validate_markers(markers: list[str], *, bad_owner: bool = False) -> dict:
             if task not in live or task not in owned or v['generation'] != generation[task] or v['released_pages'] != pages[task]:
                 raise ValueError('retirement identity or pages')
             expected = (1<<32) if task < 4 else (4<<32) if task == 4 else (2<<32)|6
-            if v['outcome'] != expected or (v['calls'] == 0) != (task == 5) or v['calls'] < previous_calls[task]:
+            zero_calls = task == 5 or (prepared_dispatch is not None and task == 4 and generation[task] == 1)
+            if v['outcome'] != expected or (v['calls'] == 0) != zero_calls or v['calls'] < previous_calls[task]:
                 raise ValueError('wrong terminal outcome or lost accounting')
             if task == 3 and (4 in live or 5 in live): raise ValueError('shell abandoned live children')
             previous_calls[task] = v['calls']
@@ -84,13 +87,16 @@ def validate_markers(markers: list[str], *, bad_owner: bool = False) -> dict:
                 raise ValueError('invalid unused image cleanup')
             owned.remove(task); unused.append(v)
         else:
-            expected_flushes = sum(r['task'] == 4 for r in retires)
-            if dispatches != (len(samples)+1)*64 or dispatches < last_event or v['cr3_writes'] != 2*dispatches+expected_flushes or v['extra_flushes'] != expected_flushes:
+            expected_flushes = sum(r['task'] == 4 and r['calls'] > 0 for r in retires)
+            held = int(prepared_dispatch is not None and dispatches >= prepared_dispatch)
+            if dispatches != (len(samples)+1)*64 or dispatches < last_event or v['cr3_writes'] != 2*(dispatches-held)+expected_flushes or v['extra_flushes'] != expected_flushes:
                 raise ValueError('dispatch/flush accounting')
             if v['pages'] != sum(pages[j] for j in owned) or v['live_mask'] != sum(1<<j for j in live) or [v['generation4'],v['generation5']] != generation[4:] or v['retired'] != len(retires) or v['unused'] != len(unused):
                 raise ValueError('lifecycle accounting')
             for j in range(6):
                 pair = (v[f'calls{j}'], v[f'ticks{j}'])
+                if prepared_dispatch is not None and j == 4 and generation[j] == 1 and pair != (0,0):
+                    raise ValueError('prepared child executed')
                 if pair[0] < previous_calls[j] or pair[1] < previous_ticks[j]: raise ValueError('accounting regressed')
                 if j < 2 and (pair[0] <= previous_calls[j] or pair[1] <= previous_ticks[j]): raise ValueError('survivor stopped progressing')
                 if j not in live and pair != frozen.setdefault(j, pair): raise ValueError('retired image resumed')
@@ -130,8 +136,8 @@ def scenario(nonce: str, *, bad_owner: bool = False) -> shell.Scenario:
     command(b'exit', b'Bye.\r\n', True)
     return shell.Scenario('bad-owner' if bad_owner else 'process-control', nonce, tuple(steps))
 
-def negative_controls(markers: list[str], *, bad_owner: bool = False) -> int:
-    validate_markers(markers, bad_owner=bad_owner)
+def negative_controls(markers: list[str], *, bad_owner: bool = False, prepared_dispatch: int | None = None) -> int:
+    validate_markers(markers, bad_owner=bad_owner, prepared_dispatch=prepared_dispatch)
     cases = [markers[:i]+markers[i+1:] for i in range(len(markers)-1)]
     cases += [markers+[markers[-1]], markers+['POOLEOS:PANIC injected']]
     for i in range(29,len(markers)):
@@ -143,7 +149,7 @@ def negative_controls(markers: list[str], *, bad_owner: bool = False) -> int:
                 changed=markers.copy(); changed[i]=re.sub(r' '+field+r'=[0-9]+', ' '+field+'=0', changed[i])
                 cases.append(changed)
     for case in cases:
-        try: validate_markers(case, bad_owner=bad_owner)
+        try: validate_markers(case, bad_owner=bad_owner, prepared_dispatch=prepared_dispatch)
         except ValueError: continue
         raise ValueError('hostile process observation accepted')
     return len(cases)

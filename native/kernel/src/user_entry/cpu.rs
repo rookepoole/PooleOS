@@ -119,6 +119,17 @@ impl<H: Cpu> CpuImage<H> {
         self.state
     }
 
+    pub(crate) fn unexposed_admission(&self) -> Result<crate::user_entry::ImageAdmission, Error> {
+        if self.state != State::Inactive
+            || self.context.is_some()
+            || !self.user_quiescent
+            || !self.timer_quiescent
+        {
+            return Err(Error::State);
+        }
+        self.prepared.admission().ok_or(Error::State)
+    }
+
     fn timer_context(&mut self) -> Result<timer::Mappings, Error> {
         if self.state != State::Active {
             return Err(Error::State);

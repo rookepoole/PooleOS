@@ -7,6 +7,7 @@ pub(super) fn reap(
     scheduler: &scheduler::Scheduler,
     outcome: task::Outcome,
     pages: u64,
+    admitted: bool,
     serial: &mut Com1,
     debugcon: &mut DebugCon,
 ) -> Result<(), ()> {
@@ -19,7 +20,7 @@ pub(super) fn reap(
         }
     }
     #[cfg(feature = "development-shell-cleanup-retry")]
-    if (4..6).contains(&outcome.id.slot) && (1..=2).contains(&outcome.id.generation) {
+    if admitted && (4..6).contains(&outcome.id.slot) && (1..=2).contains(&outcome.id.generation) {
         let before = manager.summary().allocated_pages;
         let mode = 1 + (outcome.id.slot - 4) * 2 + (outcome.id.generation as u8 - 1);
         let mut memory = FaultMemory {
@@ -70,7 +71,7 @@ pub(super) fn reap(
         log.write_str(" released_pages=0 ordinary_free_denials=5 no_reentry=1 early_completion_rejected=1 cpl=0 production=0\n");
     }
     #[cfg(not(feature = "development-shell-cleanup-retry"))]
-    let _ = (scheduler, pages, serial, debugcon);
+    let _ = (scheduler, pages, admitted, serial, debugcon);
     if p.slot
         .reclaim(p.id, manager, &mut p.memory)
         .map_err(|_| ())?

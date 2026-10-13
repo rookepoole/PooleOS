@@ -160,6 +160,7 @@ pub(crate) fn run(
     let mut ticks = [0u64; 6];
     let mut generations = [0u32; 2];
     let mut extra_flushes = 0;
+    let mut held_dispatches = 0;
     let mut retired = 0;
     let mut cancelled = 0;
     loop {
@@ -169,68 +170,89 @@ pub(crate) fn run(
             stop(34003, serial, debugcon);
         }
         let p = &mut peers[i];
-        if let Some(ticket) = waiting[i] {
-            checked!(unsafe {
-                arch::x86_64::user_ipc::with_waits(|s| {
-                    s.complete_wait(ticket, &mut scheduler, cpu, |status| {
-                        p.slot
-                            .complete_wait(p.id, ticket, status)
-                            .map_err(|_| poolekernel::capability_ipc::Error::Identity)
-                    })
-                })
-            });
-            waiting[i] = None;
-        }
-        checked!(p.slot.activate(p.id, manager, &mut p.memory));
-        let result = p.slot.run_slice(p.id);
-        ticks[i] = checked!(
-            ticks[i]
-                .checked_add(checked!(p.slot.account_slice(p.id, &mut scheduler, cpu)))
-                .ok_or(())
-        );
-        let slice = checked!(result);
-        match slice.event {
-            Event::Waiting { ticket, syscalls } => {
-                calls[i] = syscalls;
+        if cfg!(feature = "development-shell-prepared-stop") && i == 4 && id.generation == 1 {
+            if held_dispatches != 0
+                || p.slot.state(p.id) != Ok(task::State::Prepared)
+                || waiting[i].is_some()
+                || calls[i] != 0
+                || ticks[i] != 0
+            {
+                stop(34018, serial, debugcon);
+            }
+            checked!(scheduler.block_current(cpu));
+            held_dispatches = 1;
+            prepared_hold(
+                p,
+                scheduler.summary().dispatch_count,
+                arch::x86_64::user_root_write_count() - before,
+                serial,
+                debugcon,
+            );
+        } else {
+            if let Some(ticket) = waiting[i] {
                 checked!(unsafe {
-                    arch::x86_64::user_ipc::with_waits(|s| s.park_wait(ticket, &mut scheduler, cpu))
+                    arch::x86_64::user_ipc::with_waits(|s| {
+                        s.complete_wait(ticket, &mut scheduler, cpu, |status| {
+                            p.slot
+                                .complete_wait(p.id, ticket, status)
+                                .map_err(|_| poolekernel::capability_ipc::Error::Identity)
+                        })
+                    })
                 });
-                waiting[i] = Some(ticket);
+                waiting[i] = None;
             }
-            Event::Preempted { syscalls, .. } | Event::BudgetYield { syscalls } => {
-                calls[i] = syscalls;
-                checked!(scheduler.yield_current(cpu));
-            }
-            Event::Terminated(outcome) => {
-                calls[i] = outcome.syscalls;
-                if i < 2 || (i < 4 && outcome.reason != Reason::Exit(0)) {
-                    stop(34004, serial, debugcon);
+            checked!(p.slot.activate(p.id, manager, &mut p.memory));
+            let result = p.slot.run_slice(p.id);
+            ticks[i] = checked!(
+                ticks[i]
+                    .checked_add(checked!(p.slot.account_slice(p.id, &mut scheduler, cpu)))
+                    .ok_or(())
+            );
+            let slice = checked!(result);
+            match slice.event {
+                Event::Waiting { ticket, syscalls } => {
+                    calls[i] = syscalls;
+                    checked!(unsafe {
+                        arch::x86_64::user_ipc::with_waits(|s| {
+                            s.park_wait(ticket, &mut scheduler, cpu)
+                        })
+                    });
+                    waiting[i] = Some(ticket);
                 }
-                checked!(retire(
-                    p,
-                    outcome,
-                    false,
-                    manager,
-                    &mut scheduler,
-                    pages[i],
-                    i >= 4,
-                    serial,
-                    debugcon
-                ));
-                live[i] = false;
-                owned[i] = false;
-                retired += 1;
-                retirement(
-                    serial,
-                    debugcon,
-                    outcome,
-                    pages[i],
-                    scheduler.summary().dispatch_count,
-                );
+                Event::Preempted { syscalls, .. } | Event::BudgetYield { syscalls } => {
+                    calls[i] = syscalls;
+                    checked!(scheduler.yield_current(cpu));
+                }
+                Event::Terminated(outcome) => {
+                    calls[i] = outcome.syscalls;
+                    if i < 2 || (i < 4 && outcome.reason != Reason::Exit(0)) {
+                        stop(34004, serial, debugcon);
+                    }
+                    checked!(retire(
+                        p,
+                        outcome,
+                        manager,
+                        &mut scheduler,
+                        pages[i],
+                        i >= 4,
+                        serial,
+                        debugcon
+                    ));
+                    live[i] = false;
+                    owned[i] = false;
+                    retired += 1;
+                    retirement(
+                        serial,
+                        debugcon,
+                        outcome,
+                        pages[i],
+                        scheduler.summary().dispatch_count,
+                    );
+                }
             }
-        }
-        if checked!(scheduler.task_snapshot(id)).runtime_ticks != ticks[i] {
-            stop(34005, serial, debugcon);
+            if checked!(scheduler.task_snapshot(id)).runtime_ticks != ticks[i] {
+                stop(34005, serial, debugcon);
+            }
         }
         if let Some(permit) =
             checked!(unsafe { arch::x86_64::user_ipc::with_waits(|s| Ok(s.claim_process_stop())) })
@@ -245,12 +267,7 @@ pub(crate) fn run(
             let p = &mut peers[j];
             let prepared = checked!(p.slot.state(p.id)) == task::State::Prepared;
             let outcome = if prepared {
-                task::Outcome {
-                    id: p.id,
-                    root: p.root,
-                    reason: Reason::Cancelled,
-                    syscalls: 0,
-                }
+                checked!(p.slot.cancel_prepared(p.id))
             } else if let Some(ticket) = waiting[j] {
                 checked!(p.slot.cancel_waiting(p.id, ticket))
             } else {
@@ -260,7 +277,6 @@ pub(crate) fn run(
             checked!(retire(
                 p,
                 outcome,
-                prepared,
                 manager,
                 &mut scheduler,
                 pages[j],
@@ -382,8 +398,10 @@ pub(crate) fn run(
                     stop(34014, serial, debugcon);
                 }
                 let previous = manager.summary().allocated_pages;
-                let parts = checked!(p.slot.abandon(p.id, manager, &mut p.memory));
-                checked!(p.release(manager, parts));
+                let outcome = checked!(p.slot.cancel_prepared(p.id));
+                checked!(reclaim::reap(
+                    p, manager, &scheduler, outcome, pages[j], false, serial, debugcon
+                ));
                 if previous - manager.summary().allocated_pages != pages[j] {
                     stop(34015, serial, debugcon);
                 }
@@ -409,7 +427,8 @@ pub(crate) fn run(
         if unsafe { arch::x86_64::read_cr3() } != core.page_table_root_physical
             || arch::x86_64::user::active()
             || arch::x86_64::read_rflags() & ((1 << 9) | (1 << 10) | (1 << 18)) != 0
-            || arch::x86_64::user_root_write_count() - before != 2 * d + extra_flushes
+            || arch::x86_64::user_root_write_count() - before
+                != 2 * (d - held_dispatches) + extra_flushes
             || manager.summary().allocated_pages - baseline
                 != (0..6).filter(|&j| owned[j]).map(|j| pages[j]).sum::<u64>()
         {
@@ -456,7 +475,6 @@ pub(crate) fn run(
 fn retire(
     p: &mut Peer,
     outcome: task::Outcome,
-    prepared: bool,
     manager: &mut PhysicalMemoryManager,
     scheduler: &mut scheduler::Scheduler,
     pages: u64,
@@ -465,22 +483,9 @@ fn retire(
     debugcon: &mut DebugCon,
 ) -> Result<(), ()> {
     let before = manager.summary().allocated_pages;
-    if prepared {
-        if outcome.id != p.id
-            || outcome.root != p.root
-            || outcome.reason != Reason::Cancelled
-            || outcome.syscalls != 0
-        {
-            return Err(());
-        }
-        let parts = p
-            .slot
-            .abandon(p.id, manager, &mut p.memory)
-            .map_err(|_| ())?;
-        p.release(manager, parts)?;
-    } else {
-        reclaim::reap(p, manager, scheduler, outcome, pages, serial, debugcon)?;
-    }
+    reclaim::reap(
+        p, manager, scheduler, outcome, pages, true, serial, debugcon,
+    )?;
     scheduler
         .teardown(scheduler::TaskId::new(p.id.slot, p.id.generation).map_err(|_| ())?)
         .map_err(|_| ())?;
@@ -526,6 +531,32 @@ fn retirement(
             ("dispatches", u64::from(dispatches)),
         ],
     );
+}
+
+fn prepared_hold(
+    p: &Peer,
+    dispatches: u32,
+    writes: u64,
+    serial: &mut Com1,
+    debugcon: &mut DebugCon,
+) {
+    let mut log = EarlyLogger::new(BootSink {
+        serial,
+        debugcon,
+        ring: &EARLY_RING,
+    });
+    log.write_str("POOLEOS:PREPARED HOLD contract=PCANCEL1 task=4 generation=1");
+    for (name, value) in [
+        ("root", p.root),
+        ("dispatches", u64::from(dispatches)),
+        ("cr3_writes", writes),
+    ] {
+        log.write_str(" ");
+        log.write_str(name);
+        log.write_str("=");
+        log.write_decimal_u64(value);
+    }
+    log.write_str(" calls=0 ticks=0 state=blocked entered=0 cpl=0 production=0\n");
 }
 
 fn record(serial: &mut Com1, debugcon: &mut DebugCon, event: &str, fields: &[(&str, u64)]) {

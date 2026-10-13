@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 275
+Last roadmap reconciliation: PooleOS Cycle 276
 
-Cycle275 adds retained terminal-process cleanup ownership and controlled native
+Cycle276 implements owned pre-entry cancellation and retained prepared-child
+cleanup in the interactive integration. Nine final-source VM runs pass, including
+shell lifecycle and default regressions; nine superseded pre-format runs remain
+historical. Next: owner-death/orphan recovery, read-only files, two useful separate
+apps and sustained optical ISO acceptance. No usable integration ISO, main merge
+or production qualification follows. All N0-N39, complete robust microkernel,
+PooleGlyph/PDC, PooleGlass, reproducibility and signing obligations remain.
+[Evidence](checkpoints/cycle276-prepared-cancellation.md).
+
+Historical Cycle275 adds retained terminal-process cleanup ownership and controlled native
 retries; nine VM runs pass including ordinary shell and default regressions.
 Prepared cleanup/owner death, read-only files, two useful separate apps and optical
 ISO acceptance remain the immediate integration path. No usable integration ISO

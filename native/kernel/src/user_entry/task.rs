@@ -435,6 +435,35 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
         }
         task.outcome.ok_or(Error::State)
     }
+
+    /// Trusted dispatcher only: cancel an owned image that has never been exposed
+    /// to a CPU. The outcome is not a userspace exit or proof of reclamation.
+    pub fn cancel_prepared(&mut self, id: TaskId) -> Result<Outcome, Error> {
+        let task = self.owned_mut(id)?;
+        if task.state != State::Prepared
+            || task.pending_charge.is_some()
+            || task.last_slice.is_some()
+            || task.outcome.is_some()
+            || task.runtime != Runtime::default()
+        {
+            return Err(Error::State);
+        }
+        let image = task
+            .cpu
+            .as_ref()
+            .ok_or(Error::State)?
+            .unexposed_admission()
+            .map_err(Error::Cpu)?;
+        let outcome = Outcome {
+            id,
+            root: image.root_physical,
+            reason: Reason::Cancelled,
+            syscalls: 0,
+        };
+        task.outcome = Some(outcome);
+        task.state = State::Terminated;
+        Ok(outcome)
+    }
     pub fn activate<M: TableMemory>(
         &mut self,
         id: TaskId,

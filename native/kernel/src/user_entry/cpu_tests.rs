@@ -3,6 +3,8 @@ use crate::user_entry::prepared::cpu::{Cpu, CpuImage, Error as CpuError, Snapsho
 use crate::user_entry::privilege;
 use std::{cell::RefCell, rc::Rc};
 
+#[path = "prepared_cancel_tests.rs"]
+mod prepared_cancel_tests;
 #[path = "retirement_tests.rs"]
 mod retirement_tests;
 
