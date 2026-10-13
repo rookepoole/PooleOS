@@ -1,15 +1,35 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-13
-Plan version: 2.177.0-native-shell-process-control
-Roadmap cycle: PooleOS Cycle 274
+Plan version: 2.178.0-native-retained-terminal-cleanup
+Roadmap cycle: PooleOS Cycle 275
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 274: Native Shell Process Control
+## Cycle 275: Retained Terminal Cleanup
+
+Terminal slots now retain original allocation ownership through erase/readback,
+finish and release, preserve failed cleanup for retry, and prevent reentry/reuse
+or early process completion. Three fault-injected shell guests, three ordinary
+shell guests, two default diagnostic boots and ordinary unsigned-boot denial pass.
+Ten native cleanup failures recover through one controlled immediate retry each.
+Kernel tests pass520 per profile, user tests78; ownership doctests10 and initial
+Python oracle tests15 pass. [Evidence](checkpoints/cycle275-retained-terminal-cleanup.md).
+
+USI-3/4 remain partial. Prepared cleanup migration/native stop, owner-death/orphan
+policy and asynchronous retry remain open. Next close those lifecycle boundaries,
+then read-only bundled files, two useful separately launched apps and sustained
+optical ISO acceptance. Full robust microkernel work continues after that milestone.
+Normal/injected kernels112/113 pages; default208/208 with120 RELRO padding bytes.
+Stack36 pages unchanged; measured local frame51384 is not full stack proof.
+No phase/flag closes:40 phases301 subphases8996 requirements59 additions98 flags43
+open20 gap groups.1422 Python tests/673 architecture bindings are inventories,
+not full canonical qualification. No usable integration ISO or main merge yet.
+
+## Historical Cycle 274: Native Shell Process Control
 
 The isolated shell now starts, stops, inspects and restarts real diagnostic child
 processes through generation-bound capabilities. Two native fault generations

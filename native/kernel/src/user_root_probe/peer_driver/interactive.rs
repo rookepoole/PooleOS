@@ -1,5 +1,6 @@
 //! Opt-in shell integration. Commands and restart decisions remain in CPL3.
 use super::*;
+mod reclaim;
 use poolekernel::{
     capability_ipc::admission::Member,
     user_entry::startup::{Arguments, Program},
@@ -212,7 +213,9 @@ pub(crate) fn run(
                     manager,
                     &mut scheduler,
                     pages[i],
-                    i >= 4
+                    i >= 4,
+                    serial,
+                    debugcon
                 ));
                 live[i] = false;
                 owned[i] = false;
@@ -261,7 +264,9 @@ pub(crate) fn run(
                 manager,
                 &mut scheduler,
                 pages[j],
-                true
+                true,
+                serial,
+                debugcon
             ));
             if arch::x86_64::user_root_write_count() - flushes != u64::from(!prepared) {
                 stop(34007, serial, debugcon);
@@ -456,6 +461,8 @@ fn retire(
     scheduler: &mut scheduler::Scheduler,
     pages: u64,
     publish: bool,
+    serial: &mut Com1,
+    debugcon: &mut DebugCon,
 ) -> Result<(), ()> {
     let before = manager.summary().allocated_pages;
     if prepared {
@@ -472,7 +479,7 @@ fn retire(
             .map_err(|_| ())?;
         p.release(manager, parts)?;
     } else {
-        p.reap(manager, outcome)?;
+        reclaim::reap(p, manager, scheduler, outcome, pages, serial, debugcon)?;
     }
     scheduler
         .teardown(scheduler::TaskId::new(p.id.slot, p.id.generation).map_err(|_| ())?)

@@ -312,6 +312,7 @@ pub enum State {
     Waiting,
     Quarantined,
     Terminated,
+    Reclaiming,
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Error {
@@ -322,6 +323,7 @@ pub enum Error {
     State,
     Cpu(super::prepared::cpu::Error),
     Accounting(crate::scheduler::Error),
+    Reclamation(super::retirement::Error),
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -337,6 +339,7 @@ pub struct Runtime {
 struct Owned<H: Cpu, D: Driver> {
     id: TaskId,
     cpu: Option<CpuImage<H>>,
+    reclaim: Option<super::retirement::RetiredImage>,
     driver: D,
     state: State,
     outcome: Option<Outcome>,
@@ -398,6 +401,7 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
         self.owned = Some(Owned {
             id,
             cpu: Some(cpu),
+            reclaim: None,
             driver,
             state: State::Prepared,
             outcome: None,
@@ -426,7 +430,7 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
     }
     pub fn outcome(&self, id: TaskId) -> Result<Outcome, Error> {
         let task = self.owned(id)?;
-        if task.state != State::Terminated {
+        if !matches!(task.state, State::Terminated | State::Reclaiming) {
             return Err(Error::State);
         }
         task.outcome.ok_or(Error::State)
@@ -478,6 +482,53 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
         let outcome = self.outcome(id)?;
         let parts = self.detach(id, manager, memory)?;
         Ok((parts, outcome))
+    }
+
+    /// Stop-to-free is one retained ownership transaction. Failed revocation or
+    /// restoration keeps the CPU owner; failed destruction keeps all live tokens.
+    /// The slot cannot be reused until the exact terminal outcome is returned.
+    pub fn reclaim<M: TableMemory>(
+        &mut self,
+        id: TaskId,
+        manager: &mut PhysicalMemoryManager,
+        memory: &mut M,
+    ) -> Result<Outcome, Error> {
+        let outcome = self.outcome(id)?;
+        let task = self.owned_mut(id)?;
+        if task.pending_charge.is_some() || task.runtime.unknown {
+            return Err(Error::State);
+        }
+        if task.reclaim.is_none() {
+            task.driver
+                .revoke(id)
+                .map_err(|e| Error::Cpu(super::prepared::cpu::Error::User(e)))?;
+            let cpu = task.cpu.take().ok_or(Error::State)?;
+            match cpu.retire_owned(manager) {
+                Ok(owner) => {
+                    task.reclaim = Some(owner);
+                    task.state = State::Reclaiming;
+                }
+                Err((error, cpu)) => {
+                    task.cpu = Some(cpu);
+                    return Err(Error::Cpu(error));
+                }
+            }
+        }
+        task.reclaim
+            .as_mut()
+            .ok_or(Error::State)?
+            .reclaim(manager, memory)
+            .map_err(Error::Reclamation)?;
+        self.owned = None;
+        Ok(outcome)
+    }
+
+    pub fn reclaim_remaining_pages(&self, id: TaskId) -> Result<u64, Error> {
+        self.owned(id)?
+            .reclaim
+            .as_ref()
+            .map(|r| r.remaining_pages())
+            .ok_or(Error::State)
     }
     /// Cancel before entry, or recover a failed architectural operation. This
     /// never fabricates an application exit status or restarts the task.

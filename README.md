@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle274 adds real shell start/stop/status
+**Current development checkpoint:** Cycle275 retains terminal-process memory
+ownership through failed cleanup and verifies controlled native retries. Nine VM
+runs pass, including ordinary shell interaction and default boot regressions.
+Next: prepared/owner-death recovery, read-only files, two useful apps, then optical
+ISO acceptance. No usable integration ISO or new main qualification yet. The full
+robust microkernel remains required afterward.
+[Evidence](docs/checkpoints/cycle275-retained-terminal-cleanup.md).
+
+**Historical development checkpoint:** Cycle274 adds real shell start/stop/status
 and generation-bound restart. Child faults leave the shell and worker running;
 invalid launch authority rejects. Six fresh VM runs pass, including earlier-shell
 regression. Next: cleanup recovery, bundled files, two useful apps, then optical

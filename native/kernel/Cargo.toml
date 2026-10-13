@@ -18,6 +18,8 @@ development-console-bad-handle = ["development-console"]
 development-console-ipc = ["development-console"]
 development-shell-process = ["development-console-ipc"]
 development-shell-process-bad-owner = ["development-shell-process"]
+
+development-shell-cleanup-retry = ["development-shell-process"]
 development-console-ipc-bad-peer = ["development-console-ipc"]
 development-session-capacity = ["development-console-ipc"]
 development-session-capacity-bad-startup = ["development-session-capacity"]

@@ -3,6 +3,9 @@ use crate::user_entry::prepared::cpu::{Cpu, CpuImage, Error as CpuError, Snapsho
 use crate::user_entry::privilege;
 use std::{cell::RefCell, rc::Rc};
 
+#[path = "retirement_tests.rs"]
+mod retirement_tests;
+
 struct Machine {
     snapshot: Snapshot,
     writes: std::vec::Vec<u64>,

@@ -1,15 +1,24 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-10-11
+Status date: 2026-10-13
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 270
+Last roadmap reconciliation: PooleOS Cycle 275
 
-Cycle270 adds a real CPL3 serial command shell over the isolated console service.
+Cycle275 adds retained terminal-process cleanup ownership and controlled native
+retries; nine VM runs pass including ordinary shell and default regressions.
+Prepared cleanup/owner death, read-only files, two useful separate apps and optical
+ISO acceptance remain the immediate integration path. No usable integration ISO
+or production/main qualification is claimed. This narrower milestone does not
+replace any N0-N39, complete robust microkernel, PooleGlyph/PDC, PooleGlass,
+reproducibility or signing obligation in this charter.
+[Evidence](checkpoints/cycle275-retained-terminal-cleanup.md).
+
+Historical Cycle270 adds a real CPL3 serial command shell over the isolated console service.
 Three fresh guests prove typed commands/editing, clean shutdown and denied-peer
 termination. Seven user programs reproduce; six earlier binaries are unchanged.
 Next connect actual lifecycle/status, read-only files and two useful separate apps,

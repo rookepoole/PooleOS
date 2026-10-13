@@ -343,11 +343,53 @@ impl<H: Cpu> CpuImage<H> {
         manager: &mut PhysicalMemoryManager,
         memory: &mut M,
     ) -> Result<DetachedImage, (Error, Self)> {
+        if let Err(error) = self.restore_for_retirement(manager) {
+            return Err((error, self));
+        }
+        match self.prepared.abort(manager, memory) {
+            Ok(parts) => Ok(parts),
+            Err((error, prepared)) => {
+                self.prepared = prepared;
+                Err((Error::Prepared(error), self))
+            }
+        }
+    }
+
+    /// Preserve the original PMM tokens through post-execution destruction.
+    /// Unlike retire, this never exposes unretained detached allocations.
+    #[allow(clippy::result_large_err)]
+    pub fn retire_owned(
+        mut self,
+        manager: &PhysicalMemoryManager,
+    ) -> Result<crate::user_entry::retirement::RetiredImage, (Error, Self)> {
+        if self.prepared.admission.is_none()
+            || self
+                .prepared
+                .retained
+                .each_ref()
+                .map(|r| r.as_ref().map(|r| r.handle()))
+                != self.prepared.handles()
+        {
+            return Err((Error::Prepared(super::Error::Ownership), self));
+        }
+        if let Err(error) = manager
+            .validate_retentions(&self.prepared.retained)
+            .map_err(|_| Error::Prepared(super::Error::Ownership))
+            .and_then(|_| self.restore_for_retirement(manager))
+        {
+            return Err((error, self));
+        }
+        Ok(crate::user_entry::retirement::RetiredImage::new(
+            self.prepared.retained,
+        ))
+    }
+
+    fn restore_for_retirement(&mut self, manager: &PhysicalMemoryManager) -> Result<(), Error> {
         if !self.user_quiescent {
-            return Err((Error::User(privilege::Error::State), self));
+            return Err(Error::User(privilege::Error::State));
         }
         if !self.timer_quiescent {
-            return Err((Error::Timer(timer::Error::State), self));
+            return Err(Error::Timer(timer::Error::State));
         }
         if self.state != State::Inactive {
             let restoration = (|| {
@@ -373,15 +415,9 @@ impl<H: Cpu> CpuImage<H> {
                 Ok(())
             })();
             if let Err(error) = restoration {
-                return Err((error, self));
+                return Err(error);
             }
         }
-        match self.prepared.abort(manager, memory) {
-            Ok(parts) => Ok(parts),
-            Err((error, prepared)) => {
-                self.prepared = prepared;
-                Err((Error::Prepared(error), self))
-            }
-        }
+        Ok(())
     }
 }

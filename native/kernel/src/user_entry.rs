@@ -17,6 +17,7 @@ pub mod context;
 pub mod preemption;
 pub mod prepared;
 pub mod privilege;
+pub mod retirement;
 pub mod spawn;
 pub mod startup;
 pub mod syscall;

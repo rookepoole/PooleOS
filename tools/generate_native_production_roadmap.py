@@ -14322,13 +14322,94 @@ def apply_cycle274(roadmap: dict, test_count: int) -> dict:
             "prepared-child stop and complete stack/resource bounds; preserve process controls and fault survival",
             "read-only bundled files and two useful separately launched apps, not diagnostic counters",
             "optical ISO sustained interaction; canonical gates before main; full robust microkernel afterward"])
+    return apply_cycle275(roadmap, test_count)
+
+
+def apply_cycle275(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle275-retained-terminal-cleanup.md"
+    path = "runs/native-retained-cleanup-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle274_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=275, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 275
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-retained-cleanup.md"]
+    gate["current_candidate_audit"]["cycle"] = 275
+    gate["current_focused_source_projection"]["cycle"] = 275
+    gate["qualification_status"] = "retained_terminal_cleanup_native_pass_owner_death_files_apps_and_ISO_gates_pending"
+    for name in ("current_shell_process_qualification", "current_shell_process_metadata"):
+        gate[name]["evidence_status"] = "historical_cycle274_not_current_candidate_qualification"
+    baseline["native_shell_process"]["evidence_status"] = "historical_cycle274_not_current_candidate_qualification"
+    record = dict(cycle=275, contract_id="PRECLAIM1", status="pass", receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), kernel_tests_per_profile=520,
+        new_kernel_tests=8, user_tests_per_profile=78, ownership_doctests=10,
+        independent_program_pairs_reverified=10, retained_program_build_cycle=274,
+        guest_runs=9, shell_guests=6, default_diagnostic_guests=2, ordinary_denial_guests=1,
+        source_binding_count=len(receipt["native_execution"]["normal"]["source_bindings"]),
+        terminal_slot_reclamation=True, original_retention_tokens_transferred=True,
+        controlled_native_cleanup_retry=True, native_injected_failures=10,
+        ordinary_free_denials=50, early_completion_denials=10, page_boundary_failure_cases=78,
+        useful_application_count=0, prepared_child_stop_native_tested=False,
+        prepared_child_cleanup_migrated=False, asynchronous_cleanup_recovery=False,
+        owner_death_recovery=False, general_cleanup_retry=False,
+        partial_allocator_commit_failure_injected=False, full_stack_bound_proven=False,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_retained_cleanup_qualification"] = record
+    gate["current_retained_cleanup_metadata"] = dict(cycle=275, status="pass", tests_passed=267,
+        unittest_elapsed_seconds=54.725, capture_elapsed_seconds=55.891,
+        log_sha256="00A81BAAFD8B854D4285F72C0F8EA93A1CD5388311D4A242BA8BE2838E86953E",
+        retained_closeout_helper_failure="incorrect_kernel1_archive_lookup_corrected_to_recorded_kernel_directory",
+        failed_helper_log_sha256="2A416C7CA25FFC7D198030FA6735B2A8D46382A49A8A8F157D9D070578452DEE",
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_retained_cleanup"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=275, selected_stage="USI-3", session_contract="PRECLAIM1", receipt_path=path,
+        receipt_section="native_execution", native_execution_evidence_cycle=275,
+        native_execution_replayed_this_cycle=True, native_execution_status="retained_terminal_cleanup_controlled_retry_and_shell_process_control_pass",
+        shell_native_execution_evidence_cycle=275, shell_native_execution_replayed_this_cycle=True,
+        shell_application_launch=True, shell_launch_catalogue_is_diagnostic=True, useful_application_count=0,
+        terminal_slot_reclamation=True, controlled_native_cleanup_retry=True,
+        asynchronous_cleanup_recovery=False, prepared_child_cleanup_migrated=False,
+        owner_death_recovery=False, general_cleanup_retry=False, prepared_child_stop_native_tested=False,
+        retained_kernel_sources_unchanged=False, kernel_image_pages=112, kernel_remaining_capacity_pages=96,
+        default_profile_build_cycle=275, default_profile_pages=208, default_profile_replayed_this_cycle=True,
+        default_relro_padding_bytes=120, integration_dispatcher_local_bytes=51384,
+        bundled_files=False, full_stack_bound_proven=False, local_keyboard_display=False)
+    lane["stages"]["USI-3"] = "partial_terminal_cleanup_controlled_retry_verified_prepared_owner_death_and_async_recovery_pending"
+    lane["stages"]["USI-4"] = "partial_native_shell_process_controls_files_useful_apps_and_local_input_pending"
+    evidence = "Cycle275: terminal task slots preserve original retained allocation tokens through cleanup failures, deny reuse/reentry and publish completion only after reclamation. Eight new kernel tests include78 page-boundary failures;520 kernel/78 user tests per profile and10 ownership doctests pass. Three injected guests recover10 failures with50 ordinary-free and10 early-completion denials; three ordinary shell guests and two default diagnostics plus ordinary unsigned-boot denial pass. Ten retained Cycle274 program pairs reverified, not rebuilt. Normal112/injected113/default208 pages,36 stack pages; local frame51384 is not full stack proof. " + checkpoint
+    gap = "Qualify prepared-stop cleanup migration and owner-death/orphan handling before wider app integration. Asynchronous cleanup recovery, partial allocator-commit fault injection and full stack bounds remain. Then implement read-only bundled files and two useful separately launched applications and sustained optical ISO acceptance. Diagnostic worker/fault tasks are not useful apps. Preserve16384-byte RX cap,8 mappings/4 frame bindings,32 PMM records and208-page default capacity (120 RELRO padding bytes). General executable trust, writable data/heap, local input/display, efficient idle and exact-candidate canonical gates remain open. Complete robust microkernel/PDC/PooleGlyph/PooleGlass work continues after usable ISO."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N9", "N13", "N14", "N16", "N18", "N20", "N36"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 275 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N13-USERSPACE-ISO-001", "FLAG-N36-EVIDENCE-STORAGE-001"):
+            flag["evidence"].append(checkpoint)
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["closure_condition"] += " Cycle275: " + gap
+        if flag["id"] == "FLAG-N36-EVIDENCE-STORAGE-001":
+            flag["closure_condition"] += " Cycle275 preserves20 generated build/media archives with exact member hashes; automatic reservation and restore remain open."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Qualify prepared and owner-death cleanup, then bundled files, useful apps and ISO",
+        entry_evidence=[checkpoint, path, "docs/native-retained-cleanup.md", "docs/native-userspace-integration-iso.md"],
+        exit_evidence=["prepared-child cleanup retention/native stop and owner-death/orphan policy",
+            "asynchronous cleanup retry and partial allocator-commit controls; complete stack/resource bounds",
+            "read-only bundled files and two useful separately launched apps, not diagnostic counters",
+            "optical ISO sustained interaction; canonical gates before main; full robust microkernel afterward"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1419)
+    parser.add_argument("--test-count", type=int, default=1422)
     parser.add_argument("--status-date", default="2026-10-13")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

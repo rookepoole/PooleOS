@@ -25,6 +25,14 @@ ADR_NAMES = (
 )
 BOUND_SOURCE_PATHS = (
     "docs/checkpoints/cycle274-native-shell-process-control.md",
+    "docs/checkpoints/cycle275-retained-terminal-cleanup.md",
+    "docs/native-retained-cleanup.md",
+    "runs/native-retained-cleanup-readiness.json",
+    "native/kernel/src/user_entry/retirement.rs",
+    "native/kernel/src/user_entry/retirement_tests.rs",
+    "native/kernel/src/user_root_probe/peer_driver/interactive/reclaim.rs",
+    "runtime/native_shell_cleanup.py",
+    "tests/test_native_shell_cleanup.py",
     "docs/native-shell-process.md",
     "runs/native-shell-process-readiness.json",
     "native/kernel/src/user_root_probe/peer_driver/interactive.rs",

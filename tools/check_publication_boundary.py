@@ -77,6 +77,7 @@ ALLOWED_RUNS = {
     "runs/native-vm-allocation-pages-readiness.json",
     "runs/native-multipage-program-readiness.json",
     "runs/native-shell-process-readiness.json",
+    "runs/native-retained-cleanup-readiness.json",
     "runs/native-kernel-virtual-memory-readiness.json",
     "runs/native_model_readiness.json",
     "runs/native_microcode_readiness.json",
