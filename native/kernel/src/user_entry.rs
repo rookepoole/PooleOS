@@ -231,7 +231,7 @@ fn admit_image_with_roots<M: TableMemory>(
         } else {
             image.stack_page
         };
-        let (owned_frame, permissions, cache) = space
+        let (owned_frame, page_offset, permissions, cache) = space
             .owned_mapping(virtual_address)
             .ok_or(Error::Ownership)?;
         let expected_permissions = if index == code_index {
@@ -240,6 +240,7 @@ fn admit_image_with_roots<M: TableMemory>(
             vm::Permissions::USER_RW
         };
         if owned_frame.start_page * PAGE_BYTES != physical
+            || page_offset != 0
             || permissions != expected_permissions
             || cache != vm::CachePolicy::WriteBack
         {

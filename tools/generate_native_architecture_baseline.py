@@ -24,6 +24,8 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle272-owned-allocation-page-mappings.md",
+    "runs/native-vm-allocation-pages-readiness.json",
     "docs/checkpoints/cycle271-native-process-completion.md",
     "docs/native-process-completion.md",
     "runs/native-process-completion-readiness.json",

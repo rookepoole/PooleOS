@@ -32,7 +32,7 @@ def main():
     args=p.parse_args();work=args.work_dir.resolve();programs=args.program_dir.resolve()
     if not work.is_relative_to(ROOT/'outputs') or not programs.is_relative_to(ROOT/'outputs'):p.error('workspace outputs required')
     storage=require_space(work);work.mkdir(parents=True,exist_ok=False);before=source.source_bindings()
-    report=dict(cycle=271,contract_id='PCOMP1',launch_contract_id='PLAUNCH1',status='fail',source_bindings=before,storage_preflight=storage,guest_bound_seconds=120,guest_runs=[],iso_built=False,production_ready=False)
+    report=dict(cycle=272,contract_id='PCOMP1',launch_contract_id='PLAUNCH1',status='fail',source_bindings=before,storage_preflight=storage,guest_bound_seconds=120,guest_runs=[],iso_built=False,production_ready=False)
     try:
         cargo,_,env=shared._toolchain(ROOT/'.toolchains/rust-1.97.0')
         report['program_build'],code=program_input(programs,env)

@@ -14121,13 +14121,75 @@ def apply_cycle271(roadmap: dict, test_count: int) -> dict:
             "review one-page program admission and resources before feature growth",
             "read-only files and two useful separate apps, then optical ISO sustained acceptance",
             "canonical gates before main; complete robust native microkernel afterward"])
+    return apply_cycle272(roadmap, test_count)
+
+
+def apply_cycle272(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle272-owned-allocation-page-mappings.md"
+    path = "runs/native-vm-allocation-pages-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle271_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=272, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 272
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path]
+    gate["current_candidate_audit"]["cycle"] = 272
+    gate["current_focused_source_projection"]["cycle"] = 272
+    gate["qualification_status"] = "owned_allocation_pages_host_pass_native_regression_pass_loader_shell_ISO_gates_pending"
+    for name in ("current_completion_qualification", "current_completion_metadata"):
+        gate[name]["evidence_status"] = "historical_cycle271_not_current_candidate_qualification"
+    record = dict(cycle=272, status="pass", receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), kernel_tests_per_profile=503,
+        new_kernel_tests=7, guest_regression_runs=3, source_binding_count=len(receipt["native_regression"]["source_bindings"]),
+        host_offset_mapping_verified=True, native_offset_mapping_verified=False,
+        multipage_executable_admission=False, multipage_program_execution=False,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_vm_allocation_pages_qualification"] = record
+    gate["current_vm_allocation_pages_metadata"] = dict(cycle=272, status="pass", tests_passed=257,
+        unittest_elapsed_seconds=53.496, capture_elapsed_seconds=54.593,
+        log_sha256="BE8F2750D854C13B1BBDD47DEE34D370D4BF8BD03BB94A9EB0317F7F694C17A0",
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_vm_allocation_pages"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=272, selected_stage="USI-3", session_contract="PCOMP1", receipt_path=path,
+        receipt_section="native_regression", native_execution_evidence_cycle=272,
+        native_execution_replayed_this_cycle=True, native_execution_status="legacy_native_process_completion_regression_pass_offsets_host_only",
+        vm_allocation_page_offsets=True, multipage_executable_admission=False, multipage_program_execution=False,
+        executable_byte_limit=4096, retained_kernel_sources_unchanged=False,
+        kernel_image_pages=111, kernel_remaining_capacity_pages=97,
+        default_profile_build_cycle=272, default_profile_pages=207, default_profile_replayed_this_cycle=False)
+    lane["stages"]["USI-3"] = "partial_owned_page_mapping_host_verified_multipage_loader_and_cleanup_retry_pending"
+    evidence = "Cycle272: exact allocation-page offsets retain one PMM owner across mappings/aliases and free the whole allocation after final invalidation. Seven new hostile tests;503 kernel tests pass per profile. Three fresh existing PCOMP1 guests pass; independent normal kernels agree. Offset mapping is host-tested only; programs remain one page. Normal111/208 pages, denied109, default build207,36 stack pages. " + checkpoint
+    gap = "Finish bounded multipage Program/InitialImage admission, complete RX readback, construction copy/zeroing, return bounds and every-page retirement before raising the 4096-byte extractor cap. Then shell start/stop/status, retained cleanup ownership, native stop/fault controls, read-only files, two useful separate apps and optical ISO interaction. Current VM limits8 mappings/4 frame bindings and32 PMM records remain. General loader trust, owner death, local display/input, efficient idle, full stack proof and exact-candidate canonical gates stay open; complete robust microkernel work follows usable ISO."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N9", "N14", "N16", "N18", "N36"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 272 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N13-USERSPACE-ISO-001", "FLAG-N36-EVIDENCE-STORAGE-001"):
+            flag["evidence"].append(checkpoint)
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["closure_condition"] += " Cycle272: " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Finish bounded multipage executable loading, then integrate shell lifecycle and useful apps",
+        entry_evidence=[checkpoint, path, "docs/native-userspace-integration-iso.md"],
+        exit_evidence=["admitted code ranges, strict W^X/guard/alias validation and whole-allocation construction/retirement",
+            "native execution across code pages, invalid range/offset controls and legacy program compatibility",
+            "real shell start/stop/status, retained cleanup, bundled files and two separate useful apps",
+            "optical ISO sustained interaction; canonical gates before main; full robust microkernel afterward"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1411)
+    parser.add_argument("--test-count", type=int, default=1412)
     parser.add_argument("--status-date", default="2026-10-13")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

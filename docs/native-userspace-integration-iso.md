@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 271, 2026-10-13. No new ISO exists yet.
+Status: implementation started, Cycle 272, 2026-10-13. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -45,7 +45,7 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | --- | --- | --- | --- |
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
-| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle271 partial: bounded supervisor consumes generation-bound terminal results and waits through withheld completion before restart. Native stop/fault completion, general loading/trust, cleanup retry, owner-death policy and efficient idle remain |
+| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle272 partial: generation-bound completion retained; owned allocation-page offsets host-tested. Multipage executable admission/construction/return/cleanup remains, with native stop/fault completion, general loading/trust, cleanup retry, owner death and efficient idle |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle270 partial: real serial shell commands/editing and authenticated console-peer death pass; shell lifecycle/status, files, two separate apps and display/input integration remain |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
@@ -496,6 +496,16 @@ production qualification. Firmware identity mappings are an explicit bootstrap
 precondition, not inherited task authority or a general-purpose direct map.
 
 ## Follow-On Microkernel Work
+
+Cycle 272 records the loader prerequisite in
+[Owned Allocation Page Mappings](checkpoints/cycle272-owned-allocation-page-mappings.md).
+The seven hostile mapping tests and three fresh legacy process boots do not lift
+the 4096-byte program limit. Before command growth, admit and execute bounded code
+ranges, preserve startup/guard geometry, validate every RX leaf and backing offset,
+and scrub/unmap every page before terminal completion. The existing eight mapping
+slots and four allocation bindings remain fixed; one PMM owner per code allocation
+avoids spending another PMM record for each code page. This does not solve general
+PMM capacity, owner-death policy, retained adapter cleanup or full stack bounds.
 
 Historical Cycle 236 evidence: [User Root CPU Lifecycle](checkpoints/cycle236-user-root-cpu-lifecycle.md).
 PKUSER3 consumes PKUSER2 ownership and retains pages across uncertain CPU writes,

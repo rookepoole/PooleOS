@@ -358,6 +358,18 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle272-owned-allocation-page-mappings.md",
+      "sha256": "CAD029BADE10728CDB26DBC7834188BCB4C0A60A172EBC5ED2D98E74F01CAFB0",
+      "byte_count": 7424,
+      "line_count": 115
+    },
+    {
+      "path": "runs/native-vm-allocation-pages-readiness.json",
+      "sha256": "0D08F4E66B02D2E0F3F69CC0B6C7B5B469FE9D67A465FBEA0AADC851295861F5",
+      "byte_count": 274664,
+      "line_count": 5243
+    },
+    {
       "path": "docs/checkpoints/cycle271-native-process-completion.md",
       "sha256": "7ADE6F84B5993D3E60101BE2A3CDBB2839930E6761B3435CF4E1604E51B2D2DB",
       "byte_count": 6000,
@@ -533,7 +545,7 @@
     },
     {
       "path": "tools/qualify_native_process_launch.py",
-      "sha256": "27DA8EE04D3A9023052F0C988F44F7029F806D1FB57C24A25B8D2450AC2D2E2D",
+      "sha256": "D394CAC4FDF62C041E051BE2378E19E1E91CF903658209A92636D386332036A9",
       "byte_count": 6718,
       "line_count": 78
     },
@@ -1757,15 +1769,15 @@
     },
     {
       "path": "docs/native-userspace-integration-iso.md",
-      "sha256": "42CD6362799150B721D03CBDB9A977F25150D185D8A5C0480D01735C31980D3A",
-      "byte_count": 35587,
-      "line_count": 520
+      "sha256": "6A09E9AA88FC15732F5ABECA847B0412A0F42E312D8285EDE12C853625A97D92",
+      "byte_count": 36324,
+      "line_count": 530
     },
     {
       "path": "native/kernel/src/user_entry.rs",
-      "sha256": "A1BC2C093FCE847079EB649EBA3B1E424B06C8E2867EBA2AC4D97113723DF2E3",
-      "byte_count": 9067,
-      "line_count": 274
+      "sha256": "19C622536E52D1CD8DB83282844B4C0010748826657C718B740A06CBDF1BA805",
+      "byte_count": 9112,
+      "line_count": 275
     },
     {
       "path": "native/kernel/src/user_entry/tests.rs",
@@ -3107,9 +3119,9 @@
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "E2166029F4EFB609DC910417860D6E89E603BEBCDA63BC3EE5C70326C6950554",
-      "byte_count": 586328,
-      "line_count": 5789
+      "sha256": "10A45D6C5DB983891A5C2D721AC3AB28BE3F391ABA0B01ED7010AB3D4313D7C3",
+      "byte_count": 587960,
+      "line_count": 5813
     },
     {
       "path": "docs/publication-boundary.md",
@@ -3983,9 +3995,9 @@
     },
     {
       "path": "native/kernel/src/virtual_memory.rs",
-      "sha256": "7A77873EBD09ED41C907A0DD236C85B8AE973862648276C426833763319A61BD",
-      "byte_count": 47744,
-      "line_count": 1370
+      "sha256": "D81ED1E26109A4BBB82174746F15427BE222B90182A4607217FF0ABA539B532E",
+      "byte_count": 64021,
+      "line_count": 1838
     },
     {
       "path": "native/kernel/src/active_virtual_memory.rs",

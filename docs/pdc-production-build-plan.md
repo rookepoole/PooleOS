@@ -1,15 +1,39 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-13
-Plan version: 2.174.0-native-process-completion
-Roadmap cycle: PooleOS Cycle 271
+Plan version: 2.175.0-owned-allocation-page-mappings
+Roadmap cycle: PooleOS Cycle 272
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 271: Native Process Completion
+## Cycle 272: Owned Allocation Page Mappings
+
+The shell has 527 bytes remaining under its current 4096-byte executable limit.
+The next required loader foundation is now implemented: multiple virtual pages
+can map distinct offsets of one exact owned allocation. Protection, translation,
+retirement and invalidation preserve those offsets and whole-allocation ownership.
+Seven new hostile tests pass; all 503 kernel tests pass in debug and release.
+Three fresh existing native process-completion guests pass, including denied-owner
+admission. This proves compatibility, not native execution of a multipage program.
+[Evidence and remaining loader integration](checkpoints/cycle272-owned-allocation-page-mappings.md).
+
+USI-3 remains partial. Next finish bounded multipage program construction,
+admission, return bounds and cleanup; only then raise the extractor size limit.
+Follow with real shell launch/stop/status, read-only bundled files, two separate
+useful apps and optical ISO acceptance. No boot-screen redesign or substitute
+kernel shell. Complete robust microkernel development continues after the ISO.
+
+Normal kernel 111/208 pages; denied 109; fresh default build 207 with 24 RELRO padding
+bytes. 36 guarded stack pages unchanged; full stack proof remains open. No phase
+or flag closes: 40 phases, 301 subphases, 8996 requirements, 59 additions, 98 flags
+(43 open), 20 gap groups. 1412 Python tests and 651 architecture bindings are inventories, not
+full canonical qualification. Shell interaction and the default profile were not
+re-booted this cycle. The three tracked readiness failures remain unresolved.
+
+## Historical Cycle 271: Native Process Completion
 
 PCOMP1 adds generation-bound terminal results and separates detached attachment
 from completed cleanup. The real user-space supervisor waits for completion before
