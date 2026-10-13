@@ -15,6 +15,7 @@ use crate::{
 
 pub const CONTRACT_ID: &str = "PKUSER8";
 pub const CALLS_PER_DISPATCH: u8 = 64;
+pub mod arguments;
 pub mod cleanup;
 pub mod job;
 
@@ -326,6 +327,7 @@ pub enum Error {
     Cpu(super::prepared::cpu::Error),
     Accounting(crate::scheduler::Error),
     Reclamation(super::retirement::Error),
+    Arguments(arguments::Error),
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]

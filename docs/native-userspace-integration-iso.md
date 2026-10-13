@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 280, 2026-10-13. No new ISO exists yet.
+Status: implementation started, Cycle 281, 2026-10-13. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -46,12 +46,32 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle278 partial: native prepared/suspended parent-death cleanup now survives dispatch-separated erase failures. Native exhaustion/multiple pending owners/live-parent completion, waiting interleavings, general supervision, trust and idle remain |
-| USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle280 partial: file service/shell previously native-qualified; two application programs now compiled and host-tested, but their native launch, file grants and shell commands remain; local display/input also open |
+| USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle281 partial: two apps compiled; owned late startup-handle handoff and SEND-only launch grants host-tested. Native launch wiring, app file policy and shell commands remain; local display/input also open |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
 ### Immediate Next Move
 
-Current: [Cycle280 application programs](checkpoints/cycle280-application-programs.md).
+Current: [Cycle281 startup handoff](checkpoints/cycle281-startup-handoff.md).
+The kernel now has an owned pre-entry argument replacement operation. Host tests
+verify actual admission handles, narrow rights, three grant generations and rollback.
+It is not called by the native dispatcher yet. No new VM or ISO is claimed.
+
+1. Implement shell job/result multiplexing and file-client authorization for the
+   two application roles. Use kernel sender identity, current child generation,
+   exact kind/sequence and bounded results. Do not trust a payload identity.
+2. Wire both programs into the native launch catalogue. Keep actual inherited
+   handles, construct equal-length startup arguments, and call the owned handoff
+   before dispatch. Admission commits first; any handoff error must fail closed
+   with memory owners retained. Do not imply combined failure-atomic rollback.
+3. Qualify changed-input results, repeated jobs, both apps alive, stop/restart and
+   a contained app fault. Close remaining file/cleanup controls, then package and
+   operate the actual optical ISO with sustained real interaction on fresh boots.
+4. Continue complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass
+   development afterward. The ISO milestone does not replace production gates.
+
+### Historical Cycle280 Next Move
+
+Historical: [Cycle280 application programs](checkpoints/cycle280-application-programs.md).
 PooleText and PooleNumbers implement bounded file workloads and authenticated
 job/result state machines. Both compile independently into flat native programs.
 They are not yet available in the native shell; useful native app count remains0.

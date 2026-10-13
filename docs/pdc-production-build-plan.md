@@ -1,15 +1,47 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-13
-Plan version: 2.183.0-application-programs
-Roadmap cycle: PooleOS Cycle 280
+Plan version: 2.184.0-startup-handoff
+Roadmap cycle: PooleOS Cycle 281
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 280: Application Programs
+## Cycle 281: Owned Startup Handoff
+
+The kernel now supports replacing a never-executed task's bounded startup block
+with actual launch handles. Exact task/image identity and equal encoded length
+are required. Original bytes are checked before writing; failed reads, partial
+writes, incorrect readback or failed completion quarantine the retained owner.
+The task cannot activate or retry the handoff after failure. Startup bytes convey
+handles but do not grant authority. [Evidence](checkpoints/cycle281-startup-handoff.md).
+
+Eleven new kernel tests cover startup handoff and the existing atomic admission
+transaction with two SEND-only application grants. Both default551 and file-profile
+567 tests pass in debug/release;26 kernel ownership doctests pass. Restarted grants
+have new generations; either grant failure or process-lease quota rolls back the
+new authority while preserving existing services. These are host tests, not VM
+proof. No native launch caller, shell application command, app file-server policy
+or ISO is added yet. Native useful app count remains0.
+
+Next implement the user-space shell's authenticated application job/result bridge
+and bounded file-client policy, then wire the actual native launch catalogue to
+this handoff. Admission and startup writes are not one failure-atomic operation:
+the exclusive BSP dispatcher must prohibit dispatch between them and fail closed
+with owners retained on handoff error. Qualify both apps with changed-input results,
+repeated jobs, stop/restart and contained faults before optical ISO acceptance.
+
+Keep six roles,32 PMM records,16384-byte RX and existing mappings/stack limits.
+Native resource/stack measurement remains required once this path is instantiated.
+Full robust microkernel, PooleGlyph/PDC and accessible PooleGlass follow the usable
+milestone. No phase/flag closes:40 phases301 subphases8996 requirements59 additions,
+98 flags43 open20 gap groups.1439 Python tests,725 architecture bindings and903
+execution-source inputs are inventories, not full canonical execution. No new
+ISO, main qualification, release or production readiness is claimed.
+
+## Historical Cycle 280: Application Programs
 
 PooleText and PooleNumbers now implement real streaming file workloads in separate
 freestanding programs, with authenticated PAPP1 job/result IPC and PFILE1 reads.

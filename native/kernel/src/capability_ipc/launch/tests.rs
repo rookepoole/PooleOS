@@ -60,6 +60,209 @@ fn claim(s: &mut Space, c: Caller, h: u64, n: u32) -> Permit {
     s.claim_launch().unwrap()
 }
 
+fn application_steps(s: &mut Space, owner: TaskId) -> [Step; 2] {
+    let control = s.create_endpoint(owner).unwrap();
+    let files = s.create_endpoint(id(2, 1)).unwrap();
+    [
+        Step::Inherit {
+            source: owner,
+            handle: control,
+            member: 0,
+            rights: Rights::SEND,
+        },
+        Step::Inherit {
+            source: id(2, 1),
+            handle: files,
+            member: 0,
+            rights: Rights::SEND,
+        },
+    ]
+}
+
+#[test]
+fn application_launch_attenuates_both_endpoints_and_never_grants_ownership() {
+    let (mut s, mut q, c, factory) = fixture();
+    let steps = application_steps(&mut s, c.id);
+    let permit = claim(&mut s, c, factory, 1);
+    let admitted = s
+        .admit_launch(&permit, &mut q, member(1, 1), &steps)
+        .unwrap();
+    assert_eq!(admitted.count, 3);
+    for handle in &admitted.handles[..2] {
+        assert!(s.resolve(1, *handle, Rights::SEND).is_ok());
+        for denied in [Rights::RECEIVE, Rights::GRANT, Rights::DESTROY, Rights::ALL] {
+            assert_eq!(s.resolve(1, *handle, denied), Err(Error::Denied));
+        }
+        assert_eq!(
+            s.derive(id(1, 1), *handle, c.id, Rights::SEND),
+            Err(Error::Denied)
+        );
+        assert_eq!(s.destroy(id(1, 1), *handle), Err(Error::Denied));
+    }
+    assert_eq!(
+        s.tables[1]
+            .caps
+            .iter()
+            .filter(|cap| cap.value.is_some())
+            .count(),
+        2
+    );
+    assert_eq!(
+        s.objects
+            .iter()
+            .filter(|object| object.value.is_some())
+            .count(),
+        2
+    );
+    assert!(s.objects.iter().all(|object| {
+        !object
+            .value
+            .is_some_and(|endpoint| endpoint.owner == id(1, 1))
+    }));
+    assert_eq!(
+        s.request_launch(c, factory, 1),
+        (Status::Ok, admitted.handles[2])
+    );
+    assert_eq!(
+        s.process_operation(c, admitted.handles[2], false),
+        (Status::Ok, 1)
+    );
+}
+
+#[test]
+fn application_restart_uses_actual_new_handles_and_rejects_both_old_grants() {
+    let (mut s, mut q, c, factory) = fixture();
+    let steps = application_steps(&mut s, c.id);
+    let mut old = [0; 2];
+    for generation in 1..=3 {
+        let permit = claim(&mut s, c, factory, generation);
+        let admitted = s
+            .admit_launch(&permit, &mut q, member(1, generation), &steps)
+            .unwrap();
+        for index in 0..2 {
+            assert_ne!(admitted.handles[index], old[index]);
+            assert_eq!(admitted.handles[index] >> 32, u64::from(generation));
+            assert!(s.resolve(1, admitted.handles[index], Rights::SEND).is_ok());
+            assert_eq!(s.resolve(1, old[index], Rights::SEND), Err(Error::Denied));
+        }
+        old.copy_from_slice(&admitted.handles[..2]);
+        s.detach(id(1, generation)).unwrap();
+        q.teardown(crate::scheduler::TaskId::new(1, generation).unwrap())
+            .unwrap();
+        for handle in old {
+            assert_eq!(s.resolve(1, handle, Rights::SEND), Err(Error::Denied));
+        }
+        assert_eq!(
+            s.publish_process_completion(
+                crate::user_entry::task::Outcome {
+                    id: id(1, generation),
+                    root: image(1).root_physical,
+                    reason: crate::user_entry::task::Reason::Cancelled,
+                    syscalls: 0,
+                },
+                &q
+            ),
+            Ok(1)
+        );
+        for step in steps {
+            let Step::Inherit { source, handle, .. } = step else {
+                panic!()
+            };
+            assert!(
+                s.resolve(usize::from(source.slot), handle, Rights::ALL)
+                    .is_ok()
+            );
+        }
+    }
+}
+
+#[test]
+fn second_application_grant_failure_removes_first_and_preserves_services() {
+    for mode in 0..3 {
+        let (mut s, mut q, c, factory) = fixture();
+        let mut steps = application_steps(&mut s, c.id);
+        let Step::Inherit { source, handle, .. } = steps[1] else {
+            panic!()
+        };
+        steps[1] = Step::Inherit {
+            source,
+            member: 0,
+            rights: Rights::SEND,
+            handle: match mode {
+                0 => handle ^ (1 << 32),
+                1 => s.derive(source, handle, id(3, 1), Rights::SEND).unwrap(),
+                _ => handle,
+            },
+        };
+        if mode == 1 {
+            let Step::Inherit { handle, .. } = steps[1] else {
+                panic!()
+            };
+            steps[1] = Step::Inherit {
+                source: id(3, 1),
+                handle,
+                member: 0,
+                rights: Rights::SEND,
+            };
+        } else if mode == 2 {
+            s.detach(source).unwrap();
+        }
+        let before = q;
+        let permit = claim(&mut s, c, factory, 1);
+        assert!(
+            s.admit_launch(&permit, &mut q, member(1, 1), &steps)
+                .is_err()
+        );
+        unchanged_scheduler(q, before);
+        assert!(s.table(id(1, 1)).is_err());
+        assert!(s.tables[1].caps.iter().all(|cap| cap.value.is_none()));
+        assert!(s.processes.iter().all(|process| process.value.is_none()));
+        assert!(s.validate_launch(&permit).is_ok());
+        let Step::Inherit { source, handle, .. } = steps[0] else {
+            panic!()
+        };
+        assert!(
+            s.resolve(usize::from(source.slot), handle, Rights::ALL)
+                .is_ok()
+        );
+    }
+}
+
+#[test]
+fn process_quota_after_both_application_grants_rolls_back_without_endpoint_leaks() {
+    let (mut s, mut q, c, factory) = fixture();
+    let steps = application_steps(&mut s, c.id);
+    let lease = s
+        .grant_process(c.id, id(2, 1), process::Rights::Inspect)
+        .unwrap();
+    s.grant_process(c.id, id(3, 1), process::Rights::Inspect)
+        .unwrap();
+    let permit = claim(&mut s, c, factory, 1);
+    let before = q;
+    assert_eq!(
+        s.admit_launch(&permit, &mut q, member(1, 1), &steps),
+        Err(admission::Error::Ipc(Error::Quota))
+    );
+    unchanged_scheduler(q, before);
+    assert!(s.table(id(1, 1)).is_err());
+    assert!(s.tables[1].caps.iter().all(|cap| cap.value.is_none()));
+    assert_eq!(
+        s.objects
+            .iter()
+            .filter(|object| object.value.is_some())
+            .count(),
+        2
+    );
+    assert_eq!(s.process_operation(c, lease, false), (Status::Ok, 1));
+    assert!(s.validate_launch(&permit).is_ok());
+    s.revoke_process(c.id, lease).unwrap();
+    let admitted = s
+        .admit_launch(&permit, &mut q, member(1, 2), &steps)
+        .unwrap();
+    assert_eq!(admitted.handles[0] >> 32, 2);
+    assert_eq!(admitted.handles[1] >> 32, 2);
+}
+
 #[test]
 fn abi_numbered_requests_reject_pointers_extra_args_zero_and_overflow() {
     assert_eq!(

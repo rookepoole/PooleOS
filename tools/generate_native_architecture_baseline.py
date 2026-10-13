@@ -24,6 +24,11 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle281-startup-handoff.md",
+    "docs/native-startup-handoff.md",
+    "runs/native-startup-handoff-readiness.json",
+    "native/kernel/src/user_entry/task/arguments.rs",
+    "native/kernel/src/user_entry/startup_handoff_tests.rs",
     "docs/checkpoints/cycle280-application-programs.md",
     "docs/native-application-programs.md",
     "runs/native-app-programs-readiness.json",

@@ -198,8 +198,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 280)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1438)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 281)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1439)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -239,8 +239,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "application_programs_compiled_native_integration_ISO_and_canonical_gates_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 280)
+        self.assertEqual(current["qualification_status"], "startup_handoff_host_verified_native_integration_ISO_and_canonical_gates_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 281)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -773,9 +773,11 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertEqual(record[field], receipt["product"][field])
         sources = {p.relative_to(ROOT).as_posix() for p in (ROOT / "native/kernel/src").rglob("*.rs")}
         inputs = receipt["bindings"]["implementation_inputs"]
-        self.assertEqual((len(sources), len(inputs)), (124, 79))
+        self.assertEqual((len(sources), len(inputs)), (126, 79))
         self.assertEqual(sources - {item["path"] for item in inputs},
-                         {"native/kernel/src/capability_ipc/process/completion_tests.rs",
+                         {"native/kernel/src/user_entry/task/arguments.rs",
+                          "native/kernel/src/user_entry/startup_handoff_tests.rs",
+                          "native/kernel/src/capability_ipc/process/completion_tests.rs",
                           "native/kernel/src/scheduler/reclamation.rs",
                           "native/kernel/src/user_entry/task/cleanup.rs",
                           "native/kernel/src/user_entry/cleanup_tests.rs",
@@ -6368,10 +6370,47 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(r['captures']['programs2']['return_code'],0)
         for c in r['captures'].values(): self.assertTrue(c['source_unchanged'] and c['owner_report_unchanged'])
         lane=b['user_space_integration']
-        self.assertEqual((lane['cycle'],lane['selected_stage'],lane['session_contract']),(280,'USI-4','PAPP1'))
+        self.assertEqual((lane['cycle'],lane['selected_stage'],lane['session_contract']),(281,'USI-4','PSTART1'))
         self.assertFalse(lane['native_execution_replayed_this_cycle'] or lane['application_launch_and_shell_integration'])
         self.assertTrue(lane['continue_full_microkernel_after_iso'])
         self.assertIn('native shell',self.roadmap['immediate_next_move']['title'])
+
+    def test_cycle281_startup_handoff_is_owned_host_evidence_not_native_promotion(self) -> None:
+        from tools.qualify_native_user_entry import source_bindings
+        record = self.roadmap['baseline']['native_startup_handoff']
+        raw = (ROOT / record['receipt_path']).read_bytes()
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), record['receipt_sha256'])
+        r = json.loads(raw)
+        self.assertEqual((r['cycle'], r['contract_id'], r['status']), (281, 'PSTART1', 'startup_handoff_host_verified'))
+        self.assertEqual((r['new_kernel_tests'], r['default_kernel_tests_per_profile'], r['file_kernel_tests_per_profile'], r['ownership_doctests']), (11, 551, 567, 26))
+        self.assertEqual(r['source_bindings'], source_bindings())
+        self.assertEqual(len(r['source_bindings']), 903)
+        self.assertEqual(len(r['tested_changed_kernel_sources']), 5)
+        for path, digest in r['tested_changed_kernel_sources'].items():
+            self.assertEqual(hashlib.sha256((ROOT/path).read_bytes()).hexdigest().upper(), digest)
+        for key in ('pre_entry_owned_startup_replacement', 'actual_admission_handle_handoff_host_tested',
+                    'equal_encoded_length_required', 'stale_identity_and_exposed_state_rejected',
+                    'every_word_read_write_readback_failures_host_tested', 'memory_failure_quarantines_owner',
+                    'send_only_application_grants_host_tested', 'application_grant_rollback_and_restart_host_tested',
+                    'single_bsp_exclusive_dispatch_required', 'user_program_sources_unchanged'):
+            self.assertTrue(r[key], key)
+        for key in ('admission_and_startup_combined_failure_atomic', 'native_launch_dispatcher_calls_new_api',
+                    'shell_application_commands', 'file_server_application_acl', 'native_execution_verified',
+                    'native_replayed_this_cycle', 'iso_built', 'production_ready', 'merge_qualified',
+                    'canonical_full_replay_performed'):
+            self.assertFalse(r[key], key)
+        self.assertEqual((r['native_application_count'], r['useful_application_count'], r['guest_runs']), (0, 0, 0))
+        self.assertEqual(r['captures']['hostrepaired']['passed_test_counts'], [551])
+        self.assertEqual(r['captures']['release']['passed_test_counts'], [551])
+        self.assertEqual(r['captures']['profiles2']['passed_test_counts'], [567, 567, 26])
+        self.assertNotEqual(r['captures']['hostfirst']['return_code'], 0)
+        self.assertNotEqual(r['captures']['profiles']['return_code'], 0)
+        self.assertEqual(len(r['failures_and_repairs']), 2)
+        for capture in r['captures'].values():
+            self.assertTrue(capture['source_unchanged'] and capture['owner_report_unchanged'])
+        lane = self.roadmap['baseline']['user_space_integration']
+        self.assertTrue(lane['startup_handoff_host_verified'] and lane['continue_full_microkernel_after_iso'])
+        self.assertFalse(lane['native_startup_handoff_called'] or lane['application_launch_and_shell_integration'])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]

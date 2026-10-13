@@ -11,7 +11,16 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle280 adds two freestanding application
+**Current development checkpoint:** Cycle281 adds owned, pre-entry startup-handle
+replacement for application launch. Partial writes quarantine the image; host tests
+verify attenuated control/file grants, rollback and fresh restart generations.
+551 default and567 file-profile kernel tests pass in debug/release, plus26 ownership
+doctests. The native dispatcher and shell do not yet use this new path. Next connect
+the two compiled useful applications, qualify them in fresh guests, then build the
+optical ISO. Full robust microkernel development continues afterward.
+[Evidence](docs/checkpoints/cycle281-startup-handoff.md).
+
+**Historical development checkpoint:** Cycle280 adds two freestanding application
 programs: text counts and signed-integer file summaries.110 user tests per profile
 and15 independent program builds pass; all13 older binaries remain byte-identical.
 The new apps are compiled and host-tested, not yet launched from the native shell.

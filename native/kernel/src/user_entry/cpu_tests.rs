@@ -11,6 +11,8 @@ mod job_tests;
 mod prepared_cancel_tests;
 #[path = "retirement_tests.rs"]
 mod retirement_tests;
+#[path = "startup_handoff_tests.rs"]
+mod startup_handoff_tests;
 
 struct Machine {
     snapshot: Snapshot,

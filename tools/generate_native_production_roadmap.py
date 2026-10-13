@@ -14777,13 +14777,73 @@ def apply_cycle280(roadmap: dict, test_count: int) -> dict:
             "actual shell job/result protocol with changed-input results from both isolated applications",
             "native stop/restart/fault containment and remaining file/cleanup recovery controls",
             "sustained optical ISO acceptance, then complete robust microkernel; canonical gates before main"])
+    return apply_cycle281(roadmap, test_count)
+
+
+def apply_cycle281(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle281-startup-handoff.md"
+    path = "runs/native-startup-handoff-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle280_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=281, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 281
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-startup-handoff.md"]
+    gate["current_candidate_audit"]["cycle"] = 281
+    gate["current_focused_source_projection"]["cycle"] = 281
+    gate["qualification_status"] = "startup_handoff_host_verified_native_integration_ISO_and_canonical_gates_pending"
+    for name in ("current_application_program_qualification", "current_application_program_metadata"):
+        gate[name]["evidence_status"] = "historical_cycle280_not_current_candidate_qualification"
+    baseline["native_application_programs"]["evidence_status"] = "historical_cycle280_unchanged_program_sources_not_current_kernel_qualification"
+    record = dict(cycle=281, contract_id="PSTART1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("new_kernel_tests", "default_kernel_tests_per_profile", "file_kernel_tests_per_profile",
+                "ownership_doctests", "pre_entry_owned_startup_replacement", "actual_admission_handle_handoff_host_tested",
+                "admission_and_startup_combined_failure_atomic", "native_launch_dispatcher_calls_new_api",
+                "native_application_count", "useful_application_count", "guest_runs", "native_execution_verified",
+                "shell_application_commands", "file_server_application_acl", "iso_built", "production_ready", "merge_qualified"):
+        record[key] = receipt[key]
+    gate["current_startup_handoff_qualification"] = record
+    gate["current_startup_handoff_metadata"] = dict(cycle=281, status="pass", tests_passed=284,
+        unittest_elapsed_seconds=58.347, capture_elapsed_seconds=59.422,
+        log_sha256="25F8255C3EE66C9C27C7F4971D9DF42B7A62B0B0C9E2752DF5B0E249F3BB7000",
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_startup_handoff"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=281, session_contract="PSTART1", receipt_path=path, receipt_section="captures",
+        startup_handoff_host_verified=True, native_startup_handoff_called=False,
+        native_execution_status="historical_cycle279_file_session_not_replayed_for_current_kernel")
+    lane["stages"]["USI-4"] = "partial_startup_handoff_host_verified_native_apps_and_shell_bridge_open"
+    evidence = "Cycle281: owned pre-entry startup-handle replacement rejects wrong identity/length/content and quarantines retained owners after memory errors.11 new kernel tests cover handoff, two SEND-only application grants, three restart generations and rollback.551 default/567 file-profile tests pass per debug/release profile;26 whole-kernel ownership doctests pass. No native caller, VM, useful-native-app or ISO claim. " + checkpoint
+    gap = "Implement shell application job/result multiplexing and bounded file-client authorization, then connect actual native launch handles to the owned startup handoff before any dispatch. Admission commits first: hold exclusive BSP/IF0 ownership and fail closed with owners retained on handoff error; combined failure-atomic rollback remains unimplemented. Qualify changed-input results, repeated jobs, stop/restart and contained faults. Preserve six roles/32 PMM records/16384-byte RX and measure native stack/resource impact. Then remaining file/cleanup controls and sustained optical ISO acceptance, followed by the complete robust microkernel, PooleGlyph/PDC and PooleGlass. Exact canonical gates remain required before main."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N13", "N14", "N16", "N18", "N19", "N20", "N22", "N30", "N36"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle281 source inventory: {test_count} Python tests discovered; full canonical qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["evidence"].append(checkpoint)
+            flag["closure_condition"] += " Cycle281 remaining work: " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Connect useful applications to the native shell, then optical ISO",
+        entry_evidence=[checkpoint, path, "docs/native-startup-handoff.md", "docs/native-userspace-integration-iso.md"],
+        exit_evidence=["bounded shell application protocol and explicit file-service client policy",
+            "native launch catalogue using actual granted handles and owned pre-entry handoff",
+            "both isolated apps compute changed-input results; stop/restart and fault containment",
+            "remaining file/cleanup controls and sustained optical ISO; complete robust microkernel afterward"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1438)
+    parser.add_argument("--test-count", type=int, default=1439)
     parser.add_argument("--status-date", default="2026-10-13")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
