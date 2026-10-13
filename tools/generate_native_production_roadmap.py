@@ -14837,13 +14837,75 @@ def apply_cycle281(roadmap: dict, test_count: int) -> dict:
             "native launch catalogue using actual granted handles and owned pre-entry handoff",
             "both isolated apps compute changed-input results; stop/restart and fault containment",
             "remaining file/cleanup controls and sustained optical ISO; complete robust microkernel afterward"])
+    return apply_cycle282(roadmap, test_count)
+
+
+def apply_cycle282(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle282-application-shell.md"
+    path = "runs/native-app-shell-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle281_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=282, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 282
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-application-shell.md"]
+    gate["current_candidate_audit"]["cycle"] = 282
+    gate["current_focused_source_projection"]["cycle"] = 282
+    gate["qualification_status"] = "application_shell_compiled_native_integration_ISO_and_canonical_gates_pending"
+    for name in ("current_startup_handoff_qualification", "current_startup_handoff_metadata"):
+        gate[name]["evidence_status"] = "historical_cycle281_not_current_candidate_qualification"
+    baseline["native_startup_handoff"]["evidence_status"] = "historical_cycle281_kernel_unchanged_user_inputs_changed"
+    baseline["native_application_programs"]["evidence_status"] = "historical_cycle280_program_inputs_changed"
+    record = dict(cycle=282, contract_id="PAPP1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        source_binding_count=len(receipt["program_build"]["source_bindings"]))
+    for key in ("user_tests_per_profile", "new_user_tests", "independent_program_pairs", "compiled_application_count",
+                "native_application_count", "useful_application_count", "guest_runs", "shell_application_commands",
+                "file_server_application_acl", "native_launch_catalogue_connected", "kernel_source_unchanged",
+                "native_execution_verified", "iso_built", "production_ready", "merge_qualified"):
+        record[key] = receipt[key]
+    gate["current_application_shell_qualification"] = record
+    gate["current_application_shell_metadata"] = dict(cycle=282, status="pass", tests_passed=285,
+        unittest_elapsed_seconds=58.562, capture_elapsed_seconds=59.641,
+        log_sha256="06AC0D0E4D99A11EDEDD3AAD652175D2498FC91852170B9FFEA7781E3F139E11",
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_application_shell"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=282, session_contract="PAPP1", receipt_path=path, receipt_section="program_build",
+        application_shell_compiled=True, application_file_policy_compiled=True,
+        application_launch_and_shell_integration=False, native_startup_handoff_called=False,
+        native_execution_status="historical_cycle279_file_session_not_replayed_for_changed_programs")
+    lane["stages"]["USI-4"] = "partial_application_shell_and_file_policy_compiled_native_launch_open"
+    evidence = "Cycle282: PooleAppShell implements text/numbers lifecycle and bounded authenticated job/result commands; PooleAppFiles opts into reserved application-role file clients.127 user tests per debug/release profile (17 new) exercise actual app engines in a host IPC model.17 independently compiled ELF/code pairs match exactly; shell15136 bytes fits four RX pages, file service2823 fits one.13 prior binaries unchanged; PooleFiles/PooleFileShell changed and require native replay. Four failed freestanding candidates remain recorded; no linker/object restrictions weakened. Kernel unchanged; no guest/useful-native-app/ISO claim. " + checkpoint
+    gap = "Connect the compiled application shell, file service and two apps to the native six-role catalogue. Retain owned startup metadata, derive actual SEND-only control/file handles during admission, and replace startup bytes before dispatch under exclusive BSP/IF0 ownership. Admission commits first; failed handoff must retain owners and stop dispatch, not claim combined atomic rollback. Verify the catalogue generation-to-child identity contract, stack/resource use, changed-input results, both apps alive, repeated jobs, stop/restart, and one app fault with surviving shell/peer. Replay changed legacy file binaries, close remaining file/cleanup controls, then build and operate a sustained optical ISO on fresh guests. Preserve32 PMM records/16384-byte RX. Continue full robust microkernel/PooleGlyph/PDC/PooleGlass afterward; canonical gates before main."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N13", "N14", "N16", "N18", "N19", "N20", "N22", "N30", "N36"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle282 source inventory: {test_count} Python tests discovered; full canonical qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["evidence"].append(checkpoint)
+            flag["closure_condition"] += " Cycle282 remaining work: " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Wire useful applications into the native shell session, then optical ISO",
+        entry_evidence=[checkpoint, path, "docs/native-application-shell.md", "docs/native-userspace-integration-iso.md"],
+        exit_evidence=["native catalogue derives and hands off actual SEND-only grants before dispatch",
+            "both apps compute changed-input results; repeated jobs, stop/restart and fault containment",
+            "changed legacy file replay, remaining cleanup controls and sustained optical ISO",
+            "complete robust microkernel afterward; exact canonical gates before main"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1439)
+    parser.add_argument("--test-count", type=int, default=1440)
     parser.add_argument("--status-date", default="2026-10-13")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

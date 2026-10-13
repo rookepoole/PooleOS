@@ -6,6 +6,7 @@ pub const LINE_BYTES: usize = 64;
 pub const BANNER: &[u8] = b"PooleOS native shell\r\n";
 pub const PROMPT: &[u8] = b"PooleOS> ";
 
+pub mod applications;
 pub mod files;
 pub mod processes;
 

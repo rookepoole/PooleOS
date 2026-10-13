@@ -1,15 +1,40 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-13
-Plan version: 2.184.0-startup-handoff
-Roadmap cycle: PooleOS Cycle 281
+Plan version: 2.185.0-application-shell
+Roadmap cycle: PooleOS Cycle 282
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 281: Owned Startup Handoff
+## Cycle 282: Application Shell Bridge
+
+PooleAppShell now implements application lifecycle, file-job commands, authenticated
+job/result IPC, bounded cleanup and fault requests. PooleAppFiles explicitly admits
+the two reserved application roles through kernel-authenticated tracked requests;
+legacy file access remains restricted.127 user tests pass in each debug/release
+profile, including both actual application engines in a host IPC model.17 ELF/code
+pairs independently reproduce. The shell fits four RX pages at15136 bytes; the app
+file service fits one at2823. [Evidence](checkpoints/cycle282-application-shell.md).
+
+This is compiled user-space integration code, not native execution or an ISO.
+13 prior binaries match exactly; PooleFiles/PooleFileShell changed and require
+fresh VM replay. Native useful app count stays0. Four failed freestanding candidates
+led to bounded code-generation repairs without weakening linker/object checks.
+
+Next wire the native catalogue and actual SEND-only startup grants, preserving
+ownership across admission and startup handoff. Then qualify real changed-input
+results, repeated jobs, both apps alive, stop/restart and contained app faults;
+replay changed file binaries, close remaining recovery controls and operate the
+actual optical ISO. Admission/handoff are not a combined failure-atomic transaction.
+Full robust microkernel, PooleGlyph/PDC and accessible PooleGlass follow this usable
+milestone. No phase/flag closes;1440 Python tests,732 architecture bindings and907
+execution inputs are inventories, not canonical qualification. No main/release
+or production promotion is claimed. Six roles/32 PMM records/16384-byte RX remain.
+
+## Historical Cycle 281: Owned Startup Handoff
 
 The kernel now supports replacing a never-executed task's bounded startup block
 with actual launch handles. Exact task/image identity and equal encoded length

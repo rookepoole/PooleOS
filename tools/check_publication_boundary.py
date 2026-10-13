@@ -84,6 +84,7 @@ ALLOWED_RUNS = {
     "runs/native-files-readiness.json",
     "runs/native-app-programs-readiness.json",
     "runs/native-startup-handoff-readiness.json",
+    "runs/native-app-shell-readiness.json",
     "runs/native-kernel-virtual-memory-readiness.json",
     "runs/native_model_readiness.json",
     "runs/native_microcode_readiness.json",

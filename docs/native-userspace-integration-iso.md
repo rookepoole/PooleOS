@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 281, 2026-10-13. No new ISO exists yet.
+Status: implementation started, Cycle 282, 2026-10-13. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -46,12 +46,30 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle278 partial: native prepared/suspended parent-death cleanup now survives dispatch-separated erase failures. Native exhaustion/multiple pending owners/live-parent completion, waiting interleavings, general supervision, trust and idle remain |
-| USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle281 partial: two apps compiled; owned late startup-handle handoff and SEND-only launch grants host-tested. Native launch wiring, app file policy and shell commands remain; local display/input also open |
+| USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle282 partial: app shell/file policy and two apps compiled and host-tested; owned startup handoff available. Native catalogue wiring and fresh app/file guest qualification remain; local display/input also open |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
 ### Immediate Next Move
 
-Current: [Cycle281 startup handoff](checkpoints/cycle281-startup-handoff.md).
+Current: [Cycle282 application shell](checkpoints/cycle282-application-shell.md).
+Application lifecycle and job/result commands, opt-in app file access and both
+application engines pass127 host tests/profile and17 independent binary pairs.
+PooleFiles/PooleFileShell changed and require native replay. No new ISO exists.
+
+1. Wire the six-role native catalogue to PooleAppShell, PooleAppFiles, PooleText
+   and PooleNumbers. Keep actual SEND-only admission handles and owned startup
+   metadata; call the handoff before dispatch. Preserve owners on handoff failure.
+2. Qualify both apps with changed-file results, repeated jobs, stop/restart and
+   a deliberate app fault with surviving shell/peer. Verify generation identity,
+   stack/resource bounds and changed legacy file binaries on fresh guests.
+3. Close remaining file/cleanup controls, build the optical ISO and exercise real
+   sustained interaction on fresh boots. No compiled-only acceptance substitute.
+4. Continue complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass
+   afterward. Production and main-merge gates remain required.
+
+### Historical Cycle281 Next Move
+
+Historical: [Cycle281 startup handoff](checkpoints/cycle281-startup-handoff.md).
 The kernel now has an owned pre-entry argument replacement operation. Host tests
 verify actual admission handles, narrow rights, three grant generations and rollback.
 It is not called by the native dispatcher yet. No new VM or ISO is claimed.

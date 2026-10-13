@@ -7,9 +7,17 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 281
+Last roadmap reconciliation: PooleOS Cycle 282
 
-Cycle281 implements owned pre-entry startup-handle replacement and host-verifies
+Cycle282 implements compiled application shell job/result commands and an opt-in
+file-service application policy.127 user tests per profile and17 independent
+ELF/code pairs pass. Native catalogue/startup wiring and fresh guest qualification
+are next, followed by the actual usable optical ISO. These host/build results do
+not count as native app acceptance. The full robust microkernel and every N0-N39,
+PooleGlyph/PDC, accessible PooleGlass, signing and reproducibility obligation remain.
+[Evidence](checkpoints/cycle282-application-shell.md).
+
+Historical Cycle281 implements owned pre-entry startup-handle replacement and host-verifies
 the two SEND-only launch grants, rollback and restart generations.551 default and
 567 file-profile kernel tests pass per debug/release profile, plus26 ownership
 doctests. Native launch dispatch, file-client authorization, shell application

@@ -42,6 +42,61 @@ fn start(p: &mut Processes<Fake>) {
     assert_eq!(p.response(), b"worker: admitted\r\n");
 }
 #[test]
+fn application_names_and_observation_keep_liveness_separate_from_stop_requests() {
+    let mut p = ApplicationProcesses::new(FACTORIES, Fake::default()).unwrap();
+    assert!(!p.begin(b"start worker").unwrap());
+    assert!(!p.begin(b"start fault").unwrap());
+    assert_eq!(p.child(0), None);
+    assert!(p.request_stop(0).unwrap());
+    assert_eq!(p.observe(0), Ok(Observation::Reported));
+    assert_eq!(p.response(), b"text: not started\r\n");
+    assert!(p.begin(b"start text").unwrap());
+    assert_eq!(p.observe(0), Err(Error::Sequence));
+    assert_eq!(p.request_stop(0), Err(Error::Sequence));
+    p.calls.replies.push_back((0, CHILD));
+    assert!(p.poll().unwrap());
+    assert_eq!(
+        p.child(0),
+        Some(Child {
+            sequence: 1,
+            handle: CHILD
+        })
+    );
+    for result in [(6, 1), (6, 2), (6, 3), (6, 4), (5, 0)] {
+        p.calls.replies.push_back(result);
+        assert_eq!(
+            p.observe(0).unwrap(),
+            if result == (6, 1) {
+                Observation::Attached
+            } else {
+                Observation::Reported
+            }
+        );
+        assert!(!p.close_allowed());
+    }
+    for result in [(6, 0), (9, 0), (5, 0)] {
+        p.calls.replies.push_back(result);
+        assert_eq!(p.request_stop(0).unwrap(), result != (5, 0));
+        assert!(!p.close_allowed());
+    }
+    p.calls.replies.push_back((0, 4 << 32));
+    assert_eq!(p.observe(0), Ok(Observation::Reported));
+    assert_eq!(p.response(), b"text: cancelled\r\n");
+    assert_eq!(p.child(0), None);
+    assert!(p.close_allowed());
+}
+#[test]
+fn malformed_async_observation_never_fabricates_process_completion() {
+    for result in [(0, 0), (0, 8 << 32), (6, 0), (6, 5), (9, 0), (5, 1)] {
+        let mut p = policy();
+        start(&mut p);
+        p.calls.replies.push_back(result);
+        assert_eq!(p.observe(0), Err(Error::Transport));
+        assert!(p.child(0).is_some());
+        assert!(!p.close_allowed());
+    }
+}
+#[test]
 fn names_tokens_and_factory_shapes_are_exact() {
     for f in [
         [0, FACTORIES[1]],

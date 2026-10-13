@@ -200,8 +200,16 @@ fn peer(bytes: &[u8]) -> Result<u64, Error> {
 }
 #[inline(always)]
 pub fn file_shell(bytes: &[u8], version: u64) -> Result<FileShellBoot, Error> {
+    file_shell_role(bytes, version, b"file-shell")
+}
+#[inline(always)]
+pub fn application_shell(bytes: &[u8], version: u64) -> Result<FileShellBoot, Error> {
+    file_shell_role(bytes, version, b"app-shell")
+}
+#[inline(always)]
+fn file_shell_role(bytes: &[u8], version: u64, role: &[u8]) -> Result<FileShellBoot, Error> {
     let args = arguments::<8>(bytes, version)?;
-    if args[0] != b"file-shell" {
+    if !crate::files::same_bytes(args[0], role) {
         return Err(Error::Role);
     }
     let receive = handle(args[1])?;
@@ -233,8 +241,16 @@ pub fn file_init(bytes: &[u8], version: u64) -> Result<(u64, u64), Error> {
 }
 #[inline(always)]
 pub fn file_server(bytes: &[u8], version: u64) -> Result<(u64, [u64; 2]), Error> {
+    file_server_role(bytes, version, b"file-service")
+}
+#[inline(always)]
+pub fn application_file_server(bytes: &[u8], version: u64) -> Result<(u64, [u64; 2]), Error> {
+    file_server_role(bytes, version, b"app-file-service")
+}
+#[inline(always)]
+fn file_server_role(bytes: &[u8], version: u64, role: &[u8]) -> Result<(u64, [u64; 2]), Error> {
     let args = arguments::<4>(bytes, version)?;
-    if args[0] != b"file-service" {
+    if !crate::files::same_bytes(args[0], role) {
         return Err(Error::Role);
     }
     let peers = [peer(args[2])?, peer(args[3])?];
@@ -356,6 +372,43 @@ mod tests {
         numbers[0] = b"numbers-app";
         assert!(application(&block(numbers), 1, crate::apps::Kind::Numbers).is_ok());
         assert!(application(&block([args[0]]), 1, crate::apps::Kind::Text).is_err());
+    }
+    #[test]
+    fn application_service_roles_cannot_be_confused_with_legacy_file_roles() {
+        let args: [&[u8]; 8] = [
+            b"app-shell",
+            b"0000000100010001",
+            b"0000000100010002",
+            b"0000000100000002",
+            b"0000000100060001",
+            b"0000000100060002",
+            b"0000000100010003",
+            b"0000000100000001",
+        ];
+        assert!(application_shell(&block(args), 1).is_ok());
+        assert!(file_shell(&block(args), 1).is_err());
+        assert!(application_shell(&block(args), 2).is_err());
+        for i in [0, 6, 7] {
+            let mut bad = args;
+            bad[i] = match i {
+                0 => b"file-shell",
+                6 => args[1],
+                _ => b"0000000000000001",
+            };
+            assert!(application_shell(&block(bad), 1).is_err());
+        }
+        let args: [&[u8]; 4] = [
+            b"app-file-service",
+            b"0000000100010001",
+            b"0000000100000000",
+            b"0000000100000003",
+        ];
+        assert!(application_file_server(&block(args), 1).is_ok());
+        assert!(file_server(&block(args), 1).is_err());
+        assert!(application_file_server(&block(args), 2).is_err());
+        let mut bad = args;
+        bad[3] = bad[2];
+        assert!(application_file_server(&block(bad), 1).is_err());
     }
     #[test]
     fn file_roles_require_exact_counts_peers_and_separate_channels() {

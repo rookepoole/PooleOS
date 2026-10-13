@@ -68,7 +68,11 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 725)
+        self.assertEqual(len(self.artifact["bound_sources"]), 732)
+        self.assertTrue({"docs/checkpoints/cycle282-application-shell.md", "docs/native-application-shell.md",
+            "runs/native-app-shell-readiness.json", "native/userspace/src/shell/applications.rs",
+            "native/userspace/src/shell/applications/tests.rs", "native/userspace/src/bin/application_shell.rs",
+            "native/userspace/src/bin/application_files.rs"}.issubset({item["path"] for item in self.artifact["bound_sources"]}))
         self.assertTrue({"docs/checkpoints/cycle281-startup-handoff.md", "docs/native-startup-handoff.md",
             "runs/native-startup-handoff-readiness.json", "native/kernel/src/user_entry/task/arguments.rs",
             "native/kernel/src/user_entry/startup_handoff_tests.rs"}.issubset({item["path"] for item in self.artifact["bound_sources"]}))

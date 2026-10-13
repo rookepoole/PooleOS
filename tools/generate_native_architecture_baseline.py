@@ -24,6 +24,13 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle282-application-shell.md",
+    "docs/native-application-shell.md",
+    "runs/native-app-shell-readiness.json",
+    "native/userspace/src/bin/application_shell.rs",
+    "native/userspace/src/bin/application_files.rs",
+    "native/userspace/src/shell/applications.rs",
+    "native/userspace/src/shell/applications/tests.rs",
     "docs/checkpoints/cycle281-startup-handoff.md",
     "docs/native-startup-handoff.md",
     "runs/native-startup-handoff-readiness.json",

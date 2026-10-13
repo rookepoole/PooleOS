@@ -84,14 +84,16 @@ impl<C: Calls> Client<C> {
         }
     }
 }
-pub struct Server<C> {
+pub type Server<C> = Service<C, false>;
+pub type ApplicationServer<C> = Service<C, true>;
+pub struct Service<C, const APPLICATIONS: bool> {
     endpoint: u64,
     peers: [u64; 2],
     reply: u64,
     output: Frame,
     calls: C,
 }
-impl<C: Calls> Server<C> {
+impl<C: Calls, const APPLICATIONS: bool> Service<C, APPLICATIONS> {
     #[inline(always)]
     pub const fn new(endpoint: u64, peers: [u64; 2], calls: C) -> Self {
         Self {
@@ -132,7 +134,12 @@ impl<C: Calls> Server<C> {
                     if !token(reply, 2) {
                         return Err(Error::Peer);
                     }
-                    self.output = if self.peers.contains(&peer) {
+                    // The opt-in catalogue reserves slots4/5 for apps. A live
+                    // kernel reply token authenticates the sender generation;
+                    // retirement revokes it, including queued stale requests.
+                    self.output = if self.peers.contains(&peer)
+                        || (APPLICATIONS && matches!(peer & 0xffffffff, 4 | 5))
+                    {
                         super::answer(wire.get(32..).ok_or(Error::Wire)?)
                     } else {
                         super::answer(&[])

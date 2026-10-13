@@ -90,11 +90,12 @@ impl Frame {
         if self.phase != RESULT || self.status != OK || self.len != 32 {
             return None;
         }
-        let mut values = [0; 4];
-        for (to, bytes) in values.iter_mut().zip(self.data.chunks_exact(8)) {
-            *to = i64::from_le_bytes(bytes.try_into().ok()?);
-        }
-        Some(values)
+        Some([
+            i64::from_le_bytes(self.data[0..8].try_into().ok()?),
+            i64::from_le_bytes(self.data[8..16].try_into().ok()?),
+            i64::from_le_bytes(self.data[16..24].try_into().ok()?),
+            i64::from_le_bytes(self.data[24..32].try_into().ok()?),
+        ])
     }
 }
 #[cfg(test)]

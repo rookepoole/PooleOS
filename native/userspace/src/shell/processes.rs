@@ -27,7 +27,21 @@ enum Operation {
     Stop,
     Status,
 }
-pub struct Processes<C> {
+pub type Processes<C> = Policy<C, false>;
+pub type ApplicationProcesses<C> = Policy<C, true>;
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Child {
+    pub sequence: u32,
+    pub handle: u64,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Observation {
+    Attached,
+    Reported,
+}
+
+pub struct Policy<C, const APPLICATIONS: bool> {
     tasks: [Task; 2],
     pending: Option<(usize, Operation)>,
     calls: C,
@@ -37,7 +51,7 @@ pub struct Processes<C> {
 fn typed(handle: u64, tag: u64) -> bool {
     handle >> 32 != 0 && handle & 0xffff0000 == tag << 16 && handle & 0xffff != 0
 }
-impl<C: Calls> Processes<C> {
+impl<C: Calls, const APPLICATIONS: bool> Policy<C, APPLICATIONS> {
     #[inline(always)]
     pub fn new(factories: [u64; 2], calls: C) -> Result<Self, Error> {
         let mut policy = Self::unbound(calls);
@@ -66,11 +80,67 @@ impl<C: Calls> Processes<C> {
         self.tasks[1].factory = factories[1];
         Ok(())
     }
+    pub fn child(&self, slot: usize) -> Option<Child> {
+        let task = self.tasks.get(slot)?;
+        if task.complete {
+            return None;
+        }
+        Some(Child {
+            sequence: task.sequence,
+            handle: task.handle?,
+        })
+    }
+    /// One observation call; only the kernel's terminal result closes a lifetime.
+    pub fn observe(&mut self, slot: usize) -> Result<Observation, Error> {
+        if self.pending.is_some() {
+            return Err(Error::Sequence);
+        }
+        let Some(child) = self.child(slot) else {
+            self.reply(slot, b"not started", None)?;
+            return Ok(Observation::Reported);
+        };
+        match self.calls.invoke(20, child.handle, 0) {
+            (6, 1) => Ok(Observation::Attached),
+            (6, 2..=4) => {
+                self.reply(slot, b"stopping", None)?;
+                Ok(Observation::Reported)
+            }
+            (0, value) => {
+                self.terminal(slot, value)?;
+                Ok(Observation::Reported)
+            }
+            (5, 0) => {
+                self.reply(slot, b"denied", None)?;
+                Ok(Observation::Reported)
+            }
+            _ => Err(Error::Transport),
+        }
+    }
+    /// A stop request is not a completion or permission to close the session.
+    pub fn request_stop(&mut self, slot: usize) -> Result<bool, Error> {
+        if self.pending.is_some() {
+            return Err(Error::Sequence);
+        }
+        let Some(child) = self.child(slot) else {
+            return Ok(true);
+        };
+        match self.calls.invoke(18, child.handle, 0) {
+            (6 | 9, 0) => Ok(true),
+            (5, 0) => Ok(false),
+            _ => Err(Error::Transport),
+        }
+    }
     fn reply(&mut self, slot: usize, label: &[u8], detail: Option<u32>) -> Result<bool, Error> {
         self.bytes = 0;
         self.output.fill(0);
         for bytes in [
-            if slot == 0 {
+            if APPLICATIONS {
+                if slot == 0 {
+                    &b"text: "[..]
+                } else {
+                    &b"numbers: "[..]
+                }
+            } else if slot == 0 {
                 &b"worker: "[..]
             } else {
                 &b"fault: "[..]
@@ -122,9 +192,13 @@ impl<C: Calls> Processes<C> {
         self.reply(slot, label, detail)
     }
 }
-impl<C: Calls> Commands for Processes<C> {
+impl<C: Calls, const APPLICATIONS: bool> Commands for Policy<C, APPLICATIONS> {
     fn help(&self) -> &'static [u8] {
-        b"help  version  echo TEXT  exit\r\nstart worker|fault  stop worker|fault  status worker|fault\r\n"
+        if APPLICATIONS {
+            b"help  version  echo TEXT  exit\r\nstart text|numbers  stop text|numbers  status text|numbers\r\n"
+        } else {
+            b"help  version  echo TEXT  exit\r\nstart worker|fault  stop worker|fault  status worker|fault\r\n"
+        }
     }
     fn begin(&mut self, line: &[u8]) -> Result<bool, Error> {
         if self.tasks.iter().any(|task| task.factory == 0) {
@@ -143,8 +217,10 @@ impl<C: Calls> Commands for Processes<C> {
             return Ok(false);
         };
         let slot = match name {
-            b"worker" => 0,
-            b"fault" => 1,
+            b"text" if APPLICATIONS => 0,
+            b"numbers" if APPLICATIONS => 1,
+            b"worker" if !APPLICATIONS => 0,
+            b"fault" if !APPLICATIONS => 1,
             _ => return Ok(false),
         };
         let task = self.tasks.get(slot).ok_or(Error::Wire)?;

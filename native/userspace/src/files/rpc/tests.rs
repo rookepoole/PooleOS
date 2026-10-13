@@ -31,6 +31,40 @@ const REQUEST: u64 = 0x100030001;
 const REPLY: u64 = 0x100020001;
 const PEER: u64 = 0x100000001;
 #[test]
+fn application_file_access_is_opt_in_and_uses_kernel_role_not_payload_identity() {
+    fn check<const APPS: bool>(peer: u64, allowed: bool) {
+        let request = Frame::empty(super::super::LIST, 1, 0);
+        let encoded = request.encode();
+        let response = super::super::answer(if allowed { &encoded } else { &[] }).encode();
+        let calls = CallsMock {
+            steps: [
+                (7, ENDPOINT, wrap(peer, 0, &request.encode()), (0, 96)),
+                (7, ENDPOINT, wrap(peer, REPLY, &request.encode()), (0, 96)),
+                (8, REPLY, response.to_vec(), (0, 64)),
+            ]
+            .into(),
+        };
+        let mut server = Service::<_, APPS>::new(ENDPOINT, [PEER, 0x100000003], calls);
+        for _ in 0..3 {
+            server.poll().unwrap();
+        }
+        assert_eq!(server.reply, 0);
+        assert!(server.calls.steps.is_empty());
+    }
+    for generation in [1u64, 2, u32::MAX as u64] {
+        for slot in [4, 5] {
+            check::<true>((generation << 32) | slot, true);
+            check::<false>((generation << 32) | slot, false);
+        }
+    }
+    for peer in [0x100000002, 0x100000006, 0x200000003, 0x100000104] {
+        check::<true>(peer, false);
+    }
+    for peer in [PEER, 0x100000003] {
+        check::<true>(peer, true);
+    }
+}
+#[test]
 fn plain_messages_without_reply_authority_do_not_terminate_the_service() {
     let request = Frame::empty(super::super::LIST, 1, 0);
     let calls = CallsMock {
