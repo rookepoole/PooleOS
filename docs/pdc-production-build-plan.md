@@ -1,15 +1,42 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-13
-Plan version: 2.182.0-native-files
-Roadmap cycle: PooleOS Cycle 279
+Plan version: 2.183.0-application-programs
+Roadmap cycle: PooleOS Cycle 280
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 279: Native Bundled Files
+## Cycle 280: Application Programs
+
+PooleText and PooleNumbers now implement real streaming file workloads in separate
+freestanding programs, with authenticated PAPP1 job/result IPC and PFILE1 reads.
+Text reports bytes, words and LF count; numbers reports count, sum, minimum and
+maximum for a bounded signed-i32 single column.110 user tests pass in each host
+profile, including malformed/changed inputs and transport faults;15 ELF/code pairs
+rebuild independently. New programs5877/5884 bytes each fit two RX pages. All13
+prior program binaries are directly byte-identical. Kernel source is unchanged.
+[Evidence and limits](checkpoints/cycle280-application-programs.md).
+
+These applications are compiled, not yet admitted to native execution. Native useful
+application count stays0 and there are no new VM runs. Next connect generation-bound
+control/file grants at launch, file-service client authorization, and actual shell
+commands with authenticated result multiplexing. Test repeated/changed file jobs,
+concurrent app survival, stale authority, stop/restart and deliberate contained app
+faults before counting either as usable. Preserve six roles,32 PMM records and
+16384-byte RX unless separately reviewed; do not enlarge capacity implicitly.
+
+Then qualify remaining file/cleanup recovery cases and sustained optical ISO
+operation. Full robust microkernel, PooleGlyph/PDC and accessible PooleGlass remain
+required afterward. The earlier file-session evidence is historical; unchanged
+binaries do not turn it into a fresh VM or canonical replay. No phase/flag closes:
+40 phases301 subphases8996 requirements59 additions98 flags43 open20 gap groups.
+1438 Python tests and720 architecture bindings are inventories, not full canonical
+execution. No new ISO, main qualification, release or production readiness follows.
+
+## Historical Cycle 279: Native Bundled Files
 
 An isolated user-space file service now serves four immutable public files over
 capability IPC. The actual native shell lists and reads them, including multichunk,

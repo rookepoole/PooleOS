@@ -1,5 +1,6 @@
 #![no_std]
 
+pub mod apps;
 pub mod console;
 pub mod console_ipc;
 pub mod files;

@@ -82,6 +82,7 @@ ALLOWED_RUNS = {
     "runs/native-owner-death-readiness.json",
     "runs/native-deferred-cleanup-readiness.json",
     "runs/native-files-readiness.json",
+    "runs/native-app-programs-readiness.json",
     "runs/native-kernel-virtual-memory-readiness.json",
     "runs/native_model_readiness.json",
     "runs/native_microcode_readiness.json",

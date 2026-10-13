@@ -7,9 +7,19 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 277
+Last roadmap reconciliation: PooleOS Cycle 280
 
-Cycle277 adds durable parent-death child ownership and bounded native cleanup.
+Cycle280 adds compiled PooleText/PooleNumbers application programs and their
+authenticated file/job/result engines.110 user tests per host profile and15
+independent ELF/code pairs pass. Native shell integration, application grants,
+fresh guest qualification and the optical ISO remain open; these compiled programs
+do not yet count as useful native apps. Cycle279 supplies the isolated read-only
+file service and real shell ls/cat. Next connect both applications, qualify recovery
+and optical interaction, then continue the full robust microkernel. All N0-N39,
+PooleGlyph/PDC, accessible PooleGlass, reproducibility and signing obligations remain.
+[Evidence](checkpoints/cycle280-application-programs.md).
+
+Historical Cycle277 adds durable parent-death child ownership and bounded native cleanup.
 Six shell-fault guests retain independent console/init/counter progress;15 total
 VM runs pass with regressions. Next: native waiting-child/scheduled cleanup
 recovery, bundled files, two useful apps and sustained optical ISO acceptance.

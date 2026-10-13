@@ -154,6 +154,44 @@ pub struct FileShellBoot {
     pub endpoint: u64,
     pub peer: u64,
 }
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ApplicationBoot {
+    pub control: u64,
+    pub control_peer: u64,
+    pub files: u64,
+    pub file_peer: u64,
+}
+#[inline(always)]
+pub fn application(
+    bytes: &[u8],
+    version: u64,
+    kind: crate::apps::Kind,
+) -> Result<ApplicationBoot, Error> {
+    let args = arguments::<5>(bytes, version)?;
+    let role: &[u8] = match kind {
+        crate::apps::Kind::Text => b"text-app",
+        crate::apps::Kind::Numbers => b"numbers-app",
+    };
+    if !crate::files::same_bytes(args[0], role) {
+        return Err(Error::Role);
+    }
+    let boot = ApplicationBoot {
+        control: handle(args[1])?,
+        control_peer: peer(args[2])?,
+        files: handle(args[3])?,
+        file_peer: peer(args[4])?,
+    };
+    if boot.control == boot.files
+        || boot.control_peer == boot.file_peer
+        || [boot.control, boot.files]
+            .iter()
+            .any(|&h| h >> 32 == 0 || h & 0xffff0000 != 1 << 16 || h & 0xffff == 0)
+    {
+        return Err(Error::Handle);
+    }
+    Ok(boot)
+}
 #[inline(always)]
 fn peer(bytes: &[u8]) -> Result<u64, Error> {
     let value = handle(bytes)?;
@@ -288,6 +326,36 @@ mod tests {
     }
     fn valid() -> Vec<u8> {
         block([b"init", b"0000000100010001", b"0000000100010002"])
+    }
+    #[test]
+    fn application_startup_requires_role_and_distinct_typed_channels() {
+        let args: [&[u8]; 5] = [
+            b"text-app",
+            b"0000000200010001",
+            b"0000000100000003",
+            b"0000000200010002",
+            b"0000000100000001",
+        ];
+        let boot = application(&block(args), 1, crate::apps::Kind::Text).unwrap();
+        assert_eq!(boot.control, 0x200010001);
+        assert_eq!(boot.files, 0x200010002);
+        assert!(application(&block(args), 2, crate::apps::Kind::Text).is_err());
+        assert!(application(&block(args), 1, crate::apps::Kind::Numbers).is_err());
+        for (index, value) in [
+            (3, args[1]),
+            (4, args[2]),
+            (1, b"0000000100060001"),
+            (2, b"0000000000000003"),
+            (3, b"0000000100010000"),
+        ] {
+            let mut bad = args;
+            bad[index] = value;
+            assert!(application(&block(bad), 1, crate::apps::Kind::Text).is_err());
+        }
+        let mut numbers = args;
+        numbers[0] = b"numbers-app";
+        assert!(application(&block(numbers), 1, crate::apps::Kind::Numbers).is_ok());
+        assert!(application(&block([args[0]]), 1, crate::apps::Kind::Text).is_err());
     }
     #[test]
     fn file_roles_require_exact_counts_peers_and_separate_channels() {

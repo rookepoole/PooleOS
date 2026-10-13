@@ -14711,13 +14711,79 @@ def apply_cycle279(roadmap: dict, test_count: int) -> dict:
             "native malformed file requests, requester death and remaining cleanup/owner-death controls",
             "sustained optical ISO operation on fresh guests; exact canonical gates before main",
             "complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass afterward"])
+    return apply_cycle280(roadmap, test_count)
+
+
+def apply_cycle280(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle280-application-programs.md"
+    path = "runs/native-app-programs-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle279_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=280, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 280
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-application-programs.md"]
+    gate["current_candidate_audit"]["cycle"] = 280
+    gate["current_focused_source_projection"]["cycle"] = 280
+    gate["qualification_status"] = "application_programs_compiled_native_integration_ISO_and_canonical_gates_pending"
+    for name in ("current_file_service_qualification", "current_file_service_metadata"):
+        gate[name]["evidence_status"] = "historical_cycle279_not_current_candidate_qualification"
+    baseline["native_files"]["evidence_status"] = "historical_cycle279_not_current_candidate_qualification"
+    record = dict(cycle=280, contract_id="PAPP1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        source_binding_count=len(receipt["program_build"]["source_bindings"]))
+    for key in ("user_tests_per_profile", "new_user_tests", "compiled_application_count", "useful_application_count",
+                "native_application_count", "native_execution_verified", "independent_program_pairs", "guest_runs",
+                "old_program_bytes_compared_directly", "kernel_source_unchanged", "shell_application_commands",
+                "launch_capability_integration", "file_server_application_acl", "iso_built", "merge_qualified", "production_ready"):
+        record[key] = receipt[key]
+    gate["current_application_program_qualification"] = record
+    gate["current_application_program_metadata"] = dict(cycle=280, status="pass", tests_passed=283,
+        unittest_elapsed_seconds=57.870, capture_elapsed_seconds=58.937,
+        log_sha256="5F4525427DDC16BC428E1BD26C955A038AE3D00DD18D670C7C09C88FA90EFBE0",
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_application_programs"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=280, selected_stage="USI-4", session_contract="PAPP1", receipt_path=path,
+        receipt_section="program_build", compiled_application_count=2, useful_application_count=0,
+        native_application_count=0, native_execution_evidence_cycle=279, native_execution_replayed_this_cycle=False,
+        native_execution_status="historical_file_session_unchanged_program_bytes_not_current_native_replay",
+        shell_native_execution_replayed_this_cycle=False, default_profile_replayed_this_cycle=False,
+        application_launch_and_shell_integration=False, full_stack_bound_proven=False)
+    lane["stages"]["USI-4"] = "partial_two_application_programs_compiled_native_launch_and_commands_open"
+    evidence = "Cycle280: PooleText and PooleNumbers implement bounded streaming file statistics, authenticated PAPP1 jobs/results and PFILE1 reads with one syscall per poll.110 user tests per debug/release profile (17 new) and15 independent ELF/code pairs pass. All13 prior binaries directly equal Cycle279 bytes. New programs5877/5884 bytes each fit two RX pages; no imports, writable segments or final relocations. First failed helper-import build is preserved. No kernel source changes or new VM execution; native useful app count stays0. " + checkpoint
+    gap = "Next integrate both compiled apps into the native six-role init/files/console/shell/app1/app2 session. Deliver generation-bound file/control grants transactionally at launch, extend file-service authorization for explicitly admitted child identities, and add shell job/result multiplexing authenticated by kernel sender, kind and job sequence. Qualify changed-input results, repeated jobs, both apps alive, stale authority, stop/restart and one app fault while the other and shell survive. Preserve32 PMM records/16384-byte RX; review resource and full stack impact. Then remaining file/cleanup recovery controls and sustained optical ISO acceptance, followed by complete robust microkernel/PooleGlyph/PDC/PooleGlass development. No compiled-only or shell builtin substitute for useful native apps. Canonical gates remain required before main."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N13", "N14", "N16", "N18", "N19", "N20", "N22", "N30", "N36"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle280 source inventory: {test_count} Python tests discovered; full canonical qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["evidence"].append(checkpoint)
+            flag["closure_condition"] += " Cycle280 remaining work: " + gap
+        if flag["id"] == "FLAG-N36-EVIDENCE-STORAGE-001":
+            flag["evidence"].append(checkpoint)
+            flag["closure_condition"] += " Cycle280 retains five verified program-build archives, including the failed build; automated reservation/restore remain open."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Connect useful applications to the native shell, then optical ISO",
+        entry_evidence=[checkpoint, path, "docs/native-application-programs.md", "docs/native-userspace-integration-iso.md"],
+        exit_evidence=["generation-bound transactional launch grants and bounded file-service client authorization",
+            "actual shell job/result protocol with changed-input results from both isolated applications",
+            "native stop/restart/fault containment and remaining file/cleanup recovery controls",
+            "sustained optical ISO acceptance, then complete robust microkernel; canonical gates before main"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1437)
+    parser.add_argument("--test-count", type=int, default=1438)
     parser.add_argument("--status-date", default="2026-10-13")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

@@ -104,6 +104,34 @@ impl crate::console_ipc::rpc::Calls for ConsoleCalls {
     }
 }
 
+/// SAFETY: called only from the PSTART1 shim with the live mapped startup block.
+#[inline(always)]
+pub unsafe fn application(address: u64, bytes: u64, version: u64, kind: crate::apps::Kind) -> ! {
+    let block = unsafe { file_block(address, bytes) }.unwrap_or_else(|_| exit(200));
+    let boot = startup::application(block, version, kind).unwrap_or_else(|_| exit(200));
+    let files = crate::files::rpc::Client::new(boot.files, boot.file_peer, ConsoleCalls);
+    let mut app = crate::apps::program::Program::new(
+        kind,
+        boot.control,
+        boot.control_peer,
+        ConsoleCalls,
+        files,
+    );
+    loop {
+        match app.poll() {
+            Ok(crate::apps::program::Progress::FaultRequested) => {
+                // SAFETY: an authenticated explicit test job requests a CPL3 fault.
+                unsafe {
+                    asm!("ud2", options(noreturn));
+                }
+            }
+            Ok(_) => {}
+            Err(crate::console_ipc::Error::Revoked) => exit(201),
+            Err(_) => exit(202),
+        }
+    }
+}
+
 /// SAFETY: live kernel-owned PSTART1 entry block, as for boot().
 #[inline(always)]
 pub unsafe fn file_block<'a>(address: u64, bytes: u64) -> Result<&'a [u8], startup::Error> {

@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 279, 2026-10-13. No new ISO exists yet.
+Status: implementation started, Cycle 280, 2026-10-13. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -46,12 +46,37 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle278 partial: native prepared/suspended parent-death cleanup now survives dispatch-separated erase failures. Native exhaustion/multiple pending owners/live-parent completion, waiting interleavings, general supervision, trust and idle remain |
-| USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle279 partial: isolated read-only file service and actual shell ls/cat pass, including stale-file authority denial; two useful separate apps and local display/input remain |
+| USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle280 partial: file service/shell previously native-qualified; two application programs now compiled and host-tested, but their native launch, file grants and shell commands remain; local display/input also open |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
 ### Immediate Next Move
 
-Current: [Cycle279 native files](checkpoints/cycle279-native-files.md).
+Current: [Cycle280 application programs](checkpoints/cycle280-application-programs.md).
+PooleText and PooleNumbers implement bounded file workloads and authenticated
+job/result state machines. Both compile independently into flat native programs.
+They are not yet available in the native shell; useful native app count remains0.
+
+1. Connect both programs to the existing launch catalogue. Derive control/file
+   grants inside the atomic admission transaction; deliver actual generation-bound
+   handles in startup data. Extend file-service client authorization deliberately,
+   without trusting application payload identity or granting device/endpoint ownership.
+2. Add real shell application commands and job/result multiplexing. Authenticate
+   kernel peers, application kind, job sequence and exact bounded result data.
+   Verify changed-input results, both apps alive, repeated jobs and stop/restart;
+   a deliberate fault in one app must leave the other and shell useful.
+3. Qualify remaining malformed/untracked file requests, requester death and native
+   deferred-cleanup recovery cases. Then build and operate the optical ISO through
+   sustained real user interaction on fresh boots, retaining exact artifact evidence.
+4. Continue complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass
+   development after that usable milestone. No production gates are replaced.
+
+Preserve six roles,32 PMM records,16384-byte RX and existing mapping/stack limits
+unless separately reviewed. The application protocol is compiled and host-tested,
+not a supervisor, native execution proof, new ISO or full canonical qualification.
+
+### Historical Cycle279 Next Move
+
+Historical: [Cycle279 native files](checkpoints/cycle279-native-files.md).
 Three final-source file guests prove actual shell list/read through granted IPC
 while a worker runs; twelve VMs pass including lifecycle and boot regressions.
 Four immutable public files are implemented. Useful application count remains0.

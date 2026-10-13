@@ -90,7 +90,8 @@ def build(cargo: Path, env: dict, target: Path, log: Path) -> dict:
                          ("PooleMultiSupervisor", "multi_supervisor"),
                          ("PooleControlShell", "control_shell"), ("PooleWorker", "worker"),
                          ("PooleFiles", "files"), ("PooleFileInit", "file_init"),
-                         ("PooleFileShell", "file_shell")):
+                         ("PooleFileShell", "file_shell"), ("PooleText", "text"),
+                         ("PooleNumbers", "numbers")):
         path = target / TARGET / "release" / name
         blob = path.read_bytes()
         code, record = extract(blob)
@@ -144,7 +145,7 @@ def main() -> int:
             if release: command.append("--release")
             output=run(command,env,work / ("release.log" if release else "debug.log"))
             match=re.search(r"test result: ok\. (\d+) passed; 0 failed; 0 ignored;",output)
-            if not match or int(match[1]) != 93: raise ValueError("expected93 Rust host tests")
+            if not match or int(match[1]) != 110: raise ValueError("expected110 Rust host tests")
             report["host_tests"].append(dict(profile="release" if release else "debug", tests_passed=int(match[1])))
         first=build(cargo,env,work / "build1",work / "build1.log")
         second=build(cargo,env,work / "build2",work / "build2.log")

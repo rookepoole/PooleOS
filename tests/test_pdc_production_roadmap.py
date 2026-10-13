@@ -198,8 +198,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 279)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1437)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 280)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1438)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -239,8 +239,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "bounded_files_pass_apps_ISO_and_canonical_gates_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 279)
+        self.assertEqual(current["qualification_status"], "application_programs_compiled_native_integration_ISO_and_canonical_gates_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 280)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -6288,9 +6288,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         runs = []
         for lane,oracle in (('files',native_files),('normal',native_shell_process),('deferred',native_deferred_cleanup)):
             live = r['native_execution'][lane]
-            self.assertEqual(live['source_bindings'],source_bindings())
+            self.assertEqual(record['evidence_status'],'historical_cycle279_not_current_candidate_qualification')
+            self.assertNotEqual(live['source_bindings'],source_bindings())
             self.assertEqual(len(live['source_bindings']),892)
-            self.assertEqual(live['program_build']['source_bindings'],bindings())
+            self.assertNotEqual(live['program_build']['source_bindings'],bindings())
             self.assertTrue(live['source_unchanged'] and live['independent_kernel_builds_equal'])
             self.assertEqual(len(live['program_build']['programs']),13)
             self.assertEqual([t['tests_passed'] for t in live['program_build']['host_tests']],[93,93])
@@ -6323,11 +6324,54 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertTrue(run['fresh_vars_copy'] and run['media_read_only'] and run['serial_debugcon_exact_match'])
             self.assertFalse(run['guest_network'] or run['host_acceleration'] or run['local_paths_recorded'])
         self.assertEqual((r['default_regression']['budget']['image_pages'],r['guarded_stack_pages']),(208,36))
-        lane=b['user_space_integration']
+        lane=b['historical_cycle279_user_space_integration']
         self.assertEqual((lane['cycle'],lane['selected_stage'],lane['session_contract']),(279,'USI-4','PFILE1'))
         self.assertTrue(lane['bundled_files'] and lane['continue_full_microkernel_after_iso'])
         self.assertEqual(lane['useful_application_count'],0)
         self.assertIn('useful applications',self.roadmap['immediate_next_move']['title'])
+
+    def test_cycle280_application_programs_are_compiled_not_native_promoted(self) -> None:
+        from tools.qualify_native_user_programs import bindings
+        b=self.roadmap['baseline']
+        record=b['native_application_programs']
+        raw=(ROOT/record['receipt_path']).read_bytes()
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
+        r=json.loads(raw)
+        self.assertEqual((r['cycle'],r['contract_id'],r['status']),(280,'PAPP1','compiled_and_host_tested'))
+        self.assertEqual((r['user_tests_per_profile'],r['new_user_tests']),(110,17))
+        self.assertEqual((r['compiled_application_count'],r['useful_application_count'],r['native_application_count']),(2,0,0))
+        self.assertEqual(r['independent_program_pairs'],15)
+        self.assertEqual((r['guest_runs'],r['previous_file_guest_evidence_cycle']),(0,279))
+        self.assertTrue(r['old_program_bytes_compared_directly'] and r['kernel_source_unchanged'])
+        self.assertEqual(len(r['unchanged_previous_programs']),13)
+        for key in ('native_execution_verified','native_replayed_this_cycle','heap_or_writable_segment_added',
+                    'shell_application_commands','launch_capability_integration','file_server_application_acl',
+                    'iso_built','production_ready','merge_qualified','canonical_full_replay_performed'):
+            self.assertFalse(r[key],key)
+        build=r['program_build']
+        self.assertEqual(build['source_bindings'],bindings())
+        self.assertEqual(len(build['source_bindings']),57)
+        self.assertEqual([t['tests_passed'] for t in build['host_tests']],[110,110])
+        self.assertEqual((build['status'],build['independent_builds']),('pass',2))
+        self.assertTrue(build['source_unchanged'] and build['direct_byte_equality'])
+        for name,size in [('PooleText',5877),('PooleNumbers',5884)]:
+            p=build['programs'][name]
+            self.assertEqual((p['code_bytes'],p['load_pages']),(size,2))
+            self.assertEqual((p['writable_segments'],p['relocations'],p['imports']),(0,0,0))
+            self.assertFalse(p['native_execution_verified'] or p['production_ready'])
+        old=json.loads((ROOT/'runs/native-files-readiness.json').read_bytes())['native_execution']['files']['program_build']['programs']
+        self.assertEqual(set(r['unchanged_previous_programs']),set(old))
+        for name in old:
+            for key in ('elf_sha256','code_sha256','elf_bytes','code_bytes'):
+                self.assertEqual(old[name][key],build['programs'][name][key])
+        self.assertNotEqual(r['captures']['programs']['return_code'],0)
+        self.assertEqual(r['captures']['programs2']['return_code'],0)
+        for c in r['captures'].values(): self.assertTrue(c['source_unchanged'] and c['owner_report_unchanged'])
+        lane=b['user_space_integration']
+        self.assertEqual((lane['cycle'],lane['selected_stage'],lane['session_contract']),(280,'USI-4','PAPP1'))
+        self.assertFalse(lane['native_execution_replayed_this_cycle'] or lane['application_launch_and_shell_integration'])
+        self.assertTrue(lane['continue_full_microkernel_after_iso'])
+        self.assertIn('native shell',self.roadmap['immediate_next_move']['title'])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]

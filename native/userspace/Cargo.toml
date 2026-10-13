@@ -17,6 +17,18 @@ bench = false
 path = "src/lib.rs"
 
 [[bin]]
+name = "PooleText"
+path = "src/bin/text.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleNumbers"
+path = "src/bin/numbers.rs"
+test = false
+bench = false
+
+[[bin]]
 name = "PooleFiles"
 path = "src/bin/files.rs"
 test = false

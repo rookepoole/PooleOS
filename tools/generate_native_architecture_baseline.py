@@ -24,6 +24,18 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle280-application-programs.md",
+    "docs/native-application-programs.md",
+    "runs/native-app-programs-readiness.json",
+    "native/userspace/src/apps.rs",
+    "native/userspace/src/apps/program.rs",
+    "native/userspace/src/apps/program/tests.rs",
+    "native/userspace/src/apps/stats.rs",
+    "native/userspace/src/apps/stats/tests.rs",
+    "native/userspace/src/apps/wire.rs",
+    "native/userspace/src/apps/wire/tests.rs",
+    "native/userspace/src/bin/text.rs",
+    "native/userspace/src/bin/numbers.rs",
     "docs/checkpoints/cycle279-native-files.md",
     "docs/native-files.md",
     "runs/native-files-readiness.json",

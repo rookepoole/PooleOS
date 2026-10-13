@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle279 adds an isolated read-only file
+**Current development checkpoint:** Cycle280 adds two freestanding application
+programs: text counts and signed-integer file summaries.110 user tests per profile
+and15 independent program builds pass; all13 older binaries remain byte-identical.
+The new apps are compiled and host-tested, not yet launched from the native shell.
+Next: connect their launch grants and job/result IPC, qualify both in fresh guests,
+then optical ISO acceptance. Full robust microkernel development continues afterward.
+[Evidence](docs/checkpoints/cycle280-application-programs.md).
+
+**Historical development checkpoint:** Cycle279 adds an isolated read-only file
 service and real native shell `ls`/`cat` over capability IPC. Twelve final-source
 VM cases pass, including stale-file-handle denial and lifecycle regressions;
 540 default/556 file-profile kernel tests and93 user tests pass per profile.
