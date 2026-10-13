@@ -3,6 +3,10 @@
 Contract: `PCANCEL1`. Cycle276, 2026-10-13. Development-only, single-BSP
 interactive integration. This extends retained cleanup, not production recovery.
 
+This page records the frozen Cycle276 qualification. Cycle277 adds bounded
+parent-death cleanup; see [current job lifecycle](native-job-lifecycle.md).
+The remaining-boundaries section below describes Cycle276, not current coverage.
+
 ## Ownership And Ordering
 
 `Slot::cancel_prepared` accepts only the exact occupied task generation in

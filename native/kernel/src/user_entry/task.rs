@@ -15,6 +15,7 @@ use crate::{
 
 pub const CONTRACT_ID: &str = "PKUSER8";
 pub const CALLS_PER_DISPATCH: u8 = 64;
+pub mod job;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Fault {
@@ -338,6 +339,7 @@ pub struct Runtime {
 
 struct Owned<H: Cpu, D: Driver> {
     id: TaskId,
+    identity: job::Identity,
     cpu: Option<CpuImage<H>>,
     reclaim: Option<super::retirement::RetiredImage>,
     driver: D,
@@ -397,9 +399,14 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
             Ok(id) => id,
             Err(e) => return Err((e, cpu, driver)),
         };
+        let image = match cpu.unexposed_admission() {
+            Ok(image) => image,
+            Err(error) => return Err((Error::Cpu(error), cpu, driver)),
+        };
         self.generation = id.generation;
         self.owned = Some(Owned {
             id,
+            identity: job::Identity::new(id, image),
             cpu: Some(cpu),
             reclaim: None,
             driver,

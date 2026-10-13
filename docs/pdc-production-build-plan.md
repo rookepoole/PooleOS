@@ -1,15 +1,40 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-13
-Plan version: 2.179.0-native-prepared-cancellation
-Roadmap cycle: PooleOS Cycle 276
+Plan version: 2.180.0-native-owner-death
+Roadmap cycle: PooleOS Cycle 277
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 276: Owned Prepared Cancellation
+## Cycle 277: Native Parent-Death Cleanup
+
+The kernel now retains a bounded child-ownership relationship after parent leases
+are removed. Six native shell-fault guests reclaim prepared/suspended children
+while independent console/init/counter tasks continue. Fifteen final-source VM
+runs pass, including ordinary/prepared shell and default boot regressions. Seven
+new tests bring the kernel suite to533 per profile;78 user tests per profile and
+11 ownership doctests pass. Ten fresh program pairs reproduce. One failed native
+test assumption is retained and corrected, not counted as a successful boot.
+[Evidence and failures](checkpoints/cycle277-native-owner-death.md).
+
+USI-3/4 remain partial. Next qualify native waiting children and pending/claimed
+request interleavings, then bounded scheduled cleanup retry with backoff and
+exhaustion. General supervisor restart, partial allocator-commit fault injection
+and full stack bounds remain open. Replace diagnostic roles with a read-only
+file service and two useful separate apps in the reviewed six-process layout;
+sustained optical ISO acceptance follows. Complete robust microkernel, PooleGlyph,
+PDC and accessible PooleGlass work continues after that intermediate milestone.
+
+Normal112, retry/prepared113 and default208/208 pages; stack36 unchanged. Measured
+dispatcher local allocation49432 bytes is not full stack proof. No phase/flag
+closes:40 phases301 subphases8996 requirements59 additions98 flags43 open20 gap
+groups.1429 Python tests/686 architecture bindings are inventories. No usable
+integration ISO, full canonical qualification or main merge is claimed.
+
+## Historical Cycle 276: Owned Prepared Cancellation
 
 A child stopped before its first instruction now derives cancellation from its
 owned image, retains memory across failed reclamation, and cannot be reused or

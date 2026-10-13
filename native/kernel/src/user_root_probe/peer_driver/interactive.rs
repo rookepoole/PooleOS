@@ -89,6 +89,10 @@ pub(crate) fn run(
         .each_mut()
         .map(|slot| slot.as_mut().expect("initialized peer"));
     let pages = programs.each_ref().map(|p| 12 + p.code_pages());
+    let mut job = checked!(task::job::Job::<2>::new(&peers[3].slot, peers[3].id));
+    for child in &peers[4..] {
+        checked!(job.adopt(&child.slot, child.id));
+    }
     let total: u64 = pages.iter().sum();
     if baseline > 12
         || manager.summary().allocated_pages != baseline + total
@@ -163,6 +167,7 @@ pub(crate) fn run(
     let mut held_dispatches = 0;
     let mut retired = 0;
     let mut cancelled = 0;
+    let mut owner_fault = false;
     loop {
         let id = checked!(scheduler.dispatch(cpu));
         let i = usize::from(id.slot);
@@ -225,8 +230,26 @@ pub(crate) fn run(
                 }
                 Event::Terminated(outcome) => {
                     calls[i] = outcome.syscalls;
-                    if i < 2 || (i < 4 && outcome.reason != Reason::Exit(0)) {
+                    if i < 2 || (i == 2 && outcome.reason != Reason::Exit(0)) {
                         stop(34004, serial, debugcon);
+                    }
+                    if i == 3 {
+                        checked!(job.owner_stopped(&p.slot, p.id));
+                        owner_fault = outcome.reason != Reason::Exit(0);
+                        if owner_fault {
+                            job_record(
+                                serial,
+                                debugcon,
+                                "OWNER",
+                                &[
+                                    ("task", u64::from(p.id.slot)),
+                                    ("generation", u64::from(p.id.generation)),
+                                    ("root", p.root),
+                                    ("children", job.child_count() as u64),
+                                    ("dispatches", u64::from(scheduler.summary().dispatch_count)),
+                                ],
+                            );
+                        }
                     }
                     checked!(retire(
                         p,
@@ -235,6 +258,7 @@ pub(crate) fn run(
                         &mut scheduler,
                         pages[i],
                         i >= 4,
+                        &mut job,
                         serial,
                         debugcon
                     ));
@@ -281,6 +305,7 @@ pub(crate) fn run(
                 &mut scheduler,
                 pages[j],
                 true,
+                &mut job,
                 serial,
                 debugcon
             ));
@@ -341,6 +366,7 @@ pub(crate) fn run(
                     topology,
                     hpet
                 ));
+                checked!(job.adopt(&p.slot, p.id));
             }
             let admitted = checked!(unsafe {
                 arch::x86_64::user_ipc::with_waits(|s| {
@@ -386,34 +412,101 @@ pub(crate) fn run(
             );
         }
         if !live[3] {
-            if live[4] || live[5] {
-                stop(34013, serial, debugcon);
-            }
-            for j in 4..6 {
-                if !owned[j] {
-                    continue;
+            let orphan_count = job.child_count();
+            while let Some(target) = job.next_orphan() {
+                let j = usize::from(target.slot);
+                if !(4..6).contains(&j) || !owned[j] || peers[j].id != target {
+                    stop(34013, serial, debugcon);
                 }
                 let p = &mut peers[j];
-                if generations[j - 4] != 0 || p.slot.state(p.id) != Ok(task::State::Prepared) {
+                let admitted = live[j];
+                let prepared = checked!(p.slot.state(p.id)) == task::State::Prepared;
+                if !admitted && (generations[j - 4] != 0 || !prepared) {
                     stop(34014, serial, debugcon);
                 }
                 let previous = manager.summary().allocated_pages;
-                let outcome = checked!(p.slot.cancel_prepared(p.id));
-                checked!(reclaim::reap(
-                    p, manager, &scheduler, outcome, pages[j], false, serial, debugcon
-                ));
+                let outcome = checked!(job.cancel_orphan(&mut p.slot, p.id, waiting[j]));
+                let flushes = arch::x86_64::user_root_write_count();
+                if admitted {
+                    checked!(retire(
+                        p,
+                        outcome,
+                        manager,
+                        &mut scheduler,
+                        pages[j],
+                        true,
+                        &mut job,
+                        serial,
+                        debugcon
+                    ));
+                    retired += 1;
+                    retirement(
+                        serial,
+                        debugcon,
+                        outcome,
+                        pages[j],
+                        scheduler.summary().dispatch_count,
+                    );
+                    if owner_fault {
+                        job_record(
+                            serial,
+                            debugcon,
+                            "CHILD",
+                            &[
+                                ("task", u64::from(p.id.slot)),
+                                ("generation", u64::from(p.id.generation)),
+                                ("root", p.root),
+                                ("prepared", u64::from(prepared)),
+                                ("remaining", job.child_count() as u64),
+                                ("published", 0),
+                                ("dispatches", u64::from(scheduler.summary().dispatch_count)),
+                            ],
+                        );
+                    }
+                } else {
+                    checked!(reclaim::reap(
+                        p,
+                        manager,
+                        &scheduler,
+                        outcome,
+                        pages[j],
+                        false,
+                        Some(&mut job),
+                        serial,
+                        debugcon
+                    ));
+                    cancelled += 1;
+                    record(
+                        serial,
+                        debugcon,
+                        "UNUSED",
+                        &[
+                            ("task", j as u64),
+                            ("released_pages", pages[j]),
+                            ("dispatches", u64::from(scheduler.summary().dispatch_count)),
+                        ],
+                    );
+                }
                 if previous - manager.summary().allocated_pages != pages[j] {
                     stop(34015, serial, debugcon);
                 }
+                if arch::x86_64::user_root_write_count() - flushes != u64::from(!prepared) {
+                    stop(34019, serial, debugcon);
+                }
+                extra_flushes += u64::from(!prepared);
+                calls[j] = outcome.syscalls;
+                waiting[j] = None;
+                live[j] = false;
                 owned[j] = false;
-                cancelled += 1;
-                record(
+            }
+            if owner_fault && orphan_count != 0 {
+                job_record(
                     serial,
                     debugcon,
-                    "UNUSED",
+                    "DRAINED",
                     &[
-                        ("task", j as u64),
-                        ("released_pages", pages[j]),
+                        ("children", job.child_count() as u64),
+                        ("owned_pages", manager.summary().allocated_pages - baseline),
                         ("dispatches", u64::from(scheduler.summary().dispatch_count)),
                     ],
                 );
@@ -479,12 +572,22 @@ fn retire(
     scheduler: &mut scheduler::Scheduler,
     pages: u64,
     publish: bool,
+    job: &mut task::job::Job<2>,
     serial: &mut Com1,
     debugcon: &mut DebugCon,
 ) -> Result<(), ()> {
     let before = manager.summary().allocated_pages;
+    let child = p.id.slot >= 4;
     reclaim::reap(
-        p, manager, scheduler, outcome, pages, true, serial, debugcon,
+        p,
+        manager,
+        scheduler,
+        outcome,
+        pages,
+        true,
+        if child { Some(&mut *job) } else { None },
+        serial,
+        debugcon,
     )?;
     scheduler
         .teardown(scheduler::TaskId::new(p.id.slot, p.id.generation).map_err(|_| ())?)
@@ -498,7 +601,7 @@ fn retire(
             arch::x86_64::user_ipc::with_waits(|s| s.publish_process_completion(outcome, scheduler))
         }
         .map_err(|_| ())?
-            != 1
+            != usize::from(!job.is_closing())
     {
         return Err(());
     }
@@ -557,6 +660,24 @@ fn prepared_hold(
         log.write_decimal_u64(value);
     }
     log.write_str(" calls=0 ticks=0 state=blocked entered=0 cpl=0 production=0\n");
+}
+
+fn job_record(serial: &mut Com1, debugcon: &mut DebugCon, event: &str, fields: &[(&str, u64)]) {
+    let mut log = EarlyLogger::new(BootSink {
+        serial,
+        debugcon,
+        ring: &EARLY_RING,
+    });
+    log.write_str("POOLEOS:JOB ");
+    log.write_str(event);
+    log.write_str(" contract=PJOB1");
+    for &(name, value) in fields {
+        log.write_str(" ");
+        log.write_str(name);
+        log.write_str("=");
+        log.write_decimal_u64(value);
+    }
+    log.write_str(" cpl=0 production=0\n");
 }
 
 fn record(serial: &mut Com1, debugcon: &mut DebugCon, event: &str, fields: &[(&str, u64)]) {

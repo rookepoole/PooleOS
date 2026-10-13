@@ -8,6 +8,7 @@ pub(super) fn reap(
     outcome: task::Outcome,
     pages: u64,
     admitted: bool,
+    mut job: Option<&mut task::job::Job<2>>,
     serial: &mut Com1,
     debugcon: &mut DebugCon,
 ) -> Result<(), ()> {
@@ -28,11 +29,16 @@ pub(super) fn reap(
             mode,
             fired: false,
         };
-        let result = p.slot.reclaim(p.id, manager, &mut memory);
+        let children = job.as_ref().map(|j| j.child_count());
+        let result = match job.as_deref_mut() {
+            Some(j) => j.reclaim_child(&mut p.slot, p.id, manager, &mut memory),
+            None => p.slot.reclaim(p.id, manager, &mut memory),
+        };
         if !memory.fired
             || !matches!(result, Err(task::Error::Reclamation(_)))
             || p.slot.state(p.id) != Ok(task::State::Reclaiming)
             || p.slot.reclaim_remaining_pages(p.id) != Ok(pages)
+            || job.as_ref().map(|j| j.child_count()) != children
             || manager.summary().allocated_pages != before
             || p.slot.run_slice(p.id).is_ok()
             || p.slot.activate(p.id, manager, &mut p.memory).is_ok()
@@ -72,12 +78,11 @@ pub(super) fn reap(
     }
     #[cfg(not(feature = "development-shell-cleanup-retry"))]
     let _ = (scheduler, pages, admitted, serial, debugcon);
-    if p.slot
-        .reclaim(p.id, manager, &mut p.memory)
-        .map_err(|_| ())?
-        != outcome
-        || p.slot.state(p.id) != Err(task::Error::Missing)
-    {
+    let result = match job.as_deref_mut() {
+        Some(j) => j.reclaim_child(&mut p.slot, p.id, manager, &mut p.memory),
+        None => p.slot.reclaim(p.id, manager, &mut p.memory),
+    };
+    if result.map_err(|_| ())? != outcome || p.slot.state(p.id) != Err(task::Error::Missing) {
         return Err(());
     }
     Ok(())

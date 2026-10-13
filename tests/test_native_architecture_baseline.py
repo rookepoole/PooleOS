@@ -68,7 +68,11 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 679)
+        self.assertEqual(len(self.artifact["bound_sources"]), 686)
+        self.assertTrue({"docs/checkpoints/cycle277-native-owner-death.md", "docs/native-job-lifecycle.md",
+            "runs/native-owner-death-readiness.json", "native/kernel/src/user_entry/task/job.rs",
+            "native/kernel/src/user_entry/job_tests.rs", "runtime/native_shell_orphan.py",
+            "tests/test_native_shell_orphan.py"}.issubset({s["path"] for s in self.artifact["bound_sources"]}))
         self.assertTrue({"docs/checkpoints/cycle276-prepared-cancellation.md",
             "docs/native-prepared-cleanup.md", "runs/native-prepared-cleanup-readiness.json",
             "native/kernel/src/user_entry/prepared_cancel_tests.rs", "runtime/native_prepared_cleanup.py",

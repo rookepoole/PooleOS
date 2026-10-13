@@ -24,6 +24,13 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle277-native-owner-death.md",
+    "docs/native-job-lifecycle.md",
+    "runs/native-owner-death-readiness.json",
+    "native/kernel/src/user_entry/task/job.rs",
+    "native/kernel/src/user_entry/job_tests.rs",
+    "runtime/native_shell_orphan.py",
+    "tests/test_native_shell_orphan.py",
     "docs/checkpoints/cycle276-prepared-cancellation.md",
     "docs/native-prepared-cleanup.md",
     "runs/native-prepared-cleanup-readiness.json",

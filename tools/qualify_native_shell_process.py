@@ -7,6 +7,7 @@ sys.path.insert(0, str(ROOT))
 from runtime import native_shell_process as probe, native_user_program, native_shell, native_console, native_session
 from runtime import native_shell_cleanup as cleanup
 from runtime import native_prepared_cleanup as prepared
+from runtime import native_shell_orphan as orphan
 from tools import qualify_native_console_ipc as shared, qualify_native_user_entry as source
 from tools.qualify_native_user_programs import bindings as program_bindings
 from tools.native_build_space import require_space
@@ -32,9 +33,10 @@ def program_inputs(directory, env):
     return receipt
 
 class Interaction(shared.Interaction):
-    def __init__(self, case):
+    def __init__(self, case, *, owner_death=False):
         super().__init__(case.sent, False)
         self.case, self.step, self.expected = case, 0, native_shell.BANNER
+        self.final_mask = 7 if owner_death else 3
 
     def poll(self, debug):
         if self.sock is None:
@@ -55,7 +57,7 @@ class Interaction(shared.Interaction):
             if self.sock.send(byte) == 1:
                 self.sent += 1; self.step += 1; self.expected += response
         return bool(self.step == len(self.case.steps) and application == self.case.expected
-            and len(runs) >= 8 and all(v['live_mask'] == 3 for v in runs[-2:]))
+            and len(runs) >= 8 and all(v['live_mask'] == self.final_mask for v in runs[-2:]))
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -63,12 +65,13 @@ def main():
     parser.add_argument('--program-dir', type=Path, required=True)
     parser.add_argument('--cleanup-retry', action='store_true')
     parser.add_argument('--prepared-stop', action='store_true')
+    parser.add_argument('--owner-death', action='store_true')
     args = parser.parse_args(); work, programs = args.work_dir.resolve(), args.program_dir.resolve()
     if not work.is_relative_to(ROOT/'outputs') or not programs.is_relative_to(ROOT/'outputs'):
         parser.error('workspace output paths required')
     storage = require_space(work); work.mkdir(parents=True, exist_ok=False)
     before = source.source_bindings()
-    report = dict(cycle=276, contract_id='PCANCEL1' if args.prepared_stop else 'PRECLAIM1' if args.cleanup_retry else 'PSHELLPROC1', status='fail', source_bindings=before,
+    report = dict(cycle=277, contract_id='PJOB1' if args.owner_death else 'PCANCEL1' if args.prepared_stop else 'PRECLAIM1' if args.cleanup_retry else 'PSHELLPROC1', status='fail', source_bindings=before,
         storage_preflight=storage, guest_bound_seconds=180, guest_runs=[], useful_applications=0,
         bundled_files=False, iso_built=False, production_ready=False)
     oracle = cleanup if args.cleanup_retry else probe
@@ -78,6 +81,11 @@ def main():
         oracle = prepared
         features = ('development-shell-prepared-stop',)
         bad_features = ('development-shell-prepared-stop', 'development-shell-process-bad-owner')
+    if args.owner_death:
+        oracle = orphan
+        if not args.prepared_stop:
+            features = ('development-shell-cleanup-retry',)
+            bad_features = ('development-shell-cleanup-retry', 'development-shell-process-bad-owner')
     try:
         cargo, _, env = shared._toolchain(ROOT/'.toolchains/rust-1.97.0')
         report['program_build'] = program_inputs(programs, env)
@@ -107,12 +115,14 @@ def main():
             inspected = shared.load.inspect_media_bytes(media)
             path = work/f'{name}.img'; path.write_bytes(media)
             run_dir = work/name; run_dir.mkdir()
-            case = probe.scenario(secrets.token_hex(8), bad_owner=bad_owner)
-            interaction = Interaction(case)
+            case = (orphan if args.owner_death else probe).scenario(secrets.token_hex(8), bad_owner=bad_owner)
+            oracle_options = dict(bad_owner=bad_owner)
+            if args.owner_death: oracle_options['prepared_stop'] = args.prepared_stop
+            interaction = Interaction(case, owner_death=args.owner_death)
             print(f'Native process shell {name}: frozen 180-second bound', flush=True)
             try:
                 run, _, handoff = shared.boot._execute_once(name, lock, profile, qemu, path, run_dir, 180,
-                    marker_validator=lambda m: oracle.validate_markers(m, bad_owner=bad_owner),
+                    marker_validator=lambda m: oracle.validate_markers(m, **oracle_options),
                     marker_extractor=native_session.extract_markers, hpet_msi=True, pause_on_completion=True,
                     console_port=interaction.port, console_poll=interaction.poll)
             finally:
@@ -131,7 +141,7 @@ def main():
             shared.load.validate_oracle_binding(prefix['boot_prefix'], inspected, run['pbp1_transcript'])
             run['transcript_binding'] = shared.transfer.validate_transcript_binding(prefix, run['pbp1_transcript'])
             run['independent_revalidation'] = shared.transfer.validate_revalidation_binding(prefix, handoff, retained)
-            run['hostile_marker_cases_rejected'] = oracle.negative_controls(run['markers'], bad_owner=bad_owner)
+            run['hostile_marker_cases_rejected'] = oracle.negative_controls(run['markers'], **oracle_options)
             run.update(media_sha256=shared.sha(media), kernel_sha256=shared.sha(image))
             report['guest_runs'].append(run)
         if before != source.source_bindings() or program_inputs(programs, env) != report['program_build']:

@@ -3,6 +3,8 @@ use crate::user_entry::prepared::cpu::{Cpu, CpuImage, Error as CpuError, Snapsho
 use crate::user_entry::privilege;
 use std::{cell::RefCell, rc::Rc};
 
+#[path = "job_tests.rs"]
+mod job_tests;
 #[path = "prepared_cancel_tests.rs"]
 mod prepared_cancel_tests;
 #[path = "retirement_tests.rs"]
@@ -924,7 +926,11 @@ fn setup() -> Setup {
 }
 
 fn setup_with_timer(timer: bool) -> Setup {
-    let fixture = Fixture::new();
+    setup_at(timer, 4096)
+}
+
+fn setup_at(timer: bool, base: u64) -> Setup {
+    let fixture = Fixture::at(base);
     let handles = fixture.handles();
     let core = fixture.core;
     let (manager, memory, prepared) = if timer {

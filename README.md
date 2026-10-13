@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle276 adds owned cancellation for children
+**Current development checkpoint:** Cycle277 adds durable parent-death cleanup.
+Six native shell-fault guests reclaim prepared/running children while independent
+console/init/counter services continue;15 VM runs pass including regressions.
+Next: bounded waiting-child/scheduled cleanup recovery, read-only files, two useful
+apps and sustained optical ISO acceptance. No usable integration ISO or new main
+qualification yet. Complete robust microkernel development continues afterward.
+[Evidence](docs/checkpoints/cycle277-native-owner-death.md).
+
+**Historical development checkpoint:** Cycle276 adds owned cancellation for children
 that have never executed and migrates their interactive cleanup to retained
 reclamation. Nine final-source VM runs pass, including real shell stop/restart,
 fault survival and default boot regressions. Next: owner-death/orphan handling,

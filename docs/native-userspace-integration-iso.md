@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 276, 2026-10-13. No new ISO exists yet.
+Status: implementation started, Cycle 277, 2026-10-13. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -45,40 +45,42 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | --- | --- | --- | --- |
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
-| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle276 partial: shell lifecycle and retained terminal/prepared cleanup pass; controlled native prepared-stop retries prove no entry. Owner death, asynchronous retry, general loading/trust and efficient idle remain |
+| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle277 partial: durable parent-death cleanup passes for prepared/suspended children with independent console survival. Native waiting-child coverage, asynchronous retry, general supervision/restart, loading/trust and efficient idle remain |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle274 partial: actual serial shell lifecycle/status and diagnostic fault survival pass; files, two useful separate apps and local display/input remain |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
 ### Immediate Next Move
 
-Current: [Cycle276 prepared cancellation](checkpoints/cycle276-prepared-cancellation.md).
-Owned cancellation now covers admitted and unused prepared children in the
-interactive integration. Three injected prepared-stop guests prove no first-child
-execution, retained cleanup failure, real shell stop completion and a running next
-generation. Three ordinary shell and three default/denial regressions also pass.
-Next: durable owner-death/orphan cleanup, files, useful apps, optical ISO.
+Current: [Cycle277 parent-death cleanup](checkpoints/cycle277-native-owner-death.md).
+The durable job record now outlives parent leases. Six actual shell-fault guests
+reclaim prepared/suspended children and preserve the independent console, init
+and counter. Nine regression VMs also pass. No supervisor restart is claimed.
+Next: close bounded recovery gaps, files, useful apps, optical ISO.
 
-1. Keep a bounded child-ownership record alive after parent IPC/launch/process
-   leases are removed. Match parent and child generations and owned image roots;
-   stale capabilities, detachment or a dropped request are not reclamation.
-2. Define supervised-child cancellation versus independent service lifetime.
-   Qualify parent death with prepared, runnable, waiting and reclaiming children,
-   pending/claimed launch and stop requests, failed cleanup and slot reuse. Keep
-   unrelated tasks running. Current unexpected-shell-exit/live-child halts are
-   not recovery; do not invent a successful supervisor restart.
-3. Add bounded scheduled cleanup retry and exhaustion/backoff policy without
+1. Qualify native parent death with waiting children and pending/claimed launch
+   and stop requests. Host tests already cover exact waiting tickets, failed
+   revocation and stale requests, but do not prove native interleavings. Preserve
+   explicit supervised-child cancellation versus independent service lifetime.
+2. Add bounded scheduled cleanup retry and exhaustion/backoff policy without
    dropping memory owners or publishing early completion. Retain partial
    allocator-commit and complete call-chain/interrupt stack qualification gaps.
-4. Replace diagnostic roles with real init, console, shell, read-only file service
+   Current immediate retry and fail-closed halt are not asynchronous recovery.
+3. Replace diagnostic roles with real init, console, shell, read-only file service
    and two useful apps within the existing six-process layout. Seven images would
    exceed the current32 PMM-record budget at five records each plus firmware.
    Review any growth explicitly. Keep executable RX <=16384 bytes and writable
    data/heap expansion separate; small immutable file data can use existing rodata.
-5. Qualify real file listing/reading and useful workloads across exit/stop/fault,
+4. Qualify real file listing/reading and useful workloads across exit/stop/fault,
    then package and operate the exact optical ISO through sustained interaction.
 
 Asynchronous recovery, complete stack proof and general microkernel obligations
 remain open. Default208/208 and36-page guarded stack limits stay unchanged.
+
+Historical: [Cycle276 prepared cancellation](checkpoints/cycle276-prepared-cancellation.md).
+Owned cancellation covered admitted and unused prepared children. Three native
+prepared-stop guests proved zero first-child execution and a running next
+generation; three ordinary-shell and three default/denial regressions passed.
+Parent-death recovery was still open at that checkpoint.
 
 Historical: [Cycle275 retained cleanup](checkpoints/cycle275-retained-terminal-cleanup.md).
 Failed terminal cleanup now remains owned in the task slot until a verified retry

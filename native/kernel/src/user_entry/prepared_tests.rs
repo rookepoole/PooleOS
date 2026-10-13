@@ -88,7 +88,10 @@ struct Fixture {
 
 impl Fixture {
     fn new() -> Self {
-        let mut manager = PhysicalMemoryManager::test_manager(4096, 64, 32);
+        Self::at(4096)
+    }
+    fn at(base: u64) -> Self {
+        let mut manager = PhysicalMemoryManager::test_manager(base, 64, 32);
         let tables = manager.allocate(Zone::Dma32, 4, vm::TABLE_OWNER).unwrap();
         let code = manager.allocate(Zone::Dma32, 1, vm::DATA_OWNER).unwrap();
         let user_stack = manager.allocate(Zone::Dma32, 1, vm::DATA_OWNER).unwrap();
