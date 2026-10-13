@@ -99,6 +99,7 @@ runs/*
 !runs/native-shell-readiness.json
 !runs/native-process-completion-readiness.json
 !runs/native-vm-allocation-pages-readiness.json
+!runs/native-multipage-program-readiness.json
 !runs/native_initial_system_readiness.json
 !runs/native_microcode_readiness.json
 !runs/native_recovery_readiness.json

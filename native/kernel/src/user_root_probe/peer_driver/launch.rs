@@ -29,6 +29,7 @@ pub fn run(
     let baseline = manager.summary().allocated_pages;
     let before = arch::x86_64::user_root_write_count();
     let program = checked!(Program::new(SUPERVISOR, 0));
+    let image_pages = 38 + program.code_pages();
     let arguments = checked!(Arguments::new(&[
         b"supervisor",
         if bad {
@@ -70,7 +71,7 @@ pub fn run(
         )),
     ];
     if baseline > 12
-        || manager.summary().allocated_pages != baseline + 39
+        || manager.summary().allocated_pages != baseline + image_pages
         || peers
             .iter()
             .enumerate()
@@ -111,7 +112,7 @@ pub fn run(
             ("root0", peers[0].root),
             ("root1", peers[1].root),
             ("root2", peers[2].root),
-            ("image_pages", 39),
+            ("image_pages", image_pages),
             ("firmware_pages", baseline),
         ],
     );
@@ -167,7 +168,12 @@ pub fn run(
                 checked!(p.reap(manager, outcome));
                 checked!(scheduler.teardown(id));
                 dead[i] = true;
-                if pages - manager.summary().allocated_pages != 13 {
+                let owned_pages = if i == 1 {
+                    12 + program.code_pages()
+                } else {
+                    13
+                };
+                if pages - manager.summary().allocated_pages != owned_pages {
                     stop(32004, serial, debugcon);
                 }
                 if i == 0 {
@@ -386,8 +392,11 @@ pub fn run(
             ("ticks2", ticks[2]),
             ("dispatches", dispatches),
             ("cr3_writes", writes),
-            ("released_pages", if bad { 39 } else { 52 }),
-            ("scrubbed_data_pages", if bad { 18 } else { 24 }),
+            ("released_pages", image_pages + if bad { 0 } else { 13 }),
+            (
+                "scrubbed_data_pages",
+                image_pages - 21 + if bad { 0 } else { 6 },
+            ),
             ("objects_remaining", 0),
         ],
     );

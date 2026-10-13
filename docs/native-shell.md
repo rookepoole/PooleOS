@@ -29,6 +29,12 @@ ISO session is provided by this increment. Builtins are not the two useful apps.
 
 ## Build And Admission
 
+Cycle273 update: the bounded loader/extractor now permits up to four RX pages.
+Eight programs reproduce with60 user tests per profile. The3569-byte shell itself
+is unchanged; its interactive guest evidence below remains Cycle270, not a fresh
+shell replay. See [multipage evidence](checkpoints/cycle273-bounded-multipage-executables.md).
+The following build measurements describe the historical shell introduction.
+
 `tools/qualify_native_user_programs.py` builds seven binaries twice, checks literal
 ELF/code equality, and runs58 runtime tests in both debug/release. Shell code is
 3569 bytes within the unchanged4096-byte RX page. No writable data, imports,

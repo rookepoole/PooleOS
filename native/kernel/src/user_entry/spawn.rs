@@ -54,6 +54,7 @@ enum State {
 pub struct Construction {
     retained: [Option<RetainedAllocation>; 5],
     state: State,
+    code_pages: u64,
 }
 
 impl Default for Construction {
@@ -66,6 +67,13 @@ impl Construction {
         Self {
             retained: core::array::from_fn(|_| None),
             state: State::Allocating,
+            code_pages: 1,
+        }
+    }
+    pub fn for_program(program: &Program<'_>) -> Self {
+        Self {
+            code_pages: program.code_pages(),
+            ..Self::new()
         }
     }
     pub fn handles(&self) -> [Option<AllocationHandle>; 5] {
@@ -88,6 +96,7 @@ impl Construction {
             .position(Option::is_none)
             .ok_or(Error::State)?;
         let (pages, owner) = SHAPES[index];
+        let pages = if index == 1 { self.code_pages } else { pages };
         match manager.allocate_retained(Zone::Dma32, pages, owner) {
             Ok(token) => {
                 self.retained[index] = Some(token);
@@ -111,11 +120,14 @@ impl Construction {
         bits: u8,
         timer: Option<timer::Mappings>,
     ) -> Result<PreparedImage, Error> {
+        image.validate().map_err(|_| Error::Layout)?;
         let offset = image
             .entry
             .checked_sub(image.code_page)
             .ok_or(Error::Layout)?;
-        if !offset.is_multiple_of(8) || offset >= PAGE_BYTES {
+        if !offset.is_multiple_of(8)
+            || offset >= image.code_end().map_err(|_| Error::Layout)? - image.code_page
+        {
             return Err(Error::Layout);
         }
         self.build_inner(
@@ -186,7 +198,16 @@ impl Construction {
         self.state = State::Building;
         let [tables, code, stack, entry_stack, entry_tables] = self.handles().map(Option::unwrap);
         image.validate().map_err(|_| Error::Layout)?;
-        if payload.is_empty() || offset % 8 != 0 || payload.len() > PAGE_BYTES as usize - offset {
+        let capacity = code
+            .page_count
+            .checked_mul(PAGE_BYTES)
+            .ok_or(Error::Layout)? as usize;
+        if code.page_count != image.code_pages
+            || payload.is_empty()
+            || offset % 8 != 0
+            || offset >= capacity
+            || payload.len() > capacity - offset
+        {
             return Err(Error::Layout);
         }
         for handle in [code, stack, entry_stack] {
@@ -195,10 +216,16 @@ impl Construction {
         for (index, chunk) in payload.chunks(8).enumerate() {
             let mut word = [0; 8];
             word[..chunk.len()].copy_from_slice(chunk);
+            let word_index = (offset / 8).checked_add(index).ok_or(Error::Layout)?;
+            let page = code
+                .start_page
+                .checked_add((word_index / vm::TABLE_ENTRIES) as u64)
+                .and_then(|page| page.checked_mul(PAGE_BYTES))
+                .ok_or(Error::Layout)?;
             checked_write(
                 memory,
-                code.start_page * PAGE_BYTES,
-                offset / 8 + index,
+                page,
+                word_index % vm::TABLE_ENTRIES,
                 u64::from_le_bytes(word),
             )?;
         }
@@ -212,21 +239,33 @@ impl Construction {
         }
         let mut space =
             AddressSpace::initialize(manager, tables, memory).map_err(|_| Error::Mapping)?;
-        for (address, frame, permissions) in [
-            (image.code_page, code, Permissions::USER_RX),
-            (image.stack_page, stack, Permissions::USER_RW),
-        ] {
+        for offset in 0..image.code_pages {
+            let address = offset
+                .checked_mul(PAGE_BYTES)
+                .and_then(|bytes| image.code_page.checked_add(bytes))
+                .ok_or(Error::Layout)?;
             space
-                .map(
+                .map_page(
                     manager,
                     memory,
                     address,
-                    frame,
-                    permissions,
+                    code,
+                    offset,
+                    Permissions::USER_RX,
                     CachePolicy::WriteBack,
                 )
                 .map_err(|_| Error::Mapping)?;
         }
+        space
+            .map(
+                manager,
+                memory,
+                image.stack_page,
+                stack,
+                Permissions::USER_RW,
+                CachePolicy::WriteBack,
+            )
+            .map_err(|_| Error::Mapping)?;
         let mut retained = core::array::from_fn(|_| None);
         for (source, destination) in [0, 1, 2, vm::MAX_FRAMES + 1, vm::MAX_FRAMES + 2]
             .into_iter()

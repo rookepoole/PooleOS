@@ -89,7 +89,7 @@ fn build_input(
     let mut failed = Failure {
         error: Error::State,
         allocated_pages: 0,
-        owner: Construction::new(),
+        owner: program.map_or_else(Construction::new, |(p, _)| Construction::for_program(p)),
         memory: None,
     };
     let result = (|| {
@@ -100,10 +100,15 @@ fn build_input(
         failed.memory = Some(memory(manager, core, bits, handles.map(Some))?);
         let mut image = InitialImage {
             code_page: USER_WINDOW_START,
+            code_pages: 1,
             entry: USER_WINDOW_START + 16,
             stack_page: USER_WINDOW_START + 3 * PAGE_BYTES,
         };
         let (prepared, startup) = if let Some((program, args)) = program {
+            // Preserve the startup/guard ABI. Larger code lives above that region.
+            if program.code_pages() > 1 {
+                image.code_page = USER_WINDOW_START + 16 * PAGE_BYTES;
+            }
             image = program
                 .image(image.code_page, image.stack_page)
                 .map_err(|_| Error::Layout)?;
@@ -228,6 +233,7 @@ pub fn fault_cases(
     let baseline = manager.summary().allocated_pages;
     let image = InitialImage {
         code_page: USER_WINDOW_START,
+        code_pages: 1,
         entry: USER_WINDOW_START + 16,
         stack_page: USER_WINDOW_START + 3 * PAGE_BYTES,
     };

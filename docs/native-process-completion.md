@@ -64,4 +64,7 @@ normal guests finish two lifetimes, all cleanup, and survivor execution.
 
 Host tests cover fault/cancel/watchdog encodings and malformed/forged identities;
 native injected fault/stop completion is not claimed yet. Shell lifecycle commands,
-bundled files, useful apps, multipage executables and optical ISO remain open.
+bundled files, useful apps and optical ISO remain open. Cycle273 adds bounded
+four-page executable construction/execution and normal retirement, with six fresh
+completion guests across multipage and legacy programs. Fault/stop completion
+and general post-execution cleanup retry still need native integration.

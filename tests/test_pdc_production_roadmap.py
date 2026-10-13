@@ -198,8 +198,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 272)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1412)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 273)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1415)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -239,8 +239,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "owned_allocation_pages_host_pass_native_regression_pass_loader_shell_ISO_gates_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 272)
+        self.assertEqual(current["qualification_status"], "bounded_multipage_native_pass_shell_lifecycle_cleanup_and_ISO_gates_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 273)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -5832,7 +5832,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
                     "bundled_files", "default_native_execution_replayed", "canonical_full_replay_performed", "merge_qualified", "iso_built", "production_ready"):
             self.assertFalse(receipt[key])
         live = receipt["native_regression"]
-        self.assertEqual(live["source_bindings"], source_bindings())
+        self.assertNotEqual(live["source_bindings"], source_bindings())
         self.assertEqual(len(live["guest_runs"]), 3)
         for i, run in enumerate(live["guest_runs"]):
             summary = native_process_completion.validate_markers(run["markers"], bad_owner=i==2)
@@ -5843,10 +5843,49 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual([receipt["budgets"][k]["image_pages"] for k in ("kernel1", "kernel2", "bad-kernel")], [111, 111, 109])
         self.assertEqual(receipt["default_build"]["budget"]["image_pages"], 207)
         self.assertNotEqual(receipt["retained_failure"]["capture"]["return_code"], 0)
-        lane = b["user_space_integration"]
+        lane = b["historical_cycle272_user_space_integration"]
         self.assertEqual((lane["cycle"], lane["selected_stage"]), (272, "USI-3"))
         self.assertTrue(lane["continue_full_microkernel_after_iso"])
         self.assertFalse(lane["multipage_program_execution"] or lane["shell_application_launch"])
+
+    def test_cycle273_multipage_execution_is_bounded_and_not_an_iso(self) -> None:
+        from runtime import native_process_completion
+        from tools.qualify_native_user_entry import source_bindings
+        from tools.qualify_native_user_programs import bindings
+        b = self.roadmap["baseline"]
+        record = b["native_multipage_program"]
+        raw = (ROOT / record["receipt_path"]).read_bytes()
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), record["receipt_sha256"])
+        self.assertEqual(record["receipt_sha256"], "0EB85EB64094DACA9AC8258F90D1F4BDD016E728FBE27681401DB5B09C218DB6")
+        receipt = json.loads(raw)
+        self.assertEqual((receipt["cycle"], receipt["status"], receipt["kernel_tests_per_profile"], receipt["new_kernel_tests"]), (273, "pass", 512, 9))
+        self.assertEqual((receipt["user_tests_per_profile"], receipt["independent_programs"], receipt["unchanged_legacy_programs"]), (60, 8, 7))
+        self.assertEqual((receipt["maximum_code_pages"], receipt["executable_byte_limit"], receipt["mapping_capacity"], receipt["frame_binding_capacity"]), (4, 16384, 8, 4))
+        for key in ("whole_allocation_retirement", "native_offset_mapping_verified", "multipage_executable_admission", "multipage_program_execution"):
+            self.assertTrue(receipt[key])
+        for key in ("native_multipage_fault_cleanup", "arbitrary_elf_loader", "executable_trust", "diagnostic_program_is_useful_application",
+                    "general_cleanup_retry", "shell_application_launch", "shell_process_status", "bundled_files", "shell_interaction_replayed",
+                    "default_native_execution_replayed", "canonical_full_replay_performed", "merge_qualified", "iso_built", "production_ready"):
+            self.assertFalse(receipt[key])
+        for name, pages in (("multi", 4), ("legacy", 1)):
+            live = receipt["native_execution"][name]
+            self.assertEqual(live["source_bindings"], source_bindings())
+            self.assertEqual(live["program_build"]["source_bindings"], bindings())
+            self.assertEqual(len(live["guest_runs"]), 3)
+            for i, run in enumerate(live["guest_runs"]):
+                summary = native_process_completion.validate_markers(run["markers"], bad_owner=i==2, supervisor_code_pages=pages)
+                self.assertEqual(json.loads(json.dumps(summary)), run["marker_summary"])
+                self.assertEqual(native_process_completion.negative_controls(run["markers"], bad_owner=i==2, supervisor_code_pages=pages), run["hostile_marker_cases_rejected"])
+                self.assertTrue(run["fresh_vars_copy"] and run["media_read_only"] and run["serial_debugcon_exact_match"])
+                self.assertFalse(run["guest_network"] or run["host_acceleration"] or run["local_paths_recorded"])
+            self.assertEqual([receipt["budgets"][name][k]["image_pages"] for k in ("kernel1", "kernel2", "bad-kernel")], [111,111,109])
+        self.assertEqual(receipt["default_build"]["budget"]["image_pages"], 208)
+        self.assertEqual(len(receipt["retained_failures"]), 5)
+        self.assertTrue(all(v["capture"]["return_code"] != 0 for v in receipt["retained_failures"].values()))
+        lane = b["user_space_integration"]
+        self.assertEqual((lane["cycle"], lane["selected_stage"]), (273, "USI-3"))
+        self.assertTrue(lane["multipage_program_execution"] and lane["continue_full_microkernel_after_iso"])
+        self.assertFalse(lane["shell_application_launch"])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]

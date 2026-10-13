@@ -378,13 +378,21 @@ impl Peer {
         for h in [self.handles[1], self.handles[2], self.handles[3]] {
             self.memory.zero(h).map_err(|_| ())?;
         }
-        for address in [self.image.code_page, self.image.stack_page] {
+        for page in 0..=self.image.code_pages {
+            let address = if page < self.image.code_pages {
+                page.checked_mul(PAGE_BYTES)
+                    .and_then(|bytes| self.image.code_page.checked_add(bytes))
+                    .ok_or(())?
+            } else {
+                self.image.stack_page
+            };
             let t = parts
                 .space
                 .begin_unmap(&mut self.memory, address)
                 .map_err(|_| ())?;
             parts.space.acknowledge_inactive(t).map_err(|_| ())?;
-            if !parts.space.complete_unmap(manager, t).map_err(|_| ())? {
+            let released = parts.space.complete_unmap(manager, t).map_err(|_| ())?;
+            if released != (page >= self.image.code_pages.saturating_sub(1)) {
                 return Err(());
             }
         }

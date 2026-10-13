@@ -55,11 +55,17 @@ impl TableMemory for Memory {
 }
 
 fn fixture() -> (PhysicalMemoryManager, AddressSpace, Memory, InitialImage) {
+    fixture_pages(1)
+}
+
+fn fixture_pages(pages: u64) -> (PhysicalMemoryManager, AddressSpace, Memory, InitialImage) {
     let mut manager = PhysicalMemoryManager::test_manager(4096, 64, 16);
     let tables = manager
         .allocate(Zone::Dma32, vm::TABLE_PAGE_COUNT, vm::TABLE_OWNER)
         .unwrap();
-    let code = manager.allocate(Zone::Dma32, 1, vm::DATA_OWNER).unwrap();
+    let code = manager
+        .allocate(Zone::Dma32, pages, vm::DATA_OWNER)
+        .unwrap();
     let stack = manager.allocate(Zone::Dma32, 1, vm::DATA_OWNER).unwrap();
     let mut memory = Memory {
         base: tables.start_page * PAGE_BYTES,
@@ -68,22 +74,27 @@ fn fixture() -> (PhysicalMemoryManager, AddressSpace, Memory, InitialImage) {
         writes: 0,
         fail_at: None,
     };
+    let base = USER_WINDOW_START + if pages == 1 { 0 } else { 16 * PAGE_BYTES };
     let image = InitialImage {
-        code_page: USER_WINDOW_START,
-        entry: USER_WINDOW_START + 16,
+        code_page: base,
+        code_pages: pages,
+        entry: base + 16,
         stack_page: USER_WINDOW_START + 3 * PAGE_BYTES,
     };
     let mut space = AddressSpace::initialize(&manager, tables, &mut memory).unwrap();
-    space
-        .map(
-            &manager,
-            &mut memory,
-            image.code_page,
-            code,
-            Permissions::USER_RX,
-            CachePolicy::WriteBack,
-        )
-        .unwrap();
+    for offset in 0..pages {
+        space
+            .map_page(
+                &manager,
+                &mut memory,
+                image.code_page + offset * PAGE_BYTES,
+                code,
+                offset,
+                Permissions::USER_RX,
+                CachePolicy::WriteBack,
+            )
+            .unwrap();
+    }
     space
         .map(
             &manager,
@@ -121,6 +132,140 @@ fn admits_real_vm_tree_with_guarded_stack_and_fixed_unprivileged_frame() {
     assert_eq!(memory.reads, 2048);
     assert_eq!(memory.writes, writes);
     assert_eq!(memory.pages, before);
+}
+
+#[test]
+fn bounded_code_regions_admit_every_page_and_preserve_guard_geometry() {
+    for pages in 2..=MAX_CODE_PAGES {
+        let (manager, space, mut memory, image) = fixture_pages(pages);
+        let before = memory.pages;
+        let admitted = admit_initial_image(&manager, &space, &mut memory, image, 36).unwrap();
+        assert_eq!(admitted.code_end, image.code_page + pages * PAGE_BYTES);
+        assert_eq!(
+            admitted.initial_frame.rsp,
+            USER_WINDOW_START + 4 * PAGE_BYTES
+        );
+        assert_eq!(space.summary().bound_frames, 2);
+        assert_eq!(space.summary().active_mappings, pages as usize + 1);
+        for offset in 0..pages {
+            assert_eq!(
+                space
+                    .translate(&mut memory, image.code_page + offset * PAGE_BYTES)
+                    .unwrap()
+                    .physical_address,
+                admitted.code_physical + offset * PAGE_BYTES
+            );
+        }
+        assert_eq!(memory.pages, before);
+        let last = InitialImage {
+            entry: admitted.code_end - 1,
+            ..image
+        };
+        assert!(admit_initial_image(&manager, &space, &mut memory, last, 36).is_ok());
+        for invalid in [
+            InitialImage {
+                code_pages: 0,
+                ..image
+            },
+            InitialImage {
+                code_pages: MAX_CODE_PAGES + 1,
+                ..image
+            },
+            InitialImage {
+                code_pages: u64::MAX,
+                ..image
+            },
+            InitialImage {
+                code_page: u64::MAX - PAGE_BYTES + 1,
+                ..image
+            },
+            InitialImage {
+                code_page: USER_WINDOW_END_EXCLUSIVE - PAGE_BYTES,
+                ..image
+            },
+            InitialImage {
+                code_page: image.stack_page - PAGE_BYTES,
+                entry: image.stack_page - PAGE_BYTES,
+                ..image
+            },
+            InitialImage {
+                entry: admitted.code_end,
+                ..image
+            },
+        ] {
+            assert_eq!(
+                admit_initial_image(&manager, &space, &mut memory, invalid, 36),
+                Err(Error::Layout)
+            );
+        }
+    }
+}
+
+#[test]
+fn multipage_readback_rejects_each_code_leaf_mutation_holes_and_extra_leaves() {
+    let (manager, space, memory, image) = fixture_pages(MAX_CODE_PAGES);
+    let first = ((image.code_page >> 12) & 511) as usize;
+    for offset in 0..MAX_CODE_PAGES as usize {
+        for bit in 0..64 {
+            if bit == 5 || bit == 6 {
+                continue;
+            }
+            let mut changed = memory.clone();
+            changed.pages[3][first + offset] ^= 1 << bit;
+            assert!(
+                admit_initial_image(&manager, &space, &mut changed, image, 36).is_err(),
+                "offset {offset}, bit {bit}"
+            );
+            assert_eq!(changed.writes, memory.writes);
+        }
+        let mut changed = memory.clone();
+        changed.pages[3][first + offset] = 0;
+        assert!(admit_initial_image(&manager, &space, &mut changed, image, 36).is_err());
+    }
+    let mut changed = memory.clone();
+    changed.pages[3][first + MAX_CODE_PAGES as usize] = memory.pages[3][first];
+    assert_eq!(
+        admit_initial_image(&manager, &space, &mut changed, image, 36),
+        Err(Error::UnexpectedMapping)
+    );
+}
+
+#[test]
+fn multipage_owned_offsets_and_permissions_cannot_be_replaced_with_matching_raw_entries() {
+    for offset in 1..MAX_CODE_PAGES {
+        let (mut manager, mut space, mut memory, image) = fixture_pages(MAX_CODE_PAGES);
+        let handle = space.owned_mapping(image.code_page).unwrap().0;
+        let address = image.code_page + offset * PAGE_BYTES;
+        let token = space.begin_unmap(&mut memory, address).unwrap();
+        space.acknowledge_inactive(token).unwrap();
+        assert!(!space.complete_unmap(&mut manager, token).unwrap());
+        space
+            .map_page(
+                &manager,
+                &mut memory,
+                address,
+                handle,
+                0,
+                Permissions::USER_RX,
+                CachePolicy::WriteBack,
+            )
+            .unwrap();
+        assert_eq!(
+            admit_initial_image(&manager, &space, &mut memory, image, 36),
+            Err(Error::Ownership)
+        );
+        let (manager, mut space, mut memory, image) = fixture_pages(MAX_CODE_PAGES);
+        let index = ((address >> 12) & 511) as usize;
+        let original = memory.pages[3][index];
+        space
+            .protect(&mut memory, address, Permissions::USER_RW)
+            .unwrap();
+        memory.pages[3][index] = original;
+        assert_eq!(
+            admit_initial_image(&manager, &space, &mut memory, image, 36),
+            Err(Error::Ownership)
+        );
+    }
 }
 
 #[test]

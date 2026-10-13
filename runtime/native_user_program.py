@@ -1,4 +1,4 @@
-"""Build-time extraction of a single-page original user program, not a trust loader."""
+"""Build-time extraction of a bounded original user program, not a trust loader."""
 from __future__ import annotations
 
 import hashlib
@@ -6,6 +6,7 @@ import struct
 
 CONTRACT = "PUSERBIN1"
 MAX_FILE = 65536
+MAX_CODE_PAGES = 4
 
 
 def inspect(blob: bytes) -> dict:
@@ -25,8 +26,8 @@ def inspect(blob: bytes) -> dict:
     ptype, permissions, offset, address, physical, size, memory, alignment = segment
     require((ptype, permissions, address, physical, alignment) == (1, 5, 0, 0, 4096),
             "single RX program segment")
-    require(0 < size <= 4096 and memory == size and offset >= 120 and offset % 4096 == 0,
-            "one-page code geometry")
+    require(0 < size <= MAX_CODE_PAGES * 4096 and memory == size and offset >= 120 and offset % 4096 == 0,
+            "bounded code geometry")
     require(offset + size <= shoff, "segment overlaps section table")
     sections = [struct.unpack_from("<IIQQQQIIQQ", blob, shoff + i * 64) for i in range(shnum)]
     require(sections[0] == (0,) * 10, "null section")
@@ -63,7 +64,7 @@ def inspect(blob: bytes) -> dict:
             "elf_sha256": hashlib.sha256(blob).hexdigest().upper(),
             "code_offset": offset, "code_bytes": size,
             "code_sha256": hashlib.sha256(code).hexdigest().upper(),
-            "entry_offset": entry, "load_pages": 1, "code_section_flags": allocated[0][2],
+            "entry_offset": entry, "load_pages": (size + 4095) // 4096, "code_section_flags": allocated[0][2],
             "writable_segments": 0, "relocations": 0, "imports": 0,
             "position_independent_source_and_flags_required": True,
             "native_execution_verified": False, "production_ready": False}

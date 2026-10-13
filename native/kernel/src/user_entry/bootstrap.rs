@@ -58,7 +58,13 @@ impl Access {
                 .checked_add(h.page_count)
                 .and_then(|p| p.checked_mul(PAGE_BYTES))
                 .ok_or(Error::MemoryAccess)?;
-            if (h.owner, h.page_count) != shapes[i]
+            let pages_valid = if i == 1 {
+                (1..=super::MAX_CODE_PAGES).contains(&h.page_count)
+            } else {
+                h.page_count == shapes[i].1
+            };
+            if h.owner != shapes[i].0
+                || !pages_valid
                 || h.zone != Zone::Dma32
                 || start == 0
                 || start & !mask != 0
@@ -193,6 +199,27 @@ mod tests {
             (0x100000, 53),
         ] {
             assert!(Access::new(&p, root, bits, owned).is_err());
+        }
+    }
+
+    #[test]
+    fn bounded_code_allocation_allows_every_page_but_not_larger_or_stack_shapes() {
+        for pages in 2..=super::super::MAX_CODE_PAGES + 1 {
+            let (mut p, mut owned) = fixture();
+            p.free(owned[1]).unwrap();
+            owned[1] = p.allocate(Zone::Dma32, pages, vm::DATA_OWNER).unwrap();
+            let access = Access::new(&p, 0x100000, 36, owned);
+            if pages > super::super::MAX_CODE_PAGES {
+                assert!(access.is_err());
+                continue;
+            }
+            let a = access.unwrap();
+            for offset in 0..pages {
+                let page = (owned[1].start_page + offset) * PAGE_BYTES;
+                assert_eq!(a.address(0x100000, page, 511, true), Ok(page + 4088));
+            }
+            owned.swap(1, 2);
+            assert!(Access::new(&p, 0x100000, 36, owned).is_err());
         }
     }
 }

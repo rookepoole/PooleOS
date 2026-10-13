@@ -14183,13 +14183,76 @@ def apply_cycle272(roadmap: dict, test_count: int) -> dict:
             "native execution across code pages, invalid range/offset controls and legacy program compatibility",
             "real shell start/stop/status, retained cleanup, bundled files and two separate useful apps",
             "optical ISO sustained interaction; canonical gates before main; full robust microkernel afterward"])
+    return apply_cycle273(roadmap, test_count)
+
+
+def apply_cycle273(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle273-bounded-multipage-executables.md"
+    path = "runs/native-multipage-program-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle272_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=273, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 273
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path]
+    gate["current_candidate_audit"]["cycle"] = 273
+    gate["current_focused_source_projection"]["cycle"] = 273
+    gate["qualification_status"] = "bounded_multipage_native_pass_shell_lifecycle_cleanup_and_ISO_gates_pending"
+    for name in ("current_vm_allocation_pages_qualification", "current_vm_allocation_pages_metadata"):
+        gate[name]["evidence_status"] = "historical_cycle272_not_current_candidate_qualification"
+    record = dict(cycle=273, status="pass", receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), kernel_tests_per_profile=512,
+        new_kernel_tests=9, user_tests_per_profile=60, independent_programs=8, unchanged_legacy_programs=7,
+        guest_runs=6, source_binding_count=len(receipt["native_execution"]["multi"]["source_bindings"]),
+        executable_byte_limit=16384, native_offset_mapping_verified=True,
+        multipage_executable_admission=True, multipage_program_execution=True,
+        native_multipage_fault_cleanup=False, general_cleanup_retry=False,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_multipage_program_qualification"] = record
+    gate["current_multipage_program_metadata"] = dict(cycle=273, status="pass", tests_passed=260,
+        unittest_elapsed_seconds=53.668, capture_elapsed_seconds=54.766,
+        log_sha256="B71247531CC8121F6A677D409F4FFEDA11F5175B188E1F9B1D94D5EDB7768D46",
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_multipage_program"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=273, selected_stage="USI-3", session_contract="PCOMP1", receipt_path=path,
+        receipt_section="native_execution", native_execution_evidence_cycle=273,
+        native_execution_replayed_this_cycle=True, native_execution_status="four_page_supervisor_and_legacy_completion_pass",
+        multipage_executable_admission=True, multipage_program_execution=True, executable_byte_limit=16384,
+        retained_kernel_sources_unchanged=False, kernel_image_pages=111, kernel_remaining_capacity_pages=97,
+        default_profile_build_cycle=273, default_profile_pages=208, default_profile_replayed_this_cycle=False)
+    lane["stages"]["USI-3"] = "partial_bounded_multipage_loader_verified_shell_lifecycle_and_cleanup_retry_pending"
+    evidence = "Cycle273: one-to-four-page owned RX construction, full admission readback, return bounds and normal retirement pass.512 kernel tests per profile,60 user tests,8 independent programs (7 unchanged),6 fresh native guests. Four-page supervisor13392 bytes; normal55/27 released/scrubbed pages, denied42/21; legacy52/24 and39/18. Normal kernels111/208, denied109; exact default builds208 with120 RELRO padding bytes,36 stack pages. " + checkpoint
+    gap = "Integrate genuine shell start/stop/status and generation-bound completion with retained post-execution cleanup. Qualify native stop/fault and owner-death cases, then read-only bundled files and two useful separate applications before sustained optical ISO interaction. Diagnostic multipage supervisor is not a useful app. Preserve16384-byte RX cap,8 mappings/4 frame bindings,32 PMM records, full stack proof and208-page default capacity. General executable trust, writable data/heap, local input/display, efficient idle and exact-candidate canonical gates remain open. Complete robust microkernel/PDC/PooleGlyph/PooleGlass work continues after usable ISO."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N9", "N14", "N16", "N18", "N36"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 273 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N13-USERSPACE-ISO-001", "FLAG-N36-EVIDENCE-STORAGE-001"):
+            flag["evidence"].append(checkpoint)
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["closure_condition"] += " Cycle273: " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Integrate shell process lifecycle and retained cleanup, then bundled files and useful apps",
+        entry_evidence=[checkpoint, path, "docs/native-userspace-integration-iso.md"],
+        exit_evidence=["real shell start/stop/status with generation-bound handles and terminal completion",
+            "retained cleanup ownership plus native stop/fault and owner-death qualification",
+            "read-only bundled files and two useful separately launched apps",
+            "optical ISO sustained interaction; canonical gates before main; full robust microkernel afterward"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1412)
+    parser.add_argument("--test-count", type=int, default=1415)
     parser.add_argument("--status-date", default="2026-10-13")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

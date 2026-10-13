@@ -137,9 +137,10 @@ pub fn run(
     IST1_TOP.store(descriptors.ist1_top, Ordering::Release);
     IST2_BOTTOM.store(descriptors.ist2_bottom, Ordering::Release);
     IST2_TOP.store(descriptors.ist2_top, Ordering::Release);
-    let quota = if cfg!(feature = "development-process-control")
-        || cfg!(feature = "development-process-launch")
-    {
+    let quota = if cfg!(feature = "development-process-launch") {
+        // Two one-page workers and one bounded multipage supervisor.
+        38 + poolekernel::user_entry::MAX_CODE_PAGES + 12
+    } else if cfg!(feature = "development-process-control") {
         39 + 12
     } else if cfg!(feature = "development-session-capacity") {
         // Six owned images; firmware is charged independently, not hidden in78.
@@ -291,6 +292,7 @@ pub fn run(
     let mut space = checked!(12, AddressSpace::initialize(&manager, tables, &mut memory));
     let image = InitialImage {
         code_page: USER_WINDOW_START,
+        code_pages: 1,
         entry: USER_WINDOW_START + 16,
         stack_page: USER_WINDOW_START + 3 * PAGE_BYTES,
     };

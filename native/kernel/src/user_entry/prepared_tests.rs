@@ -111,6 +111,7 @@ impl Fixture {
         let mut space = AddressSpace::initialize(&manager, tables, &mut memory).unwrap();
         let image = InitialImage {
             code_page: USER_WINDOW_START,
+            code_pages: 1,
             entry: USER_WINDOW_START + 16,
             stack_page: USER_WINDOW_START + 3 * PAGE_BYTES,
         };
@@ -390,6 +391,7 @@ fn installs_exact_supervisor_root_and_guarded_entry_stack_then_detaches() {
             &mut memory,
             InitialImage {
                 code_page: USER_WINDOW_START,
+                code_pages: 1,
                 entry: USER_WINDOW_START + 16,
                 stack_page: USER_WINDOW_START + 3 * PAGE_BYTES
             },

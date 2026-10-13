@@ -86,7 +86,8 @@ def build(cargo: Path, env: dict, target: Path, log: Path) -> dict:
     result = {}
     for name, source in (("PooleInit", "init"), ("PooleCounter", "counter"), ("PooleConsole", "console"),
                          ("PooleConsoleService", "console_service"), ("PooleConsoleClient", "console_client"),
-                         ("PooleSupervisor", "supervisor"), ("PooleShell", "shell")):
+                         ("PooleSupervisor", "supervisor"), ("PooleShell", "shell"),
+                         ("PooleMultiSupervisor", "multi_supervisor")):
         path = target / TARGET / "release" / name
         blob = path.read_bytes()
         code, record = extract(blob)
@@ -112,7 +113,7 @@ def main() -> int:
     storage = require_space(work)
     work.mkdir(parents=True, exist_ok=False)
     before = bindings()
-    report = dict(cycle=271, contract_id="PUSERBIN1", status="fail", source_bindings=before, storage_preflight=storage,
+    report = dict(cycle=273, contract_id="PUSERBIN1", status="fail", source_bindings=before, storage_preflight=storage,
         source_unchanged=False, native_execution_verified=False, actual_init_service=False,
         normal_session_boot=False, iso_built=False, production_ready=False)
     try:

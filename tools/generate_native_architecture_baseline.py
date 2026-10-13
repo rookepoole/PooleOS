@@ -24,6 +24,9 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle273-bounded-multipage-executables.md",
+    "runs/native-multipage-program-readiness.json",
+    "native/userspace/src/bin/multi_supervisor.rs",
     "docs/checkpoints/cycle272-owned-allocation-page-mappings.md",
     "runs/native-vm-allocation-pages-readiness.json",
     "docs/checkpoints/cycle271-native-process-completion.md",

@@ -40,6 +40,7 @@ def source_bindings() -> dict[str, str]:
         "native/kernel/src/user_root_probe/peer_driver/launch.rs",
         "native/userspace/src/supervisor.rs",
         "native/userspace/src/bin/supervisor.rs",
+        "native/userspace/src/bin/multi_supervisor.rs",
         "tests/test_native_process_launch.py",
         "native/kernel/src/capability_ipc/process.rs",
         "native/kernel/src/capability_ipc/process/tests.rs",

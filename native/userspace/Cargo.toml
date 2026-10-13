@@ -29,6 +29,12 @@ test = false
 bench = false
 
 [[bin]]
+name = "PooleMultiSupervisor"
+path = "src/bin/multi_supervisor.rs"
+test = false
+bench = false
+
+[[bin]]
 name = "PooleCounter"
 path = "src/bin/counter.rs"
 test = false

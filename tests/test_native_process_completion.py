@@ -9,6 +9,28 @@ def markers():
     return result
 
 class NativeProcessCompletionTests(unittest.TestCase):
+    def test_multipage_profile_requires_matching_size_and_cleanup(self):
+        for bad in (False, True):
+            original = launch_markers(True) if bad else markers()
+            for pages in (2, 3, 4):
+                data = original.copy()
+                import re
+                data[29] = re.sub(r'supervisor_bytes=\d+', f'supervisor_bytes={4096*(pages-1)+1}', data[29])
+                data[29] = data[29].replace('image_pages=39', f'image_pages={38+pages}')
+                released, scrubbed = (39, 18) if bad else (52, 24)
+                data[-2] = data[-2].replace(f'released_pages={released}', f'released_pages={released+pages-1}')
+                data[-2] = data[-2].replace(f'scrubbed_data_pages={scrubbed}', f'scrubbed_data_pages={scrubbed+pages-1}')
+                result = completion.validate_markers(data, bad_owner=bad, supervisor_code_pages=pages)
+                self.assertEqual(result['result']['released_pages'], released+pages-1)
+                self.assertGreater(completion.negative_controls(data, bad_owner=bad, supervisor_code_pages=pages), 50)
+                with self.assertRaises(ValueError): completion.validate_markers(data, bad_owner=bad)
+                for index in (29, len(data)-2):
+                    stale = data.copy(); stale[index] = original[index]
+                    with self.assertRaises(ValueError):
+                        completion.validate_markers(stale, bad_owner=bad, supervisor_code_pages=pages)
+        for pages in (0, 5, True, 1.0, '1'):
+            with self.assertRaises(ValueError): completion.validate_markers(markers(), supervisor_code_pages=pages)
+
     def test_deferred_completion_preserves_full_launch_oracle(self):
         result = completion.validate_markers(markers())
         self.assertEqual(len(result['completions']), 2)

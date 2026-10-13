@@ -1,4 +1,4 @@
-//! Inactive, two-page user-image admission for the first native user-space lane.
+//! Inactive, bounded code-region and guarded-stack user-image admission.
 //!
 //! This does not activate CR3, install descriptors, execute IRETQ, or confer
 //! authority. The caller must hold exclusive address-space/allocation ownership
@@ -24,6 +24,7 @@ pub mod task;
 pub mod timer;
 
 pub const CONTRACT_ID: &str = "PKUSER1";
+pub const MAX_CODE_PAGES: u64 = 4;
 // Preserve the existing kernel code/data and two-slot TSS at GDT indices 1..4.
 // Data before code also leaves the required ordering for a later SYSRET ABI.
 pub const USER_DATA_SELECTOR: u64 = (5 << 3) | 3;
@@ -56,11 +57,22 @@ pub enum Error {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct InitialImage {
     pub code_page: u64,
+    pub code_pages: u64,
     pub entry: u64,
     pub stack_page: u64,
 }
 
 impl InitialImage {
+    fn code_end(self) -> Result<u64, Error> {
+        if !(1..=MAX_CODE_PAGES).contains(&self.code_pages) {
+            return Err(Error::Layout);
+        }
+        self.code_pages
+            .checked_mul(PAGE_BYTES)
+            .and_then(|bytes| self.code_page.checked_add(bytes))
+            .filter(|&end| end <= USER_WINDOW_END_EXCLUSIVE)
+            .ok_or(Error::Layout)
+    }
     fn validate(self) -> Result<(), Error> {
         for page in [self.code_page, self.stack_page] {
             if !page.is_multiple_of(PAGE_BYTES)
@@ -69,11 +81,12 @@ impl InitialImage {
                 return Err(Error::Layout);
             }
         }
-        if !(self.code_page..self.code_page + PAGE_BYTES).contains(&self.entry)
+        let code_end = self.code_end()?;
+        if !(self.code_page..code_end).contains(&self.entry)
             || self.stack_page == USER_WINDOW_START
             || self.stack_page + 2 * PAGE_BYTES > USER_WINDOW_END_EXCLUSIVE
-            || (self.stack_page - PAGE_BYTES..self.stack_page + 2 * PAGE_BYTES)
-                .contains(&self.code_page)
+            || (self.code_page < self.stack_page + 2 * PAGE_BYTES
+                && self.stack_page - PAGE_BYTES < code_end)
         {
             return Err(Error::Layout);
         }
@@ -98,6 +111,7 @@ pub struct ImageAdmission {
     pub root_physical: u64,
     pub root_generation: u64,
     pub code_physical: u64,
+    pub code_end: u64,
     pub stack_physical: u64,
     pub initial_frame: InitialReturnFrame,
 }
@@ -109,7 +123,7 @@ fn physical_mask(bits: u8) -> Result<u64, Error> {
     Ok(((1u64 << bits) - 1) & !(PAGE_BYTES - 1))
 }
 
-/// Read back the entire owned four-page tree, not just the intended two leaves.
+/// Read back the entire owned four-page tree, not just the intended leaves.
 /// Only this inactive PKVM1 image is accepted; kernel-half attachment, active
 /// roots, executable loading, zeroing and architectural state are later gates.
 pub fn admit_initial_image<M: TableMemory>(
@@ -138,7 +152,7 @@ fn admit_image_with_roots<M: TableMemory>(
         || summary.root_generation == 0
         || summary.pending_invalidations != 0
         || summary.table_pages != vm::TABLE_PAGE_COUNT
-        || summary.active_mappings != 2
+        || summary.active_mappings != image.code_pages as usize + 1
         || summary.bound_frames != 2
     {
         return Err(Error::SpaceState);
@@ -197,19 +211,47 @@ fn admit_image_with_roots<M: TableMemory>(
     let leaf_table = root + 3 * PAGE_BYTES;
     let code_index = ((image.code_page >> 12) & 511) as usize;
     let stack_index = ((image.stack_page >> 12) & 511) as usize;
-    let mut code_physical = 0;
-    let mut stack_physical = 0;
+    let (code_handle, code_offset, _, _) = space
+        .owned_mapping(image.code_page)
+        .ok_or(Error::Ownership)?;
+    let (stack_handle, stack_offset, _, _) = space
+        .owned_mapping(image.stack_page)
+        .ok_or(Error::Ownership)?;
+    if code_handle.page_count != image.code_pages
+        || code_offset != 0
+        || stack_handle.page_count != 1
+        || stack_offset != 0
+        || code_handle == stack_handle
+    {
+        return Err(Error::Ownership);
+    }
+    let code_physical = code_handle
+        .start_page
+        .checked_mul(PAGE_BYTES)
+        .ok_or(Error::Ownership)?;
+    let stack_physical = stack_handle
+        .start_page
+        .checked_mul(PAGE_BYTES)
+        .ok_or(Error::Ownership)?;
+    let code_physical_end = code_handle
+        .start_page
+        .checked_add(image.code_pages)
+        .and_then(|end| end.checked_mul(PAGE_BYTES))
+        .ok_or(Error::Ownership)?;
     for index in 0..vm::TABLE_ENTRIES {
         let entry = memory
             .read_entry(leaf_table, index)
             .map_err(|_| Error::TableAccess)?;
-        if index != code_index && index != stack_index {
+        // Indices below the code range wrap above its bounded page count.
+        let code_offset = index.wrapping_sub(code_index) as u64;
+        let is_code = code_offset < image.code_pages;
+        if !is_code && index != stack_index {
             if entry != 0 {
                 return Err(Error::UnexpectedMapping);
             }
             continue;
         }
-        let expected_flags = if index == code_index {
+        let expected_flags = if is_code {
             PRESENT | USER
         } else {
             PRESENT | WRITE | USER | NX
@@ -218,47 +260,41 @@ fn admit_image_with_roots<M: TableMemory>(
             return Err(Error::LeafEntry);
         }
         let physical = entry & mask;
-        if !handles[1..]
-            .iter()
-            .flatten()
-            .any(|handle| handle.page_count == 1 && handle.start_page * PAGE_BYTES == physical)
-        {
-            return Err(Error::Ownership);
-        }
         // Compare against the owner's mapping, in addition to the raw PTE flags.
-        let virtual_address = if index == code_index {
-            image.code_page
+        let (expected_handle, expected_offset) = if is_code {
+            (code_handle, code_offset)
         } else {
-            image.stack_page
+            (stack_handle, 0)
         };
         let (owned_frame, page_offset, permissions, cache) = space
-            .owned_mapping(virtual_address)
+            .owned_mapping(USER_WINDOW_START | (index as u64) << 12)
             .ok_or(Error::Ownership)?;
-        let expected_permissions = if index == code_index {
+        let expected_permissions = if is_code {
             vm::Permissions::USER_RX
         } else {
             vm::Permissions::USER_RW
         };
-        if owned_frame.start_page * PAGE_BYTES != physical
-            || page_offset != 0
+        if owned_frame != expected_handle
+            || page_offset != expected_offset
+            || owned_frame
+                .start_page
+                .checked_add(page_offset)
+                .and_then(|page| page.checked_mul(PAGE_BYTES))
+                != Some(physical)
             || permissions != expected_permissions
             || cache != vm::CachePolicy::WriteBack
         {
             return Err(Error::Ownership);
         }
-        if index == code_index {
-            code_physical = physical;
-        } else {
-            stack_physical = physical;
-        }
     }
-    if code_physical == stack_physical {
+    if (code_physical..code_physical_end).contains(&stack_physical) {
         return Err(Error::PhysicalAlias);
     }
     Ok(ImageAdmission {
         root_physical: root,
         root_generation: summary.root_generation,
         code_physical,
+        code_end: image.code_end()?,
         stack_physical,
         initial_frame: InitialReturnFrame {
             rip: image.entry,

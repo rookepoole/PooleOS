@@ -293,7 +293,7 @@ pub fn entry_frame(image: ImageAdmission, t: &Trap) -> Result<(), Error> {
 pub fn return_violation(image: ImageAdmission, t: &Trap) -> Result<Option<ReturnViolation>, Error> {
     entry_frame(image, t)?;
     let f = image.initial_frame;
-    Ok(if t.rip < f.rip || t.rip >= (f.rip & !4095) + 4096 {
+    Ok(if t.rip < f.rip || t.rip >= image.code_end {
         Some(ReturnViolation::Instruction)
     } else if t.rsp < f.rsp.saturating_sub(4096) || t.rsp > f.rsp {
         Some(ReturnViolation::Stack)
@@ -384,6 +384,7 @@ mod tests {
             root_physical: 0x100000,
             root_generation: 1,
             code_physical: 0x200000,
+            code_end: 0x40001000,
             stack_physical: 0x210000,
             initial_frame: super::super::InitialReturnFrame {
                 rip: USER_WINDOW_START + 16,
@@ -424,6 +425,34 @@ mod tests {
             (0, 0, 0, 0, 1),
         ] {
             assert_eq!(request(0, 1, s, d, n, f, r), Err(Status::Arguments));
+        }
+    }
+
+    #[test]
+    fn syscall_and_timer_return_policy_uses_the_complete_admitted_code_range() {
+        let mut i = image();
+        i.initial_frame.rip = 0x40010000;
+        i.code_end = i.initial_frame.rip + 4 * 4096;
+        let mut t = trap();
+        for offset in [0, 4095, 4096, 8192, 3 * 4096, 4 * 4096 - 1] {
+            t.rip = i.initial_frame.rip + offset;
+            assert_eq!(return_violation(i, &t), Ok(None));
+            assert!(frame(i, &t).is_ok());
+            t.vector = u64::from(crate::interrupt_time::TIMER_VECTOR);
+            assert_eq!(return_violation(i, &t), Ok(None));
+            t.vector = VECTOR;
+        }
+        for rip in [
+            i.initial_frame.rip - 1,
+            i.code_end,
+            i.code_end + 1,
+            u64::MAX,
+        ] {
+            t.rip = rip;
+            assert_eq!(
+                return_violation(i, &t),
+                Ok(Some(ReturnViolation::Instruction))
+            );
         }
     }
     #[test]

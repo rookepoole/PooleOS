@@ -1,7 +1,7 @@
 //! Development bootstrap data, not executable trust or capability authority.
 #![forbid(unsafe_code)]
 
-use super::{ImageAdmission, InitialImage};
+use super::{ImageAdmission, InitialImage, MAX_CODE_PAGES};
 use poole_handoff::PAGE_BYTES;
 
 pub const CONTRACT_ID: &str = "PSTART1";
@@ -26,7 +26,10 @@ pub struct Program<'a> {
 }
 impl<'a> Program<'a> {
     pub fn new(code: &'a [u8], entry_offset: usize) -> Result<Self, Error> {
-        if code.is_empty() || code.len() > PAGE_BYTES as usize || entry_offset >= code.len() {
+        if code.is_empty()
+            || code.len() > (MAX_CODE_PAGES * PAGE_BYTES) as usize
+            || entry_offset >= code.len()
+        {
             return Err(Error::Program);
         }
         Ok(Self { code, entry_offset })
@@ -34,9 +37,13 @@ impl<'a> Program<'a> {
     pub fn code(&self) -> &[u8] {
         self.code
     }
+    pub fn code_pages(&self) -> u64 {
+        self.code.len().div_ceil(PAGE_BYTES as usize) as u64
+    }
     pub fn image(&self, code_page: u64, stack_page: u64) -> Result<InitialImage, Error> {
         let image = InitialImage {
             code_page,
+            code_pages: self.code_pages(),
             entry: code_page
                 .checked_add(self.entry_offset as u64)
                 .ok_or(Error::Image)?,
@@ -123,8 +130,8 @@ mod tests {
 
     #[test]
     fn program_entry_must_be_inside_code_and_image_geometry_is_checked() {
-        for (size, entry) in [(0, 0), (4097, 0), (8, 8), (8, usize::MAX)] {
-            assert!(Program::new(&[0x90; 4097][..size], entry).is_err());
+        for (size, entry) in [(0, 0), (16385, 0), (8, 8), (8, usize::MAX)] {
+            assert!(Program::new(&[0x90; 16385][..size], entry).is_err());
         }
         let bytes = [0x90; 4096];
         let p = Program::new(&bytes, 4095).unwrap();
@@ -135,6 +142,27 @@ mod tests {
         assert!(p.image(u64::MAX, BASE).is_err());
         assert!(p.image(BASE + 1, BASE + 3 * PAGE_BYTES).is_err());
         assert!(p.image(BASE, BASE).is_err());
+    }
+
+    #[test]
+    fn program_page_rounding_is_bounded_and_does_not_consume_stack_guards() {
+        let bytes = [0x90; (MAX_CODE_PAGES * PAGE_BYTES) as usize];
+        for length in [4096, 4097, 8192, 8193, bytes.len()] {
+            let p = Program::new(&bytes[..length], length - 1).unwrap();
+            let expected = (length as u64).div_ceil(PAGE_BYTES);
+            assert_eq!(p.code_pages(), expected);
+            let image = p
+                .image(BASE + 16 * PAGE_BYTES, BASE + 3 * PAGE_BYTES)
+                .unwrap();
+            assert_eq!(image.code_pages, expected);
+            assert_eq!(
+                image.code_end().unwrap(),
+                BASE + (16 + expected) * PAGE_BYTES
+            );
+            if expected > 2 {
+                assert!(p.image(BASE, BASE + 3 * PAGE_BYTES).is_err());
+            }
+        }
     }
 
     #[test]

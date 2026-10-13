@@ -29,6 +29,7 @@ fn image(slot: u8) -> ImageAdmission {
         root_physical: 0x100000 + u64::from(slot) * 4096,
         root_generation: 1,
         code_physical: 0x200000,
+        code_end: 0x40001000,
         stack_physical: 0x210000,
         initial_frame: InitialReturnFrame {
             rip: 0x40000010,

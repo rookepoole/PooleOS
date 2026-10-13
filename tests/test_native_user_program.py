@@ -8,21 +8,32 @@ from runtime import native_user_program as program
 
 ROOT = Path(__file__).resolve().parents[1]
 
-def fixture():
-    code=b"\x31\xed\xc3"
+def fixture(size=3):
+    code=b"\x31\xed\xc3" + bytes(size-3)
     names=b"\0.text\0.shstrtab\0"
-    shoff=4120
+    shoff=(4096+len(code)+len(names)+7)&~7
     blob=bytearray(shoff+192)
     blob[:16]=b"\x7fELF\x02\x01\x01"+bytes(9)
     struct.pack_into("<HHIQQQIHHHHHH",blob,16,2,62,1,0,64,shoff,0,64,56,1,64,3,2)
     struct.pack_into("<IIQQQQQQ",blob,64,1,5,4096,0,0,len(code),len(code),4096)
-    blob[4096:4099]=code
-    blob[4099:4099+len(names)]=names
+    blob[4096:4096+len(code)]=code
+    blob[4096+len(code):4096+len(code)+len(names)]=names
     struct.pack_into("<IIQQQQIIQQ",blob,shoff+64,1,1,6,0,4096,len(code),0,0,16,0)
-    struct.pack_into("<IIQQQQIIQQ",blob,shoff+128,7,3,0,0,4099,len(names),0,0,1,0)
+    struct.pack_into("<IIQQQQIIQQ",blob,shoff+128,7,3,0,0,4096+len(code),len(names),0,0,1,0)
     return bytes(blob)
 
 class NativeUserProgramTests(unittest.TestCase):
+    def test_multipage_exact_bounds_and_single_segment_contract(self):
+        for size in (4096,4097,8192,8193,12288,12289,16384):
+            code,record=program.extract(fixture(size))
+            self.assertEqual(len(code),size)
+            self.assertEqual(record["load_pages"],(size+4095)//4096)
+            self.assertFalse(record["native_execution_verified"])
+            for offset,value in ((68,7),(88,4096),(104,size+4096)):
+                blob=bytearray(fixture(size))
+                struct.pack_into("<I" if offset==68 else "<Q",blob,offset,value)
+                with self.assertRaises(ValueError): program.inspect(bytes(blob))
+        with self.assertRaises(ValueError): program.inspect(fixture(16385))
     def test_object_relocations_require_defined_local_readonly_symbols_not_name_prefixes(self):
         from tools.qualify_native_user_programs import local_relocations
         def audit():
@@ -112,7 +123,7 @@ class NativeUserProgramTests(unittest.TestCase):
     def test_linker_source_rejects_got_data_relocations_and_oversize(self):
         text=(ROOT/"native/userspace/linker.ld").read_text()
         for required in [".text.start","FLAGS(5)","*(.data", ".got", ".dynamic", ".rela.*",
-                "SIZEOF(.text) <= 4096","SIZEOF(.forbidden) == 0","_start == 0"]:
+                "SIZEOF(.text) <= 16384","SIZEOF(.forbidden) == 0","_start == 0"]:
             self.assertIn(required,text)
     def test_user_runtime_has_no_kernel_or_host_dependency_and_memory_clobbers_are_preserved(self):
         import tomllib

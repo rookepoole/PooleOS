@@ -9,13 +9,13 @@ from tools import qualify_native_console_ipc as shared, qualify_native_user_entr
 from tools.qualify_native_user_programs import bindings as program_bindings
 from tools.native_build_space import require_space
 
-def program_input(directory,env):
+def program_input(directory,env,*,multipage=False):
     receipt=json.loads((directory/'receipt.json').read_bytes())
     if receipt['status']!='pass' or not receipt['source_unchanged'] or not receipt['direct_byte_equality']: raise ValueError('program qualification failed')
     if receipt.get('independent_builds')!=2 or receipt['source_bindings']!=program_bindings():raise ValueError('incomplete or stale program source bindings')
     for p,h in receipt['source_bindings'].items():
         if shared.sha((ROOT/p).read_bytes())!=h: raise ValueError('program source drift')
-    name='PooleSupervisor'
+    name='PooleMultiSupervisor' if multipage else 'PooleSupervisor'
     a=(directory/f'build1-{name}.bin').read_bytes();b=(directory/f'build2-{name}.bin').read_bytes()
     if a!=b or shared.sha(a)!=receipt['programs'][name]['code_sha256']:raise ValueError('supervisor code mismatch')
     # ELF/code identity is checked before capture, not inferred from the receipt.
@@ -24,18 +24,21 @@ def program_input(directory,env):
         elf=(snapshot if snapshot.is_file() else directory/build/'x86_64-unknown-none/release'/name).read_bytes()
         code,record=native_user_program.extract(elf)
         if code!=a or record['elf_sha256']!=receipt['programs'][name]['elf_sha256']:raise ValueError('supervisor ELF mismatch')
+        if record['load_pages']!=(4 if multipage else 1):raise ValueError('supervisor page profile mismatch')
     env['POOLEOS_SUPERVISOR_CODE']=str((directory/f'build1-{name}.bin').resolve())
     return receipt,a
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--work-dir',type=Path,required=True);p.add_argument('--program-dir',type=Path,required=True)
+    p.add_argument('--multipage-supervisor',action='store_true')
     args=p.parse_args();work=args.work_dir.resolve();programs=args.program_dir.resolve()
     if not work.is_relative_to(ROOT/'outputs') or not programs.is_relative_to(ROOT/'outputs'):p.error('workspace outputs required')
     storage=require_space(work);work.mkdir(parents=True,exist_ok=False);before=source.source_bindings()
-    report=dict(cycle=272,contract_id='PCOMP1',launch_contract_id='PLAUNCH1',status='fail',source_bindings=before,storage_preflight=storage,guest_bound_seconds=120,guest_runs=[],iso_built=False,production_ready=False)
+    pages=4 if args.multipage_supervisor else 1
+    report=dict(cycle=273,contract_id='PCOMP1',launch_contract_id='PLAUNCH1',status='fail',source_bindings=before,storage_preflight=storage,guest_bound_seconds=120,guest_runs=[],supervisor_code_pages=pages,iso_built=False,production_ready=False)
     try:
         cargo,_,env=shared._toolchain(ROOT/'.toolchains/rust-1.97.0')
-        report['program_build'],code=program_input(programs,env)
+        report['program_build'],code=program_input(programs,env,multipage=args.multipage_supervisor)
         lock,profile=shared.tier0.validate_contracts(ROOT);qemu=shared.tier0._require_workspace_tool_path(shared.tier0.DEFAULT_QEMU_ROOT,ROOT)
         shared.tier0.verify_local_launch_runtime(lock,qemu,ROOT)
         print('Build independent launch kernels and denied-owner control',flush=True)
@@ -58,16 +61,16 @@ def main():
             inspected=shared.load.inspect_media_bytes(media);path=work/f'{name}.img';path.write_bytes(media)
             run_dir=work/name;run_dir.mkdir();print(f'PLAUNCH1 {name}:120-second bound',flush=True)
             run,_,handoff=shared.boot._execute_once(name,lock,profile,qemu,path,run_dir,120,
-                marker_validator=lambda m:probe.validate_markers(m,bad_owner=bad_owner),marker_extractor=shared.transfer.extract_markers,
+                marker_validator=lambda m:probe.validate_markers(m,bad_owner=bad_owner,supervisor_code_pages=pages),marker_extractor=shared.transfer.extract_markers,
                 completion_marker=probe.COMPLETION,hpet_msi=True)
             if run['marker_summary']['start']['supervisor_bytes']!=len(code):raise ValueError('observed program size mismatch')
             prefix=run['marker_summary']['transfer_prefix'];shared.load.validate_oracle_binding(prefix['boot_prefix'],inspected,run['pbp1_transcript'])
             run['transcript_binding']=shared.transfer.validate_transcript_binding(prefix,run['pbp1_transcript'])
             run['independent_revalidation']=shared.transfer.validate_revalidation_binding(prefix,handoff,retained)
-            run['hostile_marker_cases_rejected']=probe.negative_controls(run['markers'],bad_owner=bad_owner)
+            run['hostile_marker_cases_rejected']=probe.negative_controls(run['markers'],bad_owner=bad_owner,supervisor_code_pages=pages)
             run['kernel_sha256']=shared.sha(image);run['media_sha256']=shared.sha(media);report['guest_runs'].append(run)
         if before!=source.source_bindings():raise ValueError('source drift')
-        program_input(programs,env)
+        program_input(programs,env,multipage=args.multipage_supervisor)
         report['status']='pass'
     except Exception as error:
         report['failure']=f'{type(error).__name__}: {error}';print(report['failure'],flush=True)

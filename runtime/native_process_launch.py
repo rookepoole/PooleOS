@@ -21,7 +21,10 @@ def parse(line:str,event:str)->dict:
     if any(n>=1<<64 for n in values): raise ValueError("launch observation overflow")
     return dict(zip(names,values))
 
-def validate_markers(markers:list[str],*,bad_owner:bool=False)->dict:
+def validate_markers(markers:list[str],*,bad_owner:bool=False,supervisor_code_pages:int=1)->dict:
+    if type(supervisor_code_pages) is not int or not 1<=supervisor_code_pages<=4:
+        raise ValueError("supervisor page bound")
+    image_pages=38+supervisor_code_pages
     if len(markers)!=(33 if bad_owner else 36) or markers[-1]!=END: raise ValueError("launch ordering/terminal")
     arm=transfer.TRANSFER_ARM.fullmatch(markers[23])
     if arm is None or int(arm.group(10))!=23: raise ValueError("launch selector")
@@ -32,7 +35,7 @@ def validate_markers(markers:list[str],*,bad_owner:bool=False)->dict:
     common.pop("kernel_terminal",None);common["synthetic_unsigned_terminal_used_for_prefix_parser_only"]=True
     start=parse(markers[29],"START");roots=[start[f"root{i}"] for i in range(3)]
     def root_ok(r): return 0<r<1<<32 and r%4096==0 and r!=common["transfer_arm"]["root"]
-    if start["bad_owner"]!=int(bad_owner) or not 0<start["supervisor_bytes"]<=4096 or start["image_pages"]!=39 or not 1<=start["firmware_pages"]<=12 or len(set(roots))!=3 or not all(root_ok(r) for r in roots): raise ValueError("launch startup bounds")
+    if start["bad_owner"]!=int(bad_owner) or not (supervisor_code_pages-1)*4096<start["supervisor_bytes"]<=supervisor_code_pages*4096 or start["image_pages"]!=image_pages or not 1<=start["firmware_pages"]<=12 or len(set(roots))!=3 or not all(root_ok(r) for r in roots): raise ValueError("launch startup bounds")
     lifetimes=[]
     if bad_owner:
         cancel=parse(markers[30],"CANCELLED")
@@ -45,7 +48,7 @@ def validate_markers(markers:list[str],*,bad_owner:bool=False)->dict:
             if retired!=dict(sequence=n,child_generation=n,calls=257,released_pages=13,scrubbed_data_pages=6): raise ValueError("child retirement")
             lifetimes.append(dict(admitted=admitted,retired=retired))
     result=parse(markers[-2],"RESULT")
-    fixed=dict(launched=0 if bad_owner else 2,retired=0 if bad_owner else 2,prepared_cancelled=int(bad_owner),supervisor_exit=170 if bad_owner else 0,child_calls=0 if bad_owner else 514,survivor_calls=8193,released_pages=39 if bad_owner else 52,scrubbed_data_pages=18 if bad_owner else 24,objects_remaining=0)
+    fixed=dict(launched=0 if bad_owner else 2,retired=0 if bad_owner else 2,prepared_cancelled=int(bad_owner),supervisor_exit=170 if bad_owner else 0,child_calls=0 if bad_owner else 514,survivor_calls=8193,released_pages=image_pages+(0 if bad_owner else 13),scrubbed_data_pages=image_pages-21+(0 if bad_owner else 6),objects_remaining=0)
     if any(result[k]!=v for k,v in fixed.items()): raise ValueError("launch cleanup/outcome")
     d=result["dispatches"]
     if not 129<d<=512 or result["cr3_writes"]!=2*d or not 2<=result["supervisor_calls"]<=64*d or result["ticks1"]==0 or result["ticks2"]==0: raise ValueError("launch accounting")
@@ -54,15 +57,15 @@ def validate_markers(markers:list[str],*,bad_owner:bool=False)->dict:
     elif not 0<result["survivor_after_restart"]<d or result["ticks0"]==0 or result["supervisor_calls"]<7: raise ValueError("restart survival")
     return dict(transfer_prefix=common,start=start,lifetimes=lifetimes,result=result,bad_owner=bad_owner,native_execution_requires_guest_binding=True,iso_built=False,production_ready=False)
 
-def negative_controls(markers:list[str],*,bad_owner:bool=False)->int:
-    validate_markers(markers,bad_owner=bad_owner)
+def negative_controls(markers:list[str],*,bad_owner:bool=False,supervisor_code_pages:int=1)->int:
+    validate_markers(markers,bad_owner=bad_owner,supervisor_code_pages=supervisor_code_pages)
     cases=[markers[:i]+markers[i+1:] for i in range(len(markers))]+[markers+[markers[-1]],markers[:29]+list(reversed(markers[29:]))]
     for i in range(29,len(markers)):
         for m in re.finditer(r"(?<==)[0-9]+(?= |$)",markers[i]):
             changed=markers.copy();changed[i]=markers[i][:m.start()]+("0" if m.group()!="0" else "1")+markers[i][m.end():]
             cases.append(changed)
     for case in cases:
-        try: validate_markers(case,bad_owner=bad_owner)
+        try: validate_markers(case,bad_owner=bad_owner,supervisor_code_pages=supervisor_code_pages)
         except ValueError: continue
         raise ValueError("hostile launch observation accepted")
     return len(cases)

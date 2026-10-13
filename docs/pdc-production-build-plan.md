@@ -1,15 +1,38 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-13
-Plan version: 2.175.0-owned-allocation-page-mappings
-Roadmap cycle: PooleOS Cycle 272
+Plan version: 2.176.0-bounded-multipage-executables
+Roadmap cycle: PooleOS Cycle 273
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 272: Owned Allocation Page Mappings
+## Cycle 273: Bounded Multipage Executables
+
+The owned native loader now admits, copies, maps and retires one-to-four-page RX
+programs, with complete page readback and range-aware syscall/timer return checks.
+A separately compiled 13392-byte diagnostic executes through all four pages in
+three fresh guests. Three legacy supervisor guests also pass. 512 kernel and60
+user-runtime tests pass in each profile; eight program builds reproduce exactly,
+with the earlier seven unchanged. [Evidence and limits](checkpoints/cycle273-bounded-multipage-executables.md).
+
+USI-3 remains partial. Next integrate shell start/stop/status and retained cleanup,
+qualify stop/fault completion, then read-only bundled files and two useful separate
+apps before optical ISO acceptance. No boot-screen redesign, kernel shell or
+diagnostic workload substitutes for those requirements. Robust microkernel work
+continues afterward. This increment removes the 4096-byte code-size prerequisite,
+not general executable trust, writable data/heap or post-execution cleanup recovery.
+
+Native profiles111/208 pages, denied109; fresh default208/208,120 RELRO padding
+bytes,36 stack pages. An initial209-page link failure was repaired with checked
+arithmetic; capacity guards were not raised. Default boot/shell interaction were
+not replayed. No phase/flag closes:40 phases301 subphases8996 requirements59 additions
+98 flags43 open20 gap groups.1415 Python tests/654 architecture bindings are
+inventories. Canonical gates and three tracked readiness failures remain open.
+
+## Historical Cycle 272: Owned Allocation Page Mappings
 
 The shell has 527 bytes remaining under its current 4096-byte executable limit.
 The next required loader foundation is now implemented: multiple virtual pages

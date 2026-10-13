@@ -23,6 +23,6 @@ SECTIONS
   }
 }
 ASSERT(_start == 0, "startup must be the first byte")
-ASSERT(SIZEOF(.text) > 0 && SIZEOF(.text) <= 4096, "program exceeds one code page")
+ASSERT(SIZEOF(.text) > 0 && SIZEOF(.text) <= 16384, "program exceeds four code pages")
 ASSERT(SIZEOF(.forbidden) == 0, "program needs unsupported data or relocation")
 ASSERT(SIZEOF(.rela.forbidden) == 0 && SIZEOF(.rel.forbidden) == 0, "program needs relocations")
