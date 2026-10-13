@@ -68,6 +68,23 @@ def fixture(bad=False, file_controls=False):
     return markers
 
 
+def file_wait_fixture(bad=False):
+    result=[]
+    for marker in fixture(bad):
+        result.append(marker)
+        if 'APPS ADMIT ' not in marker: continue
+        v=apps.parse(marker,'ADMIT')
+        if bad and v['task']==5: continue
+        for event,delta in [('WAIT',1),('WAKE',2)]:
+            values=dict(task=v['task'],generation=v['generation'],calls=1,
+                        queued=int(event=='WAIT'),claimed=0,completed=int(event=='WAKE'),
+                        dispatches=v['dispatches']+delta)
+            result.append('POOLEOS:APPS '+event+' contract=PAPPSESSION1'+
+                          ''.join(' '+n+'='+str(values[n]) for n in apps.FIELDS[event].split())+
+                          ' cpl=3 production=0')
+    return result
+
+
 def claimed_fixture(bad=False):
     # Synthetic waiting/cancellation observations, not captured native events.
     result=[];extra_flushes=0
@@ -138,6 +155,42 @@ def deferred_fixture(bad=False, boundary=False):
 
 
 class NativeAppSessionTests(unittest.TestCase):
+    def test_file_wait_pairs_require_both_app_generations_and_exact_pending_state(self):
+        for bad in (False,True):
+            markers=file_wait_fixture(bad)
+            report=apps.validate_markers(markers,bad_file=bad,file_waits=True)
+            self.assertEqual(len(report['file_wait_pairs']),2 if bad else 4)
+            self.assertGreater(apps.negative_controls(markers,bad_file=bad,file_waits=True),200)
+            with self.assertRaises(ValueError):
+                apps.validate_markers(fixture(bad),bad_file=bad,file_waits=True)
+            for event in ('WAIT','WAKE'):
+                index=next(i for i,m in enumerate(markers) if 'APPS '+event+' ' in m)
+                for field in ('task','generation','calls','queued','claimed','completed','dispatches'):
+                    changed=markers.copy()
+                    changed[index]=re.sub(' '+field+r'=([0-9]+)',lambda m:' '+field+'='+str(int(m[1])+1),changed[index])
+                    if field=='dispatches':
+                        changed[index]=changed[index].replace('dispatches='+str(apps.parse(markers[index],event)['dispatches']+1),'dispatches=0')
+                    with self.assertRaises(ValueError,msg=(bad,event,field)):
+                        apps.validate_markers(changed,bad_file=bad,file_waits=True)
+
+    def test_file_wait_missing_duplicate_reordered_or_resumed_observations_are_rejected(self):
+        markers=file_wait_fixture()
+        first=next(i for i,m in enumerate(markers) if 'APPS WAIT ' in m)
+        cases=[markers[:first]+markers[first+2:],
+               markers[:first]+[markers[first]]+markers[first:],
+               markers[:first]+[markers[first+1],markers[first]]+markers[first+2:]]
+        for changed in cases:
+            with self.assertRaises(ValueError):apps.validate_markers(changed,file_waits=True)
+        # Keep Text parked across a sample and prove its syscall total cannot grow.
+        changed=markers.copy()
+        wake=changed.pop(first+1).replace('dispatches=72','dispatches=129')
+        sample=next(i for i,m in enumerate(changed) if 'APPS RUN ' in m and ' dispatches=128 ' in m)
+        changed[sample]=changed[sample].replace('calls4=10','calls4=1')
+        changed.insert(sample+1,wake)
+        apps.validate_markers(changed,file_waits=True)
+        changed[sample]=changed[sample].replace('calls4=1 ','calls4=2 ')
+        with self.assertRaises(ValueError):apps.validate_markers(changed,file_waits=True)
+
     def test_claimed_waiting_requesters_are_cancelled_and_detached_in_both_generations(self):
         for bad in (False,True):
             markers=claimed_fixture(bad)

@@ -1,13 +1,52 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-13
-Plan version: 2.191.0-native-userspace-iso
-Roadmap cycle: PooleOS Cycle 288
+Plan version: 2.192.0-native-app-file-wait
+Roadmap cycle: PooleOS Cycle 289
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 289: Useful Applications Use Kernel File Waits
+
+Text and Numbers now use PSABI1 RequestWait before consuming authenticated file
+replies. Each poll still performs at most one syscall. A revoked notification
+does not release its request: RequestPoll consumes it before the next job. The
+scalar adapter passes zero pointer/length, and host tests cover backpressure,
+already-completed replies, revocation, malformed responses and fail-closed state.
+
+The existing kernel wait algorithm was not replaced. Development-dispatcher
+observations and a strict oracle prove real park/wake pairs, unchanged syscall
+totals while blocked and completed request ownership before resumption. Two
+normal optical guests each show20 pairs; a stale Numbers grant control shows14
+Text pairs. Both generations are required. A launcher replay adds20 pairs, and
+ordinary unsigned denial plus the actual injected-key terminal test bring this
+cycle to six optical boots. The rebuilt preview remains66109440 bytes; its exact
+identity and launch instructions are in [the preview guide](native-userspace-preview.md).
+
+143 user tests pass per debug/release profile,20 clean independent program pairs
+match, and only Text/Numbers bytes differ from Cycle287. Kernel host suites pass
+554 default/573 application tests per debug/release plus26 doctests. Application
+kernels independently reproduce and remain121/208 pages with36 stack pages.
+52 focused Python tests pass. No capacity or guest timeout was increased.
+[Evidence and preserved failures](checkpoints/cycle289-native-app-file-wait.md).
+
+Inspection found the real shell-stop dispatcher already has a waiting-task branch,
+but an active shell job is synchronous. This cycle connects ordinary useful apps
+to existing waits first; it does not claim shell-triggered blocked cancellation.
+Next qualify that exact stop-permit path, then interruptible jobs and generalized
+idle/wakeup, race/stress, service supervision and exhausted-owner recovery. Native
+revoked-wakeup evidence, full stack bounds, production layout, portable packaging,
+local display/input, drivers, persistence/networking, PooleGlyph/PDC and accessible
+PooleGlass remain open. All N0-N39 requirements still apply; no production phase,
+flag, main merge, signing or release gate is closed by this development preview.
+
+The focused metadata replay passes330 tests after repairing stale cycle/schema
+assertions; both failed attempts remain recorded. Inventory is1485 Python tests,
+764 architecture bindings,931 execution inputs and68 user-build inputs. Final
+staged verification follows this closeout; full canonical qualification is pending.
 
 ## Cycle 288: Native User-Space Optical Preview
 

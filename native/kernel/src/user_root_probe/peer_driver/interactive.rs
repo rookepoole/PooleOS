@@ -352,6 +352,10 @@ pub(crate) fn run(
                         })
                     })
                 });
+                #[cfg(feature = "development-applications")]
+                checked!(applications::file_wait(
+                    p, "WAKE", calls[i], &scheduler, serial, debugcon
+                ));
                 waiting[i] = None;
             }
             checked!(p.slot.activate(p.id, manager, &mut p.memory));
@@ -371,6 +375,10 @@ pub(crate) fn run(
                         })
                     });
                     waiting[i] = Some(ticket);
+                    #[cfg(feature = "development-applications")]
+                    checked!(applications::file_wait(
+                        p, "WAIT", calls[i], &scheduler, serial, debugcon
+                    ));
                 }
                 Event::Preempted { syscalls, .. } | Event::BudgetYield { syscalls } => {
                     calls[i] = syscalls;

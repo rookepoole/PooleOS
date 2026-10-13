@@ -15330,13 +15330,82 @@ def apply_cycle288(roadmap: dict, test_count: int) -> dict:
         exit_evidence=["native shell-triggered waiting cancellation with exact generation and request ownership",
             "surviving services and useful application regression without late-reply authority leaks",
             "preserve usable optical preview and continue all N0-N39 production work"])
+    return apply_cycle289(roadmap, test_count)
+
+
+def apply_cycle289(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle289-native-app-file-wait.md"
+    path = "runs/native-app-file-wait-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle288_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=289, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 289
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path]
+    gate["current_candidate_audit"]["cycle"] = 289
+    gate["current_focused_source_projection"]["cycle"] = 289
+    gate["qualification_status"] = "native_file_wait_optical_preview_verified_canonical_pending"
+    for key in ("current_native_userspace_iso_qualification", "current_native_userspace_iso_metadata"):
+        gate[key]["evidence_status"] = "historical_cycle288_not_current_candidate_qualification"
+    baseline["native_userspace_iso"]["evidence_status"] = "historical_cycle288_superseded_preview_preserved"
+    baseline["native_claimed_requester"]["evidence_status"] = "historical_cycle287_diagnostics_not_replayed_apps_now_changed"
+    record = dict(cycle=289, contract_id="PAPPFILEWAIT1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("guest_runs", "iso_built", "iso_sha256", "iso_byte_count", "file_wait_pairs_per_optical_guest",
+                "launcher_file_wait_pairs", "host_kernel_test_counts", "host_user_tests_per_profile",
+                "image_pages", "guarded_stack_pages", "kernel_wait_algorithm_changed", "native_ordinary_file_wait_verified",
+                "native_revoked_wakeup_verified", "shell_triggered_waiting_stop_verified", "production_layout_passed",
+                "production_ready", "signed", "canonical_full_replay_performed", "merge_qualified"):
+        record[key] = receipt[key]
+    gate["current_native_app_file_wait_qualification"] = record
+    gate["current_native_app_file_wait_metadata"] = dict(cycle=289, status="pass", tests_passed=330,
+        unittest_elapsed_seconds=93.789, capture_elapsed_seconds=95.047,
+        log_sha256="93B129B668695D0EEA900CEE92E82CEC3F3CD56F54FC2F0E6CCFC8AF3841CB05",
+        prior_failed_attempts=[
+            dict(tests_run=330, failures=3, unittest_elapsed_seconds=93.731, capture_elapsed_seconds=94.953,
+                log_sha256="53928649E6E815890189F34921A03AF51F4A1519E312BE83C42CC40924E054CF",
+                reason="stale_cycle288_schema_and_qualification_status_assertion"),
+            dict(tests_run=330, failures=1, unittest_elapsed_seconds=95.258, capture_elapsed_seconds=96.718,
+                log_sha256="587F5B9BB51334AF696740F5EA0AD5CD34BD97386D20BE528FC1F481F5896F74",
+                reason="next_assertion_still_expected_cycle288_candidate_audit")],
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_app_file_wait"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=289, session_contract="PAPPFILEWAIT1", receipt_path=path, receipt_section="native_execution",
+        native_execution_status="six_optical_guests_pass_ordinary_file_wait_connected",
+        native_execution_replayed_this_cycle=True, native_execution_evidence_cycle=289,
+        shell_native_execution_replayed_this_cycle=True, shell_native_execution_evidence_cycle=289,
+        optical_iso_sha256=receipt["iso_sha256"], native_file_wait_verified=True,
+        shell_triggered_waiting_stop_verified=False, native_revoked_wakeup_verified=False,
+        kernel_profile="ordinary_applications_file_wait_optical_and_stale_file_control")
+    evidence = "Cycle289: ordinary Text/Numbers now use non-consuming RequestWait before authenticated file RequestPoll. Two normal optical guests each prove20 park/wake pairs, stale Numbers grant proves14 Text pairs; strict launcher adds20. Six optical boots including unsigned denial and injected-key terminal pass.143 user tests per profile;20 independent program pairs; only Text/Numbers bytes changed.554 default/573 application kernel tests per debug/release plus26 doctests. Kernel121/208 pages,36 stack pages; no changed kernel wait algorithm or capacities. " + checkpoint
+    gap = "Qualify the real shell-stop permit against a waiting/claimed requester, then make active shell jobs interruptible. Native revoked-wakeup controls, generalized idle/CPU-efficiency measurement, request races/stress, supervision, exhausted-owner recovery and full stack bounds remain. Diagnostic/default native guest profiles are historical, not fresh qualification of changed apps. Preserve the working serial optical preview while continuing final release layout, portable packaging, drivers, local display/input, persistence/networking, PooleGlyph/PDC, accessible PooleGlass and all N0-N39 production/signing/canonical gates."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N5", "N9", "N12", "N13", "N14", "N16", "N18", "N36", "N38", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["evidence"].append(checkpoint)
+            flag["closure_condition"] += " Cycle289 connects ordinary file waits without closing production. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Qualify shell-triggered waiting stop and interruptible jobs",
+        entry_evidence=[checkpoint, path, "docs/native-userspace-preview.md"],
+        exit_evidence=["native shell stop consumes exact live stop permit while child waits on claimed file request",
+            "old waiter and request authority revoked, late reply denied, both generations reclaimed, peer survives",
+            "keep synchronous-job interruption separate until implemented and tested; preserve usable optical preview",
+            "continue all N0-N39 production and tandem PooleGlyph/PDC work"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1482)
+    parser.add_argument("--test-count", type=int, default=1485)
     parser.add_argument("--status-date", default="2026-10-13")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

@@ -1,6 +1,6 @@
 # Run The Native User-Space Preview
 
-Cycle288, 2026-10-13. Unsigned native PooleBoot + PooleKernel, not Linux.
+Cycle289, 2026-10-13. Unsigned native PooleBoot + PooleKernel, not Linux.
 This is a one-CPU QEMU/OVMF optical preview operated through a host terminal.
 It is not a desktop, installer, signed release or hardware-qualified image.
 
@@ -15,7 +15,7 @@ the Windows terminal only transports COM2 bytes.
 The local pointer is `outputs/native-userspace-preview.json`. The explicit form:
 
 ```powershell
-.\Launch-UserSpace-Preview.cmd --receipt outputs/cycle288-optical3/receipt.json
+.\Launch-UserSpace-Preview.cmd --receipt outputs/cycle289-optical/receipt.json
 ```
 
 Try these commands individually, waiting for each result:
@@ -42,6 +42,8 @@ exit
 ```
 
 Text computes counts; Numbers summarizes signed integers in the bundled file.
+Their file requests use native kernel wait/wakeup. Jobs are still synchronous:
+the shell cannot yet interrupt an active job to accept another command.
 The fault command intentionally faults Numbers inside this development guest.
 `exit` refuses while children remain owned. `Ctrl+]` closes the entire VM from
 the host. Sessions also stop at 15 minutes or bounded input/output/log limits.
@@ -56,10 +58,10 @@ Guest escape sequences are sanitized before display on the host.
 
 ## Image And Reproduction
 
-Image: `outputs/cycle288-optical3/PooleOS-UserSpace-Preview.iso`
+Image: `outputs/cycle289-optical/PooleOS-UserSpace-Preview.iso`
 
 Size: 66109440 bytes. SHA256:
-`1E4752E3D45972CEA7711AF443C15EFC22CD82558F1A975B6B676ADF6C7841AE`
+`17A5D17F11F106F27EA22B6E5939A8F4449496086963245DC3E5002642499969`
 
 Do not write it to physical media. It is an optical-only VM image, not a hybrid
 USB image. The launcher depends on this repository and its pinned local tools;
@@ -69,7 +71,7 @@ but do not authenticate them. Source changes make old qualification fail closed.
 Use the configured Python runtime with `-B` and repository `PYTHONPATH`:
 
 ```text
-tools/qualify_native_app_session.py --work-dir outputs/NEW-UNUSED-DIRECTORY --program-dir outputs/cycle287-programs2 --optical
+tools/qualify_native_app_session.py --work-dir outputs/NEW-UNUSED-DIRECTORY --program-dir outputs/cycle289-programs2 --optical
 tools/launch_native_userspace_iso.py --receipt outputs/NEW-UNUSED-DIRECTORY/receipt.json --work-dir outputs/NEW-SESSION-DIRECTORY --self-test
 ```
 

@@ -58,6 +58,18 @@ impl<C: Calls> Client<C> {
             _ => Err(Error::Transport),
         }
     }
+    /// Wait is a notification, not consumption: even Revoked must be polled to
+    /// release the completed request slot and validate the terminal response.
+    pub fn wait(&mut self) -> Result<bool, Error> {
+        if self.pending == 0 {
+            return Err(Error::Sequence);
+        }
+        match self.calls.invoke(13, self.pending, &mut []) {
+            (0 | 9, 0) => Ok(true),
+            (6, 0) => Ok(false),
+            _ => Err(Error::Transport),
+        }
+    }
     pub fn finish(&mut self) -> Result<Option<Frame>, Error> {
         if self.pending == 0 {
             return Err(Error::Sequence);

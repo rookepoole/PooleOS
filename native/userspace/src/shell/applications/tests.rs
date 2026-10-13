@@ -105,9 +105,22 @@ impl Calls for Rpc {
                 assert!(handle == CONTROL || handle == FILE);
                 return (0, b.request(self.actor, wire, handle == FILE));
             }
-            assert_eq!(number, 11);
             let p = b.pending.get(&handle).expect("app owns request");
             assert_eq!(p.actor, self.actor);
+            if number == 13 {
+                assert!(wire.is_empty());
+                return (
+                    if p.cancelled {
+                        9
+                    } else if p.reply.is_some() {
+                        0
+                    } else {
+                        6
+                    },
+                    0,
+                );
+            }
+            assert_eq!(number, 11);
             if p.cancelled {
                 b.pending.remove(&handle);
                 return (9, 0);

@@ -44,7 +44,7 @@ def check_preview(receipt: Path):
         window=run['sustained_window']
         if window!=optical.validate_sustained(samples,window['first_dispatch'],window['last_dispatch']):
             raise ValueError('sustained evidence differs')
-        apps.validate_markers(run['markers'],bad_file=run['run_id']=='bad-file')
+        apps.validate_markers(run['markers'],bad_file=run['run_id']=='bad-file',file_waits=report.get('file_waits',False))
     ordinary=report['ordinary_denial']
     if ordinary['qemu_exit_code']!=0 or ordinary['iso_sha256']!=report['optical_images']['ordinary-denial']['iso_sha256']:
         raise ValueError('ordinary denial image differs')
@@ -135,7 +135,7 @@ def run_session(receipt: Path, work: Path, interaction, self_test: bool):
     try:
         run,_,handoff=shared.boot._execute_once('launcher-self-test' if self_test else 'manual-session',
             lock,optical.optical_profile(base),qemu,path,work,result['guest_bound_seconds'],
-            marker_validator=apps.validate_markers if self_test else manual_summary,
+            marker_validator=(lambda m: apps.validate_markers(m,file_waits=report.get('file_waits',False))) if self_test else manual_summary,
             marker_extractor=session.extract_markers,hpet_msi=True,pause_on_completion=True,
             console_port=interaction.port,console_poll=interaction.poll,capture_log_limit_bytes=LOG_LIMIT)
         if self_test:

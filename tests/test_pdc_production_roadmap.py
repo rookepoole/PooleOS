@@ -198,8 +198,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 288)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1482)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 289)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1485)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -239,8 +239,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "native_userspace_optical_preview_verified_canonical_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 288)
+        self.assertEqual(current["qualification_status"], "native_file_wait_optical_preview_verified_canonical_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 289)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -6669,6 +6669,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             for i,run in enumerate(live['guest_runs']):
                 options=dict(bad_file=i==2,file_controls=controls)
                 summary=apps.validate_markers(run['markers'],**options)
+                self.assertEqual(summary.pop('file_wait_pairs'),[])
                 self.assertEqual(json.loads(json.dumps(summary)),run['marker_summary'])
                 self.assertEqual(apps.negative_controls(run['markers'],**options),run['hostile_marker_cases_rejected'])
                 interaction=run['interaction']
@@ -6744,6 +6745,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
                 options=dict(bad_file=i==2)
                 if name!='exhaustion':options['deferred_cleanup']=name=='deferred'
                 summary=oracle.validate_markers(run['markers'],**options)
+                if name!='exhaustion':self.assertEqual(summary.pop('file_wait_pairs'),[])
                 self.assertEqual(json.loads(json.dumps(summary)),run['marker_summary'])
                 self.assertEqual(oracle.negative_controls(run['markers'],**options),run['hostile_marker_cases_rejected'])
                 interaction=run['interaction'];case=oracle.scenario(interaction['nonce'],bad_file=i==2)
@@ -6778,9 +6780,9 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
         self.assertEqual(record['receipt_sha256'],'38F7A18C4CEEEDEED6E01ECF2250F71EAA22BD3676C60AC8858265D8A278D2D4')
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(287,'PCLAIM1','pass'))
-        self.assertEqual(record['evidence_status'],'historical_cycle287_diagnostics_not_replayed_native_bytes_unchanged')
+        self.assertEqual(record['evidence_status'],'historical_cycle287_diagnostics_not_replayed_apps_now_changed')
         self.assertEqual(len(r['source_bindings']),921)
-        self.assertEqual(r['program_build']['source_bindings'],bindings())
+        self.assertNotEqual(r['program_build']['source_bindings'],bindings())
         self.assertEqual(len(bindings()),68)
         self.assertEqual((len(r['program_build']['programs']),r['program_build']['independent_builds']),(20,2))
         self.assertEqual([p['tests_passed'] for p in r['program_build']['host_tests']],[138,138])
@@ -6813,12 +6815,14 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertFalse(r[key],key)
         for name,live in r['native_execution'].items():
             self.assertEqual(live['source_bindings'],r['source_bindings'])
-            self.assertEqual(live['program_build']['source_bindings'],bindings())
+            self.assertEqual(live['program_build']['source_bindings'],r['program_build']['source_bindings'])
+            self.assertNotEqual(live['program_build']['source_bindings'],bindings())
             self.assertTrue(live['source_unchanged'] and live['independent_kernel_builds_equal'])
             self.assertEqual((len(live['guest_runs']),live['guest_bound_seconds']),(3,240))
             for i,run in enumerate(live['guest_runs']):
                 options=dict(bad_file=i==2,file_controls=name=='controls',claimed_requester=name=='claimed')
                 summary=apps.validate_markers(run['markers'],**options)
+                self.assertEqual(summary.pop('file_wait_pairs'),[])
                 self.assertEqual(json.loads(json.dumps(summary)),run['marker_summary'])
                 self.assertEqual(apps.negative_controls(run['markers'],**options),run['hostile_marker_cases_rejected'])
                 interaction=run['interaction'];kw=dict(bad_file=i==2)
@@ -6853,11 +6857,11 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
         self.assertEqual(record['receipt_sha256'],'BEE1CDEF65E2B3E3983CE1D981DDA91BB69EDF45208AF1A5D160D35832F545EB')
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(288,'PUSIISO1','pass'))
-        self.assertEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),931)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),931)
         self.assertEqual((r['guest_runs'],r['iso_byte_count']),(6,66109440))
         self.assertEqual(r['iso_sha256'],'1E4752E3D45972CEA7711AF443C15EFC22CD82558F1A975B6B676ADF6C7841AE')
         prior=json.loads((ROOT/'runs/native-claimed-requester-readiness.json').read_bytes())
-        delta=r['historical_cycle287_source_delta'];previous=prior['source_bindings'];current=source_bindings()
+        delta=r['historical_cycle287_source_delta'];previous=prior['source_bindings'];current=r['source_bindings']
         self.assertEqual(delta['receipt_sha256'],'38F7A18C4CEEEDEED6E01ECF2250F71EAA22BD3676C60AC8858265D8A278D2D4')
         self.assertEqual(delta['removed_paths'],[])
         self.assertEqual(sorted(set(current)-set(previous)),delta['added_paths'])
@@ -6868,6 +6872,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertEqual(r['native_execution']['kernels'][key],prior['native_execution']['applications']['kernels'][key])
         for i,run in enumerate(r['native_execution']['guest_runs']):
             summary=apps.validate_markers(run['markers'],bad_file=i==2)
+            self.assertEqual(summary.pop('file_wait_pairs'),[])
             self.assertEqual(json.loads(json.dumps(summary)),run['marker_summary'])
             window=run['sustained_window']
             self.assertEqual(optical.validate_sustained(summary['samples'],window['first_dispatch'],window['last_dispatch']),window)
@@ -6891,7 +6896,55 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertTrue(c['source_unchanged'] and c['owner_report_unchanged'])
         lane=self.roadmap['baseline']['user_space_integration']
         self.assertTrue(lane['optical_iso_built'] and lane['continue_full_microkernel_after_iso'])
-        self.assertEqual(self.roadmap['immediate_next_move']['title'],'Resume robust microkernel: shell-triggered waiting cancellation')
+        self.assertEqual(self.roadmap['immediate_next_move']['title'],'Qualify shell-triggered waiting stop and interruptible jobs')
+
+    def test_cycle289_file_wait_is_native_bound_and_preserves_the_optical_preview(self) -> None:
+        from runtime import native_app_session as apps, native_userspace_iso as optical, native_shell
+        from tools.qualify_native_user_entry import source_bindings
+        from tools.qualify_native_user_programs import bindings
+        record=self.roadmap['baseline']['native_app_file_wait']
+        raw=(ROOT/record['receipt_path']).read_bytes();r=json.loads(raw)
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
+        self.assertEqual(record['receipt_sha256'],'FC1BAB005C909467D9995CA2E5F9C5593B5802AA989134629F6A10B5E695852A')
+        self.assertEqual((r['cycle'],r['contract_id'],r['status']),(289,'PAPPFILEWAIT1','pass'))
+        self.assertEqual(r['source_bindings'],source_bindings())
+        self.assertEqual(r['program_build']['source_bindings'],bindings())
+        self.assertEqual(r['host_kernel_test_counts'],[554,554,573,573,26])
+        self.assertEqual(r['host_user_tests_per_profile'],143)
+        self.assertEqual(r['changed_user_programs'],['PooleText','PooleNumbers'])
+        self.assertEqual(len(r['byte_identical_user_programs_to_cycle287']),18)
+        self.assertEqual((r['image_pages'],r['reserved_image_pages'],r['guarded_stack_pages']),(121,208,36))
+        prior=json.loads((ROOT/'runs/native-userspace-iso-readiness.json').read_bytes())
+        delta=r['historical_cycle288_source_delta']
+        self.assertEqual(delta['receipt_sha256'],'BEE1CDEF65E2B3E3983CE1D981DDA91BB69EDF45208AF1A5D160D35832F545EB')
+        self.assertEqual(delta['added_paths'],[]);self.assertEqual(delta['removed_paths'],[])
+        self.assertEqual(delta['changed_paths'],sorted(p for p,h in prior['source_bindings'].items() if r['source_bindings'][p]!=h))
+        self.assertEqual(len(delta['changed_paths']),13)
+        for i,g in enumerate(r['native_execution']['guest_runs']):
+            self.assertEqual(r['native_execution']['source_bindings'],r['source_bindings'])
+            summary=apps.validate_markers(g['markers'],bad_file=i==2,file_waits=True)
+            self.assertEqual(json.loads(json.dumps(summary)),g['marker_summary'])
+            self.assertEqual(len(summary['file_wait_pairs']),14 if i==2 else 20)
+            self.assertEqual(apps.negative_controls(g['markers'],bad_file=i==2,file_waits=True),g['hostile_marker_cases_rejected'])
+            window=g['sustained_window']
+            self.assertEqual(optical.validate_sustained(summary['samples'],window['first_dispatch'],window['last_dispatch']),window)
+            case=apps.scenario(g['interaction']['nonce'],bad_file=i==2)
+            self.assertTrue(native_shell.validate_interaction(case,bytes.fromhex(g['interaction']['input_hex']),bytes.fromhex(g['interaction']['output_hex']))['exact_interaction'])
+        self.assertEqual((r['guest_runs'],r['iso_byte_count'],r['launcher_file_wait_pairs']),(6,66109440,20))
+        self.assertEqual(r['iso_sha256'],'17A5D17F11F106F27EA22B6E5939A8F4449496086963245DC3E5002642499969')
+        self.assertTrue(r['terminal_adapter_evidence']['exact_interaction'])
+        self.assertEqual(len(apps.validate_markers(r['launcher_self_test']['run']['markers'],file_waits=True)['file_wait_pairs']),20)
+        for key in ('kernel_wait_algorithm_changed','native_revoked_wakeup_verified','shell_triggered_waiting_stop_verified',
+                    'default_kernel_guest_replayed','diagnostic_profiles_replayed','physical_keyboard_tested',
+                    'native_gui','local_display_input','production_layout_passed','production_ready','signed',
+                    'canonical_full_replay_performed','merge_qualified'):
+            self.assertFalse(r[key],key)
+        for tag,c in r['captures'].items():
+            self.assertEqual(c['return_code']==0,tag!='programs')
+            self.assertTrue(c['source_unchanged'] and c['owner_report_unchanged'])
+        lane=self.roadmap['baseline']['user_space_integration']
+        self.assertEqual(lane['cycle'],289)
+        self.assertTrue(lane['native_file_wait_verified'] and lane['continue_full_microkernel_after_iso'])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]

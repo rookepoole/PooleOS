@@ -11,14 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle288 builds and boots the native user-space
-optical ISO. Six fresh optical guests pass: normal applications, stale file
+**Current development checkpoint:** Cycle289 connects ordinary Text/Numbers file
+reads to native kernel waits and refreshes the usable user-space optical ISO.
+Six fresh optical guests pass: normal applications, stale file
 authority, ordinary unsigned-boot denial, launcher replay and the actual host
 terminal adapter. The shell can read bundled files, run Text/Numbers, and contain
 an application fault while its peer survives. This is an unsigned one-CPU VM
 preview with serial interaction, not a graphical desktop or production release.
 [Run the preview](docs/native-userspace-preview.md).
-[Evidence](docs/checkpoints/cycle288-native-userspace-iso.md).
+[Evidence](docs/checkpoints/cycle289-native-app-file-wait.md).
 Complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass work continues.
 
 **Historical development checkpoint:** Cycle287 verifies cancellation of native apps

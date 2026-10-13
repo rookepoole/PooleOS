@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 288
+Last roadmap reconciliation: PooleOS Cycle 289
 
-Cycle288 delivers a reproducible unsigned native user-space optical preview and
+Cycle289 connects ordinary Text/Numbers file reads to the existing native kernel
+request-wait/wakeup path and refreshes the usable optical preview. Six optical
+boots pass, including two normal sessions, stale file authority, unsigned denial,
+launcher and terminal adapter. The kernel wait algorithm is unchanged; this is
+verified user/kernel integration, not comprehensive idle or interruption support.
+Next qualify shell-triggered waiting cancellation and interruptible jobs while
+continuing the complete robust microkernel. Every production requirement remains.
+[Evidence](checkpoints/cycle289-native-app-file-wait.md).
+
+Historical Cycle288 delivers a reproducible unsigned native user-space optical preview and
 a host serial-terminal launcher, with six optical guests and four strict
 4096-dispatch six-role progress windows. Production release layout still fails
 the unchanged policy; the explicit development layout is qualified separately.

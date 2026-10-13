@@ -2,6 +2,43 @@
 use super::*;
 use poolekernel::development_apps;
 
+pub(super) fn file_wait(
+    p: &Peer,
+    event: &str,
+    calls: u64,
+    scheduler: &scheduler::Scheduler,
+    serial: &mut Com1,
+    debugcon: &mut DebugCon,
+) -> Result<(), ()> {
+    // Diagnostic requesters have their own cancellation/death observation contract.
+    if p.id.slot < 4
+        || cfg!(any(
+            feature = "development-file-controls",
+            feature = "development-claimed-requester",
+            feature = "development-app-cleanup-exhaustion"
+        ))
+    {
+        return Ok(());
+    }
+    let state = unsafe { arch::x86_64::user_ipc::with_waits(|s| s.request_snapshot(p.id)) }
+        .map_err(|_| ())?;
+    record(
+        serial,
+        debugcon,
+        event,
+        &[
+            ("task", u64::from(p.id.slot)),
+            ("generation", u64::from(p.id.generation)),
+            ("calls", calls),
+            ("queued", u64::from(state.queued)),
+            ("claimed", u64::from(state.claimed)),
+            ("completed", u64::from(state.completed)),
+            ("dispatches", u64::from(scheduler.summary().dispatch_count)),
+        ],
+    );
+    Ok(())
+}
+
 #[cfg(feature = "development-file-controls")]
 pub(super) fn requester_snapshot(
     p: &Peer,

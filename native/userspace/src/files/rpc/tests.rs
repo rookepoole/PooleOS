@@ -8,6 +8,9 @@ impl Calls for CallsMock {
     fn invoke(&mut self, number: u64, handle: u64, wire: &mut [u8]) -> (u64, u64) {
         let (n, h, bytes, result) = self.steps.pop_front().expect("unexpected syscall");
         assert_eq!((number, handle), (n, h));
+        if number == 13 {
+            assert!(wire.is_empty());
+        }
         if !bytes.is_empty() {
             if matches!(number, 7 | 11) {
                 wire[..bytes.len()].copy_from_slice(&bytes);
@@ -30,6 +33,72 @@ const ENDPOINT: u64 = 0x100010001;
 const REQUEST: u64 = 0x100030001;
 const REPLY: u64 = 0x100020001;
 const PEER: u64 = 0x100000001;
+#[test]
+fn wait_preserves_pending_request_until_authenticated_consumption() {
+    let request = Frame::empty(super::super::LIST, 7, 0);
+    let reply = super::super::answer(&request.encode());
+    let calls = CallsMock {
+        steps: [
+            (10, ENDPOINT, request.encode().to_vec(), (0, REQUEST)),
+            (13, REQUEST, Vec::new(), (6, 0)),
+            (13, REQUEST, Vec::new(), (0, 0)),
+            (11, REQUEST, wrap(PEER, 0, &reply.encode()), (0, 96)),
+        ]
+        .into(),
+    };
+    let mut client = Client::new(ENDPOINT, PEER, calls);
+    assert_eq!(client.wait(), Err(Error::Sequence));
+    assert!(client.start(&request).unwrap());
+    assert!(!client.wait().unwrap());
+    assert!(client.wait().unwrap());
+    assert_eq!(client.pending, REQUEST);
+    assert_eq!(client.start(&request), Err(Error::Sequence));
+    assert_eq!(client.finish(), Ok(Some(reply)));
+    assert_eq!(client.wait(), Err(Error::Sequence));
+    assert!(client.calls.steps.is_empty());
+}
+#[test]
+fn revoked_wait_is_consumed_before_reusing_the_request_slot() {
+    let request = Frame::empty(super::super::READ, 1, 0);
+    let calls = CallsMock {
+        steps: [
+            (10, ENDPOINT, Vec::new(), (0, REQUEST)),
+            (13, REQUEST, Vec::new(), (9, 0)),
+            (11, REQUEST, Vec::new(), (9, 0)),
+            (10, ENDPOINT, Vec::new(), (0, REQUEST + (1 << 32))),
+        ]
+        .into(),
+    };
+    let mut client = Client::new(ENDPOINT, PEER, calls);
+    assert!(client.start(&request).unwrap());
+    assert!(client.wait().unwrap());
+    assert_eq!(client.pending, REQUEST);
+    assert_eq!(client.finish(), Err(Error::Revoked));
+    assert_eq!(client.pending, 0);
+    assert!(client.start(&request).unwrap());
+    assert!(client.calls.steps.is_empty());
+}
+#[test]
+fn malformed_wait_status_never_promotes_or_consumes_a_request() {
+    for result in [(0, 1), (9, 1), (6, 1), (5, 0), (10, 0), (255, 0)] {
+        let calls = CallsMock {
+            steps: [
+                (10, ENDPOINT, Vec::new(), (0, REQUEST)),
+                (13, REQUEST, Vec::new(), result),
+            ]
+            .into(),
+        };
+        let mut client = Client::new(ENDPOINT, PEER, calls);
+        assert!(
+            client
+                .start(&Frame::empty(super::super::LIST, 1, 0))
+                .unwrap()
+        );
+        assert_eq!(client.wait(), Err(Error::Transport));
+        assert_eq!(client.pending, REQUEST);
+        assert!(client.calls.steps.is_empty());
+    }
+}
 #[test]
 fn application_file_access_is_opt_in_and_uses_kernel_role_not_payload_identity() {
     fn check<const APPS: bool>(peer: u64, allowed: bool) {

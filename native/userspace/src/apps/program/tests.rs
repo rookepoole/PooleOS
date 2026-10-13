@@ -18,6 +18,8 @@ struct StateMock {
     control_mutation: Option<(usize, u8)>,
     file_fault: u8,
     fault_job: bool,
+    waits: usize,
+    wait_result: (u64, u64),
 }
 #[derive(Clone)]
 struct Adapter {
@@ -53,6 +55,14 @@ impl Calls for Adapter {
             s.pending[lane] = Some(bytes.to_vec());
             s.tokens[lane] += 1u64 << 32;
             return (0, s.tokens[lane]);
+        }
+        if number == 13 {
+            assert_eq!(lane, 1);
+            assert_eq!(handle, s.tokens[1]);
+            assert!(s.pending[1].is_some());
+            assert!(bytes.is_empty());
+            s.waits += 1;
+            return s.wait_result;
         }
         assert_eq!(number, 11);
         assert_eq!(handle, s.tokens[lane]);
@@ -139,6 +149,8 @@ fn fixture(kind: Kind, paths: &[&[u8]]) -> (Program<Adapter>, Rc<RefCell<StateMo
         control_mutation: None,
         file_fault: 0,
         fault_job: false,
+        waits: 0,
+        wait_result: (0, 0),
     }));
     let control = Adapter {
         shared: shared.clone(),
@@ -210,6 +222,7 @@ fn text_jobs_read_real_bundle_chunks_and_wait_for_authenticated_ack() {
         vec![1, 2, 3]
     );
     assert!(s.file_requests.len() > 3);
+    assert_eq!(s.waits, s.file_requests.len() * 2);
     assert!(
         s.file_requests
             .windows(2)
@@ -281,6 +294,43 @@ fn denied_or_revoked_file_access_returns_unavailable_and_job_loop_survives() {
                 .collect::<Vec<_>>(),
             vec![UNAVAILABLE; 2]
         );
+    }
+}
+#[test]
+fn wait_backpressure_never_polls_early_and_revoked_wakeup_is_consumed() {
+    let (mut app, s) = fixture(Kind::Text, &[b"/readme.txt"]);
+    for _ in 0..30 {
+        if app.state == State::Wait {
+            break;
+        }
+        app.poll().unwrap();
+    }
+    assert_eq!(app.state, State::Wait);
+    s.borrow_mut().wait_result = (6, 0);
+    let before = s.borrow().calls;
+    for _ in 0..10 {
+        assert_eq!(app.poll(), Ok(Progress::Pending));
+        assert_eq!(app.state, State::Wait);
+    }
+    assert_eq!(s.borrow().calls, before + 10);
+    assert_eq!(s.borrow().waits, 10);
+    assert!(s.borrow().finish_again[1]);
+    s.borrow_mut().wait_result = (9, 0);
+    s.borrow_mut().file_fault = 2;
+    drive(&mut app, &s, 1).unwrap();
+    assert_eq!(s.borrow().results[0].status, UNAVAILABLE);
+    assert!(s.borrow().pending[1].is_none());
+}
+#[test]
+fn invalid_wait_fails_closed_without_accepting_file_bytes() {
+    for result in [(0, 1), (9, 1), (5, 0), (255, 0)] {
+        let (mut app, s) = fixture(Kind::Text, &[b"/readme.txt"]);
+        s.borrow_mut().wait_result = result;
+        assert_eq!(drive(&mut app, &s, 1), Err(Error::Transport));
+        assert!(s.borrow().results.is_empty());
+        let calls = s.borrow().calls;
+        assert_eq!(app.poll(), Err(Error::Transport));
+        assert_eq!(s.borrow().calls, calls);
     }
 }
 #[test]

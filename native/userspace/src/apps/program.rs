@@ -14,6 +14,7 @@ enum State {
     Ready,
     Job,
     Read,
+    Wait,
     Data,
     Report,
     Ack,
@@ -197,14 +198,19 @@ impl<C: Calls> Program<C> {
                 }
             }
             State::Read => match self.files.start(&self.request) {
-                Ok(true) => self.state = State::Data,
+                Ok(true) => self.state = State::Wait,
                 Ok(false) => {}
                 Err(Error::Revoked) => self.report(Err(UNAVAILABLE)),
                 Err(error) => return Err(error),
             },
+            State::Wait => {
+                if self.files.wait()? {
+                    self.state = State::Data;
+                }
+            }
             State::Data => match self.files.finish() {
                 Ok(Some(reply)) => self.data(reply)?,
-                Ok(None) => {}
+                Ok(None) => self.state = State::Wait,
                 Err(Error::Revoked) => self.report(Err(UNAVAILABLE)),
                 Err(error) => return Err(error),
             },

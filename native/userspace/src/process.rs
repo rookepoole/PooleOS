@@ -99,8 +99,8 @@ pub struct ConsoleCalls;
 impl crate::console_ipc::rpc::Calls for ConsoleCalls {
     #[inline(always)]
     fn invoke(&mut self, number: u64, handle: u64, wire: &mut [u8]) -> (u64, u64) {
-        if number == 9 && wire.is_empty() {
-            // SAFETY: PSABI1 discard carries a reply handle and no user pointer.
+        if matches!(number, 9 | 13) && wire.is_empty() {
+            // SAFETY: PSABI1 discard/request-wait carry a handle and no user pointer.
             return unsafe { call(number, handle, 0, 0) };
         }
         // SAFETY: each bounded wire stays live and exclusively borrowed during the kernel copy.
