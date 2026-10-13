@@ -24,6 +24,8 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle284-live-parent-app-recovery.md",
+    "runs/native-app-recovery-readiness.json",
     "docs/checkpoints/cycle283-native-applications.md",
     "docs/native-app-session.md",
     "runs/native-app-session-readiness.json",

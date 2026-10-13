@@ -108,6 +108,7 @@ runs/*
 !runs/native-files-readiness.json
 !runs/native-app-programs-readiness.json
 !runs/native-app-session-readiness.json
+!runs/native-app-recovery-readiness.json
 !runs/native_initial_system_readiness.json
 !runs/native_microcode_readiness.json
 !runs/native_recovery_readiness.json

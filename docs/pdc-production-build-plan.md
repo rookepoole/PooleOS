@@ -1,15 +1,44 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-13
-Plan version: 2.186.0-native-applications
-Roadmap cycle: PooleOS Cycle 283
+Plan version: 2.187.0-live-parent-app-recovery
+Roadmap cycle: PooleOS Cycle 284
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 283: Native Applications
+## Cycle 284: Live-Parent Application Recovery
+
+Three fresh application guests now qualify delayed cleanup while the parent shell
+remains alive. Each stops/faults both app generations, retains all 14 child pages
+through two injected cleanup failures, and completes only after 192 independent
+dispatches. The stopped child's counters freeze while init/files/console/shell
+continue progressing. Actual reclamation precedes terminal status and restart.
+Both apps compute useful results in normal guests. The stale-file control preserves
+text and shell operation while denying numbers access to files.
+[Evidence](checkpoints/cycle284-live-parent-app-recovery.md).
+
+The existing native cleanup algorithm is unchanged. This cycle adds the reviewed
+application/deferred feature combination, strict evidence validation and four
+generation-bound input barriers per guest. The first guest correctly reported
+`retiring`; the test expected a terminal outcome too early. Its failed capture
+and two repaired synthetic test failures are preserved. No deadline was extended.
+All final guests pass their frozen 240-second limits.
+570 kernel tests pass per debug/release and 26 ownership doctests; 13 oracle tests
+pass. Recovery kernel 122/208 pages, 36 guarded stack pages; normal Cycle283 kernel
+remains historical 121 pages. No native source, process, PMM or RX limits changed.
+No new default/prepared regression guests or full canonical run are claimed.
+
+Next: malformed/untracked file requests and requester death, cleanup exhaustion,
+multiple pending owners and waiting/pending request interleavings, then the actual
+optical ISO and sustained fresh-boot interaction. Preserve all full microkernel,
+PooleGlyph/PDC and accessible PooleGlass obligations afterward. PooleGlyph Phase65
+remains latest. No phase/flag closes. Source inventories: 1455 Python tests, 742
+architecture bindings, 912 execution inputs. No ISO, merge or production promotion.
+
+## Historical Cycle 283: Native Applications
 
 The native six-role session now launches two useful isolated apps through actual
 SEND-only grants and owned pre-entry handoff. PooleText computes file statistics;

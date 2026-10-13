@@ -2,6 +2,7 @@
 from __future__ import annotations
 import re
 from runtime import native_kernel_transfer as transfer, native_shell as shell, native_files as files
+from runtime import native_deferred_cleanup as cleanup
 
 PROGRAMS = [('PooleFileInit', 'INIT'), ('PooleAppFiles', 'COUNTER'),
             ('PooleConsoleService', 'CONSOLE'), ('PooleAppShell', 'CONSOLE_CLIENT'),
@@ -27,7 +28,7 @@ def parse(line: str, event: str) -> dict:
     return dict(zip(names, values))
 
 
-def validate_markers(markers: list[str], *, bad_file: bool = False) -> dict:
+def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False) -> dict:
     if len(markers) < 51: raise ValueError('incomplete application session')
     arm = transfer.TRANSFER_ARM.fullmatch(markers[23])
     if arm is None or int(arm.group(10)) != 23: raise ValueError('session selector required')
@@ -52,15 +53,57 @@ def validate_markers(markers: list[str], *, bad_file: bool = False) -> dict:
     admits, handoffs, retires, samples = [], [], [], []
     previous_calls, previous_ticks = [0]*6, [0]*6
     frozen, pending, last_event = {}, None, 0
+    cleaning, completed, cleanup_events = {}, {}, []
+    complete_pending = None
     for marker in markers[31:]:
+        if marker.startswith(cleanup.PREFIX):
+            if not deferred_cleanup or pending is not None or complete_pending is not None:
+                raise ValueError('unexpected cleanup observation')
+            event = marker.split()[1]
+            if event not in ('DEFER', 'RETRY', 'COMPLETE'): raise ValueError('unexpected cleanup transition')
+            v = cleanup.parse(marker, event)
+            task, dispatches = v['task'], v['dispatches']
+            last_sample = samples[-1]['dispatches'] if samples else 0
+            if task not in (4,5) or task not in live or 3 not in live or v['generation'] != generation[task] or v['admitted'] != 1:
+                raise ValueError('cleanup lacks live parent and owned child')
+            if not last_sample <= dispatches <= last_sample+64 or dispatches < last_event:
+                raise ValueError('cleanup event ordering')
+            last_event = dispatches
+            key = (task, generation[task])
+            if event == 'DEFER':
+                if task in cleaning or key in completed or v['attempts'] != 0 or v['next'] != dispatches+64 or v['pages'] != pages[task]:
+                    raise ValueError('invalid cleanup deferral')
+                cleaning[task] = dict(defer=v, retry=None, samples=[])
+            else:
+                state = cleaning.get(task)
+                if state is None: raise ValueError('cleanup has no retained owner')
+                if event == 'RETRY':
+                    if state['retry'] is not None or v['attempts'] != 1 or dispatches != state['defer']['next'] or v['next'] != dispatches+128 or v['pages'] != pages[task]:
+                        raise ValueError('invalid dispatch-separated retry')
+                    state['retry'] = v
+                else:
+                    if state['retry'] is None or v['attempts'] != 2 or dispatches != state['retry']['next'] or v['next'] != 0 or v['pages'] != 0:
+                        raise ValueError('invalid cleanup completion')
+                    held = state['samples']
+                    expected_samples = 3 + int(state['defer']['dispatches'] % 64 == 0)
+                    if len(held) != expected_samples or any((s[f'calls{task}'], s[f'ticks{task}']) != (held[0][f'calls{task}'], held[0][f'ticks{task}']) for s in held):
+                        raise ValueError('retained task resumed or retention interval missing')
+                    for peer in (0,1,2,3):
+                        if any(b[f'calls{peer}'] <= a[f'calls{peer}'] or b[f'ticks{peer}'] <= a[f'ticks{peer}'] for a,b in zip(held,held[1:])):
+                            raise ValueError('live services stopped during cleanup')
+                    complete_pending = v
+            cleanup_events.append(dict(event=event, **v))
+            continue
         event = next((e for e in FIELDS if marker.startswith('POOLEOS:APPS '+e+' ')), None)
         if event not in ('HANDOFF','ADMIT','RETIRE','RUN'): raise ValueError('unknown application event')
         if pending is not None and event != 'ADMIT': raise ValueError('handoff not immediately admitted')
+        if complete_pending is not None and event != 'RETIRE': raise ValueError('cleanup completion not immediately retired')
         v = parse(marker, event)
         dispatches = v['dispatches']
         last_sample = samples[-1]['dispatches'] if samples else 0
         if event != 'RUN':
-            if not last_sample < dispatches <= last_sample+64 or dispatches < last_event:
+            lower = last_sample if complete_pending is not None else last_sample+1
+            if not lower <= dispatches <= last_sample+64 or dispatches < last_event:
                 raise ValueError('event ordering')
             last_event = dispatches
             task = v['task']
@@ -94,6 +137,16 @@ def validate_markers(markers: list[str], *, bad_file: bool = False) -> dict:
             expected = (1<<32) if task < 4 else (2<<32)|6 if task == 5 and generation[task] == 1 else 4<<32
             if v['outcome'] != expected or v['calls'] == 0 or v['calls'] < previous_calls[task]:
                 raise ValueError('wrong terminal outcome or lost accounting')
+            if deferred_cleanup and task >= 4:
+                if complete_pending is None or any(v[n] != complete_pending[n] for n in ('task','generation','dispatches')):
+                    raise ValueError('retirement before cleanup completion')
+                state = cleaning.pop(task)
+                if any(s[f'calls{task}'] != v['calls'] for s in state['samples']):
+                    raise ValueError('retained terminal calls changed')
+                completed[(task,generation[task])] = state
+                complete_pending = None
+            elif complete_pending is not None:
+                raise ValueError('wrong cleanup owner retired')
             # CLOSE reply can retire the console before the shell consumes it.
             # Neither service may exit while either application remains live.
             if task < 4 and (4 in live or 5 in live): raise ValueError('service abandoned live children')
@@ -101,6 +154,7 @@ def validate_markers(markers: list[str], *, bad_file: bool = False) -> dict:
             live.remove(task); owned.remove(task); retires.append(v)
         else:
             flushes = sum(r['outcome'] == 4<<32 for r in retires)
+            flushes += sum(not (task == 5 and generation[task] == 1) for task in cleaning)
             if dispatches != (len(samples)+1)*64 or dispatches < last_event or v['cr3_writes'] != 2*dispatches+flushes or v['extra_flushes'] != flushes:
                 raise ValueError('dispatch/flush accounting')
             if v['pages'] != sum(pages[j] for j in owned) or v['live_mask'] != sum(1<<j for j in live) or [v['generation4'],v['generation5']] != generation[4:] or v['retired'] != len(retires) or v['unused'] != 0:
@@ -112,8 +166,11 @@ def validate_markers(markers: list[str], *, bad_file: bool = False) -> dict:
                 if j not in live and pair != frozen.setdefault(j, pair): raise ValueError('retired image resumed')
                 previous_calls[j], previous_ticks[j] = pair
             samples.append(v)
-    if pending is not None or live != {0,1} or owned != {0,1} or generation[4:] != [2,2] or len(retires) != 6:
+            for state in cleaning.values(): state['samples'].append(v)
+    if pending is not None or cleaning or complete_pending is not None or live != {0,1} or owned != {0,1} or generation[4:] != [2,2] or len(retires) != 6:
         raise ValueError('incomplete application lifecycle')
+    if deferred_cleanup and set(completed) != {(4,1),(4,2),(5,1),(5,2)}:
+        raise ValueError('both generations require deferred cleanup')
     if len(samples) < 8 or any(v['live_mask'] != 3 for v in samples[-2:]) or not any(v['live_mask'] == 63 and min(v['calls4'],v['calls5'],v['ticks4'],v['ticks5']) > 0 for v in samples):
         raise ValueError('concurrent apps or post-retirement survival missing')
     fault = next(r for r in retires if r['task'] == 5 and r['generation'] == 1)
@@ -125,6 +182,9 @@ def validate_markers(markers: list[str], *, bad_file: bool = False) -> dict:
     return dict(transfer_prefix=common, start=start, program_bytes=sizes, handoffs=handoffs,
                 admits=admits, retires=retires, samples=samples, bad_file_handle=bad_file,
                 native_execution_requires_guest_binding=True, useful_applications=0,
+                deferred_cleanup=deferred_cleanup, cleanup_events=cleanup_events,
+                live_parent_recovery=deferred_cleanup, native_exhaustion_qualified=False,
+                multiple_pending_cleanup_owners_qualified=False,
                 bundled_files=False, iso_built=False, production_ready=False)
 
 
@@ -181,19 +241,20 @@ def scenario(nonce: str, *, bad_file: bool = False) -> shell.Scenario:
     return shell.Scenario('stale-app-file' if bad_file else 'application-session', nonce, tuple(steps))
 
 
-def negative_controls(markers: list[str], *, bad_file: bool = False) -> int:
-    validate_markers(markers, bad_file=bad_file)
+def negative_controls(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False) -> int:
+    validate_markers(markers, bad_file=bad_file, deferred_cleanup=deferred_cleanup)
     cases = [markers[:i]+markers[i+1:] for i in range(len(markers)-1)]
     cases += [markers+[markers[-1]], markers+['POOLEOS:PANIC injected']]
     for i in range(29,len(markers)):
         for field in ('production','cpl','grants','control','files','startup_files','bytes','entered',
-                      'handle','generation','sequence','released_pages','owned_pages','outcome','live_mask','cr3_writes'):
+                      'handle','generation','sequence','released_pages','owned_pages','outcome','live_mask','cr3_writes',
+                      'attempts','next','pages','admitted','dispatches'):
             if ' '+field+'=' in markers[i]:
                 changed = markers.copy()
                 changed[i] = re.sub(r' '+field+r'=[0-9]+', ' '+field+'='+str((1<<64)-1), changed[i])
                 cases.append(changed)
     for case in cases:
-        try: validate_markers(case, bad_file=bad_file)
+        try: validate_markers(case, bad_file=bad_file, deferred_cleanup=deferred_cleanup)
         except ValueError: continue
         raise ValueError('hostile application observation accepted')
     return len(cases)

@@ -14971,13 +14971,79 @@ def apply_cycle283(roadmap: dict, test_count: int) -> dict:
             "actual optical ISO with useful apps and sustained real interaction on fresh boots",
             "documented interactive VM launch path and explicit serial-console limits",
             "complete robust microkernel afterward; exact canonical gates before main"])
+    return apply_cycle284(roadmap, test_count)
+
+
+def apply_cycle284(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle284-live-parent-app-recovery.md"
+    path = "runs/native-app-recovery-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle283_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=284, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 284
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path]
+    gate["current_candidate_audit"]["cycle"] = 284
+    gate["current_focused_source_projection"]["cycle"] = 284
+    gate["qualification_status"] = "live_parent_app_recovery_verified_remaining_controls_and_optical_ISO_pending"
+    for name in ("current_native_application_qualification", "current_native_application_metadata"):
+        gate[name]["evidence_status"] = "historical_cycle283_not_current_candidate_qualification"
+    baseline["native_application_session"]["evidence_status"] = "historical_cycle283_native_sources_unchanged_oracle_extended"
+    record = dict(cycle=284, contract_id="PAPPRECOVERY1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("guest_runs", "deferred_cleanups_per_guest", "dispatch_separation_per_cleanup",
+                "kernel_host_tests_per_profile", "ownership_doctests", "python_oracle_tests",
+                "live_parent_deferred_completion_verified", "both_app_restarts_verified",
+                "retained_pages_and_frozen_child_counters", "independent_service_progress",
+                "stale_file_authority_control", "native_kernel_algorithm_changed",
+                "native_cleanup_exhaustion_verified", "multiple_pending_cleanup_owners_verified",
+                "iso_built", "production_ready", "merge_qualified"):
+        record[key] = receipt[key]
+    gate["current_native_app_recovery_qualification"] = record
+    gate["current_native_app_recovery_metadata"] = dict(cycle=284, status="pass", tests_passed=300,
+        unittest_elapsed_seconds=65.134, capture_elapsed_seconds=66.234,
+        log_sha256="1C702C1A1488B6D385FAB852690B4B9179778F3C9783F68A7166F02E875ECCF6",
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_app_recovery"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=284, session_contract="PAPPRECOVERY1", receipt_path=path, receipt_section="native_execution",
+        native_execution_status="three_fresh_live_parent_app_recovery_guests_pass",
+        native_execution_replayed_this_cycle=True, native_execution_evidence_cycle=284,
+        shell_native_execution_replayed_this_cycle=True, shell_native_execution_evidence_cycle=284,
+        live_parent_deferred_completion_verified=True, both_app_restarts_verified=True,
+        native_cleanup_exhaustion_verified=False, multiple_pending_cleanup_owners_verified=False,
+        kernel_image_pages=122, kernel_remaining_capacity_pages=86,
+        kernel_profile="applications_with_development_only_deferred_cleanup_injection",
+        default_profile_replayed_this_cycle=False, prepared_profile_replayed_this_cycle=False)
+    lane["stages"]["USI-4"] = "partial_native_useful_apps_and_live_parent_recovery_verified_remaining_controls_and_ISO_pending"
+    evidence = "Cycle284: three fresh application guests qualify four live-parent delayed cleanups each, 192 independent dispatches per cleanup, retained14-page owners, frozen child counters, continued service progress and both app restarts. Existing native algorithms unchanged.570 kernel tests per debug/release and26 ownership doctests pass;13 oracle tests. Recovery122/208 pages and36 stack pages. First retiring-status mismatch and two synthetic fixture failures preserved; exact generation barriers repair the harness without changing240-second guest limits. " + checkpoint
+    gap = "Qualify native malformed/untracked file requests and requester death, cleanup exhaustion, multiple pending owners and waiting/pending/claimed request interleavings; then optical ISO packaging, sustained real input and fresh boots with a documented VM launcher. COM2 is not local display/input. General supervision, idle, job abort, full stack bounds, complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass remain. Preserve limits and immutable prior receipts; no production or main promotion without exact canonical gates. Retain and verify build evidence before consuming remaining host C storage."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N13", "N14", "N16", "N18", "N36", "N38"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["evidence"].append(checkpoint)
+            flag["closure_condition"] += " Cycle284 live-parent recovery is qualified; remaining work: " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Close recovery controls for useful applications in the native shell, then qualify the optical ISO",
+        entry_evidence=[checkpoint, path, "docs/native-userspace-integration-iso.md"],
+        exit_evidence=["native file requester and remaining cleanup/interleaving controls",
+            "actual optical ISO with useful apps and sustained fresh-boot interaction",
+            "documented interactive VM launcher with explicit serial limits",
+            "full microkernel continues afterward; exact canonical gates before main"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1450)
+    parser.add_argument("--test-count", type=int, default=1455)
     parser.add_argument("--status-date", default="2026-10-13")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

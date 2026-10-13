@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 283
+Last roadmap reconciliation: PooleOS Cycle 284
 
-Cycle283 qualifies two useful native apps, changed inputs, repeated jobs, contained
+Cycle284 qualifies live-parent delayed application cleanup and restart in three
+fresh guests. Both app generations retain pages and stop executing until cleanup
+completes, while the shell and services continue. The native algorithm is unchanged;
+the combined fault-injection profile and strict verification are new. Optical ISO
+acceptance follows the remaining targeted file/lifecycle controls. No production,
+canonical or main-merge gate is waived. Full N0-N39, robust microkernel, PooleGlyph,
+PDC, accessible PooleGlass and signed reproducible ISO obligations remain.
+[Evidence](checkpoints/cycle284-live-parent-app-recovery.md).
+
+Historical Cycle283 qualifies two useful native apps, changed inputs, repeated jobs, contained
 fault, stop/restart and stale-file denial on three fresh guests plus nine regression
 boots. Restart timer caching is fixed without reusing old owner measurements.
 The optical ISO remains the immediate deliverable after targeted recovery controls.

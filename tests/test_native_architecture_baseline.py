@@ -68,7 +68,9 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 740)
+        self.assertEqual(len(self.artifact["bound_sources"]), 742)
+        self.assertTrue({"docs/checkpoints/cycle284-live-parent-app-recovery.md",
+            "runs/native-app-recovery-readiness.json"}.issubset({item["path"] for item in self.artifact["bound_sources"]}))
         self.assertTrue({"docs/checkpoints/cycle283-native-applications.md", "docs/native-app-session.md",
             "runs/native-app-session-readiness.json", "native/kernel/src/development_apps.rs",
             "native/kernel/src/user_root_probe/peer_driver/interactive/applications.rs",

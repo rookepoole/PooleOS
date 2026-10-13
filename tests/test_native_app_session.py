@@ -1,3 +1,4 @@
+import re
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -52,7 +53,105 @@ def fixture(bad=False):
     return markers
 
 
+def deferred_fixture(bad=False, boundary=False):
+    markers = fixture(bad)[:31]
+    pages, roots = [13,13,13,16,14,14], [0x100000+i*0x10000 for i in range(6)]
+    live, owned, generations = set(range(4)), set(range(6)), [0,0]
+    calls, ticks, cleaning = [0]*6, [0]*6, set()
+    retired = flushes = 0
+    def emit(event, values):
+        markers.append('POOLEOS:APPS '+event+' contract=PAPPSESSION1'+
+                       ''.join(' '+n+'='+str(values[n]) for n in apps.FIELDS[event].split())+' cpl=3 production=0')
+    events = [(70,'launch',4),(80,'launch',5),(192 if boundary else 200,'defer',5),
+              (470,'launch',5),(530,'defer',4),(790,'launch',4),(860,'defer',4),
+              (1120,'defer',5),(1320,'exit',2),(1330,'exit',3)]
+    for d,event,j in list(events):
+        if event == 'defer': events.extend([(d+64,'retry',j),(d+192,'complete',j)])
+    events.extend((d,'sample',0) for d in range(64,1473,64))
+    # The dispatcher samples after a stop, but before the next cleanup poll.
+    events.sort(key=lambda e:(e[0], 1 if e[1] in ('retry','complete') else 0))
+    for d,event,j in events:
+        if event == 'launch':
+            gen=generations[j-4]+1
+            emit('HANDOFF',dict(task=j,generation=gen,control=(gen<<32)|0x10001,
+                 files=(gen<<32)|0x10002,startup_files=((gen+int(bad and j==5))<<32)|0x10002,
+                 bytes=176,entered=0,dispatches=d))
+            emit('ADMIT',dict(task=j,generation=gen,sequence=gen,handle=(gen<<32)|0x50000|(j-3),
+                 root=roots[j],owned_pages=pages[j],dispatches=d))
+            live.add(j);owned.add(j);generations[j-4]=gen;calls[j]=ticks[j]=0
+        elif event in ('defer','retry','complete'):
+            attempt={'defer':0,'retry':1,'complete':2}[event]
+            value=dict(task=j,generation=generations[j-4],attempts=attempt,
+                       next=d+(64 if attempt==0 else 128) if attempt<2 else 0,
+                       pages=pages[j] if attempt<2 else 0,dispatches=d,admitted=1)
+            markers.append('POOLEOS:CLEANUP '+event.upper()+' contract=PCLEANUP2'+
+                           ''.join(' '+n+'='+str(value[n]) for n in apps.cleanup.FIELDS)+' cpl=0 production=0')
+            if event=='defer':
+                cleaning.add(j);flushes+=int(not (j==5 and generations[j-4]==1))
+            if event=='complete': cleaning.remove(j)
+        if event in ('complete','exit'):
+            outcome=(1<<32) if j<4 else (2<<32)|6 if j==5 and generations[j-4]==1 else 4<<32
+            emit('RETIRE',dict(task=j,generation=generations[j-4] if j>=4 else 1,
+                 outcome=outcome,calls=calls[j],released_pages=pages[j],dispatches=d))
+            live.remove(j);owned.remove(j);retired+=1
+        if event=='sample':
+            for k in live-cleaning: calls[k]+=10;ticks[k]+=100
+            emit('RUN',dict(dispatches=d,cr3_writes=2*d+flushes,extra_flushes=flushes,
+                 pages=sum(pages[k] for k in owned),live_mask=sum(1<<k for k in live),
+                 generation4=generations[0],generation5=generations[1],retired=retired,unused=0,
+                 **{f'calls{k}':calls[k] for k in range(6)},**{f'ticks{k}':ticks[k] for k in range(6)}))
+    return markers
+
+
 class NativeAppSessionTests(unittest.TestCase):
+    def test_interaction_waits_on_exact_cleanup_generation_before_next_command(self):
+        from tools.qualify_native_app_session import cleanup_barriers
+        case=apps.scenario('0'*16)
+        barriers=cleanup_barriers(case.sent)
+        self.assertEqual(list(barriers.values()),[(5,1),(4,1),(4,2),(5,2)])
+        for offset,(task,_) in barriers.items():
+            self.assertTrue(case.sent[offset:].startswith(b'status '+(b'text' if task==4 else b'numbers')+b'\r'))
+            self.assertEqual(case.sent[offset-1:offset],b'\r')
+
+    def test_live_parent_deferred_completion_and_both_restarts(self):
+        for bad in (False,True):
+            for boundary in (False,True):
+                markers=deferred_fixture(bad,boundary)
+                result=apps.validate_markers(markers,bad_file=bad,deferred_cleanup=True)
+                self.assertEqual(len(result['cleanup_events']),12)
+                self.assertTrue(result['live_parent_recovery'])
+                self.assertFalse(result['native_exhaustion_qualified'])
+                self.assertFalse(result['multiple_pending_cleanup_owners_qualified'])
+                self.assertGreater(apps.negative_controls(markers,bad_file=bad,deferred_cleanup=True),400)
+                with self.assertRaises(ValueError):apps.validate_markers(markers,bad_file=bad)
+        with self.assertRaises(ValueError):apps.validate_markers(fixture(),deferred_cleanup=True)
+
+    def test_cleanup_rejects_missing_reordered_early_and_wrong_owner_events(self):
+        markers=deferred_fixture()
+        positions=[i for i,m in enumerate(markers) if m.startswith(apps.cleanup.PREFIX)]
+        cases=[]
+        for i in positions:
+            cases.extend([markers[:i]+markers[i+1:],markers[:i]+[markers[i]]+markers[i:]])
+            for field in apps.cleanup.FIELDS:
+                changed=markers.copy();changed[i]=re.sub(' '+field+r'=[0-9]+',' '+field+'=0',changed[i])
+                if changed!=markers:cases.append(changed)
+        swapped=markers.copy();a,b=positions[:2];swapped[a],swapped[b]=swapped[b],swapped[a];cases.append(swapped)
+        for case in cases:
+            with self.assertRaises(ValueError):apps.validate_markers(case,deferred_cleanup=True)
+
+    def test_cleanup_freezes_child_pages_and_counters_without_stalling_services(self):
+        markers=deferred_fixture()
+        i=next(i for i,m in enumerate(markers) if 'APPS RUN contract=PAPPSESSION1 dispatches=320 ' in m)
+        for field in ('calls5','ticks5','pages','live_mask','extra_flushes','retired','calls3','ticks3'):
+            changed=markers.copy()
+            previous=apps.parse(next(m for m in reversed(markers[:i]) if 'APPS RUN ' in m),'RUN')
+            value=previous[field] if field in ('calls3','ticks3') else apps.parse(markers[i],'RUN')[field]+1
+            changed[i]=re.sub(' '+field+r'=([0-9]+)',' '+field+'='+str(value),changed[i])
+            with self.subTest(field=field), self.assertRaises(ValueError):apps.validate_markers(changed,deferred_cleanup=True)
+        j=next(i for i,m in enumerate(markers) if 'CLEANUP COMPLETE ' in m)
+        early=markers.copy();retire=early.pop(j+1);early.insert(j,retire)
+        with self.assertRaises(ValueError):apps.validate_markers(early,deferred_cleanup=True)
+
     def test_six_roles_exact_handoff_restart_fault_and_survival_are_required(self):
         for bad in (False,True):
             result=apps.validate_markers(fixture(bad),bad_file=bad)

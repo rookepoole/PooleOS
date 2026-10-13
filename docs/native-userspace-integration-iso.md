@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: native applications verified, Cycle 283, 2026-10-13. No new ISO exists yet.
+Status: live-parent app recovery verified, Cycle 284, 2026-10-13. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -51,7 +51,21 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 
 ### Immediate Next Move
 
-Current: [Cycle283 native applications](checkpoints/cycle283-native-applications.md).
+Current: [Cycle284 live-parent recovery](checkpoints/cycle284-live-parent-app-recovery.md).
+Three fresh guests qualify four delayed cleanups each with both app generations,
+retained pages, frozen child counters, live service progress and successful restart.
+Existing kernel mechanisms are unchanged. Fault injection remains development-only.
+
+1. Qualify malformed/untracked file requests and requester death, cleanup exhaustion,
+   multiple pending owners and waiting/pending request interleavings.
+2. Package the actual optical ISO and operate sustained sessions on fresh boots
+   through a documented interactive VM launcher. Current input is COM2 serial.
+3. Continue the complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass.
+   No production, signing, release or main-merge gates are waived.
+
+### Historical Cycle283 Next Move
+
+Historical: [Cycle283 native applications](checkpoints/cycle283-native-applications.md).
 Three application guests and nine regression boots pass. The six-role native path
 hands off actual grants before dispatch. Both apps compute results, restart and
 survive a peer fault. The restart calibration-cache omission is repaired.

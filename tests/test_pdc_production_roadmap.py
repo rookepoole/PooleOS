@@ -198,8 +198,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 283)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1450)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 284)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1455)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -239,8 +239,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "native_applications_verified_optical_ISO_and_canonical_gates_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 283)
+        self.assertEqual(current["qualification_status"], "live_parent_app_recovery_verified_remaining_controls_and_optical_ISO_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 284)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -6474,7 +6474,12 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
         r = json.loads(raw)
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(283,'PAPPSESSION1','pass'))
-        self.assertEqual(r['source_bindings'],source_bindings())
+        current=source_bindings()
+        self.assertEqual(set(r['source_bindings']),set(current))
+        self.assertEqual({p for p,h in r['source_bindings'].items() if current[p]!=h}, {
+            'runtime/native_app_session.py','tests/test_native_app_session.py',
+            'tools/qualify_native_app_session.py','tools/qualify_native_kernel_entry.py'})
+        self.assertIn('historical_cycle283',record['evidence_status'])
         self.assertEqual(len(r['source_bindings']),912)
         self.assertEqual((r['guest_runs'],r['application_guest_runs'],r['native_application_count'],r['useful_application_count']),(12,3,2,2))
         self.assertEqual((r['default_kernel_tests_per_profile'],r['file_kernel_tests_per_profile'],r['application_kernel_tests_per_profile'],r['ownership_doctests']),(551,567,570,26))
@@ -6493,7 +6498,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         all_runs=[]
         for lane,oracle in [('applications',native_app_session),('files',native_files),('deferred',native_deferred_cleanup)]:
             live=r['native_execution'][lane]
-            self.assertEqual(live['source_bindings'],source_bindings())
+            self.assertEqual(live['source_bindings'],r['source_bindings'])
             self.assertEqual(live['program_build']['source_bindings'],bindings())
             self.assertTrue(live['source_unchanged'] and live['independent_kernel_builds_equal'])
             self.assertEqual(len(live['guest_runs']),3)
@@ -6501,8 +6506,11 @@ class PdcProductionRoadmapTests(unittest.TestCase):
                 options=dict(bad_file=i==2) if lane=='applications' else dict(bad_owner=i==2)
                 if lane=='deferred':options['prepared_stop']=True
                 summary=oracle.validate_markers(run['markers'],**options)
-                self.assertEqual(json.loads(json.dumps(summary)),run['marker_summary'])
-                self.assertEqual(oracle.negative_controls(run['markers'],**options),run['hostile_marker_cases_rejected'])
+                # Cycle284 adds explicit cleanup scope fields and hostile cases;
+                # replay every original observation without rewriting the receipt.
+                current_summary=json.loads(json.dumps(summary))
+                self.assertEqual({k:current_summary[k] for k in run['marker_summary']},run['marker_summary'])
+                self.assertGreaterEqual(oracle.negative_controls(run['markers'],**options),run['hostile_marker_cases_rejected'])
                 interaction=run['interaction']
                 scenario=native_shell_orphan if lane=='deferred' else oracle
                 case=scenario.scenario(interaction['nonce'],**({k:v for k,v in options.items() if k!='prepared_stop'}))
@@ -6528,7 +6536,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertEqual(capture['return_code']==0,tag not in ('oracle1','apps1','apps2'))
             self.assertTrue(capture['source_unchanged'] and capture['owner_report_unchanged'])
         self.assertEqual(r['captures']['hosts']['passed_test_counts'],[551,551,567,567,570,570,26])
-        lane=b['user_space_integration']
+        lane=b['historical_cycle283_user_space_integration']
         self.assertEqual((lane['cycle'],lane['selected_stage'],lane['session_contract']),(283,'USI-4','PAPPSESSION1'))
         self.assertTrue(lane['native_execution_replayed_this_cycle'] and lane['native_startup_handoff_called'])
         self.assertTrue(lane['application_launch_and_shell_integration'] and lane['continue_full_microkernel_after_iso'])
@@ -6540,6 +6548,57 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual((lane['kernel_image_pages'],lane['kernel_remaining_capacity_pages']),(121,87))
         self.assertEqual(lane['native_execution_evidence_cycle'],283)
         self.assertNotIn('integration_dispatcher_local_bytes',lane)
+
+    def test_cycle284_live_parent_cleanup_is_native_bound_not_optical_acceptance(self) -> None:
+        from runtime import native_app_session as apps, native_shell
+        from tools.qualify_native_user_entry import source_bindings
+        from tools.qualify_native_user_programs import bindings
+        b=self.roadmap['baseline'];record=b['native_app_recovery']
+        raw=(ROOT/record['receipt_path']).read_bytes()
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
+        r=json.loads(raw);live=r['native_execution']
+        self.assertEqual((r['cycle'],r['contract_id'],r['status']),(284,'PAPPRECOVERY1','pass'))
+        self.assertEqual(r['source_bindings'],source_bindings())
+        self.assertEqual(live['source_bindings'],source_bindings())
+        self.assertEqual(len(r['source_bindings']),912)
+        self.assertEqual(live['program_build']['source_bindings'],bindings())
+        self.assertTrue(live['source_unchanged'] and live['independent_kernel_builds_equal'])
+        self.assertEqual((r['guest_runs'],len(live['guest_runs']),live['guest_bound_seconds']),(3,3,240))
+        self.assertEqual((r['deferred_cleanups_per_guest'],r['dispatch_separation_per_cleanup']),(4,192))
+        self.assertEqual((r['kernel_host_tests_per_profile'],r['ownership_doctests'],r['python_oracle_tests']),(570,26,13))
+        for key in ('live_parent_deferred_completion_verified','both_app_restarts_verified',
+                    'retained_pages_and_frozen_child_counters','independent_service_progress','stale_file_authority_control'):
+            self.assertTrue(r[key],key)
+        for key in ('native_kernel_algorithm_changed','native_cleanup_exhaustion_verified',
+                    'multiple_pending_cleanup_owners_verified','native_malformed_file_request_injection',
+                    'native_requester_death_injection','default_profile_replayed_this_cycle',
+                    'prepared_profile_replayed_this_cycle','local_display_input','full_stack_bound_proven',
+                    'iso_built','production_ready','canonical_full_replay_performed','merge_qualified'):
+            self.assertFalse(r[key],key)
+        for i,run in enumerate(live['guest_runs']):
+            options=dict(bad_file=i==2,deferred_cleanup=True)
+            summary=apps.validate_markers(run['markers'],**options)
+            self.assertEqual(json.loads(json.dumps(summary)),run['marker_summary'])
+            self.assertEqual(len(summary['cleanup_events']),12)
+            self.assertEqual(apps.negative_controls(run['markers'],**options),run['hostile_marker_cases_rejected'])
+            interaction=run['interaction'];case=apps.scenario(interaction['nonce'],bad_file=i==2)
+            sent,output=bytes.fromhex(interaction['input_hex']),bytes.fromhex(interaction['output_hex'])
+            self.assertEqual((len(sent),interaction['cleanup_barriers_observed']),(557,4))
+            self.assertTrue(native_shell.validate_interaction(case,sent,output)['exact_interaction'])
+            for name,data in [('input',sent),('output',output)]:
+                self.assertEqual(hashlib.sha256(data).hexdigest().upper(),interaction[name+'_sha256'])
+            self.assertTrue(run['fresh_vars_copy'] and run['media_read_only'] and run['serial_debugcon_exact_match'])
+            self.assertFalse(run['guest_network'] or run['host_acceleration'] or run['local_paths_recorded'])
+        for budget in r['budgets'].values():
+            self.assertEqual((budget['image_pages'],budget['guarded_stack_pages'],budget['reserved_pages']),(122,36,208))
+        for tag,capture in r['captures'].items():
+            self.assertEqual(capture['return_code']==0,tag not in ('oracle1','oracle2','recovery1'))
+            self.assertTrue(capture['source_unchanged'] and capture['owner_report_unchanged'])
+        self.assertEqual(r['captures']['hosts']['passed_test_counts'],[570,570,26])
+        lane=b['user_space_integration']
+        self.assertEqual((lane['cycle'],lane['session_contract'],lane['kernel_image_pages']),(284,'PAPPRECOVERY1',122))
+        self.assertTrue(lane['live_parent_deferred_completion_verified'] and lane['continue_full_microkernel_after_iso'])
+        self.assertFalse(lane['default_profile_replayed_this_cycle'] or lane['prepared_profile_replayed_this_cycle'] or lane['optical_iso_built'])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]

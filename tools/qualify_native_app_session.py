@@ -10,10 +10,26 @@ from tools.qualify_native_shell_process import program_inputs
 from tools.native_build_space import require_space
 
 
+def cleanup_barriers(payload):
+    """Wait before the following command, not by adding post-hoc wall-time sleeps."""
+    generations = {b'text': 0, b'numbers': 0}
+    result, offset = {}, 0
+    for command in payload.split(b'\r')[:-1]:
+        offset += len(command)+1
+        words = command.split()
+        if len(words) == 2 and words[1] in generations:
+            if words[0] == b'start': generations[words[1]] += 1
+            elif words[0] in (b'stop', b'fault'):
+                result[offset] = (4 if words[1] == b'text' else 5, generations[words[1]])
+    return result
+
+
 class Interaction(shared.Interaction):
-    def __init__(self, case):
+    def __init__(self, case, deferred_cleanup=False):
         super().__init__(case.sent, False)
         self.case, self.step, self.expected = case, 0, native_shell.BANNER
+        self.barriers = cleanup_barriers(case.sent) if deferred_cleanup else {}
+        self.observed_barriers = set()
 
     def poll(self, debug):
         if self.sock is None:
@@ -31,6 +47,10 @@ class Interaction(shared.Interaction):
         markers = native_session.extract_markers(debug)
         runs = [probe.parse(m,'RUN') for m in markers if m.startswith('POOLEOS:APPS RUN ')]
         if runs and runs[-1]['dispatches'] >= 128 and application == self.expected and self.step < len(self.case.steps):
+            if self.step in self.barriers:
+                completed = [probe.cleanup.parse(m,'COMPLETE') for m in markers if m.startswith(probe.cleanup.PREFIX+'COMPLETE ')]
+                if self.barriers[self.step] not in {(v['task'],v['generation']) for v in completed}: return False
+                self.observed_barriers.add(self.step)
             byte, response = self.case.steps[self.step]
             if self.sock.send(byte) == 1:
                 self.sent += 1; self.step += 1; self.expected += response
@@ -42,12 +62,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--work-dir', type=Path, required=True)
     parser.add_argument('--program-dir', type=Path, required=True)
+    parser.add_argument('--deferred-cleanup', action='store_true')
     args = parser.parse_args(); work, programs = args.work_dir.resolve(), args.program_dir.resolve()
     if not work.is_relative_to(ROOT/'outputs') or not programs.is_relative_to(ROOT/'outputs'):
         parser.error('workspace output paths required')
     storage = require_space(work); work.mkdir(parents=True, exist_ok=False)
     before = source.source_bindings()
-    report = dict(cycle=283, contract_id='PAPPSESSION1', status='fail', source_bindings=before,
+    report = dict(cycle=284 if args.deferred_cleanup else 283,
+                  contract_id='PAPPRECOVERY1' if args.deferred_cleanup else 'PAPPSESSION1',
+                  deferred_cleanup=args.deferred_cleanup, status='fail', source_bindings=before,
                   storage_preflight=storage, guest_bound_seconds=240, guest_runs=[], useful_applications=0,
                   bundled_files=False, iso_built=False, production_ready=False)
     try:
@@ -57,10 +80,11 @@ def main():
         qemu = shared.tier0._require_workspace_tool_path(shared.tier0.DEFAULT_QEMU_ROOT, ROOT)
         shared.tier0.verify_local_launch_runtime(lock, qemu, ROOT)
         print('Build two application kernels and a stale-file-grant control', flush=True)
-        linked, kernel, plan = shared.entry._build_product(cargo, env, work/'kernel1', features=('development-applications',))
-        linked2, kernel2, _ = shared.entry._build_product(cargo, env, work/'kernel2', features=('development-applications',))
+        extra = ('development-shell-deferred-cleanup',) if args.deferred_cleanup else ()
+        linked, kernel, plan = shared.entry._build_product(cargo, env, work/'kernel1', features=('development-applications',)+extra)
+        linked2, kernel2, _ = shared.entry._build_product(cargo, env, work/'kernel2', features=('development-applications',)+extra)
         if (linked,kernel) != (linked2,kernel2): raise ValueError('independent kernel mismatch')
-        bad_linked, bad, bad_plan = shared.entry._build_product(cargo, env, work/'bad-kernel', features=('development-applications-bad-file',))
+        bad_linked, bad, bad_plan = shared.entry._build_product(cargo, env, work/'bad-kernel', features=('development-applications-bad-file',)+extra)
         if bad == kernel: raise ValueError('stale grant control is not distinct')
         report['independent_kernel_builds_equal'] = True
         report['kernels'] = {}
@@ -80,11 +104,11 @@ def main():
             path = work/f'{name}.img'; path.write_bytes(media)
             run_dir = work/name; run_dir.mkdir()
             case = probe.scenario(secrets.token_hex(8), bad_file=bad_file)
-            interaction = Interaction(case)
+            interaction = Interaction(case, args.deferred_cleanup)
             print(f'Native application session {name}: frozen 240-second bound', flush=True)
             try:
                 run, _, handoff = shared.boot._execute_once(name, lock, profile, qemu, path, run_dir, 240,
-                    marker_validator=lambda m: probe.validate_markers(m, bad_file=bad_file),
+                    marker_validator=lambda m: probe.validate_markers(m, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup),
                     marker_extractor=native_session.extract_markers, hpet_msi=True, pause_on_completion=True,
                     console_port=interaction.port, console_poll=interaction.poll)
             finally:
@@ -94,8 +118,10 @@ def main():
                 (run_dir/'console-output.bin').write_bytes(output)
             _, application = native_console.split_output(output)
             if sent != case.sent or application != case.expected: raise ValueError('inexact application interaction')
+            if interaction.observed_barriers != set(interaction.barriers): raise ValueError('cleanup barriers not observed')
             run['interaction'] = dict(nonce=case.nonce, input_hex=sent.hex(), output_hex=output.hex(),
                 input_sha256=shared.sha(sent), output_sha256=shared.sha(output), exact_interaction=True,
+                cleanup_barriers_observed=len(interaction.observed_barriers),
                 kernel_evidence_from_com2=False)
             if run['marker_summary']['program_bytes'] != [report['program_build']['programs'][n]['code_bytes'] for n,_ in probe.PROGRAMS]:
                 raise ValueError('observed program sizes differ')
@@ -103,7 +129,7 @@ def main():
             shared.load.validate_oracle_binding(prefix['boot_prefix'], inspected, run['pbp1_transcript'])
             run['transcript_binding'] = shared.transfer.validate_transcript_binding(prefix, run['pbp1_transcript'])
             run['independent_revalidation'] = shared.transfer.validate_revalidation_binding(prefix, handoff, retained)
-            run['hostile_marker_cases_rejected'] = probe.negative_controls(run['markers'], bad_file=bad_file)
+            run['hostile_marker_cases_rejected'] = probe.negative_controls(run['markers'], bad_file=bad_file, deferred_cleanup=args.deferred_cleanup)
             run.update(media_sha256=shared.sha(media), kernel_sha256=shared.sha(image))
             report['guest_runs'].append(run)
         if before != source.source_bindings() or program_inputs(programs, env, probe.PROGRAMS) != report['program_build']:
@@ -113,7 +139,7 @@ def main():
         report['failure'] = f'{type(error).__name__}: {error}'; print(report['failure'], flush=True)
     report['source_unchanged'] = before == source.source_bindings()
     (work/'receipt.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8',newline='\n')
-    print(f"PAPPSESSION1 {report['status']}; useful apps={report['useful_applications']} ISO=0 production=0", flush=True)
+    print(f"{report['contract_id']} {report['status']}; useful apps={report['useful_applications']} ISO=0 production=0", flush=True)
     return int(report['status'] != 'pass')
 
 
