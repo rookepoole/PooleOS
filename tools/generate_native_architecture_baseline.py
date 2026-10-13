@@ -24,6 +24,11 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle285-native-file-controls.md",
+    "runs/native-file-controls-readiness.json",
+    "native/userspace/src/bin/file_probe.rs",
+    "native/userspace/src/files/probe.rs",
+    "native/userspace/src/files/probe/tests.rs",
     "docs/checkpoints/cycle284-live-parent-app-recovery.md",
     "runs/native-app-recovery-readiness.json",
     "docs/checkpoints/cycle283-native-applications.md",

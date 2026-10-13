@@ -15037,13 +15037,84 @@ def apply_cycle284(roadmap: dict, test_count: int) -> dict:
             "actual optical ISO with useful apps and sustained fresh-boot interaction",
             "documented interactive VM launcher with explicit serial limits",
             "full microkernel continues afterward; exact canonical gates before main"])
+    return apply_cycle285(roadmap, test_count)
+
+
+def apply_cycle285(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle285-native-file-controls.md"
+    path = "runs/native-file-controls-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle284_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=285, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 285
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path]
+    gate["current_candidate_audit"]["cycle"] = 285
+    gate["current_focused_source_projection"]["cycle"] = 285
+    gate["qualification_status"] = "native_file_controls_verified_remaining_lifecycle_and_optical_ISO_pending"
+    for name in ("current_native_app_recovery_qualification", "current_native_app_recovery_metadata"):
+        gate[name]["evidence_status"] = "historical_cycle284_not_current_candidate_qualification"
+    baseline["native_app_recovery"]["evidence_status"] = "historical_cycle284_source_changed_not_replayed"
+    baseline["native_application_session"]["evidence_status"] = "historical_cycle283_source_changed_regression_in_cycle285"
+    record = dict(cycle=285, contract_id="PFILECONTROL1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("guest_runs", "file_control_guest_runs", "normal_application_guest_runs",
+                "default_kernel_tests_per_profile", "file_control_kernel_tests_per_profile",
+                "user_tests_per_profile", "ownership_doctests", "python_oracle_tests",
+                "native_malformed_file_request_injection", "native_untracked_file_request_injection",
+                "native_queued_requester_death_verified", "native_claimed_requester_death_verified",
+                "queued_requester_deaths", "claimed_requester_deaths", "normal_application_regression_verified",
+                "native_cleanup_exhaustion_verified", "multiple_pending_cleanup_owners_verified",
+                "iso_built", "production_ready", "merge_qualified"):
+        record[key] = receipt[key]
+    gate["current_native_file_controls_qualification"] = record
+    gate["current_native_file_controls_metadata"] = dict(cycle=285, status="pass", tests_passed=304,
+        unittest_elapsed_seconds=67.695, capture_elapsed_seconds=68.766,
+        log_sha256="9AF954B64BF1C552F89227191C3CF11E2B0C629F7F228318D25992D5701870E1",
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_file_controls"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=285, session_contract="PFILECONTROL1", receipt_path=path, receipt_section="native_execution",
+        native_execution_status="three_file_controls_three_application_and_three_default_cases_pass",
+        native_execution_replayed_this_cycle=True, native_execution_evidence_cycle=285,
+        shell_native_execution_replayed_this_cycle=True, shell_native_execution_evidence_cycle=285,
+        native_malformed_file_request_injection=True, native_untracked_file_request_injection=True,
+        native_queued_requester_death_verified=True, native_claimed_requester_death_verified=False,
+        live_parent_deferred_replayed_this_cycle=False, live_parent_deferred_evidence_cycle=284,
+        native_cleanup_exhaustion_verified=False, multiple_pending_cleanup_owners_verified=False,
+        kernel_image_pages=121, kernel_remaining_capacity_pages=87,
+        kernel_profile="ordinary_applications_and_separate_development_file_controls",
+        default_profile_replayed_this_cycle=True, default_profile_evidence_cycle=285,
+        default_profile_build_cycle=285, prepared_profile_replayed_this_cycle=False)
+    lane["stages"]["USI-4"] = "partial_native_apps_file_controls_and_queued_requester_death_verified_optical_pending"
+    evidence = "Cycle285: three fresh file-control guests each run two diagnostic generations,13 malformed and13 untracked messages per generation,26 validated completions and one abandoned queued request. Six queued caller deaths observed; zero claimed deaths. Three ordinary app guests and two default boots plus unsigned denial pass.553 default/572 file-control kernel tests and132 user tests per debug/release;26 doctests.18 independent program pairs; all17 prior programs byte-identical. Read-only kernel snapshot adds no user authority. Controls/apps121 of208 pages,36 stack pages; default208. " + checkpoint
+    gap = "Qualify cleanup exhaustion, multiple pending owners and waiting/pending/claimed request interleavings, including claimed-requester death. Then package the actual optical ISO and qualify fresh boots plus sustained real interaction with a documented VM launcher. Current COM2 serial is not local keyboard/display. Cycle284 delayed-cleanup evidence is historical, not a fresh replay. General supervision, efficient idle, job abort, full stack bounds, robust microkernel, PooleGlyph/PDC and accessible PooleGlass remain. Preserve capacity/authority gates and immutable receipts; exact canonical gates before main. Retain verified older build evidence before further large builds on low host storage."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N13", "N14", "N16", "N18", "N36", "N38"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["evidence"].append(checkpoint)
+            flag["closure_condition"] += " Cycle285 file and queued-requester controls qualify; remaining work: " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Finish lifecycle controls for useful applications in the native shell, then qualify the optical ISO",
+        entry_evidence=[checkpoint, path, "docs/native-userspace-integration-iso.md"],
+        exit_evidence=["native exhaustion, multiple cleanup owners and waiting/claimed request controls",
+            "actual optical ISO with useful apps and sustained fresh-boot interaction",
+            "documented interactive VM launcher with explicit serial limits",
+            "full microkernel continues afterward; exact canonical gates before main"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1455)
+    parser.add_argument("--test-count", type=int, default=1459)
     parser.add_argument("--status-date", default="2026-10-13")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

@@ -2,6 +2,75 @@ use super::*;
 use crate::capability_ipc::request::Operation as Control;
 mod deadlines;
 
+#[test]
+fn request_snapshot_observes_queued_claimed_completed_and_consumed_without_mutation() {
+    use crate::capability_ipc::request::Snapshot;
+    let (mut s, _, endpoint, send, mut m) = setup();
+    assert_eq!(s.request_snapshot(id(0)), Ok(Snapshot::default()));
+    let request = begin(&mut s, send, &mut m);
+    let before = (s.tables, s.objects);
+    assert_eq!(
+        s.request_snapshot(id(0)),
+        Ok(Snapshot {
+            queued: 1,
+            claimed: 0,
+            completed: 0
+        })
+    );
+    assert_eq!((s.tables, s.objects), before);
+    let token = receive(&mut s, endpoint, &mut m);
+    assert_eq!(
+        s.request_snapshot(id(0)),
+        Ok(Snapshot {
+            queued: 0,
+            claimed: 1,
+            completed: 0
+        })
+    );
+    assert_eq!(
+        s.message(caller(1), token, BASE, MAX_BYTES, Operation::Reply, &mut m),
+        (Status::Ok, 64)
+    );
+    assert_eq!(
+        s.request_snapshot(id(0)),
+        Ok(Snapshot {
+            queued: 0,
+            claimed: 0,
+            completed: 1
+        })
+    );
+    assert_eq!(take(&mut s, request, &mut m), (Status::Ok, 96));
+    assert_eq!(s.request_snapshot(id(0)), Ok(Snapshot::default()));
+}
+
+#[test]
+fn request_snapshot_rejects_missing_and_stale_generation_after_requester_death() {
+    for claimed in [false, true] {
+        let (mut s, _, endpoint, send, mut m) = setup();
+        begin(&mut s, send, &mut m);
+        if claimed {
+            receive(&mut s, endpoint, &mut m);
+        }
+        let stale = TaskId {
+            slot: 0,
+            generation: 2,
+        };
+        assert_eq!(s.request_snapshot(stale), Err(Error::Identity));
+        s.detach(id(0)).unwrap();
+        assert_eq!(s.request_snapshot(id(0)), Err(Error::Identity));
+        s.attach(stale, image(0)).unwrap();
+        assert_eq!(s.request_snapshot(stale), Ok(Default::default()));
+        assert_eq!(s.request_snapshot(id(0)), Err(Error::Identity));
+        assert_eq!(
+            s.request_snapshot(TaskId {
+                slot: 255,
+                generation: 1
+            }),
+            Err(Error::Identity)
+        );
+    }
+}
+
 fn begin(s: &mut Space, send: u64, m: &mut Wire) -> u64 {
     let (status, handle) = s.request_operation(caller(0), send, BASE, MAX_BYTES, Control::Begin, m);
     assert_eq!(status, Status::Ok);

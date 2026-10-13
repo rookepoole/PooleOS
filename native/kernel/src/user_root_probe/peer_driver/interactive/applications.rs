@@ -2,6 +2,53 @@
 use super::*;
 use poolekernel::development_apps;
 
+#[cfg(feature = "development-file-controls")]
+pub(super) fn requester_snapshot(
+    p: &Peer,
+    outcome: task::Outcome,
+) -> Result<poolekernel::capability_ipc::request::Snapshot, ()> {
+    if outcome.reason != Reason::Exit(85) || p.id.slot != 4 {
+        return Err(());
+    }
+    let state = unsafe { arch::x86_64::user_ipc::with_waits(|s| s.request_snapshot(p.id)) }
+        .map_err(|_| ())?;
+    if state.queued + state.claimed != 1 || state.completed != 0 {
+        return Err(());
+    }
+    Ok(state)
+}
+
+#[cfg(feature = "development-file-controls")]
+pub(super) fn requester_retired(
+    p: &Peer,
+    state: poolekernel::capability_ipc::request::Snapshot,
+    scheduler: &scheduler::Scheduler,
+    serial: &mut Com1,
+    debugcon: &mut DebugCon,
+) -> Result<(), ()> {
+    let detached =
+        unsafe { arch::x86_64::user_ipc::with_waits(|s| Ok(s.request_snapshot(p.id).is_err())) }
+            .map_err(|_| ())?;
+    if !detached {
+        return Err(());
+    }
+    record(
+        serial,
+        debugcon,
+        "REQUESTER",
+        &[
+            ("task", u64::from(p.id.slot)),
+            ("generation", u64::from(p.id.generation)),
+            ("queued", u64::from(state.queued)),
+            ("claimed", u64::from(state.claimed)),
+            ("completed", u64::from(state.completed)),
+            ("detached", 1),
+            ("dispatches", u64::from(scheduler.summary().dispatch_count)),
+        ],
+    );
+    Ok(())
+}
+
 #[inline(never)]
 pub(super) fn configure(args: &mut [Arguments; 6]) -> Result<(), ()> {
     args[1] = Arguments::new(&[

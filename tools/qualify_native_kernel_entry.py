@@ -207,6 +207,8 @@ def _build_product(cargo: Path, env: dict[str, str], target_dir: Path, *, featur
                         ("development-applications",), ("development-applications-bad-file",),
                         ("development-applications", "development-shell-deferred-cleanup"),
                         ("development-applications-bad-file", "development-shell-deferred-cleanup"),
+                        ("development-file-controls",),
+                        ("development-file-controls", "development-applications-bad-file"),
                         ("development-shell-cleanup-retry",), ("development-shell-cleanup-retry", "development-shell-process-bad-owner"),
                         ("development-shell-prepared-stop",), ("development-shell-prepared-stop", "development-shell-process-bad-owner"),
                         ("development-shell-cleanup-retry", "development-shell-deferred-cleanup"),
@@ -218,7 +220,7 @@ def _build_product(cargo: Path, env: dict[str, str], target_dir: Path, *, featur
     product_env = _product_environment(env)
     if features in (("development-files",), ("development-files-bad-handle",)):
         product_env["CARGO_ENCODED_RUSTFLAGS"] += "\x1f-Clink-arg=--defsym=__poole_files_profile=1"
-    if features and features[0] in ("development-applications", "development-applications-bad-file"):
+    if features and features[0] in ("development-applications", "development-applications-bad-file", "development-file-controls"):
         product_env["CARGO_ENCODED_RUSTFLAGS"] += "\x1f-Clink-arg=--defsym=__poole_apps_profile=1"
     _run(
         [

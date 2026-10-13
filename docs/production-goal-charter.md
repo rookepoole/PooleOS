@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 284
+Last roadmap reconciliation: PooleOS Cycle 285
 
-Cycle284 qualifies live-parent delayed application cleanup and restart in three
+Cycle285 qualifies native malformed/untracked file requests and queued-requester
+death, with three file-control guests and six application/default regressions.
+The diagnostic remains opt-in; all prior user binaries are unchanged. Claimed
+requester death and remaining cleanup/interleaving controls stay open before
+optical ISO packaging and sustained fresh-boot interaction. No production,
+canonical or main-merge gate is waived. Complete robust microkernel, N0-N39,
+PooleGlyph/PDC, accessible PooleGlass and signed reproducible ISO remain required.
+[Evidence](checkpoints/cycle285-native-file-controls.md).
+
+Historical Cycle284 qualifies live-parent delayed application cleanup and restart in three
 fresh guests. Both app generations retain pages and stop executing until cleanup
 completes, while the shell and services continue. The native algorithm is unchanged;
 the combined fault-injection profile and strict verification are new. Optical ISO

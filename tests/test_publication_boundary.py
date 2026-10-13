@@ -74,6 +74,8 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-app-session-readiness-private.json",
             "runs/native-app-recovery-readiness-raw.json",
             "runs/native-app-recovery-readiness-private.json",
+            "runs/native-file-controls-readiness-raw.json",
+            "runs/native-file-controls-readiness-private.json",
             "runs/native-console-ipc-private.json",
             "firmware/private/device.bin",
         )
@@ -101,7 +103,7 @@ class PublicationBoundaryTests(unittest.TestCase):
                      "runs/native-deferred-cleanup-readiness.json", "runs/native-files-readiness.json",
                      "runs/native-app-programs-readiness.json", "runs/native-startup-handoff-readiness.json",
                      "runs/native-app-shell-readiness.json", "runs/native-app-session-readiness.json",
-                     "runs/native-app-recovery-readiness.json"):
+                     "runs/native-app-recovery-readiness.json", "runs/native-file-controls-readiness.json"):
             for data, kind in ((fake_token, "secret_pattern"), (user_path, "absolute_user_path")):
                 self.assertTrue(any(item["type"] == kind for item in publication.inspect_public_blob(path, data)))
 
@@ -180,6 +182,7 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-app-shell-readiness.json",
             "runs/native-app-session-readiness.json",
             "runs/native-app-recovery-readiness.json",
+            "runs/native-file-controls-readiness.json",
             "runs/native_microcode_readiness.json",
             "runs/native_recovery_readiness.json",
             "runs/native_system_manifest_readiness.json",

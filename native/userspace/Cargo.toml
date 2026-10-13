@@ -105,6 +105,12 @@ panic = "abort"
 strip = "symbols"
 
 [[bin]]
+name = "PooleFileProbe"
+path = "src/bin/file_probe.rs"
+test = false
+bench = false
+
+[[bin]]
 name = "PooleConsole"
 path = "src/bin/console.rs"
 test = false

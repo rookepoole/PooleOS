@@ -378,6 +378,12 @@ pub(crate) fn run(
                 }
                 Event::Terminated(outcome) => {
                     calls[i] = outcome.syscalls;
+                    #[cfg(feature = "development-file-controls")]
+                    let request_state = if i == 4 {
+                        Some(checked!(applications::requester_snapshot(p, outcome)))
+                    } else {
+                        None
+                    };
                     if i < 2 || (i == 2 && outcome.reason != Reason::Exit(0)) {
                         stop(34004, serial, debugcon);
                     }
@@ -411,6 +417,12 @@ pub(crate) fn run(
                         debugcon
                     ));
                     if complete {
+                        #[cfg(feature = "development-file-controls")]
+                        if let Some(state) = request_state {
+                            checked!(applications::requester_retired(
+                                p, state, &scheduler, serial, debugcon
+                            ));
+                        }
                         live[i] = false;
                         owned[i] = false;
                         retired += 1;

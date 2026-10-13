@@ -3,6 +3,13 @@ use super::*;
 use crate::virtual_memory::{USER_WINDOW_END_EXCLUSIVE, USER_WINDOW_START};
 
 const TAG: u64 = 3 << 16;
+/// Kernel-only observation, not a request handle, authority, or lifetime pin.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct Snapshot {
+    pub queued: u8,
+    pub claimed: u8,
+    pub completed: u8,
+}
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Operation {
     Begin,
@@ -40,6 +47,23 @@ impl Slot {
 }
 
 impl Space {
+    pub fn request_snapshot(&self, owner: TaskId) -> Result<Snapshot, Error> {
+        let table = self.table(owner)?;
+        let mut snapshot = Snapshot::default();
+        for slot in self.tables[table].requests {
+            if let Some(request) = slot.value {
+                if request.completion.is_some() {
+                    snapshot.completed += 1;
+                } else if request.receiver.is_some() {
+                    snapshot.claimed += 1;
+                } else {
+                    snapshot.queued += 1;
+                }
+            }
+        }
+        Ok(snapshot)
+    }
+
     pub(super) fn pending_deadlines(&self) -> bool {
         self.tables.iter().any(|t| {
             t.requests.iter().any(|s| {

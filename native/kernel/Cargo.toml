@@ -21,6 +21,7 @@ development-files = ["development-shell-process"]
 development-files-bad-handle = ["development-files"]
 development-applications = ["development-files"]
 development-applications-bad-file = ["development-applications"]
+development-file-controls = ["development-applications"]
 development-shell-process-bad-owner = ["development-shell-process"]
 
 development-shell-cleanup-retry = ["development-shell-process"]

@@ -11,7 +11,16 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle284 verifies delayed app cleanup with a
+**Current development checkpoint:** Cycle285 verifies malformed/untracked file
+requests and caller exit with a queued request in three fresh native guests.
+Three ordinary app sessions and three default/trust-control cases also pass.
+All 17 earlier user programs remain byte-identical; the diagnostic is opt-in,
+not a replacement for PooleText. No integration ISO exists yet. Next: remaining
+lifecycle controls, optical packaging and fresh-boot interaction, then continued
+full microkernel development.
+[Evidence](docs/checkpoints/cycle285-native-file-controls.md).
+
+**Historical development checkpoint:** Cycle284 verifies delayed app cleanup with a
 live native shell. Three fresh guests exercise four failures/recoveries each,
 retain pages until reclamation, keep services progressing, and restart both
 PooleText and PooleNumbers. The combined profile passes 570 kernel tests in each

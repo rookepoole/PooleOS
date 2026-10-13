@@ -6,13 +6,14 @@ from runtime import native_app_session as apps, native_files as files
 from tests.test_native_kernel_transfer import valid_markers
 
 
-def fixture(bad=False):
+def fixture(bad=False, file_controls=False):
     # Synthetic parser fixture only. All six images, pages and roots are distinct
     # logical roles; none of these made-up observations count as guest evidence.
     markers = valid_markers()[:29]
     markers[23] = markers[23].replace('trap_scenario=0', 'trap_scenario=23')
     markers.append(apps.FILE_MARKER)
     sizes, pages = [1800,2800,4000,15136,5877,5884], [13,13,13,16,14,14]
+    if file_controls: sizes[4],pages[4]=2809,13
     roots = [0x100000+i*0x10000 for i in range(6)]
     def emit(event, values):
         markers.append('POOLEOS:APPS '+event+' contract=PAPPSESSION1'+
@@ -27,24 +28,38 @@ def fixture(bad=False):
         emit('HANDOFF', dict(task=task,generation=gen,control=(gen<<32)|0x10001,
                             files=(gen<<32)|0x10002,startup_files=((gen+int(bad and task==5))<<32)|0x10002,
                             bytes=176,entered=0,dispatches=dispatch))
-        emit('ADMIT',dict(task=task,generation=gen,sequence=gen,handle=(gen<<32)|0x50000|(task-3),
+        process_slot=6-task if file_controls else task-3
+        emit('ADMIT',dict(task=task,generation=gen,sequence=gen,handle=(gen<<32)|0x50000|process_slot,
                          root=roots[task],owned_pages=pages[task],dispatches=dispatch))
         live.add(task); owned.add(task); generations[task-4]=gen
         calls[task]=ticks[task]=0
     def retire(task, dispatch, outcome):
         nonlocal retired, flushes
+        if file_controls and task==4:
+            emit('REQUESTER',dict(task=task,generation=generations[task-4],queued=1,claimed=0,
+                                 completed=0,detached=1,dispatches=dispatch))
         emit('RETIRE',dict(task=task,generation=generations[task-4] if task>=4 else 1,
                           outcome=outcome,calls=calls[task],released_pages=pages[task],dispatches=dispatch))
         live.remove(task);owned.remove(task);retired+=1;flushes+=int(outcome==4<<32)
-    for dispatch in range(64,577,64):
-        if dispatch==128: launch(4,70);launch(5,80)
-        if dispatch==256: retire(5,200,(2<<32)|6)
-        if dispatch==320: launch(5,270)
-        if dispatch==384: retire(4,330,4<<32)
-        if dispatch==448: launch(4,390)
-        if dispatch==512:
-            retire(4,460,4<<32);retire(5,461,4<<32)
-            retire(2,470,1<<32);retire(3,480,1<<32)
+    for dispatch in range(64,705 if file_controls else 577,64):
+        if file_controls:
+            if dispatch==128: launch(5,70);launch(4,80)
+            if dispatch==256: retire(4,200,(1<<32)|85)
+            if dispatch==320: launch(4,270)
+            if dispatch==384: retire(4,330,(1<<32)|85)
+            if dispatch==448: retire(5,390,(2<<32)|6)
+            if dispatch==512: launch(5,460)
+            if dispatch==576:
+                retire(5,520,4<<32);retire(2,530,1<<32);retire(3,540,1<<32)
+        else:
+            if dispatch==128: launch(4,70);launch(5,80)
+            if dispatch==256: retire(5,200,(2<<32)|6)
+            if dispatch==320: launch(5,270)
+            if dispatch==384: retire(4,330,4<<32)
+            if dispatch==448: launch(4,390)
+            if dispatch==512:
+                retire(4,460,4<<32);retire(5,461,4<<32)
+                retire(2,470,1<<32);retire(3,480,1<<32)
         for j in live: calls[j]+=10;ticks[j]+=100
         emit('RUN',dict(dispatches=dispatch,cr3_writes=2*dispatch+flushes,extra_flushes=flushes,
                         pages=sum(pages[j] for j in owned),live_mask=sum(1<<j for j in live),
@@ -104,6 +119,45 @@ def deferred_fixture(bad=False, boundary=False):
 
 
 class NativeAppSessionTests(unittest.TestCase):
+    def test_file_probe_requires_both_outstanding_requester_deaths_and_surviving_services(self):
+        for bad in (False,True):
+            markers=fixture(bad,file_controls=True)
+            result=apps.validate_markers(markers,bad_file=bad,file_controls=True)
+            self.assertEqual(len(result['requester_deaths']),2)
+            self.assertTrue(result['file_controls'])
+            self.assertFalse(result['iso_built'] or result['production_ready'])
+            self.assertGreater(apps.negative_controls(markers,bad_file=bad,file_controls=True),200)
+            with self.assertRaises(ValueError):apps.validate_markers(markers,bad_file=bad)
+            wrong=markers.copy()
+            index=next(i for i,m in enumerate(wrong) if 'APPS ADMIT ' in m)
+            wrong[index]=wrong[index].replace('handle=4295294977','handle=4295294978')
+            with self.assertRaises(ValueError):apps.validate_markers(wrong,bad_file=bad,file_controls=True)
+        with self.assertRaises(ValueError):apps.validate_markers(fixture(),file_controls=True)
+
+    def test_file_probe_rejects_completed_missing_forged_or_early_requester_retirement(self):
+        markers=fixture(file_controls=True)
+        index=next(i for i,m in enumerate(markers) if 'APPS REQUESTER ' in m)
+        for old,new in [('queued=1','queued=0'),('claimed=0','claimed=1'),('completed=0','completed=1'),
+                        ('detached=1','detached=0'),('task=4','task=5'),('generation=1','generation=2')]:
+            changed=markers.copy();changed[index]=changed[index].replace(old,new)
+            with self.assertRaises(ValueError):apps.validate_markers(changed,file_controls=True)
+        # A genuinely claimed but incomplete request is also outstanding.
+        claimed=markers.copy();claimed[index]=claimed[index].replace('queued=1 claimed=0','queued=0 claimed=1')
+        self.assertEqual(apps.validate_markers(claimed,file_controls=True)['requester_deaths'][0]['claimed'],1)
+        changed=markers.copy();changed[index],changed[index+1]=changed[index+1],changed[index]
+        with self.assertRaises(ValueError):apps.validate_markers(changed,file_controls=True)
+
+    def test_file_controls_keep_diagnostic_exit_separate_from_useful_application_results(self):
+        from tools.qualify_native_app_session import retirement_barriers
+        for bad in (False,True):
+            case=apps.file_control_scenario('0123456789abcdef',bad_file=bad)
+            self.assertEqual(list(retirement_barriers(case.sent).values()),[(5,1),(5,2),(4,1),(4,2)])
+            self.assertEqual(case.expected.count(b'text: exit 0x00000055\r\n'),2)
+            self.assertEqual(case.sent.count(b'cat /version.txt\r'),3)
+            self.assertEqual(case.expected.count(b'numbers: file service unavailable\r\n' if bad else b'numbers: count=5 sum=50 min=3 max=21\r\n'),4)
+            self.assertNotIn(b'text: bytes=',case.expected)
+            self.assertTrue(case.expected.endswith(b'Bye.\r\n'))
+
     def test_interaction_waits_on_exact_cleanup_generation_before_next_command(self):
         from tools.qualify_native_app_session import cleanup_barriers
         case=apps.scenario('0'*16)

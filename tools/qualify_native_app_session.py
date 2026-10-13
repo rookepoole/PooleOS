@@ -24,12 +24,24 @@ def cleanup_barriers(payload):
     return result
 
 
+def retirement_barriers(payload):
+    result=cleanup_barriers(payload)
+    generation,offset=0,0
+    for command in payload.split(b'\r')[:-1]:
+        offset+=len(command)+1
+        if command==b'start text':
+            generation+=1;result[offset]=(4,generation)
+    return result
+
+
 class Interaction(shared.Interaction):
-    def __init__(self, case, deferred_cleanup=False):
+    def __init__(self, case, deferred_cleanup=False, file_controls=False):
         super().__init__(case.sent, False)
         self.case, self.step, self.expected = case, 0, native_shell.BANNER
         self.barriers = cleanup_barriers(case.sent) if deferred_cleanup else {}
         self.observed_barriers = set()
+        self.retirements = retirement_barriers(case.sent) if file_controls else {}
+        self.observed_retirements = set()
 
     def poll(self, debug):
         if self.sock is None:
@@ -51,6 +63,10 @@ class Interaction(shared.Interaction):
                 completed = [probe.cleanup.parse(m,'COMPLETE') for m in markers if m.startswith(probe.cleanup.PREFIX+'COMPLETE ')]
                 if self.barriers[self.step] not in {(v['task'],v['generation']) for v in completed}: return False
                 self.observed_barriers.add(self.step)
+            if self.step in self.retirements:
+                retired=[probe.parse(m,'RETIRE') for m in markers if m.startswith('POOLEOS:APPS RETIRE ')]
+                if self.retirements[self.step] not in {(v['task'],v['generation']) for v in retired}: return False
+                self.observed_retirements.add(self.step)
             byte, response = self.case.steps[self.step]
             if self.sock.send(byte) == 1:
                 self.sent += 1; self.step += 1; self.expected += response
@@ -63,28 +79,34 @@ def main():
     parser.add_argument('--work-dir', type=Path, required=True)
     parser.add_argument('--program-dir', type=Path, required=True)
     parser.add_argument('--deferred-cleanup', action='store_true')
+    parser.add_argument('--file-controls', action='store_true')
     args = parser.parse_args(); work, programs = args.work_dir.resolve(), args.program_dir.resolve()
+    if args.deferred_cleanup and args.file_controls: parser.error('separate control profiles required')
     if not work.is_relative_to(ROOT/'outputs') or not programs.is_relative_to(ROOT/'outputs'):
         parser.error('workspace output paths required')
     storage = require_space(work); work.mkdir(parents=True, exist_ok=False)
     before = source.source_bindings()
-    report = dict(cycle=284 if args.deferred_cleanup else 283,
-                  contract_id='PAPPRECOVERY1' if args.deferred_cleanup else 'PAPPSESSION1',
+    report = dict(cycle=285 if args.file_controls else 284 if args.deferred_cleanup else 283,
+                  contract_id='PFILECONTROL1' if args.file_controls else 'PAPPRECOVERY1' if args.deferred_cleanup else 'PAPPSESSION1',
+                  file_controls=args.file_controls,
                   deferred_cleanup=args.deferred_cleanup, status='fail', source_bindings=before,
                   storage_preflight=storage, guest_bound_seconds=240, guest_runs=[], useful_applications=0,
                   bundled_files=False, iso_built=False, production_ready=False)
     try:
         cargo, _, env = shared._toolchain(ROOT/'.toolchains/rust-1.97.0')
-        report['program_build'] = program_inputs(programs, env, probe.PROGRAMS)
+        selected=[('PooleFileProbe' if args.file_controls and key=='TEXT' else name,key) for name,key in probe.PROGRAMS]
+        report['program_build'] = program_inputs(programs, env, selected)
         lock, profile = shared.tier0.validate_contracts(ROOT)
         qemu = shared.tier0._require_workspace_tool_path(shared.tier0.DEFAULT_QEMU_ROOT, ROOT)
         shared.tier0.verify_local_launch_runtime(lock, qemu, ROOT)
         print('Build two application kernels and a stale-file-grant control', flush=True)
         extra = ('development-shell-deferred-cleanup',) if args.deferred_cleanup else ()
-        linked, kernel, plan = shared.entry._build_product(cargo, env, work/'kernel1', features=('development-applications',)+extra)
-        linked2, kernel2, _ = shared.entry._build_product(cargo, env, work/'kernel2', features=('development-applications',)+extra)
+        normal_features=('development-file-controls',) if args.file_controls else ('development-applications',)+extra
+        bad_features=('development-file-controls','development-applications-bad-file') if args.file_controls else ('development-applications-bad-file',)+extra
+        linked, kernel, plan = shared.entry._build_product(cargo, env, work/'kernel1', features=normal_features)
+        linked2, kernel2, _ = shared.entry._build_product(cargo, env, work/'kernel2', features=normal_features)
         if (linked,kernel) != (linked2,kernel2): raise ValueError('independent kernel mismatch')
-        bad_linked, bad, bad_plan = shared.entry._build_product(cargo, env, work/'bad-kernel', features=('development-applications-bad-file',)+extra)
+        bad_linked, bad, bad_plan = shared.entry._build_product(cargo, env, work/'bad-kernel', features=bad_features)
         if bad == kernel: raise ValueError('stale grant control is not distinct')
         report['independent_kernel_builds_equal'] = True
         report['kernels'] = {}
@@ -103,12 +125,13 @@ def main():
             inspected = shared.load.inspect_media_bytes(media)
             path = work/f'{name}.img'; path.write_bytes(media)
             run_dir = work/name; run_dir.mkdir()
-            case = probe.scenario(secrets.token_hex(8), bad_file=bad_file)
-            interaction = Interaction(case, args.deferred_cleanup)
+            scenario=probe.file_control_scenario if args.file_controls else probe.scenario
+            case = scenario(secrets.token_hex(8), bad_file=bad_file)
+            interaction = Interaction(case, args.deferred_cleanup, args.file_controls)
             print(f'Native application session {name}: frozen 240-second bound', flush=True)
             try:
                 run, _, handoff = shared.boot._execute_once(name, lock, profile, qemu, path, run_dir, 240,
-                    marker_validator=lambda m: probe.validate_markers(m, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup),
+                    marker_validator=lambda m: probe.validate_markers(m, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls),
                     marker_extractor=native_session.extract_markers, hpet_msi=True, pause_on_completion=True,
                     console_port=interaction.port, console_poll=interaction.poll)
             finally:
@@ -119,22 +142,24 @@ def main():
             _, application = native_console.split_output(output)
             if sent != case.sent or application != case.expected: raise ValueError('inexact application interaction')
             if interaction.observed_barriers != set(interaction.barriers): raise ValueError('cleanup barriers not observed')
+            if interaction.observed_retirements != set(interaction.retirements): raise ValueError('retirement barriers not observed')
             run['interaction'] = dict(nonce=case.nonce, input_hex=sent.hex(), output_hex=output.hex(),
                 input_sha256=shared.sha(sent), output_sha256=shared.sha(output), exact_interaction=True,
                 cleanup_barriers_observed=len(interaction.observed_barriers),
+                retirement_barriers_observed=len(interaction.observed_retirements),
                 kernel_evidence_from_com2=False)
-            if run['marker_summary']['program_bytes'] != [report['program_build']['programs'][n]['code_bytes'] for n,_ in probe.PROGRAMS]:
+            if run['marker_summary']['program_bytes'] != [report['program_build']['programs'][n]['code_bytes'] for n,_ in selected]:
                 raise ValueError('observed program sizes differ')
             prefix = run['marker_summary']['transfer_prefix']
             shared.load.validate_oracle_binding(prefix['boot_prefix'], inspected, run['pbp1_transcript'])
             run['transcript_binding'] = shared.transfer.validate_transcript_binding(prefix, run['pbp1_transcript'])
             run['independent_revalidation'] = shared.transfer.validate_revalidation_binding(prefix, handoff, retained)
-            run['hostile_marker_cases_rejected'] = probe.negative_controls(run['markers'], bad_file=bad_file, deferred_cleanup=args.deferred_cleanup)
+            run['hostile_marker_cases_rejected'] = probe.negative_controls(run['markers'], bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls)
             run.update(media_sha256=shared.sha(media), kernel_sha256=shared.sha(image))
             report['guest_runs'].append(run)
-        if before != source.source_bindings() or program_inputs(programs, env, probe.PROGRAMS) != report['program_build']:
+        if before != source.source_bindings() or program_inputs(programs, env, selected) != report['program_build']:
             raise ValueError('source or input drift')
-        report.update(status='pass', bundled_files=True, useful_applications=2)
+        report.update(status='pass', bundled_files=True, useful_applications=1 if args.file_controls else 2)
     except Exception as error:
         report['failure'] = f'{type(error).__name__}: {error}'; print(report['failure'], flush=True)
     report['source_unchanged'] = before == source.source_bindings()

@@ -1,13 +1,51 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-13
-Plan version: 2.187.0-live-parent-app-recovery
-Roadmap cycle: PooleOS Cycle 284
+Plan version: 2.188.0-native-file-controls
+Roadmap cycle: PooleOS Cycle 285
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 285: Native File Controls
+
+Three fresh guests execute a separate, one-page PooleFileProbe under the opt-in
+file-control profile. Each of two generations sends 13 untracked malformed
+messages, validates 13 tracked error replies and 13 valid reads, then exits while
+its final request remains outstanding. Kernel-only, generation-checked snapshots
+observe six queued requests and their detached owners. Zero claimed-request
+deaths were observed; that native case remains open. The probe is diagnostic,
+not PooleText and not a useful-application acceptance substitute.
+
+Three ordinary application guests and two default boots plus unsigned trust denial
+also pass. Normal text/numeric results, restart, contained fault, and stale-file
+denial remain qualified. All 17 prior programs are byte-identical; 18 independently
+compiled ELF/code pairs match. Host tests: 553 default and 572 file-control kernel
+tests per debug/release profile; 132 user tests per profile; 26 ownership doctests;
+16 application-oracle tests. Controls/apps use 121/208 pages and 36 stack pages;
+default remains 208 pages. No capacity, linker or relocation gate was relaxed.
+The repaired focused evidence/roadmap set passes 304 tests; full canonical
+qualification remains pending and final staged checks follow documentation.
+[Evidence](checkpoints/cycle285-native-file-controls.md).
+
+Retained failures: two compiler-import candidates, a format-check rejection, and
+a first guest rejected by a launch-order assumption in the oracle. In-place wire
+construction and checked arithmetic fix compilation; exact scenario-specific
+process slots fix the oracle. Three fresh reruns pass the original 240-second
+bound. Historical receipts stay unchanged. Two old failed build trees were copied
+and independently hash-checked before workspace removal; shared host cache and
+owner files were untouched. Host storage remains low and needs further verified
+retention before large builds.
+
+Next: cleanup exhaustion, multiple pending owners and waiting/pending/claimed
+request interleavings, then actual optical ISO packaging, fresh boots and sustained
+real input through a documented VM launcher. Current COM2 interaction is not local
+keyboard/display. Cycle284 deferred-cleanup evidence is historical, not replayed
+this cycle. Full microkernel, PooleGlyph/PDC and accessible PooleGlass continue
+after the ISO. No phase/flag closes or production/merge gate is waived. Inventories:
+1459 Python tests, 747 architecture bindings, 915 execution inputs.
 
 ## Cycle 284: Live-Parent Application Recovery
 
