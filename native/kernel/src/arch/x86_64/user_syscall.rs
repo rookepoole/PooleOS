@@ -257,6 +257,9 @@ pub(super) fn dispatch_owned(
         frame.rax, frame.rdi, frame.rsi, frame.rdx, frame.r10, frame.r8, frame.r9,
     ) {
         Ok(Request::Version) => (Status::Ok, syscall::VERSION),
+        Ok(Request::ProcessCompletion(handle)) => caller.map_or((Status::Denied, 0), |caller| {
+            super::user_ipc::process_completion(caller, handle)
+        }),
         Ok(Request::Launch { handle, sequence }) => caller.map_or((Status::Denied, 0), |caller| {
             super::user_ipc::request_launch(caller, handle, sequence)
         }),

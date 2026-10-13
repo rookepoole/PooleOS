@@ -2,6 +2,7 @@
 use super::*;
 
 pub const CONTRACT_ID: &str = "PPROC1";
+pub const COMPLETION_CONTRACT_ID: &str = "PCOMP1";
 pub const LEASES: usize = 4;
 pub const PER_OWNER: usize = 2;
 const TAG: u64 = 5 << 16;
@@ -26,6 +27,7 @@ pub(super) struct Lease {
     target: Caller,
     rights: Rights,
     state: State,
+    completion: Option<u64>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -98,6 +100,7 @@ impl Space {
                 target,
                 rights,
                 state: State::Attached,
+                completion: None,
             }),
         };
         Ok((u64::from(generation) << 32) | TAG | (slot + 1) as u64)
@@ -204,6 +207,86 @@ impl Space {
         Ok(())
     }
 
+    /// PCOMP1: Again/1..4 = attached, pending, claimed, detached. None of these
+    /// states proves runnability or reclamation. Ok carries a terminal reason.
+    pub fn process_completion(&self, caller: Caller, handle: u64) -> (Status, u64) {
+        let Ok(i) = self.process_slot(caller, handle) else {
+            return (Status::Denied, 0);
+        };
+        let lease = self.processes[i].value.expect("resolved lease");
+        if let Some(completion) = lease.completion {
+            return (Status::Ok, completion);
+        }
+        let state = if !self.process_attached(lease.target) {
+            4
+        } else {
+            match lease.state {
+                State::Attached => 1,
+                State::Pending => 2,
+                State::Claimed => 3,
+                State::Revoked => 4,
+            }
+        };
+        (Status::Again, state)
+    }
+
+    /// Trusted quiescent dispatcher only, after successful physical cleanup and
+    /// scheduler teardown. Detachment alone must never call this function.
+    /// This checks the observed outcome and exact retained target identities;
+    /// cleanup ownership remains the dispatcher's obligation, not a user claim.
+    pub fn publish_process_completion(
+        &mut self,
+        outcome: crate::user_entry::task::Outcome,
+        scheduler: &crate::scheduler::Scheduler,
+    ) -> Result<usize, Error> {
+        use crate::user_entry::task::Reason;
+        let slot = usize::from(outcome.id.slot);
+        if slot >= TASKS
+            || self.tables[slot].caller.is_some()
+            || outcome.root == 0
+            || outcome.root & 4095 != 0
+            || TaskId::new(outcome.id.slot, outcome.id.generation).is_err()
+            || outcome.validate(outcome.id, outcome.root).is_err()
+        {
+            return Err(Error::Identity);
+        }
+        let id = crate::scheduler::TaskId::new(outcome.id.slot, outcome.id.generation)
+            .map_err(|_| Error::Identity)?;
+        if !scheduler
+            .task_snapshot(id)
+            .is_ok_and(|s| s.state == crate::scheduler::TaskState::Dead)
+        {
+            return Err(Error::Denied);
+        }
+        let value = match outcome.reason {
+            Reason::Exit(code) => (1 << 32) | u64::from(code),
+            Reason::Fault(fault) => (2 << 32) | fault.vector,
+            Reason::InvalidReturn { violation, .. } => (3 << 32) | violation as u64,
+            Reason::Cancelled => 4 << 32,
+            Reason::CallLimit => 5 << 32,
+            Reason::CallCounterExhausted => 6 << 32,
+            Reason::Watchdog => 7 << 32,
+        };
+        // Validate the whole fan-out before publishing to any inspector.
+        for lease in self.processes.iter().filter_map(|p| p.value) {
+            if lease.target.id == outcome.id
+                && (lease.target.root != outcome.root
+                    || lease.state != State::Revoked
+                    || lease.completion.is_some())
+            {
+                return Err(Error::Denied);
+            }
+        }
+        let mut published = 0;
+        for lease in self.processes.iter_mut().filter_map(|p| p.value.as_mut()) {
+            if lease.target.id == outcome.id {
+                lease.completion = Some(value);
+                published += 1;
+            }
+        }
+        Ok(published)
+    }
+
     pub(super) fn retire_processes(&mut self, task: TaskId) {
         for p in &mut self.processes {
             if let Some(l) = &mut p.value {
@@ -219,3 +302,6 @@ impl Space {
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod completion_tests;

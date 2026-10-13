@@ -1,15 +1,38 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-10-11
-Plan version: 2.173.0-native-command-shell
-Roadmap cycle: PooleOS Cycle 270
+Status date: 2026-10-13
+Plan version: 2.174.0-native-process-completion
+Roadmap cycle: PooleOS Cycle 271
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 270: Native Command Shell
+## Cycle 271: Native Process Completion
+
+PCOMP1 adds generation-bound terminal results and separates detached attachment
+from completed cleanup. The real user-space supervisor waits for completion before
+restart; the kernel launch capability also refuses premature supersession. Two
+normal native boots with deliberately withheld results and a denied-owner boot
+pass.496 kernel tests and60 user tests pass in each profile;55 focused Python tests
+pass. Seven programs reproduce, with six unchanged including PooleShell.
+[Evidence, failure history and remaining work](checkpoints/cycle271-native-process-completion.md).
+
+This is a lifecycle prerequisite, not shell application integration or an ISO.
+Next: connect shell launch/stop/status, retain cleanup ownership on failures, test
+native stop/fault completion, then read-only bundled files and two separate useful
+apps before optical ISO acceptance. Review multipage admission before command
+growth. Full robust microkernel development continues after the usable ISO.
+
+Normal completion kernel111/208 pages; denied109; freshly built default207, with
+only24 RELRO padding bytes.36 guarded stack pages unchanged; full stack proof open.
+No phase/flag closes:40 phases301 subphases8996 requirements59 additions98 flags43
+open20 gap groups.1411 Python tests and649 architecture bindings are inventories,
+not full qualification. Canonical gates and three tracked readiness failures still
+block main. The default profile and shell interaction were not re-booted this cycle.
+
+## Historical Cycle 270: Native Command Shell
 
 USI-4 now has a real isolated serial PooleShell using the user-space console
 service. Typed help/version/echo/exit, line editing, CRLF, interrupts, invalid and

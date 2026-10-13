@@ -1,6 +1,6 @@
 # Native Process Launch Authority
 
-PLAUNCH1, Cycle268. Development-only bounded launch mechanism and separately
+PLAUNCH1, introduced Cycle268, extended by PCOMP1 in Cycle271. Bounded launch and separately
 compiled user-space policy. Complements PPROC1; not a general exec/service manager.
 
 ## Authority And ABI
@@ -13,7 +13,9 @@ program ID, task ID, pointer or requested code buffer never confers authority.
 PSABI1 call19 takes a launch handle and nonzero u32 operation sequence; remaining
 arguments must be zero. Same-sequence calls poll the same operation, including
 after child death. Only the exact next sequence can start another operation after
-completion/failure and absent child attachment. Superseding a completed operation
+completion/failure and absent child attachment. A previously admitted child also
+requires a published PCOMP1 terminal result; detachment alone remains Again.
+Superseding a completed operation
 releases its already-revoked process handle. Sequence exhaustion rejects.
 
 States: Idle -> Pending -> Claimed -> Complete(process handle) or Failed. A
@@ -40,9 +42,11 @@ not evidence of page reclamation. General retry/quarantine policy remains open.
 PooleSupervisor is independently compiled, not kernel policy or an assembly-only
 test controller. PSTART1 arguments supply a typed launch handle and lifetime limit
 1..16. Each policy step makes at most one call. It polls call19, monitors the
-returned process attachment using call17, and requests the next sequence only
-after revocation. Policy completion exits0; transport denial exits170. It currently
-has no interactive stop command, exit-reason service or general orphan policy.
+returned process using call20, and requests the next sequence only after a valid
+terminal result. The fixed diagnostic expects final Exit100 and then exits0;
+transport denial exits170 and an unexpected terminal reason exits172. It currently
+has no interactive stop command or general orphan policy. See
+[completion semantics](native-process-completion.md).
 
 The native adapter qualifies a fixed two-lifetime worker and independent survivor.
 The first child is prepared but never attached/activated before the user request;
@@ -61,7 +65,8 @@ rollback and retained failed claims. Native guests qualify two starts/retirement
 invalid authority, prepared cancellation and continued independent execution.
 They do not prove every owner-death/cleanup race or injected native allocation failure.
 
-Kernel image208/208 pages,36-page guarded stack; default RELRO padding152 bytes.
+Historical Cycle268 image208/208 pages. Cycle271 completion profile111/208,
+fresh default build207/208,36-page guarded stack; default RELRO padding24 bytes.
 Capacity/profile review is mandatory before growth. Keep complete call-chain stack
 proof, PMM-record limits, efficient idle, signed executable trust/loading, truthful
 exit results and retained cleanup recovery open. Next integrate real shell/input,

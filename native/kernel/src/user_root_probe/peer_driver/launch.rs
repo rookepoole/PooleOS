@@ -124,6 +124,8 @@ pub fn run(
     let mut survivor_after_restart = 0u64;
     let mut owner_exit = u32::MAX;
     let mut prepared_cancelled = 0u64;
+    let mut pending_completion = None;
+    let mut held_dispatches = 0u64;
     for _ in 0..512 {
         let id = checked!(scheduler.dispatch(cpu));
         let i = usize::from(id.slot);
@@ -169,6 +171,11 @@ pub fn run(
                     stop(32004, serial, debugcon);
                 }
                 if i == 0 {
+                    if pending_completion.is_some() {
+                        stop(32019, serial, debugcon);
+                    }
+                    pending_completion = Some(outcome);
+                    held_dispatches = 0;
                     retired += 1;
                     if outcome.syscalls != 257 || retired != launched {
                         stop(32005, serial, debugcon);
@@ -220,6 +227,36 @@ pub fn run(
                 }
             }
             Event::Waiting { .. } => stop(32010, serial, debugcon),
+        }
+        if i == 1 && pending_completion.is_some() {
+            // Let the real CPL3 owner poll a detached but unpublished child.
+            // A timer-preempted slice is not yet a full syscall-budget sample.
+            held_dispatches += 1;
+            if let Event::BudgetYield { .. } = slice.event {
+                let outcome = pending_completion.take().expect("pending completion");
+                let published = checked!(unsafe {
+                    arch::x86_64::user_ipc::with_waits(|s| {
+                        s.publish_process_completion(outcome, &scheduler)
+                    })
+                });
+                if published != 1 {
+                    stop(32020, serial, debugcon);
+                }
+                record(
+                    serial,
+                    debugcon,
+                    "COMPLETED",
+                    &[
+                        ("sequence", u64::from(retired)),
+                        ("child_generation", u64::from(outcome.id.generation)),
+                        ("outcome_word", (1 << 32) | 100),
+                        ("observers", published as u64),
+                        ("held_dispatches", held_dispatches),
+                    ],
+                );
+            } else if dead[1] {
+                stop(32021, serial, debugcon);
+            }
         }
         if unsafe { arch::x86_64::read_cr3() } != core.page_table_root_physical
             || arch::x86_64::user::active()
@@ -318,6 +355,7 @@ pub fn run(
     let dispatches = u64::from(summary.dispatch_count);
     let writes = arch::x86_64::user_root_write_count() - before;
     if !dead.iter().all(|v| *v)
+        || pending_completion.is_some()
         || calls[2] != 8193
         || calls[0] != if bad { 0 } else { 514 }
         || ticks[1] == 0

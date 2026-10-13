@@ -1,10 +1,10 @@
-"""Independent user supervisor and kernel builds, then three fresh PLAUNCH1 guests."""
+"""Independent supervisor/kernel builds; three PLAUNCH1 guests with PCOMP1 completion."""
 from __future__ import annotations
 import argparse,json,sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
-from runtime import native_process_launch as probe, native_user_program
+from runtime import native_process_completion as probe, native_user_program
 from tools import qualify_native_console_ipc as shared, qualify_native_user_entry as source
 from tools.qualify_native_user_programs import bindings as program_bindings
 from tools.native_build_space import require_space
@@ -32,7 +32,7 @@ def main():
     args=p.parse_args();work=args.work_dir.resolve();programs=args.program_dir.resolve()
     if not work.is_relative_to(ROOT/'outputs') or not programs.is_relative_to(ROOT/'outputs'):p.error('workspace outputs required')
     storage=require_space(work);work.mkdir(parents=True,exist_ok=False);before=source.source_bindings()
-    report=dict(cycle=268,contract_id='PLAUNCH1',status='fail',source_bindings=before,storage_preflight=storage,guest_bound_seconds=120,guest_runs=[],iso_built=False,production_ready=False)
+    report=dict(cycle=271,contract_id='PCOMP1',launch_contract_id='PLAUNCH1',status='fail',source_bindings=before,storage_preflight=storage,guest_bound_seconds=120,guest_runs=[],iso_built=False,production_ready=False)
     try:
         cargo,_,env=shared._toolchain(ROOT/'.toolchains/rust-1.97.0')
         report['program_build'],code=program_input(programs,env)

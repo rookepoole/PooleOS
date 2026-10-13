@@ -45,6 +45,7 @@ pub enum Status {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Request {
+    ProcessCompletion(u64),
     Launch {
         handle: u64,
         sequence: u32,
@@ -261,6 +262,8 @@ pub fn request(
             })
         }
         19 => Err(Status::Arguments),
+        20 if destination == 0 && bytes == 0 => Ok(Request::ProcessCompletion(source)),
+        20 => Err(Status::Arguments),
         _ => Err(Status::Unknown),
     }
 }

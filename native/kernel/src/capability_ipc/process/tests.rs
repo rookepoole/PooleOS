@@ -4,10 +4,10 @@ use crate::user_entry::{
     syscall::{Request, request},
 };
 
-fn id(slot: u8) -> TaskId {
+pub(super) fn id(slot: u8) -> TaskId {
     TaskId::new(slot, 1).unwrap()
 }
-fn image(slot: u8) -> ImageAdmission {
+pub(super) fn image(slot: u8) -> ImageAdmission {
     ImageAdmission {
         root_physical: 0x100000 + u64::from(slot) * 4096,
         root_generation: 1,
@@ -22,17 +22,17 @@ fn image(slot: u8) -> ImageAdmission {
         },
     }
 }
-fn caller(slot: u8) -> Caller {
+pub(super) fn caller(slot: u8) -> Caller {
     Caller::new(id(slot), image(slot))
 }
-fn space() -> Space {
+pub(super) fn space() -> Space {
     let mut s = Space::new();
     for i in 0..TASKS {
         s.attach(id(i as u8), image(i as u8)).unwrap();
     }
     s
 }
-fn grant(s: &mut Space) -> u64 {
+pub(super) fn grant(s: &mut Space) -> u64 {
     s.grant_process(id(0), id(1), Rights::InspectTerminate)
         .unwrap()
 }
@@ -55,7 +55,7 @@ fn abi_has_no_user_pointer_task_id_or_extra_argument() {
         }
         assert_eq!(request(number, 2, 123, 0, 0, 0, 0), Err(Status::Version));
     }
-    assert_eq!(request(20, 1, 0, 0, 0, 0, 0), Err(Status::Unknown));
+    assert_eq!(request(21, 1, 0, 0, 0, 0, 0), Err(Status::Unknown));
 }
 
 #[test]

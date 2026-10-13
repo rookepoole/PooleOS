@@ -173,7 +173,20 @@ fn atomic_child_admission_returns_owned_handle_and_same_sequence_never_restarts(
     for _ in 0..3 {
         assert_eq!(s.request_launch(c, h, 1), (Status::Ok, child));
         assert!(s.claim_launch().is_none());
+        assert_eq!(s.request_launch(c, h, 2), (Status::Again, 0));
     }
+    assert_eq!(
+        s.publish_process_completion(
+            crate::user_entry::task::Outcome {
+                id: id(1, 1),
+                root: image(1).root_physical,
+                reason: crate::user_entry::task::Reason::Exit(100),
+                syscalls: 257,
+            },
+            &q
+        ),
+        Ok(1)
+    );
     let p2 = claim(&mut s, c, h, 2);
     assert_eq!(s.process_operation(c, child, true), (Status::Denied, 0));
     let r2 = s.admit_launch(&p2, &mut q, member(1, 2), &[]).unwrap();

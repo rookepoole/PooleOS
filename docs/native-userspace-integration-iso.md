@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 270, 2026-10-11. No new ISO exists yet.
+Status: implementation started, Cycle 271, 2026-10-13. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -45,13 +45,20 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | --- | --- | --- | --- |
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
-| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle268 partial: bounded user-space supervisor starts/restarts a fixed worker through atomic generation-bound admission; stop and six-process console regressions pass. General loading/trust, exit/cleanup recovery, owner-death policy and efficient idle remain |
+| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle271 partial: bounded supervisor consumes generation-bound terminal results and waits through withheld completion before restart. Native stop/fault completion, general loading/trust, cleanup retry, owner-death policy and efficient idle remain |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle270 partial: real serial shell commands/editing and authenticated console-peer death pass; shell lifecycle/status, files, two separate apps and display/input integration remain |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
 ### Immediate Next Move
 
-Current: [Cycle270 native shell](checkpoints/cycle270-native-command-shell.md).
+Current: [Cycle271 process completion](checkpoints/cycle271-native-process-completion.md).
+PCOMP1 distinguishes detached from complete; user-space supervision and kernel
+launch supersession now wait for real terminal results. Two normal fresh boots
+with withheld results and a denied-owner boot pass. Interactive shell lifecycle,
+retained cleanup retry and native fault/stop completion remain the next integration
+work. Default kernel builds at207/208 pages; normal completion profile111.
+
+Historical: [Cycle270 native shell](checkpoints/cycle270-native-command-shell.md).
 The3569-byte PooleShell runs as an isolated client of the console service. Three
 fresh guests prove actual commands, editing, clean close and denied-peer handling.
 Seven programs reproduce independently; six existing binaries are unchanged.

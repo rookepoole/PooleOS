@@ -24,6 +24,12 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle271-native-process-completion.md",
+    "docs/native-process-completion.md",
+    "runs/native-process-completion-readiness.json",
+    "runtime/native_process_completion.py",
+    "tests/test_native_process_completion.py",
+    "native/kernel/src/capability_ipc/process/completion_tests.rs",
     "docs/checkpoints/cycle270-native-command-shell.md",
     "docs/native-shell.md",
     "runs/native-shell-readiness.json",

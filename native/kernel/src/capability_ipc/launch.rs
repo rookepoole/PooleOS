@@ -147,8 +147,10 @@ impl Space {
             return (Status::Again, 0);
         }
         if let State::Complete(h) = l.state {
-            if self.process_operation(caller, h, false) != (Status::Revoked, 0) {
-                return (Status::Denied, 0);
+            match self.process_completion(caller, h).0 {
+                Status::Ok => {}
+                Status::Again => return (Status::Again, 0),
+                _ => return (Status::Denied, 0),
             }
             self.revoke_process(caller.id, h)
                 .expect("revoked launch child");
