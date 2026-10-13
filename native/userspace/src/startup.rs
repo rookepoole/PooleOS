@@ -147,6 +147,65 @@ pub fn control_shell(bytes: &[u8], version: u64) -> Result<(ConsoleIpcBoot, [u64
     ))
 }
 
+#[derive(Clone, Copy)]
+pub struct FileShellBoot {
+    pub console: ConsoleIpcBoot,
+    pub factories: [u64; 2],
+    pub endpoint: u64,
+    pub peer: u64,
+}
+#[inline(always)]
+fn peer(bytes: &[u8]) -> Result<u64, Error> {
+    let value = handle(bytes)?;
+    crate::console_ipc::Peer::from_packed(value).map_err(|_| Error::Handle)?;
+    Ok(value)
+}
+#[inline(always)]
+pub fn file_shell(bytes: &[u8], version: u64) -> Result<FileShellBoot, Error> {
+    let args = arguments::<8>(bytes, version)?;
+    if args[0] != b"file-shell" {
+        return Err(Error::Role);
+    }
+    let receive = handle(args[1])?;
+    let send = handle(args[2])?;
+    let endpoint = handle(args[6])?;
+    if receive == send || endpoint == receive || endpoint == send {
+        return Err(Error::Handle);
+    }
+    Ok(FileShellBoot {
+        console: ConsoleIpcBoot {
+            port: None,
+            receive,
+            send,
+            peer: crate::console_ipc::Peer::from_packed(peer(args[3])?)
+                .map_err(|_| Error::Handle)?,
+        },
+        factories: [handle(args[4])?, handle(args[5])?],
+        endpoint,
+        peer: peer(args[7])?,
+    })
+}
+#[inline(always)]
+pub fn file_init(bytes: &[u8], version: u64) -> Result<(u64, u64), Error> {
+    let args = arguments::<3>(bytes, version)?;
+    if args[0] != b"file-init" {
+        return Err(Error::Role);
+    }
+    Ok((handle(args[1])?, peer(args[2])?))
+}
+#[inline(always)]
+pub fn file_server(bytes: &[u8], version: u64) -> Result<(u64, [u64; 2]), Error> {
+    let args = arguments::<4>(bytes, version)?;
+    if args[0] != b"file-service" {
+        return Err(Error::Role);
+    }
+    let peers = [peer(args[2])?, peer(args[3])?];
+    if peers[0] == peers[1] {
+        return Err(Error::Handle);
+    }
+    Ok((handle(args[1])?, peers))
+}
+
 #[inline(always)]
 pub fn diagnostic(bytes: &[u8], version: u64) -> Result<bool, Error> {
     match arguments::<1>(bytes, version)?[0] {
@@ -229,6 +288,63 @@ mod tests {
     }
     fn valid() -> Vec<u8> {
         block([b"init", b"0000000100010001", b"0000000100010002"])
+    }
+    #[test]
+    fn file_roles_require_exact_counts_peers_and_separate_channels() {
+        let args: [&[u8]; 8] = [
+            b"file-shell",
+            b"0000000100010001",
+            b"0000000100010002",
+            b"0000000100000002",
+            b"0000000100060001",
+            b"0000000100060002",
+            b"0000000100010003",
+            b"0000000100000001",
+        ];
+        let boot = file_shell(&block(args), 1).unwrap();
+        assert_eq!(boot.endpoint, 0x100010003);
+        assert_eq!(boot.peer, 0x100000001);
+        for index in [1, 2] {
+            let mut bad = args;
+            bad[6] = bad[index];
+            assert!(file_shell(&block(bad), 1).is_err());
+        }
+        let mut bad = args;
+        bad[7] = b"0000000000000001";
+        assert!(file_shell(&block(bad), 1).is_err());
+        assert!(file_shell(&block(args), 2).is_err());
+        assert!(file_shell(&block([args[0], args[1]]), 1).is_err());
+        assert_eq!(
+            file_init(
+                &block([b"file-init", b"0000000100010001", b"0000000100000001"]),
+                1
+            ),
+            Ok((0x100010001, 0x100000001))
+        );
+        assert_eq!(
+            file_server(
+                &block([
+                    b"file-service",
+                    b"0000000100010001",
+                    b"0000000100000000",
+                    b"0000000100000003"
+                ]),
+                1
+            ),
+            Ok((0x100010001, [0x100000000, 0x100000003]))
+        );
+        assert!(
+            file_server(
+                &block([
+                    b"file-service",
+                    b"0000000100010001",
+                    b"0000000100000000",
+                    b"0000000100000000"
+                ]),
+                1
+            )
+            .is_err()
+        );
     }
     #[test]
     fn control_shell_has_exact_separate_console_and_factory_arguments() {

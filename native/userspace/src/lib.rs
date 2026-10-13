@@ -2,6 +2,7 @@
 
 pub mod console;
 pub mod console_ipc;
+pub mod files;
 pub mod protocol;
 pub mod service;
 pub mod shell;

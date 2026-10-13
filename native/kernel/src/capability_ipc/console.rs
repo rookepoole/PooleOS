@@ -26,6 +26,45 @@ pub trait BytePorts {
 }
 
 impl Space {
+    /// File readers receive only SEND authority. Only the file service owns its
+    /// endpoint; only the console service holds the existing device lease.
+    pub fn admit_file_session(
+        &mut self,
+        scheduler: &mut crate::scheduler::Scheduler,
+        members: &[admission::Member; 4],
+    ) -> Result<admission::Admitted, admission::Error> {
+        use admission::Step;
+        self.admit(
+            scheduler,
+            members,
+            &[
+                Step::Endpoint { member: 1 },
+                Step::Grant {
+                    endpoint: 0,
+                    target: members[0].id,
+                    rights: Rights::SEND,
+                },
+                Step::Endpoint { member: 2 },
+                Step::Endpoint { member: 3 },
+                Step::Grant {
+                    endpoint: 3,
+                    target: members[2].id,
+                    rights: Rights::SEND,
+                },
+                Step::Grant {
+                    endpoint: 2,
+                    target: members[3].id,
+                    rights: Rights::SEND,
+                },
+                Step::Grant {
+                    endpoint: 0,
+                    target: members[3].id,
+                    rights: Rights::SEND,
+                },
+                Step::Console { member: 2 },
+            ],
+        )
+    }
     /// Trusted four-image launch: two separate endpoint pairs, one device owner.
     /// No caller may dispatch until this transaction and hardware quiescence pass.
     pub fn admit_console_session(

@@ -95,13 +95,29 @@ pub unsafe fn diagnostic_boot(
     let block = unsafe { core::slice::from_raw_parts(address as *const u8, bytes as usize) };
     startup::diagnostic(block, version)
 }
-struct ConsoleCalls;
+pub struct ConsoleCalls;
 impl crate::console_ipc::rpc::Calls for ConsoleCalls {
     #[inline(always)]
     fn invoke(&mut self, number: u64, handle: u64, wire: &mut [u8]) -> (u64, u64) {
         // SAFETY: each bounded wire stays live and exclusively borrowed during the kernel copy.
         unsafe { call(number, handle, wire.as_mut_ptr() as u64, wire.len() as u64) }
     }
+}
+
+/// SAFETY: live kernel-owned PSTART1 entry block, as for boot().
+#[inline(always)]
+pub unsafe fn file_block<'a>(address: u64, bytes: u64) -> Result<&'a [u8], startup::Error> {
+    if address != 0x40003000 || !(96..=512).contains(&bytes) {
+        return Err(startup::Error::Header);
+    }
+    // SAFETY: caller holds the mapped startup stack for the returned borrow.
+    Ok(unsafe { core::slice::from_raw_parts(address as *const u8, bytes as usize) })
+}
+#[inline(always)]
+pub fn console_client(boot: startup::ConsoleIpcBoot) -> ConsoleIpc {
+    ConsoleIpc(crate::console_ipc::rpc::Transport::new(
+        boot.send, boot.peer, false,
+    ))
 }
 /// SAFETY: live kernel-owned PSTART1 block, as for boot().
 #[inline(always)]

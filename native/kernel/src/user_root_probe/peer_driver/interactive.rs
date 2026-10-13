@@ -36,7 +36,8 @@ pub(crate) fn run(
     let before = arch::x86_64::user_root_write_count();
     let programs =
         [INIT, COUNTER, CONSOLE, SHELL, WORKER, WORKER].map(|code| checked!(Program::new(code, 0)));
-    let args = [
+    #[allow(unused_mut)]
+    let mut args = [
         checked!(Arguments::new(&[
             b"init",
             b"0000000100010001",
@@ -69,6 +70,34 @@ pub(crate) fn run(
         checked!(Arguments::new(&[b"worker"])),
         checked!(Arguments::new(&[b"fault"])),
     ];
+    #[cfg(feature = "development-files")]
+    {
+        args[0] = checked!(Arguments::new(&[
+            b"file-init",
+            b"0000000100010001",
+            b"0000000100000001"
+        ]));
+        args[1] = checked!(Arguments::new(&[
+            b"file-service",
+            b"0000000100010001",
+            b"0000000100000000",
+            b"0000000100000003"
+        ]));
+        args[3] = checked!(Arguments::new(&[
+            b"file-shell",
+            b"0000000100010001",
+            b"0000000100010002",
+            b"0000000100000002",
+            b"0000000100060001",
+            b"0000000100060002",
+            if cfg!(feature = "development-files-bad-handle") {
+                b"0000000200010003"
+            } else {
+                b"0000000100010003"
+            },
+            b"0000000100000001",
+        ]));
+    }
     // Fill one retained owner at a time; neither from_fn nor a six-value literal
     // may keep a second full image array live during nested construction.
     let mut storage: [Option<Peer>; 6] = [const { None }; 6];
@@ -105,12 +134,14 @@ pub(crate) fn run(
     }
     let mut scheduler = checked!(scheduler::Scheduler::new(1));
     let cpu = checked!(scheduler::CpuId::new(0));
+    #[cfg(not(feature = "development-files"))]
     let grants = checked!(unsafe {
         arch::x86_64::user_ipc::bootstrap_console_ipc(
             core::array::from_fn(|i| (peers[i].id, peers[i].admission)),
             &mut scheduler,
         )
     });
+    #[cfg(not(feature = "development-files"))]
     if grants
         != [
             0x100010001,
@@ -125,6 +156,46 @@ pub(crate) fn run(
         ]
     {
         stop(34002, serial, debugcon);
+    }
+    #[cfg(feature = "development-files")]
+    {
+        let grants = checked!(unsafe {
+            arch::x86_64::user_ipc::bootstrap_files(
+                core::array::from_fn(|i| (peers[i].id, peers[i].admission)),
+                &mut scheduler,
+            )
+        });
+        if grants
+            != [
+                0x100010001,
+                0x100010001,
+                0x100010001,
+                0x100010001,
+                0x100010002,
+                0x100010002,
+                0x100010003,
+                0x100040001,
+            ]
+        {
+            stop(34022, serial, debugcon);
+        }
+        // Slot one replaces the legacy counter role only in this opt-in profile.
+        record(
+            serial,
+            debugcon,
+            "FILES",
+            &[
+                ("version", 1),
+                ("init_slot", 0),
+                ("service_slot", 1),
+                ("shell_slot", 3),
+                (
+                    "bad_handle",
+                    u64::from(cfg!(feature = "development-files-bad-handle")),
+                ),
+                ("grants", grants.len() as u64),
+            ],
+        );
     }
     checked!(unsafe {
         arch::x86_64::user_ipc::with_waits(|s| {

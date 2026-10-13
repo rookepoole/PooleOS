@@ -11,7 +11,16 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle278 adds scheduled retained cleanup.
+**Current development checkpoint:** Cycle279 adds an isolated read-only file
+service and real native shell `ls`/`cat` over capability IPC. Twelve final-source
+VM cases pass, including stale-file-handle denial and lifecycle regressions;
+540 default/556 file-profile kernel tests and93 user tests pass per profile.
+Next: two useful separate apps, remaining recovery controls, then optical ISO
+qualification. No new ISO or main qualification yet. The complete robust
+microkernel remains required afterward.
+[Evidence](docs/checkpoints/cycle279-native-files.md).
+
+**Historical development checkpoint:** Cycle278 adds scheduled retained cleanup.
 Six native guests keep independent services running across cleanup failures;
 15 VM runs pass including regressions, plus540 kernel tests per profile.
 Next: read-only bundled-file service, two useful user-space apps, then optical

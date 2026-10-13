@@ -17,6 +17,24 @@ bench = false
 path = "src/lib.rs"
 
 [[bin]]
+name = "PooleFiles"
+path = "src/bin/files.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleFileInit"
+path = "src/bin/file_init.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleFileShell"
+path = "src/bin/file_shell.rs"
+test = false
+bench = false
+
+[[bin]]
 name = "PooleControlShell"
 path = "src/bin/control_shell.rs"
 test = false

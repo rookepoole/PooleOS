@@ -17,6 +17,8 @@ development-console = ["development-session"]
 development-console-bad-handle = ["development-console"]
 development-console-ipc = ["development-console"]
 development-shell-process = ["development-console-ipc"]
+development-files = ["development-shell-process"]
+development-files-bad-handle = ["development-files"]
 development-shell-process-bad-owner = ["development-shell-process"]
 
 development-shell-cleanup-retry = ["development-shell-process"]

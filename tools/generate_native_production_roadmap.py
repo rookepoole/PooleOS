@@ -14637,13 +14637,87 @@ def apply_cycle278(roadmap: dict, test_count: int) -> dict:
             "two useful separately launched applications, not diagnostic roles or shell builtins",
             "remaining native cleanup and owner-death controls before sustained optical ISO acceptance",
             "exact canonical gates before main and complete robust microkernel development after the usable ISO"])
+    return apply_cycle279(roadmap, test_count)
+
+
+def apply_cycle279(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle279-native-files.md"
+    path = "runs/native-files-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle278_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=279, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 279
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-files.md"]
+    gate["current_candidate_audit"]["cycle"] = 279
+    gate["current_focused_source_projection"]["cycle"] = 279
+    gate["qualification_status"] = "bounded_files_pass_apps_ISO_and_canonical_gates_pending"
+    for name in ("current_deferred_cleanup_qualification", "current_deferred_cleanup_metadata"):
+        gate[name]["evidence_status"] = "historical_cycle278_not_current_candidate_qualification"
+    baseline["native_deferred_cleanup"]["evidence_status"] = "historical_cycle278_not_current_candidate_qualification"
+    record = dict(cycle=279, contract_id="PFILE1", status="pass", receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        source_binding_count=len(receipt["native_execution"]["files"]["source_bindings"]))
+    for key in ("kernel_tests_per_profile", "file_profile_kernel_tests_per_profile", "new_kernel_tests",
+                "user_tests_per_profile", "new_user_tests", "ownership_doctests", "initial_python_tests",
+                "guest_runs", "earlier_native_guests", "file_guests", "ordinary_shell_guests",
+                "deferred_cleanup_guests", "independent_program_pairs_reverified", "bundled_files",
+                "file_service_in_user_space", "stale_file_handle_denied", "useful_application_count",
+                "malformed_request_native_injection", "requester_death_native_injection",
+                "canonical_full_replay_performed", "merge_qualified", "iso_built", "production_ready"):
+        record[key] = receipt[key]
+    gate["current_file_service_qualification"] = record
+    gate["current_file_service_metadata"] = dict(cycle=279, status="pass", tests_passed=282,
+        unittest_elapsed_seconds=58.502, capture_elapsed_seconds=59.61,
+        log_sha256="8021D17C1265A8D8304EC285281D950A4FDA45C651D1EE582584793F52982874",
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_files"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    file_budget = receipt["budgets"]["files"]["kernel1"]
+    default_budget = receipt["default_regression"]["budget"]
+    lane.update(cycle=279, selected_stage="USI-4", session_contract="PFILE1", receipt_path=path,
+        receipt_section="native_execution", native_execution_evidence_cycle=279,
+        native_execution_replayed_this_cycle=True, native_execution_status="bounded_file_service_and_regressions_pass",
+        shell_native_execution_evidence_cycle=279, shell_native_execution_replayed_this_cycle=True,
+        kernel_image_pages=file_budget["image_pages"], kernel_remaining_capacity_pages=file_budget["remaining_pages"],
+        default_profile_build_cycle=279, default_profile_pages=default_budget["image_pages"],
+        default_profile_replayed_this_cycle=True, default_relro_padding_bytes=default_budget["relro_padding_bytes"],
+        integration_dispatcher_local_bytes=receipt["stack_observations"]["files"]["local_frame_bytes"],
+        prepared_profile_replayed_this_cycle=False, prepared_profile_build_cycle=278,
+        bundled_files=True, useful_application_count=0, real_service_supervisor=False,
+        file_profile_ro_entry_offset=0xe000, full_stack_bound_proven=False)
+    lane["stages"]["USI-4"] = "partial_native_files_and_shell_pass_two_useful_apps_and_display_open"
+    evidence = "Cycle279: PFILE1 is an isolated immutable file service with real ls/cat over capability IPC. Three final-source file guests cover multichunk, empty, missing and invalid paths plus stale file grants while worker/process fault commands remain usable. Twelve final-source VMs pass with normal shell, deferred-cleanup and default/denial regressions.540 default and556 feature kernel tests per profile,93 user tests per profile,11 ownership doctests,13 exact independent ELF/code pairs. Three earlier VM passes are retained but not substituted. File-only RO/entry0xE000 stays inside208 total pages; default0xD000 and36 stack pages unchanged. " + checkpoint
+    gap = "Next build two useful separately launched apps over the bounded read-only file service, within six init/files/console/shell/app1/app2 roles,32 PMM records and16384-byte RX. Health-polling file init is not a general supervisor; no writable disk or host files. Native malformed/untracked-request and requester-death injection remain to qualify. Before optical acceptance retain live-parent deferred completion/restart, exhaustion/multiple pending owners, waiting children and pending/claimed request interleavings. Full stack/idle/trust/SMP and general supervisor recovery remain open. Package and operate the actual optical ISO, then continue the complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass. Exact canonical gates still precede main or promotion."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N9", "N13", "N14", "N16", "N18", "N19", "N20", "N22", "N30", "N36"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle279 source inventory: {test_count} Python tests discovered; full canonical qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N13-USERSPACE-ISO-001", "FLAG-N36-EVIDENCE-STORAGE-001"):
+            flag["evidence"].append(checkpoint)
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001": flag["closure_condition"] += " Cycle279 remaining work: " + gap
+        if flag["id"] == "FLAG-N36-EVIDENCE-STORAGE-001": flag["closure_condition"] += " Cycle279 retains47 verified generated archives, including failures; automatic reservation and restore remain open."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Build useful applications, then optical ISO",
+        entry_evidence=[checkpoint, path, "docs/native-files.md", "docs/native-userspace-integration-iso.md"],
+        exit_evidence=["two useful separately launched applications using confined file access and observable results",
+            "native malformed file requests, requester death and remaining cleanup/owner-death controls",
+            "sustained optical ISO operation on fresh guests; exact canonical gates before main",
+            "complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass afterward"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1432)
+    parser.add_argument("--test-count", type=int, default=1437)
     parser.add_argument("--status-date", default="2026-10-13")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

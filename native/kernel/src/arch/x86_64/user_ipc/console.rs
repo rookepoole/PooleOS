@@ -83,10 +83,34 @@ pub(crate) fn byte(caller: Caller, handle: u64, offset: u64, value: Option<u64>)
     unsafe { &mut *(&raw mut IPC) }.console_byte(caller, handle, offset, value, &mut Ports)
 }
 
+/// SAFETY: exclusive BSP/IF0, four owned prepared roots, no dispatched task/AP.
+#[cfg(feature = "development-files")]
+pub unsafe fn bootstrap_files(
+    tasks: [(TaskId, ImageAdmission); 4],
+    scheduler: &mut poolekernel::scheduler::Scheduler,
+) -> Result<[u64; 8], Error> {
+    idle()?;
+    let s = unsafe { &mut *(&raw mut IPC) };
+    if !s.is_empty() {
+        return Err(Error::State);
+    }
+    let members = tasks.map(|(id, image)| Member {
+        id,
+        image,
+        priority: 16,
+    });
+    let admitted = s
+        .admit_file_session(scheduler, &members)
+        .map_err(|_| Error::State)?;
+    quiesce()?;
+    admitted.handles[..8].try_into().map_err(|_| Error::State)
+}
+
 /// SAFETY: exclusive BSP, IF0, four owned prepared roots, no dispatched task/AP.
 #[cfg(all(
     feature = "development-console-ipc",
-    not(feature = "development-session-capacity")
+    not(feature = "development-session-capacity"),
+    not(feature = "development-files")
 ))]
 pub unsafe fn bootstrap_ipc(
     tasks: [(TaskId, ImageAdmission); 4],

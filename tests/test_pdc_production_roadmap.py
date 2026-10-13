@@ -198,8 +198,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 278)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1432)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 279)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1437)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -239,8 +239,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "bounded_deferred_cleanup_pass_files_apps_ISO_and_canonical_gates_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 278)
+        self.assertEqual(current["qualification_status"], "bounded_files_pass_apps_ISO_and_canonical_gates_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 279)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -6141,7 +6141,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             live = r["native_execution"][lane]
             self.assertEqual(record["evidence_status"],"historical_cycle277_not_current_candidate_qualification")
             self.assertEqual(len(live["source_bindings"]),876)
-            self.assertEqual(live["program_build"]["source_bindings"],bindings())
+            self.assertNotEqual(live["program_build"]["source_bindings"],bindings())
             self.assertTrue(live["source_unchanged"] and live["independent_kernel_builds_equal"])
             self.assertEqual(len(live["program_build"]["programs"]),10)
             self.assertEqual(live["program_build"]["programs"]["PooleControlShell"]["code_bytes"],6816)
@@ -6216,9 +6216,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         for lane,oracle in (("normal",native_shell_process),("prepared",native_prepared_cleanup),
                             ("deferred",native_deferred_cleanup),("deferred_prepared",native_deferred_cleanup)):
             live=r["native_execution"][lane]
-            self.assertEqual(live["source_bindings"],source_bindings())
+            self.assertEqual(record["evidence_status"],"historical_cycle278_not_current_candidate_qualification")
+            self.assertNotEqual(live["source_bindings"],source_bindings())
             self.assertEqual(len(live["source_bindings"]),881)
-            self.assertEqual(live["program_build"]["source_bindings"],bindings())
+            self.assertNotEqual(live["program_build"]["source_bindings"],bindings())
             self.assertTrue(live["source_unchanged"] and live["independent_kernel_builds_equal"])
             self.assertEqual(len(live["guest_runs"]),3)
             self.assertEqual([v["image_pages"] for v in r["budgets"][lane].values()],[114 if lane=="normal" else 115]*3)
@@ -6251,11 +6252,82 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertTrue(run['fresh_vars_copy'] and run['media_read_only'] and run['serial_debugcon_exact_match'])
             self.assertFalse(run['guest_network'] or run['host_acceleration'] or run['local_paths_recorded'])
         self.assertEqual((r['default_regression']['budget']['image_pages'],r['guarded_stack_pages']),(208,36))
-        lane=b['user_space_integration']
+        lane=b['historical_cycle278_user_space_integration']
         self.assertEqual((lane['cycle'],lane['selected_stage'],lane['session_contract']),(278,'USI-4','PCLEANUP2'))
         self.assertTrue(lane['continue_full_microkernel_after_iso'] and lane['asynchronous_cleanup_recovery'])
         self.assertEqual(lane['useful_application_count'],0)
-        self.assertIn('read-only bundled files',self.roadmap['immediate_next_move']['title'])
+        self.assertEqual(b['native_files']['cycle'],279)
+
+    def test_cycle279_native_files_are_scoped_and_byte_bound(self) -> None:
+        from runtime import native_files, native_shell_process, native_shell_orphan, native_deferred_cleanup
+        from runtime import native_shell, native_user_root, native_kernel_load
+        from tools.qualify_native_user_entry import source_bindings
+        from tools.qualify_native_user_programs import bindings
+        b = self.roadmap['baseline']
+        record = b['native_files']
+        raw = (ROOT / record['receipt_path']).read_bytes()
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
+        r = json.loads(raw)
+        self.assertEqual((r['cycle'],r['contract_id'],r['status']),(279,'PFILE1','pass'))
+        self.assertEqual((r['kernel_tests_per_profile'],r['file_profile_kernel_tests_per_profile'],r['user_tests_per_profile']),(540,556,93))
+        self.assertEqual((r['new_kernel_tests'],r['new_user_tests'],r['ownership_doctests']),(2,15,11))
+        self.assertEqual((r['guest_runs'],r['earlier_native_guests'],r['independent_program_pairs_reverified']),(12,3,13))
+        self.assertTrue(r['bundled_files'] and r['file_service_in_user_space'] and r['shell_lists_and_reads_over_ipc'])
+        self.assertTrue(r['stale_file_handle_denied'] and r['plain_message_drop_host_tested'] and r['requester_death_host_tested'])
+        self.assertEqual((r['bundle_entry_count'],r['process_capacity'],r['pmm_allocation_records'],r['max_user_code_bytes']),(4,6,32,16384))
+        self.assertEqual((r['file_profile_ro_entry_offset'],r['default_ro_entry_offset']),(0xe000,0xd000))
+        for key in ('writable_file_service','host_filesystem_access','real_service_supervisor','efficient_idle',
+                    'malformed_request_native_injection','requester_death_native_injection','bootstrap_capacity_increased',
+                    'full_stack_bound_proven','sustained_iso_acceptance','canonical_full_replay_performed',
+                    'merge_qualified','iso_built','production_ready'):
+            self.assertFalse(r[key],key)
+        for c in (*r['captures'].values(),*r['earlier_passes'].values()):
+            self.assertEqual(c['return_code'],0)
+            self.assertTrue(c['source_unchanged'] and c['owner_report_unchanged'])
+        for c in r['retained_failures'].values(): self.assertNotEqual(c['return_code'],0)
+        runs = []
+        for lane,oracle in (('files',native_files),('normal',native_shell_process),('deferred',native_deferred_cleanup)):
+            live = r['native_execution'][lane]
+            self.assertEqual(live['source_bindings'],source_bindings())
+            self.assertEqual(len(live['source_bindings']),892)
+            self.assertEqual(live['program_build']['source_bindings'],bindings())
+            self.assertTrue(live['source_unchanged'] and live['independent_kernel_builds_equal'])
+            self.assertEqual(len(live['program_build']['programs']),13)
+            self.assertEqual([t['tests_passed'] for t in live['program_build']['host_tests']],[93,93])
+            self.assertEqual(len(live['guest_runs']),3)
+            self.assertLessEqual(r['budgets'][lane]['kernel1']['image_pages'],208)
+            for i,run in enumerate(live['guest_runs']):
+                options = dict(bad_owner=i==2)
+                if lane=='deferred': options['prepared_stop']=False
+                summary=oracle.validate_markers(run['markers'],**options)
+                self.assertEqual(json.loads(json.dumps(summary)),run['marker_summary'])
+                self.assertEqual(oracle.negative_controls(run['markers'],**options),run['hostile_marker_cases_rejected'])
+                interaction=run['interaction']
+                scenario=native_files if lane=='files' else native_shell_orphan if lane=='deferred' else native_shell_process
+                case=scenario.scenario(interaction['nonce'],bad_owner=i==2)
+                sent,output=bytes.fromhex(interaction['input_hex']),bytes.fromhex(interaction['output_hex'])
+                self.assertTrue(native_shell.validate_interaction(case,sent,output)['exact_interaction'])
+                for kind,data in (('input',sent),('output',output)):
+                    self.assertEqual(hashlib.sha256(data).hexdigest().upper(),interaction[kind+'_sha256'])
+                if lane=='files':
+                    self.assertEqual(summary['bad_file_handle'],i==2)
+                    self.assertTrue(summary['legacy_counter_field_means_file_service'])
+                runs.append(run)
+        default=r['default_regression']['native_execution']
+        self.assertEqual((default['status'],len(default['guest_runs'])),('pass',2))
+        for run in default['guest_runs']:
+            self.assertEqual(native_user_root.validate_markers(run['markers']),run['marker_summary'])
+        denial=default['ordinary_denial']
+        self.assertEqual(native_kernel_load.validate_markers(denial['markers']),denial['marker_summary'])
+        for run in runs+default['guest_runs']+[denial]:
+            self.assertTrue(run['fresh_vars_copy'] and run['media_read_only'] and run['serial_debugcon_exact_match'])
+            self.assertFalse(run['guest_network'] or run['host_acceleration'] or run['local_paths_recorded'])
+        self.assertEqual((r['default_regression']['budget']['image_pages'],r['guarded_stack_pages']),(208,36))
+        lane=b['user_space_integration']
+        self.assertEqual((lane['cycle'],lane['selected_stage'],lane['session_contract']),(279,'USI-4','PFILE1'))
+        self.assertTrue(lane['bundled_files'] and lane['continue_full_microkernel_after_iso'])
+        self.assertEqual(lane['useful_application_count'],0)
+        self.assertIn('useful applications',self.roadmap['immediate_next_move']['title'])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]

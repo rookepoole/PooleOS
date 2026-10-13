@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 278, 2026-10-13. No new ISO exists yet.
+Status: implementation started, Cycle 279, 2026-10-13. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -46,12 +46,37 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle278 partial: native prepared/suspended parent-death cleanup now survives dispatch-separated erase failures. Native exhaustion/multiple pending owners/live-parent completion, waiting interleavings, general supervision, trust and idle remain |
-| USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle274 partial: actual serial shell lifecycle/status and diagnostic fault survival pass; files, two useful separate apps and local display/input remain |
+| USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle279 partial: isolated read-only file service and actual shell ls/cat pass, including stale-file authority denial; two useful separate apps and local display/input remain |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
 ### Immediate Next Move
 
-Current: [Cycle278 scheduled cleanup](checkpoints/cycle278-native-deferred-cleanup.md).
+Current: [Cycle279 native files](checkpoints/cycle279-native-files.md).
+Three final-source file guests prove actual shell list/read through granted IPC
+while a worker runs; twelve VMs pass including lifecycle and boot regressions.
+Four immutable public files are implemented. Useful application count remains0.
+
+1. Build two useful separately launched applications over the file service with
+   visible computed results. Preserve the six-role init/files/console/shell/app1/app2
+   layout,32 PMM-record budget and16384-byte RX limit unless separately reviewed.
+   Diagnostic workers, fault probes and shell builtins do not count as these apps.
+2. Qualify native malformed/untracked file requests and requester death. Existing
+   host tests cover bounded errors, dropping plain messages without reply authority
+   and continuing after denied replies; they are not native injection evidence.
+3. Before optical acceptance, qualify live-parent deferred completion/restart,
+   native exhaustion/multiple cleanup owners, waiting children and pending/claimed
+   request interleavings. Keep immutable-file and lifecycle regressions current.
+4. Package and operate the exact optical ISO with real commands, both apps,
+   sustained interaction and fault/recovery on fresh boots. Continue the full
+   robust microkernel, PooleGlyph/PDC and accessible PooleGlass afterward.
+
+The file-profile health-polling init is not a general supervisor. Writable disks,
+host files, full stack bounds, executable trust and efficient idle remain open.
+File integration115 pages, default208/208,36 stack pages; no capacity increase.
+
+### Historical Cycle278 Next Move
+
+Historical: [Cycle278 scheduled cleanup](checkpoints/cycle278-native-deferred-cleanup.md).
 Six native guests prove retained cleanup across192 independent dispatches, with
 15 qualified VMs including regressions. Exhaustion remains host-tested only.
 

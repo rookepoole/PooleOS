@@ -6,6 +6,7 @@ pub const LINE_BYTES: usize = 64;
 pub const BANNER: &[u8] = b"PooleOS native shell\r\n";
 pub const PROMPT: &[u8] = b"PooleOS> ";
 
+pub mod files;
 pub mod processes;
 
 pub trait Commands {
@@ -13,6 +14,10 @@ pub trait Commands {
     fn begin(&mut self, line: &[u8]) -> Result<bool, Error>;
     fn poll(&mut self) -> Result<bool, Error>;
     fn response(&self) -> &[u8];
+    /// False keeps the command active after this output chunk is acknowledged.
+    fn response_complete(&self) -> bool {
+        true
+    }
     fn close_allowed(&self) -> bool;
 }
 impl<P: Commands> Commands for &mut P {
@@ -27,6 +32,9 @@ impl<P: Commands> Commands for &mut P {
     }
     fn response(&self) -> &[u8] {
         (**self).response()
+    }
+    fn response_complete(&self) -> bool {
+        (**self).response_complete()
     }
     fn close_allowed(&self) -> bool {
         (**self).close_allowed()
@@ -254,7 +262,12 @@ impl<P: Commands> Shell<P> {
                 }
                 Next::Command => {
                     if self.commands.poll()? {
-                        self.emit(Output::Command, Next::Prompt);
+                        let next = if self.commands.response_complete() {
+                            Next::Prompt
+                        } else {
+                            Next::Command
+                        };
+                        self.emit(Output::Command, next);
                     }
                     return Ok(false);
                 }

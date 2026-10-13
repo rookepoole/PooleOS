@@ -2,6 +2,9 @@ OUTPUT_FORMAT(elf64-x86-64)
 OUTPUT_ARCH(i386:x86-64)
 ENTRY(poole_kernel_entry)
 
+/* Only the reviewed file-session build supplies this absolute selector. */
+__poole_ro_capacity = DEFINED(__poole_files_profile) ? 0xE000 : 0xD000;
+
 PHDRS
 {
   phdr PT_PHDR PHDRS FLAGS(4);
@@ -27,11 +30,11 @@ SECTIONS
     *(.rodata .rodata.*)
     __poole_ro_used_end = .;
     FILL(0)
-    . = 0xD000;
+    . = __poole_ro_capacity;
   } :ro
   __poole_ro_end = .;
 
-  . = 0xD000;
+  . = __poole_ro_capacity;
   __poole_text_start = .;
   .text :
   {

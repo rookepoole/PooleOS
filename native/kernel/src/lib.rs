@@ -59,7 +59,10 @@ pub const LOCKS_CONTRACT_ID: &str = locks::CONTRACT_ID;
 #[unsafe(link_section = ".text.pkbuild_literal")]
 static BUILD_ID_BYTES: [u8; 44] = *b"PKBUILD1-CYCLE216-N12-SMP-TXN-V1-00000000001";
 pub const BUILD_ID: &[u8] = &BUILD_ID_BYTES;
+#[cfg(not(feature = "development-files"))]
 pub const ENTRY_OFFSET: u64 = 0xd000;
+#[cfg(feature = "development-files")]
+pub const ENTRY_OFFSET: u64 = 0xe000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 
 #[used]
@@ -1475,8 +1478,20 @@ mod tests {
     #[test]
     fn runtime_entry_offset_matches_linker_text_start() {
         let linker = include_str!("../linker.ld").replace("\r\n", "\n");
-        let boundary = std::format!(". = 0x{:X};\n  __poole_text_start = .;", ENTRY_OFFSET);
-        assert!(linker.contains(&boundary));
+        assert!(
+            linker.contains(
+                "__poole_ro_capacity = DEFINED(__poole_files_profile) ? 0xE000 : 0xD000;"
+            )
+        );
+        assert!(linker.contains(". = __poole_ro_capacity;\n  __poole_text_start = .;"));
+        assert_eq!(
+            ENTRY_OFFSET,
+            if cfg!(feature = "development-files") {
+                0xe000
+            } else {
+                0xd000
+            }
+        );
     }
 
     #[derive(Default)]

@@ -203,6 +203,7 @@ def _build_product(cargo: Path, env: dict[str, str], target_dir: Path, *, featur
                         ("development-console",), ("development-console-bad-handle",),
                         ("development-console-ipc",), ("development-console-ipc-bad-peer",),
                         ("development-shell-process",), ("development-shell-process-bad-owner",),
+                        ("development-files",), ("development-files-bad-handle",),
                         ("development-shell-cleanup-retry",), ("development-shell-cleanup-retry", "development-shell-process-bad-owner"),
                         ("development-shell-prepared-stop",), ("development-shell-prepared-stop", "development-shell-process-bad-owner"),
                         ("development-shell-cleanup-retry", "development-shell-deferred-cleanup"),
@@ -211,6 +212,9 @@ def _build_product(cargo: Path, env: dict[str, str], target_dir: Path, *, featur
                         ("development-shell-prepared-stop", "development-shell-process-bad-owner", "development-shell-deferred-cleanup"),
                         ("development-session-capacity",), ("development-session-capacity-bad-startup",)):
         raise QualificationError("unreviewed kernel build feature set")
+    product_env = _product_environment(env)
+    if features in (("development-files",), ("development-files-bad-handle",)):
+        product_env["CARGO_ENCODED_RUSTFLAGS"] += "\x1f-Clink-arg=--defsym=__poole_files_profile=1"
     _run(
         [
             str(cargo),
@@ -231,7 +235,7 @@ def _build_product(cargo: Path, env: dict[str, str], target_dir: Path, *, featur
             *(["--features", ",".join(features)] if features else []),
         ],
         cwd=NATIVE_ROOT,
-        env=_product_environment(env),
+        env=product_env,
     )
     artifact = target_dir / PRODUCT_TARGET / "release" / "PooleKernelLinked"
     if not artifact.is_file():

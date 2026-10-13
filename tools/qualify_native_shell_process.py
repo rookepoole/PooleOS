@@ -9,6 +9,7 @@ from runtime import native_shell_cleanup as cleanup
 from runtime import native_prepared_cleanup as prepared
 from runtime import native_shell_orphan as orphan
 from runtime import native_deferred_cleanup as deferred
+from runtime import native_files
 from tools import qualify_native_console_ipc as shared, qualify_native_user_entry as source
 from tools.qualify_native_user_programs import bindings as program_bindings
 from tools.native_build_space import require_space
@@ -16,11 +17,11 @@ from tools.native_build_space import require_space
 PROGRAMS = [('PooleInit','INIT'), ('PooleCounter','COUNTER'), ('PooleConsoleService','CONSOLE'),
     ('PooleControlShell','CONSOLE_CLIENT'), ('PooleWorker','WORKER')]
 
-def program_inputs(directory, env):
+def program_inputs(directory, env, programs=PROGRAMS):
     receipt = json.loads((directory/'receipt.json').read_bytes())
     if receipt.get('status') != 'pass' or receipt.get('source_unchanged') is not True or receipt.get('direct_byte_equality') is not True or receipt.get('independent_builds') != 2 or receipt.get('source_bindings') != program_bindings():
         raise ValueError('failed or stale program qualification')
-    for name,key in PROGRAMS:
+    for name,key in programs:
         code = (directory/f'build1-{name}.bin').read_bytes()
         if code != (directory/f'build2-{name}.bin').read_bytes() or shared.sha(code) != receipt['programs'][name]['code_sha256']:
             raise ValueError('independent code mismatch')
@@ -68,8 +69,12 @@ def main():
     parser.add_argument('--prepared-stop', action='store_true')
     parser.add_argument('--owner-death', action='store_true')
     parser.add_argument('--deferred-cleanup', action='store_true')
+    parser.add_argument('--files', action='store_true')
     args = parser.parse_args(); work, programs = args.work_dir.resolve(), args.program_dir.resolve()
     if args.deferred_cleanup and not args.owner_death: parser.error('deferred qualification requires owner-death scenario')
+    if args.files and any((args.cleanup_retry, args.prepared_stop, args.owner_death, args.deferred_cleanup)):
+        parser.error('file profile must be qualified independently of fault-injection profiles')
+    selected_programs = native_files.PROGRAMS if args.files else PROGRAMS
     if not work.is_relative_to(ROOT/'outputs') or not programs.is_relative_to(ROOT/'outputs'):
         parser.error('workspace output paths required')
     storage = require_space(work); work.mkdir(parents=True, exist_ok=False)
@@ -93,13 +98,17 @@ def main():
         oracle = deferred
         features += ('development-shell-deferred-cleanup',)
         bad_features += ('development-shell-deferred-cleanup',)
+    if args.files:
+        oracle = native_files
+        features, bad_features = ('development-files',), ('development-files-bad-handle',)
+        report.update(cycle=279, contract_id='PFILE1', control_kind='stale-file-handle')
     try:
         cargo, _, env = shared._toolchain(ROOT/'.toolchains/rust-1.97.0')
-        report['program_build'] = program_inputs(programs, env)
+        report['program_build'] = program_inputs(programs, env, selected_programs)
         lock, profile = shared.tier0.validate_contracts(ROOT)
         qemu = shared.tier0._require_workspace_tool_path(shared.tier0.DEFAULT_QEMU_ROOT, ROOT)
         shared.tier0.verify_local_launch_runtime(lock, qemu, ROOT)
-        print('Build two process-shell kernels and denied-factory control', flush=True)
+        print('Build two session kernels and independent denied-authority control', flush=True)
         linked, kernel, plan = shared.entry._build_product(cargo, env, work/'kernel1', features=features)
         linked2, kernel2, _ = shared.entry._build_product(cargo, env, work/'kernel2', features=features)
         if (linked,kernel) != (linked2,kernel2): raise ValueError('independent kernel mismatch')
@@ -108,7 +117,7 @@ def main():
         report['independent_kernel_builds_equal'] = True
         report['kernels'] = {}
         for name, image, link, layout in [('shell',kernel,linked,plan),('bad-owner',bad,bad_linked,bad_plan)]:
-            for _, key in PROGRAMS:
+            for _, key in selected_programs:
                 if image.count(Path(env[f'POOLEOS_{key}_CODE']).read_bytes()) != 1: raise ValueError('program embedding mismatch')
             (work/f'{name}.elf').write_bytes(image)
             report['kernels'][name] = dict(sha256=shared.sha(image), linked_sha256=shared.sha(link), bytes=len(image), image_pages=layout.image_byte_count//4096)
@@ -122,7 +131,7 @@ def main():
             inspected = shared.load.inspect_media_bytes(media)
             path = work/f'{name}.img'; path.write_bytes(media)
             run_dir = work/name; run_dir.mkdir()
-            case = (orphan if args.owner_death else probe).scenario(secrets.token_hex(8), bad_owner=bad_owner)
+            case = (native_files if args.files else orphan if args.owner_death else probe).scenario(secrets.token_hex(8), bad_owner=bad_owner)
             oracle_options = dict(bad_owner=bad_owner)
             if args.owner_death: oracle_options['prepared_stop'] = args.prepared_stop
             interaction = Interaction(case, owner_death=args.owner_death)
@@ -142,7 +151,7 @@ def main():
             run['interaction'] = dict(nonce=case.nonce, input_hex=sent.hex(), output_hex=output.hex(),
                 input_sha256=shared.sha(sent), output_sha256=shared.sha(output), exact_interaction=True,
                 kernel_evidence_from_com2=False, useful_applications=0)
-            if run['marker_summary']['program_bytes'] != [report['program_build']['programs'][n]['code_bytes'] for n,_ in PROGRAMS]:
+            if run['marker_summary']['program_bytes'] != [report['program_build']['programs'][n]['code_bytes'] for n,_ in selected_programs]:
                 raise ValueError('observed program sizes differ')
             prefix = run['marker_summary']['transfer_prefix']
             shared.load.validate_oracle_binding(prefix['boot_prefix'], inspected, run['pbp1_transcript'])
@@ -151,14 +160,15 @@ def main():
             run['hostile_marker_cases_rejected'] = oracle.negative_controls(run['markers'], **oracle_options)
             run.update(media_sha256=shared.sha(media), kernel_sha256=shared.sha(image))
             report['guest_runs'].append(run)
-        if before != source.source_bindings() or program_inputs(programs, env) != report['program_build']:
+        if before != source.source_bindings() or program_inputs(programs, env, selected_programs) != report['program_build']:
             raise ValueError('source or input drift')
         report['status'] = 'pass'
+        report['bundled_files'] = args.files
     except Exception as error:
         report['failure'] = f'{type(error).__name__}: {error}'; print(report['failure'], flush=True)
     report['source_unchanged'] = before == source.source_bindings()
     (work/'receipt.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8',newline='\n')
-    print(f"PSHELLPROC1 {report['status']}; useful apps=0 files=0 ISO=0 production=0", flush=True)
+    print(f"{report['contract_id']} {report['status']}; useful apps=0 files={int(report['bundled_files'])} ISO=0 production=0", flush=True)
     return int(report['status'] != 'pass')
 
 if __name__ == '__main__': raise SystemExit(main())

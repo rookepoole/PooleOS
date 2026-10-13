@@ -1,15 +1,47 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-13
-Plan version: 2.181.0-native-deferred-cleanup
-Roadmap cycle: PooleOS Cycle 278
+Plan version: 2.182.0-native-files
+Roadmap cycle: PooleOS Cycle 279
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 278: Native Scheduled Cleanup
+## Cycle 279: Native Bundled Files
+
+An isolated user-space file service now serves four immutable public files over
+capability IPC. The actual native shell lists and reads them, including multichunk,
+empty and missing files, while a separate worker runs. Invalid paths reject;
+stale file authority denies without disabling console or process commands.
+Twelve final-source VM cases pass with ordinary shell, deferred cleanup and
+default/denial regressions. Three earlier VM passes remain separate history.
+[Evidence and limits](checkpoints/cycle279-native-files.md).
+
+Kernel tests pass540 default and556 file-feature per debug/release profile;
+93 user tests per profile,11 ownership doctests and13 independently rebuilt
+ELF/code pairs pass. Fifteen new user tests and two new kernel tests cover the
+bounded protocol, streaming shell, authenticated peers and atomic admission.
+Malformed/untracked requests and requester death are host-tested, not yet native
+injection-qualified. Health-polling init is not a general service supervisor.
+
+USI-4 remains partial. Next implement two useful separately launched applications
+using the file service, then qualify remaining file/recovery controls and sustained
+optical ISO interaction. Keep six roles,32 PMM records and16384-byte RX unless
+separately reviewed. Diagnostic children and shell builtins are not those apps.
+Full robust microkernel, PooleGlyph/PDC and accessible PooleGlass follow the usable
+milestone; they are not replaced by it or all required before it.
+
+File/cleanup profiles115 pages, ordinary shell114, default208/208; guarded stack36.
+The explicit file-only RO/entry offset0xE000 fixes measured RO overflow without
+raising total capacity; default remains0xD000. Local file-dispatcher allocation
+49640 bytes is not full stack proof. No phase/flag closes:40 phases301 subphases
+8996 requirements59 additions98 flags (43 open),20 gap groups.1437 Python tests
+and708 architecture bindings are inventories, not canonical execution. No new
+ISO, main merge, release or production readiness is claimed.
+
+## Historical Cycle 278: Native Scheduled Cleanup
 
 Stopped tasks now retain their memory and identity in a non-wakeable scheduler
 wait while cleanup is retried between real user dispatches. Six native guests

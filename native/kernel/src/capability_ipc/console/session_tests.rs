@@ -12,6 +12,7 @@ fn members() -> [admission::Member; 4] {
             root_physical: 0x100000 + i as u64 * 4096,
             root_generation: 1,
             code_physical: 0x200000 + i as u64 * 4096,
+            code_end: 0x40001000,
             stack_physical: 0x300000 + i as u64 * 4096,
             initial_frame: InitialReturnFrame {
                 rip: 0x40000000,
@@ -53,6 +54,50 @@ fn capacity_members() -> [admission::Member; 6] {
         m.image.stack_physical += i as u64 * 4096;
         m
     })
+}
+
+#[test]
+fn file_session_grants_are_read_only_routes_without_device_or_transfer_authority() {
+    let (mut s, mut scheduler, m) = (Space::new(), Scheduler::new(1).unwrap(), members());
+    let a = s.admit_file_session(&mut scheduler, &m).unwrap();
+    assert_eq!(a.count, 8);
+    assert_eq!(
+        &a.handles[..8],
+        &[
+            0x100010001,
+            0x100010001,
+            0x100010001,
+            0x100010001,
+            0x100010002,
+            0x100010002,
+            0x100010003,
+            0x100040001
+        ]
+    );
+    assert_eq!(scheduler.summary().runnable_count, 4);
+    for i in 0..4 {
+        assert_eq!(s.owns_console(m[i].id), i == 2);
+    }
+    for (i, h) in [(0, a.handles[1]), (3, a.handles[6])] {
+        let cap = s.resolve(i, h, Rights::SEND).unwrap();
+        assert_eq!(s.objects[cap.object.slot].value.unwrap().owner, m[1].id);
+        assert!(s.resolve(i, h, Rights::RECEIVE).is_err());
+        assert!(s.derive(m[i].id, h, m[2].id, Rights::SEND).is_err());
+        assert!(s.resolve(i, h + (1 << 32), Rights::SEND).is_err());
+    }
+    assert!(s.resolve(1, 0x100010002, Rights::SEND).is_err());
+    assert!(s.resolve(2, 0x100010003, Rights::SEND).is_err());
+    scheduler.validate().unwrap();
+}
+#[test]
+fn file_session_admission_failure_is_atomic() {
+    let (mut s, mut scheduler, m) = (Space::new(), Scheduler::new(1).unwrap(), members());
+    s.console.generation = u32::MAX;
+    let before = scheduler.summary();
+    assert!(s.admit_file_session(&mut scheduler, &m).is_err());
+    assert_eq!(scheduler.summary(), before);
+    assert!(s.is_empty());
+    assert!(m.iter().all(|member| !s.owns_console(member.id)));
 }
 
 #[test]

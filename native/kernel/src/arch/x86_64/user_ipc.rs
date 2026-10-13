@@ -19,9 +19,12 @@ mod console;
 pub use console::bootstrap as bootstrap_console;
 #[cfg(feature = "development-session-capacity")]
 pub use console::bootstrap_capacity as bootstrap_console_capacity;
+#[cfg(feature = "development-files")]
+pub use console::bootstrap_files;
 #[cfg(all(
     feature = "development-console-ipc",
-    not(feature = "development-session-capacity")
+    not(feature = "development-session-capacity"),
+    not(feature = "development-files")
 ))]
 pub use console::bootstrap_ipc as bootstrap_console_ipc;
 #[cfg(feature = "development-console")]
