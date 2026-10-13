@@ -11,6 +11,8 @@ use poolekernel::{
 use timer_driver::{PeerRun, Timer};
 
 mod admission;
+#[cfg(feature = "development-shell-process")]
+pub(super) mod interactive;
 pub(super) mod ipc;
 mod ipc_deadline;
 pub(super) mod ipc_pressure;
@@ -23,7 +25,10 @@ pub(super) mod process_control;
 mod service;
 #[cfg(all(
     feature = "development-session",
-    not(feature = "development-process-launch")
+    not(any(
+        feature = "development-process-launch",
+        feature = "development-shell-process"
+    ))
 ))]
 pub(super) mod session;
 mod startup;

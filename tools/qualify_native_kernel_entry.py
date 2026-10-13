@@ -202,6 +202,7 @@ def _build_product(cargo: Path, env: dict[str, str], target_dir: Path, *, featur
                         ("development-process-launch-bad-owner",), ("development-session",), ("development-session-bad-startup",),
                         ("development-console",), ("development-console-bad-handle",),
                         ("development-console-ipc",), ("development-console-ipc-bad-peer",),
+                        ("development-shell-process",), ("development-shell-process-bad-owner",),
                         ("development-session-capacity",), ("development-session-capacity-bad-startup",)):
         raise QualificationError("unreviewed kernel build feature set")
     _run(

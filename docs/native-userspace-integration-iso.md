@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 273, 2026-10-13. No new ISO exists yet.
+Status: implementation started, Cycle 274, 2026-10-13. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -45,13 +45,22 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | --- | --- | --- | --- |
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
-| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle273 partial: bounded four-page RX construction/admission/return and normal retirement pass natively; legacy compatibility passes. Shell lifecycle, native stop/fault completion, general loading/trust, cleanup retry, owner death and efficient idle remain |
-| USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle270 partial: real serial shell commands/editing and authenticated console-peer death pass; shell lifecycle/status, files, two separate apps and display/input integration remain |
+| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle274 partial: bounded loader and real shell-controlled start/stop/restart with terminal results pass; post-execution cleanup retry, owner death, general loading/trust and efficient idle remain |
+| USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle274 partial: actual serial shell lifecycle/status and diagnostic fault survival pass; files, two useful separate apps and local display/input remain |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
 ### Immediate Next Move
 
-Current: [Cycle273 multipage executables](checkpoints/cycle273-bounded-multipage-executables.md).
+Current: [Cycle274 shell process control](checkpoints/cycle274-native-shell-process-control.md).
+The actual shell now launches, inspects, stops and restarts isolated diagnostic
+children. Two faulting generations leave the other programs running; invalid
+factory generation denies. Three new and three earlier-shell guests pass.
+Next retain failed cleanup ownership/retry and qualify owner-death handling, then
+bundled files, two useful apps and optical ISO acceptance. Construction stack
+overflow was repaired without raising limits; full stack proof remains open.
+Default208/208 capacity and production gates remain unchanged.
+
+Historical: [Cycle273 multipage executables](checkpoints/cycle273-bounded-multipage-executables.md).
 The one-page code limit is replaced by a verified four-page bounded loader, with
 six native guest passes and exact independent program/kernel builds. Next connect
 shell start/stop/status to real process capabilities, retain cleanup ownership and

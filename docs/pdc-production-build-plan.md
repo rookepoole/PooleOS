@@ -1,15 +1,36 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-13
-Plan version: 2.176.0-bounded-multipage-executables
-Roadmap cycle: PooleOS Cycle 273
+Plan version: 2.177.0-native-shell-process-control
+Roadmap cycle: PooleOS Cycle 274
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 273: Bounded Multipage Executables
+## Cycle 274: Native Shell Process Control
+
+The isolated shell now starts, stops, inspects and restarts real diagnostic child
+processes through generation-bound capabilities. Two native fault generations
+leave the shell and worker running; invalid launch authority rejects. Three
+process-control guests and three earlier-shell regression guests pass.78 user
+tests and512 kernel tests pass in each profile;10 program builds reproduce.
+[Evidence and failure history](checkpoints/cycle274-native-shell-process-control.md).
+
+Two construction-stack guard failures were repaired with in-place owner storage,
+without enlarging the36-page stack. Current integration112/208 pages, legacy113,
+default208 with120 RELRO padding bytes. Default boot was not replayed. Full
+call-chain stack proof and post-execution cleanup recovery remain open.
+
+USI-3/4 are partial. Next retain cleanup ownership/retry and qualify owner death,
+then bundled read-only files, two useful separate apps and optical ISO acceptance.
+The worker/fault diagnostics are not those apps. Full robust microkernel work
+continues after the ISO. No phase/flag closes:40 phases301 subphases8996 requirements
+59 additions98 flags43 open20 gap groups.1419 Python tests/665 architecture bindings
+are inventories, not canonical qualification. Main merge remains unqualified.
+
+## Historical Cycle 273: Bounded Multipage Executables
 
 The owned native loader now admits, copies, maps and retires one-to-four-page RX
 programs, with complete page readback and range-aware syscall/timer return checks.

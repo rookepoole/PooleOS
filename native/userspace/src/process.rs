@@ -63,6 +63,38 @@ pub unsafe fn supervisor_boot(
     startup::supervisor(block, version)
 }
 pub struct ConsoleIpc(crate::console_ipc::rpc::Transport);
+/// SAFETY: the caller supplies the live kernel-owned PSTART1 stack block.
+#[inline(always)]
+pub unsafe fn control_shell_boot(
+    address: u64,
+    bytes: u64,
+    version: u64,
+) -> Result<(ConsoleIpc, [u64; 2]), startup::Error> {
+    if address != 0x40003000 || !(96..=512).contains(&bytes) {
+        return Err(startup::Error::Header);
+    }
+    let block = unsafe { core::slice::from_raw_parts(address as *const u8, bytes as usize) };
+    let (boot, factories) = startup::control_shell(block, version)?;
+    Ok((
+        ConsoleIpc(crate::console_ipc::rpc::Transport::new(
+            boot.send, boot.peer, false,
+        )),
+        factories,
+    ))
+}
+/// SAFETY: the caller supplies the live kernel-owned PSTART1 stack block.
+#[inline(always)]
+pub unsafe fn diagnostic_boot(
+    address: u64,
+    bytes: u64,
+    version: u64,
+) -> Result<bool, startup::Error> {
+    if address != 0x40003000 || !(96..=512).contains(&bytes) {
+        return Err(startup::Error::Header);
+    }
+    let block = unsafe { core::slice::from_raw_parts(address as *const u8, bytes as usize) };
+    startup::diagnostic(block, version)
+}
 struct ConsoleCalls;
 impl crate::console_ipc::rpc::Calls for ConsoleCalls {
     #[inline(always)]

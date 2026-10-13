@@ -137,7 +137,9 @@ pub fn run(
     IST1_TOP.store(descriptors.ist1_top, Ordering::Release);
     IST2_BOTTOM.store(descriptors.ist2_bottom, Ordering::Release);
     IST2_TOP.store(descriptors.ist2_top, Ordering::Release);
-    let quota = if cfg!(feature = "development-process-launch") {
+    let quota = if cfg!(feature = "development-shell-process") {
+        6 * (12 + poolekernel::user_entry::MAX_CODE_PAGES) + 12
+    } else if cfg!(feature = "development-process-launch") {
         // Two one-page workers and one bounded multipage supervisor.
         38 + poolekernel::user_entry::MAX_CODE_PAGES + 12
     } else if cfg!(feature = "development-process-control") {
@@ -205,6 +207,17 @@ pub fn run(
         );
     }
     if session {
+        #[cfg(feature = "development-shell-process")]
+        peer_driver::interactive::run(
+            handoff,
+            core,
+            bits,
+            &mut manager,
+            topology,
+            hpet,
+            serial,
+            debugcon,
+        );
         #[cfg(feature = "development-process-launch")]
         peer_driver::launch::run(
             handoff,
@@ -218,7 +231,10 @@ pub fn run(
         );
         #[cfg(all(
             feature = "development-session",
-            not(feature = "development-process-launch")
+            not(any(
+                feature = "development-process-launch",
+                feature = "development-shell-process"
+            ))
         ))]
         peer_driver::session::run(
             handoff,

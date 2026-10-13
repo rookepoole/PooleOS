@@ -17,6 +17,18 @@ bench = false
 path = "src/lib.rs"
 
 [[bin]]
+name = "PooleControlShell"
+path = "src/bin/control_shell.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleWorker"
+path = "src/bin/worker.rs"
+test = false
+bench = false
+
+[[bin]]
 name = "PooleSupervisor"
 path = "src/bin/supervisor.rs"
 test = false

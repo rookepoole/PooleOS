@@ -24,6 +24,17 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle274-native-shell-process-control.md",
+    "docs/native-shell-process.md",
+    "runs/native-shell-process-readiness.json",
+    "native/kernel/src/user_root_probe/peer_driver/interactive.rs",
+    "native/userspace/src/bin/control_shell.rs",
+    "native/userspace/src/bin/worker.rs",
+    "native/userspace/src/shell/processes.rs",
+    "native/userspace/src/shell/processes/tests.rs",
+    "runtime/native_shell_process.py",
+    "tools/qualify_native_shell_process.py",
+    "tests/test_native_shell_process.py",
     "docs/checkpoints/cycle273-bounded-multipage-executables.md",
     "runs/native-multipage-program-readiness.json",
     "native/userspace/src/bin/multi_supervisor.rs",

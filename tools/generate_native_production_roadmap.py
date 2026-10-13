@@ -14246,13 +14246,89 @@ def apply_cycle273(roadmap: dict, test_count: int) -> dict:
             "retained cleanup ownership plus native stop/fault and owner-death qualification",
             "read-only bundled files and two useful separately launched apps",
             "optical ISO sustained interaction; canonical gates before main; full robust microkernel afterward"])
+    return apply_cycle274(roadmap, test_count)
+
+
+def apply_cycle274(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle274-native-shell-process-control.md"
+    path = "runs/native-shell-process-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle273_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=274, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 274
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-shell-process.md"]
+    gate["current_candidate_audit"]["cycle"] = 274
+    gate["current_focused_source_projection"]["cycle"] = 274
+    gate["qualification_status"] = "native_shell_process_control_pass_cleanup_files_apps_and_ISO_gates_pending"
+    for name in ("current_multipage_program_qualification", "current_multipage_program_metadata"):
+        gate[name]["evidence_status"] = "historical_cycle273_not_current_candidate_qualification"
+    baseline["native_multipage_program"]["evidence_status"] = "historical_cycle273_not_current_candidate_qualification"
+    record = dict(cycle=274, contract_id="PSHELLPROC1", status="pass", receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), kernel_tests_per_profile=512,
+        user_tests_per_profile=78, new_user_tests=18, independent_programs=10,
+        unchanged_legacy_programs=7, guest_runs=6, process_control_guests=3, legacy_shell_guests=3,
+        source_binding_count=len(receipt["native_execution"]["source_bindings"]),
+        shell_start_stop_status=True, generation_bound_restart=True, child_fault_survival=True,
+        useful_application_count=0, prepared_child_stop_native_tested=False,
+        owner_death_recovery=False, general_cleanup_retry=False, full_stack_bound_proven=False,
+        canonical_full_replay_performed=False, merge_qualified=False, production_ready=False)
+    gate["current_shell_process_qualification"] = record
+    gate["current_shell_process_metadata"] = dict(cycle=274, status="pass", tests_passed=264,
+        unittest_elapsed_seconds=54.213, capture_elapsed_seconds=55.297,
+        log_sha256="1FFB53154DD49B979CA74A12036CB35140604AB713212EB45A5536458AAEDDB3",
+        retained_failed_assertion_count=1,
+        failed_log_sha256="FD7195D451289107395E0FE7C27F8C1248427156DD4EF1ADA4E9C64E5E4F56B2",
+        repair="exact kernel source inventory includes new native interactive dispatcher:115 files, frozen entry inputs remain79",
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_shell_process"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=274, selected_stage="USI-3", session_contract="PSHELLPROC1", receipt_path=path,
+        receipt_section="native_execution", native_execution_evidence_cycle=274,
+        native_execution_replayed_this_cycle=True, native_execution_status="shell_process_control_fault_survival_and_legacy_shell_pass",
+        shell_native_execution_evidence_cycle=274, shell_native_execution_replayed_this_cycle=True,
+        shell_application_launch=True, shell_launch_catalogue_is_diagnostic=True, useful_application_count=0,
+        shell_process_status=True, generation_bound_restart=True, child_fault_survival=True,
+        bundled_files=False, owner_death_recovery=False, general_cleanup_retry=False,
+        prepared_child_stop_native_tested=False, retained_kernel_sources_unchanged=False,
+        current_shell_processes=6, kernel_image_pages=112, kernel_remaining_capacity_pages=96,
+        default_profile_build_cycle=274, default_profile_pages=208, default_profile_replayed_this_cycle=False,
+        default_relro_padding_bytes=120, full_stack_bound_proven=False, local_keyboard_display=False)
+    lane["stages"]["USI-3"] = "partial_shell_lifecycle_and_fault_survival_verified_cleanup_retry_and_owner_death_pending"
+    lane["stages"]["USI-4"] = "partial_native_shell_process_controls_files_useful_apps_and_local_input_pending"
+    evidence = "Cycle274: real CPL3 shell start/stop/status/restart uses generation-bound factory/process capabilities and deferred PCOMP1 completion after reclamation. Three new guests prove two worker/fault generations, child UD2 survival and denied factory; three fresh legacy-shell guests pass.512 kernel and78 user tests per profile,10 independent programs (7 unchanged); control shell6720 bytes,worker491,legacy shell3621. Normal integration112/208 pages,legacy113; default build208,36 stack pages. Two guarded boot failures were repaired by in-place peer construction (local frame69896->48680 bytes), without raising stack or image limits. " + checkpoint
+    gap = "Retain post-execution cleanup ownership and retry; qualify owner death/orphans and prepared-child stop before wider app integration. Full stack bound remains unproven despite repaired guarded boot. Add read-only bundled-file service and two useful separate applications, then sustained optical ISO acceptance. Diagnostic worker/fault tasks are not useful apps. Preserve16384-byte RX cap,8 mappings/4 frame bindings,32 PMM records and208-page default capacity. General executable trust, writable data/heap, local input/display, efficient idle and exact-candidate canonical gates remain open. Complete robust microkernel/PDC/PooleGlyph/PooleGlass work continues after usable ISO."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N9", "N13", "N14", "N16", "N18", "N20", "N36"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 274 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N13-USERSPACE-ISO-001", "FLAG-N36-EVIDENCE-STORAGE-001"):
+            flag["evidence"].append(checkpoint)
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["closure_condition"] += " Cycle274: " + gap
+        if flag["id"] == "FLAG-N36-EVIDENCE-STORAGE-001":
+            flag["closure_condition"] += " Cycle274 preserves39 generated build/media archives with exact member hashes; automatic reservation and restore remain open."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Retain cleanup recovery and owner-death safety, then bundled files, useful apps and ISO",
+        entry_evidence=[checkpoint, path, "docs/native-shell-process.md", "docs/native-userspace-integration-iso.md"],
+        exit_evidence=["retained cleanup ownership/retry and native owner-death/orphan policy",
+            "prepared-child stop and complete stack/resource bounds; preserve process controls and fault survival",
+            "read-only bundled files and two useful separately launched apps, not diagnostic counters",
+            "optical ISO sustained interaction; canonical gates before main; full robust microkernel afterward"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1415)
+    parser.add_argument("--test-count", type=int, default=1419)
     parser.add_argument("--status-date", default="2026-10-13")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

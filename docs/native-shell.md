@@ -29,6 +29,12 @@ ISO session is provided by this increment. Builtins are not the two useful apps.
 
 ## Build And Admission
 
+Cycle274 update: the earlier shell is3621 bytes and passes three fresh regression
+guests. The separate6720-byte PooleControlShell adds real process commands and
+fault survival in another three guests. Ten binaries reproduce with78 user tests
+per profile. See [process integration](native-shell-process.md). The older numbers
+below describe historical increments, not the current program inventory.
+
 Cycle273 update: the bounded loader/extractor now permits up to four RX pages.
 Eight programs reproduce with60 user tests per profile. The3569-byte shell itself
 is unchanged; its interactive guest evidence below remains Cycle270, not a fresh
@@ -73,7 +79,9 @@ The reused PSESSION4 marker summary alone retains `shell=false`: kernel scheduli
 markers cannot prove command semantics. PSHELL1 adds exact independently built
 program identity and fresh challenge input/output before claiming a native shell.
 
-Next: connect genuine application lifecycle/status requests and a user-space
-read-only bundled-file service, then two useful separate applications and optical
-ISO acceptance. Multipage executable admission, trust, robust supervisor/cleanup,
-idle, full stack bounds and the complete production microkernel remain open.
+Cycle274 connects genuine diagnostic process lifecycle/status through
+`PooleControlShell`; see [PSHELLPROC1](native-shell-process.md). Next: retained
+cleanup recovery and owner-death handling, then a read-only bundled-file service,
+two useful separate applications and optical ISO acceptance. Bounded multipage
+admission is implemented; general executable trust, robust supervision, idle,
+full stack bounds and the complete production microkernel remain open.

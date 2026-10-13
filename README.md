@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle270 runs an actual isolated user-space
+**Current development checkpoint:** Cycle274 adds real shell start/stop/status
+and generation-bound restart. Child faults leave the shell and worker running;
+invalid launch authority rejects. Six fresh VM runs pass, including earlier-shell
+regression. Next: cleanup recovery, bundled files, two useful apps, then optical
+ISO acceptance. The diagnostic children are not the useful apps. Full robust
+microkernel development continues afterward. No usable integration ISO or new
+main qualification yet. [Evidence](docs/checkpoints/cycle274-native-shell-process-control.md).
+
+**Historical development checkpoint:** Cycle270 runs an actual isolated user-space
 serial shell with commands and line editing. Three fresh VM boots pass commands,
 clean close and denied-peer handling; seven binaries reproduce independently.
 Next: shell application control/status, bundled files and two useful separate apps,

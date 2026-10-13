@@ -123,6 +123,38 @@ pub struct ConsoleIpcBoot {
     pub send: u64,
     pub peer: crate::console_ipc::Peer,
 }
+
+#[inline(always)]
+pub fn control_shell(bytes: &[u8], version: u64) -> Result<(ConsoleIpcBoot, [u64; 2]), Error> {
+    let args = arguments::<6>(bytes, version)?;
+    if args[0] != b"control-shell" {
+        return Err(Error::Role);
+    }
+    let receive = handle(args[1])?;
+    let send = handle(args[2])?;
+    if receive == send {
+        return Err(Error::Handle);
+    }
+    Ok((
+        ConsoleIpcBoot {
+            port: None,
+            receive,
+            send,
+            peer: crate::console_ipc::Peer::from_packed(handle(args[3])?)
+                .map_err(|_| Error::Handle)?,
+        },
+        [handle(args[4])?, handle(args[5])?],
+    ))
+}
+
+#[inline(always)]
+pub fn diagnostic(bytes: &[u8], version: u64) -> Result<bool, Error> {
+    match arguments::<1>(bytes, version)?[0] {
+        b"worker" => Ok(false),
+        b"fault" => Ok(true),
+        _ => Err(Error::Role),
+    }
+}
 #[inline(always)]
 pub fn console_ipc(bytes: &[u8], version: u64, server: bool) -> Result<ConsoleIpcBoot, Error> {
     let (port, receive, send, peer) = if server {
@@ -180,10 +212,10 @@ pub fn decode(bytes: &[u8], version: u64, expected: Role) -> Result<Boot, Error>
 mod tests {
     use super::*;
     use std::vec::Vec;
-    fn block(args: [&[u8]; 3]) -> Vec<u8> {
+    fn block<const N: usize>(args: [&[u8]; N]) -> Vec<u8> {
         let mut bytes = std::vec![0; 96];
         bytes[..8].copy_from_slice(b"PSTART1\0");
-        bytes[16..24].copy_from_slice(&3u64.to_le_bytes());
+        bytes[16..24].copy_from_slice(&(N as u64).to_le_bytes());
         for (i, arg) in args.iter().enumerate() {
             let offset = bytes.len() as u64;
             bytes[32 + i * 8..40 + i * 8].copy_from_slice(&offset.to_le_bytes());
@@ -197,6 +229,45 @@ mod tests {
     }
     fn valid() -> Vec<u8> {
         block([b"init", b"0000000100010001", b"0000000100010002"])
+    }
+    #[test]
+    fn control_shell_has_exact_separate_console_and_factory_arguments() {
+        let args: [&[u8]; 6] = [
+            b"control-shell",
+            b"0000000100010001",
+            b"0000000100010002",
+            b"0000000100000002",
+            b"0000000100060001",
+            b"0000000100060002",
+        ];
+        let bytes = block(args);
+        let (boot, factories) = control_shell(&bytes, 1).unwrap();
+        assert_eq!(boot.port, None);
+        assert_eq!((boot.receive, boot.send), (0x100010001, 0x100010002));
+        assert_eq!(factories, [0x100060001, 0x100060002]);
+        for n in 0..bytes.len() {
+            assert!(control_shell(&bytes[..n], 1).is_err());
+        }
+        for index in 0..6 {
+            let mut bad = args;
+            bad[index] = b"invalid";
+            assert!(control_shell(&block(bad), 1).is_err());
+        }
+        let mut bad = args;
+        bad[2] = args[1];
+        assert!(control_shell(&block(bad), 1).is_err());
+        assert!(control_shell(&bytes, 2).is_err());
+        assert!(console_ipc(&bytes, 1, false).is_err());
+    }
+    #[test]
+    fn diagnostic_roles_are_exact_and_grant_no_handles() {
+        assert_eq!(diagnostic(&block([&b"worker"[..]]), 1), Ok(false));
+        assert_eq!(diagnostic(&block([&b"fault"[..]]), 1), Ok(true));
+        for role in [&b""[..], b"Fault", b"worker ", b"fault2"] {
+            assert!(diagnostic(&block([role]), 1).is_err());
+        }
+        assert!(diagnostic(&block([&b"worker"[..], b"authority"]), 1).is_err());
+        assert!(diagnostic(&block([&b"worker"[..]]), 0).is_err());
     }
     #[test]
     fn supervisor_policy_is_copied_and_bounded_without_minting_authority() {

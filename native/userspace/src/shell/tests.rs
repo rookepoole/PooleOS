@@ -214,3 +214,86 @@ fn sequence_exhaustion_fails_instead_of_wrapping() {
     assert_eq!(shell.poll(&mut channel), Err(Error::Sequence));
     assert_eq!(shell.sequence, u64::MAX);
 }
+
+struct Script(std::rc::Rc<std::cell::RefCell<VecDeque<((u64, u64, u64), (u64, u64))>>>);
+impl crate::supervisor::Calls for Script {
+    fn invoke(&mut self, number: u64, handle: u64, argument: u64) -> (u64, u64) {
+        let (expected, result) = self
+            .0
+            .borrow_mut()
+            .pop_front()
+            .expect("unexpected process call");
+        assert_eq!((number, handle, argument), expected);
+        result
+    }
+}
+fn control(input: &[u8], script: &[((u64, u64, u64), (u64, u64))], backpressure: bool) -> Console {
+    let queue = std::rc::Rc::new(std::cell::RefCell::new(script.iter().copied().collect()));
+    let policy =
+        processes::Processes::new([0x100060001, 0x100060002], Script(queue.clone())).unwrap();
+    let mut shell = Shell::with_commands(policy);
+    let mut console = Console {
+        input: input.iter().copied().collect(),
+        ..Console::default()
+    };
+    for i in 0..40000 {
+        console.blocked_send = backpressure && i % 3 != 0;
+        console.blocked_receive = backpressure && i % 4 != 0;
+        if shell.poll(&mut console).unwrap() {
+            assert!(queue.borrow().is_empty());
+            assert!(console.input.is_empty());
+            assert!(console.closed);
+            return console;
+        }
+    }
+    panic!("control shell did not terminate");
+}
+#[test]
+fn process_commands_survive_console_backpressure_without_duplicate_actions() {
+    let script = [
+        ((19, 0x100060001, 1), (6, 0)),
+        ((19, 0x100060001, 1), (0, 0x100050001)),
+        ((18, 0x100050001, 0), (6, 0)),
+        ((20, 0x100050001, 0), (0, 4 << 32)),
+        ((19, 0x100060002, 1), (0, 0x100050002)),
+        ((20, 0x100050002, 0), (0, (2 << 32) | 6)),
+        ((20, 0x100050001, 0), (0, 4 << 32)),
+        ((19, 0x100060001, 2), (0, 0x200050001)),
+        ((18, 0x200050001, 0), (6, 0)),
+        ((20, 0x200050001, 0), (0, 4 << 32)),
+    ];
+    let input = b"start worker\rexit\rstop worker\rstatus worker\rstart fault\rstatus fault\rstart worker\rstop worker\rstatus worker\rexit\r";
+    let unblocked = control(input, &script, false);
+    let blocked = control(input, &script, true);
+    assert_eq!(unblocked.output, blocked.output);
+    for text in [
+        &b"Stop tasks and check status before exit."[..],
+        b"worker: admitted",
+        b"worker: stop requested",
+        b"worker: cancelled",
+        b"fault: fault 0x00000006",
+        b"Bye.",
+    ] {
+        assert!(contains(&blocked.output, text));
+    }
+}
+#[test]
+fn unknown_and_corrupt_process_commands_never_call_the_kernel() {
+    let console = control(
+        b"start kernel\rstart worker extra\rstart worker\xff\r\x04",
+        &[],
+        true,
+    );
+    assert!(contains(&console.output, b"Unknown command."));
+    assert!(contains(&console.output, b"Invalid line."));
+}
+#[test]
+fn denied_launch_does_not_invent_a_task_or_prevent_close() {
+    let console = control(
+        b"start worker\rstatus worker\rexit\r",
+        &[((19, 0x100060001, 1), (5, 0))],
+        true,
+    );
+    assert!(contains(&console.output, b"worker: denied"));
+    assert!(contains(&console.output, b"worker: not started"));
+}
