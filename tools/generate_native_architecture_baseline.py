@@ -24,6 +24,14 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle278-native-deferred-cleanup.md",
+    "docs/native-deferred-cleanup.md",
+    "runs/native-deferred-cleanup-readiness.json",
+    "native/kernel/src/scheduler/reclamation.rs",
+    "native/kernel/src/user_entry/task/cleanup.rs",
+    "native/kernel/src/user_entry/cleanup_tests.rs",
+    "runtime/native_deferred_cleanup.py",
+    "tests/test_native_deferred_cleanup.py",
     "docs/checkpoints/cycle277-native-owner-death.md",
     "docs/native-job-lifecycle.md",
     "runs/native-owner-death-readiness.json",

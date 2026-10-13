@@ -1,15 +1,41 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-13
-Plan version: 2.180.0-native-owner-death
-Roadmap cycle: PooleOS Cycle 277
+Plan version: 2.181.0-native-deferred-cleanup
+Roadmap cycle: PooleOS Cycle 278
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 277: Native Parent-Death Cleanup
+## Cycle 278: Native Scheduled Cleanup
+
+Stopped tasks now retain their memory and identity in a non-wakeable scheduler
+wait while cleanup is retried between real user dispatches. Six native guests
+cover prepared and suspended children across two erase failures and192 independent
+dispatches before successful reclamation. Fifteen VM runs pass with regressions;
+540 kernel tests pass per debug/release profile,11 ownership doctests and12 focused
+Python oracle tests pass. Three-attempt exhaustion is host-tested, not yet native
+qualified. [Evidence and limits](checkpoints/cycle278-native-deferred-cleanup.md).
+
+Next implementation: read-only bundled-file service and shell list/read commands
+over capabilities, within the reviewed six-process layout. Then two useful
+separately launched applications, followed by optical ISO interaction. Before ISO
+acceptance, qualify live-parent deferred completion/restart, native exhaustion,
+multiple pending cleanup owners, waiting-child and pending/claimed request
+interleavings. Do not turn the entire robust-microkernel roadmap into a prerequisite
+for this bounded usable milestone. General supervision/restart, SMP cleanup,
+allocator-commit fault injection, complete stack proof and wider trust remain open.
+
+Normal114 pages, instrumented profiles115, default208/208;36 stack pages unchanged.
+Measured local frames49784/49800 bytes are not full call-chain/interrupt bounds.
+No phase or flag closes:40 phases301 subphases8996 requirements59 additions98 flags
+(43 open),20 gap groups.1432 Python tests and694 architecture bindings are
+inventories, not canonical execution. No new ISO, main merge or release is claimed.
+Full robust microkernel, PooleGlyph/PDC and accessible PooleGlass remain required.
+
+## Historical Cycle 277: Native Parent-Death Cleanup
 
 The kernel now retains a bounded child-ownership relationship after parent leases
 are removed. Six native shell-fault guests reclaim prepared/suspended children

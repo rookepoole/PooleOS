@@ -1,7 +1,7 @@
 use super::*;
 use task::job::Job;
 
-fn at(
+pub(super) fn at(
     owner: CpuImage<Hardware>,
     index: u8,
 ) -> (Slot<Hardware, StopDriver>, Rc<RefCell<StopControl>>, TaskId) {

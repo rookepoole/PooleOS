@@ -14564,13 +14564,86 @@ def apply_cycle277(roadmap: dict, test_count: int) -> dict:
             "bounded scheduled cleanup retry/backoff/exhaustion with retained owners and no early completion",
             "read-only file service and two useful separately launched apps in reviewed six-process capacity",
             "sustained optical ISO interaction; exact canonical gates before main; complete robust microkernel afterward"])
+    return apply_cycle278(roadmap, test_count)
+
+
+def apply_cycle278(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle278-native-deferred-cleanup.md"
+    path = "runs/native-deferred-cleanup-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle277_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=278, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 278
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-deferred-cleanup.md"]
+    gate["current_candidate_audit"]["cycle"] = 278
+    gate["current_focused_source_projection"]["cycle"] = 278
+    gate["qualification_status"] = "bounded_deferred_cleanup_pass_files_apps_ISO_and_canonical_gates_pending"
+    for name in ("current_owner_death_qualification", "current_owner_death_metadata"):
+        gate[name]["evidence_status"] = "historical_cycle277_not_current_candidate_qualification"
+    baseline["native_owner_death"]["evidence_status"] = "historical_cycle277_not_current_candidate_qualification"
+    record = dict(cycle=278, contract_id="PCLEANUP2", status="pass", receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        source_binding_count=len(receipt["native_execution"]["normal"]["source_bindings"]))
+    for key in ("kernel_tests_per_profile", "new_kernel_tests", "ownership_doctests", "initial_python_tests",
+                "guest_runs", "failed_guest_qualification_attempts", "deferred_guests", "prepared_deferred_guests",
+                "asynchronous_cleanup_recovery", "cleanup_scope", "first_dispatch_delay", "deferred_max_attempts",
+                "exhaustion_host_tested", "exhaustion_native_qualified", "multiple_pending_native_qualified",
+                "wall_time_backoff", "native_waiting_orphan_qualified", "supervisor_restart", "full_stack_bound_proven",
+                "independent_program_pairs_reverified", "user_programs_rebuilt_this_cycle", "useful_application_count",
+                "canonical_full_replay_performed", "merge_qualified", "production_ready"):
+        record[key] = receipt[key]
+    gate["current_deferred_cleanup_qualification"] = record
+    gate["current_deferred_cleanup_metadata"] = dict(cycle=278, status="pass", tests_passed=277,
+        unittest_elapsed_seconds=56.841, capture_elapsed_seconds=57.921,
+        log_sha256="1DBC9A8404B764799548B32275D96D96AE2FAE3A1E5200AF888750412FC766A9",
+        retained_failed_log_sha256="C9D762776CCF3FEEAC0E58FB59E0CD0C38F90D531E3BD90F7DD514A3D251772D",
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_deferred_cleanup"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=278, selected_stage="USI-4", session_contract="PCLEANUP2", receipt_path=path,
+        receipt_section="native_execution", native_execution_evidence_cycle=278,
+        native_execution_replayed_this_cycle=True, native_execution_status="bounded_scheduled_cleanup_and_regressions_pass",
+        shell_native_execution_evidence_cycle=278, shell_native_execution_replayed_this_cycle=True,
+        asynchronous_cleanup_recovery=True, general_cleanup_retry=False,
+        exhaustion_host_tested=True, exhaustion_native_qualified=False, multiple_pending_native_qualified=False,
+        kernel_image_pages=114, kernel_remaining_capacity_pages=94, prepared_profile_pages=115,
+        default_profile_build_cycle=278, default_profile_pages=208, default_profile_replayed_this_cycle=True,
+        default_relro_padding_bytes=120, integration_dispatcher_local_bytes=49784, prepared_dispatcher_local_bytes=49800,
+        bundled_files=False, useful_application_count=0, full_stack_bound_proven=False)
+    lane["stages"]["USI-3"] = "partial_native_deferred_cleanup_pass_broader_recovery_open"
+    evidence = "Cycle278: PCLEANUP2 retains failed cleanup in the task-slot owner and a non-wakeable scheduler wait; one due owner per dispatch,64/128/256-dispatch backoff, at most three deferred attempts. Six native prepared/suspended owner-death guests recover after two erase failures and192 independent dispatches. Fifteen VM qualifications pass including normal/prepared shell and default/denial controls.540 kernel tests per profile,11 ownership doctests,12 focused Python tests; unchanged10 program pairs reverified, not rebuilt. Normal114/instrumented115/default208 pages,36 stack pages; local frames49784/49800 not full proof. " + checkpoint
+    gap = "Next implement read-only bundled-file service and actual shell list/read commands over capabilities, then two useful separate apps in the six-role init/files/console/shell/app1/app2 layout. Keep32 PMM records,16384-byte RX,8 mappings/4 frame bindings unless separately reviewed. Before sustained optical ISO acceptance, qualify native live-parent deferred completion/restart, exhaustion, multiple pending owners, waiting-child and pending/claimed request interleavings. Host exhaustion is not native qualification; no wall-time/all-idle recovery, automatic exhausted-owner reset, general supervisor restart, partial allocator-commit injection or full stack/SMP guarantee. Keep default208/208 capacity and exact-candidate canonical gates explicit. Complete robust microkernel, PDC, PooleGlyph and accessible PooleGlass continue after the bounded usable ISO."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N9", "N13", "N14", "N16", "N18", "N20", "N36"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"][0] = "Historical Cycle277 gap; bounded dispatch-separated retry now covered, other portions remain: " + phase["current_gaps"][0]
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle278 source inventory: {test_count} Python tests discovered, full canonical qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N13-USERSPACE-ISO-001", "FLAG-N36-EVIDENCE-STORAGE-001"):
+            flag["evidence"].append(checkpoint)
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001": flag["closure_condition"] += " Cycle278 remaining work: " + gap
+        if flag["id"] == "FLAG-N36-EVIDENCE-STORAGE-001": flag["closure_condition"] += " Cycle278 retains38 verified build/media archives; automated reservation/restore remain open."
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Build read-only bundled files, then useful apps and optical ISO",
+        entry_evidence=[checkpoint, path, "docs/native-deferred-cleanup.md", "docs/native-userspace-integration-iso.md"],
+        exit_evidence=["capability-confined user-space file service with exact bounded path/offset/read semantics and actual shell commands",
+            "two useful separately launched applications, not diagnostic roles or shell builtins",
+            "remaining native cleanup and owner-death controls before sustained optical ISO acceptance",
+            "exact canonical gates before main and complete robust microkernel development after the usable ISO"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1429)
+    parser.add_argument("--test-count", type=int, default=1432)
     parser.add_argument("--status-date", default="2026-10-13")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

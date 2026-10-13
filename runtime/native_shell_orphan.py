@@ -17,7 +17,7 @@ def parse(line, event):
     if any(v >= 1<<64 for v in values): raise ValueError('job value overflow')
     return dict(zip(names,values))
 
-def validate_markers(markers, *, bad_owner=False, prepared_stop=False):
+def validate_markers(markers, *, bad_owner=False, prepared_stop=False, cleanup_window=None):
     holds = [(i,m) for i,m in enumerate(markers) if m.startswith(prepared.PREFIX)]
     if len(holds) != int(prepared_stop): raise ValueError('prepared hold count')
     dispatch = None
@@ -27,7 +27,8 @@ def validate_markers(markers, *, bad_owner=False, prepared_stop=False):
         root,dispatch,writes = map(int,match.groups())
         if not 0 < dispatch < 1<<63 or writes != 2*(dispatch-1): raise ValueError('prepared exposure')
     base_markers = [m for m in markers if not m.startswith((PREFIX,prepared.PREFIX))]
-    base = cleanup.validate_markers(base_markers,bad_owner=bad_owner,prepared_dispatch=dispatch,owner_death=True)
+    base = (control.validate_markers(base_markers,bad_owner=bad_owner,prepared_dispatch=dispatch,owner_death=True,cleanup_window=cleanup_window)
+        if cleanup_window else cleanup.validate_markers(base_markers,bad_owner=bad_owner,prepared_dispatch=dispatch,owner_death=True))
     observed = [(i,m) for i,m in enumerate(markers) if m.startswith(PREFIX)]
     if len(observed) != 3: raise ValueError('job lifecycle count')
     owner,child,drained = [parse(item[1],event) for item,event in zip(observed,FIELDS)]
@@ -37,16 +38,19 @@ def validate_markers(markers, *, bad_owner=False, prepared_stop=False):
     death = retires[3]['dispatches']
     if owner != dict(task=3,generation=1,root=base['start']['root3'],children=2,dispatches=death):
         raise ValueError('owner binding')
-    if child != dict(task=4,generation=1,root=admission['root'],prepared=int(prepared_stop),remaining=1,published=0,dispatches=death):
+    completed = cleanup_window[1] if cleanup_window else death
+    if cleanup_window and cleanup_window[0] != death: raise ValueError('cleanup detached from owner death')
+    if child != dict(task=4,generation=1,root=admission['root'],prepared=int(prepared_stop),remaining=0 if cleanup_window else 1,published=0,dispatches=completed):
         raise ValueError('orphan binding or false observer completion')
     independent_pages = sum(12+(base['program_bytes'][i]+4095)//4096 for i in range(3))
-    if drained != dict(children=0,owned_pages=independent_pages,dispatches=death): raise ValueError('job drain')
+    if drained != dict(children=0,owned_pages=independent_pages,dispatches=completed+int(cleanup_window is not None)): raise ValueError('job drain')
     def position(event, task):
         return next(i for i,m in enumerate(markers) if m.startswith('POOLEOS:CONTROL '+event+' ') and control.parse(m,event)['task']==task)
     parent_i,child_i,unused_i = position('RETIRE',3),position('RETIRE',4),position('UNUSED',5)
-    if not position('ADMIT',4) < observed[0][0] < parent_i < child_i < observed[1][0] < unused_i < observed[2][0]:
+    order = [position('ADMIT',4),observed[0][0],parent_i,unused_i,child_i,observed[1][0],observed[2][0]] if cleanup_window else [position('ADMIT',4),observed[0][0],parent_i,child_i,observed[1][0],unused_i,observed[2][0]]
+    if order != sorted(set(order)):
         raise ValueError('owner/orphan retirement order')
-    if retires[4]['dispatches'] != death or base['unused'][0]['dispatches'] != death:
+    if retires[4]['dispatches'] != completed or base['unused'][0]['dispatches'] != death:
         raise ValueError('cleanup not in owner retirement window')
     if prepared_stop:
         if root != admission['root'] or not position('ADMIT',4) < holds[0][0] < observed[0][0] or not admission['dispatches'] < dispatch < death:
@@ -55,7 +59,7 @@ def validate_markers(markers, *, bad_owner=False, prepared_stop=False):
         after = [control.parse(m,'RUN')['dispatches'] for m in markers[holds[0][0]+1:] if m.startswith('POOLEOS:CONTROL RUN ')]
         if not after or not (before[-1] if before else 0) < dispatch <= after[0]: raise ValueError('hold sample window')
     return dict(base,job_contract='PJOB1',owner_death_recovery=True,owner=owner,orphan=child,drained=drained,
-                prepared_stop=prepared_stop,held_dispatch=dispatch,asynchronous_cleanup_recovery=False,
+                prepared_stop=prepared_stop,held_dispatch=dispatch,asynchronous_cleanup_recovery=cleanup_window is not None,
                 general_owner_death_recovery=False,supervisor_restart=False)
 
 def negative_controls(markers, *, bad_owner=False, prepared_stop=False):

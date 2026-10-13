@@ -205,6 +205,10 @@ def _build_product(cargo: Path, env: dict[str, str], target_dir: Path, *, featur
                         ("development-shell-process",), ("development-shell-process-bad-owner",),
                         ("development-shell-cleanup-retry",), ("development-shell-cleanup-retry", "development-shell-process-bad-owner"),
                         ("development-shell-prepared-stop",), ("development-shell-prepared-stop", "development-shell-process-bad-owner"),
+                        ("development-shell-cleanup-retry", "development-shell-deferred-cleanup"),
+                        ("development-shell-cleanup-retry", "development-shell-process-bad-owner", "development-shell-deferred-cleanup"),
+                        ("development-shell-prepared-stop", "development-shell-deferred-cleanup"),
+                        ("development-shell-prepared-stop", "development-shell-process-bad-owner", "development-shell-deferred-cleanup"),
                         ("development-session-capacity",), ("development-session-capacity-bad-startup",)):
         raise QualificationError("unreviewed kernel build feature set")
     _run(

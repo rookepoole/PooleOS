@@ -145,4 +145,20 @@ impl<const N: usize> Job<N> {
         self.children[index] = None;
         Ok(outcome)
     }
+
+    pub fn reclaim_deferred_child<H: Cpu, D: Driver, M: TableMemory>(
+        &mut self,
+        child: &mut Slot<H, D>,
+        id: TaskId,
+        manager: &mut PhysicalMemoryManager,
+        memory: &mut M,
+        scheduler: &crate::scheduler::Scheduler,
+    ) -> Result<cleanup::Progress, Error> {
+        let index = self.member(child, id)?;
+        let progress = child.reclaim_deferred(id, manager, memory, scheduler)?;
+        if matches!(progress, cleanup::Progress::Complete(_)) {
+            self.children[index] = None;
+        }
+        Ok(progress)
+    }
 }

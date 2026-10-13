@@ -54,7 +54,14 @@ also reject owner-death-invalidated pending and claimed permits. Host tests are
 not native interleaving evidence. Ordinary shell and prepared-stop regression
 guests verify that normal clean-close behavior has not changed.
 
-## Remaining Work
+## Cycle278 Follow-Up
+
+[Scheduled retained cleanup](native-deferred-cleanup.md) now keeps the dispatcher
+running across memory/readback errors. Six fresh prepared/suspended owner-death
+guests cover dispatch-separated failure/retry; job membership survives until
+success. Cycle277 evidence above remains historical and unchanged.
+
+## Remaining Work At Cycle277
 
 Qualify native waiting children and pending/claimed request interleavings across
 parent death. Add bounded scheduled cleanup retry, backoff/exhaustion and retained

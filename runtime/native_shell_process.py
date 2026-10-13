@@ -20,7 +20,7 @@ def parse(line: str, event: str) -> dict:
     if any(v >= 1 << 64 for v in values): raise ValueError('observation overflow')
     return dict(zip(names, values))
 
-def validate_markers(markers: list[str], *, bad_owner: bool = False, prepared_dispatch: int | None = None, owner_death: bool = False) -> dict:
+def validate_markers(markers: list[str], *, bad_owner: bool = False, prepared_dispatch: int | None = None, owner_death: bool = False, cleanup_window: tuple[int, int] | None = None) -> dict:
     if prepared_dispatch is not None and (type(prepared_dispatch) is not int or not 0 < prepared_dispatch < 1 << 64):
         raise ValueError('invalid prepared dispatch')
     if len(markers) < 40: raise ValueError('incomplete process session')
@@ -46,6 +46,7 @@ def validate_markers(markers: list[str], *, bad_owner: bool = False, prepared_di
     admits, retires, unused, samples = [], [], [], []
     previous_calls, previous_ticks = [0]*6, [0]*6
     frozen = {}
+    cleanup_frozen = None
     last_event = 0
     for marker in markers[30:]:
         event = next((e for e in FIELDS if marker.startswith('POOLEOS:CONTROL '+e+' ')), None)
@@ -54,7 +55,7 @@ def validate_markers(markers: list[str], *, bad_owner: bool = False, prepared_di
         dispatches = v['dispatches']
         last_sample = samples[-1]['dispatches'] if samples else 0
         if event != 'RUN':
-            if not last_sample < dispatches <= last_sample+64 or dispatches < last_event:
+            if not (last_sample <= dispatches if cleanup_window else last_sample < dispatches) or dispatches > last_sample+64 or dispatches < last_event:
                 raise ValueError('event ordering')
             last_event = dispatches
             task = v['task']
@@ -93,6 +94,8 @@ def validate_markers(markers: list[str], *, bad_owner: bool = False, prepared_di
             owned.remove(task); unused.append(v)
         else:
             expected_flushes = sum(r['task'] == 4 and r['calls'] > 0 for r in retires)
+            if cleanup_window and cleanup_window[0] <= dispatches < cleanup_window[1] and prepared_dispatch is None:
+                expected_flushes += 1
             held = int(prepared_dispatch is not None and dispatches >= prepared_dispatch)
             if dispatches != (len(samples)+1)*64 or dispatches < last_event or v['cr3_writes'] != 2*(dispatches-held)+expected_flushes or v['extra_flushes'] != expected_flushes:
                 raise ValueError('dispatch/flush accounting')
@@ -106,6 +109,10 @@ def validate_markers(markers: list[str], *, bad_owner: bool = False, prepared_di
                 if j < (3 if owner_death else 2) and (pair[0] <= previous_calls[j] or pair[1] <= previous_ticks[j]): raise ValueError('survivor stopped progressing')
                 if j not in live and pair != frozen.setdefault(j, pair): raise ValueError('retired image resumed')
                 previous_calls[j], previous_ticks[j] = pair
+            if cleanup_window and cleanup_window[0] <= dispatches < cleanup_window[1]:
+                pair = (v['calls4'],v['ticks4'])
+                if cleanup_frozen is None: cleanup_frozen = pair
+                if pair != cleanup_frozen: raise ValueError('cleanup-wait task resumed')
             samples.append(v)
     final_generations = [1,0] if owner_death else [2,0 if bad_owner else 2]
     survivors = {0,1,2} if owner_death else {0,1}

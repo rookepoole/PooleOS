@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: implementation started, Cycle 277, 2026-10-13. No new ISO exists yet.
+Status: implementation started, Cycle 278, 2026-10-13. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -45,13 +45,35 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | --- | --- | --- | --- |
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
-| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle277 partial: durable parent-death cleanup passes for prepared/suspended children with independent console survival. Native waiting-child coverage, asynchronous retry, general supervision/restart, loading/trust and efficient idle remain |
+| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle278 partial: native prepared/suspended parent-death cleanup now survives dispatch-separated erase failures. Native exhaustion/multiple pending owners/live-parent completion, waiting interleavings, general supervision, trust and idle remain |
 | USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle274 partial: actual serial shell lifecycle/status and diagnostic fault survival pass; files, two useful separate apps and local display/input remain |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
 ### Immediate Next Move
 
-Current: [Cycle277 parent-death cleanup](checkpoints/cycle277-native-owner-death.md).
+Current: [Cycle278 scheduled cleanup](checkpoints/cycle278-native-deferred-cleanup.md).
+Six native guests prove retained cleanup across192 independent dispatches, with
+15 qualified VMs including regressions. Exhaustion remains host-tested only.
+
+1. Implement a bounded read-only bundled-file service in user space and shell
+   list/read commands over granted IPC handles. Start with immutable public bundle
+   data, exact path/offset/length validation and no writable or host filesystem.
+2. Replace diagnostic roles with two useful separate apps. Preserve the six-role
+   init/files/console/shell/app1/app2 layout and32 PMM-record budget; do not silently
+   expand RX beyond16384 bytes, mappings or writable data/heap.
+3. Before optical acceptance, qualify native live-parent deferred completion and
+   restart, exhausted/multiple cleanup owners, waiting children and pending/claimed
+   requests across parent death. Host tests alone do not close these native gates.
+4. Package the exact optical ISO and exercise real input, files, both apps, invalid
+   requests, sustained interaction and fault/recovery on fresh boots. Keep broader
+   microkernel/PDC/PooleGlyph/PooleGlass development required after this milestone.
+
+Partial allocator commits, general supervision, full stack bounds, executable
+trust and efficient idle remain open. Default208/208 and36 stack pages unchanged.
+
+### Historical Cycle277 Next Move
+
+[Cycle277 parent-death cleanup](checkpoints/cycle277-native-owner-death.md).
 The durable job record now outlives parent leases. Six actual shell-fault guests
 reclaim prepared/suspended children and preserve the independent console, init
 and counter. Nine regression VMs also pass. No supervisor restart is claimed.

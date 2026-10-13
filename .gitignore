@@ -104,6 +104,7 @@ runs/*
 !runs/native-retained-cleanup-readiness.json
 !runs/native-prepared-cleanup-readiness.json
 !runs/native-owner-death-readiness.json
+!runs/native-deferred-cleanup-readiness.json
 !runs/native_initial_system_readiness.json
 !runs/native_microcode_readiness.json
 !runs/native_recovery_readiness.json

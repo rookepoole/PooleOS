@@ -15,6 +15,7 @@ use crate::{
 
 pub const CONTRACT_ID: &str = "PKUSER8";
 pub const CALLS_PER_DISPATCH: u8 = 64;
+pub mod cleanup;
 pub mod job;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -342,6 +343,7 @@ struct Owned<H: Cpu, D: Driver> {
     identity: job::Identity,
     cpu: Option<CpuImage<H>>,
     reclaim: Option<super::retirement::RetiredImage>,
+    deferred: Option<cleanup::Deferred>,
     driver: D,
     state: State,
     outcome: Option<Outcome>,
@@ -409,6 +411,7 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
             identity: job::Identity::new(id, image),
             cpu: Some(cpu),
             reclaim: None,
+            deferred: None,
             driver,
             state: State::Prepared,
             outcome: None,
@@ -529,6 +532,18 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
         manager: &mut PhysicalMemoryManager,
         memory: &mut M,
     ) -> Result<Outcome, Error> {
+        if self.owned(id)?.deferred.is_some() {
+            return Err(Error::State);
+        }
+        self.reclaim_inner(id, manager, memory)
+    }
+
+    fn reclaim_inner<M: TableMemory>(
+        &mut self,
+        id: TaskId,
+        manager: &mut PhysicalMemoryManager,
+        memory: &mut M,
+    ) -> Result<Outcome, Error> {
         let outcome = self.outcome(id)?;
         let task = self.owned_mut(id)?;
         if task.pending_charge.is_some() || task.runtime.unknown {
@@ -596,7 +611,7 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
         memory: &mut M,
     ) -> Result<DetachedImage, Error> {
         let task = self.owned_mut(id)?;
-        if task.pending_charge.is_some() || task.runtime.unknown {
+        if task.pending_charge.is_some() || task.runtime.unknown || task.deferred.is_some() {
             return Err(Error::State);
         }
         task.driver

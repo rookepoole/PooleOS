@@ -85,7 +85,10 @@ pub enum WaitKind {
     Mutex = 2,
     ExternalLock = 3,
     Ipc = 4,
+    Reclamation = 5,
 }
+
+mod reclamation;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Error {

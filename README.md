@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle277 adds durable parent-death cleanup.
+**Current development checkpoint:** Cycle278 adds scheduled retained cleanup.
+Six native guests keep independent services running across cleanup failures;
+15 VM runs pass including regressions, plus540 kernel tests per profile.
+Next: read-only bundled-file service, two useful user-space apps, then optical
+ISO qualification with the remaining recovery controls. No new ISO or main
+qualification yet. Full robust microkernel development continues afterward.
+[Evidence](docs/checkpoints/cycle278-native-deferred-cleanup.md).
+
+**Historical development checkpoint:** Cycle277 adds durable parent-death cleanup.
 Six native shell-fault guests reclaim prepared/running children while independent
 console/init/counter services continue;15 VM runs pass including regressions.
 Next: bounded waiting-child/scheduled cleanup recovery, read-only files, two useful
