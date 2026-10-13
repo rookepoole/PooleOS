@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 287
+Last roadmap reconciliation: PooleOS Cycle 288
 
-Cycle287 qualifies claimed RequestWait-blocked requester cancellation, stale-wait
+Cycle288 delivers a reproducible unsigned native user-space optical preview and
+a host serial-terminal launcher, with six optical guests and four strict
+4096-dispatch six-role progress windows. Production release layout still fails
+the unchanged policy; the explicit development layout is qualified separately.
+No native GUI, physical keyboard/hardware, signing, persistence or networking is
+claimed. Resume shell-triggered waiting cancellation and the complete robust
+microkernel; all N0-N39, PooleGlyph/PDC, PooleGlass and production gates remain.
+[Evidence](checkpoints/cycle288-native-userspace-iso.md).
+
+Historical Cycle287 qualifies claimed RequestWait-blocked requester cancellation, stale-wait
 rejection and diagnostic-service late-reply denial on three fresh guests, plus
 six ordinary application and file-control regressions. The actual optical ISO
 and interactive VM launcher are next. Generalized interleaving/recovery work

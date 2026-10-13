@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from runtime import native_app_session as probe, native_shell, native_console, native_session
 from runtime import native_cleanup_exhaustion as exhaustion
+from runtime import native_userspace_iso as optical
 from tools import qualify_native_console_ipc as shared, qualify_native_user_entry as source
 from tools.qualify_native_shell_process import program_inputs
 from tools.native_build_space import require_space
@@ -36,7 +37,7 @@ def retirement_barriers(payload):
 
 
 class Interaction(shared.Interaction):
-    def __init__(self, case, deferred_cleanup=False, file_controls=False, exhaust_cleanup=False):
+    def __init__(self, case, deferred_cleanup=False, file_controls=False, exhaust_cleanup=False, sustained=False):
         super().__init__(case.sent, False)
         self.case, self.step, self.expected = case, 0, native_shell.BANNER
         self.barriers = cleanup_barriers(case.sent) if deferred_cleanup else {}
@@ -46,6 +47,9 @@ class Interaction(shared.Interaction):
         self.exhaust_cleanup = exhaust_cleanup
         self.exhaustion_barrier = case.sent.index(b'stop numbers\r')+len(b'stop numbers\r') if exhaust_cleanup else None
         self.exhaustion_observed = False
+        self.sustained_barrier = case.sent.index(b'start numbers\r')+len(b'start numbers\r') if sustained else None
+        self.sustained_first = None
+        self.sustained_evidence = None
 
     def poll(self, debug):
         if self.sock is None:
@@ -64,6 +68,15 @@ class Interaction(shared.Interaction):
         runs = [probe.parse(m,'RUN') for m in markers if m.startswith('POOLEOS:APPS RUN ')]
         exhausted = [probe.cleanup.parse(m,'EXHAUSTED') for m in markers if m.startswith(probe.cleanup.PREFIX+'EXHAUSTED ')]
         if runs and runs[-1]['dispatches'] >= 128 and application == self.expected and self.step < len(self.case.steps):
+            if self.step == self.sustained_barrier:
+                if self.sustained_first is None:
+                    ready = [s for s in runs if s['live_mask'] == 63 and
+                             all(s[f'calls{i}'] > 0 and s[f'ticks{i}'] > 0 for i in range(6))]
+                    if not ready: return False
+                    self.sustained_first = ready[-1]['dispatches']
+                end = self.sustained_first + optical.SUSTAINED_DISPATCHES
+                if runs[-1]['dispatches'] < end: return False
+                self.sustained_evidence = optical.validate_sustained(runs, self.sustained_first, end)
             if self.step == self.exhaustion_barrier:
                 if {(v['task'],v['generation']) for v in exhausted} != {(4,1),(5,1)}: return False
                 self.exhaustion_observed = True
@@ -95,14 +108,16 @@ def main():
     parser.add_argument('--file-controls', action='store_true')
     parser.add_argument('--exhaust-cleanup', action='store_true')
     parser.add_argument('--claimed-requester', action='store_true')
+    parser.add_argument('--optical', action='store_true')
     args = parser.parse_args(); work, programs = args.work_dir.resolve(), args.program_dir.resolve()
-    if sum((args.deferred_cleanup,args.file_controls,args.exhaust_cleanup,args.claimed_requester)) > 1: parser.error('separate control profiles required')
+    if sum((args.deferred_cleanup,args.file_controls,args.exhaust_cleanup,args.claimed_requester,args.optical)) > 1: parser.error('separate control profiles required')
     if not work.is_relative_to(ROOT/'outputs') or not programs.is_relative_to(ROOT/'outputs'):
         parser.error('workspace output paths required')
     storage = require_space(work); work.mkdir(parents=True, exist_ok=False)
     before = source.source_bindings()
-    report = dict(cycle=287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
-                  contract_id='PCLAIM1' if args.claimed_requester else 'PCLEANUP3' if args.exhaust_cleanup else 'PFILECONTROL1' if args.file_controls else 'PAPPRECOVERY1' if args.deferred_cleanup else 'PAPPSESSION1',
+    report = dict(cycle=288 if args.optical else 287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
+                  contract_id=optical.CONTRACT if args.optical else 'PCLAIM1' if args.claimed_requester else 'PCLEANUP3' if args.exhaust_cleanup else 'PFILECONTROL1' if args.file_controls else 'PAPPRECOVERY1' if args.deferred_cleanup else 'PAPPSESSION1',
+                  optical=args.optical, optical_images={},
                   claimed_requester=args.claimed_requester,
                   exhaust_cleanup=args.exhaust_cleanup,
                   file_controls=args.file_controls,
@@ -118,6 +133,7 @@ def main():
         lock, profile = shared.tier0.validate_contracts(ROOT)
         qemu = shared.tier0._require_workspace_tool_path(shared.tier0.DEFAULT_QEMU_ROOT, ROOT)
         shared.tier0.verify_local_launch_runtime(lock, qemu, ROOT)
+        if args.optical: profile = optical.optical_profile(profile)
         print('Build two application kernels and a stale-file-grant control', flush=True)
         extra = ('development-shell-deferred-cleanup',) if args.deferred_cleanup else ()
         normal_features=('development-file-controls',) if args.file_controls else ('development-applications',)+extra
@@ -149,18 +165,32 @@ def main():
             if media != shared.load.build_media_bytes(development, config, manifest, image, files): raise ValueError('media mismatch')
             inspected = shared.load.inspect_media_bytes(media)
             path = work/f'{name}.img'; path.write_bytes(media)
+            if args.optical:
+                variant = 'bad-file' if bad_file else 'applications'
+                license_text = (ROOT/'LICENSE').read_bytes()
+                iso, iso_report = optical.build_iso(media, license_text, variant)
+                if iso != optical.build_iso(media, license_text, variant)[0]: raise ValueError('optical build mismatch')
+                iso_report['architecture'] = optical.development_architecture(iso)
+                if iso_report['architecture']['status'] != 'pass': raise ValueError('optical architecture rejected')
+                if name == 'applications-2' and iso_report['iso_sha256'] != report['optical_images']['applications-1']['iso_sha256']:
+                    raise ValueError('normal optical images differ')
+                path = work/(optical.PRIMARY_NAME if name == 'applications-1' else name+'.iso')
+                path.write_bytes(iso)
+                iso_report.update(path=path.relative_to(ROOT).as_posix(), independent_builds_equal=True)
+                report['optical_images'][name] = iso_report
             run_dir = work/name; run_dir.mkdir()
             scenario=probe.file_control_scenario if args.file_controls else probe.scenario
             if args.exhaust_cleanup: scenario=exhaustion.scenario
             case = probe.file_control_scenario(secrets.token_hex(8),bad_file=bad_file,claimed_requester=True) if args.claimed_requester else scenario(secrets.token_hex(8), bad_file=bad_file)
-            interaction = Interaction(case, args.deferred_cleanup, args.file_controls or args.claimed_requester, args.exhaust_cleanup)
+            interaction = Interaction(case, args.deferred_cleanup, args.file_controls or args.claimed_requester, args.exhaust_cleanup, sustained=args.optical)
             validator = (lambda m: exhaustion.validate_markers(m,bad_file=bad_file)) if args.exhaust_cleanup else (lambda m: probe.validate_markers(m, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester))
             print(f'Native application session {name}: frozen 240-second bound', flush=True)
             try:
                 run, _, handoff = shared.boot._execute_once(name, lock, profile, qemu, path, run_dir, 240,
                     marker_validator=validator,
                     marker_extractor=native_session.extract_markers, hpet_msi=True, pause_on_completion=True,
-                    console_port=interaction.port, console_poll=interaction.poll)
+                    console_port=interaction.port, console_poll=interaction.poll,
+                    capture_log_limit_bytes=16*1024*1024 if args.optical else None)
             finally:
                 interaction.close()
                 sent, output = interaction.payload[:interaction.sent], bytes(interaction.received)
@@ -171,6 +201,10 @@ def main():
             if interaction.observed_barriers != set(interaction.barriers): raise ValueError('cleanup barriers not observed')
             if interaction.observed_retirements != set(interaction.retirements): raise ValueError('retirement barriers not observed')
             if args.exhaust_cleanup and not interaction.exhaustion_observed: raise ValueError('exhaustion barrier not observed')
+            if args.optical:
+                if not interaction.sustained_evidence: raise ValueError('sustained optical window missing')
+                run['sustained_window'] = interaction.sustained_evidence
+                run['iso_sha256'] = iso_report['iso_sha256']
             run['interaction'] = dict(nonce=case.nonce, input_hex=sent.hex(), output_hex=output.hex(),
                 input_sha256=shared.sha(sent), output_sha256=shared.sha(output), exact_interaction=True,
                 cleanup_barriers_observed=len(interaction.observed_barriers),
@@ -186,6 +220,28 @@ def main():
             run['hostile_marker_cases_rejected'] = exhaustion.negative_controls(run['markers'],bad_file=bad_file) if args.exhaust_cleanup else probe.negative_controls(run['markers'], bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester)
             run.update(media_sha256=shared.sha(media), kernel_sha256=shared.sha(image))
             report['guest_runs'].append(run)
+        if args.optical:
+            ordinary, report['ordinary_boot_build'] = shared.boot._build_and_test(ROOT/'.toolchains/rust-1.97.0', work/'ordinary')
+            if ordinary == development or b'POOLEBOOT/0.1 TRANSFER_ARM PASS' in ordinary:
+                raise ValueError('ordinary/development boot boundary differs')
+            manifest = shared.load.canonical_manifest_bytes(kernel, files)
+            disk = shared.load.build_media_bytes(ordinary, config, manifest, kernel, files)
+            (work/'ordinary-denial.img').write_bytes(disk)
+            iso, inspection = optical.build_iso(disk, license_text, 'ordinary-denial')
+            if iso != optical.build_iso(disk, license_text, 'ordinary-denial')[0]: raise ValueError('ordinary optical mismatch')
+            path = work/'ordinary-denial.iso'; path.write_bytes(iso)
+            inspection.update(path=path.relative_to(ROOT).as_posix(), independent_builds_equal=True)
+            report['optical_images']['ordinary-denial'] = inspection
+            run_dir = work/'ordinary-denial'; run_dir.mkdir()
+            print('Ordinary optical unsigned-denial control: frozen 45-second bound', flush=True)
+            run, _, _ = shared.boot._execute_once('ordinary-denial', lock, profile, qemu, path, run_dir, 45,
+                marker_validator=shared.load.validate_markers, marker_extractor=native_session.extract_markers, hpet_msi=True)
+            if any('USER-ROOT' in m or 'POOLEOS:KERNEL:ENTRY' in m for m in run['markers']):
+                raise ValueError('ordinary boot entered development path')
+            shared.load.validate_oracle_binding(run['marker_summary'], shared.load.inspect_media_bytes(disk), run['pbp1_transcript'])
+            run['iso_sha256'] = inspection['iso_sha256']
+            report['ordinary_denial'] = run
+            report['iso_built'] = True
         if before != source.source_bindings() or program_inputs(programs, env, selected) != report['program_build']:
             raise ValueError('source or input drift')
         report.update(status='pass', bundled_files=True, useful_applications=1 if args.file_controls or args.claimed_requester else 2)
@@ -193,7 +249,7 @@ def main():
         report['failure'] = f'{type(error).__name__}: {error}'; print(report['failure'], flush=True)
     report['source_unchanged'] = before == source.source_bindings()
     (work/'receipt.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8',newline='\n')
-    print(f"{report['contract_id']} {report['status']}; useful apps={report['useful_applications']} ISO=0 production=0", flush=True)
+    print(f"{report['contract_id']} {report['status']}; useful apps={report['useful_applications']} ISO={int(report['iso_built'])} production=0", flush=True)
     return int(report['status'] != 'pass')
 
 

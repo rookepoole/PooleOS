@@ -24,6 +24,13 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle288-native-userspace-iso.md",
+    "docs/native-userspace-preview.md",
+    "runs/native-userspace-iso-readiness.json",
+    "runtime/native_userspace_iso.py",
+    "tools/launch_native_userspace_iso.py",
+    "tests/test_native_userspace_iso.py",
+    "Launch-UserSpace-Preview.cmd",
     "docs/checkpoints/cycle287-native-claimed-requester.md",
     "runs/native-claimed-requester-readiness.json",
     "native/userspace/src/bin/waiting_file_probe.rs",

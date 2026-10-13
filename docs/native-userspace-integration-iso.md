@@ -1,6 +1,8 @@
 # Native User-Space Integration ISO
 
-Status: bounded claimed/waiting requester controls verified, Cycle 287, 2026-10-13. Optical integration is next; no new ISO exists yet.
+Status: unsigned one-BSP optical preview verified, Cycle 288, 2026-10-13.
+The current ISO and host serial-terminal launcher are available; see
+[launch instructions](native-userspace-preview.md). This is not a native GUI.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -46,10 +48,26 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle287 partial: claimed waiting requester cancellation and service survival qualify. Cycle286 delayed/exhausted cleanup remains historical; general supervision, races, trust and idle remain |
-| USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle287 partial: ordinary apps and queued/malformed/untracked file controls replayed; claimed waiting diagnostics pass separately. Local display/input and optical acceptance remain |
-| USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
+| USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle288 bounded serial preview verified on optical boots; local display/input and general service qualification remain |
+| USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Cycle288 partial: reproducible unsigned development ISO, six optical guests, actual host-terminal adapter; production layout/signing/hardware and generalized stress remain |
 
 ### Immediate Next Move
+
+Current: [Cycle288 optical preview](checkpoints/cycle288-native-userspace-iso.md).
+Two normal optical boots, stale-file control and ordinary unsigned denial pass.
+The launcher adds another strict session and an injected-key test of its actual
+terminal adapter. Four strict sessions each sustain all six roles for 4096
+dispatches. Prior cleanup/exhaustion/claimed-requester profiles are historical,
+not fresh optical replays. The production layout policy still fails this preview.
+
+1. Resume the robust microkernel with shell-triggered waiting cancellation and
+   generation-bound retirement; broaden request races, supervision and recovery.
+2. Keep efficient idle, job interruption, full stack bounds, local display/input,
+   final release layout and portable preview packaging visible as open work.
+3. Continue PooleGlyph/PDC, accessible PooleGlass and every N0-N39 production gate.
+   No main merge, signatures, release or production qualification is implied.
+
+### Historical Cycle287 Next Move
 
 Current: [Cycle287 claimed waiting requester](checkpoints/cycle287-native-claimed-requester.md).
 Three claimed-waiting, three ordinary application and three file-control guests

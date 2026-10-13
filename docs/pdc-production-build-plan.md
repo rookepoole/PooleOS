@@ -1,13 +1,53 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-13
-Plan version: 2.190.0-native-claimed-requester
-Roadmap cycle: PooleOS Cycle 287
+Plan version: 2.191.0-native-userspace-iso
+Roadmap cycle: PooleOS Cycle 288
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 288: Native User-Space Optical Preview
+
+The first current native user-space ISO exists: 66109440 bytes, independently
+rebuilt byte-identically and booted from read-only virtual optical media. Two
+normal sessions and a stale Numbers file-authority control pass the full native
+application oracle. Each includes 65 consecutive observations over 4096 dispatches
+with all six roles live and every role's call/timer counters strictly advancing.
+A fresh ordinary PooleBoot optical control still denies unsigned execution.
+
+The launcher passes a fourth strict application session and the actual terminal
+adapter passes a separate 557-keystroke scenario with exact native responses.
+That is six optical boots, not physical keyboard or GUI qualification. The image
+contains the existing native shell, read-only files, Text and Numbers. Both
+application kernels are directly byte-identical to Cycle287; no Rust kernel or
+user program changed. Twenty prior program pairs remain exactly source-bound.
+PooleBoot's development/ordinary builds independently reproduce; eight boot host
+tests pass for each build profile. Kernel/user host suites were not rerun.
+
+The preview uses the native loader's canonical twelve-file EFI layout. The
+unchanged production architecture policy still rejects four future release paths.
+The development-only check records that failure and rejects every other violation.
+This is not production-layout acceptance. The first layout failure, a synthetic
+fixture error, and the first optical guest's unrecognized DVD-ROM prelude remain
+preserved. Exact prelude tokens and negative tests repair console capture.
+
+[Launch instructions](native-userspace-preview.md).
+[Evidence](checkpoints/cycle288-native-userspace-iso.md).
+Next: shell-triggered cancellation of a waiting requester, then generalized
+interleaving/stress, supervision, exhausted-owner recovery, efficient idle,
+job interruption and full stack bounds. Track final release layout and portable
+preview packaging under the existing ISO/release work. Native display/input,
+PooleGlyph/PDC and accessible PooleGlass remain required. This preview does not
+replace any N0-N39 gate or qualify main, signatures, hardware or production.
+
+The focused metadata suite passes327 tests in83.987 seconds after correcting the
+architecture schema's stale757-file count to exactly764. The failed replay remains
+recorded. Inventories:1482 Python tests,764 architecture bindings,931 execution
+inputs and68 user-build inputs. No production phase/flag closes. Final staged
+verification follows this documentation closeout; full canonical replay is pending.
 
 ## Cycle 287: Claimed Waiting Requester Containment
 

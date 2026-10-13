@@ -8,6 +8,8 @@ CONTROL_PREFIX_LIMIT = 4096
 CONTROL_SEQUENCES = (b"\x1b[2J", b"\x1b[01;01H", b"\x1b[=3h",
     b'BdsDxe: loading Boot0001 "UEFI Misc Device" from PciRoot(0x0)/Pci(0x1,0x0)\r\n',
     b'BdsDxe: starting Boot0001 "UEFI Misc Device" from PciRoot(0x0)/Pci(0x1,0x0)\r\n',
+    b'BdsDxe: loading Boot0001 "UEFI QEMU DVD-ROM QM00001 " from PciRoot(0x0)/Pci(0x1F,0x2)/Sata(0x0,0xFFFF,0x0)\r\n',
+    b'BdsDxe: starting Boot0001 "UEFI QEMU DVD-ROM QM00001 " from PciRoot(0x0)/Pci(0x1F,0x2)/Sata(0x0,0xFFFF,0x0)\r\n',
     b"PooleOS native UEFI proof of life\r\n")
 START = re.compile(r"POOLEOS:SESSION START contract=PSESSION2 programs=3 bootstrap=PSTART1 abi=PSABI1 init_bytes=([0-9]+) counter_bytes=([0-9]+) console_bytes=([0-9]+) root0=(0x[0-9A-F]{16}) root1=(0x[0-9A-F]{16}) root2=(0x[0-9A-F]{16}) granted_handles=5 port=COM2 irq=0 diagnostics=0 production=0")
 RUN = re.compile(session.RUN.pattern.replace(" cpl=3", r" calls2=([0-9]+) ticks2=([0-9]+) console_dead=([01]) allocated_pages=([0-9]+) cpl=3"))

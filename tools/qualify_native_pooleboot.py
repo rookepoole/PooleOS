@@ -341,11 +341,14 @@ def _execute_once(
     pause_on_completion: bool = False,
     console_port: int | None = None,
     console_poll: Callable[[bytes], bool] | None = None,
+    capture_log_limit_bytes: int | None = None,
 ) -> tuple[dict[str, Any], bytes, bytes]:
     if (console_port is None) != (console_poll is None) or (console_port is not None and
             (type(console_port) is not int or not 1 <= console_port <= 65535 or not pause_on_completion)):
         raise ValueError("console capture requires a bounded loopback port, observer and paused snapshot")
     timer_options = _hpet_msi_options(hpet_msi)
+    if capture_log_limit_bytes is not None and (type(capture_log_limit_bytes) is not int or not 65536 <= capture_log_limit_bytes <= 16*1024*1024):
+        raise ValueError('bounded capture log limit required')
     firmware = {item["role"]: item for item in lock["firmware"]["files"]}
     vars_source = qemu_root / firmware["vars_template_copy_only"]["relative_path"]
     shutil.copyfile(vars_source, run_dir / profile["evidence_contract"]["vars_copy"])
@@ -371,13 +374,18 @@ def _execute_once(
             f"tcp:127.0.0.1:{port},server=on,wait=off",
         ]
     )
-    process = subprocess.Popen(
-        command,
-        cwd=ROOT,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.PIPE,
-        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-    )
+    error_log = tempfile.TemporaryFile() if capture_log_limit_bytes is not None else None
+    try:
+        process = subprocess.Popen(
+            command,
+            cwd=ROOT,
+            stdout=subprocess.DEVNULL,
+            stderr=error_log if error_log is not None else subprocess.PIPE,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+    except BaseException:
+        if error_log is not None: error_log.close()
+        raise
     client: _QmpClient | None = None
     try:
         client, greeting = _QmpClient.connect(port, process, timeout)
@@ -389,6 +397,10 @@ def _execute_once(
         frame_ready_observed = False
         completion_marker_observed = False
         while time.monotonic() < deadline:
+            if capture_log_limit_bytes is not None:
+                paths = [debug_path, serial_path, run_dir / profile['evidence_contract']['qemu_trace_log']]
+                if any(p.is_file() and p.stat().st_size > capture_log_limit_bytes for p in paths) or error_log.seek(0, 2) > capture_log_limit_bytes:
+                    raise QualificationError('capture log limit exceeded')
             raw_debug = debug_path.read_bytes() if debug_path.is_file() else b""
             if (
                 b"POOLEBOOT/0.1 ERROR" in raw_debug
@@ -444,7 +456,12 @@ def _execute_once(
         process.wait(timeout=10)
         if process.returncode != 0:
             raise QualificationError(f"QEMU QMP quit returned exit code {process.returncode}")
-        stderr = process.stderr.read() if process.stderr is not None else b""
+        if error_log is not None:
+            error_log.seek(0)
+            stderr = error_log.read(capture_log_limit_bytes+1)
+            if len(stderr) > capture_log_limit_bytes: raise QualificationError('stderr capture limit exceeded')
+        else:
+            stderr = process.stderr.read() if process.stderr is not None else b""
         marker_bytes = native_pooleboot.canonical_json_bytes(debug_markers)
         return (
             {
@@ -485,6 +502,7 @@ def _execute_once(
         if process.poll() is None:
             process.kill()
             process.wait()
+        if error_log is not None: error_log.close()
 
 
 def _recalculate_gpt_header(image: bytearray, header_lba: int, entries_crc: int) -> None:

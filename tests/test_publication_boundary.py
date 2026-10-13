@@ -80,6 +80,8 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-cleanup-exhaustion-readiness-private.json",
             "runs/native-claimed-requester-readiness-raw.json",
             "runs/native-claimed-requester-readiness-private.json",
+            "runs/native-userspace-iso-readiness-raw.json",
+            "runs/native-userspace-iso-readiness-private.json",
             "runs/native-console-ipc-private.json",
             "firmware/private/device.bin",
         )
@@ -108,7 +110,8 @@ class PublicationBoundaryTests(unittest.TestCase):
                      "runs/native-app-programs-readiness.json", "runs/native-startup-handoff-readiness.json",
                      "runs/native-app-shell-readiness.json", "runs/native-app-session-readiness.json",
                      "runs/native-app-recovery-readiness.json", "runs/native-file-controls-readiness.json",
-                     "runs/native-cleanup-exhaustion-readiness.json", "runs/native-claimed-requester-readiness.json"):
+                     "runs/native-cleanup-exhaustion-readiness.json", "runs/native-claimed-requester-readiness.json",
+                     "runs/native-userspace-iso-readiness.json"):
             for data, kind in ((fake_token, "secret_pattern"), (user_path, "absolute_user_path")):
                 self.assertTrue(any(item["type"] == kind for item in publication.inspect_public_blob(path, data)))
 
@@ -131,6 +134,7 @@ class PublicationBoundaryTests(unittest.TestCase):
 
     def test_native_toolchain_ledger_remains_explicitly_public(self) -> None:
         paths = (
+            "runs/native-userspace-iso-readiness.json",
             "runs/native_toolchain_qualification.json",
             "runs/native_model_readiness.json",
             "runs/native_pooleboot_readiness.json",

@@ -15254,13 +15254,89 @@ def apply_cycle287(roadmap: dict, test_count: int) -> dict:
             "fresh optical boots, sustained real input, fault containment and exact image binding",
             "documented interactive VM launcher with explicit unsigned serial-console limits",
             "continue robust microkernel and generalized stress afterward; canonical gates before main"])
+    return apply_cycle288(roadmap, test_count)
+
+
+def apply_cycle288(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle288-native-userspace-iso.md"
+    path = "runs/native-userspace-iso-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle287_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=288, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 288
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-userspace-preview.md"]
+    gate["current_candidate_audit"]["cycle"] = 288
+    gate["current_focused_source_projection"]["cycle"] = 288
+    gate["qualification_status"] = "native_userspace_optical_preview_verified_canonical_pending"
+    for name in ("current_native_claimed_requester_qualification", "current_native_claimed_requester_metadata"):
+        gate[name]["evidence_status"] = "historical_cycle287_not_current_candidate_qualification"
+    baseline["native_claimed_requester"]["evidence_status"] = "historical_cycle287_diagnostics_not_replayed_native_bytes_unchanged"
+    record = dict(cycle=288, contract_id="PUSIISO1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("guest_runs", "optical_application_qualification_guests", "ordinary_optical_denial_guests",
+                "launcher_qualification_guests", "terminal_adapter_guests", "sustained_dispatches_per_qualified_guest",
+                "iso_built", "iso_sha256", "iso_byte_count", "kernel_bytes_directly_equal_to_cycle287",
+                "physical_keyboard_tested", "local_display_input", "production_layout_passed", "production_ready",
+                "signed", "canonical_full_replay_performed", "merge_qualified"):
+        record[key] = receipt[key]
+    gate["current_native_userspace_iso_qualification"] = record
+    gate["native_userspace_iso_publication_repair"] = dict(cycle=288,
+        failed_capture_log_sha256="12ADA9030B1AF134E5F185C64114EB9DE50F4A7FDC7450359A694E63ABDCC762",
+        tests_passed_before_scan=55, indexed_paths=2000, violations=1,
+        reason="new_sanitized_receipt_not_explicitly_allowlisted",
+        repair="allow_exact_public_receipt_only_keep_raw_private_secret_and_user_path_rejections",
+        production_ready=False)
+    gate["current_native_userspace_iso_metadata"] = dict(cycle=288, status="pass", tests_passed=327,
+        unittest_elapsed_seconds=83.987, capture_elapsed_seconds=85.125,
+        log_sha256="6CF50A325B220AFD2EDDE74E166DEC57D79C5C74996722D21C33253E7E08ADD5",
+        prior_failed_attempt=dict(tests_run=327, failures=1, unittest_elapsed_seconds=84.113,
+            capture_elapsed_seconds=85.281,
+            log_sha256="14695695C9136A65434E0969DDBF5902156B70AC95BDB65E144242C2D02FA9AC",
+            reason="architecture_schema_still_required757_inputs_instead_of_exact764"),
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_userspace_iso"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=288, session_contract="PUSIISO1", receipt_path=path, receipt_section="native_execution",
+        native_execution_status="six_optical_guests_pass_unsigned_development_serial_preview",
+        native_execution_replayed_this_cycle=True, native_execution_evidence_cycle=288,
+        shell_native_execution_replayed_this_cycle=True, shell_native_execution_evidence_cycle=288,
+        optical_iso_built=True, optical_iso_sha256=receipt["iso_sha256"], host_serial_launcher=True,
+        physical_keyboard_tested=False, native_gui=False, production_layout_passed=False,
+        claimed_requester_controls_replayed_this_cycle=False, file_controls_replayed_this_cycle=False,
+        live_parent_deferred_replayed_this_cycle=False, cleanup_exhaustion_replayed_this_cycle=False,
+        kernel_profile="ordinary_applications_optical_and_separate_stale_file_control",
+        ordinary_pooleboot_denial_replayed_this_cycle=True, default_profile_replayed_this_cycle=False,
+        prepared_profile_replayed_this_cycle=False)
+    lane["stages"]["USI-4"] = "bounded_serial_optical_preview_verified_general_service_qualification_open"
+    lane["stages"]["USI-5"] = "partial_reproducible_unsigned_optical_preview_six_guests_production_gates_open"
+    evidence = "Cycle288: reproducible66109440-byte native optical ISO; two normal and one stale-file session, ordinary unsigned denial, strict launcher replay and actual terminal adapter with injected keys. Four strict application sessions each sustain six roles for4096 dispatches. Both application kernels are byte-identical to Cycle287. No Rust source changed. " + checkpoint
+    gap = "Resume shell-triggered waiting cancellation, then generalized request races/stress, supervision, exhausted-owner recovery, efficient idle, job interruption and full stack bounds. Production layout still fails four future release paths; unchanged policy and final layout remain required. Portable preview packaging, local display/input, drivers, persistence/networking, PooleGlyph/PDC and accessible PooleGlass remain. Historical diagnostic profiles are not fresh optical replays. No signing, hardware, full canonical or production qualification follows from this serial VM preview."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N5", "N13", "N14", "N16", "N18", "N36", "N38", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["evidence"].append(checkpoint)
+            flag["closure_condition"] += " Cycle288 bounded optical preview qualifies; this does not close production. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Resume robust microkernel: shell-triggered waiting cancellation",
+        entry_evidence=[checkpoint, path, "docs/native-userspace-preview.md"],
+        exit_evidence=["native shell-triggered waiting cancellation with exact generation and request ownership",
+            "surviving services and useful application regression without late-reply authority leaks",
+            "preserve usable optical preview and continue all N0-N39 production work"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1471)
+    parser.add_argument("--test-count", type=int, default=1482)
     parser.add_argument("--status-date", default="2026-10-13")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

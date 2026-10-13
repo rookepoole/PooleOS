@@ -11,7 +11,17 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle287 verifies cancellation of native apps
+**Current development checkpoint:** Cycle288 builds and boots the native user-space
+optical ISO. Six fresh optical guests pass: normal applications, stale file
+authority, ordinary unsigned-boot denial, launcher replay and the actual host
+terminal adapter. The shell can read bundled files, run Text/Numbers, and contain
+an application fault while its peer survives. This is an unsigned one-CPU VM
+preview with serial interaction, not a graphical desktop or production release.
+[Run the preview](docs/native-userspace-preview.md).
+[Evidence](docs/checkpoints/cycle288-native-userspace-iso.md).
+Complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass work continues.
+
+**Historical development checkpoint:** Cycle287 verifies cancellation of native apps
 blocked on already-claimed file requests, stale-wait rejection and late-reply
 denial in a diagnostic service. Nine final-source VM cases pass across claimed
 requesters, ordinary useful apps and file controls. All 18 prior user programs
