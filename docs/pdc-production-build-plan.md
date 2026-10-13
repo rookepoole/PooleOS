@@ -1,13 +1,48 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-13
-Plan version: 2.188.0-native-file-controls
-Roadmap cycle: PooleOS Cycle 285
+Plan version: 2.189.0-native-cleanup-exhaustion
+Roadmap cycle: PooleOS Cycle 286
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 286: Overlapping Native Cleanup Exhaustion
+
+Three fresh guests now stop both real applications and exhaust all three deferred
+cleanup attempts. Both job members and all 28 child pages remain owned. Child
+runtime and cleanup-write counters stay frozen after exhaustion; the shell and
+file service continue. Status/start/stop report retiring, exit is denied while
+children remain owned, and file reads plus a fresh echo challenge still work.
+This verifies safe retention, not successful recovery from exhausted cleanup.
+
+Three ordinary application and three successful delayed-cleanup guests also pass.
+All nine current-source cases use read-only virtual media, no networking, and the
+original 240-second guest bound. Three earlier exhaustion guests also passed but
+precede the final hostile-test expansion; their evidence is retained separately.
+The new opt-in profile does not change the production cleanup algorithm, user
+programs, user authority, task capacity or page limits. Kernel tests: 554 default
+and 573 application tests per debug/release profile, plus 26 ownership doctests.
+All 22 focused oracle tests pass. Exhaustion/deferred kernels use 122/208 pages;
+ordinary applications use 121/208; guarded stack remains 36 pages. Full call-chain
+stack bounds remain unproven. [Evidence](checkpoints/cycle286-native-cleanup-exhaustion.md).
+
+Next: native waiting/pending/claimed request interleavings, including claimed
+requester death, then actual optical ISO packaging and sustained fresh-boot input
+through a documented VM launcher. Input remains COM2 serial, not local display
+and keyboard. Default/prepared and file-control profiles were not replayed this
+cycle. General exhausted-owner recovery policy, supervision, efficient idle and
+job interruption remain; complete robust microkernel, PooleGlyph/PDC and accessible
+PooleGlass continue after the ISO. No production phase/flag or merge gate closes.
+
+Five superseded/failed build trees were copied and hash-verified before removing
+their workspace copies: 5856 files, 1880934049 bytes. Current passing evidence,
+shared host target and owner inputs were retained. Inventories: 1466 Python tests,
+751 architecture bindings, 917 execution inputs. Counts are not full qualification.
+The focused evidence/roadmap suite passes311 tests in73.915 seconds; final staged
+replay follows this documentation update. Full canonical qualification is pending.
 
 ## Cycle 285: Native File Controls
 

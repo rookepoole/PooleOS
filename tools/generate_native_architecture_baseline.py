@@ -24,6 +24,10 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle286-native-cleanup-exhaustion.md",
+    "runs/native-cleanup-exhaustion-readiness.json",
+    "runtime/native_cleanup_exhaustion.py",
+    "tests/test_native_cleanup_exhaustion.py",
     "docs/checkpoints/cycle285-native-file-controls.md",
     "runs/native-file-controls-readiness.json",
     "native/userspace/src/bin/file_probe.rs",

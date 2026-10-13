@@ -15108,13 +15108,82 @@ def apply_cycle285(roadmap: dict, test_count: int) -> dict:
             "actual optical ISO with useful apps and sustained fresh-boot interaction",
             "documented interactive VM launcher with explicit serial limits",
             "full microkernel continues afterward; exact canonical gates before main"])
+    return apply_cycle286(roadmap, test_count)
+
+
+def apply_cycle286(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle286-native-cleanup-exhaustion.md"
+    path = "runs/native-cleanup-exhaustion-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle285_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=286, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 286
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path]
+    gate["current_candidate_audit"]["cycle"] = 286
+    gate["current_focused_source_projection"]["cycle"] = 286
+    gate["qualification_status"] = "native_cleanup_exhaustion_verified_request_interleavings_and_optical_ISO_pending"
+    for name in ("current_native_file_controls_qualification", "current_native_file_controls_metadata"):
+        gate[name]["evidence_status"] = "historical_cycle285_not_current_candidate_qualification"
+    baseline["native_file_controls"]["evidence_status"] = "historical_cycle285_source_changed_not_replayed"
+    baseline["native_app_recovery"]["evidence_status"] = "historical_cycle284_regression_replayed_in_cycle286"
+    baseline["native_application_session"]["evidence_status"] = "historical_cycle283_regression_replayed_in_cycle286"
+    record = dict(cycle=286, contract_id="PCLEANUP3", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("guest_runs", "exhaustion_guest_runs", "normal_application_guest_runs", "live_parent_deferred_guest_runs",
+                "default_kernel_tests_per_profile", "application_kernel_tests_per_profile", "ownership_doctests", "python_oracle_tests",
+                "native_cleanup_exhaustion_verified", "multiple_pending_cleanup_owners_verified", "retained_child_pages_per_guest",
+                "maximum_cleanup_attempts", "minimum_post_exhaustion_dispatches", "no_cleanup_writes_after_exhaustion",
+                "no_false_completion_or_restart", "independent_service_progress", "normal_application_regression_verified",
+                "live_parent_deferred_replayed_this_cycle", "native_claimed_requester_death_verified",
+                "iso_built", "production_ready", "merge_qualified"):
+        record[key] = receipt[key]
+    gate["current_native_cleanup_exhaustion_qualification"] = record
+    gate["current_native_cleanup_exhaustion_metadata"] = dict(cycle=286, status="pass", tests_passed=311,
+        unittest_elapsed_seconds=73.915, capture_elapsed_seconds=75.016,
+        log_sha256="54DDCDD7A59504826D566C477C636352F662B14ED40CC0B800657E796006A64E",
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_cleanup_exhaustion"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=286, session_contract="PCLEANUP3", receipt_path=path, receipt_section="native_execution",
+        native_execution_status="three_exhaustion_three_application_and_three_deferred_guests_pass",
+        native_execution_replayed_this_cycle=True, native_execution_evidence_cycle=286,
+        shell_native_execution_replayed_this_cycle=True, shell_native_execution_evidence_cycle=286,
+        native_cleanup_exhaustion_verified=True, multiple_pending_cleanup_owners_verified=True,
+        live_parent_deferred_replayed_this_cycle=True, live_parent_deferred_evidence_cycle=286,
+        file_controls_replayed_this_cycle=False, file_controls_evidence_cycle=285,
+        kernel_image_pages=122, kernel_remaining_capacity_pages=86,
+        kernel_profile="ordinary_applications_and_separate_deferred_or_exhaustion_injection",
+        default_profile_replayed_this_cycle=False, prepared_profile_replayed_this_cycle=False)
+    lane["stages"]["USI-4"] = "partial_native_apps_recovery_and_overlapping_exhaustion_verified_optical_pending"
+    evidence = "Cycle286: three fresh native guests exhaust both stopped app cleanups after three delayed attempts, retaining28 pages and both job members with frozen runtime and no further cleanup writes; shell/file services survive. Three ordinary app and three successful deferred-cleanup regressions pass.554 default/573 application kernel tests per debug/release,26 doctests,22 oracle tests. User program inputs unchanged. Exhaustion/deferred122 and ordinary121 of208 kernel pages,36 stack pages. No successful exhaustion recovery, default/prepared/file-control replay or ISO claim. " + checkpoint
+    gap = "Qualify native waiting/pending/claimed request interleavings, including claimed-requester death. Then build the actual optical ISO and qualify fresh boots and sustained real interaction through a documented VM launcher. Exhaustion intentionally retains owners; generalized reclamation recovery policy remains open. COM2 is not local keyboard/display. Default/prepared and file-control evidence is historical. Full stack bounds, supervision, efficient idle, job abort, complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass remain. Preserve narrow capacity/authority bounds, immutable evidence and exact canonical gates before main. Retain verified superseded build trees before further large builds on low host storage."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N13", "N14", "N16", "N18", "N36", "N38"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["evidence"].append(checkpoint)
+            flag["closure_condition"] += " Cycle286 overlapping exhaustion qualifies; remaining work: " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Finish request interleavings for useful applications in the native shell, then qualify the optical ISO",
+        entry_evidence=[checkpoint, path, "docs/native-userspace-integration-iso.md"],
+        exit_evidence=["native waiting/pending/claimed requester controls",
+            "actual optical ISO with useful apps and sustained fresh-boot interaction",
+            "documented interactive VM launcher with explicit serial limits",
+            "full microkernel continues afterward; exact canonical gates before main"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1459)
+    parser.add_argument("--test-count", type=int, default=1466)
     parser.add_argument("--status-date", default="2026-10-13")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

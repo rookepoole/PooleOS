@@ -11,7 +11,15 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle285 verifies malformed/untracked file
+**Current development checkpoint:** Cycle286 verifies two simultaneous stopped-app
+cleanup owners reaching their retry limit without freeing pages, restarting, or
+claiming completion. The shell and file service remain usable. Nine current-source
+VM cases pass across exhaustion, ordinary applications and successful delayed
+cleanup. No integration ISO exists yet. Next: request interleavings, optical
+packaging and fresh-boot interaction, then continued complete microkernel work.
+[Evidence](docs/checkpoints/cycle286-native-cleanup-exhaustion.md).
+
+**Historical development checkpoint:** Cycle285 verifies malformed/untracked file
 requests and caller exit with a queued request in three fresh native guests.
 Three ordinary app sessions and three default/trust-control cases also pass.
 All 17 earlier user programs remain byte-identical; the diagnostic is opt-in,

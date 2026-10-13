@@ -171,6 +171,79 @@ fn deferred_cleanup_rejects_early_state_stale_identity_and_running_cpu() {
 }
 
 #[test]
+fn two_exhausted_children_keep_distinct_owners_and_stop_retry_writes() {
+    let parent = setup_at(false, 4096);
+    let a = setup_at(false, 4224);
+    let b = setup_at(false, 4352);
+    let (p, _, pid) = job_tests::at(parent.owner, 3);
+    let mut job = task::job::Job::<2>::new(&p, pid).unwrap();
+    let mut s = Scheduler::new(1).unwrap();
+    let cpu = CpuId::new(0).unwrap();
+    let other = s.create_task(7, 1, 16, 1).unwrap();
+    s.activate(other, cpu).unwrap();
+    let mut children = [a, b]
+        .into_iter()
+        .enumerate()
+        .map(|(i, mut f)| {
+            let (mut slot, control, id) = job_tests::at(f.owner, 4 + i as u8);
+            job.adopt(&slot, id).unwrap();
+            slot.cancel_prepared(id).unwrap();
+            f.memory.fail_finish = true;
+            assert!(
+                job.reclaim_child(&mut slot, id, &mut f.manager, &mut f.memory)
+                    .is_err()
+            );
+            let child = s.create_task(id.slot, id.generation, 16, 1).unwrap();
+            s.activate(child, cpu).unwrap();
+            slot.defer_reclamation(id, &mut s, cpu, true).unwrap();
+            (slot, control, id, f.manager, f.memory, f.handles)
+        })
+        .collect::<std::vec::Vec<_>>();
+    for attempt in 1..=MAX_ATTEMPTS {
+        advance(&mut s, cpu, FIRST_DELAY << (attempt - 1));
+        for (slot, _, id, manager, memory, _) in &mut children {
+            assert_eq!(
+                job.reclaim_deferred_child(slot, *id, manager, memory, &s),
+                Ok(if attempt == MAX_ATTEMPTS {
+                    Progress::Exhausted
+                } else {
+                    Progress::Retried
+                })
+            );
+            assert_eq!(job.child_count(), 2);
+        }
+    }
+    let writes = children
+        .iter()
+        .map(|c| c.4.writes)
+        .collect::<std::vec::Vec<_>>();
+    advance(&mut s, cpu, 1024);
+    for (i, (slot, control, id, manager, memory, handles)) in children.iter_mut().enumerate() {
+        memory.fail_finish = false;
+        for _ in 0..4 {
+            assert_eq!(
+                job.reclaim_deferred_child(slot, *id, manager, memory, &s),
+                Ok(Progress::Exhausted)
+            );
+        }
+        assert_eq!(memory.writes, writes[i]);
+        assert_eq!(slot.reclaim_remaining_pages(*id), Ok(13));
+        assert_eq!(
+            slot.cleanup_status(*id).unwrap().unwrap().next_dispatch,
+            None
+        );
+        assert!(slot.run_slice(*id).is_err());
+        assert!(slot.activate(*id, manager, memory).is_err());
+        assert!(s.create_task(id.slot, id.generation + 1, 16, 1).is_err());
+        assert_eq!(control.borrow().entries, 0);
+        retained(manager, handles);
+    }
+    assert_eq!(job.child_count(), 2);
+    assert_eq!(s.summary().teardown_count, 0);
+    assert_eq!(s.task_snapshot(other).unwrap().runtime_ticks, 1472);
+}
+
+#[test]
 fn deferred_entered_task_preserves_accounting_and_job_until_success() {
     let parent = setup_at(false, 4096);
     let mut f = setup_at(false, 4224);

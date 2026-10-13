@@ -5,6 +5,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from runtime import native_app_session as probe, native_shell, native_console, native_session
+from runtime import native_cleanup_exhaustion as exhaustion
 from tools import qualify_native_console_ipc as shared, qualify_native_user_entry as source
 from tools.qualify_native_shell_process import program_inputs
 from tools.native_build_space import require_space
@@ -35,13 +36,16 @@ def retirement_barriers(payload):
 
 
 class Interaction(shared.Interaction):
-    def __init__(self, case, deferred_cleanup=False, file_controls=False):
+    def __init__(self, case, deferred_cleanup=False, file_controls=False, exhaust_cleanup=False):
         super().__init__(case.sent, False)
         self.case, self.step, self.expected = case, 0, native_shell.BANNER
         self.barriers = cleanup_barriers(case.sent) if deferred_cleanup else {}
         self.observed_barriers = set()
         self.retirements = retirement_barriers(case.sent) if file_controls else {}
         self.observed_retirements = set()
+        self.exhaust_cleanup = exhaust_cleanup
+        self.exhaustion_barrier = case.sent.index(b'stop numbers\r')+len(b'stop numbers\r') if exhaust_cleanup else None
+        self.exhaustion_observed = False
 
     def poll(self, debug):
         if self.sock is None:
@@ -58,7 +62,11 @@ class Interaction(shared.Interaction):
             raise ValueError('application shell differs at step '+str(self.step)+': '+repr(application[-192:]))
         markers = native_session.extract_markers(debug)
         runs = [probe.parse(m,'RUN') for m in markers if m.startswith('POOLEOS:APPS RUN ')]
+        exhausted = [probe.cleanup.parse(m,'EXHAUSTED') for m in markers if m.startswith(probe.cleanup.PREFIX+'EXHAUSTED ')]
         if runs and runs[-1]['dispatches'] >= 128 and application == self.expected and self.step < len(self.case.steps):
+            if self.step == self.exhaustion_barrier:
+                if {(v['task'],v['generation']) for v in exhausted} != {(4,1),(5,1)}: return False
+                self.exhaustion_observed = True
             if self.step in self.barriers:
                 completed = [probe.cleanup.parse(m,'COMPLETE') for m in markers if m.startswith(probe.cleanup.PREFIX+'COMPLETE ')]
                 if self.barriers[self.step] not in {(v['task'],v['generation']) for v in completed}: return False
@@ -70,6 +78,11 @@ class Interaction(shared.Interaction):
             byte, response = self.case.steps[self.step]
             if self.sock.send(byte) == 1:
                 self.sent += 1; self.step += 1; self.expected += response
+        if self.exhaust_cleanup:
+            return bool(self.step == len(self.case.steps) and application == self.case.expected
+                        and self.exhaustion_observed and len(exhausted) == 2 and runs
+                        and runs[-1]['dispatches'] >= max(v['dispatches'] for v in exhausted)+512
+                        and len([m for m in markers if m.startswith(exhaustion.HOLD)]) >= 16)
         return bool(self.step == len(self.case.steps) and application == self.case.expected
                     and len(runs) >= 8 and all(v['live_mask'] == 3 for v in runs[-2:]))
 
@@ -80,14 +93,16 @@ def main():
     parser.add_argument('--program-dir', type=Path, required=True)
     parser.add_argument('--deferred-cleanup', action='store_true')
     parser.add_argument('--file-controls', action='store_true')
+    parser.add_argument('--exhaust-cleanup', action='store_true')
     args = parser.parse_args(); work, programs = args.work_dir.resolve(), args.program_dir.resolve()
-    if args.deferred_cleanup and args.file_controls: parser.error('separate control profiles required')
+    if sum((args.deferred_cleanup,args.file_controls,args.exhaust_cleanup)) > 1: parser.error('separate control profiles required')
     if not work.is_relative_to(ROOT/'outputs') or not programs.is_relative_to(ROOT/'outputs'):
         parser.error('workspace output paths required')
     storage = require_space(work); work.mkdir(parents=True, exist_ok=False)
     before = source.source_bindings()
-    report = dict(cycle=285 if args.file_controls else 284 if args.deferred_cleanup else 283,
-                  contract_id='PFILECONTROL1' if args.file_controls else 'PAPPRECOVERY1' if args.deferred_cleanup else 'PAPPSESSION1',
+    report = dict(cycle=286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
+                  contract_id='PCLEANUP3' if args.exhaust_cleanup else 'PFILECONTROL1' if args.file_controls else 'PAPPRECOVERY1' if args.deferred_cleanup else 'PAPPSESSION1',
+                  exhaust_cleanup=args.exhaust_cleanup,
                   file_controls=args.file_controls,
                   deferred_cleanup=args.deferred_cleanup, status='fail', source_bindings=before,
                   storage_preflight=storage, guest_bound_seconds=240, guest_runs=[], useful_applications=0,
@@ -103,6 +118,9 @@ def main():
         extra = ('development-shell-deferred-cleanup',) if args.deferred_cleanup else ()
         normal_features=('development-file-controls',) if args.file_controls else ('development-applications',)+extra
         bad_features=('development-file-controls','development-applications-bad-file') if args.file_controls else ('development-applications-bad-file',)+extra
+        if args.exhaust_cleanup:
+            normal_features=('development-app-cleanup-exhaustion',)
+            bad_features=normal_features+('development-applications-bad-file',)
         linked, kernel, plan = shared.entry._build_product(cargo, env, work/'kernel1', features=normal_features)
         linked2, kernel2, _ = shared.entry._build_product(cargo, env, work/'kernel2', features=normal_features)
         if (linked,kernel) != (linked2,kernel2): raise ValueError('independent kernel mismatch')
@@ -126,12 +144,14 @@ def main():
             path = work/f'{name}.img'; path.write_bytes(media)
             run_dir = work/name; run_dir.mkdir()
             scenario=probe.file_control_scenario if args.file_controls else probe.scenario
+            if args.exhaust_cleanup: scenario=exhaustion.scenario
             case = scenario(secrets.token_hex(8), bad_file=bad_file)
-            interaction = Interaction(case, args.deferred_cleanup, args.file_controls)
+            interaction = Interaction(case, args.deferred_cleanup, args.file_controls, args.exhaust_cleanup)
+            validator = (lambda m: exhaustion.validate_markers(m,bad_file=bad_file)) if args.exhaust_cleanup else (lambda m: probe.validate_markers(m, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls))
             print(f'Native application session {name}: frozen 240-second bound', flush=True)
             try:
                 run, _, handoff = shared.boot._execute_once(name, lock, profile, qemu, path, run_dir, 240,
-                    marker_validator=lambda m: probe.validate_markers(m, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls),
+                    marker_validator=validator,
                     marker_extractor=native_session.extract_markers, hpet_msi=True, pause_on_completion=True,
                     console_port=interaction.port, console_poll=interaction.poll)
             finally:
@@ -143,10 +163,12 @@ def main():
             if sent != case.sent or application != case.expected: raise ValueError('inexact application interaction')
             if interaction.observed_barriers != set(interaction.barriers): raise ValueError('cleanup barriers not observed')
             if interaction.observed_retirements != set(interaction.retirements): raise ValueError('retirement barriers not observed')
+            if args.exhaust_cleanup and not interaction.exhaustion_observed: raise ValueError('exhaustion barrier not observed')
             run['interaction'] = dict(nonce=case.nonce, input_hex=sent.hex(), output_hex=output.hex(),
                 input_sha256=shared.sha(sent), output_sha256=shared.sha(output), exact_interaction=True,
                 cleanup_barriers_observed=len(interaction.observed_barriers),
                 retirement_barriers_observed=len(interaction.observed_retirements),
+                exhaustion_barrier_observed=interaction.exhaustion_observed,
                 kernel_evidence_from_com2=False)
             if run['marker_summary']['program_bytes'] != [report['program_build']['programs'][n]['code_bytes'] for n,_ in selected]:
                 raise ValueError('observed program sizes differ')
@@ -154,7 +176,7 @@ def main():
             shared.load.validate_oracle_binding(prefix['boot_prefix'], inspected, run['pbp1_transcript'])
             run['transcript_binding'] = shared.transfer.validate_transcript_binding(prefix, run['pbp1_transcript'])
             run['independent_revalidation'] = shared.transfer.validate_revalidation_binding(prefix, handoff, retained)
-            run['hostile_marker_cases_rejected'] = probe.negative_controls(run['markers'], bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls)
+            run['hostile_marker_cases_rejected'] = exhaustion.negative_controls(run['markers'],bad_file=bad_file) if args.exhaust_cleanup else probe.negative_controls(run['markers'], bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls)
             run.update(media_sha256=shared.sha(media), kernel_sha256=shared.sha(image))
             report['guest_runs'].append(run)
         if before != source.source_bindings() or program_inputs(programs, env, selected) != report['program_build']:

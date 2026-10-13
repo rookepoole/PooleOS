@@ -742,6 +742,12 @@ pub(crate) fn run(
                     ("unused", cancelled),
                 ],
             );
+            #[cfg(feature = "development-app-cleanup-exhaustion")]
+            for p in &peers[4..6] {
+                checked!(reclaim::exhausted_observation(
+                    p, &scheduler, &job, serial, debugcon
+                ));
+            }
         }
     }
 }

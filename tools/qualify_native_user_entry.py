@@ -38,6 +38,7 @@ def source_bindings() -> dict[str, str]:
         "native/kernel/src/development_apps.rs",
         "native/kernel/src/user_root_probe/peer_driver/interactive/applications.rs",
         "tests/test_native_app_session.py",
+        "tests/test_native_cleanup_exhaustion.py",
         "native/userspace/src/bin/application_shell.rs",
         "native/userspace/src/bin/application_files.rs",
         "native/userspace/src/shell/applications.rs",

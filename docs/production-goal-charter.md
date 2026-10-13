@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 285
+Last roadmap reconciliation: PooleOS Cycle 286
 
-Cycle285 qualifies native malformed/untracked file requests and queued-requester
+Cycle286 qualifies overlapping native cleanup exhaustion while the shell and
+services survive, plus ordinary app and successful delayed-cleanup regressions.
+Exhaustion retains all child pages and job members; it is not successful recovery.
+Native waiting/pending/claimed request interleavings remain before optical ISO
+packaging and sustained fresh-boot interaction. No production, canonical or merge
+gate is waived. All N0-N39, complete robust microkernel, PooleGlyph/PDC, accessible
+PooleGlass and signed reproducible ISO obligations remain.
+[Evidence](checkpoints/cycle286-native-cleanup-exhaustion.md).
+
+Historical Cycle285 qualifies native malformed/untracked file requests and queued-requester
 death, with three file-control guests and six application/default regressions.
 The diagnostic remains opt-in; all prior user binaries are unchanged. Claimed
 requester death and remaining cleanup/interleaving controls stay open before

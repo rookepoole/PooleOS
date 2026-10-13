@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: native file controls verified, Cycle 285, 2026-10-13. No new ISO exists yet.
+Status: overlapping cleanup exhaustion verified, Cycle 286, 2026-10-13. No new ISO exists yet.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
@@ -45,13 +45,26 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | --- | --- | --- | --- |
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
-| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle278 partial: native prepared/suspended parent-death cleanup now survives dispatch-separated erase failures. Native exhaustion/multiple pending owners/live-parent completion, waiting interleavings, general supervision, trust and idle remain |
-| USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle283 partial: native app results, coexistence, stop/restart and contained fault pass; stale file authority denied. Targeted file/cleanup controls and local display/input remain |
+| USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle286 partial: live-parent deferred recovery and overlapping exhausted owners qualify; exhaustion retains pages, not successful recovery. Waiting/claimed interleavings, general supervision, trust and idle remain |
+| USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle286 partial: app results, coexistence, stop/restart, contained fault and stale-file denial replayed. Cycle285 file controls remain historical; claimed requester, local display/input and optical acceptance remain |
 | USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Not started |
 
 ### Immediate Next Move
 
-Current: [Cycle285 native file controls](checkpoints/cycle285-native-file-controls.md).
+Current: [Cycle286 cleanup exhaustion](checkpoints/cycle286-native-cleanup-exhaustion.md).
+Three exhaustion, three ordinary application and three successful deferred-cleanup
+guests pass. Two exhausted owners retain 28 pages and job membership without
+resuming, writing again or claiming completion; shell/file services stay usable.
+
+1. Qualify waiting/pending/claimed request interleavings and claimed-requester death.
+2. Package and qualify the actual optical ISO on fresh boots with sustained real
+   interaction and a documented VM launcher. Current input is COM2 serial.
+3. Continue the complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass.
+   General exhausted-owner recovery policy and production gates remain open.
+
+### Historical Cycle285 Next Move
+
+Historical: [Cycle285 native file controls](checkpoints/cycle285-native-file-controls.md).
 Three fresh control guests qualify 13 malformed/untracked cases per diagnostic
 generation and six queued-requester deaths. Three ordinary application sessions
 and three default/trust-control cases also pass. All prior user binaries remain

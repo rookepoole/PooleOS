@@ -130,7 +130,9 @@ pub(super) fn poll(
     let status = p.slot.cleanup_status(p.id).map_err(|_| ())?.ok_or(())?;
     let result;
     #[cfg(feature = "development-shell-deferred-cleanup")]
-    if p.id.slot >= 4 && status.attempts == 0 {
+    if p.id.slot >= 4
+        && (status.attempts == 0 || cfg!(feature = "development-app-cleanup-exhaustion"))
+    {
         let mut memory = FaultMemory {
             inner: &mut p.memory,
             mode: 4,
@@ -139,7 +141,12 @@ pub(super) fn poll(
         result = job
             .reclaim_deferred_child(&mut p.slot, p.id, manager, &mut memory, scheduler)
             .map_err(|_| ())?;
-        if !memory.fired || result != task::cleanup::Progress::Retried {
+        let expected = if status.attempts + 1 == task::cleanup::MAX_ATTEMPTS {
+            task::cleanup::Progress::Exhausted
+        } else {
+            task::cleanup::Progress::Retried
+        };
+        if !memory.fired || result != expected {
             return Err(());
         }
     } else {
@@ -208,6 +215,63 @@ fn retry(
             .reclaim_deferred(p.id, manager, &mut p.memory, scheduler)
     }
     .map_err(|_| ())
+}
+
+#[cfg(feature = "development-app-cleanup-exhaustion")]
+pub(super) fn exhausted_observation(
+    p: &Peer,
+    scheduler: &scheduler::Scheduler,
+    job: &task::job::Job<2>,
+    serial: &mut Com1,
+    debugcon: &mut DebugCon,
+) -> Result<(), ()> {
+    let Some(status) = p.slot.cleanup_status(p.id).map_err(|_| ())? else {
+        return Ok(());
+    };
+    if status.next_dispatch.is_some() {
+        return Ok(());
+    }
+    let id = scheduler::TaskId::new(p.id.slot, p.id.generation).map_err(|_| ())?;
+    let scheduled = scheduler.task_snapshot(id).map_err(|_| ())?;
+    let runtime = p.slot.runtime(p.id).map_err(|_| ())?;
+    if status.attempts != task::cleanup::MAX_ATTEMPTS
+        || !status.admitted
+        || p.slot.state(p.id) != Ok(task::State::Reclaiming)
+        || scheduled.wait_kind != scheduler::WaitKind::Reclamation
+        || scheduled.runtime_ticks != runtime.charged_ticks
+        || runtime.pending_ticks.is_some()
+        || runtime.unknown
+        || job.child_count() != 2
+    {
+        return Err(());
+    }
+    let mut log = EarlyLogger::new(BootSink {
+        serial,
+        debugcon,
+        ring: &EARLY_RING,
+    });
+    log.write_str("POOLEOS:EXHAUST HOLD contract=PCLEANUP3");
+    for (name, value) in [
+        ("task", u64::from(p.id.slot)),
+        ("generation", u64::from(p.id.generation)),
+        ("attempts", u64::from(status.attempts)),
+        (
+            "pages",
+            p.slot.reclaim_remaining_pages(p.id).map_err(|_| ())?,
+        ),
+        ("writes", p.memory.physical_write_count()),
+        ("calls", p.slot.outcome(p.id).map_err(|_| ())?.syscalls),
+        ("ticks", runtime.charged_ticks),
+        ("dispatches", u64::from(scheduler.summary().dispatch_count)),
+        ("children", job.child_count() as u64),
+    ] {
+        log.write_str(" ");
+        log.write_str(name);
+        log.write_str("=");
+        log.write_decimal_u64(value);
+    }
+    log.write_str(" cpl=0 production=0\n");
+    Ok(())
 }
 
 fn observation(
