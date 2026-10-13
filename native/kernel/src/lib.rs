@@ -19,6 +19,8 @@ pub mod acpi;
 pub mod active_virtual_memory;
 pub mod atomics;
 pub mod capability_ipc;
+#[cfg(feature = "development-applications")]
+pub mod development_apps;
 pub mod interrupt_time;
 pub mod locks;
 pub mod physical_memory;
@@ -61,8 +63,13 @@ static BUILD_ID_BYTES: [u8; 44] = *b"PKBUILD1-CYCLE216-N12-SMP-TXN-V1-0000000000
 pub const BUILD_ID: &[u8] = &BUILD_ID_BYTES;
 #[cfg(not(feature = "development-files"))]
 pub const ENTRY_OFFSET: u64 = 0xd000;
-#[cfg(feature = "development-files")]
+#[cfg(all(
+    feature = "development-files",
+    not(feature = "development-applications")
+))]
 pub const ENTRY_OFFSET: u64 = 0xe000;
+#[cfg(feature = "development-applications")]
+pub const ENTRY_OFFSET: u64 = 0x13000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 
 #[used]
@@ -1480,13 +1487,15 @@ mod tests {
         let linker = include_str!("../linker.ld").replace("\r\n", "\n");
         assert!(
             linker.contains(
-                "__poole_ro_capacity = DEFINED(__poole_files_profile) ? 0xE000 : 0xD000;"
+                "__poole_ro_capacity = DEFINED(__poole_apps_profile) ? 0x13000 : (DEFINED(__poole_files_profile) ? 0xE000 : 0xD000);"
             )
         );
         assert!(linker.contains(". = __poole_ro_capacity;\n  __poole_text_start = .;"));
         assert_eq!(
             ENTRY_OFFSET,
-            if cfg!(feature = "development-files") {
+            if cfg!(feature = "development-applications") {
+                0x13000
+            } else if cfg!(feature = "development-files") {
                 0xe000
             } else {
                 0xd000

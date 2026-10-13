@@ -32,6 +32,9 @@ def source_bindings() -> dict[str, str]:
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "runtime").glob("*.py"))
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "tools").glob("qualify_native_*.py"))
     paths.update({
+        "native/kernel/src/development_apps.rs",
+        "native/kernel/src/user_root_probe/peer_driver/interactive/applications.rs",
+        "tests/test_native_app_session.py",
         "native/userspace/src/bin/application_shell.rs",
         "native/userspace/src/bin/application_files.rs",
         "native/userspace/src/shell/applications.rs",

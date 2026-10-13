@@ -97,6 +97,7 @@ impl Arguments {
 
 /// Bound startup metadata, not an ownership token. Only construction creates it;
 /// the existing CpuImage/Slot retains the actual memory and execution authority.
+#[derive(Clone, Copy)]
 pub struct Startup {
     image: ImageAdmission,
     byte_count: usize,

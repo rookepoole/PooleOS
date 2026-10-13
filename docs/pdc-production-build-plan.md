@@ -1,15 +1,41 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-13
-Plan version: 2.185.0-application-shell
-Roadmap cycle: PooleOS Cycle 282
+Plan version: 2.186.0-native-applications
+Roadmap cycle: PooleOS Cycle 283
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 282: Application Shell Bridge
+## Cycle 283: Native Applications
+
+The native six-role session now launches two useful isolated apps through actual
+SEND-only grants and owned pre-entry handoff. PooleText computes file statistics;
+PooleNumbers computes count/sum/min/max. Three fresh guests verify changed inputs,
+repeated jobs, coexistence, contained UD2, both restarts and stale file denial.
+Nine regression guests also pass. This is native CPL3 computation, not a kernel
+command interpreter or transcript. [Evidence](checkpoints/cycle283-native-applications.md).
+
+The first run timed out while progressing. Restarted programs had omitted their
+per-owner timer cache and recalibrated every dispatch. Restart now measures into
+its own fresh cache. Final guests pass under the original240-second bound. No old
+owner sample or timer check is bypassed. Console CLOSE ordering is corrected in
+the oracle; both apps must retire before either service exits.
+
+Default551/file567/app570 kernel tests pass per debug/release plus26 ownership
+doctests. App kernel121/208 pages, files/deferred115, default208;36 guarded stack
+pages, six roles,32 PMM records and16384-byte RX remain. Full stack bounds and
+combined failure-atomic admission/startup remain open. Current interface is COM2.
+
+Next close targeted file/cleanup controls, then build and operate the optical ISO
+on fresh boots with sustained input and recovery. No ISO exists from this cycle.
+Complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass remain required
+afterward. No phase/flag closes.1450 Python tests,740 architecture bindings and912
+execution inputs are inventories. No canonical, main, release or production claim.
+
+## Historical Cycle 282: Application Shell Bridge
 
 PooleAppShell now implements application lifecycle, file-job commands, authenticated
 job/result IPC, bounded cleanup and fault requests. PooleAppFiles explicitly admits

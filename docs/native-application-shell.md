@@ -1,7 +1,8 @@
 # Native Application Shell Bridge
 
-Cycle282 implements the compiled user-space bridge for PAPP1. Native catalogue
-wiring and guest qualification remain open. This is not an ISO acceptance receipt.
+Cycle282 implements the compiled user-space bridge for PAPP1. Cycle283 adds
+[native catalogue and guest qualification](native-app-session.md). The host/build
+results below remain historical; they are not an ISO acceptance receipt.
 
 ## Programs And Authority
 

@@ -2,8 +2,8 @@ OUTPUT_FORMAT(elf64-x86-64)
 OUTPUT_ARCH(i386:x86-64)
 ENTRY(poole_kernel_entry)
 
-/* Only the reviewed file-session build supplies this absolute selector. */
-__poole_ro_capacity = DEFINED(__poole_files_profile) ? 0xE000 : 0xD000;
+/* Only reviewed opt-in session builds supply these absolute selectors. */
+__poole_ro_capacity = DEFINED(__poole_apps_profile) ? 0x13000 : (DEFINED(__poole_files_profile) ? 0xE000 : 0xD000);
 
 PHDRS
 {

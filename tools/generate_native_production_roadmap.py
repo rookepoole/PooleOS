@@ -14899,13 +14899,85 @@ def apply_cycle282(roadmap: dict, test_count: int) -> dict:
             "both apps compute changed-input results; repeated jobs, stop/restart and fault containment",
             "changed legacy file replay, remaining cleanup controls and sustained optical ISO",
             "complete robust microkernel afterward; exact canonical gates before main"])
+    return apply_cycle283(roadmap, test_count)
+
+
+def apply_cycle283(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle283-native-applications.md"
+    path = "runs/native-app-session-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle282_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=283, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 283
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-app-session.md"]
+    gate["current_candidate_audit"]["cycle"] = 283
+    gate["current_focused_source_projection"]["cycle"] = 283
+    gate["qualification_status"] = "native_applications_verified_optical_ISO_and_canonical_gates_pending"
+    for name in ("current_application_shell_qualification", "current_application_shell_metadata"):
+        gate[name]["evidence_status"] = "historical_cycle282_not_current_candidate_qualification"
+    baseline["native_application_shell"]["evidence_status"] = "historical_cycle282_compiled_bridge_native_evidence_in_cycle283"
+    baseline["native_startup_handoff"]["evidence_status"] = "historical_cycle281_kernel_changed_native_handoff_now_qualified"
+    record = dict(cycle=283, contract_id="PAPPSESSION1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("guest_runs", "application_guest_runs", "default_kernel_tests_per_profile",
+                "file_kernel_tests_per_profile", "application_kernel_tests_per_profile", "ownership_doctests",
+                "native_application_count", "useful_application_count", "native_launch_catalogue_connected",
+                "native_startup_handoff_called", "changed_input_results_verified", "application_fault_contained",
+                "both_app_restarts_verified", "stale_application_file_grant_denied", "legacy_file_replayed",
+                "restarted_owner_calibration_cache_enabled", "iso_built", "production_ready", "merge_qualified"):
+        record[key] = receipt[key]
+    gate["current_native_application_qualification"] = record
+    gate["current_native_application_metadata"] = dict(cycle=283, status="pass", tests_passed=295,
+        unittest_elapsed_seconds=63.929, capture_elapsed_seconds=65.015,
+        log_sha256="16BD7F3C645E2B96068004B7FA117DAC9B36AE70414435D15D3EAD9B6D061172",
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_application_session"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=283, session_contract="PAPPSESSION1", receipt_path=path, receipt_section="native_execution",
+        application_launch_and_shell_integration=True, native_startup_handoff_called=True,
+        native_execution_replayed_this_cycle=True, native_execution_status="three_fresh_application_guests_and_nine_regressions_pass",
+        native_application_count=2, useful_application_count=2, bundled_files=True,
+        interface="COM2_serial_console_not_local_display_input", optical_iso_built=False,
+        native_counter_program=False, native_file_program=True, shell_launch_catalogue_is_diagnostic=False,
+        kernel_image_pages=121, kernel_remaining_capacity_pages=87,
+        native_execution_evidence_cycle=283, shell_native_execution_evidence_cycle=283,
+        shell_native_execution_replayed_this_cycle=True, default_profile_evidence_cycle=283,
+        default_profile_replayed_this_cycle=True, default_profile_build_cycle=283,
+        prepared_profile_replayed_this_cycle=True, prepared_profile_build_cycle=283)
+    lane["historical_dispatcher_frame_observations_not_current"] = {
+        name: lane.pop(name) for name in ("integration_dispatcher_local_bytes", "prepared_dispatcher_local_bytes")}
+    lane["stages"]["USI-4"] = "partial_native_useful_apps_verified_targeted_recovery_and_optical_acceptance_pending"
+    evidence = "Cycle283: six actual native user-space roles and two useful apps qualify through real SEND-only startup handoff. Three fresh guests verify changed-input results, concurrent apps, numbers UD2 with surviving text/shell, both restarts and stale-file denial; nine regression guests pass.551 default/567 file/570 app kernel tests per debug/release and26 ownership doctests pass. Restarted session owners now create their own calibration cache; old owner measurements are never reused. Timed-out and deliberately interrupted diagnostics remain retained; final guests pass original240-second bounds. App121/208 pages, file/deferred115, default208;36 stack pages. COM2 only, no ISO or production claim. " + checkpoint
+    gap = "Qualify native malformed/untracked file requests, requester death, live-parent deferred completion/restart, exhausted/multiple cleanup owners and waiting/pending request interleavings. Then build and operate the actual optical ISO with real sustained input, both apps and recovery on fresh boots through a documented interactive VM launcher. Local keyboard/display, job interruption, efficient idle, general supervision and full stack bounds remain open. Admission/startup handoff is not a combined rollback transaction. Preserve six roles/32 PMM records/16384-byte RX/208 kernel pages/36 stack pages. Complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass continue afterward; exact canonical gates remain required before main."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N13", "N14", "N16", "N18", "N19", "N20", "N22", "N30", "N36", "N38"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle283 source inventory: {test_count} Python tests discovered; full canonical qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["evidence"].append(checkpoint)
+            flag["closure_condition"] += " Cycle283 remaining work: " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Qualify useful applications for the native shell optical ISO",
+        entry_evidence=[checkpoint, path, "docs/native-app-session.md", "docs/native-userspace-integration-iso.md"],
+        exit_evidence=["bounded native file requester and cleanup recovery controls",
+            "actual optical ISO with useful apps and sustained real interaction on fresh boots",
+            "documented interactive VM launch path and explicit serial-console limits",
+            "complete robust microkernel afterward; exact canonical gates before main"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1440)
+    parser.add_argument("--test-count", type=int, default=1450)
     parser.add_argument("--status-date", default="2026-10-13")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

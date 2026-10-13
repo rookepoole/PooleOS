@@ -1,5 +1,7 @@
 //! Opt-in shell integration. Commands and restart decisions remain in CPL3.
 use super::*;
+#[cfg(feature = "development-applications")]
+mod applications;
 mod reclaim;
 use poolekernel::{
     capability_ipc::admission::Member,
@@ -10,7 +12,12 @@ static INIT: &[u8] = include_bytes!(env!("POOLEOS_INIT_CODE"));
 static COUNTER: &[u8] = include_bytes!(env!("POOLEOS_COUNTER_CODE"));
 static CONSOLE: &[u8] = include_bytes!(env!("POOLEOS_CONSOLE_CODE"));
 static SHELL: &[u8] = include_bytes!(env!("POOLEOS_CONSOLE_CLIENT_CODE"));
+#[cfg(not(feature = "development-applications"))]
 static WORKER: &[u8] = include_bytes!(env!("POOLEOS_WORKER_CODE"));
+#[cfg(feature = "development-applications")]
+static TEXT: &[u8] = include_bytes!(env!("POOLEOS_TEXT_CODE"));
+#[cfg(feature = "development-applications")]
+static NUMBERS: &[u8] = include_bytes!(env!("POOLEOS_NUMBERS_CODE"));
 
 #[inline(never)]
 pub(crate) fn run(
@@ -34,8 +41,12 @@ pub(crate) fn run(
     let bad = cfg!(feature = "development-shell-process-bad-owner");
     let baseline = manager.summary().allocated_pages;
     let before = arch::x86_64::user_root_write_count();
+    #[cfg(not(feature = "development-applications"))]
     let programs =
         [INIT, COUNTER, CONSOLE, SHELL, WORKER, WORKER].map(|code| checked!(Program::new(code, 0)));
+    #[cfg(feature = "development-applications")]
+    let programs =
+        [INIT, COUNTER, CONSOLE, SHELL, TEXT, NUMBERS].map(|code| checked!(Program::new(code, 0)));
     #[allow(unused_mut)]
     let mut args = [
         checked!(Arguments::new(&[
@@ -98,6 +109,8 @@ pub(crate) fn run(
             b"0000000100000001",
         ]));
     }
+    #[cfg(feature = "development-applications")]
+    checked!(applications::configure(&mut args));
     // Fill one retained owner at a time; neither from_fn nor a six-value literal
     // may keep a second full image array live during nested construction.
     let mut storage: [Option<Peer>; 6] = [const { None }; 6];
@@ -207,6 +220,7 @@ pub(crate) fn run(
             Ok(())
         })
     });
+    #[cfg(not(feature = "development-applications"))]
     record(
         serial,
         debugcon,
@@ -228,6 +242,8 @@ pub(crate) fn run(
             ("root5", peers[5].root),
         ],
     );
+    #[cfg(feature = "development-applications")]
+    applications::start(&peers, total, baseline, serial, debugcon);
     let mut live = [true, true, true, true, false, false];
     let mut owned = [true; 6];
     let mut waiting = [None; 6];
@@ -483,6 +499,10 @@ pub(crate) fn run(
             {
                 stop(34009, serial, debugcon);
             }
+            #[cfg(feature = "development-applications")]
+            let steps = poolekernel::development_apps::grants(peers[3].id, peers[1].id);
+            #[cfg(not(feature = "development-applications"))]
+            let steps = [];
             let p = &mut peers[j];
             if generations[j - 4] == 0 {
                 if !owned[j] || p.slot.state(p.id) != Ok(task::State::Prepared) {
@@ -514,12 +534,17 @@ pub(crate) fn run(
                             image: p.admission,
                             priority: 16,
                         },
-                        &[],
+                        &steps,
                     )
                     .map_err(|_| poolekernel::capability_ipc::Error::Identity)
                 })
             });
-            if admitted.count != 1
+            let handle_index = if cfg!(feature = "development-applications") {
+                2
+            } else {
+                0
+            };
+            if admitted.count != handle_index + 1
                 || p.id.generation != plan.sequence
                 || checked!(unsafe {
                     arch::x86_64::user_ipc::with_waits(|s| Ok(s.validate_launch(&permit).is_ok()))
@@ -527,6 +552,16 @@ pub(crate) fn run(
             {
                 stop(34012, serial, debugcon);
             }
+            #[cfg(feature = "development-applications")]
+            checked!(applications::handoff(
+                p,
+                &args[j],
+                &admitted.handles[..2],
+                core,
+                &scheduler,
+                serial,
+                debugcon
+            ));
             generations[j - 4] = plan.sequence;
             ticks[j] = 0;
             calls[j] = 0;
@@ -540,7 +575,7 @@ pub(crate) fn run(
                     ("task", j as u64),
                     ("generation", u64::from(p.id.generation)),
                     ("sequence", u64::from(plan.sequence)),
-                    ("handle", admitted.handles[0]),
+                    ("handle", admitted.handles[handle_index]),
                     ("root", p.root),
                     ("owned_pages", pages[j]),
                     ("dispatches", u64::from(scheduler.summary().dispatch_count)),
@@ -861,9 +896,17 @@ fn record(serial: &mut Com1, debugcon: &mut DebugCon, event: &str, fields: &[(&s
         debugcon,
         ring: &EARLY_RING,
     });
-    log.write_str("POOLEOS:CONTROL ");
+    log.write_str(if cfg!(feature = "development-applications") {
+        "POOLEOS:APPS "
+    } else {
+        "POOLEOS:CONTROL "
+    });
     log.write_str(event);
-    log.write_str(" contract=PSHELLPROC1");
+    log.write_str(if cfg!(feature = "development-applications") {
+        " contract=PAPPSESSION1"
+    } else {
+        " contract=PSHELLPROC1"
+    });
     for (name, value) in fields {
         log.write_str(" ");
         log.write_str(name);

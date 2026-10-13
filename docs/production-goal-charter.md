@@ -7,9 +7,17 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 282
+Last roadmap reconciliation: PooleOS Cycle 283
 
-Cycle282 implements compiled application shell job/result commands and an opt-in
+Cycle283 qualifies two useful native apps, changed inputs, repeated jobs, contained
+fault, stop/restart and stale-file denial on three fresh guests plus nine regression
+boots. Restart timer caching is fixed without reusing old owner measurements.
+The optical ISO remains the immediate deliverable after targeted recovery controls.
+No canonical, main, release or production promotion follows. All N0-N39, complete
+microkernel, PooleGlyph/PDC, accessible PooleGlass, signing and reproducibility
+obligations remain. [Evidence](checkpoints/cycle283-native-applications.md).
+
+Historical Cycle282 implements compiled application shell job/result commands and an opt-in
 file-service application policy.127 user tests per profile and17 independent
 ELF/code pairs pass. Native catalogue/startup wiring and fresh guest qualification
 are next, followed by the actual usable optical ISO. These host/build results do

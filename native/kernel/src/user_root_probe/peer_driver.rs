@@ -56,6 +56,8 @@ struct Peer {
     image: InitialImage,
     root: u64,
     admission: poolekernel::user_entry::ImageAdmission,
+    #[cfg(feature = "development-applications")]
+    startup: Option<poolekernel::user_entry::startup::Startup>,
 }
 impl Peer {
     #[cfg(feature = "development-session")]
@@ -92,7 +94,7 @@ impl Peer {
         if entry.set_startup(startup).is_err() {
             return Err(PeerFailure::Prepared(built));
         }
-        Self::install(index, entry, timer, built, core)
+        Self::install(index, entry, timer, built, core, Some(startup))
     }
     #[inline(never)]
     fn new(
@@ -163,7 +165,7 @@ impl Peer {
         }
         let built = spawn_driver::build(manager, core, bits, bytes, Some(timer.mappings()))
             .map_err(PeerFailure::Construction)?;
-        Self::install(index, entry, timer, built, core)
+        Self::install(index, entry, timer, built, core, None)
     }
 
     // Keep slot/CPU-image temporaries off the deep mapping-validation call path.
@@ -174,6 +176,7 @@ impl Peer {
         timer: Timer,
         built: spawn_driver::Built,
         core: CoreRecord,
+        _startup: Option<poolekernel::user_entry::startup::Startup>,
     ) -> Result<Self, PeerFailure> {
         let mut slot = Slot::new(index).map_err(|_| PeerFailure::Setup)?;
         let spawn_driver::Built {
@@ -205,6 +208,8 @@ impl Peer {
             image,
             root,
             admission,
+            #[cfg(feature = "development-applications")]
+            startup: _startup,
         })
     }
     /// Reuse the exact empty slot in place; never copy a large ownership container
@@ -242,7 +247,7 @@ impl Peer {
             .map_err(|_| PeerFailure::Setup)?;
         let built = spawn_driver::build(manager, core, bits, bytes, Some(timer.mappings()))
             .map_err(PeerFailure::Construction)?;
-        self.reinstall(entry, timer, built, core)
+        self.reinstall(entry, timer, built, core, None)
     }
     #[inline(never)]
     fn reinstall(
@@ -251,6 +256,7 @@ impl Peer {
         timer: Timer,
         built: spawn_driver::Built,
         core: CoreRecord,
+        _startup: Option<poolekernel::user_entry::startup::Startup>,
     ) -> Result<(), PeerFailure> {
         let spawn_driver::Built {
             prepared,
@@ -282,6 +288,10 @@ impl Peer {
         self.image = image;
         self.root = root;
         self.admission = admission;
+        #[cfg(feature = "development-applications")]
+        {
+            self.startup = _startup;
+        }
         Ok(())
     }
     #[inline(never)]
@@ -299,7 +309,13 @@ impl Peer {
         if self.slot.state(self.id) != Err(task::Error::Missing) {
             return Err(PeerFailure::Setup);
         }
-        let timer = Timer::new(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
+        #[allow(unused_mut)]
+        let mut timer =
+            Timer::new(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
+        #[cfg(feature = "development-session")]
+        timer
+            .reuse_session_calibration()
+            .map_err(|_| PeerFailure::Setup)?;
         let mut entry =
             unsafe { arch::x86_64::user::PeerEntry::new(core.initial_stack_top_virtual) }
                 .map_err(|_| PeerFailure::Setup)?;
@@ -315,7 +331,7 @@ impl Peer {
         if entry.set_startup(startup).is_err() {
             return Err(PeerFailure::Prepared(built));
         }
-        self.reinstall(entry, timer, built, core)
+        self.reinstall(entry, timer, built, core, Some(startup))
     }
     fn reap(
         &mut self,
