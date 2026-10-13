@@ -68,6 +68,25 @@ def fixture(bad=False, file_controls=False):
     return markers
 
 
+def claimed_fixture(bad=False):
+    # Synthetic waiting/cancellation observations, not captured native events.
+    result=[];extra_flushes=0
+    for marker in fixture(bad,file_controls=True):
+        if 'APPS REQUESTER ' in marker:
+            v=apps.parse(marker,'REQUESTER')
+            values=dict(task=4,generation=v['generation'],waiting=1,stale_wait_rejected=1,
+                        service_task=1,service_generation=1,dispatches=v['dispatches'])
+            result.append('POOLEOS:APPS CLAIMED contract=PAPPSESSION1'+''.join(' '+n+'='+str(values[n]) for n in apps.FIELDS['CLAIMED'].split())+' cpl=3 production=0')
+            marker=marker.replace('queued=1 claimed=0','queued=0 claimed=1')
+        elif 'APPS RETIRE ' in marker and ' task=4 ' in marker:
+            marker=marker.replace('outcome=4294967381','outcome=17179869184');extra_flushes+=1
+        elif 'APPS RUN ' in marker:
+            for field in ('cr3_writes','extra_flushes'):
+                marker=re.sub(' '+field+r'=([0-9]+)',lambda m:' '+field+'='+str(int(m[1])+extra_flushes),marker)
+        result.append(marker)
+    return result
+
+
 def deferred_fixture(bad=False, boundary=False):
     markers = fixture(bad)[:31]
     pages, roots = [13,13,13,16,14,14], [0x100000+i*0x10000 for i in range(6)]
@@ -119,6 +138,49 @@ def deferred_fixture(bad=False, boundary=False):
 
 
 class NativeAppSessionTests(unittest.TestCase):
+    def test_claimed_waiting_requesters_are_cancelled_and_detached_in_both_generations(self):
+        for bad in (False,True):
+            markers=claimed_fixture(bad)
+            result=apps.validate_markers(markers,bad_file=bad,claimed_requester=True)
+            self.assertEqual(len(result['claimed_waiters']),2)
+            self.assertEqual([(r['queued'],r['claimed'],r['completed']) for r in result['requester_deaths']],[(0,1,0)]*2)
+            self.assertTrue(result['kernel_injected_waiting_cancellation'])
+            self.assertFalse(result['diagnostic_requester_is_useful_app'] or result['exhaustive_request_interleavings'])
+            self.assertFalse(result['iso_built'] or result['production_ready'])
+            self.assertGreater(apps.negative_controls(markers,bad_file=bad,claimed_requester=True),200)
+        with self.assertRaises(ValueError):apps.validate_markers(fixture(file_controls=True),claimed_requester=True)
+        with self.assertRaises(ValueError):apps.validate_markers(claimed_fixture(),file_controls=True,claimed_requester=True)
+
+    def test_claimed_wait_observation_cannot_be_omitted_forged_or_reordered(self):
+        markers=claimed_fixture()
+        index=next(i for i,m in enumerate(markers) if 'APPS CLAIMED ' in m)
+        candidates=[markers[:index]+markers[index+1:],markers[:index]+[markers[index]]+markers[index:]]
+        for field in apps.FIELDS['CLAIMED'].split():
+            changed=markers.copy();changed[index]=re.sub(' '+field+r'=([0-9]+)',lambda m:' '+field+'='+str(int(m[1])+1),changed[index]);candidates.append(changed)
+        changed=markers.copy();changed[index],changed[index+1]=changed[index+1],changed[index];candidates.append(changed)
+        for candidate in candidates:
+            with self.assertRaises(ValueError):apps.validate_markers(candidate,claimed_requester=True)
+
+    def test_claimed_requester_requires_pending_claim_not_completed_or_queued(self):
+        markers=claimed_fixture()
+        index=next(i for i,m in enumerate(markers) if 'APPS REQUESTER ' in m)
+        for old,new in [('queued=0 claimed=1','queued=1 claimed=0'),('completed=0','completed=1'),('detached=1','detached=0')]:
+            changed=markers.copy();changed[index]=changed[index].replace(old,new)
+            with self.assertRaises(ValueError):apps.validate_markers(changed,claimed_requester=True)
+        changed=markers.copy();changed[index+1]=changed[index+1].replace('outcome=17179869184','outcome=4294967381')
+        with self.assertRaises(ValueError):apps.validate_markers(changed,claimed_requester=True)
+
+    def test_claimed_request_scenario_waits_for_cancelled_diagnostics_and_checks_surviving_files(self):
+        from tools.qualify_native_app_session import retirement_barriers
+        for bad in (False,True):
+            case=apps.file_control_scenario('0123456789abcdef',bad_file=bad,claimed_requester=True)
+            self.assertEqual(len(case.sent),293)
+            self.assertEqual(list(retirement_barriers(case.sent).values()),[(5,1),(5,2),(4,1),(4,2)])
+            self.assertEqual(case.expected.count(b'text: cancelled\r\n'),2)
+            self.assertEqual(case.sent.count(b'cat /version.txt\r'),3)
+            self.assertNotIn(b'text: exit 0x00000055',case.expected)
+            self.assertTrue(case.expected.endswith(b'Bye.\r\n'))
+
     def test_file_probe_requires_both_outstanding_requester_deaths_and_surviving_services(self):
         for bad in (False,True):
             markers=fixture(bad,file_controls=True)
@@ -283,6 +345,10 @@ class NativeAppSessionTests(unittest.TestCase):
         with patch('tools.qualify_native_user_entry.subprocess.check_output',return_value=''):
             bound=source_bindings()
         for name in ('native/kernel/src/development_apps.rs',
+                     'native/userspace/src/bin/waiting_file_probe.rs',
+                     'native/userspace/src/bin/claimed_files.rs',
+                     'native/userspace/src/files/claimed.rs',
+                     'native/userspace/src/files/claimed/tests.rs',
                      'native/kernel/src/user_root_probe/peer_driver/interactive/applications.rs',
                      'runtime/native_app_session.py','tools/qualify_native_app_session.py',
                      'tests/test_native_app_session.py'):

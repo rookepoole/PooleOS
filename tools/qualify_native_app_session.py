@@ -94,14 +94,16 @@ def main():
     parser.add_argument('--deferred-cleanup', action='store_true')
     parser.add_argument('--file-controls', action='store_true')
     parser.add_argument('--exhaust-cleanup', action='store_true')
+    parser.add_argument('--claimed-requester', action='store_true')
     args = parser.parse_args(); work, programs = args.work_dir.resolve(), args.program_dir.resolve()
-    if sum((args.deferred_cleanup,args.file_controls,args.exhaust_cleanup)) > 1: parser.error('separate control profiles required')
+    if sum((args.deferred_cleanup,args.file_controls,args.exhaust_cleanup,args.claimed_requester)) > 1: parser.error('separate control profiles required')
     if not work.is_relative_to(ROOT/'outputs') or not programs.is_relative_to(ROOT/'outputs'):
         parser.error('workspace output paths required')
     storage = require_space(work); work.mkdir(parents=True, exist_ok=False)
     before = source.source_bindings()
-    report = dict(cycle=286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
-                  contract_id='PCLEANUP3' if args.exhaust_cleanup else 'PFILECONTROL1' if args.file_controls else 'PAPPRECOVERY1' if args.deferred_cleanup else 'PAPPSESSION1',
+    report = dict(cycle=287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
+                  contract_id='PCLAIM1' if args.claimed_requester else 'PCLEANUP3' if args.exhaust_cleanup else 'PFILECONTROL1' if args.file_controls else 'PAPPRECOVERY1' if args.deferred_cleanup else 'PAPPSESSION1',
+                  claimed_requester=args.claimed_requester,
                   exhaust_cleanup=args.exhaust_cleanup,
                   file_controls=args.file_controls,
                   deferred_cleanup=args.deferred_cleanup, status='fail', source_bindings=before,
@@ -110,6 +112,8 @@ def main():
     try:
         cargo, _, env = shared._toolchain(ROOT/'.toolchains/rust-1.97.0')
         selected=[('PooleFileProbe' if args.file_controls and key=='TEXT' else name,key) for name,key in probe.PROGRAMS]
+        if args.claimed_requester:
+            selected=[({'TEXT':'PooleWaitingFileProbe','COUNTER':'PooleClaimedFiles'}.get(key,name),key) for name,key in probe.PROGRAMS]
         report['program_build'] = program_inputs(programs, env, selected)
         lock, profile = shared.tier0.validate_contracts(ROOT)
         qemu = shared.tier0._require_workspace_tool_path(shared.tier0.DEFAULT_QEMU_ROOT, ROOT)
@@ -120,6 +124,9 @@ def main():
         bad_features=('development-file-controls','development-applications-bad-file') if args.file_controls else ('development-applications-bad-file',)+extra
         if args.exhaust_cleanup:
             normal_features=('development-app-cleanup-exhaustion',)
+            bad_features=normal_features+('development-applications-bad-file',)
+        if args.claimed_requester:
+            normal_features=('development-claimed-requester',)
             bad_features=normal_features+('development-applications-bad-file',)
         linked, kernel, plan = shared.entry._build_product(cargo, env, work/'kernel1', features=normal_features)
         linked2, kernel2, _ = shared.entry._build_product(cargo, env, work/'kernel2', features=normal_features)
@@ -145,9 +152,9 @@ def main():
             run_dir = work/name; run_dir.mkdir()
             scenario=probe.file_control_scenario if args.file_controls else probe.scenario
             if args.exhaust_cleanup: scenario=exhaustion.scenario
-            case = scenario(secrets.token_hex(8), bad_file=bad_file)
-            interaction = Interaction(case, args.deferred_cleanup, args.file_controls, args.exhaust_cleanup)
-            validator = (lambda m: exhaustion.validate_markers(m,bad_file=bad_file)) if args.exhaust_cleanup else (lambda m: probe.validate_markers(m, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls))
+            case = probe.file_control_scenario(secrets.token_hex(8),bad_file=bad_file,claimed_requester=True) if args.claimed_requester else scenario(secrets.token_hex(8), bad_file=bad_file)
+            interaction = Interaction(case, args.deferred_cleanup, args.file_controls or args.claimed_requester, args.exhaust_cleanup)
+            validator = (lambda m: exhaustion.validate_markers(m,bad_file=bad_file)) if args.exhaust_cleanup else (lambda m: probe.validate_markers(m, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester))
             print(f'Native application session {name}: frozen 240-second bound', flush=True)
             try:
                 run, _, handoff = shared.boot._execute_once(name, lock, profile, qemu, path, run_dir, 240,
@@ -176,12 +183,12 @@ def main():
             shared.load.validate_oracle_binding(prefix['boot_prefix'], inspected, run['pbp1_transcript'])
             run['transcript_binding'] = shared.transfer.validate_transcript_binding(prefix, run['pbp1_transcript'])
             run['independent_revalidation'] = shared.transfer.validate_revalidation_binding(prefix, handoff, retained)
-            run['hostile_marker_cases_rejected'] = exhaustion.negative_controls(run['markers'],bad_file=bad_file) if args.exhaust_cleanup else probe.negative_controls(run['markers'], bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls)
+            run['hostile_marker_cases_rejected'] = exhaustion.negative_controls(run['markers'],bad_file=bad_file) if args.exhaust_cleanup else probe.negative_controls(run['markers'], bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester)
             run.update(media_sha256=shared.sha(media), kernel_sha256=shared.sha(image))
             report['guest_runs'].append(run)
         if before != source.source_bindings() or program_inputs(programs, env, selected) != report['program_build']:
             raise ValueError('source or input drift')
-        report.update(status='pass', bundled_files=True, useful_applications=1 if args.file_controls else 2)
+        report.update(status='pass', bundled_files=True, useful_applications=1 if args.file_controls or args.claimed_requester else 2)
     except Exception as error:
         report['failure'] = f'{type(error).__name__}: {error}'; print(report['failure'], flush=True)
     report['source_unchanged'] = before == source.source_bindings()

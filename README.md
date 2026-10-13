@@ -11,7 +11,16 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle286 verifies two simultaneous stopped-app
+**Current development checkpoint:** Cycle287 verifies cancellation of native apps
+blocked on already-claimed file requests, stale-wait rejection and late-reply
+denial in a diagnostic service. Nine final-source VM cases pass across claimed
+requesters, ordinary useful apps and file controls. All 18 prior user programs
+remain byte-identical. Next is actual optical ISO packaging, fresh-boot sustained
+interaction and a documented VM launcher. No integration ISO exists yet; complete
+robust microkernel, PooleGlyph/PDC and PooleGlass development continues afterward.
+[Evidence](docs/checkpoints/cycle287-native-claimed-requester.md).
+
+**Historical development checkpoint:** Cycle286 verifies two simultaneous stopped-app
 cleanup owners reaching their retry limit without freeing pages, restarting, or
 claiming completion. The shell and file service remain usable. Nine current-source
 VM cases pass across exhaustion, ordinary applications and successful delayed

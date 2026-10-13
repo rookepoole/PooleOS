@@ -24,6 +24,12 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle287-native-claimed-requester.md",
+    "runs/native-claimed-requester-readiness.json",
+    "native/userspace/src/bin/waiting_file_probe.rs",
+    "native/userspace/src/bin/claimed_files.rs",
+    "native/userspace/src/files/claimed.rs",
+    "native/userspace/src/files/claimed/tests.rs",
     "docs/checkpoints/cycle286-native-cleanup-exhaustion.md",
     "runs/native-cleanup-exhaustion-readiness.json",
     "runtime/native_cleanup_exhaustion.py",

@@ -111,6 +111,18 @@ test = false
 bench = false
 
 [[bin]]
+name = "PooleWaitingFileProbe"
+path = "src/bin/waiting_file_probe.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleClaimedFiles"
+path = "src/bin/claimed_files.rs"
+test = false
+bench = false
+
+[[bin]]
 name = "PooleConsole"
 path = "src/bin/console.rs"
 test = false

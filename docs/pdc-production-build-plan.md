@@ -1,13 +1,50 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-13
-Plan version: 2.189.0-native-cleanup-exhaustion
-Roadmap cycle: PooleOS Cycle 286
+Plan version: 2.190.0-native-claimed-requester
+Roadmap cycle: PooleOS Cycle 287
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 287: Claimed Waiting Requester Containment
+
+Three fresh diagnostic guests each cancel two app generations while blocked in
+RequestWait with one request already claimed by the file service. Native checks
+reject stale waiters, detach request ownership, reclaim the exact child and
+publish cancelled completion. The diagnostic service requires its late reply to
+be denied, then continues real file work. Three ordinary application and three
+queued/malformed/untracked file-control guests also pass. All nine use the same
+current sources and original 240-second per-guest bound.
+
+Two small diagnostic programs use existing ABI calls and the existing 64-call
+dispatch budget; no production scheduler, cleanup algorithm or user authority
+changes. Twenty independent user binary pairs match; all 18 prior programs are
+byte-identical. Host tests pass 138 user tests per debug/release, 554 default and
+573 application kernel tests per debug/release, 26 ownership doctests and 26
+focused oracle tests. All three native profiles use 121/208 kernel pages and
+36 guarded stack pages. [Evidence](checkpoints/cycle287-native-claimed-requester.md).
+
+Next is actual optical ISO packaging and fresh-boot sustained interaction through
+a documented VM launcher, using the ordinary useful-application profile. This
+bounded check is kernel-injected cancellation, not shell-triggered waiting stop,
+an independent late-reply kernel trace, or exhaustive interleaving qualification.
+General race/stress coverage, supervision, exhausted-owner recovery, efficient
+idle, job interruption and full stack bounds remain for the complete robust
+microkernel. COM2 is real serial interaction, not a graphical desktop. PooleGlyph,
+PDC, accessible PooleGlass and all production/signing/canonical gates remain.
+No default/prepared/deferred/exhaustion guest replay or new ISO is claimed here.
+
+Six superseded build trees were copied and hash-verified before removing their
+workspace copies: 7068 files, 2607975941 bytes. Current passing evidence, shared
+host target and owner inputs remain. Inventories: 1471 Python tests, 757
+architecture bindings, 921 execution inputs and 68 user-build inputs. Inventory
+is not full qualification. No phase, implementation flag or merge gate closes.
+The focused metadata suite passes 316 tests in 76.551 seconds after correcting
+two stale historical next-move title assertions; the failed capture is preserved.
+Final staged verification follows this documentation closeout.
 
 ## Cycle 286: Overlapping Native Cleanup Exhaustion
 

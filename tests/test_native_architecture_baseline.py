@@ -69,7 +69,11 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
         bound_paths = {item["path"] for item in self.artifact["bound_sources"]}
-        self.assertEqual(len(self.artifact["bound_sources"]), 751)
+        self.assertEqual(len(self.artifact["bound_sources"]), 757)
+        self.assertTrue({"docs/checkpoints/cycle287-native-claimed-requester.md",
+            "runs/native-claimed-requester-readiness.json", "native/userspace/src/bin/waiting_file_probe.rs",
+            "native/userspace/src/bin/claimed_files.rs", "native/userspace/src/files/claimed.rs",
+            "native/userspace/src/files/claimed/tests.rs"}.issubset(bound_paths))
         self.assertTrue({"docs/checkpoints/cycle286-native-cleanup-exhaustion.md",
             "runs/native-cleanup-exhaustion-readiness.json", "runtime/native_cleanup_exhaustion.py",
             "tests/test_native_cleanup_exhaustion.py"}.issubset(bound_paths))

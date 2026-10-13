@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 286
+Last roadmap reconciliation: PooleOS Cycle 287
 
-Cycle286 qualifies overlapping native cleanup exhaustion while the shell and
+Cycle287 qualifies claimed RequestWait-blocked requester cancellation, stale-wait
+rejection and diagnostic-service late-reply denial on three fresh guests, plus
+six ordinary application and file-control regressions. The actual optical ISO
+and interactive VM launcher are next. Generalized interleaving/recovery work
+continues in the full microkernel program; bounded diagnostics do not close it.
+No production, signing, canonical or merge gate is waived. All N0-N39, complete
+robust microkernel, PooleGlyph/PDC and accessible PooleGlass obligations remain.
+[Evidence](checkpoints/cycle287-native-claimed-requester.md).
+
+Historical Cycle286 qualifies overlapping native cleanup exhaustion while the shell and
 services survive, plus ordinary app and successful delayed-cleanup regressions.
 Exhaustion retains all child pages and job members; it is not successful recovery.
 Native waiting/pending/claimed request interleavings remain before optical ISO

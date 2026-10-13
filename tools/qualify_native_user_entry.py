@@ -32,6 +32,10 @@ def source_bindings() -> dict[str, str]:
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "runtime").glob("*.py"))
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "tools").glob("qualify_native_*.py"))
     paths.update({
+        "native/userspace/src/bin/waiting_file_probe.rs",
+        "native/userspace/src/bin/claimed_files.rs",
+        "native/userspace/src/files/claimed.rs",
+        "native/userspace/src/files/claimed/tests.rs",
         "native/userspace/src/files/probe.rs",
         "native/userspace/src/files/probe/tests.rs",
         "native/userspace/src/bin/file_probe.rs",

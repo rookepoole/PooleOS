@@ -1,5 +1,6 @@
 //! PFILE1: immutable bundled files. No host paths, writable storage, or kernel policy.
 #![forbid(unsafe_code)]
+pub mod claimed;
 pub mod probe;
 pub mod rpc;
 pub const BYTES: usize = 64;

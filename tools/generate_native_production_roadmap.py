@@ -15177,13 +15177,90 @@ def apply_cycle286(roadmap: dict, test_count: int) -> dict:
             "actual optical ISO with useful apps and sustained fresh-boot interaction",
             "documented interactive VM launcher with explicit serial limits",
             "full microkernel continues afterward; exact canonical gates before main"])
+    return apply_cycle287(roadmap, test_count)
+
+
+def apply_cycle287(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle287-native-claimed-requester.md"
+    path = "runs/native-claimed-requester-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle286_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=287, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 287
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path]
+    gate["current_candidate_audit"]["cycle"] = 287
+    gate["current_focused_source_projection"]["cycle"] = 287
+    gate["qualification_status"] = "native_claimed_requester_verified_optical_ISO_next_canonical_pending"
+    for name in ("current_native_cleanup_exhaustion_qualification", "current_native_cleanup_exhaustion_metadata"):
+        gate[name]["evidence_status"] = "historical_cycle286_not_current_candidate_qualification"
+    baseline["native_cleanup_exhaustion"]["evidence_status"] = "historical_cycle286_source_changed_not_replayed"
+    baseline["native_file_controls"]["evidence_status"] = "historical_cycle285_regression_replayed_in_cycle287"
+    baseline["native_app_recovery"]["evidence_status"] = "historical_cycle284_regression_in_cycle286_not_replayed_this_cycle"
+    baseline["native_application_session"]["evidence_status"] = "historical_cycle283_regression_replayed_in_cycle287"
+    record = dict(cycle=287, contract_id="PCLAIM1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("guest_runs", "claimed_requester_guest_runs", "normal_application_guest_runs", "file_control_guest_runs",
+                "default_kernel_tests_per_profile", "application_kernel_tests_per_profile", "user_tests_per_profile",
+                "ownership_doctests", "python_oracle_tests", "claimed_requester_deaths", "queued_requester_deaths",
+                "native_claimed_requester_death_verified", "request_wait_blocked_at_cancellation", "stale_waiter_rejected",
+                "kernel_injected_waiting_cancellation", "late_reply_denial_asserted_by_native_service",
+                "normal_application_regression_verified", "file_controls_replayed_this_cycle", "exhaustive_request_interleavings",
+                "iso_built", "production_ready", "merge_qualified"):
+        record[key] = receipt[key]
+    gate["current_native_claimed_requester_qualification"] = record
+    gate["current_native_claimed_requester_metadata"] = dict(cycle=287, status="pass", tests_passed=316,
+        unittest_elapsed_seconds=76.551, capture_elapsed_seconds=77.640,
+        log_sha256="54CDEDF6570086ADE876C3E1467B7D308F81EA29C45502AAA9CAF79CE8861C95",
+        prior_failed_attempt=dict(tests_run=316, failures=2, unittest_elapsed_seconds=77.180,
+            capture_elapsed_seconds=78.297,
+            log_sha256="F12E4FD1F293FF2D675C4EA1E42C88DD63F707709393A520E2AA1F283137B723",
+            reason="two_historical_tests_still_required_prior_next_move_title_instead_of_implemented_app_state"),
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_claimed_requester"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=287, session_contract="PCLAIM1", receipt_path=path, receipt_section="native_execution",
+        native_execution_status="three_claimed_requester_three_application_and_three_file_control_guests_pass",
+        native_execution_replayed_this_cycle=True, native_execution_evidence_cycle=287,
+        shell_native_execution_replayed_this_cycle=True, shell_native_execution_evidence_cycle=287,
+        native_claimed_requester_death_verified=True, request_wait_blocked_at_cancellation=True,
+        stale_waiter_rejected=True, kernel_injected_waiting_cancellation=True,
+        late_reply_denial_asserted_by_native_service=True, exhaustive_request_interleavings=False,
+        live_parent_deferred_replayed_this_cycle=False, live_parent_deferred_evidence_cycle=286,
+        cleanup_exhaustion_replayed_this_cycle=False, cleanup_exhaustion_evidence_cycle=286,
+        file_controls_replayed_this_cycle=True, file_controls_evidence_cycle=287,
+        kernel_image_pages=121, kernel_remaining_capacity_pages=87,
+        kernel_profile="ordinary_applications_and_separate_claimed_or_queued_requester_diagnostics",
+        default_profile_replayed_this_cycle=False, prepared_profile_replayed_this_cycle=False)
+    lane["stages"]["USI-4"] = "partial_native_apps_and_bounded_lifecycle_controls_verified_optical_pending"
+    evidence = "Cycle287: three fresh native diagnostic guests each cancel two RequestWait-blocked generations after file-service claim, reject stale waiters, and assert denied late replies in the live diagnostic service. Three ordinary application and three queued/malformed/untracked file-control regressions pass.20 independent user program pairs, all18 previous programs byte-identical;138 user tests per debug/release.554 default/573 application kernel tests per debug/release,26 doctests,26 oracle tests. Kernels121/208 pages,36 stack pages. Kernel-injected cancellation is not shell-triggered stop or exhaustive interleaving qualification. " + checkpoint
+    gap = "Next build and qualify the actual optical ISO using the ordinary useful-application profile, with fresh boots, sustained real interaction and a documented interactive VM launcher. Keep targeted development-only diagnostics separate. General request race/stress coverage, shell-triggered waiting cancellation, independent late-reply tracing, exhausted-owner recovery, supervision, efficient idle, job interruption, full stack bounds and local display/input remain tracked for the complete robust microkernel. Deferred/exhaustion/default/prepared evidence is historical. COM2 is real serial input, not a graphical desktop. PooleGlyph/PDC, accessible PooleGlass and all production/signing/canonical/main gates remain."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N13", "N14", "N16", "N18", "N36", "N38"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["evidence"].append(checkpoint)
+            flag["closure_condition"] += " Cycle287 bounded claimed/waiting controls qualify; next optical packaging. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Build and qualify the native user-space optical ISO",
+        entry_evidence=[checkpoint, path, "docs/native-userspace-integration-iso.md"],
+        exit_evidence=["reproducible optical ISO containing ordinary native user-space applications",
+            "fresh optical boots, sustained real input, fault containment and exact image binding",
+            "documented interactive VM launcher with explicit unsigned serial-console limits",
+            "continue robust microkernel and generalized stress afterward; canonical gates before main"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1466)
+    parser.add_argument("--test-count", type=int, default=1471)
     parser.add_argument("--status-date", default="2026-10-13")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

@@ -18,7 +18,10 @@ pub(super) fn requester_snapshot(
     Ok(state)
 }
 
-#[cfg(feature = "development-file-controls")]
+#[cfg(any(
+    feature = "development-file-controls",
+    feature = "development-claimed-requester"
+))]
 pub(super) fn requester_retired(
     p: &Peer,
     state: poolekernel::capability_ipc::request::Snapshot,

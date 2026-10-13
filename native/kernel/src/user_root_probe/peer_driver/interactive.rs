@@ -440,6 +440,78 @@ pub(crate) fn run(
                 stop(34005, serial, debugcon);
             }
         }
+        #[cfg(feature = "development-claimed-requester")]
+        if live[4]
+            && let Some(ticket) = waiting[4]
+        {
+            let state = checked!(unsafe {
+                arch::x86_64::user_ipc::with_waits(|s| s.request_snapshot(peers[4].id))
+            });
+            if state.claimed == 1 {
+                let sid = checked!(scheduler::TaskId::new(4, peers[4].id.generation));
+                let scheduled = checked!(scheduler.task_snapshot(sid));
+                if state.queued != 0
+                    || state.completed != 0
+                    || peers[4].slot.state(peers[4].id) != Ok(task::State::Waiting)
+                    || scheduled.state != scheduler::TaskState::Blocked
+                    || scheduled.wait_kind != scheduler::WaitKind::Ipc
+                {
+                    stop(34101, serial, debugcon);
+                }
+                let p = &mut peers[4];
+                let outcome = checked!(p.slot.cancel_waiting(p.id, ticket));
+                let flushes = arch::x86_64::user_root_write_count();
+                if !checked!(retire(
+                    p,
+                    outcome,
+                    manager,
+                    &mut scheduler,
+                    pages[4],
+                    true,
+                    &mut job,
+                    serial,
+                    debugcon
+                )) || arch::x86_64::user_root_write_count() - flushes != 1
+                    || checked!(unsafe {
+                        arch::x86_64::user_ipc::with_waits(|s| {
+                            Ok(s.cancel_wait(ticket, &mut scheduler, cpu).is_ok())
+                        })
+                    })
+                {
+                    stop(34102, serial, debugcon);
+                }
+                extra_flushes += 1;
+                record(
+                    serial,
+                    debugcon,
+                    "CLAIMED",
+                    &[
+                        ("task", 4),
+                        ("generation", u64::from(p.id.generation)),
+                        ("waiting", 1),
+                        ("stale_wait_rejected", 1),
+                        ("service_task", 1),
+                        ("service_generation", 1),
+                        ("dispatches", u64::from(scheduler.summary().dispatch_count)),
+                    ],
+                );
+                checked!(applications::requester_retired(
+                    p, state, &scheduler, serial, debugcon
+                ));
+                waiting[4] = None;
+                calls[4] = outcome.syscalls;
+                live[4] = false;
+                owned[4] = false;
+                retired += 1;
+                retirement(
+                    serial,
+                    debugcon,
+                    outcome,
+                    pages[4],
+                    scheduler.summary().dispatch_count,
+                );
+            }
+        }
         if let Some(permit) =
             checked!(unsafe { arch::x86_64::user_ipc::with_waits(|s| Ok(s.claim_process_stop())) })
         {

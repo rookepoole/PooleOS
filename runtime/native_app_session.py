@@ -8,6 +8,7 @@ PROGRAMS = [('PooleFileInit', 'INIT'), ('PooleAppFiles', 'COUNTER'),
             ('PooleConsoleService', 'CONSOLE'), ('PooleAppShell', 'CONSOLE_CLIENT'),
             ('PooleText', 'TEXT'), ('PooleNumbers', 'NUMBERS')]
 FIELDS = {
+    'CLAIMED': 'task generation waiting stale_wait_rejected service_task service_generation dispatches',
     'REQUESTER': 'task generation queued claimed completed detached dispatches',
     'START': 'bad_file init_bytes files_bytes console_bytes shell_bytes text_bytes numbers_bytes image_pages firmware_pages root0 root1 root2 root3 root4 root5',
     'HANDOFF': 'task generation control files startup_files bytes entered dispatches',
@@ -29,8 +30,8 @@ def parse(line: str, event: str) -> dict:
     return dict(zip(names, values))
 
 
-def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False) -> dict:
-    if deferred_cleanup and file_controls: raise ValueError('unqualified combined control modes')
+def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False) -> dict:
+    if sum((deferred_cleanup,file_controls,claimed_requester)) > 1: raise ValueError('unqualified combined control modes')
     if len(markers) < 51: raise ValueError('incomplete application session')
     arm = transfer.TRANSFER_ARM.fullmatch(markers[23])
     if arm is None or int(arm.group(10)) != 23: raise ValueError('session selector required')
@@ -58,6 +59,7 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
     cleaning, completed, cleanup_events = {}, {}, []
     complete_pending = None
     requesters, requester_pending = [], None
+    claimed_waiters, claim_pending = [], None
     for marker in markers[31:]:
         if marker.startswith(cleanup.PREFIX):
             if not deferred_cleanup or pending is not None or complete_pending is not None:
@@ -98,7 +100,8 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
             cleanup_events.append(dict(event=event, **v))
             continue
         event = next((e for e in FIELDS if marker.startswith('POOLEOS:APPS '+e+' ')), None)
-        if event not in ('HANDOFF','ADMIT','RETIRE','RUN','REQUESTER'): raise ValueError('unknown application event')
+        if event not in ('HANDOFF','ADMIT','RETIRE','RUN','REQUESTER','CLAIMED'): raise ValueError('unknown application event')
+        if claim_pending is not None and event != 'REQUESTER': raise ValueError('claimed waiter lacks requester retirement')
         if requester_pending is not None and event != 'RETIRE': raise ValueError('requester not immediately retired')
         if pending is not None and event != 'ADMIT': raise ValueError('handoff not immediately admitted')
         if complete_pending is not None and event != 'RETIRE': raise ValueError('cleanup completion not immediately retired')
@@ -112,9 +115,18 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
             last_event = dispatches
             task = v['task']
             if not 2 <= task <= 5: raise ValueError('unexpected survivor retirement')
-        if event == 'REQUESTER':
-            if not file_controls or task != 4 or task not in live or v['generation'] != generation[task] or v['queued']+v['claimed'] != 1 or v['completed'] != 0 or v['detached'] != 1:
+        if event == 'CLAIMED':
+            if (not claimed_requester or task != 4 or task not in live or v['generation'] != generation[task]
+                or v['waiting'] != 1 or v['stale_wait_rejected'] != 1 or v['service_task'] != 1 or v['service_generation'] != 1):
+                raise ValueError('invalid claimed waiting requester')
+            claim_pending=v;claimed_waiters.append(v)
+        elif event == 'REQUESTER':
+            if not (file_controls or claimed_requester) or task != 4 or task not in live or v['generation'] != generation[task] or v['queued']+v['claimed'] != 1 or v['completed'] != 0 or v['detached'] != 1:
                 raise ValueError('invalid outstanding-request death observation')
+            if claimed_requester:
+                if claim_pending is None or v['queued'] != 0 or v['claimed'] != 1 or any(v[n] != claim_pending[n] for n in ('task','generation','dispatches')):
+                    raise ValueError('claimed waiter and request do not match')
+                claim_pending=None
             requester_pending = v
             requesters.append(v)
         elif event == 'HANDOFF':
@@ -131,7 +143,7 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
             if pending is None or any(v[n] != pending[n] for n in ('task','generation','dispatches')):
                 raise ValueError('admission has no exact owned handoff')
             expected = generation[task]+1
-            process_slot = 6-task if file_controls else task-3
+            process_slot = 6-task if file_controls or claimed_requester else task-3
             if v['sequence'] != expected or v['handle'] != (expected<<32)|0x50000|process_slot or v['owned_pages'] != pages[task]:
                 raise ValueError('launch sequence, handle or pages')
             if not valid_root(v['root']) or any(v['root'] == roots[j] for j in owned if j != task) or (expected == 1 and v['root'] != roots[task]):
@@ -145,8 +157,8 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
             if task not in live or task not in owned or v['generation'] != generation[task] or v['released_pages'] != pages[task]:
                 raise ValueError('retirement identity or pages')
             expected = (1<<32) if task < 4 else (2<<32)|6 if task == 5 and generation[task] == 1 else 4<<32
-            if file_controls and task == 4:
-                expected = (1<<32)|85
+            if (file_controls or claimed_requester) and task == 4:
+                expected = 4<<32 if claimed_requester else (1<<32)|85
                 if requester_pending is None or any(v[n] != requester_pending[n] for n in ('task','generation','dispatches')):
                     raise ValueError('probe exit lacks outstanding-request retirement')
                 requester_pending = None
@@ -182,22 +194,26 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
                 previous_calls[j], previous_ticks[j] = pair
             samples.append(v)
             for state in cleaning.values(): state['samples'].append(v)
-    if pending is not None or cleaning or complete_pending is not None or requester_pending is not None or live != {0,1} or owned != {0,1} or generation[4:] != [2,2] or len(retires) != 6:
+    if pending is not None or cleaning or complete_pending is not None or requester_pending is not None or claim_pending is not None or live != {0,1} or owned != {0,1} or generation[4:] != [2,2] or len(retires) != 6:
         raise ValueError('incomplete application lifecycle')
     if deferred_cleanup and set(completed) != {(4,1),(4,2),(5,1),(5,2)}:
         raise ValueError('both generations require deferred cleanup')
     if file_controls and len(requesters) != 2: raise ValueError('both diagnostic generations required')
-    if len(samples) < 8 or any(v['live_mask'] != 3 for v in samples[-2:]) or not any(v['live_mask'] == 63 and min(v['calls4'],v['calls5'],v['ticks4'],v['ticks5']) > 0 for v in samples):
+    if claimed_requester and (len(requesters) != 2 or len(claimed_waiters) != 2): raise ValueError('both waiting requester generations required')
+    concurrent = any(v['live_mask'] == 63 and min(v['calls4'],v['calls5'],v['ticks4'],v['ticks5']) > 0 for v in samples)
+    if claimed_requester:
+        concurrent = any(v['live_mask'] & (1<<5) and min(v['calls5'],v['ticks5']) > 0 for v in samples)
+    if len(samples) < 8 or any(v['live_mask'] != 3 for v in samples[-2:]) or not concurrent:
         raise ValueError('concurrent apps or post-retirement survival missing')
     fault = next(r for r in retires if r['task'] == 5 and r['generation'] == 1)
     restart = next(a for a in admits if a['task'] == 5 and a['generation'] == 2)
     survivors = [v for v in samples if fault['dispatches'] < v['dispatches'] < restart['dispatches']]
     before_fault = [v for v in samples if v['dispatches'] < fault['dispatches']]
-    mask = 15 if file_controls else 31
-    peer = 1 if file_controls else 4
+    mask = 15 if file_controls or claimed_requester else 31
+    peer = 1 if file_controls or claimed_requester else 4
     if not before_fault or not any(v['live_mask'] == mask and v[f'calls{peer}'] > before_fault[-1][f'calls{peer}'] and v['calls3'] > before_fault[-1]['calls3'] for v in survivors):
         raise ValueError('text and shell progress after contained app fault missing')
-    return dict(transfer_prefix=common, start=start, program_bytes=sizes, handoffs=handoffs,
+    result = dict(transfer_prefix=common, start=start, program_bytes=sizes, handoffs=handoffs,
                 admits=admits, retires=retires, samples=samples, bad_file_handle=bad_file,
                 native_execution_requires_guest_binding=True, useful_applications=0,
                 deferred_cleanup=deferred_cleanup, cleanup_events=cleanup_events,
@@ -205,6 +221,11 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
                 multiple_pending_cleanup_owners_qualified=False,
                 file_controls=file_controls, requester_deaths=requesters,
                 bundled_files=False, iso_built=False, production_ready=False)
+    if claimed_requester:
+        result.update(claimed_requester=True,claimed_waiters=claimed_waiters,diagnostic_requester_is_useful_app=False,
+                      kernel_injected_waiting_cancellation=True,late_reply_denial_asserted_by_native_service=True,
+                      exhaustive_request_interleavings=False)
+    return result
 
 
 def text_result(content: bytes) -> bytes:
@@ -260,7 +281,7 @@ def scenario(nonce: str, *, bad_file: bool = False) -> shell.Scenario:
     return shell.Scenario('stale-app-file' if bad_file else 'application-session', nonce, tuple(steps))
 
 
-def file_control_scenario(nonce: str, *, bad_file: bool = False) -> shell.Scenario:
+def file_control_scenario(nonce: str, *, bad_file: bool = False, claimed_requester: bool = False) -> shell.Scenario:
     if re.fullmatch(r'[0-9a-f]{16}', nonce) is None: raise ValueError('independent challenge required')
     steps=[]
     def command(line, result, close=False):
@@ -274,7 +295,7 @@ def file_control_scenario(nonce: str, *, bad_file: bool = False) -> shell.Scenar
     numbers()
     for _ in range(2):
         command(b'start text',b'text: admitted\r\n')
-        command(b'status text',b'text: exit 0x00000055\r\n')
+        command(b'status text',b'text: cancelled\r\n' if claimed_requester else b'text: exit 0x00000055\r\n')
         command(b'cat /version.txt',files.VERSION)
         numbers()
     command(b'fault numbers',b'numbers: fault requested\r\n')
@@ -286,23 +307,24 @@ def file_control_scenario(nonce: str, *, bad_file: bool = False) -> shell.Scenar
     command(b'stop numbers',b'numbers: stop requested\r\n')
     command(b'status numbers',b'numbers: cancelled\r\n')
     command(b'exit',b'Bye.\r\n',True)
-    return shell.Scenario('file-request-controls',nonce,tuple(steps))
+    return shell.Scenario('claimed-requester-controls' if claimed_requester else 'file-request-controls',nonce,tuple(steps))
 
 
-def negative_controls(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False) -> int:
-    validate_markers(markers, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls)
+def negative_controls(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False) -> int:
+    validate_markers(markers, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester)
     cases = [markers[:i]+markers[i+1:] for i in range(len(markers)-1)]
     cases += [markers+[markers[-1]], markers+['POOLEOS:PANIC injected']]
     for i in range(29,len(markers)):
         for field in ('production','cpl','grants','control','files','startup_files','bytes','entered',
                       'handle','generation','sequence','released_pages','owned_pages','outcome','live_mask','cr3_writes',
-                      'attempts','next','pages','admitted','dispatches','queued','claimed','completed','detached'):
+                      'attempts','next','pages','admitted','dispatches','queued','claimed','completed','detached',
+                      'waiting','stale_wait_rejected','service_task','service_generation'):
             if ' '+field+'=' in markers[i]:
                 changed = markers.copy()
                 changed[i] = re.sub(r' '+field+r'=[0-9]+', ' '+field+'='+str((1<<64)-1), changed[i])
                 cases.append(changed)
     for case in cases:
-        try: validate_markers(case, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls)
+        try: validate_markers(case, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester)
         except ValueError: continue
         raise ValueError('hostile application observation accepted')
     return len(cases)

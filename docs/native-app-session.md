@@ -66,6 +66,14 @@ Local display/input, job interruption, full stack bounds, general supervision,
 efficient idle and physical hardware remain open. Complete microkernel,
 PooleGlyph/PDC, PooleGlass and all production gates remain required afterward.
 
+Current Cycle287 update: ordinary applications and queued/malformed/untracked
+file controls pass fresh native regression. The separate `--claimed-requester`
+profile qualifies two blocked claimed-requester cancellations, stale waiters and
+diagnostic-service late-reply denial per guest. See
+[Cycle287](checkpoints/cycle287-native-claimed-requester.md). Targeted lifecycle
+controls now precede actual optical packaging; generalized races/recovery remain
+in the full microkernel program. Earlier numbers above are historical Cycle283.
+
 Receipt: `runs/native-app-session-readiness.json`.
 Reproduce: `python -B tools/qualify_native_app_session.py --work-dir outputs/NEW --program-dir outputs/CURRENT-PROGRAMS`.
 Both paths must be workspace outputs and the program receipt must match current inputs.
