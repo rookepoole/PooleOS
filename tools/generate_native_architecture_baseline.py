@@ -24,6 +24,13 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle292-virtualbox-terminal-launcher.md",
+    "runs/native-virtualbox-launcher-readiness.json",
+    "runtime/native_virtualbox.py",
+    "tools/launch_native_virtualbox.py",
+    "specs/native-virtualbox-preview-profile.json",
+    "tests/test_native_virtualbox.py",
+    "Launch-VirtualBox-Preview.cmd",
     "docs/checkpoints/cycle291-native-ioapic-watchdog.md",
     "runs/native-ioapic-watchdog-readiness.json",
     "native/kernel/src/user_entry/timer/io_apic.rs",

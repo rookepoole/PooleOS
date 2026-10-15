@@ -1,13 +1,60 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-15
-Plan version: 2.194.0-native-ioapic-watchdog
-Roadmap cycle: PooleOS Cycle 291
+Plan version: 2.195.0-native-virtualbox-launcher
+Roadmap cycle: PooleOS Cycle 292
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 292: Packaged VirtualBox Terminal Preview
+
+`Launch-VirtualBox-Preview.cmd` now configures and runs the qualified local serial
+preview. Windows' "DVD Disc Image" label is normal for the actual `.iso`; attach
+it as optical media, not as a virtual hard disk. The launcher avoids that picker
+and opens a host terminal connected to the real native user-space shell.
+
+The launcher verifies thirteen recorded VirtualBox runtime hashes, the current
+ISO/source qualification, effective VM settings and the exact newly created VM
+identity. It disables guest networking, disks, shares, USB and remote display;
+uses loopback serial transport; stops and unregisters only its own VM; and
+retains diagnostic files. It does not install or update VirtualBox. This profile
+is the existing Windows7.2.20r175154 installation, not complete host attestation.
+
+32 new host tests and134 focused Python tests pass. The final candidate completes
+five QEMU guests and four VirtualBox sessions: two exact application self-tests,
+the actual Terminal adapter with557 injected keys, and a separate Ctrl+] exit.
+Each VirtualBox run confirms shutdown/unregistration and unchanged pre-existing
+registrations. Native kernel sources are unchanged; fresh optical builds produce
+the same66109440-byte ISO as Cycle291.20 retained user-program pairs remain bound.
+No new host Rust-suite execution is claimed.
+
+The first live launcher failed on VirtualBox's non-JSON running-state telemetry,
+also preventing cleanup. Its exact recorded UUID/name/config were reverified and
+that VM was stopped/unregistered. Shutdown now depends on bounded ownership and
+state records, independently of optional telemetry. Regression tests and fresh
+source-bound guest replay pass; the failed receipt and recovery remain preserved.
+
+[Launch guide](native-userspace-preview.md),
+[checkpoint](checkpoints/cycle292-virtualbox-terminal-launcher.md), and
+`runs/native-virtualbox-launcher-readiness.json` record the evidence. Execution
+binds939 inputs and architecture776 paths. Python inventory1521 is not a full
+suite run.40 phases/301 subphases/8996 source requirements/59 additions,99 flags/
+44 open and20 gap groups remain; no phase closes and no canonical/merge gate passes.
+
+Focused metadata verification passes 366 tests in 111.667s. A stale next-task
+title expectation was corrected; its earlier failed run is preserved. Exact
+staged/publication verification remains separate from full canonical acceptance.
+
+Next: diagnose default VirtualBox stage117 and prove actual watchdog delivery,
+then resume shell-issued waiting stop and interruptible jobs. Human terminal
+typing, abrupt launcher-process death cleanup, standalone packaging and other
+host/runtime profiles remain unqualified under `FLAG-N3-VIRTUALBOX-PREVIEW-001`.
+This is not a native desktop. Robust microkernel completion, local display/input,
+drivers, persistence/networking, tandem PooleGlyph/PDC, accessible PooleGlass and
+all N0-N39 production/signing gates remain open.
 
 ## Cycle 291: Native VirtualBox User-Space Sessions
 

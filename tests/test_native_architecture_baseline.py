@@ -69,7 +69,10 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
         bound_paths = {item["path"] for item in self.artifact["bound_sources"]}
-        self.assertEqual(len(self.artifact["bound_sources"]), 769)
+        self.assertEqual(len(self.artifact["bound_sources"]), 776)
+        self.assertTrue({"runtime/native_virtualbox.py", "tools/launch_native_virtualbox.py",
+                         "runs/native-virtualbox-launcher-readiness.json",
+                         "docs/checkpoints/cycle292-virtualbox-terminal-launcher.md"}.issubset(bound_paths))
         self.assertIn("native/kernel/src/early_serial.rs", bound_paths)
         self.assertTrue({"docs/checkpoints/cycle288-native-userspace-iso.md",
             "docs/native-userspace-preview.md", "runs/native-userspace-iso-readiness.json",

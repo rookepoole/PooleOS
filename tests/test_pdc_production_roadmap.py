@@ -198,8 +198,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 291)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1488)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 292)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1521)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -239,8 +239,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "native_ioapic_watchdog_and_virtualbox_serial_verified_canonical_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 291)
+        self.assertEqual(current["qualification_status"], "native_virtualbox_launcher_verified_canonical_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 292)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -6860,7 +6860,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
         self.assertEqual(record['receipt_sha256'],'BEE1CDEF65E2B3E3983CE1D981DDA91BB69EDF45208AF1A5D160D35832F545EB')
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(288,'PUSIISO1','pass'))
-        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),934)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),939)
         self.assertEqual((r['guest_runs'],r['iso_byte_count']),(6,66109440))
         self.assertEqual(r['iso_sha256'],'1E4752E3D45972CEA7711AF443C15EFC22CD82558F1A975B6B676ADF6C7841AE')
         prior=json.loads((ROOT/'runs/native-claimed-requester-readiness.json').read_bytes())
@@ -6899,7 +6899,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertTrue(c['source_unchanged'] and c['owner_report_unchanged'])
         lane=self.roadmap['baseline']['user_space_integration']
         self.assertTrue(lane['optical_iso_built'] and lane['continue_full_microkernel_after_iso'])
-        self.assertEqual(self.roadmap['immediate_next_move']['title'],'Package verified VirtualBox serial launch, then resume waiting stop and interruptible jobs')
+        self.assertEqual(self.roadmap['immediate_next_move']['title'],'Investigate VirtualBox diagnostic stage117, then resume waiting stop and interruptible jobs')
 
     def test_cycle289_file_wait_is_native_bound_and_preserves_the_optical_preview(self) -> None:
         from runtime import native_app_session as apps, native_userspace_iso as optical, native_shell
@@ -7044,7 +7044,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         r = json.loads(raw)
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), record['receipt_sha256'])
         self.assertEqual((r['cycle'], r['contract_id'], r['status']), (291, 'PIOWATCH1', 'pass'))
-        self.assertEqual(r['source_bindings'], source_bindings())
+        self.assertNotEqual(r['source_bindings'], source_bindings())
         self.assertEqual(len(r['source_bindings']), 934)
         self.assertEqual(r['program_build']['source_bindings'], bindings())
         self.assertEqual((len(bindings()), len(r['program_build']['programs']), r['reused_program_build_cycle']), (68, 20, 289))
@@ -7115,13 +7115,88 @@ class PdcProductionRoadmapTests(unittest.TestCase):
                     'canonical_full_replay_performed', 'merge_qualified'):
             self.assertFalse(r[key], key)
         self.assertEqual(r['virtualbox_full_diagnostic_failure_stage'], 117)
-        lane = self.roadmap['baseline']['user_space_integration']
+        lane = self.roadmap['baseline']['historical_cycle291_user_space_integration']
         self.assertEqual((lane['cycle'], lane['session_contract'], lane['optical_iso_sha256']), (291, 'PIOWATCH1', r['iso_sha256']))
         self.assertTrue(lane['virtualbox_user_space_verified'] and lane['continue_full_microkernel_after_iso'])
         self.assertFalse(lane['virtualbox_usable'] or lane['virtualbox_packaged_launcher'])
         flag = next(f for f in self.roadmap['implementation_flags'] if f['id'] == 'FLAG-N3-VIRTUALBOX-PREVIEW-001')
         self.assertEqual(flag['status'], 'open')
         self.assertIn(record['receipt_path'], flag['evidence'])
+
+    def test_cycle292_disposable_virtualbox_launcher_is_source_bound(self) -> None:
+        from runtime import native_app_session as apps, native_userspace_iso as optical, native_shell
+        from tools.qualify_native_user_entry import source_bindings
+        record = self.roadmap['baseline']['native_virtualbox_launcher']
+        raw = (ROOT / record['receipt_path']).read_bytes()
+        r = json.loads(raw)
+        digest = hashlib.sha256(raw).hexdigest().upper()
+        self.assertEqual(digest, '7CF22EE9BC0A24C53294DDE8FBAD2F64B59AC958E723256F3152515608DC98A6')
+        self.assertEqual(record['receipt_sha256'], digest)
+        self.assertEqual((r['cycle'], r['contract_id'], r['status']), (292, 'PVBPREVIEW1', 'pass'))
+        self.assertEqual(r['source_bindings'], source_bindings())
+        self.assertEqual(len(r['source_bindings']), 939)
+        self.assertEqual((r['host_python_tests'], r['new_launcher_tests']), (134, 32))
+        self.assertEqual((r['qemu_guest_runs'], r['virtualbox_guest_runs']), (5, 4))
+        self.assertEqual(r['native_execution']['source_bindings'], r['source_bindings'])
+        self.assertEqual(r['qemu_launcher']['source_bindings'], r['source_bindings'])
+        self.assertEqual(r['qemu_launcher']['status'], 'pass')
+        prior_raw = (ROOT / 'runs/native-ioapic-watchdog-readiness.json').read_bytes()
+        prior = json.loads(prior_raw)
+        delta = r['historical_cycle291_source_delta']
+        self.assertEqual(delta['receipt_sha256'], hashlib.sha256(prior_raw).hexdigest().upper())
+        self.assertEqual(delta['added_paths'], sorted(r['source_bindings'].keys() - prior['source_bindings'].keys()))
+        self.assertEqual(len(delta['added_paths']), 5)
+        self.assertEqual(delta['removed_paths'], [])
+        self.assertEqual(delta['changed_paths'], ['tools/qualify_native_app_session.py', 'tools/qualify_native_user_entry.py'])
+        self.assertEqual(r['iso_sha256'], prior['iso_sha256'])
+        profile = json.loads((ROOT / 'specs/native-virtualbox-preview-profile.json').read_bytes())
+        self.assertEqual(len(r['virtualbox_sessions']), 2)
+        for guest in r['virtualbox_sessions']:
+            self.assertEqual((guest['status'], guest['guest_bound_seconds']), ('pass', 240))
+            self.assertEqual(guest['source_bindings'], r['source_bindings'])
+            self.assertEqual(guest['tool_hashes'], profile['files'])
+            self.assertEqual(guest['virtualbox_version'], profile['version'])
+            self.assertEqual(guest['iso_sha256'], r['iso_sha256'])
+            self.assertTrue(all(guest[k] for k in ('source_unchanged', 'runtime_unchanged', 'iso_unchanged',
+                'effective_configuration_verified', 'no_guest_network', 'no_host_shares', 'no_guest_disk', 'no_physical_media')))
+            self.assertTrue(all(guest['cleanup'][k] for k in ('stopped', 'unregistered', 'prior_registrations_unchanged')))
+            self.assertEqual(guest['cleanup']['errors'], [])
+            summary = apps.validate_markers(guest['markers'], file_waits=True)
+            self.assertEqual(json.loads(json.dumps(summary)), guest['marker_summary'])
+            self.assertEqual(len(summary['file_wait_pairs']), 20)
+            self.assertEqual(apps.negative_controls(guest['markers'], file_waits=True), guest['hostile_marker_cases_rejected'])
+            window = guest['sustained_window']
+            self.assertEqual(optical.validate_sustained(summary['samples'], window['first_dispatch'], window['last_dispatch']), window)
+            native_shell.validate_interaction(apps.scenario(guest['interaction']['nonce']),
+                bytes.fromhex(guest['interaction']['input_hex']), bytes.fromhex(guest['interaction']['output_hex']))
+        self.assertEqual(len(r['terminal_sessions']), 2)
+        for guest in r['terminal_sessions']:
+            self.assertFalse(guest['self_test'])
+            self.assertEqual(guest['scope'], 'manual_serial_session_not_qualification')
+            self.assertTrue(all(guest['cleanup'][k] for k in ('stopped', 'unregistered', 'prior_registrations_unchanged')))
+            self.assertTrue(guest['terminal_evidence']['actual_terminal_adapter'])
+            self.assertTrue(guest['terminal_evidence']['keystrokes_injected'])
+            self.assertFalse(guest['terminal_evidence']['physical_keyboard_tested'])
+        self.assertEqual(r['terminal_sessions'][0]['terminal_evidence']['input_bytes'], 557)
+        self.assertTrue(r['terminal_sessions'][1]['terminal_evidence']['host_stop_key_tested'])
+        for capture in r['captures'].values():
+            self.assertEqual(capture['return_code'], 0)
+            self.assertTrue(capture['source_unchanged'] and capture['owner_report_unchanged'])
+        for key in ('iso_built', 'iso_byte_identical_to_cycle291', 'virtualbox_packaged_launcher',
+                    'virtualbox_user_space_verified', 'virtualbox_serial_preview_usable_on_qualified_host'):
+            self.assertTrue(r[key], key)
+        for key in ('native_kernel_sources_changed', 'host_kernel_tests_replayed', 'host_user_tests_replayed',
+                    'virtualbox_full_diagnostics_passed', 'actual_virtualbox_watchdog_delivery_verified',
+                    'user_programs_rebuilt', 'native_gui', 'local_display_input', 'physical_keyboard_tested',
+                    'physical_hardware_tested', 'production_layout_passed', 'production_ready', 'signed',
+                    'merge_qualified', 'canonical_full_replay_performed'):
+            self.assertFalse(r[key], key)
+        self.assertEqual(r['virtualbox_full_diagnostic_failure_stage'], 117)
+        self.assertTrue(r['failures'][1]['recovery']['unregistered'])
+        lane = self.roadmap['baseline']['user_space_integration']
+        self.assertEqual((lane['cycle'], lane['session_contract']), (292, 'PVBPREVIEW1'))
+        self.assertTrue(lane['virtualbox_packaged_launcher'] and lane['continue_full_microkernel_after_iso'])
+        self.assertFalse(lane['virtualbox_usable'])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]
