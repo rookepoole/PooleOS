@@ -1,8 +1,39 @@
 # Run The Native User-Space Preview
 
-Cycle289, 2026-10-13. Unsigned native PooleBoot + PooleKernel, not Linux.
+Cycle290, 2026-10-15. Unsigned native PooleBoot + PooleKernel, not Linux.
 This is a one-CPU QEMU/OVMF optical preview operated through a host terminal.
 It is not a desktop, installer, signed release or hardware-qualified image.
+
+## ISO File Type And VirtualBox
+
+Windows may describe an `.iso` as a "Disc Image File" or "DVD Disc Image".
+That description does not make it a different format. The file linked below is
+an actual ISO9660 optical image with an EFI El Torito boot entry, not a VDI or
+VHD hard disk. Do not rename it or extract the embedded `EFI.IMG` for loading.
+
+To select it in VirtualBox, power off the intended test VM, open **Settings >
+Storage**, select its optical drive (often labeled **Empty**), then use the disc
+icon and **Choose a disk file** to select `PooleOS-UserSpace-Preview.iso`.
+Do not use the **existing virtual hard disk** picker. If no optical drive exists,
+add an optical drive under a storage controller first. Enable **EFI** in the VM's
+system settings; this image has no legacy BIOS boot path. These are media-loading
+instructions, not a claim that PooleOS has passed a VirtualBox boot test.
+
+The current qualification is QEMU/OVMF only. Shell input and output use COM2
+serial, not the virtual display and keyboard. Successfully attaching the ISO
+therefore does not establish that the preview is usable in the VirtualBox window.
+Use the tested launcher below for the current interactive preview. Actual tests
+on VirtualBox7.2.20 confirm optical attachment and entry into PooleKernel, but the
+first task slice fails at stage34365/panic0x101F before a usable shell session.
+Cycle290 repairs the previously missing kernel serial diagnostics. VirtualBox
+user-space interaction and a qualified reproducible configuration remain open;
+enabling EFI alone does not repair that kernel/platform failure.
+
+Before Cycle290, a read-only recheck confirmed the original Cycle289 image's hash
+`17A5D17F11F106F27EA22B6E5939A8F4449496086963245DC3E5002642499969`,
+the EFI boot catalog, `EFI/BOOT/BOOTX64.EFI`, and no structural issues in the
+bounded ISO/FAT inspector. This was not a new guest boot. Oracle documents optical
+media attachment and EFI under [Working with Virtual Machines](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/working-with-vms.html).
 
 ## Launch On This Development Machine
 
@@ -15,7 +46,7 @@ the Windows terminal only transports COM2 bytes.
 The local pointer is `outputs/native-userspace-preview.json`. The explicit form:
 
 ```powershell
-.\Launch-UserSpace-Preview.cmd --receipt outputs/cycle289-optical/receipt.json
+.\Launch-UserSpace-Preview.cmd --receipt outputs/cycle290-optical/receipt.json
 ```
 
 Try these commands individually, waiting for each result:
@@ -58,10 +89,10 @@ Guest escape sequences are sanitized before display on the host.
 
 ## Image And Reproduction
 
-Image: `outputs/cycle289-optical/PooleOS-UserSpace-Preview.iso`
+Image: `outputs/cycle290-optical/PooleOS-UserSpace-Preview.iso`
 
 Size: 66109440 bytes. SHA256:
-`17A5D17F11F106F27EA22B6E5939A8F4449496086963245DC3E5002642499969`
+`129F2232C8EE126A80C84CE71BDC9BD97DB925521275BE0C462D4224AB5E3E65`
 
 Do not write it to physical media. It is an optical-only VM image, not a hybrid
 USB image. The launcher depends on this repository and its pinned local tools;

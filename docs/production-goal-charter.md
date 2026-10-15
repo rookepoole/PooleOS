@@ -1,15 +1,23 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-10-13
+Status date: 2026-10-15
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 289
+Last roadmap reconciliation: PooleOS Cycle 290
 
-Cycle289 connects ordinary Text/Numbers file reads to the existing native kernel
+Cycle290 repairs bounded early UART detection and refreshes the QEMU-qualified
+optical preview. Actual VirtualBox execution confirms ISO attachment, native
+boot and restored kernel diagnostics, but still fails at first-slice accounting;
+VirtualBox usability remains unqualified. Diagnose the original slice failure,
+then resume waiting-stop and interruption work. No full microkernel, N0-N39,
+PooleGlyph/PDC, PooleGlass, signing or production gate is waived.
+[Evidence](checkpoints/cycle290-native-early-serial.md).
+
+Historical Cycle289 connects ordinary Text/Numbers file reads to the existing native kernel
 request-wait/wakeup path and refreshes the usable optical preview. Six optical
 boots pass, including two normal sessions, stale file authority, unsigned denial,
 launcher and terminal adapter. The kernel wait algorithm is unchanged; this is

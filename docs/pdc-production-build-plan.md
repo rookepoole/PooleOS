@@ -1,13 +1,72 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-10-13
-Plan version: 2.192.0-native-app-file-wait
-Roadmap cycle: PooleOS Cycle 289
+Status date: 2026-10-15
+Plan version: 2.193.0-native-early-serial
+Roadmap cycle: PooleOS Cycle 290
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 290: Repair Early Serial And Diagnose VirtualBox
+
+The owner's loading complaint now has actual VirtualBox evidence. The ISO is
+accepted as optical media; PooleBoot starts, exits firmware services and transfers
+to PooleKernel. The kernel prepares six user-task images but fails at the first
+slice-accounting check, stage34365/panic0x101F. This is not a working VirtualBox
+session. Initially the failure was hidden: the UART probe read its loopback byte
+before receive readiness and reported serial absent. A saved isolated guest core
+and its early ring identified the panic without changing host settings.
+
+The kernel now polls receive readiness with a fixed4096-read bound, rejects
+receive errors and mismatched data, and always exits loopback. Seven new unit
+tests cover immediate/delayed/boundary readiness, timeout, floating bus, each
+receive-error bit and wrong data.561 default/580 application kernel tests pass
+per debug/release profile, plus26 doctests. A fresh VirtualBox run confirms
+serial present and exposes the same underlying panic directly. No timer,
+accounting, capability or admission requirement was bypassed to get further.
+
+Six fresh QEMU/OVMF optical runs pass, including the full application scenarios,
+unsigned denial, strict launcher and557-key terminal replay. Kernel pairs
+reproduce; geometry remains121/208 pages and36 guarded stack pages. All20 retained
+Cycle289 user program pairs remain source-bound and unchanged, not newly built.
+The refreshed66109440-byte ISO has SHA256
+`129F2232C8EE126A80C84CE71BDC9BD97DB925521275BE0C462D4224AB5E3E65`.
+[Run it](native-userspace-preview.md). [Evidence](checkpoints/cycle290-native-early-serial.md).
+
+New open flag `FLAG-N3-VIRTUALBOX-PREVIEW-001`: identify the original first-slice
+failure and qualify a documented isolated VirtualBox configuration and real
+shell/application interaction. Then resume shell-triggered waiting cancellation
+and interruptible jobs. Local display/input, portable packaging, all robust
+microkernel, PooleGlyph/PDC, PooleGlass and N0-N39 production gates remain open.
+40 phases/301 subphases/8996 source requirements/59 additions remain;99 flags,
+44 open,20 gap groups. No phase closes. Python inventory1486 is not full-suite
+execution. Full canonical replay, main merge, signing and release remain pending.
+
+Focused metadata verification passes331 tests after correcting two stale live
+source/flag-count assertions; failed and passing logs remain recorded in the
+checkpoint. The architecture baseline binds765 files. This is not the full
+canonical suite and does not qualify a main merge or VirtualBox usability.
+
+## Pre-Cycle290 Owner Demo Usability Follow-Up: 2026-10-15
+
+The owner reports that the demo appears as a DVD disk image and cannot be loaded
+in VirtualBox. The current Cycle289 `.iso` was rechecked read-only: 66109440 bytes,
+SHA256 `17A5D17F11F106F27EA22B6E5939A8F4449496086963245DC3E5002642499969`,
+ISO9660/EFI El Torito structure, a present `EFI/BOOT/BOOTX64.EFI`, and no structural
+issues reported by the bounded ISO/FAT inspector. This confirms format and
+identity, not VirtualBox compatibility or which file/picker the owner used.
+
+The [preview guide](native-userspace-preview.md) now distinguishes Windows file
+type labels, optical attachment, virtual hard disks, EFI, and COM2-only interaction.
+Track VirtualBox boot and actual shell interaction with an exact VM configuration
+as an open user-facing demo acceptance item. Do not count file selection, a boot
+logo, or QEMU evidence as a VirtualBox pass. Local keyboard/display and portable
+packaging remain open; the owner wants a usable native system, not another splash.
+This documentation follow-up does not advance the qualified cycle, close a phase,
+alter executable inputs, or claim a new guest run. Existing microkernel work and
+all production gates remain required.
 
 ## Cycle 289: Useful Applications Use Kernel File Waits
 

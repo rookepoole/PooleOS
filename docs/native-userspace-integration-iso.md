@@ -1,11 +1,16 @@
 # Native User-Space Integration ISO
 
-Status: unsigned one-BSP optical preview verified, Cycle 288, 2026-10-13.
+Status: unsigned one-BSP QEMU optical preview verified, Cycle 290, 2026-10-15.
 The current ISO and host serial-terminal launcher are available; see
 [launch instructions](native-userspace-preview.md). This is not a native GUI.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
+
+VirtualBox accepts the current ISO and enters the native kernel, but its first
+task slice fails. Cycle290 restores serial diagnostics; it does not qualify a
+VirtualBox session. Track `FLAG-N3-VIRTUALBOX-PREVIEW-001` for the original slice
+failure, documented configuration and actual interactive application acceptance.
 
 ## Scope And Boundaries
 

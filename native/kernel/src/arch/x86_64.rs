@@ -3732,6 +3732,19 @@ pub struct Com1 {
     available: bool,
 }
 
+struct Com1Registers;
+
+impl poolekernel::early_serial::Registers for Com1Registers {
+    fn read(&mut self, offset: u16) -> u8 {
+        // SAFETY: constructed only by the privileged, exclusive COM1 probe.
+        unsafe { inb(COM1_BASE + offset) }
+    }
+    fn write(&mut self, offset: u16, value: u8) {
+        // SAFETY: the probe uses only fixed COM1 register offsets 0 through 5.
+        unsafe { outb(COM1_BASE + offset, value) };
+    }
+}
+
 impl Com1 {
     /// Initializes the fixed legacy COM1 candidate with a bounded loopback test.
     ///
@@ -3739,23 +3752,7 @@ impl Com1 {
     ///
     /// The caller must execute at a privilege level permitted to access x86 I/O ports.
     pub unsafe fn initialize() -> Self {
-        // SAFETY: the caller owns the privileged fixed-port probe for this early boundary.
-        unsafe {
-            outb(COM1_BASE + 1, 0x00);
-            outb(COM1_BASE + 3, 0x80);
-            outb(COM1_BASE, 0x03);
-            outb(COM1_BASE + 1, 0x00);
-            outb(COM1_BASE + 3, 0x03);
-            outb(COM1_BASE + 2, 0xc7);
-            outb(COM1_BASE + 4, 0x1e);
-            outb(COM1_BASE, 0xae);
-        }
-        // SAFETY: this reads only the fixed loopback register configured above.
-        let available = unsafe { inb(COM1_BASE) == 0xae };
-        if available {
-            // SAFETY: restore normal modem-control output for the same fixed UART.
-            unsafe { outb(COM1_BASE + 4, 0x0f) };
-        }
+        let available = poolekernel::early_serial::probe(&mut Com1Registers);
         Self { available }
     }
 

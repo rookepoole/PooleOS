@@ -21,6 +21,7 @@ pub mod atomics;
 pub mod capability_ipc;
 #[cfg(feature = "development-applications")]
 pub mod development_apps;
+pub mod early_serial;
 pub mod interrupt_time;
 pub mod locks;
 pub mod physical_memory;

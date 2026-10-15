@@ -69,7 +69,8 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
         bound_paths = {item["path"] for item in self.artifact["bound_sources"]}
-        self.assertEqual(len(self.artifact["bound_sources"]), 764)
+        self.assertEqual(len(self.artifact["bound_sources"]), 765)
+        self.assertIn("native/kernel/src/early_serial.rs", bound_paths)
         self.assertTrue({"docs/checkpoints/cycle288-native-userspace-iso.md",
             "docs/native-userspace-preview.md", "runs/native-userspace-iso-readiness.json",
             "runtime/native_userspace_iso.py", "tools/launch_native_userspace_iso.py",

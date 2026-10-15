@@ -15399,14 +15399,84 @@ def apply_cycle289(roadmap: dict, test_count: int) -> dict:
             "old waiter and request authority revoked, late reply denied, both generations reclaimed, peer survives",
             "keep synchronous-job interruption separate until implemented and tested; preserve usable optical preview",
             "continue all N0-N39 production and tandem PooleGlyph/PDC work"])
+    return apply_cycle290(roadmap, test_count)
+
+
+def apply_cycle290(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle290-native-early-serial.md"
+    path = "runs/native-early-serial-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle289_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=290, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 290
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path]
+    gate["current_candidate_audit"]["cycle"] = 290
+    gate["current_focused_source_projection"]["cycle"] = 290
+    gate["qualification_status"] = "native_early_serial_optical_verified_virtualbox_blocked_canonical_pending"
+    for key in ("current_native_app_file_wait_qualification", "current_native_app_file_wait_metadata"):
+        gate[key]["evidence_status"] = "historical_cycle289_not_current_candidate_qualification"
+    baseline["native_app_file_wait"]["evidence_status"] = "historical_cycle289_superseded_preview_preserved"
+    record = dict(cycle=290, contract_id="PEARLYSERIAL1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("guest_runs", "iso_built", "iso_sha256", "iso_byte_count", "host_kernel_test_counts",
+                "new_serial_unit_tests", "reused_program_build_cycle", "user_program_sources_unchanged",
+                "user_programs_rebuilt", "host_user_tests_replayed", "image_pages", "guarded_stack_pages",
+                "virtualbox_serial_diagnostics_restored", "virtualbox_usable", "virtualbox_user_space_verified",
+                "virtualbox_slice_failure_stage", "kernel_timer_or_accounting_fixed", "production_layout_passed",
+                "production_ready", "signed", "canonical_full_replay_performed", "merge_qualified"):
+        record[key] = receipt[key]
+    gate["current_native_early_serial_qualification"] = record
+    gate["current_native_early_serial_metadata"] = dict(cycle=290, status="pass", tests_passed=331,
+        unittest_elapsed_seconds=94.956, capture_elapsed_seconds=96.156,
+        log_sha256="BE36722B97582D8EB8F9BD61987582CF615F16F0F1E32858CB339CB3BB2E7A3E",
+        prior_failed_attempt=dict(tests_run=331, failures=2, unittest_elapsed_seconds=96.268,
+            capture_elapsed_seconds=97.844,
+            log_sha256="9C17CC92E7F8824F9932C5A8169806EB32F1A9D665EAF5A193C0C0C4F4CE9CF8",
+            reason="historical_tests_expected128_current_kernel_sources_and43_open_flags_instead_of129_and44"),
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_early_serial"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=290, session_contract="PEARLYSERIAL1", receipt_path=path, receipt_section="native_execution",
+        native_execution_status="six_qemu_optical_guests_pass_virtualbox_first_slice_blocked",
+        native_execution_replayed_this_cycle=True, native_execution_evidence_cycle=290,
+        shell_native_execution_replayed_this_cycle=True, shell_native_execution_evidence_cycle=290,
+        optical_iso_sha256=receipt["iso_sha256"], virtualbox_usable=False, virtualbox_user_space_verified=False,
+        virtualbox_serial_diagnostics_restored=True, virtualbox_slice_failure_stage=34365,
+        kernel_profile="ordinary_applications_early_serial_optical_and_stale_file_control")
+    evidence = "Cycle290: bounded receive-ready polling and unconditional loopback exit repair early COM1 diagnostics. Seven new Rust tests;561 default/580 application kernel tests per debug/release plus26 doctests. Six current QEMU optical boots retain file waits, fault/restart,4096-dispatch progress and exact557-byte terminal input.20 unchanged Cycle289 program pairs reused, not rebuilt. Kernel121/208 pages,36 stack pages. Actual isolated VirtualBox7.2.20 accepts the ISO and enters PooleKernel; serial now reports the existing stage34365/panic0x101F. No usable VirtualBox shell is claimed. " + checkpoint
+    gap = "Expose the original run_slice/driver error hidden by first-slice accounting failure on VirtualBox, then repair and qualify the actual platform dependency with bounded failure and rollback. Do not bypass accounting/security checks or disable host protections. Then resume shell-issued waiting stop and interruptible jobs. QEMU evidence is not VirtualBox qualification. General races/stress, supervision, efficient idle, stack bounds, final release layout, portable packaging, drivers, local display/input, persistence/networking, PooleGlyph/PDC, accessible PooleGlass and all N0-N39 production/signing/canonical gates remain."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N3", "N5", "N8", "N12", "N13", "N18", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] == "FLAG-N13-USERSPACE-ISO-001":
+            flag["evidence"].append(checkpoint)
+            flag["closure_condition"] += " Cycle290 repairs serial diagnostics; VirtualBox first slice remains blocked. " + gap
+    roadmap["implementation_flags"].append(dict(id="FLAG-N3-VIRTUALBOX-PREVIEW-001", phase_id="N3",
+        **{"class": "REQUIRED"}, status="open",
+        closure_condition="Document and reproduce an isolated VirtualBox configuration and real native shell/application session. Diagnose original first-slice failure, retain runtime accounting and security guards, test bounded failure/rollback, and preserve QEMU regressions. ISO attachment and kernel entry alone are insufficient.",
+        evidence=[checkpoint, path, "docs/native-userspace-preview.md"]))
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Diagnose VirtualBox first-slice failure, then resume waiting stop and interruptible jobs",
+        entry_evidence=[checkpoint, path, "docs/native-userspace-preview.md"],
+        exit_evidence=["original native slice/driver error identified without masking it with accounting failure",
+            "bounded platform repair/fallback and rollback tested without relaxing security or runtime accounting",
+            "real VirtualBox shell/application session on a documented isolated profile, QEMU regression preserved",
+            "resume waiting stop and interruptible jobs; continue all N0-N39 and tandem PooleGlyph/PDC work"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1485)
-    parser.add_argument("--status-date", default="2026-10-13")
+    parser.add_argument("--test-count", type=int, default=1486)
+    parser.add_argument("--status-date", default="2026-10-15")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
     args.out.write_text(json.dumps(roadmap, indent=2, ensure_ascii=True) + "\n", encoding="utf-8", newline="\n")

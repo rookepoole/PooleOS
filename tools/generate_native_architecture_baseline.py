@@ -447,6 +447,7 @@ BOUND_SOURCE_PATHS = (
     "docs/checkpoints/cycle203-native-smp-transactions.md",
     "native/kernel/src/scheduler_smp.rs",
     "native/kernel/src/lib.rs",
+    "native/kernel/src/early_serial.rs",
     "native/kernel/manifest.pkm",
     "tests/fixtures/pksched4_transaction_probe.rs",
     "tests/test_native_smp_transactions.py",
