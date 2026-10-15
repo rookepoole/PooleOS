@@ -26,6 +26,21 @@ pub trait BytePorts {
 }
 
 impl Space {
+    /// Opt-in local-console child token. It is not a UART, IPC or transferable handle.
+    #[cfg(feature = "development-desktop")]
+    pub fn desktop_authority(&self, caller: Caller, handle: u64, open: bool) -> Option<u64> {
+        let t = self.table(caller.id).ok()?;
+        let child = self.console.handle() ^ (12 << 16);
+        if self.tables[t].caller != Some(caller)
+            || self.console.owner != Some(caller)
+            || self.console.generation == 0
+            || handle != if open { self.console.handle() } else { child }
+        {
+            return None;
+        }
+        Some(child)
+    }
+
     /// File readers receive only SEND authority. Only the file service owns its
     /// endpoint; only the console service holds the existing device lease.
     pub fn admit_file_session(

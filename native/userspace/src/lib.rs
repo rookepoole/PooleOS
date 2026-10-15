@@ -3,6 +3,7 @@
 pub mod apps;
 pub mod console;
 pub mod console_ipc;
+pub mod desktop;
 pub mod files;
 pub mod protocol;
 pub mod service;

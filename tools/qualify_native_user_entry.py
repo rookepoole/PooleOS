@@ -32,6 +32,15 @@ def source_bindings() -> dict[str, str]:
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "runtime").glob("*.py"))
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "tools").glob("qualify_native_*.py"))
     paths.update({
+        "tests/test_native_local_console.py",
+        "Launch-Local-Console.cmd",
+        "native/kernel/src/display.rs",
+        "native/kernel/src/arch/x86_64/desktop.rs",
+        "native/userspace/src/desktop.rs",
+        "native/userspace/src/desktop/font.rs",
+        "native/userspace/src/desktop/keyboard.rs",
+        "native/userspace/src/process/desktop.rs",
+        "native/userspace/src/bin/desktop_console.rs",
         "native/kernel/src/early_serial.rs",
         "native/kernel/src/user_entry/timer/io_apic.rs",
         "native/kernel/src/user_entry/timer/io_apic/tests.rs",

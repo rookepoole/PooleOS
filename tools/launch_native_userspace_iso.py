@@ -12,6 +12,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from runtime import native_userspace_iso as optical, native_app_session as apps
 from runtime import native_console as console, native_shell as shell, native_session as session
+from runtime import native_local_console
 from tools import qualify_native_app_session as qualification, qualify_native_user_entry as source
 shared=qualification.shared
 LOG_LIMIT=16*1024*1024
@@ -137,7 +138,8 @@ def run_session(receipt: Path, work: Path, interaction, self_test: bool):
             lock,optical.optical_profile(base),qemu,path,work,result['guest_bound_seconds'],
             marker_validator=(lambda m: apps.validate_markers(m,file_waits=report.get('file_waits',False))) if self_test else manual_summary,
             marker_extractor=session.extract_markers,hpet_msi=True,pause_on_completion=True,
-            console_port=interaction.port,console_poll=interaction.poll,capture_log_limit_bytes=LOG_LIMIT)
+            console_port=interaction.port,console_poll=interaction.poll,capture_log_limit_bytes=LOG_LIMIT,
+            frame_validator=native_local_console.inspect_ppm if report.get('local_console') else None)
         if self_test:
             case=interaction.case
             _,output=console.split_output(bytes(interaction.received))

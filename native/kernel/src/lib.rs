@@ -69,8 +69,13 @@ pub const ENTRY_OFFSET: u64 = 0xd000;
     not(feature = "development-applications")
 ))]
 pub const ENTRY_OFFSET: u64 = 0xe000;
-#[cfg(feature = "development-applications")]
+#[cfg(all(
+    feature = "development-applications",
+    not(feature = "development-desktop")
+))]
 pub const ENTRY_OFFSET: u64 = 0x13000;
+#[cfg(feature = "development-desktop")]
+pub const ENTRY_OFFSET: u64 = 0x15000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 
 #[used]
@@ -916,6 +921,9 @@ pub struct FramebufferSpec {
     pub foreground: u32,
 }
 
+#[cfg(feature = "development-desktop")]
+pub mod display;
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ValidatedEntry {
     pub core: CoreRecord,
@@ -1493,13 +1501,15 @@ mod tests {
         let linker = include_str!("../linker.ld").replace("\r\n", "\n");
         assert!(
             linker.contains(
-                "__poole_ro_capacity = DEFINED(__poole_apps_profile) ? 0x13000 : (DEFINED(__poole_files_profile) ? 0xE000 : 0xD000);"
+                "__poole_ro_capacity = DEFINED(__poole_desktop_profile) ? 0x15000 : (DEFINED(__poole_apps_profile) ? 0x13000 : (DEFINED(__poole_files_profile) ? 0xE000 : 0xD000));"
             )
         );
         assert!(linker.contains(". = __poole_ro_capacity;\n  __poole_text_start = .;"));
         assert_eq!(
             ENTRY_OFFSET,
-            if cfg!(feature = "development-applications") {
+            if cfg!(feature = "development-desktop") {
+                0x15000
+            } else if cfg!(feature = "development-applications") {
                 0x13000
             } else if cfg!(feature = "development-files") {
                 0xe000

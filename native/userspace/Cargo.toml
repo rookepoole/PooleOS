@@ -17,6 +17,12 @@ bench = false
 path = "src/lib.rs"
 
 [[bin]]
+name = "PooleDesktopConsole"
+path = "src/bin/desktop_console.rs"
+test = false
+bench = false
+
+[[bin]]
 name = "PooleAppShell"
 path = "src/bin/application_shell.rs"
 test = false

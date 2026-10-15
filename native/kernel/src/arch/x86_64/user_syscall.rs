@@ -257,6 +257,16 @@ pub(super) fn dispatch_owned(
         frame.rax, frame.rdi, frame.rsi, frame.rdx, frame.r10, frame.r8, frame.r9,
     ) {
         Ok(Request::Version) => (Status::Ok, syscall::VERSION),
+        #[cfg(feature = "development-desktop")]
+        Ok(Request::Desktop {
+            number,
+            handle,
+            argument,
+            value,
+            mask,
+        }) => caller.map_or((Status::Denied, 0), |caller| {
+            super::user_ipc::desktop(caller, number, handle, argument, value, mask)
+        }),
         Ok(Request::ProcessCompletion(handle)) => caller.map_or((Status::Denied, 0), |caller| {
             super::user_ipc::process_completion(caller, handle)
         }),

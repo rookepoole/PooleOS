@@ -8444,6 +8444,13 @@ extern "C" fn poole_kernel_rust_entry(
         poole_kernel_emergency_panic(PanicCode::UserRoot as u32);
     }
     if trap_scenario == DevelopmentTrapScenario::UserRoot {
+        #[cfg(feature = "development-desktop")]
+        if validated.framebuffer.is_none_or(|spec| unsafe {
+            arch::x86_64::desktop::initialize(spec, validated.core.page_table_root_physical)
+                .is_err()
+        }) {
+            poole_kernel_emergency_panic(PanicCode::UserRoot as u32);
+        }
         user_root_probe::run(
             &decoded,
             validated.core,

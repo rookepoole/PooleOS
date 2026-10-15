@@ -45,6 +45,14 @@ pub enum Status {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Request {
+    #[cfg(feature = "development-desktop")]
+    Desktop {
+        number: u64,
+        handle: u64,
+        argument: u64,
+        value: u64,
+        mask: u64,
+    },
     ProcessCompletion(u64),
     Launch {
         handle: u64,
@@ -104,7 +112,11 @@ pub fn request(
     if version != VERSION {
         return Err(Status::Version);
     }
-    if (!matches!(number, 6 | 14) && flags != 0) || reserved != 0 {
+    if (!matches!(number, 6 | 14)
+        && !(cfg!(feature = "development-desktop") && number == 24)
+        && flags != 0)
+        || reserved != 0
+    {
         return Err(Status::Arguments);
     }
     match number {
@@ -264,6 +276,18 @@ pub fn request(
         19 => Err(Status::Arguments),
         20 if destination == 0 && bytes == 0 => Ok(Request::ProcessCompletion(source)),
         20 => Err(Status::Arguments),
+        #[cfg(feature = "development-desktop")]
+        21..=25 if matches!(number, 23 | 24) || (destination == 0 && bytes == 0) => {
+            Ok(Request::Desktop {
+                number,
+                handle: source,
+                argument: destination,
+                value: bytes,
+                mask: flags,
+            })
+        }
+        #[cfg(feature = "development-desktop")]
+        21..=25 => Err(Status::Arguments),
         _ => Err(Status::Unknown),
     }
 }

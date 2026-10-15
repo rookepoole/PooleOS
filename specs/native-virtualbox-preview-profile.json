@@ -6,6 +6,14 @@
   "license": "GPL-3.0 base package with separately licensed components; no redistribution or extension-pack dependency",
   "license_reference": "https://docs.oracle.com/en/virtualization/virtualbox/7.2/licensing/licensing-licensing-info.html",
   "scope": "Declared controller and base-runtime files only; not complete host/driver attestation",
+  "gui_files": {
+    "VirtualBoxVM.exe": "CA95D6C6B52642CEEB7B5055E15C7D7FBA1D19730B3742726E3BA35FD6AFF9B6",
+    "VirtualBoxVM.dll": "9D1D15F3719CB1398ABF409063CB4B112C7C3193AD79D45C9ED215D27F857B47",
+    "UICommon.dll": "0DE55DBD9D013436D8F424122475718932CD03D5C6C5691FCE09CD7B2142D21B",
+    "Qt6CoreVBox.dll": "250556F6126F3C6BBD59274F84BD91C7AE8D121A978F30B6848D22B21AC712D7",
+    "Qt6GuiVBox.dll": "EE35DEDE8DFE2604193E7304AE9A17E1F4DB1EB3DA973C7554044836628A3779",
+    "Qt6WidgetsVBox.dll": "16A23EDD2D9A1391F176C94BD5CDC657EB784CCC335657FFFA29D6D2CEA43164"
+  },
   "files": {
     "VBoxManage.exe": "6852390A57D454D3B7C9AE27E66E45C367699FAF2807B450DE084B1F7D0203C1",
     "VBoxHeadless.exe": "5F21BC7F6E6F07F39E4D8B9B5068BABB09315A160DB2C07F97607D2F4852C776",

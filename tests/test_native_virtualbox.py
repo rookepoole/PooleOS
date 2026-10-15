@@ -86,6 +86,54 @@ class FakeCommand:
 
 
 class VirtualBoxTests(unittest.TestCase):
+    def test_gui_unlock_retry_is_bounded_and_rechecks_identity(self):
+        for mode in ('release','exhaust','foreign','other'):
+            with self.subTest(mode=mode):
+                self.setUp()
+                self.owner.create(self.iso,12345)
+                original=self.owner.command
+                attempts=[]
+                def command(*args):
+                    if args[0]=='unregistervm':
+                        attempts.append(args)
+                        if mode!='release' or len(attempts)==1:
+                            if mode=='foreign':self.command.foreign=True
+                            error='failure' if mode=='other' else 'while it is locked (0x80bb0007)'
+                            return subprocess.CompletedProcess(args,1,'',error)
+                    return original(*args)
+                self.owner.command=command
+                with patch.object(vbox.time,'sleep') as sleep:
+                    result=self.owner.cleanup()
+                self.assertEqual(result['unregistered'],mode=='release')
+                self.assertEqual(len(attempts),{'release':2,'exhaust':8,'foreign':1,'other':1}[mode])
+                self.assertEqual(sleep.call_count,{'release':1,'exhaust':7,'foreign':1,'other':0}[mode])
+                self.assertEqual(result['prior_registrations_unchanged'],mode=='release')
+                if mode!='release':self.assertTrue(result['errors'])
+
+    def test_visible_start_retains_exact_config_and_identity_validation(self):
+        self.owner.create(self.iso,12345)
+        self.owner.start(visible=True)
+        self.assertIn(('startvm',self.owner.identity,'--type','gui'),self.command.calls)
+        self.command.foreign=True
+        before=len(self.command.calls)
+        with self.assertRaises(ValueError):self.owner.start(visible=True)
+        self.assertFalse(any(c[0]=='startvm' for c in self.command.calls[before:]))
+
+    def test_gui_runtime_is_additive_and_requires_all_declared_hashes(self):
+        profile=json.loads((ROOT/'specs/native-virtualbox-preview-profile.json').read_bytes())
+        exe=self.work/'VBoxManage.exe'
+        for key in ('files','gui_files'):
+            for name in profile[key]:
+                (self.work/name).write_bytes(name.encode())
+                profile[key][name]=hashlib.sha256(name.encode()).hexdigest().upper()
+        self.assertEqual(set(vbox.verify_runtime(exe,profile)),vbox.TOOLS)
+        self.assertEqual(set(vbox.verify_runtime(exe,profile,visible=True)),vbox.TOOLS|vbox.GUI_TOOLS)
+        (self.work/'VirtualBoxVM.exe').write_bytes(b'changed')
+        with self.assertRaises(ValueError):vbox.verify_runtime(exe,profile,visible=True)
+        self.assertEqual(set(vbox.verify_runtime(exe,profile)),vbox.TOOLS)
+        profile['gui_files'].pop('VirtualBoxVM.exe')
+        with self.assertRaises(ValueError):vbox.verify_runtime(exe,profile,visible=True)
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)

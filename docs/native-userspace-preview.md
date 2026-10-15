@@ -1,176 +1,128 @@
-# Run The Native User-Space Preview
+# Run The Native Local-Console Preview
 
-Cycle292, 2026-10-15. Unsigned native PooleBoot + PooleKernel, not Linux.
-This is a one-CPU optical preview operated through a host terminal.
-It is not a desktop, installer, signed release or hardware-qualified image.
+Cycle293, 2026-10-15. Native PooleBoot + PooleKernel, not Linux.
+This build draws its terminal inside the VM and accepts the VM's keyboard.
+It is not yet a windowed desktop, PooleGlass environment, installer or production release.
 
-## ISO File Type And VirtualBox
+Final source-bound replay passes five QEMU and two visible VirtualBox guests,
+including native keyboard input, application recovery, screen pixels and cleanup.
 
-Windows may describe an `.iso` as a "Disc Image File" or "DVD Disc Image".
-That description does not make it a different format. The file linked below is
-an actual ISO9660 optical image with an EFI El Torito boot entry, not a VDI or
-VHD hard disk. Do not rename it or extract the embedded `EFI.IMG` for loading.
+## Start On This Machine
 
-To select it in VirtualBox, power off the intended test VM, open **Settings >
-Storage**, select its optical drive (often labeled **Empty**), then use the disc
-icon and **Choose a disk file** to select `PooleOS-UserSpace-Preview.iso`.
-Do not use the **existing virtual hard disk** picker. If no optical drive exists,
-add an optical drive under a storage controller first. Enable **EFI** in the VM's
-system settings; this image has no legacy BIOS boot path. These are media-loading
-instructions; selecting an ISO as a virtual hard disk will not work.
+Double-click `Launch-Local-Console.cmd` in the repository root. It opens a
+VirtualBox window using the qualified configuration automatically. Click inside
+the VM to type. Right Ctrl releases VirtualBox's keyboard capture. The host
+terminal is only the launcher; it is not the guest's keyboard/input interface.
 
-Shell input and output use COM2 serial, not the virtual display and keyboard.
-Attaching the ISO therefore does not give you an interactive desktop in the
-VirtualBox window. Use `Launch-VirtualBox-Preview.cmd` for the tested local
-VirtualBox terminal, or `Launch-UserSpace-Preview.cmd` for QEMU.
-
-The exact Cycle291 ISO completed two isolated VirtualBox7.2.20r175154 application
-sessions: shell commands, native file waits, Text/Numbers, application fault and
-restart, and4096 dispatches of six-role progress. The tested profile is512MiB,
-one CPU, EFI64, ICH9, HPET/APIC enabled, x2APIC disabled, optical media read-only,
-no guest disk/network/shares, COM1 diagnostics and COM2 loopback transport.
-The kernel now handles HPET without MSI, reset I/O APIC identity and zero-tick
-budget yields. Earlier stage34365 failure is repaired for this application profile.
-
-Cycle292 packages that profile in the source-bound terminal launcher below.
-Changing EFI alone is not a substitute for the tested full profile. Default VirtualBox diagnostics
-still fail stage117, and actual fallback watchdog interrupt delivery there has
-not been qualified. QEMU routed diagnostics do verify that delivery and recovery.
-These are scoped VM results, not general VirtualBox/hardware support.
-
-Before Cycle290, a read-only recheck confirmed the original Cycle289 image's hash
-`17A5D17F11F106F27EA22B6E5939A8F4449496086963245DC3E5002642499969`,
-the EFI boot catalog, `EFI/BOOT/BOOTX64.EFI`, and no structural issues in the
-bounded ISO/FAT inspector. This was not a new guest boot. Oracle documents optical
-media attachment and EFI under [Working with Virtual Machines](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/working-with-vms.html).
-
-## Launch On This Development Machine
-
-For VirtualBox, double-click `Launch-VirtualBox-Preview.cmd` in the repository
-root. No manual ISO picker or VM configuration is needed. The launcher discovers
-the installed Windows VirtualBox via its registry entry and verifies the exact
-7.2.20r175154 version and thirteen controller/runtime hashes recorded in
-`specs/native-virtualbox-preview-profile.json`. It does not install software,
-change global settings or modify an existing VM. Changed runtime files require
-requalification. These hashes are not complete host/driver attestation.
-
-Each run creates a fresh `PooleOS-Preview-<UUID>` VM and an
-`outputs/virtualbox-session-*` directory. Before boot, it verifies EFI64, ICH9,
-512MiB, one CPU, HPET/APIC on, x2APIC off, the sole optical image, disabled guest
-network/disk/shares/USB/remote display, and the exact serial destinations.
-The VM is headless: its usable interface is the Windows serial terminal.
-
-Use `Ctrl+]` to stop the session. The launcher confirms the exact VM identity,
-powers it off and unregisters it without deleting its files. Existing VM
-registrations must remain unchanged. Limits are15 minutes for manual sessions,
-240 seconds for self-tests, and30 seconds per control command; setup and cleanup
-are separate from the guest limit. Unexpected identity/state changes fail closed
-and retain diagnostic records rather than mutating an unknown VM.
-
-Do not forcibly close or kill the terminal process: cleanup after abrupt process
-death is not yet qualified. Use `Ctrl+]` instead. If forcibly terminated, inspect
-the exact VM name in that session's `VMs` directory and verify that same name in
-VirtualBox before powering it off; do not alter unrelated VMs. Runtime failures
-keep a local receipt and logs when the controller remains alive.
-
-For QEMU:
-
-Run `Launch-UserSpace-Preview.cmd` from the repository root. It uses the existing
-pinned QEMU/OVMF inputs and Python runtime, checks the current qualification and
-exact image/source hashes, and opens no SDL display. Wait for the native prompt.
-The actual shell and applications execute in separate guest user address spaces;
-the Windows terminal only transports COM2 bytes.
-
-The local pointer is `outputs/native-userspace-preview.json`. The explicit form:
-
-```powershell
-.\Launch-VirtualBox-Preview.cmd --receipt outputs/cycle292-opticalfinal/receipt.json
-.\Launch-UserSpace-Preview.cmd --receipt outputs/cycle292-opticalfinal/receipt.json
-```
-
-Try these commands individually, waiting for each result:
+Try commands one at a time:
 
 ```text
+help
 ls
 cat /readme.txt
 start text
 start numbers
 text /readme.txt
 numbers /numbers.csv
-status text
 status numbers
-fault numbers
-status numbers
-text /version.txt
-start numbers
-numbers /numbers.csv
-stop text
-status text
-stop numbers
-status numbers
-exit
 ```
 
-Text computes counts; Numbers summarizes signed integers in the bundled file.
-Their file requests use native kernel wait/wakeup. Jobs are still synchronous:
-the shell cannot yet interrupt an active job to accept another command.
-The fault command intentionally faults Numbers inside this development guest.
-`exit` refuses while children remain owned. `Ctrl+]` closes the entire VM from
-the host. Sessions also stop at 15 minutes or bounded input/output/log limits.
-Each QEMU launch gets fresh firmware variables and a new `outputs/preview-session-*`
-evidence directory. Neither launcher enables networking, host share, persistent guest disk,
-passthrough, physical-media write or host firmware change.
+Text counts bytes/words/lines; Numbers summarizes the bundled integer file.
+These are separate native applications using capability IPC and native file
+wait/wakeup, not a host simulation or a kernel command interpreter.
 
-Cycle292 completes two VirtualBox application self-tests, the actual Terminal
-adapter with557 injected keys and1897 native response bytes, and a separate
-Ctrl+] exit after the native prompt. All four sessions verify cleanup and exact
-runtime/ISO/source identity. QEMU launcher regression also passes. A person
-typing in a visible Windows terminal was not separately tested. ASCII input,
-Enter and Backspace are supported; cursor/history editing is not implemented.
-Guest escape sequences are sanitized before display on the host.
+To exercise containment: `fault numbers`, then `status numbers`, `start numbers`
+and `numbers /numbers.csv`. To finish normally: `stop text`, `status text`,
+`stop numbers`, `status numbers`, then `exit`. Wait for each command response.
+The shell refuses exit while child tasks are still owned.
 
-## Image And Reproduction
+For host-side termination use Ctrl+] in the launcher terminal, or close the
+VirtualBox window and choose **Power Off**, not Save State. Do not forcibly kill
+the launcher process. The controller powers off/unregisters only its recorded
+temporary VM and retains its files. Cleanup after abrupt controller-process death
+is still unqualified. Sessions have a 15-minute limit; output/logs are bounded.
 
-Image: `outputs/cycle292-opticalfinal/PooleOS-UserSpace-Preview.iso`
+The input profile is US ASCII with Shift, Enter and Backspace. No mouse, selection,
+history editing, scrollback, Unicode/IME, clipboard or interruptible jobs yet.
+Files are bundled and read-only; no data persists between sessions.
 
-An identical convenience copy is `PooleOS-UserSpace-Preview-Cycle292.iso` in
-the owner's Downloads folder. Windows may still label it "DVD Disc Image";
-no conversion, renaming, extraction or disc burning is needed.
+## Configuration And Safety
 
-Size: 66109440 bytes. SHA256:
-`CEB2794D7E63739E31EE827BFDA65F99C38BD3B24D9A09B36554933FABC14E00`
+The launcher discovers the existing Windows VirtualBox 7.2.20r175154 installation
+and checks thirteen base-runtime plus six GUI hashes. This is scoped runtime
+identity, not complete host/driver/plugin attestation. No software is installed
+and no global configuration or existing VM is changed.
 
-Do not write it to physical media. It is an optical-only VM image, not a hybrid
-USB image. The launcher depends on this repository and its pinned local tools;
-it is not a standalone distributable bundle. Unsigned receipts bind local bytes
-but do not authenticate them. Source changes make old qualification fail closed.
+Each launch creates a fresh `PooleOS-Preview-<UUID>` and
+`outputs/virtualbox-session-*` directory. Exact settings: 512MiB, one CPU, EFI64,
+ICH9, HPET/APIC on, x2APIC off, VBoxVGA/32MiB, no 3D, read-only optical media,
+no guest disk/network/shares/USB/remote display. COM1 records diagnostics; COM2
+exists for the serial mirror and read-only observation. It is still required.
+The launcher handles the loopback connection; the guest input comes from PS/2.
 
-Use the configured Python runtime with `-B` and repository `PYTHONPATH`:
+The GUI may retain a registration lock briefly after poweroff. Cleanup retries
+only the recognized lock error, with exact ownership/state revalidation, at most
+eight attempts. Other failures retain diagnostics and fail explicitly. It never
+uses `unregistervm --delete`, deletes VM files or kills global frontend processes.
+Each control command retains its 30-second timeout. Close the exact named VM only
+if a retained failure requires manual recovery; do not touch unrelated VMs.
+
+## ISO And File Type
+
+Image: `outputs/cycle293-optical6/PooleOS-UserSpace-Preview.iso`.
+
+Convenience copy: `PooleOS-LocalConsole-Cycle293.iso` in Downloads.
+Size 66109440 bytes; SHA256:
+`18DE7FF006DA3A7B963A8D8F312984BDCEC87CEE6A34E21E6CB20575B5E68CB9`.
+
+Windows may call this a "DVD Disc Image". It is still a real ISO9660 image with
+an EFI El Torito boot entry. It belongs in a VM's **optical-drive** picker, not
+the virtual-hard-disk picker. Do not extract or rename its embedded EFI image.
+Use the launcher on this machine: enabling EFI alone is not the full tested
+configuration, and manually attaching the ISO without COM2 is insufficient.
+
+This is optical-only, not a hybrid USB image. Do not write it to physical media.
+The launcher requires this repository and the recorded local tools; it is not a
+standalone distributable bundle. Unsigned receipts bind local bytes but do not
+authenticate them. Source changes make old qualification fail closed.
+
+## Other Entry Points And Reproduction
+
+`Launch-VirtualBox-Preview.cmd` retains the host serial-terminal mode.
+`Launch-UserSpace-Preview.cmd` retains headless QEMU/OVMF serial mode; it does
+not open SDL, which previously crashed on this host. Both use the current pointer
+`outputs/native-userspace-preview.json`. The new visible entry point is:
+
+```powershell
+.\Launch-Local-Console.cmd --receipt outputs/cycle293-optical6/receipt.json
+```
+
+With the configured Python runtime, `-B` and repository `PYTHONPATH`:
 
 ```text
-tools/qualify_native_app_session.py --work-dir outputs/NEW-UNUSED-DIRECTORY --program-dir outputs/cycle289-programs2 --optical
-tools/launch_native_userspace_iso.py --receipt outputs/NEW-UNUSED-DIRECTORY/receipt.json --work-dir outputs/NEW-SESSION-DIRECTORY --self-test
-tools/launch_native_virtualbox.py --receipt outputs/NEW-UNUSED-DIRECTORY/receipt.json --work-dir outputs/ANOTHER-NEW-SESSION --self-test
+tools/qualify_native_app_session.py --work-dir outputs/NEW-OPTICAL --program-dir outputs/cycle293-programs5 --optical --desktop
+tools/qualify_native_local_console.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-KEYBOARD-QEMU --backend qemu
+tools/qualify_native_local_console.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-KEYBOARD-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible
 ```
 
-The retained program directory supplies 20 independently built, source-bound
-program pairs; the qualifier builds fresh kernel and PooleBoot pairs. It then
-authors each optical variant twice and checks exact bytes, independent ISO/FAT
-decoding, actual boot transcripts and exact user interaction. Use unused output
-directories to preserve failures. Qualification time limits are fixed before run.
+Use unused directories. The program directory contains 21 independently rebuilt,
+source-bound pairs. Kernel/boot pairs and ISO variants must reproduce exactly;
+positive, stale-file-grant and ordinary unsigned-denial controls remain required.
+Native keyboard tests inject device scancodes, never serial input, and compare
+exact responses and real framebuffer pixels. A human typing is a separate check.
 
-## Remaining Gates
+## Remaining Work
 
-The release architecture scanner still fails four future production paths; the
-preview's exact twelve-file PKLOAD6 layout has a separate development-only check.
-No policy was weakened. Cycle292 runs five final QEMU guests and four VirtualBox
-sessions on one host. The two routed QEMU diagnostic proofs remain historical
-Cycle291 evidence; they were not re-executed here. Kernel sources are unchanged.
-The broader diagnostic profile remains207/208 image pages; additional diagnostic
-growth needs an explicit layout/capacity review. This is not general stress,
-second-host reproduction, physical hardware or full canonical qualification.
-Kernel cleanup/race/recovery, drivers, local input/display, persistence, networking,
-PooleGlyph/PDC, accessible PooleGlass, final layout and signing remain open.
+Next: isolated surfaces and input focus, a compositor/window manager, pointer
+input and graphical application views, then accessible PooleGlass styling.
+Continue robust microkernel work, persistence, networking and PooleGlyph/PDC.
+Default VirtualBox diagnostics still fail stage117; actual watchdog delivery
+there remains separately unqualified. This application profile does not close it.
 
-The launcher uses documented [VBoxManage lifecycle and serial controls](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/vboxmanage.html).
-It never uses `unregistervm --delete` or `--delete-all`.
+Production layout, hardware drivers, multi-host reproduction, complete runtime
+attestation, signing and the full canonical/merge gates remain open.
+See the [contract](native-local-console.md) and
+[checkpoint](checkpoints/cycle293-native-local-console.md).
+VirtualBox's [lifecycle controls](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/vboxmanage.html)
+and [optical/EFI setup](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/working-with-vms.html)
+describe the host-side operations.

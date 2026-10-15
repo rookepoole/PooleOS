@@ -342,6 +342,8 @@ def _execute_once(
     console_port: int | None = None,
     console_poll: Callable[[bytes], bool] | None = None,
     capture_log_limit_bytes: int | None = None,
+    guest_control: Callable[[Any, bytes], None] | None = None,
+    frame_validator: Callable[[bytes], dict] | None = None,
 ) -> tuple[dict[str, Any], bytes, bytes]:
     if (console_port is None) != (console_poll is None) or (console_port is not None and
             (type(console_port) is not int or not 1 <= console_port <= 65535 or not pause_on_completion)):
@@ -411,6 +413,8 @@ def _execute_once(
                 raise QualificationError("PooleBoot emitted an error or panic marker")
             if b"POOLEBOOT/0.1 FRAME READY" in raw_debug:
                 frame_ready_observed = True
+            if guest_control is not None:
+                guest_control(client, raw_debug)
             if (console_poll(raw_debug) if console_poll is not None else completion_marker in raw_debug):
                 completion_marker_observed = True
                 break
@@ -451,7 +455,7 @@ def _execute_once(
         if not screenshot_path.is_file():
             raise QualificationError("QMP screendump did not create the proof frame")
         screenshot_data = screenshot_path.read_bytes()
-        screenshot = native_pooleboot.inspect_ppm(screenshot_data)
+        screenshot = (frame_validator or native_pooleboot.inspect_ppm)(screenshot_data)
         client.execute("quit")
         process.wait(timeout=10)
         if process.returncode != 0:

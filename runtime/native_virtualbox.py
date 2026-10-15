@@ -18,6 +18,8 @@ ENTRY = b'POOLEBOOT/0.1 ENTRY\r\n'
 TOOLS = frozenset(('VBoxManage.exe', 'VBoxHeadless.exe', 'VBoxHeadless.dll', 'VBoxSVC.exe',
     'VBoxSDS.exe', 'VBoxC.dll', 'VBoxProxyStub.dll', 'VBoxRT.dll', 'VBoxVMM.dll',
     'VBoxDD.dll', 'VBoxDD2.dll', 'VBoxDDU.dll', 'VBoxSupLib.dll'))
+GUI_TOOLS = frozenset(('VirtualBoxVM.exe', 'VirtualBoxVM.dll', 'UICommon.dll',
+    'Qt6CoreVBox.dll', 'Qt6GuiVBox.dll', 'Qt6WidgetsVBox.dll'))
 SECURITY = dict(memory=512, cpus=1, firmware='EFI64', chipset='ich9', hpet='on',
     apic='on', x2apic='off', ioapic='on', longmode='on', paravirtprovider='none',
     graphicscontroller='vboxvga', vram=32, accelerate3d='off', clipboard='disabled',
@@ -108,13 +110,18 @@ def bounded_read(path: Path, limit: int) -> bytes:
     return data
 
 
-def verify_runtime(executable: Path, profile: dict) -> dict:
+def verify_runtime(executable: Path, profile: dict, *, visible: bool = False) -> dict:
     executable = executable.resolve(strict=True)
     if (executable.name != 'VBoxManage.exe' or profile.get('contract_id') != CONTRACT
             or set(profile.get('files', {})) != TOOLS):
         raise ValueError('declared VirtualBox runtime profile required')
+    files = dict(profile['files'])
+    if visible:
+        if set(profile.get('gui_files', {})) != GUI_TOOLS:
+            raise ValueError('declared graphical runtime profile required')
+        files.update(profile['gui_files'])
     observed = {}
-    for name, expected in profile['files'].items():
+    for name, expected in files.items():
         if not isinstance(expected, str) or not re.fullmatch('[0-9A-F]{64}', expected):
             raise ValueError('invalid runtime hash')
         path = (executable.parent / name).resolve(strict=True)
@@ -284,13 +291,13 @@ class OwnedVm:
         self.admission = (iso, port)
         return info
 
-    def start(self):
+    def start(self, *, visible=False):
         if self.admission is None:
             raise ValueError('configured admission required')
         iso, port = self.admission
         validate_config(self.info(), bounded_read(self.config, TEXT_LIMIT), self.identity,
                         self.name, self.config, iso, self.work / 'com1.log', port)
-        self.checked('startvm', self.identity, '--type', 'headless')
+        self.checked('startvm', self.identity, '--type', 'gui' if visible else 'headless')
 
     def pause(self):
         if self.info(identity_only=True).get('VMState') != 'running':
@@ -313,7 +320,21 @@ class OwnedVm:
                 if info.get('VMState') not in ('poweroff', 'aborted'):
                     raise ValueError('shutdown not confirmed; VM retained')
                 result['stopped'] = True
-                self.command('unregistervm', self.identity)
+                # The GUI may retain its session lock briefly after poweroff.
+                # Revalidate identity/state before every bounded retry; never
+                # kill a frontend or relax ownership to force unregistration.
+                for attempt in range(8):
+                    if self.info(identity_only=True).get('VMState') not in ('poweroff', 'aborted'):
+                        raise ValueError('owned VM restarted during cleanup; retained')
+                    removal = self.command('unregistervm', self.identity)
+                    remaining = registrations(self.checked('list', 'vms'))
+                    if self.identity not in remaining:
+                        break
+                    locked = (removal.returncode != 0 and '0x80bb0007' in removal.stderr
+                              and 'while it is locked' in removal.stderr)
+                    if not locked or attempt == 7:
+                        raise ValueError('owned VM unregistration not confirmed; retained')
+                    time.sleep(0.5)
             else:
                 if not self.create_completed:
                     raise ValueError('creation outcome unconfirmed; ownership intent retained')

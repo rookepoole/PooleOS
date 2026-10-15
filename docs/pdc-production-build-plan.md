@@ -1,13 +1,41 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-15
-Plan version: 2.195.0-native-virtualbox-launcher
-Roadmap cycle: PooleOS Cycle 292
+Plan version: 2.196.0-native-local-console
+Roadmap cycle: PooleOS Cycle 293
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 293: Native On-Screen Console And Keyboard
+
+The desktop path now has a real user-space display/input foundation: a capability-
+controlled framebuffer command queue, read-only emulated PS/2 input, and an
+independently built CPL3 console. The existing native shell, files, Text and
+Numbers operate on screen. This is an interactive terminal, not yet a windowed
+desktop, PooleGlass compositor, installer or production system.
+
+Default/application/desktop kernel host suites pass 576/595/601 tests respectively
+in both debug/release; user-space 150 per profile and 21 independent program pairs
+pass. 75 focused Python tests pass. Actual optical and native-keyboard execution
+is recorded in the [checkpoint](checkpoints/cycle293-native-local-console.md).
+Final source-bound replay passes five QEMU and two visible VirtualBox guests,
+including native keyboard commands, real application recovery, valid pixels and
+exact owned-VM cleanup. The visible launcher and verified optical ISO are ready
+for this qualified development host, not a general-purpose desktop release.
+
+N18.4, N22.3/.4, N27.1/.2 and N29.1/.4 now have partial implementation evidence.
+N18/N22/N27 move from not_started to partial: 24 partial phases, 1 blocked, 15 not
+started, 0 complete. All 40 phases/301 subphases/8996 requirements/59 additions,
+99 flags/44 open and 20 gap groups are retained; no production exit gate closes.
+
+Next: isolated per-client surfaces, input focus and pointer routing, then real
+windowed application views and accessible PooleGlass. Keep default VirtualBox
+stage117/watchdog delivery, interruptible jobs, the complete microkernel,
+drivers/persistence/networking, tandem PooleGlyph/PDC and N0-N39 gates open.
+[Local-console contract](native-local-console.md). [Launch guide](native-userspace-preview.md).
 
 ## Cycle 292: Packaged VirtualBox Terminal Preview
 
@@ -4525,16 +4553,16 @@ The exact section titles, start/end lines, subheading counts, and checkbox count
 | N15 | Partial | `107-112,155` | 240 | 1 |
 | N16 | Not started | `150` | 96 | 3 |
 | N17 | Not started | `047-050,166` | 268 | 0 |
-| N18 | Not started | `051-057,165` | 443 | 0 |
+| N18 | Partial | `051-057,165` | 443 | 0 |
 | N19 | Not started | `076-081` | 329 | 1 |
 | N20 | Not started | `082-087` | 238 | 0 |
 | N21 | Not started | `088-092,141,158,168` | 467 | 0 |
-| N22 | Not started | `093-094,157,162,167` | 308 | 0 |
+| N22 | Partial | `093-094,157,162,167` | 308 | 0 |
 | N23 | Not started | `095-098,159` | 315 | 2 |
 | N24 | Not started | `099-100,153-154` | 260 | 0 |
 | N25 | Not started | `063-066` | 210 | 0 |
 | N26 | Not started | `067-075,156` | 455 | 0 |
-| N27 | Not started | `058-061` | 172 | 1 |
+| N27 | Partial | `058-061` | 172 | 1 |
 | N28 | Not started | `062,104-105` | 96 | 0 |
 | N29 | Not started | `101-103,160-161` | 322 | 1 |
 | N30 | Not started | `106` | 70 | 0 |
@@ -5601,7 +5629,12 @@ Subphases:
 
 Exit gate: reference and Tier 1 storage read/write/flush semantics match independent tests; no production write occurs without explicit target identity and recovery evidence.
 
-### N18 - USB, Input, and Removable Media (`not_started`)
+### N18 - USB, Input, and Removable Media (`partial`)
+
+Cycle293 starts only the emulated PS/2 recovery subset of N18.4. Keyboard policy
+is in CPL3; the kernel exposes bounded read-only device polling under exclusive
+authority. Physical PS/2, virtio-input, USB/HID, pointer, focus, IRQ and isolated
+driver work remain. No hardware or phase exit acceptance is implied.
 
 Inherited sections: `051-057`, `165`.  
 Goal: provide safe interactive input and removable-media handling without trusting device descriptors.
@@ -5669,7 +5702,12 @@ Subphases:
 
 Exit gate: repeated boot reaches the same service graph; failures degrade or recover according to policy; no service can silently claim readiness; support evidence identifies every transition.
 
-### N22 - Authentication, Sessions, Shell, Terminal, Accounts, and User Data (`not_started`)
+### N22 - Authentication, Sessions, Shell, Terminal, Accounts, and User Data (`partial`)
+
+Cycle293 makes the native shell and separate services usable through an on-screen
+ASCII terminal with editing and changed-cell scrolling. N22.3/.4 are partial:
+accounts/login, PTYs, pipelines, Unicode, scrollback, selection, clipboard,
+resizing, accessibility and interruptible jobs remain unimplemented or unqualified.
 
 Inherited sections: `093-094`, `157`, `162`, `167`.  
 Goal: provide a usable local multi-process environment without collapsing authority into a universal root shell.
@@ -5752,7 +5790,12 @@ Subphases:
 
 Exit gate: supported protocols interoperate and survive hostile corpora without memory/authority escape; signed packages fetch over untrusted networks and still verify offline.
 
-### N27 - Display Bootstrap, Virtio GPU, and Native Graphics Research (`not_started`)
+### N27 - Display Bootstrap, Virtio GPU, and Native Graphics Research (`partial`)
+
+Cycle293 partially implements N27.1/.2: retained GOP RGB/BGR geometry, bounded
+rectangles/masks, CPL3 font/cell policy and actual VM frame evidence. No user
+framebuffer mapping is granted. Virtio-gpu, isolated drivers, alpha, double
+buffering, general blits/scaling, multi-display and crash-recovery gates remain.
 
 Inherited sections: `058-061`. Added: `ADD-GPU-001`.  
 Goal: deliver reliable software graphics first and isolate all accelerated graphics risk.
@@ -5788,6 +5831,12 @@ Exit gate: selected playback/capture path meets glitch, latency, privacy, and cr
 
 Inherited sections: `101-103`, `160-161`. Added: `ADD-UI-001`.  
 Goal: build the original PooleGlass desktop and Liquid Glass identity on native services with accessible fallbacks.
+
+Cycle293 adds partial N29.1/.4 evidence through the experimental single-owner
+PDISPLAY1 value protocol and original ASCII bitmap font. This is not a surface
+protocol freeze, compositor, native window policy, Unicode toolkit or PooleGlass
+material implementation. The next increment must introduce isolated surfaces and
+input focus before decorative desktop work; `FLAG-NATIVE-UI-001` stays open.
 
 Cycle 151 evidence is limited to the demo static boot mark and an OS-wide design
 specification, not a live compositor or toolkit. The PG-01 through PG-10 register

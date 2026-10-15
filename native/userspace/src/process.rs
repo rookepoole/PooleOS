@@ -41,6 +41,7 @@ unsafe fn call(number: u64, handle: u64, address: u64, bytes: u64) -> (u64, u64)
 }
 
 pub struct Console(u64);
+pub mod desktop;
 pub struct ProcessCalls;
 impl crate::supervisor::Calls for ProcessCalls {
     #[inline(always)]

@@ -29,6 +29,26 @@ pub use console::bootstrap_files;
 pub use console::bootstrap_ipc as bootstrap_console_ipc;
 #[cfg(feature = "development-console")]
 pub(super) use console::byte as console_byte;
+
+#[cfg(feature = "development-desktop")]
+pub(super) fn desktop(
+    caller: Caller,
+    number: u64,
+    handle: u64,
+    argument: u64,
+    value: u64,
+    mask: u64,
+) -> (Status, u64) {
+    let s = unsafe { &*(&raw const IPC) };
+    let Some(child) = s.desktop_authority(caller, handle, number == 21) else {
+        return (Status::Denied, 0);
+    };
+    if number == 21 {
+        (Status::Ok, child)
+    } else {
+        super::desktop::operation(number, argument, value, mask)
+    }
+}
 /// SAFETY: the clock adapter authenticates the exclusive BSP/root/IF0 before
 /// borrowing this owner, including during a suspended authenticated syscall.
 pub unsafe fn with_clock<T>(

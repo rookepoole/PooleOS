@@ -49,7 +49,7 @@
         "inspect_live_pooleglyph_each_turn": {"const": true},
         "verify_master_checklist_coverage_each_turn": {"const": true},
         "new_work_must_be_flagged": {"const": true},
-        "last_updated_cycle": {"const": 292},
+        "last_updated_cycle": {"const": 293},
         "selected_move_id": {"const": "N13-CAPABILITY-IPC-001"},
         "immediate_next_move_id": {"const": "N13-CAPABILITY-IPC-001"},
         "owner_independent_next_move_id": {"const": "N13-CAPABILITY-IPC-001"},
@@ -92,9 +92,9 @@
       "properties": {
         "total": {"const": 40},
         "complete": {"const": 0},
-        "partial": {"const": 21},
+        "partial": {"const": 24},
         "blocked": {"const": 1},
-        "not_started": {"const": 18},
+        "not_started": {"const": 15},
         "subphase_total": {"const": 301}
       }
     },

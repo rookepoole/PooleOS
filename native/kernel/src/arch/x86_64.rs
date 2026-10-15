@@ -48,6 +48,8 @@ const DOUBLE_FAULT_IST_INDEX: u8 = 2;
 const INTERRUPT_GATE_PRESENT_RING0: u8 = 0x8e;
 const TSS_AVAILABLE_PRESENT_RING0: u64 = 0x89;
 
+#[cfg(feature = "development-desktop")]
+pub mod desktop;
 pub mod user;
 pub mod user_ipc;
 mod user_preempt;

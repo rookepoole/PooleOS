@@ -1,4 +1,4 @@
-"""Use the verified native ISO in a disposable VirtualBox serial-terminal session."""
+"""Use the verified native ISO in a disposable VirtualBox console session."""
 from __future__ import annotations
 
 import argparse
@@ -46,10 +46,40 @@ def listener_socket():
         raise
 
 
-def run_session(receipt: Path, work: Path, executable: Path, interaction, self_test: bool):
+class VisibleConsole:
+    """Read-only serial observation; all guest input comes from the VM keyboard."""
+    def __init__(self, stop_requested):
+        self.sock = None
+        self.payload, self.sent, self.received = b'', 0, bytearray()
+        self.stop_requested = stop_requested
+
+    def poll(self, debug):
+        while True:
+            try:
+                data = self.sock.recv(4096)
+            except BlockingIOError:
+                break
+            if not data:
+                raise KeyboardInterrupt
+            self.received.extend(data)
+            if len(self.received) > 65536:
+                raise ValueError('local console observation limit reached')
+        runs = [apps.parse(m, 'RUN') for m in session.extract_markers(debug)
+                if m.startswith('POOLEOS:APPS RUN ')]
+        return self.stop_requested() or (len(runs) >= 2 and all(v['live_mask'] == 3 for v in runs[-2:]))
+
+    def close(self):
+        if self.sock is not None:
+            self.sock.close()
+            self.sock = None
+
+
+def run_session(receipt: Path, work: Path, executable: Path, interaction, self_test: bool, *, visible=False):
     report, iso, disk = check_preview(receipt)
+    if visible and (self_test or report.get('local_console') is not True):
+        raise ValueError('visible mode requires a qualified native local-console ISO')
     profile = json.loads((ROOT / 'specs/native-virtualbox-preview-profile.json').read_bytes())
-    tool_hashes = vbox.verify_runtime(executable, profile)
+    tool_hashes = vbox.verify_runtime(executable, profile, visible=visible)
     work = work.resolve()
     if not work.is_relative_to((ROOT / 'outputs').resolve()) or work == (ROOT / 'outputs').resolve():
         raise ValueError('new workspace output session directory required')
@@ -60,7 +90,8 @@ def run_session(receipt: Path, work: Path, executable: Path, interaction, self_t
     if before != report['source_bindings']:
         raise ValueError('source changed after preview admission')
     result = dict(contract_id=vbox.CONTRACT, status='fail', self_test=self_test,
-        scope='strict_serial_application_self_test' if self_test else 'manual_serial_session_not_qualification',
+        scope='manual_visible_local_console_not_qualification' if visible else 'strict_serial_application_self_test' if self_test else 'manual_serial_session_not_qualification',
+        visible=visible, local_console=report.get('local_console', False),
         production_ready=False, native_gui=False, source_bindings=before, tool_hashes=tool_hashes,
         runtime_origin=profile['origin'], runtime_scope=profile['scope'],
         guest_bound_seconds=240 if self_test else 900, command_bound_seconds=vbox.COMMAND_SECONDS,
@@ -78,10 +109,15 @@ def run_session(receipt: Path, work: Path, executable: Path, interaction, self_t
         port = listener.getsockname()[1]
         owner.create(iso, port)
         result['effective_configuration_verified'] = True
-        owner.start()
+        owner.start(visible=True) if visible else owner.start()
         started = time.monotonic()
+        next_state_check = started + 1
         result['stop_reason'] = 'guest_deadline'
         while time.monotonic() - started < result['guest_bound_seconds']:
+            if visible and time.monotonic() >= next_state_check:
+                if owner.info(identity_only=True).get('VMState') not in ('running', 'paused'):
+                    raise KeyboardInterrupt
+                next_state_check = time.monotonic() + 1
             if interaction.sock is None:
                 try:
                     connection, address = listener.accept()
@@ -155,7 +191,7 @@ def run_session(receipt: Path, work: Path, executable: Path, interaction, self_t
                 print('VM cleanup unconfirmed; retained identity and logs: ' + str(work), file=sys.stderr)
             result['source_unchanged'] = before == source.source_bindings()
             try:
-                result['runtime_unchanged'] = tool_hashes == vbox.verify_runtime(executable, profile)
+                result['runtime_unchanged'] = tool_hashes == vbox.verify_runtime(executable, profile, visible=visible)
                 result['iso_unchanged'] = hashlib.sha256(local_file(iso, 128 * 1024 * 1024)).hexdigest().upper() == result['iso_sha256']
             except (OSError, ValueError) as error:
                 result['identity_failure'] = str(error)
@@ -177,18 +213,27 @@ def main():
     parser.add_argument('--work-dir', type=Path)
     parser.add_argument('--virtualbox', type=Path)
     parser.add_argument('--self-test', action='store_true')
+    parser.add_argument('--visible', action='store_true', help='open the native local console in a VM window')
     args = parser.parse_args()
     interaction = None
     try:
         receipt = args.receipt or ROOT / json.loads(local_file(ROOT / 'outputs/native-userspace-preview.json', 4096))['receipt']
         executable = args.virtualbox or installed_virtualbox()
         work = args.work_dir or ROOT / 'outputs' / ('virtualbox-session-' + str(time.time_ns()))
+        if args.visible and args.self_test:
+            raise ValueError('manual visible mode and serial self-test are separate')
         if args.self_test:
             interaction = qualification.Interaction(apps.scenario(secrets.token_hex(8)), sustained=True)
         else:
             if sys.platform != 'win32' or not sys.stdin.isatty():
                 raise ValueError('interactive Windows terminal required')
             import msvcrt
+            if args.visible:
+                print('PooleOS native on-screen terminal. Type in the VirtualBox window.\n'
+                      'Right Ctrl releases the keyboard. Close the VM with Power Off, or use Ctrl+] here.\n'
+                      '15-minute development session; no persistent storage.\n', flush=True)
+                interaction = VisibleConsole(lambda: msvcrt.kbhit() and msvcrt.getwch() == '\x1d')
+                return run_session(receipt, work, executable, interaction, False, visible=True)
             print('PooleOS unsigned native preview in VirtualBox. Serial terminal; no desktop.\n'
                   'Ctrl+] closes this VM. Session limit: 15 minutes. No persistent storage.\n', flush=True)
             def emit(text):

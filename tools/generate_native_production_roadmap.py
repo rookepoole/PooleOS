@@ -15608,13 +15608,84 @@ def apply_cycle292(roadmap: dict, test_count: int) -> dict:
             "actual VirtualBox watchdog interrupt delivery and recovery separately qualified",
             "retain local serial usability; qualify abrupt-process cleanup and human terminal interaction before broader portability",
             "resume shell-issued waiting stop and interruptible jobs; continue all N0-N39 and tandem PooleGlyph/PDC work"])
+    return apply_cycle293(roadmap, test_count)
+
+
+def apply_cycle293(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle293-native-local-console.md"
+    path = "runs/native-local-console-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle292_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=293, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 293
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path, "docs/native-local-console.md"]
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 293
+    gate["current_focused_source_projection"]["evidence_status"] = "historical_cycle292_not_retested"
+    gate["qualification_status"] = "native_local_console_verified_canonical_pending"
+    for key in ("current_native_virtualbox_launcher_qualification", "current_native_virtualbox_launcher_metadata"):
+        gate[key]["evidence_status"] = "historical_cycle292_not_current_candidate_qualification"
+    baseline["native_virtualbox_launcher"]["evidence_status"] = "historical_cycle292"
+    record = dict(cycle=293, contract_id="PDISPLAY1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("iso_built", "iso_sha256", "iso_byte_count", "host_kernel_tests", "host_python_tests",
+                "qemu_guest_runs", "virtualbox_guest_runs", "local_display_input", "native_on_screen_terminal",
+                "visible_virtualbox_verified", "graphical_desktop", "window_manager", "physical_keyboard_tested",
+                "physical_hardware_tested", "production_ready", "signed", "canonical_full_replay_performed",
+                "merge_qualified", "virtualbox_full_diagnostic_failure_stage", "actual_virtualbox_watchdog_delivery_verified"):
+        record[key] = receipt[key]
+    baseline["native_local_console"] = copy.deepcopy(record)
+    gate["current_native_local_console_qualification"] = record
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=293, session_contract="PDISPLAY1", receipt_path=path, receipt_section="native_execution",
+        native_execution_status="native_on_screen_console_and_emulated_keyboard_verified",
+        native_execution_replayed_this_cycle=True, native_execution_evidence_cycle=293,
+        shell_native_execution_replayed_this_cycle=True, shell_native_execution_evidence_cycle=293,
+        optical_iso_sha256=receipt["iso_sha256"], kernel_profile="opt_in_development_desktop_124_of208_pages",
+        kernel_image_pages=124, kernel_capacity_pages=208, kernel_remaining_capacity_pages=84,
+        iso_built=True, local_keyboard_display=True, native_on_screen_terminal=True,
+        interface="native_GOP_terminal_and_emulated_PS2_keyboard_with_COM2_mirror",
+        local_display_input=True, graphical_desktop=False, virtualbox_usable=False,
+        virtualbox_local_console_usable_on_qualified_host=True, physical_keyboard_tested=False)
+    lane["stages"]["USI-4"] = "bounded_native_local_terminal_verified_windowed_desktop_and_general_services_open"
+    lane["stages"]["USI-5"] = "partial_reproducible_unsigned_optical_preview_five_qemu_two_visible_virtualbox_guests_production_gates_open"
+    evidence = "Cycle293: capability-controlled value-only display queue, boot-root-only flush after task retirement, read-only emulated PS/2 input, and independent CPL3 ASCII terminal. Existing native shell/files/Text/Numbers use the local screen. Default/application/desktop kernel576/595/601 tests per debug/release;150 user tests per profile;21 independent program pairs;75 focused Python tests. Final five QEMU and two visible VirtualBox sessions include573 device-input bytes with zero serial input, valid frames, app fault/restart/file waits and exact owned cleanup. " + checkpoint
+    gap = "Build isolated per-client surfaces/quotas, display and input services, focus/pointer routing, compositor/windows and real graphical application views, then accessible PooleGlass. Current single-owner BSP polled GOP/PS2 console lacks mouse, virtio/USB, Unicode/shaping, PTYs/scrollback, production render accounting, restart recovery and standalone portability. Keep VirtualBox stage117 and actual watchdog delivery, waiting stop/interruptible jobs, robust microkernel, persistence/networking, PooleGlyph/PDC and all N0-N39 production gates open."
+    partial_subphases = {"N18.4", "N22.3", "N22.4", "N27.1", "N27.2", "N29.1", "N29.4"}
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N13", "N18", "N22", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] in ("N18", "N22", "N27"):
+            phase["status"] = "partial"
+        for subphase in phase["subphases"]:
+            if subphase["id"] in partial_subphases:
+                subphase["status"] = "partial"
+    counts = Counter(phase["status"] for phase in roadmap["phases"])
+    for status in ("complete", "partial", "blocked", "not_started"):
+        roadmap["phase_summary"][status] = counts[status]
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N3-VIRTUALBOX-PREVIEW-001", "FLAG-N13-USERSPACE-ISO-001", "FLAG-NATIVE-UI-001"):
+            flag["evidence"].extend([checkpoint, path, "docs/native-local-console.md"])
+            flag["closure_condition"] += " Cycle293 is a local terminal, not a completed desktop. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Build isolated surfaces, input focus, and a native windowed desktop",
+        phase_ids=["N13", "N14", "N16", "N18", "N22", "N27", "N29"],
+        entry_evidence=[checkpoint, path, "docs/native-local-console.md", "docs/native-userspace-preview.md"],
+        exit_evidence=["capability-authenticated per-client surfaces and bounded display/input service ownership",
+            "pointer/focus routing, software compositor and real native application views with fault/restart evidence",
+            "accessible PooleGlass follows working native interaction, with reduced-motion/transparency and measured budgets",
+            "retain root/retirement guards and independently close stage117/watchdog, interruptible jobs and all production gates"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1521)
+    parser.add_argument("--test-count", type=int, default=1533)
     parser.add_argument("--status-date", default="2026-10-15")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

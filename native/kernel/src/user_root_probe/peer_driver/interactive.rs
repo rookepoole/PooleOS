@@ -454,6 +454,10 @@ pub(crate) fn run(
                     }
                 }
             }
+            // Terminated slices retain their root until retirement; only now
+            // are all event paths back in the retained boot address space.
+            #[cfg(feature = "development-desktop")]
+            checked!(arch::x86_64::desktop::flush());
             if checked!(scheduler.task_snapshot(id)).runtime_ticks != ticks[i] {
                 stop(34005, serial, debugcon);
             }

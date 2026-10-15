@@ -88,6 +88,8 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-ioapic-watchdog-readiness-private.json",
             "runs/native-virtualbox-launcher-readiness-raw.json",
             "runs/native-virtualbox-launcher-readiness-private.json",
+            "runs/native-local-console-readiness-raw.json",
+            "runs/native-local-console-readiness-private.json",
             "runs/native-console-ipc-private.json",
             "firmware/private/device.bin",
         )
@@ -120,7 +122,8 @@ class PublicationBoundaryTests(unittest.TestCase):
                      "runs/native-userspace-iso-readiness.json",
                      "runs/native-app-file-wait-readiness.json",
                      "runs/native-ioapic-watchdog-readiness.json",
-                     "runs/native-virtualbox-launcher-readiness.json"):
+                     "runs/native-virtualbox-launcher-readiness.json",
+                     "runs/native-local-console-readiness.json"):
             for data, kind in ((fake_token, "secret_pattern"), (user_path, "absolute_user_path")):
                 self.assertTrue(any(item["type"] == kind for item in publication.inspect_public_blob(path, data)))
 
@@ -145,6 +148,7 @@ class PublicationBoundaryTests(unittest.TestCase):
         paths = (
             "runs/native-ioapic-watchdog-readiness.json",
             "runs/native-virtualbox-launcher-readiness.json",
+            "runs/native-local-console-readiness.json",
             "runs/native-userspace-iso-readiness.json",
             "runs/native-app-file-wait-readiness.json",
             "runs/native_toolchain_qualification.json",

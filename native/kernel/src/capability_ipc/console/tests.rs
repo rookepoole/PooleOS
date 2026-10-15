@@ -34,6 +34,69 @@ fn setup() -> (Space, Caller, u64) {
     let handle = space.grant_console(id(0, 1)).unwrap();
     (space, Caller::new(id(0, 1), image(0)), handle)
 }
+
+#[cfg(feature = "development-desktop")]
+#[test]
+fn local_console_child_authority_is_distinct_caller_bound_and_revoked() {
+    let (mut s, c, h) = setup();
+    let child = s.desktop_authority(c, h, true).unwrap();
+    assert_ne!(h, child);
+    assert_eq!(s.desktop_authority(c, child, false), Some(child));
+    assert_eq!(s.desktop_authority(c, h, false), None);
+    assert_eq!(s.desktop_authority(c, child, true), None);
+    let mut ports = Ports::default();
+    assert_eq!(
+        s.console_byte(c, child, 0, None, &mut ports),
+        (Status::Denied, 0)
+    );
+    assert!(ports.0.is_empty());
+    for bad in [
+        Caller::new(id(1, 1), image(1)),
+        Caller {
+            root: c.root + 4096,
+            ..c
+        },
+        Caller { generation: 2, ..c },
+        Caller { id: id(0, 2), ..c },
+    ] {
+        assert_eq!(s.desktop_authority(bad, h, true), None);
+        assert_eq!(s.desktop_authority(bad, child, false), None);
+    }
+    for bad in [0, 1, child + 1, child ^ (1 << 32), u64::MAX] {
+        assert_eq!(s.desktop_authority(c, bad, false), None);
+    }
+    assert_eq!(
+        s.derive(c.id, child, id(1, 1), Rights::ALL),
+        Err(Error::Denied)
+    );
+    s.detach(c.id).unwrap();
+    assert_eq!(s.desktop_authority(c, child, false), None);
+    let new = id(0, 2);
+    s.attach(new, image(0)).unwrap();
+    let h2 = s.grant_console(new).unwrap();
+    let c2 = Caller::new(new, image(0));
+    assert_eq!(s.desktop_authority(c2, child, false), None);
+    assert_ne!(s.desktop_authority(c2, h2, true), Some(child));
+}
+
+#[cfg(feature = "development-desktop")]
+#[test]
+fn local_console_syscall_shape_rejects_reserved_fields_and_wrong_version() {
+    for n in 21..=25 {
+        assert!(request(n, 1, 3, 0, 0, 0, 0).is_ok());
+        assert_eq!(request(n, 2, 3, 0, 0, 0, 0), Err(Status::Version));
+        assert_eq!(request(n, 1, 3, 0, 0, 0, 1), Err(Status::Arguments));
+        if n != 24 {
+            assert_eq!(request(n, 1, 3, 0, 0, 1, 0), Err(Status::Arguments));
+        }
+        if matches!(n, 21 | 22 | 25) {
+            assert_eq!(request(n, 1, 3, 1, 0, 0, 0), Err(Status::Arguments));
+            assert_eq!(request(n, 1, 3, 0, 1, 0, 0), Err(Status::Arguments));
+        }
+    }
+    assert!(request(24, 1, 3, 0, 0, u64::MAX, 0).is_ok());
+    assert_eq!(request(26, 1, 0, 0, 0, 0, 0), Err(Status::Unknown));
+}
 #[derive(Default)]
 struct Ports(Vec<(u16, Option<u8>)>);
 impl BytePorts for Ports {

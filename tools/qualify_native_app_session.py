@@ -7,6 +7,7 @@ sys.path.insert(0, str(ROOT))
 from runtime import native_app_session as probe, native_shell, native_console, native_session
 from runtime import native_cleanup_exhaustion as exhaustion
 from runtime import native_userspace_iso as optical
+from runtime import native_local_console
 from tools import qualify_native_console_ipc as shared, qualify_native_user_entry as source
 from tools.qualify_native_shell_process import program_inputs
 from tools.native_build_space import require_space
@@ -109,15 +110,18 @@ def main():
     parser.add_argument('--exhaust-cleanup', action='store_true')
     parser.add_argument('--claimed-requester', action='store_true')
     parser.add_argument('--optical', action='store_true')
+    parser.add_argument('--desktop', action='store_true', help='opt-in native local-console optical development profile')
     args = parser.parse_args(); work, programs = args.work_dir.resolve(), args.program_dir.resolve()
+    if args.desktop and not args.optical: parser.error('local console requires the optical development profile')
     if sum((args.deferred_cleanup,args.file_controls,args.exhaust_cleanup,args.claimed_requester,args.optical)) > 1: parser.error('separate control profiles required')
     if not work.is_relative_to(ROOT/'outputs') or not programs.is_relative_to(ROOT/'outputs'):
         parser.error('workspace output paths required')
     storage = require_space(work); work.mkdir(parents=True, exist_ok=False)
     before = source.source_bindings()
-    report = dict(cycle=292 if args.optical else 287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
+    report = dict(cycle=293 if args.desktop else 292 if args.optical else 287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
                   contract_id=optical.CONTRACT if args.optical else 'PCLAIM1' if args.claimed_requester else 'PCLEANUP3' if args.exhaust_cleanup else 'PFILECONTROL1' if args.file_controls else 'PAPPRECOVERY1' if args.deferred_cleanup else 'PAPPSESSION1',
                   optical=args.optical, optical_images={}, file_waits=args.optical,
+                  local_console=args.desktop, graphical_desktop=False,
                   claimed_requester=args.claimed_requester,
                   exhaust_cleanup=args.exhaust_cleanup,
                   file_controls=args.file_controls,
@@ -127,6 +131,8 @@ def main():
     try:
         cargo, _, env = shared._toolchain(ROOT/'.toolchains/rust-1.97.0')
         selected=[('PooleFileProbe' if args.file_controls and key=='TEXT' else name,key) for name,key in probe.PROGRAMS]
+        if args.desktop:
+            selected=[('PooleDesktopConsole' if key=='CONSOLE' else name,key) for name,key in selected]
         if args.claimed_requester:
             selected=[({'TEXT':'PooleWaitingFileProbe','COUNTER':'PooleClaimedFiles'}.get(key,name),key) for name,key in probe.PROGRAMS]
         report['program_build'] = program_inputs(programs, env, selected)
@@ -138,6 +144,9 @@ def main():
         extra = ('development-shell-deferred-cleanup',) if args.deferred_cleanup else ()
         normal_features=('development-file-controls',) if args.file_controls else ('development-applications',)+extra
         bad_features=('development-file-controls','development-applications-bad-file') if args.file_controls else ('development-applications-bad-file',)+extra
+        if args.desktop:
+            normal_features=('development-desktop',)
+            bad_features=('development-desktop','development-applications-bad-file')
         if args.exhaust_cleanup:
             normal_features=('development-app-cleanup-exhaustion',)
             bad_features=normal_features+('development-applications-bad-file',)
@@ -190,6 +199,7 @@ def main():
                     marker_validator=validator,
                     marker_extractor=native_session.extract_markers, hpet_msi=True, pause_on_completion=True,
                     console_port=interaction.port, console_poll=interaction.poll,
+                    frame_validator=native_local_console.inspect_ppm if args.desktop else None,
                     capture_log_limit_bytes=16*1024*1024 if args.optical else None)
             finally:
                 interaction.close()
