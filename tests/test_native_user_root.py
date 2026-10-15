@@ -377,6 +377,18 @@ class UserRootTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             probe.validate_markers(self.markers[:58]+self.markers[59:])
 
+    def test_hpet_ioapic_transport_preserves_strict_recovery_contract(self):
+        changed = self.markers.copy()
+        changed[58] = changed[58].replace("source=hpet_msi", "source=hpet_ioapic")
+        summary = probe.validate_markers(changed)
+        self.assertEqual(summary.pop("watchdog_source"), "hpet_ioapic")
+        self.assertEqual(summary, self.summary)
+        for value in ("ioapic", "hpet", "hpet_ioapic_msi", "unknown"):
+            self.reject(58, "source", value)
+        changed[58] = changed[58].replace("restores=169", "restores=168")
+        with self.assertRaises(ValueError):
+            probe.validate_markers(changed)
+
     def test_hpet_msi_launch_option_is_explicit_allowlisted_and_boolean(self):
         from tools.qualify_native_pooleboot import _hpet_msi_options
         self.assertEqual(_hpet_msi_options(False), [])

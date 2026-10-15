@@ -13,6 +13,7 @@ use crate::{
 
 pub const CONTRACT_ID: &str = "PKUSER6";
 pub const DELIVERIES: u32 = 3;
+pub const YIELD_SAMPLE_LIMIT: usize = 4096;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Budget {
@@ -38,6 +39,27 @@ impl Budget {
             return Err(Error::Hardware);
         }
         Ok(ticks)
+    }
+
+    /// Includes bounded sampling overhead in a yield's measured interval.
+    /// A stalled counter is an error, never a fabricated positive charge.
+    pub fn sample_yield(
+        self,
+        start: u64,
+        mut read: impl FnMut() -> Result<(u64, u64), Error>,
+    ) -> Result<u64, Error> {
+        self.validate()?;
+        for _ in 0..YIELD_SAMPLE_LIMIT {
+            let (period, now) = read()?;
+            if period != self.period_fs {
+                return Err(Error::Hardware);
+            }
+            let ticks = self.partial_elapsed(start, now)?;
+            if ticks != 0 {
+                return Ok(ticks);
+            }
+        }
+        Err(Error::Hardware)
     }
 
     /// Terminal work can finish within one counter tick; never invent a tick.
@@ -332,5 +354,99 @@ mod tests {
             assert!(bad.validate().is_err());
             assert!(bad.elapsed(1, 2).is_err());
         }
+    }
+
+    #[test]
+    fn yield_sample_uses_actual_first_later_tick_including_final_poll() {
+        let b = Budget {
+            count: 1000,
+            period_fs: 69_841_279,
+            counter_mask: u64::MAX,
+        };
+        for ready in [1, 2, 17, YIELD_SAMPLE_LIMIT] {
+            let mut reads = 0;
+            assert_eq!(
+                b.sample_yield(100, || {
+                    reads += 1;
+                    Ok((b.period_fs, if reads == ready { 107 } else { 100 }))
+                }),
+                Ok(7)
+            );
+            assert_eq!(reads, ready);
+        }
+    }
+
+    #[test]
+    fn yield_sample_stall_is_bounded_and_never_fabricates_charge() {
+        let b = Budget {
+            count: 1000,
+            period_fs: 69_841_279,
+            counter_mask: u64::MAX,
+        };
+        let mut reads = 0;
+        assert_eq!(
+            b.sample_yield(100, || {
+                reads += 1;
+                Ok((b.period_fs, 100))
+            }),
+            Err(Error::Hardware)
+        );
+        assert_eq!(reads, YIELD_SAMPLE_LIMIT);
+    }
+
+    #[test]
+    fn yield_sample_rejects_changed_period_read_errors_and_regression() {
+        let b = Budget {
+            count: 1000,
+            period_fs: 100_000_000,
+            counter_mask: u64::MAX,
+        };
+        for bad in [
+            Err(Error::Context),
+            Ok((b.period_fs + 1, 101)),
+            Ok((b.period_fs, 99)),
+            Ok((b.period_fs, 1_000_101)),
+        ] {
+            for fail_at in [1, 17, YIELD_SAMPLE_LIMIT] {
+                let mut reads = 0;
+                assert!(
+                    b.sample_yield(100, || {
+                        reads += 1;
+                        if reads == fail_at {
+                            bad
+                        } else {
+                            Ok((b.period_fs, 100))
+                        }
+                    })
+                    .is_err()
+                );
+                assert_eq!(reads, fail_at);
+            }
+        }
+        let mut reads = 0;
+        assert!(
+            Budget { count: 0, ..b }
+                .sample_yield(100, || {
+                    reads += 1;
+                    Ok((b.period_fs, 101))
+                })
+                .is_err()
+        );
+        assert_eq!(reads, 0);
+    }
+
+    #[test]
+    fn yield_sample_preserves_32bit_wrap_and_terminal_zero_semantics() {
+        let b = Budget {
+            count: 1000,
+            period_fs: 100_000_000,
+            counter_mask: u32::MAX as u64,
+        };
+        assert_eq!(
+            b.sample_yield(u32::MAX as u64 - 2, || Ok((b.period_fs, 4))),
+            Ok(7)
+        );
+        assert_eq!(b.partial_elapsed(100, 100), Ok(0));
+        assert_eq!(b.elapsed(100, 100), Err(Error::Hardware));
     }
 }

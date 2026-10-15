@@ -15469,13 +15469,83 @@ def apply_cycle290(roadmap: dict, test_count: int) -> dict:
             "bounded platform repair/fallback and rollback tested without relaxing security or runtime accounting",
             "real VirtualBox shell/application session on a documented isolated profile, QEMU regression preserved",
             "resume waiting stop and interruptible jobs; continue all N0-N39 and tandem PooleGlyph/PDC work"])
+    return apply_cycle291(roadmap, test_count)
+
+
+def apply_cycle291(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle291-native-ioapic-watchdog.md"
+    path = "runs/native-ioapic-watchdog-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    gate = baseline["native_consistency_release_gate"]
+    baseline["historical_cycle290_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=291, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 291
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, path]
+    gate["current_candidate_audit"]["cycle"] = 291
+    gate["current_focused_source_projection"]["cycle"] = 291
+    gate["qualification_status"] = "native_ioapic_watchdog_and_virtualbox_serial_verified_canonical_pending"
+    for key in ("current_native_early_serial_qualification", "current_native_early_serial_metadata"):
+        gate[key]["evidence_status"] = "historical_cycle290_not_current_candidate_qualification"
+    baseline["native_early_serial"]["evidence_status"] = "historical_cycle290_superseded_preview_preserved"
+    record = dict(cycle=291, contract_id="PIOWATCH1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("iso_built", "iso_sha256", "iso_byte_count", "host_kernel_test_counts", "new_kernel_tests",
+                "image_pages", "default_image_pages", "reserved_image_pages", "guarded_stack_pages",
+                "qemu_guest_runs", "virtualbox_guest_runs", "virtualbox_user_space_verified",
+                "virtualbox_packaged_launcher", "virtualbox_full_diagnostics_passed",
+                "virtualbox_full_diagnostic_failure_stage", "kernel_watchdog_fallback_verified",
+                "actual_routed_watchdog_delivery_verified_in_qemu", "fabricated_runtime_ticks",
+                "reused_program_build_cycle", "user_program_sources_unchanged", "user_programs_rebuilt",
+                "host_user_tests_replayed", "native_gui", "local_display_input", "physical_hardware_tested",
+                "production_layout_passed", "production_ready", "signed", "canonical_full_replay_performed", "merge_qualified"):
+        record[key] = receipt[key]
+    gate["current_native_ioapic_watchdog_qualification"] = record
+    gate["current_native_ioapic_watchdog_metadata"] = dict(cycle=291, status="pass", tests_passed=333,
+        unittest_elapsed_seconds=104.176, capture_elapsed_seconds=105.375,
+        log_sha256="954F9D6C2407F0753FF2F398FF14A68161B12EB7190811B31BC66A62D3EA6822",
+        prior_failed_attempt=dict(tests_run=333, failures=2, unittest_elapsed_seconds=103.588,
+            capture_elapsed_seconds=105.422,
+            log_sha256="954BED3EE5EF65DBC8C16D750F2241BC443306E3C1B9F70C2841DFC578FD79E0",
+            reason="historical_source_delta_omitted_two_ioapic_files_and_calibration_fixture_expected_old_constructor_name"),
+        scope="pre_closeout_metadata_not_full_canonical_audit", counts_overlap=True,
+        canonical_full_replay_performed=False, production_ready=False)
+    baseline["native_ioapic_watchdog"] = copy.deepcopy(record)
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=291, session_contract="PIOWATCH1", receipt_path=path, receipt_section="native_execution",
+        native_execution_status="qemu_optical_and_two_virtualbox_serial_application_sessions_pass",
+        native_execution_replayed_this_cycle=True, native_execution_evidence_cycle=291,
+        shell_native_execution_replayed_this_cycle=True, shell_native_execution_evidence_cycle=291,
+        optical_iso_sha256=receipt["iso_sha256"], virtualbox_usable=False, virtualbox_user_space_verified=True,
+        virtualbox_packaged_launcher=False, virtualbox_full_diagnostics_passed=False,
+        virtualbox_slice_failure_stage=None, virtualbox_full_diagnostic_failure_stage=117,
+        kernel_profile="ordinary_applications_ioapic_watchdog_optical_and_stale_file_control")
+    evidence = "Cycle291: owned HPET I/O APIC fallback, reset-only controller ID initialization, supervisor UC/NX third-device mapping, complete clock-child mapping contract, and bounded real timestamp resampling repair VirtualBox user-space sessions.15 new Rust tests;576 default/595 application tests per debug/release plus26 doctests. Two complete QEMU routed diagnostics prove actual fallback watchdog recovery; optical sessions and two isolated VirtualBox7.2.20 serial sessions preserve native file waits, fault/restart and4096-dispatch progress.20 unchanged Cycle289 program pairs reused, not rebuilt. " + checkpoint
+    gap = "Package a source-bound reproducible VirtualBox terminal launcher and retain the tested isolated profile. Investigate default VirtualBox diagnostic stage117 and prove actual watchdog delivery there before broader portability claims; do not relax scheduler assertions. Then resume shell-issued waiting stop and interruptible jobs. Shared IRQ/PCI routing, concurrency/races/stress, efficient idle, stack bounds, drivers, local display/input, persistence/networking, PooleGlyph/PDC, accessible PooleGlass and all N0-N39 signing/canonical/production gates remain."
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N3", "N5", "N8", "N12", "N13", "N18", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N3-VIRTUALBOX-PREVIEW-001", "FLAG-N13-USERSPACE-ISO-001"):
+            flag["evidence"].extend([checkpoint, path])
+            flag["closure_condition"] += " Cycle291 verifies isolated serial sessions but does not close portable usability or full diagnostic qualification. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Package verified VirtualBox serial launch, then resume waiting stop and interruptible jobs",
+        entry_evidence=[checkpoint, path, "docs/native-userspace-preview.md"],
+        exit_evidence=["source-bound isolated VirtualBox launch and real owner terminal interaction",
+            "stage117 diagnostic failure investigated without weakening scheduler or accounting assertions",
+            "actual VirtualBox watchdog delivery and broader portability separately qualified",
+            "resume waiting stop and interruptible jobs; continue all N0-N39 and tandem PooleGlyph/PDC work"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1486)
+    parser.add_argument("--test-count", type=int, default=1488)
     parser.add_argument("--status-date", default="2026-10-15")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

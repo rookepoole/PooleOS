@@ -413,9 +413,9 @@ class NativeAppSessionTests(unittest.TestCase):
         source=(Path(__file__).resolve().parents[1]/'native/kernel/src/user_root_probe/peer_driver.rs').read_text()
         for name in ('new_program','restart_program'):
             body=source.split('fn '+name+'(',1)[1].split('spawn_driver::build_program(',1)[0]
-            self.assertEqual(body.count('Timer::new('),1)
+            self.assertEqual(body.count('Timer::new_watchdog('),1)
             self.assertEqual(body.count('.reuse_session_calibration()'),1)
-            self.assertLess(body.index('Timer::new('),body.index('.reuse_session_calibration()'))
+            self.assertLess(body.index('Timer::new_watchdog('),body.index('.reuse_session_calibration()'))
 
 
 if __name__=='__main__':unittest.main()

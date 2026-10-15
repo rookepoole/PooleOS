@@ -24,6 +24,10 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle291-native-ioapic-watchdog.md",
+    "runs/native-ioapic-watchdog-readiness.json",
+    "native/kernel/src/user_entry/timer/io_apic.rs",
+    "native/kernel/src/user_entry/timer/io_apic/tests.rs",
     "docs/checkpoints/cycle288-native-userspace-iso.md",
     "docs/native-userspace-preview.md",
     "runs/native-userspace-iso-readiness.json",

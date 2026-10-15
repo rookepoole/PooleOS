@@ -1,7 +1,7 @@
 # Run The Native User-Space Preview
 
-Cycle290, 2026-10-15. Unsigned native PooleBoot + PooleKernel, not Linux.
-This is a one-CPU QEMU/OVMF optical preview operated through a host terminal.
+Cycle291, 2026-10-15. Unsigned native PooleBoot + PooleKernel, not Linux.
+This is a one-CPU optical preview operated through a host terminal.
 It is not a desktop, installer, signed release or hardware-qualified image.
 
 ## ISO File Type And VirtualBox
@@ -17,17 +17,25 @@ icon and **Choose a disk file** to select `PooleOS-UserSpace-Preview.iso`.
 Do not use the **existing virtual hard disk** picker. If no optical drive exists,
 add an optical drive under a storage controller first. Enable **EFI** in the VM's
 system settings; this image has no legacy BIOS boot path. These are media-loading
-instructions, not a claim that PooleOS has passed a VirtualBox boot test.
+instructions; selecting an ISO as a virtual hard disk will not work.
 
-The current qualification is QEMU/OVMF only. Shell input and output use COM2
-serial, not the virtual display and keyboard. Successfully attaching the ISO
-therefore does not establish that the preview is usable in the VirtualBox window.
-Use the tested launcher below for the current interactive preview. Actual tests
-on VirtualBox7.2.20 confirm optical attachment and entry into PooleKernel, but the
-first task slice fails at stage34365/panic0x101F before a usable shell session.
-Cycle290 repairs the previously missing kernel serial diagnostics. VirtualBox
-user-space interaction and a qualified reproducible configuration remain open;
-enabling EFI alone does not repair that kernel/platform failure.
+Shell input and output use COM2 serial, not the virtual display and keyboard.
+Attaching the ISO therefore does not give you an interactive desktop in the
+VirtualBox window. Use the tested QEMU terminal launcher below for now.
+
+The exact Cycle291 ISO completed two isolated VirtualBox7.2.20r175154 application
+sessions: shell commands, native file waits, Text/Numbers, application fault and
+restart, and4096 dispatches of six-role progress. The tested profile is512MiB,
+one CPU, EFI64, ICH9, HPET/APIC enabled, x2APIC disabled, optical media read-only,
+no guest disk/network/shares, COM1 diagnostics and COM2 loopback transport.
+The kernel now handles HPET without MSI, reset I/O APIC identity and zero-tick
+budget yields. Earlier stage34365 failure is repaired for this application profile.
+
+A packaged VirtualBox terminal launcher is still pending; changing EFI alone is
+not a substitute for the tested full profile. Default VirtualBox diagnostics
+still fail stage117, and actual fallback watchdog interrupt delivery there has
+not been qualified. QEMU routed diagnostics do verify that delivery and recovery.
+These are scoped VM results, not general VirtualBox/hardware support.
 
 Before Cycle290, a read-only recheck confirmed the original Cycle289 image's hash
 `17A5D17F11F106F27EA22B6E5939A8F4449496086963245DC3E5002642499969`,
@@ -46,7 +54,7 @@ the Windows terminal only transports COM2 bytes.
 The local pointer is `outputs/native-userspace-preview.json`. The explicit form:
 
 ```powershell
-.\Launch-UserSpace-Preview.cmd --receipt outputs/cycle290-optical/receipt.json
+.\Launch-UserSpace-Preview.cmd --receipt outputs/cycle291-opticalfinal/receipt.json
 ```
 
 Try these commands individually, waiting for each result:
@@ -82,17 +90,18 @@ Each launch gets fresh firmware variables and a new `outputs/preview-session-*`
 evidence directory. There is no networking, host share, persistent guest disk,
 passthrough, physical-media write or host firmware change.
 
-The terminal adapter was tested with injected keys and exact responses. A person
+Cycle290 tested the unchanged terminal adapter with injected keys and exact
+responses; Cycle291 replays the source-bound launcher self-test. A person
 typing in a visible Windows terminal was not separately tested. ASCII input,
 Enter and Backspace are supported; cursor/history editing is not implemented.
 Guest escape sequences are sanitized before display on the host.
 
 ## Image And Reproduction
 
-Image: `outputs/cycle290-optical/PooleOS-UserSpace-Preview.iso`
+Image: `outputs/cycle291-opticalfinal/PooleOS-UserSpace-Preview.iso`
 
 Size: 66109440 bytes. SHA256:
-`129F2232C8EE126A80C84CE71BDC9BD97DB925521275BE0C462D4224AB5E3E65`
+`CEB2794D7E63739E31EE827BFDA65F99C38BD3B24D9A09B36554933FABC14E00`
 
 Do not write it to physical media. It is an optical-only VM image, not a hybrid
 USB image. The launcher depends on this repository and its pinned local tools;
@@ -116,8 +125,10 @@ directories to preserve failures. Qualification time limits are fixed before run
 
 The release architecture scanner still fails four future production paths; the
 preview's exact twelve-file PKLOAD6 layout has a separate development-only check.
-No policy was weakened. Four strict application sessions, ordinary trust denial
-and the terminal-adapter session passed on one host. This is not general stress,
+No policy was weakened. Four QEMU application sessions, two VirtualBox sessions,
+two QEMU routed diagnostics and two ordinary trust-denial boots pass on one host.
+The broader diagnostic profile remains207/208 image pages; additional diagnostic
+growth needs an explicit layout/capacity review. This is not general stress,
 second-host reproduction, physical hardware or full canonical qualification.
 Kernel cleanup/race/recovery, drivers, local input/display, persistence, networking,
 PooleGlyph/PDC, accessible PooleGlass, final layout and signing remain open.

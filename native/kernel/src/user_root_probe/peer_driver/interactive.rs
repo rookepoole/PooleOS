@@ -360,6 +360,16 @@ pub(crate) fn run(
             }
             checked!(p.slot.activate(p.id, manager, &mut p.memory));
             let result = p.slot.run_slice(p.id);
+            if let Err(error) = result {
+                let (component, code) = match error {
+                    task::Error::Cpu(poolekernel::user_entry::prepared::cpu::Error::User(
+                        error,
+                    )) => ("slice-user", error as u64),
+                    task::Error::Accounting(error) => ("slice-accounting", error as u64),
+                    _ => ("slice-other", 0),
+                };
+                arch::x86_64::user::report_failure(component, i as u64, code);
+            }
             ticks[i] = checked!(
                 ticks[i]
                     .checked_add(checked!(p.slot.account_slice(p.id, &mut scheduler, cpu)))
@@ -777,6 +787,7 @@ pub(crate) fn run(
             arch::x86_64::user_ipc::with_waits(|s| s.poll_wakes(&mut scheduler, cpu))
         });
         checked!(scheduler.validate());
+        let [routed_arms, routed_restores] = checked!(arch::x86_64::user_watchdog::routed_proof());
         let d = u64::from(scheduler.summary().dispatch_count);
         if unsafe { arch::x86_64::read_cr3() } != core.page_table_root_physical
             || arch::x86_64::user::active()
@@ -785,6 +796,7 @@ pub(crate) fn run(
                 != 2 * (d - held_dispatches) + extra_flushes
             || manager.summary().allocated_pages - baseline
                 != (0..6).filter(|&j| owned[j]).map(|j| pages[j]).sum::<u64>()
+            || routed_arms != routed_restores
         {
             stop(34016, serial, debugcon);
         }

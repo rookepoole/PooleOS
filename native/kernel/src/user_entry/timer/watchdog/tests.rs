@@ -131,3 +131,52 @@ fn missed_deadline_overflow_regression_and_reconfigured_message_reject() {
     h.regs[0xf0 / 8] = original[0xf0 / 8];
     assert_eq!(h.regs, original);
 }
+
+#[test]
+fn line_routing_preserves_watchdog_deadline_and_original_hpet_state() {
+    for line in [16, 23, 31] {
+        let mut h = Fake::new();
+        h.regs[CONFIG as usize / 8] = (1u64 << (32 + line)) | SIZE_CAP | (1 << 4);
+        h.regs[ROUTE as usize / 8] = 0x12345678;
+        let original = h.regs;
+        assert!(!supports_fsb(&h).unwrap());
+        assert_eq!(interrupt_routes(&h).unwrap(), 1 << line);
+        let mut l = Lease::prepare_io_apic(&h, line).unwrap();
+        l.arm(&mut h, 0).unwrap();
+        assert_eq!(
+            h.regs[CONFIG as usize / 8] & (FSB | IRQ_ROUTE | ENABLE),
+            (u64::from(line) << 9) | ENABLE
+        );
+        assert_eq!(h.regs[ROUTE as usize / 8], original[ROUTE as usize / 8]);
+        assert_eq!(l.expired(&h, l.deadline).unwrap(), l.ticks);
+        l.stop(&mut h).unwrap();
+        l.restore_after_drain(&mut h).unwrap();
+        assert_eq!(h.regs, original);
+    }
+}
+#[test]
+fn routed_watchdog_rejects_unsupported_lines_and_recovers_every_write_failure() {
+    let mut h = Fake::new();
+    h.regs[CONFIG as usize / 8] = SIZE_CAP | (1u64 << 55);
+    for line in [0, 15, 16, 22, 24, 31, 32, 255] {
+        assert!(Lease::prepare_io_apic(&h, line).is_err());
+    }
+    assert_eq!(h.writes, 0);
+    for fail in 1..=6 {
+        let mut h = Fake::new();
+        h.regs[CONFIG as usize / 8] = SIZE_CAP | (1u64 << 55);
+        let original = h.regs;
+        let mut l = Lease::prepare_io_apic(&h, 23).unwrap();
+        h.fail = fail;
+        assert!(
+            l.arm(&mut h, 0)
+                .and_then(|()| l.stop(&mut h))
+                .and_then(|()| l.restore_after_drain(&mut h))
+                .is_err()
+        );
+        h.fail = usize::MAX;
+        l.stop(&mut h).unwrap();
+        l.restore_after_drain(&mut h).unwrap();
+        assert_eq!(h.regs, original);
+    }
+}

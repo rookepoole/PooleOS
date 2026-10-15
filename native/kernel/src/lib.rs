@@ -1189,16 +1189,20 @@ impl<S: ByteSink> EarlyLogger<S> {
         Self { sink }
     }
 
+    // Share diagnostic emitters instead of duplicating them across boot probes.
+    #[inline(never)]
     pub fn write_bytes(&mut self, bytes: &[u8]) {
         for byte in bytes {
             self.sink.write_byte(*byte);
         }
     }
 
+    #[inline(never)]
     pub fn write_str(&mut self, text: &str) {
         self.write_bytes(text.as_bytes());
     }
 
+    #[inline(never)]
     pub fn write_hex_u64(&mut self, value: u64) {
         self.write_bytes(&HEX_PREFIX);
         for shift in (0..16).rev() {
@@ -1214,6 +1218,7 @@ impl<S: ByteSink> EarlyLogger<S> {
         }
     }
 
+    #[inline(never)]
     pub fn write_decimal_u64(&mut self, mut value: u64) {
         let mut digits = [0u8; 20];
         let mut used = 0usize;

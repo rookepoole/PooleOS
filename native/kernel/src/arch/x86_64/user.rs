@@ -449,6 +449,26 @@ pub fn recover_copy_fault(frame: &mut TrapFrame, depth: u32) -> bool {
     }
 }
 
+#[cold]
+#[inline(never)]
+pub(crate) fn report_failure(component: &'static str, stage: u64, error: u64) {
+    // Failure-only output at the serialized CPL0/IF0 boundary; no user data.
+    let mut serial = unsafe { Com1::initialize() };
+    let mut debugcon = DebugCon::new();
+    let mut log = crate::EarlyLogger::new(crate::BootSink {
+        serial: &mut serial,
+        debugcon: &mut debugcon,
+        ring: &crate::EARLY_RING,
+    });
+    log.write_str("POOLEOS:KERNEL:USER-SLICE-ERROR component=");
+    log.write_str(component);
+    log.write_str(" stage=");
+    log.write_decimal_u64(stage);
+    log.write_str(" error=");
+    log.write_decimal_u64(error);
+    log.write_str("\n");
+}
+
 fn denied(stage: u64, error: Error, t: &Trap) -> ! {
     // Failure-only, bounded early output. Never return to a rejected user frame.
     let mut serial = unsafe { Com1::initialize() };

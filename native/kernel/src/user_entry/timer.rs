@@ -8,13 +8,16 @@ use poole_handoff::{Handoff, MEMORY_ENTRY_BYTES, MEMORY_MMIO, PAGE_BYTES, RECORD
 pub mod calibration;
 pub mod clock;
 pub mod drain;
+pub mod io_apic;
 pub mod watchdog;
 
 pub const CONTRACT_ID: &str = "PKUSER4";
 pub const APIC_SLOT: usize = 16;
 pub const HPET_SLOT: usize = 18;
+pub const IO_APIC_SLOT: usize = 20;
 pub const APIC_VIRTUAL: u64 = KERNEL_START + APIC_SLOT as u64 * PAGE_BYTES;
 pub const HPET_VIRTUAL: u64 = KERNEL_START + HPET_SLOT as u64 * PAGE_BYTES;
+pub const IO_APIC_VIRTUAL: u64 = KERNEL_START + IO_APIC_SLOT as u64 * PAGE_BYTES;
 const FLAGS: u64 = 1 | 2 | (1 << 3) | (1 << 4) | (1 << 63);
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -35,6 +38,7 @@ pub enum Error {
 pub struct Mappings {
     apic: u64,
     hpet: u64,
+    io_apic: Option<u64>,
 }
 
 impl Mappings {
@@ -50,9 +54,41 @@ impl Mappings {
     }
 
     fn checked(map: &[u8], apic: u64, hpet: u64, bits: u8, pat: u64) -> Result<Self, Error> {
+        Self::check_pages(map, &[apic, hpet], bits, pat)?;
+        Ok(Self {
+            apic,
+            hpet,
+            io_apic: None,
+        })
+    }
+
+    pub fn with_io_apic(
+        self,
+        handoff: &Handoff<'_>,
+        address: u64,
+        bits: u8,
+        pat: u64,
+    ) -> Result<Self, Error> {
+        let map = handoff
+            .record(RECORD_MEMORY_MAP)
+            .ok_or(Error::Source)?
+            .payload;
+        Self::check_pages(map, &[self.apic, self.hpet, address], bits, pat)?;
+        if self.io_apic.is_some() {
+            return Err(Error::State);
+        }
+        Ok(Self {
+            io_apic: Some(address),
+            ..self
+        })
+    }
+
+    fn check_pages(map: &[u8], pages: &[u64], bits: u8, pat: u64) -> Result<(), Error> {
         let mask = super::physical_mask(bits).map_err(|_| Error::Address)?;
-        if apic == 0 || apic & !mask != 0 || hpet == 0 || hpet & !mask != 0 || apic == hpet {
-            return Err(Error::Address);
+        for (index, &page) in pages.iter().enumerate() {
+            if page == 0 || page & !mask != 0 || pages[..index].contains(&page) {
+                return Err(Error::Address);
+            }
         }
         // PWT=PCD=1, PAT=0 selects PAT entry 3. Never assume firmware's PAT.
         if (pat >> 24) & 0xff != 0 {
@@ -63,34 +99,35 @@ impl Mappings {
         }
         for entry in map.chunks_exact(MEMORY_ENTRY_BYTES) {
             let start = u64::from_le_bytes(entry[0..8].try_into().map_err(|_| Error::Source)?);
-            let pages = u64::from_le_bytes(entry[8..16].try_into().map_err(|_| Error::Source)?);
-            let bytes = pages.checked_mul(PAGE_BYTES).ok_or(Error::Source)?;
+            let page_count =
+                u64::from_le_bytes(entry[8..16].try_into().map_err(|_| Error::Source)?);
+            let bytes = page_count.checked_mul(PAGE_BYTES).ok_or(Error::Source)?;
             let end = start.checked_add(bytes).ok_or(Error::Source)?;
             let kind = u32::from_le_bytes(entry[24..28].try_into().map_err(|_| Error::Source)?);
             if bytes == 0 || start & 4095 != 0 || bytes & 4095 != 0 {
                 return Err(Error::Source);
             }
-            for page in [apic, hpet] {
+            for &page in pages {
                 if page < end && start < page + PAGE_BYTES && kind != MEMORY_MMIO {
                     return Err(Error::Alias);
                 }
             }
         }
-        Ok(Self { apic, hpet })
+        Ok(())
     }
 
     /// Recheck that these device pages do not alias allocator-admitted RAM.
     /// This does not grant device ownership or install a mapping.
     pub fn validate(&self, manager: &PhysicalMemoryManager, bits: u8) -> Result<(), Error> {
         let mask = super::physical_mask(bits).map_err(|_| Error::Address)?;
-        if self.apic & !mask != 0 || self.hpet & !mask != 0 {
+        if self.device_pages().any(|page| page & !mask != 0) {
             return Err(Error::Address);
         }
         let manifest = manager
             .preview_direct_map_manifest()
             .map_err(|_| Error::Alias)?;
         for range in manifest.admitted_ranges() {
-            for address in self.pages() {
+            for address in self.device_pages() {
                 let page = address / PAGE_BYTES;
                 if page >= range.start_page && page - range.start_page < range.page_count {
                     return Err(Error::Alias);
@@ -103,10 +140,14 @@ impl Mappings {
     pub const fn pages(self) -> [u64; 2] {
         [self.apic, self.hpet]
     }
+    pub fn device_pages(self) -> impl Iterator<Item = u64> {
+        self.pages().into_iter().chain(self.io_apic)
+    }
     pub(crate) fn leaf(self, index: usize) -> Option<u64> {
         match index {
             APIC_SLOT => Some(self.apic | FLAGS),
             HPET_SLOT => Some(self.hpet | FLAGS),
+            IO_APIC_SLOT => self.io_apic.map(|page| page | FLAGS),
             _ => None,
         }
     }
@@ -116,6 +157,14 @@ impl Mappings {
         Self {
             apic: 0xfee0_0000,
             hpet: 0xfed0_0000,
+            io_apic: None,
+        }
+    }
+    #[cfg(test)]
+    pub(crate) fn fixture_io_apic() -> Self {
+        Self {
+            io_apic: Some(0xfec0_0000),
+            ..Self::fixture()
         }
     }
 }
@@ -146,6 +195,35 @@ mod tests {
         data[8..16].copy_from_slice(&pages.to_le_bytes());
         data[24..28].copy_from_slice(&kind.to_le_bytes());
         data
+    }
+    #[test]
+    fn third_device_page_requires_unique_non_ram_uc_mapping_and_guards() {
+        let m = Mappings::fixture_io_apic();
+        assert_eq!(
+            m.device_pages().collect::<std::vec::Vec<_>>(),
+            [0xfee00000, 0xfed00000, 0xfec00000]
+        );
+        assert_eq!(m.leaf(IO_APIC_SLOT), Some(0xfec00000 | FLAGS));
+        assert_eq!(m.leaf(19), None);
+        assert_eq!(m.leaf(21), None);
+        for address in [0, 1, 0xfee00000, 0xfed00000, 1 << 40] {
+            assert!(
+                Mappings::check_pages(&map(0, 1, 1), &[0xfee00000, 0xfed00000, address], 36, 0)
+                    .is_err()
+            );
+        }
+        for kind in 0..=9 {
+            assert_eq!(
+                Mappings::check_pages(
+                    &map(0xfec00000, 1, kind),
+                    &[0xfee00000, 0xfed00000, 0xfec00000],
+                    36,
+                    0
+                )
+                .is_ok(),
+                kind == MEMORY_MMIO
+            );
+        }
     }
     #[test]
     fn exact_layout_has_supervisor_nx_uc_leaves_and_absent_guards() {

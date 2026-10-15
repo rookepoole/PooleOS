@@ -1,13 +1,61 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-15
-Plan version: 2.193.0-native-early-serial
-Roadmap cycle: PooleOS Cycle 290
+Plan version: 2.194.0-native-ioapic-watchdog
+Roadmap cycle: PooleOS Cycle 291
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 291: Native VirtualBox User-Space Sessions
+
+The actual ISO now completes two isolated VirtualBox7.2.20 serial application
+sessions, including native file waits, Text/Numbers, fault containment/restart
+and a4096-dispatch six-role progress window. This is real user-space execution,
+not a boot animation or kernel command interpreter. Windows' DVD image label
+does not change the ISO format; use the optical-drive picker, not a hard-disk picker.
+
+The underlying failures were missing HPET MSI support, reset I/O APIC identity,
+and real zero-duration budget yields. The kernel now leases a pristine nonlegacy
+I/O APIC route with retained rollback, admits an isolated supervisor UC/NX device
+leaf, and samples the actual clock within a fixed4096-read bound for yields.
+It never invents runtime ticks. A continuous-clock child-plan mismatch found by
+regression testing is repaired without weakening exact mapping equality.
+
+15 new Rust tests cover routing/restoration, after-effect failures, mapping
+guards/aliases and clock sampling.576 default/595 application kernel tests pass
+in both debug/release plus26 doctests. Eight QEMU guests include two complete
+MSI-disabled diagnostic runs with actual fallback watchdog recovery, optical
+application scenarios, ordinary trust denial and launcher self-test. Both
+VirtualBox sessions use the identical final ISO and exact557/1897-byte exchanges.
+Independent application builds reproduce at121/208 image pages; the full
+diagnostic remains207/208 with36 guarded stack pages.20 unchanged Cycle289
+program pairs are reused, not rebuilt. Prior failed diagnostics remain preserved.
+
+[Launch guide](native-userspace-preview.md),
+[checkpoint](checkpoints/cycle291-native-ioapic-watchdog.md), and
+`runs/native-ioapic-watchdog-readiness.json` bind the exact image and evidence.
+This is still a serial, unsigned VM preview, not a usable graphical desktop.
+The owner-facing QEMU launcher remains the tested entry point; a packaged,
+source-bound VirtualBox terminal launcher is next. Full VirtualBox diagnostics
+still stop at stage117, and actual watchdog delivery on VirtualBox remains an
+independent gate. No assertion is relaxed to conceal that failure.
+
+`FLAG-N3-VIRTUALBOX-PREVIEW-001` stays open for these remaining portability and
+usability gates. Then resume shell-issued waiting stop and interruptible jobs.
+Shared IRQ/PCI routing, robust microkernel completion, PooleGlyph/PDC, local
+display/input, persistence, networking and accessible PooleGlass remain open.
+40 phases/301 subphases/8996 source requirements/59 additions,99 flags/44 open
+and20 gap groups are unchanged. Python inventory1488 is not full-suite execution.
+No phase closes; full canonical, main merge, signing and production remain pending.
+
+Final focused metadata verification passes333 tests in104.176s after the recorded
+preflight corrections and fresh source-bound guest replay. Architecture binds769
+paths; execution binds934. The complete ISO is byte-identical across the test-only
+fingerprint correction. Final staged/publication checks are separate from the
+full canonical gate; no failed observation is relabeled as a successful run.
 
 ## Cycle 290: Repair Early Serial And Diagnose VirtualBox
 

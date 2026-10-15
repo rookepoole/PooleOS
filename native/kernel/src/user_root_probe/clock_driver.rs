@@ -142,7 +142,8 @@ impl Session {
         {
             return Err(ClockError::State);
         }
-        let timer = timer_driver::Timer::new(handoff, topology, hpet, bits)?;
+        // Bind the complete child plan; the continuous clock maps only APIC/HPET.
+        let timer = timer_driver::Timer::new_watchdog(handoff, topology, hpet, bits)?;
         let mappings = timer.mappings();
         mappings.validate(manager, bits)?;
         let pat = unsafe { arch::x86_64::read_supported_pat() }.ok_or(ClockError::Pat)?;

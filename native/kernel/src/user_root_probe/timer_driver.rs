@@ -22,8 +22,11 @@ pub struct Timer {
     apic_base: u64,
     pat: u64,
     configured: bool,
+    configure_stage: u8,
     cmci: bool,
     hpet_config: u64,
+    io_apic: Option<interrupt_time::IoApic>,
+    excluded_routes: u32,
     probe: Probe,
     #[cfg(feature = "development-session")]
     calibration: Option<timer::calibration::Cache>,
@@ -38,6 +41,8 @@ impl Timer {
         self.calibration = Some(timer::calibration::Cache::new());
         Ok(())
     }
+    // Shared by many diagnostic peers; keep topology admission out of each caller.
+    #[inline(never)]
     pub fn new(
         handoff: &Handoff<'_>,
         topology: interrupt_time::MadtTopology,
@@ -71,12 +76,46 @@ impl Timer {
             apic_base,
             pat,
             configured: false,
+            configure_stage: 0,
             cmci: false,
             hpet_config: 0,
+            io_apic: None,
+            excluded_routes: 0xffff,
             probe: Probe::None,
             #[cfg(feature = "development-session")]
             calibration: None,
         })
+    }
+
+    /// Only watchdog-bearing peers map the third device; clock/timer probes retain two.
+    #[inline(never)]
+    pub fn new_watchdog(
+        handoff: &Handoff<'_>,
+        topology: interrupt_time::MadtTopology,
+        hpet: interrupt_time::HpetDescription,
+        bits: u8,
+    ) -> Result<Self, TimerError> {
+        let mut timer = Self::new(handoff, topology, hpet, bits)?;
+        timer.io_apic = (topology.io_apic_count == 1).then_some(topology.io_apics[0]);
+        for source in &topology.overrides[..topology.override_count] {
+            if source.global_interrupt < 32 {
+                timer.excluded_routes |= 1 << source.global_interrupt;
+            }
+        }
+        for source in &topology.nmi_sources[..topology.nmi_source_count] {
+            if source.global_interrupt < 32 {
+                timer.excluded_routes |= 1 << source.global_interrupt;
+            }
+        }
+        if let Some(description) = timer.io_apic {
+            timer.mappings = timer.mappings.with_io_apic(
+                handoff,
+                u64::from(description.physical_address),
+                bits,
+                timer.pat,
+            )?;
+        }
+        Ok(timer)
     }
 
     pub fn mappings(&self) -> Mappings {
@@ -144,10 +183,12 @@ impl Timer {
         ),
         TimerError,
     > {
+        self.configure_stage = 1;
         let mut hardware = self.context(root, mappings)?;
         if self.configured || EXPECTED_ROOT.load(Ordering::Acquire) != 0 {
             return Err(TimerError::State);
         }
+        self.configure_stage = 2;
         let id = hw(hardware.apic_read(0x20))?;
         let version = hw(hardware.apic_read(0x30))?;
         let discovery = hw(validate_apic_discovery(
@@ -164,7 +205,9 @@ impl Timer {
             return Err(TimerError::Hardware);
         }
         self.cmci = discovery.max_lvt_entry == 6;
+        self.configure_stage = 3;
         Self::idle(&mut hardware)?;
+        self.configure_stage = 4;
         let capabilities = hw(hardware.hpet_read(0))?;
         let period = capabilities >> 32;
         let counter64 = capabilities & (1 << 13) != 0;
@@ -183,13 +226,16 @@ impl Timer {
             }
         }
         // Mark effects before the first write; errors must still pass quiescence.
+        self.configure_stage = 5;
         self.configured = true;
         super::clock_driver::enter(root, mappings)?;
         if self.topology.pcat_compatible {
             // SAFETY: validated MADT PCAT_COMPAT, single BSP, no concurrent PIC owner.
             unsafe { arch::x86_64::mask_legacy_pic() }.map_err(|_| TimerError::Hardware)?;
         }
+        self.configure_stage = 6;
         self.mask_sources(&mut hardware)?;
+        self.configure_stage = 7;
         hw(hardware.apic_write(0x320, u32::from(TIMER_VECTOR) | MASK))?;
         hw(hardware.apic_write(0x80, 0))?;
         hw(hardware.apic_write(0xf0, u32::from(SPURIOUS_VECTOR) | (1 << 8)))?;
@@ -198,6 +244,7 @@ impl Timer {
         if hw(hardware.hpet_read(0x10))? != self.hpet_config | 1 {
             return Err(TimerError::Hardware);
         }
+        self.configure_stage = 8;
         let counter_mask = if counter64 {
             u64::MAX
         } else {
@@ -217,6 +264,7 @@ impl Timer {
         };
         #[cfg(not(feature = "development-session"))]
         let cached: Option<u64> = None;
+        self.configure_stage = 9;
         let frequency = if let Some(frequency) = cached {
             frequency
         } else {
@@ -234,6 +282,7 @@ impl Timer {
             if elapsed < target {
                 return Err(TimerError::Hardware);
             }
+            self.configure_stage = 10;
             let current = hw(hardware.apic_read(0x390))?;
             hw(hardware.apic_write(0x380, 0))?;
             #[cfg(feature = "development-session")]
@@ -249,6 +298,7 @@ impl Timer {
                 hw(calibrate_apic_timer(u32::MAX, current, elapsed, period))?.apic_ticks_per_second;
             measured
         };
+        self.configure_stage = 11;
         let count = hw(timer_initial_count(frequency, interval_ns))?;
         IRQ_TIMER_DELIVERIES.store(0, Ordering::Release);
         IRQ_EOI_COUNT.store(0, Ordering::Release);
@@ -257,6 +307,8 @@ impl Timer {
         OBSERVED_ROOT.store(0, Ordering::Release);
         EXPECTED_ROOT.store(root, Ordering::Release);
         IRQ_APIC_VIRTUAL.store(timer::APIC_VIRTUAL, Ordering::Release);
+        self.configure_stage = 12;
+        arch::x86_64::user_watchdog::configure_route(root, self.io_apic, self.excluded_routes)?;
         Ok((
             hardware,
             poolekernel::user_entry::preemption::Budget {
@@ -332,6 +384,7 @@ impl Driver for Timer {
             return Err(TimerError::Hardware);
         }
         Self::idle(&mut hardware)?;
+        arch::x86_64::user_watchdog::release_route(root)?;
         super::clock_driver::leave(root, mappings)?;
         EXPECTED_ROOT.store(0, Ordering::Release);
         IRQ_APIC_VIRTUAL.store(0, Ordering::Release);
@@ -462,8 +515,36 @@ impl poolekernel::user_entry::task::SliceDriver for PeerRun {
         let (_, budget) = self
             .timer
             .configure(image.root_physical, self.timer.mappings, 10_000_000)
-            .map_err(|_| poolekernel::user_entry::privilege::Error::Hardware)?;
-        self.entry.set_budget(budget)?;
+            .map_err(|error| {
+                arch::x86_64::user::report_failure(
+                    "timer-config",
+                    u64::from(self.timer.configure_stage),
+                    error as u64,
+                );
+                poolekernel::user_entry::privilege::Error::Hardware
+            })?;
+        self.entry.set_budget(budget).map_err(|error| {
+            arch::x86_64::user::report_failure("entry-budget", 0, error as u64);
+            error
+        })?;
         poolekernel::user_entry::task::SliceDriver::execute_slice(&mut self.entry, image, id)
+            .inspect(|slice| {
+                if let poolekernel::user_entry::task::Event::BudgetYield { syscalls } = slice.event
+                {
+                    if slice.ticks == 0 {
+                        arch::x86_64::user::report_failure(
+                            "zero-budget-sample",
+                            u64::from(id.slot),
+                            syscalls,
+                        );
+                    }
+                }
+            })
+            .map_err(|error| {
+                if cfg!(feature = "development-session") {
+                    arch::x86_64::user::report_failure("entry-execute", 0, error as u64);
+                }
+                error
+            })
     }
 }

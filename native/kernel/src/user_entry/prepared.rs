@@ -289,13 +289,14 @@ impl PreparedImage {
             )?;
         }
         if let Some(timer) = self.timer {
-            for index in [super::timer::APIC_SLOT, super::timer::HPET_SLOT] {
-                write(
-                    memory,
-                    tables + 2 * PAGE_BYTES,
-                    index,
-                    timer.leaf(index).ok_or(Error::Layout)?,
-                )?;
+            for index in [
+                super::timer::APIC_SLOT,
+                super::timer::HPET_SLOT,
+                super::timer::IO_APIC_SLOT,
+            ] {
+                if let Some(leaf) = timer.leaf(index) {
+                    write(memory, tables + 2 * PAGE_BYTES, index, leaf)?;
+                }
             }
         }
         write(memory, image.root_physical, STACK_SLOT, tables | P | W | NX)?;
@@ -568,7 +569,7 @@ fn audit_supervisor<M: TableMemory>(
         let end = start
             .checked_add(pages * PAGE_BYTES)
             .ok_or(Error::Supervisor)?;
-        if timer.is_some_and(|t| t.pages().iter().any(|&p| p < end && start < p + PAGE_BYTES)) {
+        if timer.is_some_and(|t| t.device_pages().any(|p| p < end && start < p + PAGE_BYTES)) {
             return Err(Error::Ownership);
         }
         for &(other, other_pages) in &boot_ranges[..i] {

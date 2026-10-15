@@ -74,7 +74,7 @@ impl Peer {
         hpet: interrupt_time::HpetDescription,
     ) -> Result<Self, PeerFailure> {
         let mut timer =
-            Timer::new(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
+            Timer::new_watchdog(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
         timer
             .reuse_session_calibration()
             .map_err(|_| PeerFailure::Setup)?;
@@ -139,7 +139,7 @@ impl Peer {
         missing_local: bool,
     ) -> Result<Self, PeerFailure> {
         let mut timer =
-            Timer::new(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
+            Timer::new_watchdog(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
         timer.set_probe(probe);
         let bytes = arch::x86_64::user::peer_payload(if kind == 15 { 0 } else { kind })
             .map_err(|_| PeerFailure::Setup)?;
@@ -231,7 +231,7 @@ impl Peer {
             return Err(PeerFailure::Setup);
         }
         let mut timer =
-            Timer::new(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
+            Timer::new_watchdog(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
         timer.set_probe(probe);
         let bytes = arch::x86_64::user::peer_payload(kind).map_err(|_| PeerFailure::Setup)?;
         let mut entry =
@@ -311,7 +311,7 @@ impl Peer {
         }
         #[allow(unused_mut)]
         let mut timer =
-            Timer::new(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
+            Timer::new_watchdog(handoff, topology, hpet, bits).map_err(|_| PeerFailure::Setup)?;
         #[cfg(feature = "development-session")]
         timer
             .reuse_session_calibration()
@@ -847,7 +847,11 @@ pub fn run_all(
     log.write_str(" failed_cleanup_samples=1 scheduler_match=1 pending=0 unknown=0 clock=hpet charge_window=arm_to_event production=0\n");
     drop(log);
     let proof = checked!(128, arch::x86_64::user_watchdog::proof());
-    if proof != [samples, 1, samples, samples] || watchdog_ticks == 0 {
+    let routed = checked!(128, arch::x86_64::user_watchdog::routed_proof());
+    if proof != [samples, 1, samples, samples]
+        || watchdog_ticks == 0
+        || (routed != [0, 0] && routed != [samples, samples])
+    {
         stop(128, serial, debugcon);
     }
     let mut log = EarlyLogger::new(BootSink {
@@ -855,7 +859,13 @@ pub fn run_all(
         debugcon,
         ring: &EARLY_RING,
     });
-    log.write_str("POOLEOS:KERNEL:USER-WATCHDOG PASS contract=PKUSER14 source=hpet_msi local_masked=1 recoveries=1");
+    log.write_str("POOLEOS:KERNEL:USER-WATCHDOG PASS contract=PKUSER14 source=");
+    log.write_str(if routed[0] == 0 {
+        "hpet_msi"
+    } else {
+        "hpet_ioapic"
+    });
+    log.write_str(" local_masked=1 recoveries=1");
     for (label, value) in [
         (" arms=", proof[0]),
         (" stops=", proof[2]),

@@ -315,7 +315,7 @@ pub(super) fn dispatch(t: &Trap, frame: &mut TrapFrame) {
                         }
                         s.saved = Some(Saved { context, fx });
                         s.ticks = Some(
-                            super::super::user_preempt::terminal_ticks(s.budget, s.start)
+                            super::super::user_preempt::yield_ticks(s.budget, s.start)
                                 .unwrap_or_else(|e| denied(14, e, t)),
                         );
                         s.event = Some(Event::BudgetYield {

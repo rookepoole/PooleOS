@@ -55,7 +55,10 @@ pub(super) fn arm_quantum(budget: Budget, suppress_local: bool) -> Result<u64, E
         return Err(Error::Hardware);
     }
     let start = hw(h.hpet_read(0xf0))?;
-    super::user_watchdog::arm(start).map_err(|_| Error::Hardware)?;
+    super::user_watchdog::arm(start).map_err(|error| {
+        super::user::report_failure("watchdog-arm", 0, error as u64);
+        Error::Hardware
+    })?;
     let mask = if suppress_local { 1 << 16 } else { 0 };
     hw(h.apic_write(0x320, u32::from(crate::TIMER_VECTOR) | mask))?;
     hw(h.apic_write(0x380, budget.count))?;
@@ -104,6 +107,13 @@ pub(super) fn terminal_ticks(budget: Budget, start: u64) -> Result<u64, Error> {
         return Err(Error::Hardware);
     }
     budget.partial_elapsed(start, hw(h.hpet_read(0xf0))?)
+}
+
+pub(super) fn yield_ticks(budget: Budget, start: u64) -> Result<u64, Error> {
+    let h = hardware()?;
+    budget.sample_yield(start, || {
+        Ok((hw(h.hpet_read(0))? >> 32, hw(h.hpet_read(0xf0))?))
+    })
 }
 
 impl Session {

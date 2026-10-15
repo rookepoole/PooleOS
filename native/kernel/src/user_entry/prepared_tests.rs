@@ -238,6 +238,13 @@ fn retained(manager: &mut PhysicalMemoryManager, handles: &[AllocationHandle]) {
 }
 
 fn ready_timer(f: Fixture) -> (PhysicalMemoryManager, Memory, PreparedImage) {
+    ready_timer_mappings(f, timer::Mappings::fixture())
+}
+
+fn ready_timer_mappings(
+    f: Fixture,
+    mappings: timer::Mappings,
+) -> (PhysicalMemoryManager, Memory, PreparedImage) {
     let Fixture {
         mut manager,
         parts,
@@ -252,10 +259,56 @@ fn ready_timer(f: Fixture) -> (PhysicalMemoryManager, Memory, PreparedImage) {
         image,
         core,
         36,
-        timer::Mappings::fixture(),
+        mappings,
     )
     .unwrap_or_else(|(e, _)| panic!("{e:?}"));
     (manager, memory, prepared)
+}
+
+#[test]
+fn io_apic_leaf_is_supervisor_uc_nx_and_revalidated_with_guards() {
+    for (index, bit) in [
+        (20, 1 << 2),
+        (20, NX),
+        (20, 1 << 3),
+        (20, 1 << 4),
+        (20, 1 << 12),
+        (19, P),
+        (21, P),
+    ] {
+        let f = Fixture::new();
+        let pt = (f.parts.stack_tables.start_page + 2) * PAGE_BYTES;
+        let core = f.core;
+        let (manager, mut memory, prepared) =
+            ready_timer_mappings(f, timer::Mappings::fixture_io_apic());
+        assert_eq!(
+            memory.pages[&pt][20],
+            0xfec00000 | P | W | NX | (1 << 3) | (1 << 4)
+        );
+        prepared.revalidate(&manager, &mut memory, core).unwrap();
+        memory.pages.get_mut(&pt).unwrap()[index] ^= bit;
+        assert!(prepared.revalidate(&manager, &mut memory, core).is_err());
+    }
+}
+
+#[test]
+fn io_apic_alias_of_kernel_image_rejects_before_writes() {
+    let mut f = Fixture::new();
+    f.core.kernel_physical_base = 0xfec00000;
+    let before = f.memory.writes;
+    assert!(
+        PreparedImage::prepare_with_timer(
+            f.parts,
+            &mut f.manager,
+            &mut f.memory,
+            f.image,
+            f.core,
+            36,
+            timer::Mappings::fixture_io_apic()
+        )
+        .is_err()
+    );
+    assert_eq!(f.memory.writes, before);
 }
 
 #[test]
