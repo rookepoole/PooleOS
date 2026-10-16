@@ -11,23 +11,24 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle293 adds an on-screen native user-space
-terminal and emulated PS/2 keyboard input, mediated by capability-controlled,
-bounded kernel display commands. The shell reads bundled files, runs separate
-Text/Numbers programs, and contains application faults with restart support.
-Five final QEMU and two visible VirtualBox guests pass, including device keyboard
-input, exact application responses, screen pixels and owned-VM cleanup. Use
+**Current development checkpoint:** Cycle296 reduces native drawing work while
+preserving exact pixels. Terminal and two capability-isolated application result
+surfaces run under a native user-space window manager. Both full QEMU mouse and
+keyboard modes now pass, including focus, dragging, minimize/restore, file reads,
+and application fault/restart. Visible VirtualBox keyboard checks also pass;
+VirtualBox mouse remains unqualified. Use
 `Launch-Local-Console.cmd` on the qualified development host for a VM window.
-This is an unsigned one-CPU local terminal, not yet a windowed desktop, installer,
-portable distribution or production release.
+This is an unsigned one-CPU native window preview with read-only result panes,
+not a complete desktop, PooleGlass environment, installer or production release.
 [Run the preview](docs/native-userspace-preview.md).
-[Evidence](docs/checkpoints/cycle293-native-local-console.md).
+[Evidence](docs/checkpoints/cycle296-native-rendering.md).
 The separate default diagnostic kernel still fails at VirtualBox stage117;
 actual watchdog delivery there remains unqualified. This working application
 profile does not close those gates. Windows' "DVD Disc Image" label does not
 mean the optical `.iso` is the wrong format. The launcher supplies the tested
 configuration, including the still-required COM2 mirror.
-Next: isolated surfaces, focus/pointer routing and real windowed application views.
+Next: qualify VirtualBox pointer input and resolve the window service's tight code
+budget, then surface lifecycle/recovery, general app input and useful applications.
 Complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass work continues.
 
 **Historical development checkpoint:** Cycle287 verifies cancellation of native apps

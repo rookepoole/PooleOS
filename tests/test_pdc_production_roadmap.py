@@ -198,8 +198,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 295)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1546)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 296)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1547)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -239,8 +239,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "native_window_input_partial_canonical_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 295)
+        self.assertEqual(current["qualification_status"], "native_rendering_partial_canonical_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 296)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -6902,7 +6902,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertTrue(c['source_unchanged'] and c['owner_report_unchanged'])
         lane=self.roadmap['baseline']['user_space_integration']
         self.assertTrue(lane['optical_iso_built'] and lane['continue_full_microkernel_after_iso'])
-        self.assertEqual(self.roadmap['immediate_next_move']['title'],'Harden surface lifecycle and qualify native input overload recovery')
+        self.assertEqual(self.roadmap['immediate_next_move']['title'],'Qualify VirtualBox pointer input and resolve desktop code capacity')
 
     def test_cycle289_file_wait_is_native_bound_and_preserves_the_optical_preview(self) -> None:
         from runtime import native_app_session as apps, native_userspace_iso as optical, native_shell
@@ -7337,8 +7337,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         raw=(ROOT/record['receipt_path']).read_bytes();r=json.loads(raw)
         self.assertEqual(record['receipt_sha256'],hashlib.sha256(raw).hexdigest().upper())
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(295,'PWINPUT1','partial'))
-        self.assertEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),965)
-        self.assertEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),84)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),965)
+        self.assertNotEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),84)
         self.assertEqual(len(r['program_build']['programs']),24)
         self.assertEqual(r['program_build']['host_tests'],[dict(profile=m,tests_passed=178) for m in ('debug','release')])
         self.assertTrue(r['program_build']['direct_byte_equality'])
@@ -7384,8 +7384,75 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertFalse(r[key],key)
         old=(ROOT/'runs/native-window-manager-readiness.json').read_bytes()
         self.assertEqual(hashlib.sha256(old).hexdigest().upper(),r['historical_cycle294_receipt_sha256'])
-        lane=self.roadmap['baseline']['user_space_integration']
+        lane=self.roadmap['baseline']['historical_cycle295_user_space_integration']
         self.assertEqual((lane['kernel_image_pages'],lane['kernel_remaining_capacity_pages']),(128,80))
+
+    def test_cycle296_rendering_binds_pixels_native_profiles_and_capacity_gap(self) -> None:
+        from unittest.mock import patch
+        from tools.qualify_native_user_entry import source_bindings
+        from tools.qualify_native_user_programs import bindings
+        from tools.qualify_native_local_console import Interaction
+        from runtime import native_app_session as apps, native_console, native_userspace_iso as optical
+        record=self.roadmap['baseline']['native_rendering']
+        raw=(ROOT/record['receipt_path']).read_bytes();r=json.loads(raw)
+        self.assertEqual(record['receipt_sha256'],hashlib.sha256(raw).hexdigest().upper())
+        self.assertEqual((r['cycle'],r['contract_id'],r['status']),(296,'PRENDER1','partial'))
+        self.assertEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),965)
+        self.assertEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),84)
+        self.assertEqual(r['program_build']['host_tests'],[dict(profile=m,tests_passed=182) for m in ('debug','release')])
+        self.assertTrue(r['program_build']['direct_byte_equality'])
+        self.assertEqual(len(r['program_build']['programs']),24)
+        self.assertEqual(r['changed_programs'],['PooleDesktopConsole','PooleWindowConsole'])
+        self.assertEqual((r['console_code_bytes'],r['console_code_margin']),(16344,40))
+        self.assertEqual(r['program_build']['programs']['PooleDesktopConsole']['code_bytes'],7980)
+        self.assertEqual((r['glyph_input_cases'],r['tile_oracle_cases']),(256,1024))
+        self.assertEqual((r['blank_terminal_old_tiles'],r['blank_terminal_new_tiles'],r['blank_terminal_fill_calls']),(3648,0,2))
+        self.assertEqual([v['run_id'] for v in r['cycle295_optical_frame_equality']],['applications-1','applications-2','bad-file'])
+        self.assertTrue(all(v['byte_equal'] for v in r['cycle295_optical_frame_equality']))
+        self.assertEqual(r['host_kernel_tests'],[dict(profile=n+'-'+m,passed=c)
+            for n,c in [('default',576),('applications',595),('desktop',601),('windows',607)] for m in ('debug','release')])
+        for key,windows in (('native_execution',True),('legacy_desktop_execution',False)):
+            native=r[key]
+            self.assertEqual(native['status'],'pass')
+            self.assertEqual(native['source_bindings'],r['source_bindings'])
+            self.assertEqual(native['window_surfaces'],windows)
+            self.assertTrue(native['local_console'] and native['optical'] and native['independent_kernel_builds_equal'])
+            self.assertEqual([g['run_id'] for g in native['guest_runs']],['applications-1','applications-2','bad-file'])
+            self.assertIn('ordinary_denial',native)
+        for guest in r['input_guests']:
+            self.assertEqual(guest['source_bindings'],r['source_bindings'])
+            self.assertTrue(guest['source_unchanged'] and guest['iso_unchanged'])
+            self.assertEqual(guest['guest_bound_seconds'],240)
+            if guest['status']!='pass':
+                self.assertIn('failure',guest)
+                continue
+            self.assertEqual((guest['keyboard_input_bytes'],guest['serial_input_bytes']),(573,0))
+            summary=apps.validate_markers(guest['run']['markers'],file_waits=True,windows=True)
+            self.assertEqual(json.loads(json.dumps(summary)),guest['run']['marker_summary'])
+            window=guest['sustained_window']
+            self.assertEqual(optical.validate_sustained(summary['samples'],window['first_dispatch'],window['last_dispatch']),window)
+            with patch('tools.qualify_native_local_console.secrets.token_hex',return_value=guest['nonce']):case=Interaction(guest['keyboard_batch'])
+            try:
+                self.assertEqual(bytes.fromhex(guest['input_hex']),case.case.sent)
+                self.assertEqual(native_console.split_output(bytes.fromhex(guest['output_hex']))[1],case.case.expected)
+                if guest['keyboard_batch']==4:
+                    case.inject=lambda codes:None
+                    while case.step<len(case.case.steps):case.send_ready()
+                    self.assertEqual(case.batches,guest['batches'])
+            finally:case.close()
+            if guest['backend']=='virtualbox':
+                self.assertTrue(all(guest['cleanup'][k] for k in ('stopped','unregistered','prior_registrations_unchanged')))
+                self.assertEqual(guest['cleanup']['errors'],[])
+            if guest.get('mouse_interaction_verified'):
+                self.assertEqual((len(guest['pointer_steps']),len(guest['movement_samples'])),(17,50))
+        for mode,key in ((1,'standard_mouse_qualified'),(4,'burst_mouse_qualified')):
+            self.assertEqual(r[key],any(g['status']=='pass' and g.get('mouse_interaction_verified') and g['keyboard_batch']==mode for g in r['input_guests']))
+        self.assertTrue(r['standard_mouse_qualified'] and r['burst_mouse_qualified'])
+        for key in ('code_capacity_improved','native_overflow_reset_qualified','virtualbox_mouse_verified','production_ready','signed','canonical_full_replay_performed','merge_qualified'):
+            self.assertFalse(r[key],key)
+        self.assertTrue(r['virtualbox_burst_keyboard_qualified'])
+        old=(ROOT/'runs/native-window-input-readiness.json').read_bytes()
+        self.assertEqual(hashlib.sha256(old).hexdigest().upper(),r['historical_cycle295_receipt_sha256'])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]

@@ -16,6 +16,18 @@ pub const MAX_ROWS: usize = 24;
 pub const INK: u32 = 0xdce9e3;
 pub const PAPER: u32 = 0x18221e;
 
+const EXPANDED_ROWS: [u8; 16] = {
+    let mut table = [0; 16];
+    let mut i = 0;
+    while i < 16 {
+        let row = i as u8;
+        table[i] =
+            ((row & 8) >> 3) * 3 | ((row & 4) >> 2) * 12 | ((row & 2) >> 1) * 48 | (row & 1) * 192;
+        i += 1;
+    }
+    table
+};
+
 pub trait Canvas {
     fn fill(&mut self, x: u16, y: u16, width: u16, height: u16, color: u32) -> Result<(), Error>;
     fn tile(
@@ -42,15 +54,17 @@ pub fn glyph(
     let rows = font::rows(byte);
     for ty in 0..2 {
         for tx in 0..2 {
-            let mut mask = 0;
-            for py in 0..8 {
-                for px in 0..8 {
-                    let gx = (tx * 8 + px) / 2;
-                    let gy = (ty * 8 + py) / 2;
-                    if gx < 5 && gy < 7 && rows[gy] & (1 << (4 - gx)) != 0 {
-                        mask |= 1 << (py * 8 + px);
-                    }
-                }
+            let mut mask = 0u64;
+            for py in 0..4 {
+                let row = rows.get(ty * 4 + py).copied().unwrap_or(0);
+                // Expand five font bits, select this tile's byte and duplicate
+                // vertically. The eighth source row is blank padding.
+                let half = if tx == 0 {
+                    EXPANDED_ROWS[usize::from((row >> 1) & 15)]
+                } else {
+                    (row & 1) * 3
+                };
+                mask |= (u64::from(half) * 0x101) << (py * 16);
             }
             canvas.tile(
                 x.checked_add((tx * 8) as u16).ok_or(Error::Hardware)?,
@@ -104,8 +118,9 @@ impl<'a> Terminal<'a> {
         }
         self.cursor(canvas)
     }
+    /// Paint nonblank cells over an already-cleared PAPER background.
     #[inline]
-    pub fn repaint_region(
+    pub fn repaint_ink_region(
         &self,
         canvas: &mut impl Canvas,
         damage: windows::Rect,
@@ -122,7 +137,14 @@ impl<'a> Terminal<'a> {
             .min(self.rows);
         for row in first_row..last_row {
             for col in first_col..last_col {
-                self.cell(canvas, col, row)?;
+                if *self
+                    .cells
+                    .get(row.saturating_mul(MAX_COLUMNS).saturating_add(col))
+                    .ok_or(Error::Hardware)?
+                    != b' '
+                {
+                    self.cell(canvas, col, row)?;
+                }
             }
         }
         self.cursor(canvas)
@@ -254,6 +276,275 @@ impl<'a> Terminal<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    type Tile = (u16, u16, u16, u16, u64, u32, u32);
+    #[derive(Default)]
+    struct Tiles {
+        calls: std::vec::Vec<Tile>,
+        fail_at: Option<usize>,
+    }
+    impl Canvas for Tiles {
+        fn fill(&mut self, _: u16, _: u16, _: u16, _: u16, _: u32) -> Result<(), Error> {
+            panic!("glyph must preserve its tile-only interface")
+        }
+        fn tile(
+            &mut self,
+            x: u16,
+            y: u16,
+            w: u16,
+            h: u16,
+            m: u64,
+            fg: u32,
+            bg: u32,
+        ) -> Result<(), Error> {
+            self.calls.push((x, y, w, h, m, fg, bg));
+            if self.fail_at == Some(self.calls.len()) {
+                Err(Error::Transport)
+            } else {
+                Ok(())
+            }
+        }
+    }
+    #[test]
+    fn expanded_glyphs_match_pixel_oracle_for_every_byte() {
+        for byte in 0..=255 {
+            let rows = font::rows(byte);
+            let mut c = Tiles::default();
+            glyph(&mut c, 13, 29, byte, INK, PAPER).unwrap();
+            assert_eq!(c.calls.len(), 4);
+            for (i, &(x, y, w, h, mask, fg, bg)) in c.calls.iter().enumerate() {
+                let tx = i % 2;
+                let ty = i / 2;
+                let mut expected = 0;
+                for py in 0..8 {
+                    for px in 0..8 {
+                        let gx = (tx * 8 + px) / 2;
+                        let gy = (ty * 8 + py) / 2;
+                        if gx < 5 && gy < 7 && rows[gy] & (1 << (4 - gx)) != 0 {
+                            expected |= 1u64 << (py * 8 + px);
+                        }
+                    }
+                }
+                assert_eq!(
+                    (x, y, w, h, mask, fg, bg),
+                    (
+                        13 + (tx * 8) as u16,
+                        29 + (ty * 8) as u16,
+                        if tx == 0 { 8 } else { 4 },
+                        8,
+                        expected,
+                        INK,
+                        PAPER
+                    ),
+                    "byte={byte} tile={i}"
+                );
+            }
+        }
+    }
+    #[test]
+    fn glyph_stops_at_transport_or_coordinate_failure_without_later_tiles() {
+        for fail_at in 1..=4 {
+            let mut c = Tiles {
+                fail_at: Some(fail_at),
+                ..Tiles::default()
+            };
+            assert!(matches!(
+                glyph(&mut c, 0, 0, b'X', INK, PAPER),
+                Err(Error::Transport)
+            ));
+            assert_eq!(c.calls.len(), fail_at);
+        }
+        for (x, y, accepted) in [(65528, 0, 1), (0, 65528, 2), (65527, 65527, 4)] {
+            let mut c = Tiles::default();
+            let result = glyph(&mut c, x, y, b'X', INK, PAPER);
+            assert_eq!(result.is_ok(), accepted == 4);
+            assert_eq!(c.calls.len(), accepted);
+        }
+    }
+    struct Raster {
+        pixels: std::vec::Vec<u32>,
+        tiles: usize,
+        fills: usize,
+    }
+    impl Raster {
+        fn new() -> Self {
+            Self {
+                pixels: std::vec![0xabcdef; 640 * 480],
+                tiles: 0,
+                fills: 0,
+            }
+        }
+    }
+    impl Canvas for Raster {
+        fn fill(&mut self, x: u16, y: u16, w: u16, h: u16, color: u32) -> Result<(), Error> {
+            assert!(
+                w > 0
+                    && h > 0
+                    && u32::from(x) + u32::from(w) <= 640
+                    && u32::from(y) + u32::from(h) <= 480
+            );
+            self.fills += 1;
+            for yy in y..y + h {
+                for xx in x..x + w {
+                    self.pixels[usize::from(yy) * 640 + usize::from(xx)] = color;
+                }
+            }
+            Ok(())
+        }
+        fn tile(
+            &mut self,
+            x: u16,
+            y: u16,
+            w: u16,
+            h: u16,
+            mask: u64,
+            fg: u32,
+            bg: u32,
+        ) -> Result<(), Error> {
+            assert!(w > 0 && w <= 8 && h > 0 && h <= 8 && x + w <= 640 && y + h <= 480);
+            self.tiles += 1;
+            for yy in 0..h {
+                for xx in 0..w {
+                    self.pixels[usize::from(y + yy) * 640 + usize::from(x + xx)] =
+                        if mask & (1 << (yy * 8 + xx)) != 0 {
+                            fg
+                        } else {
+                            bg
+                        };
+                }
+            }
+            Ok(())
+        }
+    }
+    fn region(t: &Terminal, damage: windows::Rect, optimized: bool) -> Raster {
+        let mut pixels = Raster::new();
+        let mut clip = windows::Clip {
+            canvas: &mut pixels,
+            rect: damage,
+        };
+        clip.fill(
+            t.left,
+            t.top,
+            (t.columns * 12) as u16,
+            (t.rows * 16) as u16,
+            PAPER,
+        )
+        .unwrap();
+        if optimized {
+            t.repaint_ink_region(&mut clip, damage).unwrap();
+        } else {
+            t.repaint(&mut clip).unwrap();
+        }
+        pixels
+    }
+    #[test]
+    fn sparse_ink_repaint_matches_full_cells_at_damage_edges_and_after_scrolling() {
+        let mut cells = [0; MAX_COLUMNS * MAX_ROWS];
+        let mut t = Terminal::window(&mut cells);
+        t.relocate(24, 84);
+        let mut sink = compositor::Damage(None);
+        for line in 0..24 {
+            for &byte in if line % 2 == 0 {
+                &b"Sparse words X\r\n"[..]
+            } else {
+                &b" \r\n"[..]
+            } {
+                t.write(&mut sink, byte).unwrap();
+            }
+        }
+        for dense in [false, true] {
+            if dense {
+                t.cells.fill(b'W');
+            }
+            for damage in [
+                windows::Rect {
+                    x: 0,
+                    y: 0,
+                    w: 640,
+                    h: 480,
+                },
+                windows::Rect {
+                    x: 23,
+                    y: 83,
+                    w: 2,
+                    h: 2,
+                },
+                windows::Rect {
+                    x: 35,
+                    y: 99,
+                    w: 2,
+                    h: 2,
+                },
+                windows::Rect {
+                    x: 36,
+                    y: 100,
+                    w: 12,
+                    h: 16,
+                },
+                windows::Rect {
+                    x: 595,
+                    y: 380,
+                    w: 45,
+                    h: 100,
+                },
+                windows::Rect {
+                    x: 0,
+                    y: 0,
+                    w: 8,
+                    h: 8,
+                },
+                windows::Rect {
+                    x: 600,
+                    y: 388,
+                    w: 40,
+                    h: 40,
+                },
+                windows::Rect {
+                    x: 0,
+                    y: 0,
+                    w: 0,
+                    h: 0,
+                },
+            ] {
+                let reference = region(&t, damage, false);
+                let current = region(&t, damage, true);
+                assert_eq!(
+                    current.pixels, reference.pixels,
+                    "dense={dense} damage={damage:?}"
+                );
+                assert!(current.tiles <= reference.tiles);
+                for (at, &pixel) in current.pixels.iter().enumerate() {
+                    if !damage.contains((at % 640) as u16, (at / 640) as u16) {
+                        assert_eq!(pixel, 0xabcdef);
+                    }
+                }
+            }
+        }
+    }
+    #[test]
+    fn blank_window_repaint_removes_all_3648_empty_tile_calls() {
+        let mut cells = [0; MAX_COLUMNS * MAX_ROWS];
+        let mut t = Terminal::window(&mut cells);
+        t.relocate(24, 84);
+        let r = windows::Rect {
+            x: 0,
+            y: 0,
+            w: 640,
+            h: 480,
+        };
+        let old = region(&t, r, false);
+        let new = region(&t, r, true);
+        assert_eq!(old.pixels, new.pixels);
+        assert_eq!(
+            (old.tiles, new.tiles, old.fills, new.fills),
+            (3648, 0, 2, 2)
+        );
+        std::println!(
+            "blank_terminal old_tiles={} new_tiles={} background_and_cursor_fills={}",
+            old.tiles,
+            new.tiles,
+            new.fills
+        );
+    }
     struct Bounds {
         w: u16,
         h: u16,

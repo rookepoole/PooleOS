@@ -179,7 +179,7 @@ def main():
     if not work.is_relative_to(ROOT/'outputs') or work==ROOT/'outputs':raise ValueError('new workspace output required')
     work.mkdir(parents=True,exist_ok=False)
     before=source.source_bindings();interaction=Interaction(args.keyboard_batch)
-    result=dict(contract_id='PWS1' if windows else 'PDISPLAY1',cycle=295 if windows else 293,status='fail',source_bindings=before,backend=args.backend,
+    result=dict(contract_id='PWS1' if windows else 'PDISPLAY1',cycle=296,status='fail',source_bindings=before,backend=args.backend,
         guest_bound_seconds=240,iso_sha256=digest(iso),serial_input_bytes=0,physical_keyboard_tested=False,
         visible=args.visible,
         window_surfaces=windows,mouse_interaction_verified=False,graphical_desktop=False,production_ready=False)

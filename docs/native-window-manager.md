@@ -1,6 +1,9 @@
 # PWS1 Native Window Preview
 
-Cycle294, 2026-10-15. Status: partial development evidence, not production.
+Historical Cycle294 baseline, 2026-10-15. Partial development evidence, not production.
+The PWS1 authority contract remains in force. Current successor evidence is in
+[bounded input](native-window-input.md) and [rendering](native-rendering.md);
+the Cycle294 measurements below are historical, not current-source qualification.
 This opt-in `development-windows` profile extends the native desktop profile;
 it does not replace the default kernel or its diagnostics. Window composition
 and application logic execute in CPL3. Applications never receive framebuffer
@@ -111,7 +114,9 @@ they do not close either flag or any phase.
   quotas beyond two read-only panes, window close/application-stop distinction,
   session policy and file manager/editor integration.
 - PWS-G5: atomic presentation, double buffering, measured render/stack budgets,
-  overload/fuzz tests and compositor fault containment/recovery.
+  overload/fuzz tests and compositor fault containment/recovery. Current console
+  code capacity needs an evidence-backed service split or separately qualified
+  loader work before further desktop growth; no silent admission-limit increase.
 - PWS-G6: accessible PooleGlass liquid glass, Unicode/shaping, HiDPI, keyboard-only
   focus/navigation, contrast and reduced-motion/transparency. Current flat UI is
   a functional foundation, not final visual design.

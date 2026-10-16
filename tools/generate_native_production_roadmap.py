@@ -15805,13 +15805,72 @@ def apply_cycle295(roadmap: dict, test_count: int) -> dict:
             "native overflow/reset behavior and bounded controller loss telemetry under sustained input",
             "resolve both retained combined pointer timeouts without changing frozen bounds; qualify VirtualBox mouse independently",
             "retain all microkernel, PooleGlyph/PDC, accessible PooleGlass and N0-N39 production requirements"])
+    return apply_cycle296(roadmap, test_count)
+
+
+def apply_cycle296(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle296-native-rendering.md"
+    contract = "docs/native-rendering.md"
+    path = "runs/native-rendering-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle295_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=296, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 296
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 296
+    gate["qualification_status"] = "native_rendering_partial_canonical_pending"
+    baseline["native_window_input"]["evidence_status"] = "historical_cycle295"
+    gate["current_native_window_input_qualification"]["evidence_status"] = "historical_cycle295_not_current_candidate_qualification"
+    record = dict(cycle=296, contract_id="PRENDER1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("iso_built", "iso_sha256", "iso_byte_count", "host_kernel_tests", "host_python_tests",
+                "qemu_guest_runs", "virtualbox_guest_runs", "kernel_image_pages", "glyph_input_cases",
+                "blank_terminal_old_tiles", "blank_terminal_new_tiles", "console_code_bytes", "console_code_margin",
+                "standard_mouse_qualified", "burst_mouse_qualified", "virtualbox_burst_keyboard_qualified",
+                "virtualbox_mouse_verified", "native_overflow_reset_qualified", "production_ready", "signed",
+                "canonical_full_replay_performed", "merge_qualified"):
+        record[key] = receipt[key]
+    baseline["native_rendering"] = copy.deepcopy(record)
+    gate["current_native_rendering_qualification"] = record
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=296, receipt_path=path, receipt_section="native_execution",
+        native_execution_status="native_rendering_window_preview_see_exact_guest_statuses",
+        native_execution_evidence_cycle=296, shell_native_execution_evidence_cycle=296,
+        optical_iso_sha256=receipt["iso_sha256"], kernel_profile="opt_in_development_windows_128_of208_pages",
+        kernel_image_pages=receipt["kernel_image_pages"], kernel_remaining_capacity_pages=208-receipt["kernel_image_pages"],
+        combined_mouse_keyboard_qualified=receipt["standard_mouse_qualified"],
+        burst_mouse_qualified=receipt["burst_mouse_qualified"],
+        virtualbox_burst_keyboard_qualified=receipt["virtualbox_burst_keyboard_qualified"],
+        console_code_bytes=16344, console_code_margin=40)
+    evidence = ("Cycle296: compact row expansion matches all256 glyph inputs/1024 tile masks; ink-only repaint follows an explicit background clear. Blank-terminal host oracle3648->0 tile calls with identical pixels and two fills.182 user tests per profile,24 independent native program pairs; only DesktopConsole/WindowConsole identities change. Fresh window and legacy-terminal optical records plus exact input receipts are separate evidence, not a generic performance claim. " + checkpoint)
+    gap = ("Desktop code capacity is unresolved: WindowConsole16344/16384 bytes,40-byte margin, not reclaimed room. Use an evidence-backed service split or separately qualified loader capacity before growing lifecycle features. Surface retirement/status/restart, native overload/reset injection and live loss telemetry, VirtualBox mouse, general app input, accessible PooleGlass, five legacy entry failures, stage117/watchdog and complete microkernel/PDC/PooleGlyph/N0-N39 gates remain. Retain all historical mouse timeouts; current exact mode status is in PRENDER1. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N13", "N20", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-NATIVE-UI-001", "FLAG-N13-USERSPACE-ISO-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle296 rendering evidence remains partial. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Qualify VirtualBox pointer input and resolve desktop code capacity",
+        entry_evidence=[checkpoint, contract, path, "docs/native-window-manager.md"],
+        exit_evidence=["exact owned visible VirtualBox pointer/focus/drag/minimize/restore qualification without weakening input bounds",
+            "evidence-backed service split or separately qualified program-loader capacity, preserving authority and image/stack bounds",
+            "surface retirement/status notifications and compositor restart/resynchronization",
+            "native overflow/reset behavior and bounded controller loss telemetry; independent VirtualBox mouse qualification",
+            "retain all historical failures and complete microkernel, PooleGlyph/PDC, accessible PooleGlass and N0-N39 requirements"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1546)
+    parser.add_argument("--test-count", type=int, default=1547)
     parser.add_argument("--status-date", default="2026-10-15")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

@@ -1,15 +1,61 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-15
-Plan version: 2.198.0-native-window-input
-Roadmap cycle: PooleOS Cycle 295
+Plan version: 2.199.0-native-rendering
+Roadmap cycle: PooleOS Cycle 296
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 295: Bounded Desktop Input, Partial Qualification
+## Cycle 296: Native Rendering And QEMU Mouse Qualification
+
+Compact row expansion replaces per-pixel glyph-mask construction. Blank terminal
+glyphs are omitted only after the compositor clears their damaged background.
+All 256 glyph inputs/1024 tile masks, coordinate/transport failures and 16
+sparse/dense damage cases match the pixel reference. A blank 48x19 terminal
+requires zero rather than 3648 tile calls, with the same two background/cursor
+fills. This is a host drawing-command count, not a hardware speedup measurement.
+
+182 user-space tests pass in both debug/release, and 24 independently rebuilt
+native program pairs match. Only DesktopConsole and WindowConsole identities
+change. WindowConsole is 16344 bytes, leaving 40 bytes under the unchanged
+four-page cap, 12 fewer than Cycle295. Code capacity remains unresolved. Rejected
+panic-linkage, oversized and forbidden-GOT candidates remain documented.
+The kernel is 128/208 pages with 36 guarded stack pages; no syscall, mapping,
+device authority, program cap, image limit or guarded stack limit is changed.
+
+Four windowed optical checks and both full combined QEMU mouse/keyboard modes
+pass. Each mode completes 17 pointer steps/50 paced movements and 573 device
+characters, zero serial input, exact application/file/recovery output and a
+4096-dispatch progress window for all six roles. Existing 240-second guest and
+12-second pointer bounds remain unchanged. All three windowed optical final
+framebuffers are byte-identical to Cycle295. Visible VirtualBox burst keyboard,
+pixel checks and owned-VM cleanup also pass; VirtualBox mouse remains unqualified.
+Kernel default/application/desktop/windows suites 576/595/601/607 pass in both
+debug/release, as do 107 focused Python tests. Four legacy-terminal optical checks
+also pass, for 10 QEMU and 1 visible VirtualBox guest overall. 392 overlapping
+metadata/integration checks pass after correcting one stale Cycle295 assertion;
+the failed first run remains retained. The 1547-test inventory is not a complete
+canonical execution. Architecture bindings total 814; exact staged publication
+and artifact checks remain required before commit.
+
+[Checkpoint](checkpoints/cycle296-native-rendering.md) and
+[RENDER-1 through RENDER-6 contract](native-rendering.md).
+Next qualify VirtualBox pointer/focus/drag/minimize/restore and resolve desktop
+code capacity through a service split or separately qualified loader work.
+Then extend surface retirement/status/restart and general app input, with native
+overflow/reset injection and loss telemetry. Accessible PooleGlass, useful
+interactive apps, full microkernel, stage117/watchdog, five legacy entry failures,
+PooleGlyph/PDC and every N0-N39 production requirement remain open.
+
+Totals remain 40 phases/301 subphases/8996 requirements/59 additions, 99 flags
+(44 open), 20 gap groups, 24 partial phases, 1 blocked, 15 not started, 0 complete.
+Cycle295 and earlier receipts remain unchanged, including their pointer timeouts.
+No full canonical pass, main merge, signing, release or promotion is claimed.
+
+## Historical Cycle 295: Bounded Desktop Input, Partial Qualification
 
 WindowConsole now has a64-character focus-aware FIFO and a32-byte tagged PS/2
 drain limit per poll. Every mouse transition updates window state; painting alone

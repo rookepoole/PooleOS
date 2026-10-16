@@ -118,7 +118,7 @@ def main():
     if not work.is_relative_to(ROOT/'outputs') or work==ROOT/'outputs':raise ValueError('new workspace output required')
     work.mkdir(parents=True,exist_ok=False)
     before=local.source.source_bindings();interaction=WindowInteraction(args.keyboard_batch);pointer=PointerProbe(work)
-    result=dict(cycle=295,contract_id='PWS1',status='fail',source_bindings=before,iso_sha256=local.digest(iso),
+    result=dict(cycle=296,contract_id='PWS1',status='fail',source_bindings=before,iso_sha256=local.digest(iso),
         backend='qemu',serial_input_bytes=0,physical_hardware_tested=False,production_ready=False,guest_bound_seconds=240)
     started=time.monotonic()
     try:

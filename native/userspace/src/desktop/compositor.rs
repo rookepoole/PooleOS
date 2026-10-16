@@ -35,8 +35,9 @@ mod tests {
         let mut cells = [0; 1920];
         let mut t = Terminal::window(&mut cells);
         t.relocate(24, 84);
+        t.cells.fill(b'X');
         let mut c = Count(0);
-        t.repaint_region(
+        t.repaint_ink_region(
             &mut c,
             Rect {
                 x: 36,
@@ -47,7 +48,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(c.0, 4);
-        t.repaint_region(
+        t.repaint_ink_region(
             &mut c,
             Rect {
                 x: 0,
@@ -58,7 +59,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(c.0, 4);
-        t.repaint_region(
+        t.repaint_ink_region(
             &mut c,
             Rect {
                 x: 35,
@@ -295,7 +296,7 @@ pub fn paint(
             bg,
         )?;
         if i == 0 {
-            t.repaint_region(&mut c, damage)?;
+            t.repaint_ink_region(&mut c, damage)?;
         } else {
             let cells = s.cells(i - 1).ok_or(Error::Hardware)?;
             for (j, &b) in cells.iter().enumerate() {

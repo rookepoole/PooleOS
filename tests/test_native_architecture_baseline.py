@@ -69,7 +69,9 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
         bound_paths = {item["path"] for item in self.artifact["bound_sources"]}
-        self.assertEqual(len(self.artifact["bound_sources"]), 811)
+        self.assertEqual(len(self.artifact["bound_sources"]), 814)
+        self.assertTrue({"docs/checkpoints/cycle296-native-rendering.md", "docs/native-rendering.md",
+            "runs/native-rendering-readiness.json"}.issubset(bound_paths))
         self.assertTrue({"native/userspace/src/desktop/input.rs", "docs/native-window-input.md",
             "runs/native-window-input-readiness.json"}.issubset(bound_paths))
         self.assertTrue({"native/kernel/src/ps2.rs", "native/userspace/src/process/windows.rs",

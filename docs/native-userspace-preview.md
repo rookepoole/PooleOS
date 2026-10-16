@@ -1,17 +1,17 @@
 # Run The Native Window Preview
 
-Cycle295, 2026-10-15. Native PooleBoot + PooleKernel, not Linux.
+Cycle296, 2026-10-15. Native PooleBoot + PooleKernel, not Linux.
 This experimental build draws Terminal and two independent native application
 result windows inside the VM and accepts its keyboard. It is not a complete
 desktop, PooleGlass environment, installer or production release.
 
-Current source-bound replay passes five QEMU guests and one visible VirtualBox
-guest, including one-byte QEMU keyboard and burst-mode VirtualBox keyboard.
-These check actual application recovery, window pixels and owned cleanup.
-Both combined mouse/keyboard modes
-timed out at240 seconds:537/573 one-byte keys and552/573 burst-mode keys, after
-17 pointer steps/50 paced movements each. VirtualBox mouse remains untested.
-Do not depend on dragging/minimize/focus for reliable everyday use yet.
+Current window-profile replay passes four QEMU optical checks, both combined
+QEMU mouse/keyboard modes and one visible VirtualBox burst-keyboard guest.
+Each combined mode completes17 pointer steps/50 paced movements and573 keyboard
+characters within the unchanged240-second guest bound. Exact application
+recovery, pixels and sustained progress pass; VirtualBox also passes owned-VM
+cleanup. Cycle295's earlier timeouts remain preserved as historical failures.
+VirtualBox mouse remains unqualified; do not rely on it for everyday use yet.
 
 ## Start On This Machine
 
@@ -87,11 +87,11 @@ if a retained failure requires manual recovery; do not touch unrelated VMs.
 
 ## ISO And File Type
 
-Image: `outputs/cycle295-optical2/PooleOS-UserSpace-Preview.iso`.
+Image: `outputs/cycle296-optical1/PooleOS-UserSpace-Preview.iso`.
 
-Convenience copy: `PooleOS-Native-Windows-Cycle295.iso` in Downloads.
+Convenience copy: `PooleOS-Native-Windows-Cycle296.iso` in Downloads.
 Size 66109440 bytes; SHA256:
-`F750999E6088D6B67481D5B21B6B35EF2285311B83D7B66B06DD149BD1BD47AD`.
+`8B4D32976D7C85E44F7D14915013AE4AB3EE4E28B392F0073F4318C8089881A2`.
 
 Windows may call this a "DVD Disc Image". It is still a real ISO9660 image with
 an EFI El Torito boot entry. It belongs in a VM's **optical-drive** picker, not
@@ -112,15 +112,17 @@ not open SDL, which previously crashed on this host. Both use the current pointe
 `outputs/native-userspace-preview.json`. The new visible entry point is:
 
 ```powershell
-.\Launch-Local-Console.cmd --receipt outputs/cycle295-optical2/receipt.json
+.\Launch-Local-Console.cmd --receipt outputs/cycle296-optical1/receipt.json
 ```
 
 With the configured Python runtime, `-B` and repository `PYTHONPATH`:
 
 ```text
-tools/qualify_native_app_session.py --work-dir outputs/NEW-OPTICAL --program-dir outputs/cycle295-programs1 --optical --windows
+tools/qualify_native_app_session.py --work-dir outputs/NEW-OPTICAL --program-dir outputs/cycle296-programs3 --optical --windows
 tools/qualify_native_local_console.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-KEYBOARD-QEMU --backend qemu
 tools/qualify_native_local_console.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-KEYBOARD-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible --keyboard-batch 4
+tools/qualify_native_windows.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-QEMU
+tools/qualify_native_windows.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-BURST-QEMU --keyboard-batch 4
 ```
 
 Use unused directories. The program directory contains 24 independently rebuilt,
@@ -134,11 +136,13 @@ It is not an unrestricted flood test or a replacement for default one-byte mode.
 
 ## Remaining Work
 
-Next: surface lifecycle/restart recovery and native input overload testing, then
-general application input and accessible PooleGlass styling. Both combined
-pointer modes fail their time bound; a completed pointer sequence alone is not
-a passing whole-session test. The console is52 code bytes below its four-page
-cap, so further compositor growth requires an explicit architecture decision.
+Next: qualify VirtualBox pointer input and resolve desktop code capacity, then
+surface lifecycle/restart recovery, native input overload, general application
+input and accessible PooleGlass styling. Both full QEMU pointer modes pass; this
+does not establish VirtualBox mouse or unrestricted input behavior. The console
+is40 code bytes below its four-page cap, so further compositor growth requires
+a service split or separately qualified loader capacity. Rendering work was
+reduced; code margin did not improve and no hardware speedup is claimed.
 Continue robust microkernel work, persistence, networking and PooleGlyph/PDC.
 Default VirtualBox diagnostics still fail stage117; actual watchdog delivery
 there remains separately unqualified. This application profile does not close it.
@@ -146,8 +150,8 @@ there remains separately unqualified. This application profile does not close it
 Production layout, hardware drivers, multi-host reproduction, complete runtime
 attestation, signing and the full canonical/merge gates remain open.
 See the [contract and tracked gaps](native-window-manager.md) and
-[input contract](native-window-input.md) and
-[checkpoint](checkpoints/cycle295-native-window-input.md).
+[input contract](native-window-input.md), [rendering contract](native-rendering.md)
+and [checkpoint](checkpoints/cycle296-native-rendering.md).
 VirtualBox's [lifecycle controls](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/vboxmanage.html)
 and [optical/EFI setup](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/working-with-vms.html)
 describe the host-side operations.

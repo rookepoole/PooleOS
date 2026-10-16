@@ -7,9 +7,23 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 295
+Last roadmap reconciliation: PooleOS Cycle 296
 
-Cycle295 adds a bounded focus-aware native keyboard FIFO, bounded tagged-input
+Cycle296 preserves exact glyph and framebuffer pixels while removing unnecessary
+blank-terminal drawing calls. Both combined QEMU mouse/keyboard modes now pass
+unchanged bounds, alongside windowed optical and visible VirtualBox keyboard
+checks. Four legacy-terminal optical checks, fresh kernel host profiles, 107
+focused and 392 overlapping metadata/integration checks pass. A stale cycle
+assertion was repaired without changing canonical audit or production gates;
+the first failed metadata run is retained. This is not a full canonical replay.
+Next qualify VirtualBox mouse and resolve desktop code capacity, then surface
+lifecycle/recovery, native input overload and general app input. The window
+console has40 code bytes free; no loader/kernel limit was relaxed. Five legacy
+entry failures, VirtualBox stage117/watchdog, complete robust microkernel,
+PooleGlyph/PDC, accessible PooleGlass and every N0-N39/canonical/release gate remain
+required. [Evidence](checkpoints/cycle296-native-rendering.md).
+
+Historical Cycle295 adds a bounded focus-aware native keyboard FIFO, bounded tagged-input
 draining, ordered mouse transitions and host-tested overflow/reset cancellation.
 Optical, standalone QEMU keyboard and visible VirtualBox burst-keyboard checks
 pass; both combined mouse modes time out and remain failed. Kernel host profiles,
