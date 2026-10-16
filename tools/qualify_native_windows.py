@@ -7,9 +7,12 @@ from runtime import native_windows as frames
 ROOT=local.ROOT
 
 class WindowInteraction(local.Interaction):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, keyboard_batch=1):
+        super().__init__(keyboard_batch)
         self.pointer_done=False
+    def send_ready(self):
+        if self.step==self.sustained_barrier and not self.pointer_done:return
+        return super().send_ready()
     def wrap(self, connection):
         owner=self
         class DeviceSocket(local.KeyboardSocket):
@@ -108,13 +111,14 @@ class PointerProbe:
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--receipt',type=Path,required=True);p.add_argument('--work-dir',type=Path,required=True)
+    p.add_argument('--keyboard-batch',type=int,choices=(1,4),default=1)
     args=p.parse_args();report,iso,disk=local.check_preview(args.receipt.resolve())
     if report.get('window_surfaces') is not True:raise ValueError('qualified windows profile required')
     work=args.work_dir.resolve()
     if not work.is_relative_to(ROOT/'outputs') or work==ROOT/'outputs':raise ValueError('new workspace output required')
     work.mkdir(parents=True,exist_ok=False)
-    before=local.source.source_bindings();interaction=WindowInteraction();pointer=PointerProbe(work)
-    result=dict(cycle=294,contract_id='PWS1',status='fail',source_bindings=before,iso_sha256=local.digest(iso),
+    before=local.source.source_bindings();interaction=WindowInteraction(args.keyboard_batch);pointer=PointerProbe(work)
+    result=dict(cycle=295,contract_id='PWS1',status='fail',source_bindings=before,iso_sha256=local.digest(iso),
         backend='qemu',serial_input_bytes=0,physical_hardware_tested=False,production_ready=False,guest_bound_seconds=240)
     started=time.monotonic()
     try:
@@ -145,6 +149,7 @@ def main():
         (work/'keyboard-input.bin').write_bytes(interaction.case.sent[:interaction.sent])
         (work/'console-output.bin').write_bytes(bytes(interaction.received))
         result.update(pointer_steps=pointer.evidence,movement_samples=pointer.movements,maximum_injected_axis_delta=96,
+            keyboard_batch=interaction.keyboard_batch,batches=interaction.batches,keyboard_input_bytes=interaction.keyboard_bytes,
             unpaced_burst_input_qualified=False,source_unchanged=before==local.source.source_bindings(),
             iso_unchanged=local.digest(iso)==result['iso_sha256'],elapsed_seconds=round(time.monotonic()-started,3))
         if not result['source_unchanged'] or not result['iso_unchanged']:result['status']='fail'

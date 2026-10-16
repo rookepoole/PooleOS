@@ -16,6 +16,57 @@ def markers(bad=False):
 
 
 class WindowContracts(unittest.TestCase):
+    def test_keyboard_bursts_preserve_every_byte_response_and_command_boundary(self):
+        from tools.qualify_native_local_console import Interaction, scancodes
+        i=Interaction(4);sent=[]
+        try:
+            i.inject=sent.append
+            while i.step<len(i.case.steps):i.send_ready()
+            self.assertEqual((i.sent,i.keyboard_bytes,len(i.case.sent)),(573,573,573))
+            self.assertEqual(i.expected,i.case.expected)
+            self.assertTrue(any(b['bytes']==4 for b in i.batches))
+            self.assertEqual(len(sent),len(i.batches))
+            for group,codes in zip(i.batches,sent):
+                start=group['start'];count=group['bytes']
+                data=i.case.sent[start:start+count]
+                self.assertTrue(1<=count<=4)
+                self.assertNotIn(b'\r',data[:-1])
+                self.assertEqual(codes,[c for b in data for c in scancodes(bytes([b]))])
+                self.assertEqual(group['scancodes'],len(codes))
+        finally:i.close()
+
+    def test_burst_send_cannot_bypass_pointer_barrier(self):
+        from tools.qualify_native_windows import WindowInteraction
+        i=WindowInteraction(4);sent=[]
+        try:
+            i.inject=sent.append;i.step=i.sustained_barrier
+            before=(i.step,i.sent,i.expected)
+            i.send_ready();self.assertEqual(sent,[])
+            self.assertEqual((i.step,i.sent,i.expected),before)
+            i.pointer_done=True;i.send_ready()
+            self.assertEqual(len(sent),1);self.assertEqual(i.step,before[0]+4)
+        finally:i.close()
+
+    def test_unknown_batch_and_unbound_injector_do_not_fabricate_progress(self):
+        from tools.qualify_native_local_console import Interaction
+        for value in (0,2,3,8,64):
+            with self.assertRaises(ValueError):Interaction(value)
+        i=Interaction(4)
+        try:
+            with self.assertRaises(ValueError):i.send_ready()
+            self.assertEqual((i.step,i.sent,i.keyboard_bytes),(0,0,0));self.assertEqual(i.batches,[])
+        finally:i.close()
+
+    def test_failed_burst_injection_is_not_counted_as_accepted_input(self):
+        from tools.qualify_native_local_console import Interaction
+        def fail(_):raise OSError('synthetic transport failure')
+        i=Interaction(4)
+        try:
+            i.inject=fail
+            with self.assertRaises(OSError):i.send_ready()
+            self.assertEqual((i.step,i.sent,i.keyboard_bytes),(0,0,0));self.assertEqual(i.batches,[])
+        finally:i.close()
+
     def test_mouse_injection_reaches_targets_without_large_unobserved_bursts(self):
         from tools.qualify_native_windows import bounded_motion
         for target in [(0,0),(4095,2159),(20,2000),(4000,20)]:

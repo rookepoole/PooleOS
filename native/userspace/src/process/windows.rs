@@ -8,8 +8,7 @@ use crate::{
     desktop::{
         self, Terminal,
         compositor::{self, Damage},
-        keyboard::Keyboard,
-        mouse::Mouse,
+        input::{Device, Input},
         surface_rpc,
         surfaces::Surfaces,
         windows::{Manager, Rect},
@@ -21,10 +20,19 @@ pub struct Local<'a> {
     terminal: Terminal<'a>,
     surfaces: Surfaces<'a>,
     manager: Manager,
-    keyboard: Keyboard,
-    mouse: Mouse,
-    pending: Option<u8>,
+    input: Input<'a>,
     rpc: surface_rpc::Server,
+}
+struct Ps2(u64);
+impl Device for Ps2 {
+    #[inline(always)]
+    fn next(&mut self) -> Result<Option<u64>, Error> {
+        match invoke(26, self.0, 0, 0, 0) {
+            (0, byte) => Ok(Some(byte)),
+            (6, 0) => Ok(None),
+            _ => Err(Error::Transport),
+        }
+    }
 }
 impl<'a> Local<'a> {
     #[inline(always)]
@@ -33,6 +41,7 @@ impl<'a> Local<'a> {
         endpoint: u64,
         cells: &'a mut [u8; 1920],
         surface_cells: &'a mut [u8; 384],
+        key_cells: &'a mut [u8; 64],
     ) -> Self {
         let (status, h) = invoke(21, port.0, 0, 0, 0);
         if status != 0 {
@@ -50,9 +59,7 @@ impl<'a> Local<'a> {
             terminal: Terminal::window(cells),
             surfaces: Surfaces::new(surface_cells),
             manager: Manager::new(w, height).unwrap_or_else(|_| super::exit(154)),
-            keyboard: Keyboard::new(),
-            mouse: Mouse::new(),
-            pending: None,
+            input: Input::new(key_cells),
             rpc: surface_rpc::Server::new(endpoint),
         };
         local.locate();
@@ -96,7 +103,11 @@ impl<'a> Local<'a> {
                 self.manager.focus = focus;
             }
             if !self.surfaces.open(i) {
+                let focus = self.manager.focus;
                 self.manager.close(i + 1)?;
+                if focus != self.manager.focus {
+                    self.input.clear_focus();
+                }
             }
             self.paint(if !self.surfaces.open(i) {
                 self.manager.bounds
@@ -112,61 +123,25 @@ impl<'a> Local<'a> {
                 })?;
             }
         }
-        // A single byte per service turn preserves fairness with both IPC channels.
-        match invoke(26, self.display.0, 0, 0, 0) {
-            (0, b) if b < 256 => {
-                if let Some(key) = self.keyboard.feed(b as u8) {
-                    if self.manager.focus == Some(0)
-                        && self.manager.visible[0]
-                        && self.pending.is_none()
-                    {
-                        self.pending = Some(key);
-                    }
-                }
-            }
-            (0, b) if b < 512 => {
-                if let Some(motion) = self.mouse.feed((b - 256) as u8) {
-                    let old = (self.manager.x, self.manager.y);
-                    let windows = self.manager.windows;
-                    let focus = self.manager.focus;
-                    let visible = self.manager.visible;
-                    let order = self.manager.order;
-                    if self.manager.motion(motion) {
-                        self.locate();
-                        if windows != self.manager.windows
-                            || focus != self.manager.focus
-                            || visible != self.manager.visible
-                            || order
-                                .iter()
-                                .zip(self.manager.order.iter())
-                                .any(|(&a, &b)| core::hint::black_box(a) != b)
-                        {
-                            self.paint(self.manager.bounds)?;
-                        } else {
-                            self.paint(Rect {
-                                x: old.0,
-                                y: old.1,
-                                w: 12,
-                                h: 20,
-                            })?;
-                            self.paint(Rect {
-                                x: self.manager.x,
-                                y: self.manager.y,
-                                w: 12,
-                                h: 20,
-                            })?;
-                        }
-                    }
-                }
-            }
-            (0, 512) => {
-                self.keyboard = Keyboard::new();
-                self.mouse.reset();
-                self.manager.reset_input();
-                self.pending = None;
-            }
-            (6, 0) => {}
-            _ => return Err(Error::Transport),
+        let update = self
+            .input
+            .poll(&mut self.manager, &mut Ps2(self.display.0))?;
+        if update.scene_changed {
+            self.locate();
+            self.paint(self.manager.bounds)?;
+        } else if update.pointer_changed {
+            self.paint(Rect {
+                x: update.old_pointer.0,
+                y: update.old_pointer.1,
+                w: 12,
+                h: 20,
+            })?;
+            self.paint(Rect {
+                x: self.manager.x,
+                y: self.manager.y,
+                w: 12,
+                h: 20,
+            })?;
         }
         Ok(())
     }
@@ -174,13 +149,14 @@ impl<'a> Local<'a> {
 impl Registers for Local<'_> {
     #[inline(always)]
     fn read(&mut self, offset: u8) -> Result<u8, Error> {
-        if offset == 0 {
-            if let Some(b) = self.pending.take() {
+        let focused = self.manager.focus == Some(0) && self.manager.visible[0];
+        if offset == 0 && focused {
+            if let Some(b) = self.input.pop() {
                 return Ok(b);
             }
         }
         let value = self.serial.read(offset)?;
-        Ok(if offset == 5 && self.pending.is_some() {
+        Ok(if offset == 5 && focused && self.input.ready() {
             value | 1
         } else {
             value

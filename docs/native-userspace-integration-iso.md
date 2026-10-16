@@ -1,16 +1,19 @@
 # Native User-Space Integration ISO
 
-Status: unsigned one-BSP QEMU optical preview verified, Cycle 290, 2026-10-15.
-The current ISO and host serial-terminal launcher are available; see
-[launch instructions](native-userspace-preview.md). This is not a native GUI.
+Status: unsigned one-BSP native window preview, partial, Cycle295, 2026-10-15.
+Terminal and two isolated application result panes render inside the VM; see
+[launch instructions](native-userspace-preview.md). This is an early native
+windowing system, not a complete graphical desktop or accessible PooleGlass.
 Owner direction: pursue a usable native user-space integration ISO, then continue
 the complete robust microkernel. This is an intermediate milestone, not a
 replacement for the Production Goal Charter or its N0-N39 completion gates.
 
-VirtualBox accepts the current ISO and enters the native kernel, but its first
-task slice fails. Cycle290 restores serial diagnostics; it does not qualify a
-VirtualBox session. Track `FLAG-N3-VIRTUALBOX-PREVIEW-001` for the original slice
-failure, documented configuration and actual interactive application acceptance.
+The exact visible VirtualBox application profile now passes native keyboard,
+application and framebuffer checks. Default VirtualBox diagnostics still fail
+stage117, and watchdog delivery remains separately unqualified. Track
+`FLAG-N3-VIRTUALBOX-PREVIEW-001`; a passing application profile does not clear
+those diagnostic failures. Both combined QEMU pointer/keyboard modes time out;
+VirtualBox mouse, physical devices and unrestricted input remain unqualified.
 
 ## Scope And Boundaries
 
@@ -53,12 +56,23 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle287 partial: claimed waiting requester cancellation and service survival qualify. Cycle286 delayed/exhausted cleanup remains historical; general supervision, races, trust and idle remain |
-| USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle288 bounded serial preview verified on optical boots; local display/input and general service qualification remain |
-| USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Cycle288 partial: reproducible unsigned development ISO, six optical guests, actual host-terminal adapter; production layout/signing/hardware and generalized stress remain |
+| USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle295 partial: native Terminal, isolated result surfaces, bounded input FIFO and keyboard qualification; application input/lifecycle, mouse qualification and overload recovery remain |
+| USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Cycle295 partial: reproducible unsigned windowed ISO and exact QEMU/VirtualBox evidence; production layout/signing/hardware, combined pointer tests and generalized stress remain |
 
 ### Immediate Next Move
 
-Current: [Cycle288 optical preview](checkpoints/cycle288-native-userspace-iso.md).
+Current: [Cycle295 bounded window input](checkpoints/cycle295-native-window-input.md).
+Keep the pointer timeouts separate from passing optical/keyboard checks. Harden
+surface retirement/status and restart/resynchronization, qualify native input
+overflow/reset behavior and expose loss telemetry. The four-page console has
+only52 code bytes free; plan a service split or separately verified loader work
+before adding more compositor features. Continue application input, useful apps,
+interruptible jobs, full microkernel, PooleGlyph/PDC and accessible PooleGlass.
+All N0-N39 production gates remain required.
+
+### Historical Cycle288 Next Move
+
+Historical: [Cycle288 optical preview](checkpoints/cycle288-native-userspace-iso.md).
 Two normal optical boots, stale-file control and ordinary unsigned denial pass.
 The launcher adds another strict session and an injected-key test of its actual
 terminal adapter. Four strict sessions each sustain all six roles for 4096

@@ -44,7 +44,8 @@ class KeyboardSocket:
     def close(self): self.connection.close()
 
 class Interaction(qualification.Interaction):
-    def __init__(self):
+    def __init__(self, keyboard_batch=1):
+        if keyboard_batch not in (1,4): raise ValueError('keyboard batch must be1 or4')
         case=apps.scenario(secrets.token_hex(8))
         # Exercise shifted letters, punctuation and editing without changing app lifetimes.
         extra=[]
@@ -56,6 +57,21 @@ class Interaction(qualification.Interaction):
         super().__init__(case,sustained=True)
         self.inject=None
         self.keyboard_bytes=0
+        self.keyboard_batch=keyboard_batch
+        self.batches=[]
+    def send_ready(self):
+        if self.keyboard_batch==1:
+            return super().send_ready()
+        group=[]
+        for byte,response in self.case.steps[self.step:self.step+self.keyboard_batch]:
+            group.append((byte,response))
+            if byte==b'\r':break
+        if not group or self.inject is None:raise ValueError('unbound batch challenge')
+        codes=[code for byte,_ in group for code in scancodes(byte)]
+        self.inject(codes)
+        self.batches.append(dict(start=self.step,bytes=len(group),scancodes=len(codes)))
+        self.keyboard_bytes+=len(group);self.sent+=len(group);self.step+=len(group)
+        self.expected+=b''.join(response for _,response in group)
     def wrap(self,connection):
         def inject(codes):
             if self.inject is None:raise ValueError('guest keyboard is not bound')
@@ -152,16 +168,18 @@ def main():
     p.add_argument('--receipt',type=Path,required=True);p.add_argument('--work-dir',type=Path,required=True)
     p.add_argument('--backend',choices=['qemu','virtualbox'],required=True);p.add_argument('--virtualbox',type=Path)
     p.add_argument('--visible',action='store_true')
+    p.add_argument('--keyboard-batch',type=int,choices=(1,4),default=1)
     args=p.parse_args()
     if args.visible and args.backend!='virtualbox':p.error('visible mode is VirtualBox-only')
     report,iso,disk=check_preview(args.receipt.resolve())
     if report.get('local_console') is not True:raise ValueError('native local-console ISO required')
+    windows=report.get('window_surfaces',False)
+    if args.keyboard_batch!=1 and not windows:raise ValueError('burst input requires window FIFO profile')
     work=args.work_dir.resolve()
     if not work.is_relative_to(ROOT/'outputs') or work==ROOT/'outputs':raise ValueError('new workspace output required')
     work.mkdir(parents=True,exist_ok=False)
-    before=source.source_bindings();interaction=Interaction()
-    windows=report.get('window_surfaces',False)
-    result=dict(contract_id='PWS1' if windows else 'PDISPLAY1',cycle=294 if windows else 293,status='fail',source_bindings=before,backend=args.backend,
+    before=source.source_bindings();interaction=Interaction(args.keyboard_batch)
+    result=dict(contract_id='PWS1' if windows else 'PDISPLAY1',cycle=295 if windows else 293,status='fail',source_bindings=before,backend=args.backend,
         guest_bound_seconds=240,iso_sha256=digest(iso),serial_input_bytes=0,physical_keyboard_tested=False,
         visible=args.visible,
         window_surfaces=windows,mouse_interaction_verified=False,graphical_desktop=False,production_ready=False)
@@ -186,7 +204,8 @@ def main():
         interaction.close()
         (work/'keyboard-input.bin').write_bytes(interaction.case.sent[:interaction.sent])
         (work/'console-output.bin').write_bytes(bytes(interaction.received))
-        result.update(source_unchanged=before==source.source_bindings(),iso_unchanged=digest(iso)==result['iso_sha256'],elapsed_seconds=round(time.monotonic()-started,3))
+        result.update(keyboard_batch=interaction.keyboard_batch,batches=interaction.batches,
+            source_unchanged=before==source.source_bindings(),iso_unchanged=digest(iso)==result['iso_sha256'],elapsed_seconds=round(time.monotonic()-started,3))
         if not result['source_unchanged'] or not result['iso_unchanged']:result['status']='fail'
         (work/'receipt.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
     print(result['status'],result.get('failure',''),flush=True)

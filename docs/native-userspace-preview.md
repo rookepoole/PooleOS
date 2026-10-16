@@ -1,15 +1,17 @@
 # Run The Native Window Preview
 
-Cycle294, 2026-10-15. Native PooleBoot + PooleKernel, not Linux.
+Cycle295, 2026-10-15. Native PooleBoot + PooleKernel, not Linux.
 This experimental build draws Terminal and two independent native application
 result windows inside the VM and accepts its keyboard. It is not a complete
 desktop, PooleGlass environment, installer or production release.
 
-Current source-bound replay passes five QEMU and one visible VirtualBox guest,
-including native keyboard input, application recovery, window pixels and cleanup.
-Mouse support is implemented but not fully qualified:17 scripted QEMU actions
-were observed before the combined test timed out. VirtualBox mouse remains
-untested. Do not depend on dragging/minimize/focus for reliable everyday use yet.
+Current source-bound replay passes five QEMU guests and one visible VirtualBox
+guest, including one-byte QEMU keyboard and burst-mode VirtualBox keyboard.
+These check actual application recovery, window pixels and owned cleanup.
+Both combined mouse/keyboard modes
+timed out at240 seconds:537/573 one-byte keys and552/573 burst-mode keys, after
+17 pointer steps/50 paced movements each. VirtualBox mouse remains untested.
+Do not depend on dragging/minimize/focus for reliable everyday use yet.
 
 ## Start On This Machine
 
@@ -56,6 +58,12 @@ type; focused result panes discard keys. No selection, history editing,
 scrollback, Unicode/IME, clipboard or interruptible jobs yet.
 Files are bundled and read-only; no data persists between sessions.
 
+The console buffers64 decoded characters and polls at most32 device bytes per
+turn. On FIFO overflow or input reset it cancels the partial line when the shell
+next reads input and discards through Enter; then type the command afresh. That
+recovery policy has host-test coverage, not native overload qualification. It
+does not interrupt running jobs or recover bytes already lost by the controller.
+
 ## Configuration And Safety
 
 The launcher discovers the existing Windows VirtualBox 7.2.20r175154 installation
@@ -79,11 +87,11 @@ if a retained failure requires manual recovery; do not touch unrelated VMs.
 
 ## ISO And File Type
 
-Image: `outputs/cycle294-optical5/PooleOS-UserSpace-Preview.iso`.
+Image: `outputs/cycle295-optical2/PooleOS-UserSpace-Preview.iso`.
 
-Convenience copy: `PooleOS-Native-Windows-Cycle294.iso` in Downloads.
+Convenience copy: `PooleOS-Native-Windows-Cycle295.iso` in Downloads.
 Size 66109440 bytes; SHA256:
-`451E023EDA3A4CDA848C89D8C64D65F27F564D4F88DEF6A76340A3A0F6FEB88C`.
+`F750999E6088D6B67481D5B21B6B35EF2285311B83D7B66B06DD149BD1BD47AD`.
 
 Windows may call this a "DVD Disc Image". It is still a real ISO9660 image with
 an EFI El Torito boot entry. It belongs in a VM's **optical-drive** picker, not
@@ -104,15 +112,15 @@ not open SDL, which previously crashed on this host. Both use the current pointe
 `outputs/native-userspace-preview.json`. The new visible entry point is:
 
 ```powershell
-.\Launch-Local-Console.cmd --receipt outputs/cycle294-optical5/receipt.json
+.\Launch-Local-Console.cmd --receipt outputs/cycle295-optical2/receipt.json
 ```
 
 With the configured Python runtime, `-B` and repository `PYTHONPATH`:
 
 ```text
-tools/qualify_native_app_session.py --work-dir outputs/NEW-OPTICAL --program-dir outputs/cycle294-programs6 --optical --windows
+tools/qualify_native_app_session.py --work-dir outputs/NEW-OPTICAL --program-dir outputs/cycle295-programs1 --optical --windows
 tools/qualify_native_local_console.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-KEYBOARD-QEMU --backend qemu
-tools/qualify_native_local_console.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-KEYBOARD-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible
+tools/qualify_native_local_console.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-KEYBOARD-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible --keyboard-batch 4
 ```
 
 Use unused directories. The program directory contains 24 independently rebuilt,
@@ -120,13 +128,17 @@ source-bound pairs. Kernel/boot pairs and ISO variants must reproduce exactly;
 positive, stale-file-grant and ordinary unsigned-denial controls remain required.
 Native keyboard tests inject device scancodes, never serial input, and compare
 exact responses and real framebuffer pixels. A human typing is a separate check.
+The explicitly selected four-character mode groups make/break scancodes, never
+crosses a command delimiter and waits for exact output before the next group.
+It is not an unrestricted flood test or a replacement for default one-byte mode.
 
 ## Remaining Work
 
-Next: complete bounded pointer qualification, input buffering and surface
-lifecycle/restart recovery, then general application input and accessible
-PooleGlass styling. The combined pointer regression currently fails its time
-bound; a completed pointer sequence alone is not a passing whole-session test.
+Next: surface lifecycle/restart recovery and native input overload testing, then
+general application input and accessible PooleGlass styling. Both combined
+pointer modes fail their time bound; a completed pointer sequence alone is not
+a passing whole-session test. The console is52 code bytes below its four-page
+cap, so further compositor growth requires an explicit architecture decision.
 Continue robust microkernel work, persistence, networking and PooleGlyph/PDC.
 Default VirtualBox diagnostics still fail stage117; actual watchdog delivery
 there remains separately unqualified. This application profile does not close it.
@@ -134,7 +146,8 @@ there remains separately unqualified. This application profile does not close it
 Production layout, hardware drivers, multi-host reproduction, complete runtime
 attestation, signing and the full canonical/merge gates remain open.
 See the [contract and tracked gaps](native-window-manager.md) and
-[checkpoint](checkpoints/cycle294-native-windows.md).
+[input contract](native-window-input.md) and
+[checkpoint](checkpoints/cycle295-native-window-input.md).
 VirtualBox's [lifecycle controls](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/vboxmanage.html)
 and [optical/EFI setup](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/working-with-vms.html)
 describe the host-side operations.

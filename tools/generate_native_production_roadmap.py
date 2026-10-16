@@ -15747,13 +15747,71 @@ def apply_cycle294(roadmap: dict, test_count: int) -> dict:
             "input buffering/drop accounting and surface retirement/restart/resynchronization tests",
             "refresh legacy kernel-entry qualification without rewriting historical receipts or weakening assertions",
             "general app input and accessible PooleGlass follow; retain stage117/watchdog, interruptible jobs and all production gates"])
+    return apply_cycle295(roadmap, test_count)
+
+
+def apply_cycle295(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle295-native-window-input.md"
+    contract = "docs/native-window-input.md"
+    path = "runs/native-window-input-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle294_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=295, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 295
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 295
+    gate["qualification_status"] = "native_window_input_partial_canonical_pending"
+    baseline["native_window_manager"]["evidence_status"] = "historical_cycle294"
+    gate["current_native_window_manager_qualification"]["evidence_status"] = "historical_cycle294_not_current_candidate_qualification"
+    record = dict(cycle=295, contract_id="PWINPUT1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("iso_built", "iso_sha256", "iso_byte_count", "host_kernel_tests", "host_python_tests",
+                "qemu_guest_runs", "virtualbox_guest_runs", "kernel_image_pages", "keyboard_fifo_capacity",
+                "input_drain_limit", "standard_mouse_qualified", "burst_mouse_qualified", "virtualbox_burst_keyboard_qualified",
+                "virtualbox_mouse_verified", "native_overflow_reset_qualified", "production_ready", "signed",
+                "canonical_full_replay_performed", "merge_qualified"):
+        record[key] = receipt[key]
+    baseline["native_window_input"] = copy.deepcopy(record)
+    gate["current_native_window_input_qualification"] = record
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=295, receipt_path=path, receipt_section="native_execution",
+        native_execution_status="bounded_fifo_window_preview_see_separate_input_receipts",
+        native_execution_evidence_cycle=295, shell_native_execution_evidence_cycle=295,
+        optical_iso_sha256=receipt["iso_sha256"], kernel_profile="opt_in_development_windows_128_of208_pages",
+        kernel_image_pages=128, kernel_remaining_capacity_pages=80, keyboard_fifo_capacity=64,
+        input_drain_limit=32, combined_mouse_keyboard_qualified=receipt["standard_mouse_qualified"],
+        burst_mouse_qualified=receipt["burst_mouse_qualified"],
+        virtualbox_burst_keyboard_qualified=receipt["virtualbox_burst_keyboard_qualified"])
+    lane["stages"]["USI-4"] = "partial_native_windows_bounded_fifo_input_lifecycle_and_overload_gaps"
+    lane["stages"]["USI-5"] = "partial_unsigned_optical_separate_single_key_and_burst_evidence_production_gates_open"
+    evidence = ("Cycle295:64-character focus-aware FIFO,32-byte bounded tagged-input drain, ordered mouse transitions with coalesced painting, overflow/reset partial-line cancellation.178 user tests per debug/release and24 independent program pairs; window console16332 bytes; windows-only rodata0x18000, kernel128/208 pages and36 guarded stack pages. Separate standard/burst mouse and VirtualBox keyboard receipts; inspect each status, not aggregate success. " + checkpoint)
+    gap = ("PWS-G3 remains partial: native overflow/reset injection and telemetry, controller loss accounting and sustained high-rate input remain. PWS-G1 retains both failed240s combined mouse modes: standard537/573 and burst552/573 keyboard bytes, despite17 pointer steps/50 movements each. VirtualBox mouse is untested. Continue surface retirement/status/restart/resynchronization, general application input, render/stack budgets and accessible PooleGlass; preserve five legacy entry failures, stage117/watchdog, interruptible jobs, complete microkernel/PDC/PooleGlyph and all N0-N39 gates. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N13", "N18", "N22", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-NATIVE-UI-001", "FLAG-N13-USERSPACE-ISO-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle295 bounded input is partial, not unrestricted device qualification. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Harden surface lifecycle and qualify native input overload recovery",
+        entry_evidence=[checkpoint, contract, path, "docs/native-window-manager.md"],
+        exit_evidence=["surface retirement/status notifications and compositor restart/resynchronization",
+            "native overflow/reset behavior and bounded controller loss telemetry under sustained input",
+            "resolve both retained combined pointer timeouts without changing frozen bounds; qualify VirtualBox mouse independently",
+            "retain all microkernel, PooleGlyph/PDC, accessible PooleGlass and N0-N39 production requirements"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1541)
+    parser.add_argument("--test-count", type=int, default=1546)
     parser.add_argument("--status-date", default="2026-10-15")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

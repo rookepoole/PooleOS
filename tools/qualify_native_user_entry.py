@@ -35,6 +35,7 @@ def source_bindings() -> dict[str, str]:
         "tests/test_native_windows.py",
         "native/kernel/src/ps2.rs",
         "native/userspace/src/desktop/mouse.rs",
+        "native/userspace/src/desktop/input.rs",
         "native/userspace/src/desktop/windows.rs",
         "native/userspace/src/desktop/surfaces.rs",
         "native/userspace/src/desktop/surface_rpc.rs",

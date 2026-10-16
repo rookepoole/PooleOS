@@ -24,6 +24,10 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle295-native-window-input.md",
+    "docs/native-window-input.md",
+    "runs/native-window-input-readiness.json",
+    "native/userspace/src/desktop/input.rs",
     "docs/checkpoints/cycle294-native-windows.md",
     "docs/native-window-manager.md",
     "runs/native-window-manager-readiness.json",

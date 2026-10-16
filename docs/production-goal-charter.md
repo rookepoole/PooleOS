@@ -7,9 +7,20 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 294
+Last roadmap reconciliation: PooleOS Cycle 295
 
-Cycle294 implements capability-isolated application result surfaces, bounded PS/2
+Cycle295 adds a bounded focus-aware native keyboard FIFO, bounded tagged-input
+draining, ordered mouse transitions and host-tested overflow/reset cancellation.
+Optical, standalone QEMU keyboard and visible VirtualBox burst-keyboard checks
+pass; both combined mouse modes time out and remain failed. Kernel host profiles,
+107 focused Python checks and391 metadata/integration checks pass. Next harden
+surface lifecycle and qualify native overload recovery while addressing those
+timeouts and the tight compositor code budget. Five legacy entry failures,
+VirtualBox stage117/watchdog and all canonical/release gates remain open. No
+N0-N39, PooleGlyph/PDC, accessible PooleGlass, signing or production requirement
+is waived. [Evidence](checkpoints/cycle295-native-window-input.md).
+
+Historical Cycle294 implements capability-isolated application result surfaces, bounded PS/2
 mouse transport, and a native CPL3 window manager. Current optical and separate
 QEMU/VirtualBox native-keyboard checks pass; the combined mouse regression times
 out and remains failed. Overall readiness is partial. Next complete bounded

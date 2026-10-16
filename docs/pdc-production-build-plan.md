@@ -1,15 +1,57 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-15
-Plan version: 2.197.0-native-windows
-Roadmap cycle: PooleOS Cycle 294
+Plan version: 2.198.0-native-window-input
+Roadmap cycle: PooleOS Cycle 295
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 294: Native Windows, Partial Mouse Qualification
+## Cycle 295: Bounded Desktop Input, Partial Qualification
+
+WindowConsole now has a64-character focus-aware FIFO and a32-byte tagged PS/2
+drain limit per poll. Every mouse transition updates window state; painting alone
+is coalesced. Overflow/reset prioritizes partial-line cancellation and discards
+through the delimiter. Focus drops unread keys without losing modifier releases.
+This is native user-space policy behind the existing typed kernel authority,
+not a new broad device grant, allocator or host-rendered desktop.
+
+178 user-space tests pass per debug/release and24 native program pairs reproduce
+exactly. Only WindowConsole's program identity changes; its16332 code bytes leave
+52 bytes below the unchanged four-page cap. Embedded code requires the windows-
+only0x18000 read-only boundary; kernel128/208 pages,36 guarded stack pages, all
+other selectors unchanged. Four optical checks, standalone one-byte QEMU keyboard
+and visible VirtualBox burst keyboard qualification pass. Each keyboard session
+uses573 device characters with zero serial input, exact application responses,
+file waits, lifecycle recovery, sustained4096-dispatch progress and pixel checks.
+Kernel default/application/desktop/windows tests576/595/601/607 pass in both
+debug and release;107 focused Python checks and391 overlapping metadata/integration
+checks pass. Discovered inventory1546 is not a full canonical-suite execution.
+
+Both combined mouse/keyboard modes **fail** the unchanged240-second guest bound:
+one-byte mode537/573 keys; four-character mode552/573. Both observed17 pointer
+steps/50 paced movements. The burst experiment did not establish the expected
+whole-session pass, and neither timeout is cleared by keyboard-only evidence.
+Native overflow/reset injection, live loss telemetry and VirtualBox mouse remain
+unqualified; the overflow/reset policy currently has host-test evidence only.
+
+[Checkpoint](checkpoints/cycle295-native-window-input.md) and
+[INPUT-1 through INPUT-8 contract](native-window-input.md).
+Next: surface retirement/status/restart and native overload recovery; investigate
+both combined timeouts without changing their bounds, then qualify VirtualBox
+mouse and general application input. Address the tight code budget explicitly
+before growing the compositor. Accessible PooleGlass, useful interactive apps,
+full microkernel, default VirtualBox stage117/watchdog, five legacy entry failures,
+PooleGlyph/PDC and every N0-N39 production gate remain open.
+
+Totals remain40 phases/301 subphases/8996 requirements/59 additions,99 flags
+(44 open),20 gap groups,24 partial phases,1 blocked,15 not started,0 complete.
+All historical readiness receipts remain unchanged. No full canonical replay,
+main merge, signing, release or production promotion is claimed.
+
+## Historical Cycle 294: Native Windows, Partial Mouse Qualification
 
 The opt-in `development-windows` profile now runs a native CPL3 window manager,
 Terminal, and two capability-isolated application result surfaces. PWS1 uses

@@ -3,6 +3,7 @@
 use crate::console::Error;
 pub mod compositor;
 pub mod font;
+pub mod input;
 pub mod keyboard;
 pub mod mouse;
 pub mod publisher;

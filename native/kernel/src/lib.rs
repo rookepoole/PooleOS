@@ -79,7 +79,7 @@ pub const ENTRY_OFFSET: u64 = 0x13000;
 #[cfg(all(feature = "development-desktop", not(feature = "development-windows")))]
 pub const ENTRY_OFFSET: u64 = 0x15000;
 #[cfg(feature = "development-windows")]
-pub const ENTRY_OFFSET: u64 = 0x17000;
+pub const ENTRY_OFFSET: u64 = 0x18000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 
 #[used]
@@ -1505,14 +1505,14 @@ mod tests {
         let linker = include_str!("../linker.ld").replace("\r\n", "\n");
         assert!(
             linker.contains(
-                "__poole_ro_capacity = DEFINED(__poole_windows_profile) ? 0x17000 : (DEFINED(__poole_desktop_profile) ? 0x15000 : (DEFINED(__poole_apps_profile) ? 0x13000 : (DEFINED(__poole_files_profile) ? 0xE000 : 0xD000)));"
+                "__poole_ro_capacity = DEFINED(__poole_windows_profile) ? 0x18000 : (DEFINED(__poole_desktop_profile) ? 0x15000 : (DEFINED(__poole_apps_profile) ? 0x13000 : (DEFINED(__poole_files_profile) ? 0xE000 : 0xD000)));"
             )
         );
         assert!(linker.contains(". = __poole_ro_capacity;\n  __poole_text_start = .;"));
         assert_eq!(
             ENTRY_OFFSET,
             if cfg!(feature = "development-windows") {
-                0x17000
+                0x18000
             } else if cfg!(feature = "development-desktop") {
                 0x15000
             } else if cfg!(feature = "development-applications") {

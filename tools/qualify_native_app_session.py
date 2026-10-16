@@ -52,6 +52,11 @@ class Interaction(shared.Interaction):
         self.sustained_first = None
         self.sustained_evidence = None
 
+    def send_ready(self):
+        byte, response = self.case.steps[self.step]
+        if self.sock.send(byte) == 1:
+            self.sent += 1; self.step += 1; self.expected += response
+
     def poll(self, debug):
         if self.sock is None:
             self.sock = socket.create_connection(('127.0.0.1', self.port), timeout=2)
@@ -89,9 +94,7 @@ class Interaction(shared.Interaction):
                 retired=[probe.parse(m,'RETIRE') for m in markers if m.startswith('POOLEOS:APPS RETIRE ')]
                 if self.retirements[self.step] not in {(v['task'],v['generation']) for v in retired}: return False
                 self.observed_retirements.add(self.step)
-            byte, response = self.case.steps[self.step]
-            if self.sock.send(byte) == 1:
-                self.sent += 1; self.step += 1; self.expected += response
+            self.send_ready()
         if self.exhaust_cleanup:
             return bool(self.step == len(self.case.steps) and application == self.case.expected
                         and self.exhaustion_observed and len(exhausted) == 2 and runs
@@ -120,7 +123,7 @@ def main():
         parser.error('workspace output paths required')
     storage = require_space(work); work.mkdir(parents=True, exist_ok=False)
     before = source.source_bindings()
-    report = dict(cycle=294 if args.windows else 293 if args.desktop else 292 if args.optical else 287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
+    report = dict(cycle=295 if args.windows else 293 if args.desktop else 292 if args.optical else 287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
                   contract_id=optical.CONTRACT if args.optical else 'PCLAIM1' if args.claimed_requester else 'PCLEANUP3' if args.exhaust_cleanup else 'PFILECONTROL1' if args.file_controls else 'PAPPRECOVERY1' if args.deferred_cleanup else 'PAPPSESSION1',
                   optical=args.optical, optical_images={}, file_waits=args.optical,
                   local_console=args.desktop or args.windows, window_surfaces=args.windows, graphical_desktop=False,
