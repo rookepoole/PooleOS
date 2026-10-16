@@ -1,11 +1,15 @@
-# Run The Native Local-Console Preview
+# Run The Native Window Preview
 
-Cycle293, 2026-10-15. Native PooleBoot + PooleKernel, not Linux.
-This build draws its terminal inside the VM and accepts the VM's keyboard.
-It is not yet a windowed desktop, PooleGlass environment, installer or production release.
+Cycle294, 2026-10-15. Native PooleBoot + PooleKernel, not Linux.
+This experimental build draws Terminal and two independent native application
+result windows inside the VM and accepts its keyboard. It is not a complete
+desktop, PooleGlass environment, installer or production release.
 
-Final source-bound replay passes five QEMU and two visible VirtualBox guests,
-including native keyboard input, application recovery, screen pixels and cleanup.
+Current source-bound replay passes five QEMU and one visible VirtualBox guest,
+including native keyboard input, application recovery, window pixels and cleanup.
+Mouse support is implemented but not fully qualified:17 scripted QEMU actions
+were observed before the combined test timed out. VirtualBox mouse remains
+untested. Do not depend on dragging/minimize/focus for reliable everyday use yet.
 
 ## Start On This Machine
 
@@ -30,6 +34,10 @@ status numbers
 Text counts bytes/words/lines; Numbers summarizes the bundled integer file.
 These are separate native applications using capability IPC and native file
 wait/wakeup, not a host simulation or a kernel command interpreter.
+Their result windows appear after `start text` and `start numbers`. They are
+read-only snapshots, not editors. Stopping/faulting an app may leave its last
+snapshot visible; use `status` in Terminal for process state. Surface lifecycle
+notifications and recovery are still in development.
 
 To exercise containment: `fault numbers`, then `status numbers`, `start numbers`
 and `numbers /numbers.csv`. To finish normally: `stop text`, `status text`,
@@ -42,8 +50,10 @@ the launcher process. The controller powers off/unregisters only its recorded
 temporary VM and retains its files. Cleanup after abrupt controller-process death
 is still unqualified. Sessions have a 15-minute limit; output/logs are bounded.
 
-The input profile is US ASCII with Shift, Enter and Backspace. No mouse, selection,
-history editing, scrollback, Unicode/IME, clipboard or interruptible jobs yet.
+The input profile is US ASCII with Shift, Enter and Backspace. Mouse focus,
+dragging and minimize/taskbar restore are experimental. Keep Terminal focused to
+type; focused result panes discard keys. No selection, history editing,
+scrollback, Unicode/IME, clipboard or interruptible jobs yet.
 Files are bundled and read-only; no data persists between sessions.
 
 ## Configuration And Safety
@@ -69,11 +79,11 @@ if a retained failure requires manual recovery; do not touch unrelated VMs.
 
 ## ISO And File Type
 
-Image: `outputs/cycle293-optical6/PooleOS-UserSpace-Preview.iso`.
+Image: `outputs/cycle294-optical5/PooleOS-UserSpace-Preview.iso`.
 
-Convenience copy: `PooleOS-LocalConsole-Cycle293.iso` in Downloads.
+Convenience copy: `PooleOS-Native-Windows-Cycle294.iso` in Downloads.
 Size 66109440 bytes; SHA256:
-`18DE7FF006DA3A7B963A8D8F312984BDCEC87CEE6A34E21E6CB20575B5E68CB9`.
+`451E023EDA3A4CDA848C89D8C64D65F27F564D4F88DEF6A76340A3A0F6FEB88C`.
 
 Windows may call this a "DVD Disc Image". It is still a real ISO9660 image with
 an EFI El Torito boot entry. It belongs in a VM's **optical-drive** picker, not
@@ -94,18 +104,18 @@ not open SDL, which previously crashed on this host. Both use the current pointe
 `outputs/native-userspace-preview.json`. The new visible entry point is:
 
 ```powershell
-.\Launch-Local-Console.cmd --receipt outputs/cycle293-optical6/receipt.json
+.\Launch-Local-Console.cmd --receipt outputs/cycle294-optical5/receipt.json
 ```
 
 With the configured Python runtime, `-B` and repository `PYTHONPATH`:
 
 ```text
-tools/qualify_native_app_session.py --work-dir outputs/NEW-OPTICAL --program-dir outputs/cycle293-programs5 --optical --desktop
+tools/qualify_native_app_session.py --work-dir outputs/NEW-OPTICAL --program-dir outputs/cycle294-programs6 --optical --windows
 tools/qualify_native_local_console.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-KEYBOARD-QEMU --backend qemu
 tools/qualify_native_local_console.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-KEYBOARD-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible
 ```
 
-Use unused directories. The program directory contains 21 independently rebuilt,
+Use unused directories. The program directory contains 24 independently rebuilt,
 source-bound pairs. Kernel/boot pairs and ISO variants must reproduce exactly;
 positive, stale-file-grant and ordinary unsigned-denial controls remain required.
 Native keyboard tests inject device scancodes, never serial input, and compare
@@ -113,16 +123,18 @@ exact responses and real framebuffer pixels. A human typing is a separate check.
 
 ## Remaining Work
 
-Next: isolated surfaces and input focus, a compositor/window manager, pointer
-input and graphical application views, then accessible PooleGlass styling.
+Next: complete bounded pointer qualification, input buffering and surface
+lifecycle/restart recovery, then general application input and accessible
+PooleGlass styling. The combined pointer regression currently fails its time
+bound; a completed pointer sequence alone is not a passing whole-session test.
 Continue robust microkernel work, persistence, networking and PooleGlyph/PDC.
 Default VirtualBox diagnostics still fail stage117; actual watchdog delivery
 there remains separately unqualified. This application profile does not close it.
 
 Production layout, hardware drivers, multi-host reproduction, complete runtime
 attestation, signing and the full canonical/merge gates remain open.
-See the [contract](native-local-console.md) and
-[checkpoint](checkpoints/cycle293-native-local-console.md).
+See the [contract and tracked gaps](native-window-manager.md) and
+[checkpoint](checkpoints/cycle294-native-windows.md).
 VirtualBox's [lifecycle controls](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/vboxmanage.html)
 and [optical/EFI setup](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/working-with-vms.html)
 describe the host-side operations.

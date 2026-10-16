@@ -69,6 +69,17 @@ impl<C: Calls> Program<C> {
         }
     }
     #[inline(always)]
+    pub fn display_result(&self) -> Option<Frame> {
+        if matches!(self.state, State::Report | State::Ack) {
+            Some(self.output)
+        } else {
+            None
+        }
+    }
+    #[inline(always)]
+    pub fn display_idle(&self) -> bool {
+        matches!(self.state, State::Ready | State::Job)
+    }
     fn report(&mut self, values: Result<[i64; 4], u8>) {
         self.output = Frame::result(self.kind, self.sequence, values);
         self.state = State::Report;

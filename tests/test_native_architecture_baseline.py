@@ -69,7 +69,10 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
         bound_paths = {item["path"] for item in self.artifact["bound_sources"]}
-        self.assertEqual(len(self.artifact["bound_sources"]), 790)
+        self.assertEqual(len(self.artifact["bound_sources"]), 807)
+        self.assertTrue({"native/kernel/src/ps2.rs", "native/userspace/src/process/windows.rs",
+            "native/userspace/src/desktop/surface_rpc.rs", "native/userspace/src/desktop/surfaces.rs",
+            "runs/native-window-manager-readiness.json", "docs/native-window-manager.md"}.issubset(bound_paths))
         self.assertTrue({"native/kernel/src/display.rs", "native/userspace/src/bin/desktop_console.rs",
             "runtime/native_local_console.py", "tools/qualify_native_local_console.py",
             "runs/native-local-console-readiness.json", "Launch-Local-Console.cmd"}.issubset(bound_paths))

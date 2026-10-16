@@ -45,6 +45,47 @@ fn caller(m: admission::Member) -> Caller {
     Caller::new(m.id, m.image)
 }
 
+#[cfg(feature = "development-windows")]
+#[test]
+fn window_endpoint_is_distinct_and_apps_receive_no_display_or_receive_authority() {
+    let m = members();
+    let mut s = Space::new();
+    let mut scheduler = Scheduler::new(1).unwrap();
+    let a = s.admit_window_session(&mut scheduler, &m).unwrap();
+    assert_eq!(a.count, 9);
+    assert_eq!(a.handles[8], 0x100010003);
+    let own = s.resolve(2, a.handles[8], Rights::RECEIVE).unwrap();
+    let console = s.resolve(2, a.handles[2], Rights::RECEIVE).unwrap();
+    assert_ne!(own.object, console.object);
+    let child = capacity_members()[4];
+    s.attach(child.id, child.image).unwrap();
+    let send = s
+        .derive(m[2].id, a.handles[8], child.id, Rights::SEND)
+        .unwrap();
+    assert!(s.resolve(4, send, Rights::SEND).is_ok());
+    assert!(s.resolve(4, send, Rights::RECEIVE).is_err());
+    assert!(s.derive(child.id, send, m[3].id, Rights::SEND).is_err());
+    assert_eq!(s.desktop_authority(caller(child), a.handles[7], true), None);
+    s.detach(m[2].id).unwrap();
+    assert!(s.resolve(4, send, Rights::SEND).is_err());
+}
+#[cfg(feature = "development-windows")]
+#[test]
+fn last_window_endpoint_exhaustion_rolls_back_console_lease_and_scheduler() {
+    let m = members();
+    let mut s = Space::new();
+    let mut scheduler = Scheduler::new(1).unwrap();
+    for i in 3..ENDPOINTS {
+        s.objects[i].generation = u32::MAX;
+    }
+    assert!(s.admit_window_session(&mut scheduler, &m).is_err());
+    assert!(s.is_empty());
+    assert_eq!(scheduler.summary().runnable_count, 0);
+    for member in m {
+        assert!(!s.owns_console(member.id));
+    }
+}
+
 fn capacity_members() -> [admission::Member; 6] {
     core::array::from_fn(|i| {
         let mut m = members()[0];

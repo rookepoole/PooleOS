@@ -1,8 +1,14 @@
 //! Native local console policy. No kernel link, allocator, firmware calls or ports.
 #![forbid(unsafe_code)]
 use crate::console::Error;
+pub mod compositor;
 pub mod font;
 pub mod keyboard;
+pub mod mouse;
+pub mod publisher;
+pub mod surface_rpc;
+pub mod surfaces;
+pub mod windows;
 
 pub const MAX_COLUMNS: usize = 80;
 pub const MAX_ROWS: usize = 24;
@@ -69,6 +75,57 @@ pub struct Terminal<'a> {
     top: u16,
 }
 impl<'a> Terminal<'a> {
+    #[inline(always)]
+    pub fn window(cells: &'a mut [u8; MAX_COLUMNS * MAX_ROWS]) -> Self {
+        for cell in cells.iter_mut() {
+            *cell = core::hint::black_box(b' ');
+        }
+        Self {
+            cells,
+            columns: 48,
+            rows: 19,
+            column: 0,
+            row: 0,
+            left: 0,
+            top: 0,
+        }
+    }
+    #[inline]
+    pub fn relocate(&mut self, left: u16, top: u16) {
+        self.left = left;
+        self.top = top;
+    }
+    pub fn repaint(&self, canvas: &mut impl Canvas) -> Result<(), Error> {
+        for row in 0..self.rows {
+            for col in 0..self.columns {
+                self.cell(canvas, col, row)?;
+            }
+        }
+        self.cursor(canvas)
+    }
+    #[inline]
+    pub fn repaint_region(
+        &self,
+        canvas: &mut impl Canvas,
+        damage: windows::Rect,
+    ) -> Result<(), Error> {
+        let first_col = usize::from(damage.x.saturating_sub(self.left) / 12).min(self.columns);
+        let first_row = usize::from(damage.y.saturating_sub(self.top) / 16).min(self.rows);
+        let last_col = ((u32::from(damage.x) + u32::from(damage.w))
+            .saturating_sub(u32::from(self.left))
+            .div_ceil(12) as usize)
+            .min(self.columns);
+        let last_row = ((u32::from(damage.y) + u32::from(damage.h))
+            .saturating_sub(u32::from(self.top))
+            .div_ceil(16) as usize)
+            .min(self.rows);
+        for row in first_row..last_row {
+            for col in first_col..last_col {
+                self.cell(canvas, col, row)?;
+            }
+        }
+        self.cursor(canvas)
+    }
     #[inline(always)]
     pub fn new(
         width: u16,

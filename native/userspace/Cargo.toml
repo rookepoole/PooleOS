@@ -17,6 +17,24 @@ bench = false
 path = "src/lib.rs"
 
 [[bin]]
+name = "PooleWindowConsole"
+path = "src/bin/window_console.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleWindowText"
+path = "src/bin/window_text.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleWindowNumbers"
+path = "src/bin/window_numbers.rs"
+test = false
+bench = false
+
+[[bin]]
 name = "PooleDesktopConsole"
 path = "src/bin/desktop_console.rs"
 test = false

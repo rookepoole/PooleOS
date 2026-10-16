@@ -42,6 +42,7 @@ unsafe fn call(number: u64, handle: u64, address: u64, bytes: u64) -> (u64, u64)
 
 pub struct Console(u64);
 pub mod desktop;
+pub mod windows;
 pub struct ProcessCalls;
 impl crate::supervisor::Calls for ProcessCalls {
     #[inline(always)]
@@ -100,7 +101,7 @@ pub struct ConsoleCalls;
 impl crate::console_ipc::rpc::Calls for ConsoleCalls {
     #[inline(always)]
     fn invoke(&mut self, number: u64, handle: u64, wire: &mut [u8]) -> (u64, u64) {
-        if matches!(number, 9 | 13) && wire.is_empty() {
+        if matches!(number, 9 | 12 | 13) && wire.is_empty() {
             // SAFETY: PSABI1 discard/request-wait carry a handle and no user pointer.
             return unsafe { call(number, handle, 0, 0) };
         }

@@ -82,20 +82,26 @@ fn local_console_child_authority_is_distinct_caller_bound_and_revoked() {
 #[cfg(feature = "development-desktop")]
 #[test]
 fn local_console_syscall_shape_rejects_reserved_fields_and_wrong_version() {
-    for n in 21..=25 {
+    for n in 21..=if cfg!(feature = "development-windows") {
+        26
+    } else {
+        25
+    } {
         assert!(request(n, 1, 3, 0, 0, 0, 0).is_ok());
         assert_eq!(request(n, 2, 3, 0, 0, 0, 0), Err(Status::Version));
         assert_eq!(request(n, 1, 3, 0, 0, 0, 1), Err(Status::Arguments));
         if n != 24 {
             assert_eq!(request(n, 1, 3, 0, 0, 1, 0), Err(Status::Arguments));
         }
-        if matches!(n, 21 | 22 | 25) {
+        if matches!(n, 21 | 22 | 25 | 26) {
             assert_eq!(request(n, 1, 3, 1, 0, 0, 0), Err(Status::Arguments));
             assert_eq!(request(n, 1, 3, 0, 1, 0, 0), Err(Status::Arguments));
         }
     }
     assert!(request(24, 1, 3, 0, 0, u64::MAX, 0).is_ok());
+    #[cfg(not(feature = "development-windows"))]
     assert_eq!(request(26, 1, 0, 0, 0, 0, 0), Err(Status::Unknown));
+    assert_eq!(request(27, 1, 0, 0, 0, 0, 0), Err(Status::Unknown));
 }
 #[derive(Default)]
 struct Ports(Vec<(u16, Option<u8>)>);

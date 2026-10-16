@@ -99,9 +99,18 @@ pub unsafe fn bootstrap_files(
         image,
         priority: 16,
     });
+    #[cfg(not(feature = "development-windows"))]
     let admitted = s
         .admit_file_session(scheduler, &members)
         .map_err(|_| Error::State)?;
+    #[cfg(feature = "development-windows")]
+    let admitted = s
+        .admit_window_session(scheduler, &members)
+        .map_err(|_| Error::State)?;
+    #[cfg(feature = "development-windows")]
+    if admitted.count != 9 || admitted.handles[8] != 0x100010003 {
+        return Err(Error::State);
+    }
     quiesce()?;
     admitted.handles[..8].try_into().map_err(|_| Error::State)
 }

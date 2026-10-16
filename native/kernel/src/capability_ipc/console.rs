@@ -48,6 +48,22 @@ impl Space {
         scheduler: &mut crate::scheduler::Scheduler,
         members: &[admission::Member; 4],
     ) -> Result<admission::Admitted, admission::Error> {
+        self.admit_file_members(scheduler, members, false)
+    }
+    #[cfg(feature = "development-windows")]
+    pub fn admit_window_session(
+        &mut self,
+        scheduler: &mut crate::scheduler::Scheduler,
+        members: &[admission::Member; 4],
+    ) -> Result<admission::Admitted, admission::Error> {
+        self.admit_file_members(scheduler, members, true)
+    }
+    fn admit_file_members(
+        &mut self,
+        scheduler: &mut crate::scheduler::Scheduler,
+        members: &[admission::Member; 4],
+        windows: bool,
+    ) -> Result<admission::Admitted, admission::Error> {
         use admission::Step;
         self.admit(
             scheduler,
@@ -77,7 +93,8 @@ impl Space {
                     rights: Rights::SEND,
                 },
                 Step::Console { member: 2 },
-            ],
+                Step::Endpoint { member: 2 },
+            ][..if windows { 9 } else { 8 }],
         )
     }
     /// Trusted four-image launch: two separate endpoint pairs, one device owner.

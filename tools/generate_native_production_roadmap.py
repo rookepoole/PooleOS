@@ -15679,13 +15679,81 @@ def apply_cycle293(roadmap: dict, test_count: int) -> dict:
             "pointer/focus routing, software compositor and real native application views with fault/restart evidence",
             "accessible PooleGlass follows working native interaction, with reduced-motion/transparency and measured budgets",
             "retain root/retirement guards and independently close stage117/watchdog, interruptible jobs and all production gates"])
+    return apply_cycle294(roadmap, test_count)
+
+
+def apply_cycle294(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle294-native-windows.md"
+    contract = "docs/native-window-manager.md"
+    path = "runs/native-window-manager-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle293_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=294, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 294
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 294
+    gate["qualification_status"] = "native_window_preview_partial_pointer_and_canonical_pending"
+    baseline["native_local_console"]["evidence_status"] = "historical_cycle293"
+    gate["current_native_local_console_qualification"]["evidence_status"] = "historical_cycle293_not_current_candidate_qualification"
+    record = dict(cycle=294, contract_id="PWS1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("iso_built", "iso_sha256", "iso_byte_count", "host_kernel_tests", "host_python_tests",
+                "qemu_guest_runs", "virtualbox_guest_runs", "local_display_input", "native_on_screen_terminal",
+                "visible_virtualbox_verified", "graphical_desktop", "window_manager", "native_windowed_preview",
+                "isolated_application_surfaces", "mouse_actions_observed", "paced_pointer_movements_observed",
+                "combined_mouse_keyboard_qualified", "virtualbox_mouse_verified", "unpaced_burst_input_qualified",
+                "physical_keyboard_tested", "physical_hardware_tested", "production_ready", "signed",
+                "canonical_full_replay_performed", "merge_qualified", "legacy_kernel_entry_checks",
+                "virtualbox_full_diagnostic_failure_stage", "actual_virtualbox_watchdog_delivery_verified"):
+        record[key] = receipt[key]
+    baseline["native_window_manager"] = copy.deepcopy(record)
+    gate["current_native_window_manager_qualification"] = record
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=294, session_contract="PWS1", receipt_path=path, receipt_section="native_execution",
+        native_execution_status="window_preview_and_keyboard_pass_combined_pointer_timeout",
+        native_execution_replayed_this_cycle=True, native_execution_evidence_cycle=294,
+        shell_native_execution_replayed_this_cycle=True, shell_native_execution_evidence_cycle=294,
+        optical_iso_sha256=receipt["iso_sha256"], kernel_profile="opt_in_development_windows_127_of208_pages",
+        kernel_image_pages=127, kernel_capacity_pages=208, kernel_remaining_capacity_pages=81,
+        iso_built=True, local_keyboard_display=True, native_on_screen_terminal=True,
+        interface="native_CPL3_windows_isolated_result_surfaces_polled_PS2_with_COM2_mirror",
+        local_display_input=True, native_windowed_preview=True, window_manager=True,
+        graphical_desktop=False, complete_graphical_desktop=False, combined_mouse_keyboard_qualified=False,
+        virtualbox_usable=False, virtualbox_local_console_usable_on_qualified_host=True)
+    lane["stages"]["USI-4"] = "partial_native_windows_readonly_app_surfaces_mouse_and_lifecycle_gaps"
+    lane["stages"]["USI-5"] = "partial_unsigned_optical_five_qemu_one_visible_virtualbox_pass_combined_mouse_fail"
+    evidence = "Cycle294: PWS1 authenticated per-generation application surfaces, atomic endpoint/grant admission, bounded PS/2 auxiliary input and CPL3 window manager with focus/drag/minimize/restore/clipping.172 user tests per profile,24 program pairs,576/595/601/607 kernel tests per debug/release,103 focused Python tests. Five current QEMU and one visible VirtualBox guest pass; separate native keyboards each573 bytes. Combined pointer test fails240s after17 observed steps/50 paced movements and537 keys. Overall partial. " + checkpoint
+    gap = "PWS-G1 bounded complete pointer/focus qualification and VirtualBox mouse; G2 lifecycle/status/restart/resynchronization; G3 input buffering/drop accounting and starvation; G4 general app input/launch/resize; G5 atomic presentation and render/stack budgets; G6 accessible PooleGlass/Unicode/HiDPI/keyboard-only/reduced effects; G7 five legacy kernel-entry failures, default VirtualBox stage117/watchdog and interruptible jobs. Full robust microkernel, drivers/persistence/networking, PooleGlyph/PDC and all N0-N39 canonical/release gates remain. See " + contract
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N13", "N18", "N22", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        for subphase in phase["subphases"]:
+            if subphase["id"] in ("N29.2", "N29.3"):
+                subphase["status"] = "partial"
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-NATIVE-UI-001", "FLAG-N13-USERSPACE-ISO-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle294 is a partial native window preview, not a completed desktop. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Complete bounded pointer qualification and harden input and surface lifecycle",
+        phase_ids=["N13", "N14", "N16", "N18", "N22", "N27", "N29"],
+        entry_evidence=[checkpoint, path, contract, "docs/native-userspace-preview.md"],
+        exit_evidence=["bounded pointer/focus completion and native VirtualBox mouse with unchanged acceptance bounds",
+            "input buffering/drop accounting and surface retirement/restart/resynchronization tests",
+            "refresh legacy kernel-entry qualification without rewriting historical receipts or weakening assertions",
+            "general app input and accessible PooleGlass follow; retain stage117/watchdog, interruptible jobs and all production gates"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1533)
+    parser.add_argument("--test-count", type=int, default=1541)
     parser.add_argument("--status-date", default="2026-10-15")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

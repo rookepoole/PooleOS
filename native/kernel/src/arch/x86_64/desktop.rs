@@ -14,6 +14,24 @@ struct State {
 }
 static mut STATE: Option<State> = None;
 
+#[cfg(feature = "development-windows")]
+struct Ps2;
+#[cfg(feature = "development-windows")]
+impl poolekernel::ps2::Ports for Ps2 {
+    fn status(&mut self) -> u8 {
+        unsafe { inb(0x64) }
+    }
+    fn read(&mut self) -> u8 {
+        unsafe { inb(0x60) }
+    }
+    fn command(&mut self, value: u8) {
+        unsafe { super::outb(0x64, value) }
+    }
+    fn data(&mut self, value: u8) {
+        unsafe { super::outb(0x60, value) }
+    }
+}
+
 /// SAFETY: exclusive BSP/IF0, validated retained GOP identity mapping and boot root.
 pub unsafe fn initialize(spec: FramebufferSpec, root: u64) -> Result<(), ()> {
     let surface = Surface::new(spec).ok_or(())?;
@@ -23,6 +41,8 @@ pub unsafe fn initialize(spec: FramebufferSpec, root: u64) -> Result<(), ()> {
     {
         return Err(());
     }
+    #[cfg(feature = "development-windows")]
+    poolekernel::ps2::initialize(&mut Ps2)?;
     unsafe {
         *(&raw mut STATE) = Some(State {
             spec,
@@ -40,6 +60,11 @@ pub(super) fn operation(number: u64, argument: u64, value: u64, mask: u64) -> (S
         return (Status::Denied, 0);
     };
     match number {
+        #[cfg(feature = "development-windows")]
+        26 => match poolekernel::ps2::poll(&mut Ps2) {
+            Some(value) => (Status::Ok, value),
+            None => (Status::Again, 0),
+        },
         22 => (Status::Ok, s.surface.dimensions()),
         23 | 24 => match s.surface.command(
             argument,
@@ -73,7 +98,7 @@ pub(super) fn operation(number: u64, argument: u64, value: u64, mask: u64) -> (S
 }
 
 /// Never write GOP memory under a user CR3: that range is deliberately absent.
-/// The dispatcher drains accepted commands before retirement or the next task.
+/// The dispatcher drains commands after retirement restores the boot CR3.
 pub fn flush() -> Result<(), ()> {
     let s = unsafe { (&mut *(&raw mut STATE)).as_mut() }.ok_or(())?;
     if read_rflags() & (1 << 9) != 0 || unsafe { read_cr3() } != s.root {

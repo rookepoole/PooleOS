@@ -605,8 +605,14 @@ pub(crate) fn run(
             {
                 stop(34009, serial, debugcon);
             }
-            #[cfg(feature = "development-applications")]
+            #[cfg(all(
+                feature = "development-applications",
+                not(feature = "development-windows")
+            ))]
             let steps = poolekernel::development_apps::grants(peers[3].id, peers[1].id);
+            #[cfg(feature = "development-windows")]
+            let steps =
+                poolekernel::development_apps::window_grants(peers[3].id, peers[1].id, peers[2].id);
             #[cfg(not(feature = "development-applications"))]
             let steps = [];
             let p = &mut peers[j];
@@ -645,11 +651,7 @@ pub(crate) fn run(
                     .map_err(|_| poolekernel::capability_ipc::Error::Identity)
                 })
             });
-            let handle_index = if cfg!(feature = "development-applications") {
-                2
-            } else {
-                0
-            };
+            let handle_index = steps.len();
             if admitted.count != handle_index + 1
                 || p.id.generation != plan.sequence
                 || checked!(unsafe {
@@ -662,7 +664,7 @@ pub(crate) fn run(
             checked!(applications::handoff(
                 p,
                 &args[j],
-                &admitted.handles[..2],
+                &admitted.handles[..handle_index],
                 core,
                 &scheduler,
                 serial,

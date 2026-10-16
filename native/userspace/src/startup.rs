@@ -169,6 +169,29 @@ pub fn application(
     kind: crate::apps::Kind,
 ) -> Result<ApplicationBoot, Error> {
     let args = arguments::<5>(bytes, version)?;
+    application_args(args, kind)
+}
+#[inline(always)]
+pub fn window_application(
+    bytes: &[u8],
+    version: u64,
+    kind: crate::apps::Kind,
+) -> Result<(ApplicationBoot, u64), Error> {
+    let args = arguments::<6>(bytes, version)?;
+    let boot = application_args([args[0], args[1], args[2], args[3], args[4]], kind)?;
+    let surface = handle(args[5])?;
+    if surface == boot.control
+        || surface == boot.files
+        || surface >> 32 == 0
+        || surface & 0xffff0000 != 0x10000
+        || surface & 0xffff == 0
+    {
+        return Err(Error::Handle);
+    }
+    Ok((boot, surface))
+}
+#[inline(always)]
+fn application_args(args: [&[u8]; 5], kind: crate::apps::Kind) -> Result<ApplicationBoot, Error> {
     let role: &[u8] = match kind {
         crate::apps::Kind::Text => b"text-app",
         crate::apps::Kind::Numbers => b"numbers-app",
@@ -298,6 +321,33 @@ pub fn console_ipc(bytes: &[u8], version: u64, server: bool) -> Result<ConsoleIp
         peer: crate::console_ipc::Peer::from_packed(peer).map_err(|_| Error::Handle)?,
     })
 }
+#[inline(always)]
+pub fn window_console(bytes: &[u8], version: u64) -> Result<(ConsoleIpcBoot, u64), Error> {
+    let a = arguments::<6>(bytes, version)?;
+    if a[0] != b"window-console" {
+        return Err(Error::Role);
+    }
+    let port = handle(a[1])?;
+    let receive = handle(a[2])?;
+    let send = handle(a[3])?;
+    let surface = handle(a[5])?;
+    if port != 0x100040001
+        || receive != 0x100010001
+        || send != 0x100010002
+        || surface != 0x100010003
+    {
+        return Err(Error::Handle);
+    }
+    Ok((
+        ConsoleIpcBoot {
+            port: Some(port),
+            receive,
+            send,
+            peer: crate::console_ipc::Peer::from_packed(peer(a[4])?).map_err(|_| Error::Handle)?,
+        },
+        surface,
+    ))
+}
 
 #[inline(always)]
 pub fn decode(bytes: &[u8], version: u64, expected: Role) -> Result<Boot, Error> {
@@ -324,6 +374,56 @@ pub fn decode(bytes: &[u8], version: u64, expected: Role) -> Result<Boot, Error>
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn window_application_startup_requires_third_typed_distinct_endpoint() {
+        let a: [&[u8]; 6] = [
+            b"text-app",
+            b"0000000100010001",
+            b"0000000100000003",
+            b"0000000100010002",
+            b"0000000100000001",
+            b"0000000100010003",
+        ];
+        assert_eq!(
+            window_application(&block(a), 1, crate::apps::Kind::Text)
+                .unwrap()
+                .1,
+            0x100010003
+        );
+        assert!(application(&block(a), 1, crate::apps::Kind::Text).is_err());
+        for bad in [
+            b"0000000100010001",
+            b"0000000100010002",
+            b"0000000100080001",
+            b"0000000000010003",
+        ] {
+            let mut b = a;
+            b[5] = bad;
+            assert!(window_application(&block(b), 1, crate::apps::Kind::Text).is_err());
+        }
+        assert!(window_application(&block(a), 2, crate::apps::Kind::Text).is_err());
+    }
+    #[test]
+    fn window_console_startup_does_not_accept_legacy_roles_or_mixed_channels() {
+        let a: [&[u8]; 6] = [
+            b"window-console",
+            b"0000000100040001",
+            b"0000000100010001",
+            b"0000000100010002",
+            b"0000000100000003",
+            b"0000000100010003",
+        ];
+        assert!(window_console(&block(a), 1).is_ok());
+        assert!(console_ipc(&block(a), 1, true).is_err());
+        for i in [1, 2, 3, 5] {
+            let mut b = a;
+            b[i] = b"0000000200010003";
+            assert!(window_console(&block(b), 1).is_err());
+        }
+        let mut b = a;
+        b[0] = b"console-service";
+        assert!(window_console(&block(b), 1).is_err());
+    }
     use std::vec::Vec;
     fn block<const N: usize>(args: [&[u8]; N]) -> Vec<u8> {
         let mut bytes = std::vec![0; 96];

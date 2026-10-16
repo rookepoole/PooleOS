@@ -22,6 +22,51 @@ pub fn grants(shell: TaskId, files: TaskId) -> [Step; 2] {
         },
     ]
 }
+#[cfg(feature = "development-windows")]
+pub fn window_grants(shell: TaskId, files: TaskId, console: TaskId) -> [Step; 3] {
+    let base = grants(shell, files);
+    [
+        base[0],
+        base[1],
+        Step::Inherit {
+            source: console,
+            handle: 0x100010003,
+            member: 0,
+            rights: Rights::SEND,
+        },
+    ]
+}
+#[cfg(feature = "development-windows")]
+pub fn window_arguments(
+    slot: u16,
+    control: u64,
+    files: u64,
+    surface: u64,
+) -> Result<Arguments, Error> {
+    let _ = arguments(slot, control, files)?;
+    if (control == 0) != (surface == 0)
+        || (surface != 0
+            && (surface == control
+                || surface == files
+                || surface >> 32 == 0
+                || surface & 0xffff0000 != 0x10000
+                || surface & 0xffff == 0))
+    {
+        return Err(Error::Image);
+    }
+    Arguments::new(&[
+        if slot == 4 {
+            b"text-app"
+        } else {
+            b"numbers-app"
+        },
+        &hex(control),
+        b"0000000100000003",
+        &hex(files),
+        b"0000000100000001",
+        &hex(surface),
+    ])
+}
 fn hex(value: u64) -> [u8; 16] {
     let mut text = [b'0'; 16];
     for (i, byte) in text.iter_mut().enumerate() {
@@ -59,6 +104,40 @@ pub fn arguments(slot: u16, control: u64, files: u64) -> Result<Arguments, Error
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(feature = "development-windows")]
+    #[test]
+    fn window_catalogue_uses_three_distinct_send_grants_and_fixed_startup_geometry() {
+        let shell = TaskId::new(3, 1).unwrap();
+        let files = TaskId::new(1, 1).unwrap();
+        let console = TaskId::new(2, 1).unwrap();
+        let steps = window_grants(shell, files, console);
+        assert_eq!(&steps[..2], &grants(shell, files));
+        assert_eq!(
+            steps[2],
+            Step::Inherit {
+                source: console,
+                handle: 0x100010003,
+                member: 0,
+                rights: Rights::SEND
+            }
+        );
+        for slot in [4, 5] {
+            let placeholder = window_arguments(slot, 0, 0, 0).unwrap();
+            for g in [1u64, 2, u32::MAX as u64] {
+                let a = (g << 32) | 0x10001;
+                let b = (g << 32) | 0x10002;
+                let c = (g << 32) | 0x10003;
+                assert_eq!(
+                    window_arguments(slot, a, b, c).unwrap().bytes().len(),
+                    placeholder.bytes().len()
+                );
+                for bad in [0, a, b, (g << 32) | 0x80001] {
+                    assert!(window_arguments(slot, a, b, bad).is_err());
+                }
+            }
+            assert_eq!(placeholder.bytes().len(), if slot == 4 { 192 } else { 200 });
+        }
+    }
     #[test]
     fn actual_handles_keep_placeholder_geometry_across_all_generations() {
         for slot in [4, 5] {

@@ -140,7 +140,7 @@ def run_session(receipt: Path, work: Path, executable: Path, interaction, self_t
                 markers = session.extract_markers(log)
                 result['markers'] = markers
                 if self_test:
-                    summary = apps.validate_markers(markers, file_waits=report.get('file_waits', False))
+                    summary = apps.validate_markers(markers, file_waits=report.get('file_waits', False), windows=report.get('window_surfaces',False))
                     case = interaction.case
                     _, output = console.split_output(bytes(interaction.received))
                     if (interaction.payload[:interaction.sent] != case.sent or output != case.expected
@@ -154,7 +154,7 @@ def run_session(receipt: Path, work: Path, executable: Path, interaction, self_t
                     result.update(marker_summary=summary,
                         pbp1_transcript=transcript,
                         transcript_binding=qualification.shared.transfer.validate_transcript_binding(prefix, transcript),
-                        hostile_marker_cases_rejected=apps.negative_controls(markers, file_waits=report.get('file_waits', False)),
+                        hostile_marker_cases_rejected=apps.negative_controls(markers, file_waits=report.get('file_waits', False),windows=report.get('window_surfaces',False)),
                         sustained_window=interaction.sustained_evidence,
                         interaction=dict(nonce=case.nonce, input_hex=case.sent.hex(),
                             output_hex=bytes(interaction.received).hex(), exact=True))

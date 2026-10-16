@@ -8,6 +8,7 @@ PROGRAMS = [('PooleFileInit', 'INIT'), ('PooleAppFiles', 'COUNTER'),
             ('PooleConsoleService', 'CONSOLE'), ('PooleAppShell', 'CONSOLE_CLIENT'),
             ('PooleText', 'TEXT'), ('PooleNumbers', 'NUMBERS')]
 FIELDS = {
+    'SURFACE': 'task generation send entered dispatches',
     'WAIT': 'task generation calls queued claimed completed dispatches',
     'WAKE': 'task generation calls queued claimed completed dispatches',
     'CLAIMED': 'task generation waiting stale_wait_rejected service_task service_generation dispatches',
@@ -32,7 +33,8 @@ def parse(line: str, event: str) -> dict:
     return dict(zip(names, values))
 
 
-def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False) -> dict:
+def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False, windows: bool = False) -> dict:
+    if windows and (deferred_cleanup or file_controls or claimed_requester): raise ValueError('unqualified window control profile')
     if sum((deferred_cleanup,file_controls,claimed_requester)) > 1: raise ValueError('unqualified combined control modes')
     if len(markers) < 51: raise ValueError('incomplete application session')
     arm = transfer.TRANSFER_ARM.fullmatch(markers[23])
@@ -63,6 +65,7 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
     requesters, requester_pending = [], None
     claimed_waiters, claim_pending = [], None
     waiting, wake_pairs = {}, []
+    surfaces, surface_pending = [], False
     for marker in markers[31:]:
         if marker.startswith(cleanup.PREFIX):
             if not deferred_cleanup or pending is not None or complete_pending is not None:
@@ -103,10 +106,11 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
             cleanup_events.append(dict(event=event, **v))
             continue
         event = next((e for e in FIELDS if marker.startswith('POOLEOS:APPS '+e+' ')), None)
-        if event not in ('HANDOFF','ADMIT','RETIRE','RUN','REQUESTER','CLAIMED','WAIT','WAKE'): raise ValueError('unknown application event')
+        if event not in ('HANDOFF','ADMIT','RETIRE','RUN','REQUESTER','CLAIMED','WAIT','WAKE','SURFACE'): raise ValueError('unknown application event')
+        if event == 'SURFACE' and not windows: raise ValueError('surface outside window profile')
         if claim_pending is not None and event != 'REQUESTER': raise ValueError('claimed waiter lacks requester retirement')
         if requester_pending is not None and event != 'RETIRE': raise ValueError('requester not immediately retired')
-        if pending is not None and event != 'ADMIT': raise ValueError('handoff not immediately admitted')
+        if pending is not None and event not in (('SURFACE','ADMIT') if windows else ('ADMIT',)): raise ValueError('handoff not immediately admitted')
         if complete_pending is not None and event != 'RETIRE': raise ValueError('cleanup completion not immediately retired')
         v = parse(marker, event)
         dispatches = v['dispatches']
@@ -118,7 +122,12 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
             last_event = dispatches
             task = v['task']
             if not 2 <= task <= 5: raise ValueError('unexpected survivor retirement')
-        if event in ('WAIT','WAKE'):
+        if event == 'SURFACE':
+            if (pending is None or surface_pending or any(v[n] != pending[n] for n in ('task','generation','dispatches'))
+                or v['entered'] != 0 or v['send'] != (v['generation']<<32)|0x10003):
+                raise ValueError('surface lacks exact pre-entry handoff and attenuated grant')
+            surfaces.append(v); surface_pending=True
+        elif event in ('WAIT','WAKE'):
             if (file_controls or claimed_requester or task not in (4,5) or task not in live
                 or task in cleaning or v['generation'] != generation[task] or (bad_file and task == 5)
                 or v['calls'] < previous_calls[task]):
@@ -154,11 +163,13 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
             expected = generation[task]+1
             if expected > 2 or v['generation'] != expected or v['control'] != (expected<<32)|0x10001 or v['files'] != (expected<<32)|0x10002:
                 raise ValueError('handoff generation or grants')
-            if v['startup_files'] != v['files'] + ((1<<32) if bad_file and task == 5 else 0) or v['bytes'] != 176 or v['entered'] != 0:
+            if v['startup_files'] != v['files'] + ((1<<32) if bad_file and task == 5 else 0) or v['bytes'] != ((192 if task==4 else 200) if windows else 176) or v['entered'] != 0:
                 raise ValueError('startup handoff bytes or authority control')
             pending = v
             handoffs.append(v)
         elif event == 'ADMIT':
+            if surface_pending != windows: raise ValueError('window application missing surface grant')
+            surface_pending=False
             if pending is None or any(v[n] != pending[n] for n in ('task','generation','dispatches')):
                 raise ValueError('admission has no exact owned handoff')
             expected = generation[task]+1
@@ -247,6 +258,8 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
                 file_controls=file_controls, requester_deaths=requesters,
                 file_wait_pairs=wake_pairs,
                 bundled_files=False, iso_built=False, production_ready=False)
+    if windows:
+        result.update(surface_grants=surfaces, window_profile=True)
     if claimed_requester:
         result.update(claimed_requester=True,claimed_waiters=claimed_waiters,diagnostic_requester_is_useful_app=False,
                       kernel_injected_waiting_cancellation=True,late_reply_denial_asserted_by_native_service=True,
@@ -336,12 +349,12 @@ def file_control_scenario(nonce: str, *, bad_file: bool = False, claimed_request
     return shell.Scenario('claimed-requester-controls' if claimed_requester else 'file-request-controls',nonce,tuple(steps))
 
 
-def negative_controls(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False) -> int:
-    validate_markers(markers, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester,file_waits=file_waits)
+def negative_controls(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False, windows: bool = False) -> int:
+    validate_markers(markers, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester,file_waits=file_waits,windows=windows)
     cases = [markers[:i]+markers[i+1:] for i in range(len(markers)-1)]
     cases += [markers+[markers[-1]], markers+['POOLEOS:PANIC injected']]
     for i in range(29,len(markers)):
-        for field in ('production','cpl','grants','control','files','startup_files','bytes','entered',
+        for field in ('production','cpl','grants','control','files','startup_files','bytes','entered','send',
                       'handle','generation','sequence','released_pages','owned_pages','outcome','live_mask','cr3_writes',
                       'attempts','next','pages','admitted','dispatches','queued','claimed','completed','detached',
                       'waiting','stale_wait_rejected','service_task','service_generation'):
@@ -350,7 +363,7 @@ def negative_controls(markers: list[str], *, bad_file: bool = False, deferred_cl
                 changed[i] = re.sub(r' '+field+r'=[0-9]+', ' '+field+'='+str((1<<64)-1), changed[i])
                 cases.append(changed)
     for case in cases:
-        try: validate_markers(case, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester,file_waits=file_waits)
+        try: validate_markers(case, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester,file_waits=file_waits,windows=windows)
         except ValueError: continue
         raise ValueError('hostile application observation accepted')
     return len(cases)

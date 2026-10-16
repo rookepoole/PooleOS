@@ -58,7 +58,9 @@ fn abi_has_no_user_pointer_task_id_or_extra_argument() {
     }
     #[cfg(not(feature = "development-desktop"))]
     assert_eq!(request(21, 1, 0, 0, 0, 0, 0), Err(Status::Unknown));
+    #[cfg(not(feature = "development-windows"))]
     assert_eq!(request(26, 1, 0, 0, 0, 0, 0), Err(Status::Unknown));
+    assert_eq!(request(27, 1, 0, 0, 0, 0, 0), Err(Status::Unknown));
 }
 
 #[test]

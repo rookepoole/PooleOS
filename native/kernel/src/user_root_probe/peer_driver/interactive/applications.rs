@@ -111,6 +111,20 @@ pub(super) fn configure(args: &mut [Arguments; 6]) -> Result<(), ()> {
     .map_err(|_| ())?;
     args[4] = development_apps::arguments(4, 0, 0).map_err(|_| ())?;
     args[5] = development_apps::arguments(5, 0, 0).map_err(|_| ())?;
+    #[cfg(feature = "development-windows")]
+    {
+        args[2] = Arguments::new(&[
+            b"window-console",
+            b"0000000100040001",
+            b"0000000100010001",
+            b"0000000100010002",
+            b"0000000100000003",
+            b"0000000100010003",
+        ])
+        .map_err(|_| ())?;
+        args[4] = development_apps::window_arguments(4, 0, 0, 0).map_err(|_| ())?;
+        args[5] = development_apps::window_arguments(5, 0, 0, 0).map_err(|_| ())?;
+    }
     Ok(())
 }
 
@@ -124,7 +138,12 @@ pub(super) fn handoff(
     serial: &mut Com1,
     debugcon: &mut DebugCon,
 ) -> Result<(), ()> {
-    if grants.len() != 2
+    if grants.len()
+        != if cfg!(feature = "development-windows") {
+            3
+        } else {
+            2
+        }
         || arch::x86_64::user::active()
         || unsafe { arch::x86_64::read_cr3() } != core.page_table_root_physical
         || arch::x86_64::read_rflags() & ((1 << 9) | (1 << 10) | (1 << 18)) != 0
@@ -136,8 +155,13 @@ pub(super) fn handoff(
     } else {
         grants[1]
     };
+    #[cfg(not(feature = "development-windows"))]
     let replacement =
         development_apps::arguments(u16::from(p.id.slot), grants[0], files).map_err(|_| ())?;
+    #[cfg(feature = "development-windows")]
+    let replacement =
+        development_apps::window_arguments(u16::from(p.id.slot), grants[0], files, grants[2])
+            .map_err(|_| ())?;
     let startup = p.startup.as_ref().ok_or(())?;
     // Admission has committed. IF0 and the sole dispatcher prevent either parent
     // or child from observing it until the complete owned-byte handoff succeeds.
@@ -156,6 +180,19 @@ pub(super) fn handoff(
             ("files", grants[1]),
             ("startup_files", files),
             ("bytes", replacement.bytes().len() as u64),
+            ("entered", 0),
+            ("dispatches", u64::from(scheduler.summary().dispatch_count)),
+        ],
+    );
+    #[cfg(feature = "development-windows")]
+    record(
+        serial,
+        debugcon,
+        "SURFACE",
+        &[
+            ("task", u64::from(p.id.slot)),
+            ("generation", u64::from(p.id.generation)),
+            ("send", grants[2]),
             ("entered", 0),
             ("dispatches", u64::from(scheduler.summary().dispatch_count)),
         ],

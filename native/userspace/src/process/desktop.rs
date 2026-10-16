@@ -6,7 +6,7 @@ use crate::{
 };
 
 #[inline(always)]
-fn invoke(number: u64, handle: u64, argument: u64, value: u64, mask: u64) -> (u64, u64) {
+pub(super) fn invoke(number: u64, handle: u64, argument: u64, value: u64, mask: u64) -> (u64, u64) {
     let status: u64;
     let result: u64;
     // No pointers or memory copy: all arguments are bounded integer commands.
@@ -17,7 +17,7 @@ fn invoke(number: u64, handle: u64, argument: u64, value: u64, mask: u64) -> (u6
     }
     (status, result)
 }
-struct Display(u64);
+pub(super) struct Display(pub(super) u64);
 impl Display {
     #[inline]
     fn submit(&mut self, n: u64, r: u64, c: u64, m: u64) -> Result<(), Error> {

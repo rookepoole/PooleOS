@@ -14,6 +14,7 @@ sys.path.insert(0,str(ROOT))
 from runtime import native_app_session as apps, native_console, native_session, native_userspace_iso as optical
 from runtime import native_virtualbox as vbox, native_live_boot_handoff as handoff
 from runtime import native_local_console as frames
+from runtime import native_windows as window_frames
 from tools import qualify_native_app_session as qualification, qualify_native_user_entry as source
 from tools.launch_native_userspace_iso import check_preview, LOG_LIMIT
 from tools.launch_native_virtualbox import listener_socket
@@ -71,6 +72,8 @@ class Interaction(qualification.Interaction):
 def digest(path):return hashlib.sha256(path.read_bytes()).hexdigest().upper()
 
 def qemu_run(report,iso,work,interaction,result):
+    windows=report.get('window_surfaces',False)
+    pixels=window_frames if windows else frames
     shared=qualification.shared
     lock,base=shared.tier0.validate_contracts(ROOT)
     qemu=shared.tier0._require_workspace_tool_path(shared.tier0.DEFAULT_QEMU_ROOT,ROOT)
@@ -87,14 +90,16 @@ def qemu_run(report,iso,work,interaction,result):
             client.execute('screendump',{'filename':str(work/'initial.ppm'),'format':'ppm'})
             captured=True
     run,_,_=shared.boot._execute_once('native-keyboard',lock,optical.optical_profile(base),qemu,iso,work,240,
-        marker_validator=lambda m:apps.validate_markers(m,file_waits=True),marker_extractor=native_session.extract_markers,
+        marker_validator=lambda m:apps.validate_markers(m,file_waits=True,windows=windows),marker_extractor=native_session.extract_markers,
         hpet_msi=True,pause_on_completion=True,console_port=interaction.port,console_poll=interaction.poll,
-        capture_log_limit_bytes=LOG_LIMIT,guest_control=control,frame_validator=frames.inspect_ppm)
+        capture_log_limit_bytes=LOG_LIMIT,guest_control=control,frame_validator=pixels.inspect_ppm)
     if not captured:raise ValueError('initial frame missing')
     result.update(run=run,initial_frame_sha256=digest(work/'initial.ppm'),final_frame_sha256=digest(work/'pooleboot-frame.ppm'),
-        final_frame_pixels=frames.inspect_ppm((work/'pooleboot-frame.ppm').read_bytes()))
+        final_frame_pixels=pixels.inspect_ppm((work/'pooleboot-frame.ppm').read_bytes()))
 
 def vbox_run(report,iso,work,interaction,result,executable,visible=False):
+    windows=report.get('window_surfaces',False)
+    pixels=window_frames if windows else frames
     profile=json.loads((ROOT/'specs/native-virtualbox-preview-profile.json').read_bytes())
     hashes=vbox.verify_runtime(executable,profile,visible=visible)
     command=vbox.Command(executable)
@@ -122,13 +127,13 @@ def vbox_run(report,iso,work,interaction,result,executable,visible=False):
                 owner.pause()
                 log=vbox.serial_payload(vbox.bounded_read(path,LOG_LIMIT))
                 markers=native_session.extract_markers(log)
-                result['run']=dict(markers=markers,marker_summary=apps.validate_markers(markers,file_waits=True),pbp1_transcript=handoff.extract_transcript(log).summary)
+                result['run']=dict(markers=markers,marker_summary=apps.validate_markers(markers,file_waits=True,windows=windows),pbp1_transcript=handoff.extract_transcript(log).summary)
                 owner.checked('controlvm',owner.identity,'screenshotpng',work/'final.png')
                 result.update(initial_frame_sha256=digest(work/'initial.png'),final_frame_sha256=digest(work/'final.png'))
                 from PIL import Image
                 with Image.open(work/'final.png') as frame:
                     if not 320<=frame.width<=4096 or not 200<=frame.height<=2160:raise ValueError('invalid native frame size')
-                    result['final_frame_pixels']=frames.inspect_rgb(frame.width,frame.height,frame.convert('RGB').tobytes())
+                    result['final_frame_pixels']=pixels.inspect_rgb(frame.width,frame.height,frame.convert('RGB').tobytes())
                 return
             if interaction.step>=len(b'status text\rtext /readme.txt\rstart text\rstart numbers\r') and not captured:
                 owner.checked('controlvm',owner.identity,'screenshotpng',work/'initial.png');captured=True
@@ -155,10 +160,11 @@ def main():
     if not work.is_relative_to(ROOT/'outputs') or work==ROOT/'outputs':raise ValueError('new workspace output required')
     work.mkdir(parents=True,exist_ok=False)
     before=source.source_bindings();interaction=Interaction()
-    result=dict(contract_id='PDISPLAY1',cycle=293,status='fail',source_bindings=before,backend=args.backend,
+    windows=report.get('window_surfaces',False)
+    result=dict(contract_id='PWS1' if windows else 'PDISPLAY1',cycle=294 if windows else 293,status='fail',source_bindings=before,backend=args.backend,
         guest_bound_seconds=240,iso_sha256=digest(iso),serial_input_bytes=0,physical_keyboard_tested=False,
         visible=args.visible,
-        graphical_desktop=False,production_ready=False)
+        window_surfaces=windows,mouse_interaction_verified=False,graphical_desktop=False,production_ready=False)
     started=time.monotonic()
     try:
         if args.backend=='qemu':qemu_run(report,iso,work,interaction,result)
@@ -174,7 +180,7 @@ def main():
         qualification.shared.load.validate_oracle_binding(prefix['boot_prefix'],qualification.shared.load.inspect_media_bytes(disk),result['run']['pbp1_transcript'])
         result.update(status='pass',keyboard_input_bytes=interaction.keyboard_bytes,exact_interaction=True,
             sustained_window=interaction.sustained_evidence,framebuffer_changed=True,
-            hostile_marker_cases_rejected=apps.negative_controls(result['run']['markers'],file_waits=True))
+            hostile_marker_cases_rejected=apps.negative_controls(result['run']['markers'],file_waits=True,windows=windows))
     except Exception as e:result['failure']=f'{type(e).__name__}: {e}'
     finally:
         interaction.close()

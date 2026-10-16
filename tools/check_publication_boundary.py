@@ -96,6 +96,7 @@ ALLOWED_RUNS = {
     "runs/native-ioapic-watchdog-readiness.json",
     "runs/native-virtualbox-launcher-readiness.json",
     "runs/native-local-console-readiness.json",
+    "runs/native-window-manager-readiness.json",
     "runs/native-kernel-virtual-memory-readiness.json",
     "runs/native_model_readiness.json",
     "runs/native_microcode_readiness.json",

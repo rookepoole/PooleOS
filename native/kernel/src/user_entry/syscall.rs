@@ -276,6 +276,16 @@ pub fn request(
         19 => Err(Status::Arguments),
         20 if destination == 0 && bytes == 0 => Ok(Request::ProcessCompletion(source)),
         20 => Err(Status::Arguments),
+        #[cfg(feature = "development-windows")]
+        26 if destination == 0 && bytes == 0 => Ok(Request::Desktop {
+            number,
+            handle: source,
+            argument: 0,
+            value: 0,
+            mask: 0,
+        }),
+        #[cfg(feature = "development-windows")]
+        26 => Err(Status::Arguments),
         #[cfg(feature = "development-desktop")]
         21..=25 if matches!(number, 23 | 24) || (destination == 0 && bytes == 0) => {
             Ok(Request::Desktop {

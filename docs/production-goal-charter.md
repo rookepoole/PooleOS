@@ -7,9 +7,19 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 290
+Last roadmap reconciliation: PooleOS Cycle 294
 
-Cycle290 repairs bounded early UART detection and refreshes the QEMU-qualified
+Cycle294 implements capability-isolated application result surfaces, bounded PS/2
+mouse transport, and a native CPL3 window manager. Current optical and separate
+QEMU/VirtualBox native-keyboard checks pass; the combined mouse regression times
+out and remains failed. Overall readiness is partial. Next complete bounded
+pointer/focus qualification, input buffering and lifecycle recovery while
+continuing the complete robust microkernel. Five legacy kernel-entry test
+failures, VirtualBox stage117/watchdog and all canonical/release gates remain
+open. No N0-N39, PooleGlyph/PDC, accessible PooleGlass, signing or production
+requirement is waived. [Evidence](checkpoints/cycle294-native-windows.md).
+
+Historical Cycle290 repairs bounded early UART detection and refreshes the QEMU-qualified
 optical preview. Actual VirtualBox execution confirms ISO attachment, native
 boot and restored kernel diagnostics, but still fails at first-slice accounting;
 VirtualBox usability remains unqualified. Diagnose the original slice failure,
