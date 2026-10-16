@@ -1,23 +1,24 @@
 # Run The Native Window Preview
 
-Cycle296, 2026-10-15. Native PooleBoot + PooleKernel, not Linux.
+Cycle297, 2026-10-15. Native PooleBoot + PooleKernel, not Linux.
 This experimental build draws Terminal and two independent native application
 result windows inside the VM and accepts its keyboard. It is not a complete
 desktop, PooleGlass environment, installer or production release.
 
-Current window-profile replay passes four QEMU optical checks, both combined
-QEMU mouse/keyboard modes and one visible VirtualBox burst-keyboard guest.
-Each combined mode completes17 pointer steps/50 paced movements and573 keyboard
-characters within the unchanged240-second guest bound. Exact application
-recovery, pixels and sustained progress pass; VirtualBox also passes owned-VM
-cleanup. Cycle295's earlier timeouts remain preserved as historical failures.
-VirtualBox mouse remains unqualified; do not rely on it for everyday use yet.
+Both full visible VirtualBox mouse/keyboard modes pass: one-byte and four-character
+keyboard input, each with 17 pointer steps/41 observed movements at 1024x768.
+The challenge verifies 573 keyboard characters, a separate discarded focus-probe
+key, exact application/file/recovery results, pixels, sustained progress and owned
+cleanup within the unchanged 240-second guest bound. This extends the Cycle296
+QEMU result on unchanged guest binaries; fresh regressions are recorded in the
+checkpoint. Historical timeouts remain retained, not rewritten as successes.
 
 ## Start On This Machine
 
 Double-click `Launch-Local-Console.cmd` in the repository root. It opens a
 VirtualBox window using the qualified configuration automatically. Click inside
-the VM to type. Right Ctrl releases VirtualBox's keyboard capture. The host
+the VM to type. VirtualBox's Host Key (default Right Ctrl) releases captured
+keyboard/mouse input. The host
 terminal is only the launcher; it is not the guest's keyboard/input interface.
 
 Try commands one at a time:
@@ -53,7 +54,8 @@ temporary VM and retains its files. Cleanup after abrupt controller-process deat
 is still unqualified. Sessions have a 15-minute limit; output/logs are bounded.
 
 The input profile is US ASCII with Shift, Enter and Backspace. Mouse focus,
-dragging and minimize/taskbar restore are experimental. Keep Terminal focused to
+dragging and minimize/taskbar restore have bounded emulator qualification, not
+everyday reliability or physical-device qualification. Keep Terminal focused to
 type; focused result panes discard keys. No selection, history editing,
 scrollback, Unicode/IME, clipboard or interruptible jobs yet.
 Files are bundled and read-only; no data persists between sessions.
@@ -87,11 +89,13 @@ if a retained failure requires manual recovery; do not touch unrelated VMs.
 
 ## ISO And File Type
 
-Image: `outputs/cycle296-optical1/PooleOS-UserSpace-Preview.iso`.
+Image: `outputs/cycle297-optical1/PooleOS-UserSpace-Preview.iso`.
 
-Convenience copy: `PooleOS-Native-Windows-Cycle296.iso` in Downloads.
+Convenience copy: `PooleOS-Native-Windows-Cycle297.iso` in Downloads.
 Size 66109440 bytes; SHA256:
 `8B4D32976D7C85E44F7D14915013AE4AB3EE4E28B392F0073F4318C8089881A2`.
+The ISO bytes are identical to Cycle296. Cycle297 qualifies another input backend;
+it does not claim new guest features or newly executed user-program host tests.
 
 Windows may call this a "DVD Disc Image". It is still a real ISO9660 image with
 an EFI El Torito boot entry. It belongs in a VM's **optical-drive** picker, not
@@ -112,7 +116,7 @@ not open SDL, which previously crashed on this host. Both use the current pointe
 `outputs/native-userspace-preview.json`. The new visible entry point is:
 
 ```powershell
-.\Launch-Local-Console.cmd --receipt outputs/cycle296-optical1/receipt.json
+.\Launch-Local-Console.cmd --receipt outputs/cycle297-optical1/receipt.json
 ```
 
 With the configured Python runtime, `-B` and repository `PYTHONPATH`:
@@ -123,6 +127,8 @@ tools/qualify_native_local_console.py --receipt outputs/NEW-OPTICAL/receipt.json
 tools/qualify_native_local_console.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-KEYBOARD-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible --keyboard-batch 4
 tools/qualify_native_windows.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-QEMU
 tools/qualify_native_windows.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-BURST-QEMU --keyboard-batch 4
+tools/qualify_native_windows.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible
+tools/qualify_native_windows.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-BURST-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible --keyboard-batch 4
 ```
 
 Use unused directories. The program directory contains 24 independently rebuilt,
@@ -133,13 +139,17 @@ exact responses and real framebuffer pixels. A human typing is a separate check.
 The explicitly selected four-character mode groups make/break scancodes, never
 crosses a command delimiter and waits for exact output before the next group.
 It is not an unrestricted flood test or a replacement for default one-byte mode.
+Automated VirtualBox mouse qualification additionally checks the pinned installed
+PowerShell executable and exact COM registration. It does not change execution
+policy or move the host cursor. Normal interactive launching does not use that
+test helper; VirtualBox supplies the user's device input.
 
 ## Remaining Work
 
-Next: qualify VirtualBox pointer input and resolve desktop code capacity, then
+Next: resolve desktop code capacity, then
 surface lifecycle/restart recovery, native input overload, general application
-input and accessible PooleGlass styling. Both full QEMU pointer modes pass; this
-does not establish VirtualBox mouse or unrestricted input behavior. The console
+input and accessible PooleGlass styling. Bounded emulator pointer evidence does
+not establish unrestricted input or physical-device behavior. The console
 is40 code bytes below its four-page cap, so further compositor growth requires
 a service split or separately qualified loader capacity. Rendering work was
 reduced; code margin did not improve and no hardware speedup is claimed.
@@ -151,7 +161,7 @@ Production layout, hardware drivers, multi-host reproduction, complete runtime
 attestation, signing and the full canonical/merge gates remain open.
 See the [contract and tracked gaps](native-window-manager.md) and
 [input contract](native-window-input.md), [rendering contract](native-rendering.md)
-and [checkpoint](checkpoints/cycle296-native-rendering.md).
+and [checkpoint](checkpoints/cycle297-virtualbox-mouse.md).
 VirtualBox's [lifecycle controls](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/vboxmanage.html)
 and [optical/EFI setup](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/working-with-vms.html)
 describe the host-side operations.

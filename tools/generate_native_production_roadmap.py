@@ -15864,13 +15864,66 @@ def apply_cycle296(roadmap: dict, test_count: int) -> dict:
             "surface retirement/status notifications and compositor restart/resynchronization",
             "native overflow/reset behavior and bounded controller loss telemetry; independent VirtualBox mouse qualification",
             "retain all historical failures and complete microkernel, PooleGlyph/PDC, accessible PooleGlass and N0-N39 requirements"])
+    return apply_cycle297(roadmap, test_count)
+
+
+def apply_cycle297(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle297-virtualbox-mouse.md"
+    contract = "docs/native-virtualbox-mouse.md"
+    path = "runs/native-virtualbox-mouse-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle296_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=297, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 297
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 297
+    gate["qualification_status"] = "native_virtualbox_pointer_partial_canonical_pending"
+    baseline["native_rendering"]["evidence_status"] = "historical_cycle296"
+    gate["current_native_rendering_qualification"]["evidence_status"] = "historical_cycle296_not_current_host_harness_qualification"
+    record = dict(cycle=297, contract_id="PVBMOUSE1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("iso_built", "iso_sha256", "iso_byte_count", "host_python_tests", "qemu_guest_runs",
+                "virtualbox_guest_runs", "native_source_unchanged", "program_evidence_reused_from_cycle",
+                "standard_mouse_qualified", "burst_mouse_qualified", "virtualbox_standard_mouse_qualified",
+                "virtualbox_burst_mouse_qualified", "virtualbox_mouse_verified", "virtualbox_burst_keyboard_qualified",
+                "console_code_bytes", "console_code_margin", "kernel_image_pages", "production_ready", "signed",
+                "canonical_full_replay_performed", "merge_qualified"):
+        record[key] = receipt[key]
+    baseline["native_virtualbox_pointer"] = copy.deepcopy(record)
+    gate["current_native_virtualbox_pointer_qualification"] = record
+    baseline["user_space_integration"].update(cycle=297, receipt_path=path, receipt_section="native_execution",
+        native_execution_status="native_virtualbox_pointer_preview_see_exact_guest_statuses",
+        native_execution_evidence_cycle=297, shell_native_execution_evidence_cycle=297,
+        optical_iso_sha256=receipt["iso_sha256"], virtualbox_mouse_qualified=receipt["virtualbox_mouse_verified"],
+        virtualbox_standard_mouse_qualified=receipt["virtualbox_standard_mouse_qualified"],
+        virtualbox_burst_mouse_qualified=receipt["virtualbox_burst_mouse_qualified"])
+    evidence = ("Cycle297: bounded owned-VM relative mouse events through the installed COM API, exact identity/shared-session/unlock checks, no unknown-effect retry, scoped runtime pins and lossless actual framebuffer conversion. Native source/program bindings and image budgets are unchanged; Cycle296 program evidence is reused, not freshly executed host evidence. Current mode outcomes and failure history are explicit in PVBMOUSE1. " + checkpoint)
+    gap = ("Window service remains16344/16384 bytes with40 bytes free. Resolve service separation or separately qualified loader capacity before adding surface retirement/status, restart/resynchronization and general app input. Keep any failed pointer modes open; all mode results are separate from keyboard-only evidence. Native overload/reset telemetry, accessible PooleGlass, default stage117/watchdog, five legacy entry failures and all robust microkernel/PooleGlyph/PDC/N0-N39 gates remain. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N3", "N13", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-NATIVE-UI-001", "FLAG-N13-USERSPACE-ISO-001", "FLAG-N3-VIRTUALBOX-PREVIEW-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle297 does not close this flag. " + gap
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Resolve desktop code capacity and surface lifecycle" if receipt["virtualbox_mouse_verified"] else "Repair retained VirtualBox pointer failure and resolve desktop code capacity",
+        entry_evidence=[checkpoint, contract, path, "docs/native-window-manager.md"],
+        exit_evidence=["resolve any retained pointer-mode failures without weakening bounded input or ownership checks",
+            "service separation or independently qualified loader capacity preserving authority, image and stack bounds",
+            "surface retirement/status and compositor restart/resynchronization, then general application input",
+            "native overload/reset and loss telemetry; full microkernel, PooleGlyph/PDC, accessible PooleGlass and N0-N39 gates"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1547)
+    parser.add_argument("--test-count", type=int, default=1559)
     parser.add_argument("--status-date", default="2026-10-15")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

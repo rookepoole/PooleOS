@@ -358,6 +358,48 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle297-virtualbox-mouse.md",
+      "sha256": "8076F33974768676B3E6D674FCD55BFD1884EDDE78C1A2F27B002E1BC0030534",
+      "byte_count": 5620,
+      "line_count": 91
+    },
+    {
+      "path": "docs/native-virtualbox-mouse.md",
+      "sha256": "3E64F45FA964A339F61B814AFD8DBCA56D718A20E7330EDB1885B5037C7D9762",
+      "byte_count": 3419,
+      "line_count": 55
+    },
+    {
+      "path": "runs/native-virtualbox-mouse-readiness.json",
+      "sha256": "5950116DEACB8808739A9B97AB698BA721E5F265391DB54DDA0007D691E726BB",
+      "byte_count": 7201726,
+      "line_count": 152385
+    },
+    {
+      "path": "runtime/native_virtualbox_mouse.py",
+      "sha256": "F128DBC360027CF34588E7F13C3CEF62E0B8656C03EF41DDB5EBD73F835FFFBA",
+      "byte_count": 6534,
+      "line_count": 124
+    },
+    {
+      "path": "tools/native_virtualbox_mouse.ps1",
+      "sha256": "4235AEE604D6932662D216EDF275F191997F56C595C2FA893C87725BDDB4D249",
+      "byte_count": 3023,
+      "line_count": 62
+    },
+    {
+      "path": "tests/test_native_virtualbox_mouse.py",
+      "sha256": "668B1519D93C8E21C60BAA2EA5061212D77446F199F203D38507E08A0C1A20D0",
+      "byte_count": 9559,
+      "line_count": 162
+    },
+    {
+      "path": "specs/native-virtualbox-mouse-profile.json",
+      "sha256": "118F50C2665D15497524EBB0DA33AFFF8FD0F755F13DBA8B8A9134716FC33711",
+      "byte_count": 453,
+      "line_count": 9
+    },
+    {
       "path": "docs/checkpoints/cycle296-native-rendering.md",
       "sha256": "7C689E6B9040AA1A121FD64650039F508513047D61FD45E70BA993663247BAEF",
       "byte_count": 6031,
@@ -407,9 +449,9 @@
     },
     {
       "path": "docs/native-window-manager.md",
-      "sha256": "438D90C8A6046E504C1EEF4616969EA104606A363BA4D31FF0BC6E90275255FE",
-      "byte_count": 8416,
-      "line_count": 132
+      "sha256": "5B91EB3DDB1573457838DAA2F2A09D730C7F03781B5EDF37A31274D2A756DD9C",
+      "byte_count": 8486,
+      "line_count": 133
     },
     {
       "path": "runs/native-window-manager-readiness.json",
@@ -425,9 +467,9 @@
     },
     {
       "path": "tools/qualify_native_windows.py",
-      "sha256": "602A9EC0767A8F0298494751FEFEE5E5459A6BB5C3756BD1B0301CC7EB020323",
-      "byte_count": 9612,
-      "line_count": 160
+      "sha256": "2988157F273E6EB6308A3F052CD5E3C449ACD82C6A25DC978F9BAD3F2CC08CA4",
+      "byte_count": 11155,
+      "line_count": 183
     },
     {
       "path": "tests/test_native_windows.py",
@@ -527,9 +569,9 @@
     },
     {
       "path": "tools/qualify_native_local_console.py",
-      "sha256": "8E174350A934AB33F868F42961E8DAFE7C3CDC4879327541352C098B877CD086",
-      "byte_count": 13050,
-      "line_count": 214
+      "sha256": "F00E2193F343D1E8520C57D92A9EC880551E04D23D7C61A792460CBACCDFE2D7",
+      "byte_count": 13117,
+      "line_count": 215
     },
     {
       "path": "tests/test_native_local_console.py",
@@ -659,9 +701,9 @@
     },
     {
       "path": "docs/native-userspace-preview.md",
-      "sha256": "2402FF2790F3CAF454A8B79D438325D61A669B6D47CB1208CC51F1E2F8B84849",
-      "byte_count": 8816,
-      "line_count": 157
+      "sha256": "80B387CDAD4E9E87E96525EA098AB384A52F3B25F553ED7DD413DFA1CFA33BDD",
+      "byte_count": 9742,
+      "line_count": 167
     },
     {
       "path": "runs/native-userspace-iso-readiness.json",
@@ -833,8 +875,8 @@
     },
     {
       "path": "tools/qualify_native_app_session.py",
-      "sha256": "EAD35E3513D3D6543A57BC3DA5D0B51394D86EE6D27080C1D74A28B5E263C60B",
-      "byte_count": 20970,
+      "sha256": "DAD596642927D3BF478872E47CE1AE11375B3DC2FB5B79550CE59C0434886EF0",
+      "byte_count": 20979,
       "line_count": 276
     },
     {
@@ -2741,8 +2783,8 @@
     },
     {
       "path": "docs/native-userspace-integration-iso.md",
-      "sha256": "A1823D42FE4907FB16F9BD5136B57C5A4F98634F70A271E9F72F4D7DA16DA52D",
-      "byte_count": 54595,
+      "sha256": "FED4168676E5F4798D2EAF6EF8AB7A743FCBAEFA875B81B104CF59178B97B1D1",
+      "byte_count": 54527,
       "line_count": 810
     },
     {
@@ -2759,9 +2801,9 @@
     },
     {
       "path": "tools/qualify_native_user_entry.py",
-      "sha256": "C2C0AD2398449424EF39AEE95D97EF91B276078FA3677E42E732D42B9759AD6D",
-      "byte_count": 24972,
-      "line_count": 369
+      "sha256": "F37FA28652E57CFB38FE8D67A317EAF0ECA774ADE6B7E16E83394836CBC36BDA",
+      "byte_count": 25120,
+      "line_count": 372
     },
     {
       "path": "runs/native-user-entry-readiness.json",
@@ -4091,15 +4133,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "700B05A8B571405E9C652D42CD907282989D7A6DB538847BB6102301BF01FB00",
-      "byte_count": 162126,
-      "line_count": 2212
+      "sha256": "8905EBDB47891ED96C950EB5E04D6B750D1E89ED02FC6BC6E5BCF9BDD8D884D6",
+      "byte_count": 162969,
+      "line_count": 2224
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "87AF9595F43561103E38418E371E8C0FBD07B86D9F057781E7641BD151C09F23",
-      "byte_count": 643110,
-      "line_count": 6648
+      "sha256": "4385D6504BB8A8F342A78F119F578C348E5344D3708A167900B3FF189D654587",
+      "byte_count": 645954,
+      "line_count": 6691
     },
     {
       "path": "docs/publication-boundary.md",

@@ -7,9 +7,21 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 296
+Last roadmap reconciliation: PooleOS Cycle 297
 
-Cycle296 preserves exact glyph and framebuffer pixels while removing unnecessary
+Cycle297 adds a bounded, identity-checked VirtualBox mouse verification path.
+Both complete mouse/keyboard modes pass unchanged bounds, including native
+focus/drag/minimize/restore, app recovery, exact output and owned cleanup.
+Guest source and binaries remain unchanged; this does not claim new kernel or
+language implementation. Six QEMU and three visible VirtualBox checks, 118 focused
+checks and 404 overlapping metadata/integration checks pass. Historical receipts
+and failed host attempts remain retained; no full canonical replay is claimed.
+Next resolve the desktop code-capacity constraint, then surface lifecycle and
+general application input. Every full microkernel, PooleGlyph/PDC, accessible
+PooleGlass, N0-N39, canonical and release requirement remains required.
+[Evidence](checkpoints/cycle297-virtualbox-mouse.md).
+
+Historical Cycle296 preserves exact glyph and framebuffer pixels while removing unnecessary
 blank-terminal drawing calls. Both combined QEMU mouse/keyboard modes now pass
 unchanged bounds, alongside windowed optical and visible VirtualBox keyboard
 checks. Four legacy-terminal optical checks, fresh kernel host profiles, 107

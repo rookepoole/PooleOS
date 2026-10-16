@@ -123,7 +123,7 @@ def main():
         parser.error('workspace output paths required')
     storage = require_space(work); work.mkdir(parents=True, exist_ok=False)
     before = source.source_bindings()
-    report = dict(cycle=296 if args.windows or args.desktop else 292 if args.optical else 287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
+    report = dict(cycle=297 if args.windows else 296 if args.desktop else 292 if args.optical else 287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
                   contract_id=optical.CONTRACT if args.optical else 'PCLAIM1' if args.claimed_requester else 'PCLEANUP3' if args.exhaust_cleanup else 'PFILECONTROL1' if args.file_controls else 'PAPPRECOVERY1' if args.deferred_cleanup else 'PAPPSESSION1',
                   optical=args.optical, optical_images={}, file_waits=args.optical,
                   local_console=args.desktop or args.windows, window_surfaces=args.windows, graphical_desktop=False,

@@ -1,6 +1,6 @@
 # Native User-Space Integration ISO
 
-Status: unsigned one-BSP native window preview, partial, Cycle296, 2026-10-15.
+Status: unsigned one-BSP native window preview, partial, Cycle297, 2026-10-15.
 Terminal and two isolated application result panes render inside the VM; see
 [launch instructions](native-userspace-preview.md). This is an early native
 windowing system, not a complete graphical desktop or accessible PooleGlass.
@@ -12,9 +12,10 @@ The exact visible VirtualBox application profile now passes native keyboard,
 application and framebuffer checks. Default VirtualBox diagnostics still fail
 stage117, and watchdog delivery remains separately unqualified. Track
 `FLAG-N3-VIRTUALBOX-PREVIEW-001`; a passing application profile does not clear
-those diagnostic failures. Both combined QEMU pointer/keyboard modes now pass
-their unchanged bounds after pixel-equivalent rendering changes;
-VirtualBox mouse, physical devices and unrestricted input remain unqualified.
+those diagnostic failures. Both VirtualBox pointer/keyboard modes now pass their
+unchanged bounds, extending the Cycle296 QEMU evidence without changing guest
+binaries. Physical devices, unrestricted input and complete window lifecycle
+recovery remain unqualified.
 
 ## Scope And Boundaries
 
@@ -57,14 +58,13 @@ seeing failures. Ship explicit limitations and a documented VM launch command.
 | USI-1 User entry and containment | N7-N9, N12, N13.1-4, N13.6 | Real ring-3 entry, controlled kernel entry/return, private address spaces, timer recovery, and a contained application fault | Cycle249:17 native survival cases, bounded lost-sample retirement and cleanup retry; general admission/quarantine, physical clock, broader watchdog and stack/exception qualification remain |
 | USI-2 Capabilities and IPC | N13.5-7, N14.1-3, N14.5-7 | Two isolated tasks communicate only through granted handles; stale handles, oversized messages, cancellation, dead peers, and quota failures reject safely | Partial: bounded IPC/admission, epoch-bound expiry and sustained dispatch pass. Efficient idle and general resource policy remain |
 | USI-3 Runtime and services | N16, N20, N21 | Real init, executable loading, service startup/restart, and a confined console/input service | Cycle287 partial: claimed waiting requester cancellation and service survival qualify. Cycle286 delayed/exhausted cleanup remains historical; general supervision, races, trust and idle remain |
-| USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle296 partial: native Terminal, isolated result surfaces, bounded FIFO and both QEMU mouse/keyboard modes pass; VirtualBox mouse, application input/lifecycle and native overload recovery remain |
-| USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Cycle296 partial: reproducible unsigned windowed ISO and exact QEMU/VirtualBox evidence; production layout/signing/hardware, VirtualBox pointer qualification and generalized stress remain |
+| USI-4 Shell and applications | N18, N19, N22, N30 | Interactive user-space shell, read-only bundled files, two applications, observable fault containment | Cycle297 partial: both VirtualBox mouse/keyboard modes pass; native Terminal/result surfaces remain limited by code capacity, application input/lifecycle and native overload recovery |
+| USI-5 Optical integration | N5, N36, N38, N39 | Corrected ISO packaging, fresh end-to-end guest interaction, sustained-session and fault/recovery tests | Cycle297 partial: byte-identical unsigned ISO and current optical/VirtualBox pointer evidence; production layout/signing/hardware and generalized stress remain |
 
 ### Immediate Next Move
 
-Current: [Cycle296 native rendering](checkpoints/cycle296-native-rendering.md).
-Both QEMU pointer modes pass; preserve Cycle295's failed attempts as historical.
-Qualify VirtualBox pointer/focus/drag/minimize/restore on the exact owned VM.
+Current: [Cycle297 VirtualBox pointer input](checkpoints/cycle297-virtualbox-mouse.md).
+Both VirtualBox pointer modes pass on the exact owned VM; retain older failures.
 The four-page console has only40 code bytes free, less than Cycle295; resolve
 service separation or separately verified loader capacity before growing it.
 Then harden surface retirement/status and restart/resynchronization, qualify

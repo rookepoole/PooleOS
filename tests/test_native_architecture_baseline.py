@@ -69,7 +69,11 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
         bound_paths = {item["path"] for item in self.artifact["bound_sources"]}
-        self.assertEqual(len(self.artifact["bound_sources"]), 814)
+        self.assertEqual(len(self.artifact["bound_sources"]), 821)
+        self.assertTrue({"docs/checkpoints/cycle297-virtualbox-mouse.md", "docs/native-virtualbox-mouse.md",
+            "runs/native-virtualbox-mouse-readiness.json", "runtime/native_virtualbox_mouse.py",
+            "tools/native_virtualbox_mouse.ps1", "tests/test_native_virtualbox_mouse.py",
+            "specs/native-virtualbox-mouse-profile.json"}.issubset(bound_paths))
         self.assertTrue({"docs/checkpoints/cycle296-native-rendering.md", "docs/native-rendering.md",
             "runs/native-rendering-readiness.json"}.issubset(bound_paths))
         self.assertTrue({"native/userspace/src/desktop/input.rs", "docs/native-window-input.md",

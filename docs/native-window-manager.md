@@ -2,7 +2,8 @@
 
 Historical Cycle294 baseline, 2026-10-15. Partial development evidence, not production.
 The PWS1 authority contract remains in force. Current successor evidence is in
-[bounded input](native-window-input.md) and [rendering](native-rendering.md);
+[bounded input](native-window-input.md), [rendering](native-rendering.md) and
+[owned VirtualBox pointer qualification](native-virtualbox-mouse.md);
 the Cycle294 measurements below are historical, not current-source qualification.
 This opt-in `development-windows` profile extends the native desktop profile;
 it does not replace the default kernel or its diagnostics. Window composition

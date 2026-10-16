@@ -24,6 +24,13 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle297-virtualbox-mouse.md",
+    "docs/native-virtualbox-mouse.md",
+    "runs/native-virtualbox-mouse-readiness.json",
+    "runtime/native_virtualbox_mouse.py",
+    "tools/native_virtualbox_mouse.ps1",
+    "tests/test_native_virtualbox_mouse.py",
+    "specs/native-virtualbox-mouse-profile.json",
     "docs/checkpoints/cycle296-native-rendering.md",
     "docs/native-rendering.md",
     "runs/native-rendering-readiness.json",

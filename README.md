@@ -11,24 +11,24 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle296 reduces native drawing work while
-preserving exact pixels. Terminal and two capability-isolated application result
-surfaces run under a native user-space window manager. Both full QEMU mouse and
-keyboard modes now pass, including focus, dragging, minimize/restore, file reads,
-and application fault/restart. Visible VirtualBox keyboard checks also pass;
-VirtualBox mouse remains unqualified. Use
+**Current development checkpoint:** Cycle297 qualifies visible VirtualBox mouse
+input in both one-byte and burst-keyboard modes, including focus, dragging,
+minimize/restore, exact application/file results, fault/restart and owned cleanup.
+Terminal and two capability-isolated result surfaces run under the native
+user-space window manager. The guest binaries are unchanged from Cycle296;
+this is additional device-integration evidence, not new guest code. Use
 `Launch-Local-Console.cmd` on the qualified development host for a VM window.
 This is an unsigned one-CPU native window preview with read-only result panes,
 not a complete desktop, PooleGlass environment, installer or production release.
 [Run the preview](docs/native-userspace-preview.md).
-[Evidence](docs/checkpoints/cycle296-native-rendering.md).
+[Evidence](docs/checkpoints/cycle297-virtualbox-mouse.md).
 The separate default diagnostic kernel still fails at VirtualBox stage117;
 actual watchdog delivery there remains unqualified. This working application
 profile does not close those gates. Windows' "DVD Disc Image" label does not
 mean the optical `.iso` is the wrong format. The launcher supplies the tested
 configuration, including the still-required COM2 mirror.
-Next: qualify VirtualBox pointer input and resolve the window service's tight code
-budget, then surface lifecycle/recovery, general app input and useful applications.
+Next: resolve the window service's tight code budget, then surface
+lifecycle/recovery, general app input and useful applications.
 Complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass work continues.
 
 **Historical development checkpoint:** Cycle287 verifies cancellation of native apps

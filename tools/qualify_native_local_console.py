@@ -113,7 +113,7 @@ def qemu_run(report,iso,work,interaction,result):
     result.update(run=run,initial_frame_sha256=digest(work/'initial.ppm'),final_frame_sha256=digest(work/'pooleboot-frame.ppm'),
         final_frame_pixels=pixels.inspect_ppm((work/'pooleboot-frame.ppm').read_bytes()))
 
-def vbox_run(report,iso,work,interaction,result,executable,visible=False):
+def vbox_run(report,iso,work,interaction,result,executable,visible=False,control=None):
     windows=report.get('window_surfaces',False)
     pixels=window_frames if windows else frames
     profile=json.loads((ROOT/'specs/native-virtualbox-preview-profile.json').read_bytes())
@@ -153,6 +153,7 @@ def vbox_run(report,iso,work,interaction,result,executable,visible=False):
                 return
             if interaction.step>=len(b'status text\rtext /readme.txt\rstart text\rstart numbers\r') and not captured:
                 owner.checked('controlvm',owner.identity,'screenshotpng',work/'initial.png');captured=True
+            if control is not None:control(owner,log)
             time.sleep(.01)
         raise TimeoutError('native keyboard session exceeded 240 seconds')
     finally:
@@ -179,7 +180,7 @@ def main():
     if not work.is_relative_to(ROOT/'outputs') or work==ROOT/'outputs':raise ValueError('new workspace output required')
     work.mkdir(parents=True,exist_ok=False)
     before=source.source_bindings();interaction=Interaction(args.keyboard_batch)
-    result=dict(contract_id='PWS1' if windows else 'PDISPLAY1',cycle=296,status='fail',source_bindings=before,backend=args.backend,
+    result=dict(contract_id='PWS1' if windows else 'PDISPLAY1',cycle=297,status='fail',source_bindings=before,backend=args.backend,
         guest_bound_seconds=240,iso_sha256=digest(iso),serial_input_bytes=0,physical_keyboard_tested=False,
         visible=args.visible,
         window_surfaces=windows,mouse_interaction_verified=False,graphical_desktop=False,production_ready=False)

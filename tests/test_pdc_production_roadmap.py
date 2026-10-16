@@ -198,8 +198,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 296)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1547)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 297)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1559)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -239,8 +239,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "native_rendering_partial_canonical_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 296)
+        self.assertEqual(current["qualification_status"], "native_virtualbox_pointer_partial_canonical_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 297)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -6863,7 +6863,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
         self.assertEqual(record['receipt_sha256'],'BEE1CDEF65E2B3E3983CE1D981DDA91BB69EDF45208AF1A5D160D35832F545EB')
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(288,'PUSIISO1','pass'))
-        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),965)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),969)
         self.assertEqual((r['guest_runs'],r['iso_byte_count']),(6,66109440))
         self.assertEqual(r['iso_sha256'],'1E4752E3D45972CEA7711AF443C15EFC22CD82558F1A975B6B676ADF6C7841AE')
         prior=json.loads((ROOT/'runs/native-claimed-requester-readiness.json').read_bytes())
@@ -6902,7 +6902,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertTrue(c['source_unchanged'] and c['owner_report_unchanged'])
         lane=self.roadmap['baseline']['user_space_integration']
         self.assertTrue(lane['optical_iso_built'] and lane['continue_full_microkernel_after_iso'])
-        self.assertEqual(self.roadmap['immediate_next_move']['title'],'Qualify VirtualBox pointer input and resolve desktop code capacity')
+        pointer=self.roadmap['baseline']['native_virtualbox_pointer']
+        self.assertEqual(self.roadmap['immediate_next_move']['title'],
+            'Resolve desktop code capacity and surface lifecycle' if pointer['virtualbox_mouse_verified'] else
+            'Repair retained VirtualBox pointer failure and resolve desktop code capacity')
 
     def test_cycle289_file_wait_is_native_bound_and_preserves_the_optical_preview(self) -> None:
         from runtime import native_app_session as apps, native_userspace_iso as optical, native_shell
@@ -7337,7 +7340,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         raw=(ROOT/record['receipt_path']).read_bytes();r=json.loads(raw)
         self.assertEqual(record['receipt_sha256'],hashlib.sha256(raw).hexdigest().upper())
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(295,'PWINPUT1','partial'))
-        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),965)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),969)
         self.assertNotEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),84)
         self.assertEqual(len(r['program_build']['programs']),24)
         self.assertEqual(r['program_build']['host_tests'],[dict(profile=m,tests_passed=178) for m in ('debug','release')])
@@ -7397,7 +7400,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         raw=(ROOT/record['receipt_path']).read_bytes();r=json.loads(raw)
         self.assertEqual(record['receipt_sha256'],hashlib.sha256(raw).hexdigest().upper())
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(296,'PRENDER1','partial'))
-        self.assertEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),965)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(r['source_bindings']),965)
         self.assertEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),84)
         self.assertEqual(r['program_build']['host_tests'],[dict(profile=m,tests_passed=182) for m in ('debug','release')])
         self.assertTrue(r['program_build']['direct_byte_equality'])
@@ -7453,6 +7456,67 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(r['virtualbox_burst_keyboard_qualified'])
         old=(ROOT/'runs/native-window-input-readiness.json').read_bytes()
         self.assertEqual(hashlib.sha256(old).hexdigest().upper(),r['historical_cycle295_receipt_sha256'])
+
+    def test_cycle297_pointer_binds_owned_modes_and_unchanged_native_programs(self) -> None:
+        from tools.qualify_native_user_entry import source_bindings
+        from tools.qualify_native_user_programs import bindings
+        from tools.qualify_native_local_console import Interaction
+        from unittest.mock import patch
+        from runtime import native_app_session as apps,native_console,native_userspace_iso as optical
+        record=self.roadmap['baseline']['native_virtualbox_pointer']
+        raw=(ROOT/record['receipt_path']).read_bytes();r=json.loads(raw)
+        self.assertEqual(record['receipt_sha256'],hashlib.sha256(raw).hexdigest().upper())
+        self.assertEqual((r['cycle'],r['contract_id'],r['status']),(297,'PVBMOUSE1','partial'))
+        self.assertEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),969)
+        parent_raw=(ROOT/'runs/native-rendering-readiness.json').read_bytes();parent=json.loads(parent_raw)
+        self.assertEqual(hashlib.sha256(parent_raw).hexdigest().upper(),r['historical_cycle296_receipt_sha256'])
+        self.assertTrue(r['native_source_unchanged']);self.assertEqual(r['program_evidence_reused_from_cycle'],296)
+        self.assertEqual(r['program_build'],parent['program_build'])
+        self.assertEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),84)
+        self.assertEqual(r['iso_sha256'],parent['iso_sha256'])
+        self.assertEqual((r['kernel_image_pages'],r['kernel_capacity_pages'],r['kernel_guarded_stack_pages']),(128,208,36))
+        self.assertEqual((r['console_code_bytes'],r['console_code_margin']),(16344,40))
+        self.assertEqual(r['native_execution']['source_bindings'],source_bindings())
+        self.assertEqual(r['native_execution']['status'],'pass')
+        for guest in r['input_guests']:
+            self.assertEqual(guest['source_bindings'],source_bindings())
+            self.assertTrue(guest['source_unchanged'] and guest['iso_unchanged'])
+            self.assertEqual(guest['guest_bound_seconds'],240)
+            if guest['status']!='pass':
+                self.assertIn('failure',guest);continue
+            self.assertEqual((guest['keyboard_input_bytes'],guest['serial_input_bytes']),(573,0))
+            summary=apps.validate_markers(guest['run']['markers'],file_waits=True,windows=True)
+            self.assertEqual(json.loads(json.dumps(summary)),guest['run']['marker_summary'])
+            w=guest['sustained_window'];self.assertEqual(optical.validate_sustained(summary['samples'],w['first_dispatch'],w['last_dispatch']),w)
+            with patch('tools.qualify_native_local_console.secrets.token_hex',return_value=guest['nonce']):case=Interaction(guest['keyboard_batch'])
+            try:
+                self.assertEqual(bytes.fromhex(guest['input_hex']),case.case.sent)
+                self.assertEqual(native_console.split_output(bytes.fromhex(guest['output_hex']))[1],case.case.expected)
+                if guest['keyboard_batch']==4:
+                    case.inject=lambda codes:None
+                    while case.step<len(case.case.steps):case.send_ready()
+                    self.assertEqual(case.batches,guest['batches'])
+            finally:case.close()
+            if guest['backend']=='virtualbox':
+                self.assertTrue(guest['runtime_unchanged'])
+                self.assertTrue(all(guest['cleanup'][k] for k in ('stopped','unregistered','prior_registrations_unchanged')))
+                self.assertEqual(guest['cleanup']['errors'],[])
+            if guest.get('mouse_interaction_verified'):
+                self.assertEqual(len(guest['pointer_steps']),17)
+                if guest['backend']=='virtualbox':
+                    api=guest['pointer_api'];self.assertFalse(api['failed'] or api['host_cursor_moved'])
+                    self.assertEqual((api['api_bound_seconds'],api['maximum_events']),(5,96))
+                    self.assertEqual(len(api['events']),len(guest['movement_samples']))
+                    for i,event in enumerate(api['events']):
+                        self.assertEqual(event['sequence'],i);self.assertTrue(event['relative'] and event['unlocked'])
+                        self.assertLessEqual(max(abs(event['dx']),abs(event['dy'])),96)
+        for mode,key in ((1,'virtualbox_standard_mouse_qualified'),(4,'virtualbox_burst_mouse_qualified')):
+            self.assertEqual(r[key],any(g['backend']=='virtualbox' and g['status']=='pass' and
+                g.get('mouse_interaction_verified') and g['keyboard_batch']==mode for g in r['input_guests']))
+        self.assertEqual(r['virtualbox_mouse_verified'],r['virtualbox_standard_mouse_qualified'] and r['virtualbox_burst_mouse_qualified'])
+        self.assertTrue(r['standard_mouse_qualified'] and r['burst_mouse_qualified'] and r['virtualbox_burst_keyboard_qualified'])
+        for key in ('native_overflow_reset_qualified','production_ready','signed','canonical_full_replay_performed','merge_qualified'):
+            self.assertFalse(r[key],key)
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]

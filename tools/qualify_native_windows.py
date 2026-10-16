@@ -1,4 +1,4 @@
-"""Device-input qualification of the opt-in native window profile (QEMU)."""
+"""Device-input qualification of the native window profile in owned guests."""
 from __future__ import annotations
 import argparse, json, time
 from pathlib import Path
@@ -112,28 +112,46 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--receipt',type=Path,required=True);p.add_argument('--work-dir',type=Path,required=True)
     p.add_argument('--keyboard-batch',type=int,choices=(1,4),default=1)
+    p.add_argument('--backend',choices=('qemu','virtualbox'),default='qemu')
+    p.add_argument('--virtualbox',type=Path)
+    p.add_argument('--visible',action='store_true')
     args=p.parse_args();report,iso,disk=local.check_preview(args.receipt.resolve())
+    if args.visible and args.backend!='virtualbox':p.error('visible mode is VirtualBox-only')
+    if args.backend=='virtualbox' and args.virtualbox is None:p.error('explicit VirtualBox executable required')
     if report.get('window_surfaces') is not True:raise ValueError('qualified windows profile required')
     work=args.work_dir.resolve()
     if not work.is_relative_to(ROOT/'outputs') or work==ROOT/'outputs':raise ValueError('new workspace output required')
     work.mkdir(parents=True,exist_ok=False)
     before=local.source.source_bindings();interaction=WindowInteraction(args.keyboard_batch);pointer=PointerProbe(work)
-    result=dict(cycle=296,contract_id='PWS1',status='fail',source_bindings=before,iso_sha256=local.digest(iso),
-        backend='qemu',serial_input_bytes=0,physical_hardware_tested=False,production_ready=False,guest_bound_seconds=240)
+    result=dict(cycle=297,contract_id='PWS1',status='fail',source_bindings=before,iso_sha256=local.digest(iso),
+        backend=args.backend,visible=args.visible,serial_input_bytes=0,physical_hardware_tested=False,production_ready=False,guest_bound_seconds=240)
+    vbox_pointer=None
     started=time.monotonic()
     try:
         shared=local.qualification.shared
-        lock,base=shared.tier0.validate_contracts(ROOT)
-        qemu=shared.tier0._require_workspace_tool_path(shared.tier0.DEFAULT_QEMU_ROOT,ROOT)
-        shared.tier0.verify_local_launch_runtime(lock,qemu,ROOT)
-        def control(client,debug):
-            def inject(codes):
-                client.execute('input-send-event',{'events':[{'type':'key','data':{'down':not bool(c&128),'key':{'type':'number','data':c&127}}} for c in codes]})
-            interaction.inject=inject;pointer.tick(client,interaction,debug)
-        run,_,_=shared.boot._execute_once('native-windows',lock,local.optical.optical_profile(base),qemu,iso,work,240,
-            marker_validator=lambda m:local.apps.validate_markers(m,file_waits=True,windows=True),marker_extractor=local.native_session.extract_markers,
-            hpet_msi=True,pause_on_completion=True,console_port=interaction.port,console_poll=interaction.poll,
-            capture_log_limit_bytes=local.LOG_LIMIT,guest_control=control,frame_validator=frames.inspect_ppm)
+        if args.backend=='qemu':
+            lock,base=shared.tier0.validate_contracts(ROOT)
+            qemu=shared.tier0._require_workspace_tool_path(shared.tier0.DEFAULT_QEMU_ROOT,ROOT)
+            shared.tier0.verify_local_launch_runtime(lock,qemu,ROOT)
+            def control(client,debug):
+                def inject(codes):
+                    client.execute('input-send-event',{'events':[{'type':'key','data':{'down':not bool(c&128),'key':{'type':'number','data':c&127}}} for c in codes]})
+                interaction.inject=inject;pointer.tick(client,interaction,debug)
+            run,_,_=shared.boot._execute_once('native-windows',lock,local.optical.optical_profile(base),qemu,iso,work,240,
+                marker_validator=lambda m:local.apps.validate_markers(m,file_waits=True,windows=True),marker_extractor=local.native_session.extract_markers,
+                hpet_msi=True,pause_on_completion=True,console_port=interaction.port,console_poll=interaction.poll,
+                capture_log_limit_bytes=local.LOG_LIMIT,guest_control=control,frame_validator=frames.inspect_ppm)
+        else:
+            from runtime.native_virtualbox_mouse import PointerClient
+            def control(owner,debug):
+                nonlocal vbox_pointer
+                if not interaction.sustained_evidence:return
+                if vbox_pointer is None:vbox_pointer=PointerClient(owner,args.virtualbox.resolve())
+                pointer.tick(vbox_pointer,interaction,debug)
+            local.vbox_run(report,iso,work,interaction,result,args.virtualbox.resolve(),args.visible,control)
+            run=result['run']
+            if vbox_pointer is None:raise ValueError('pointer API was not reached')
+            vbox_pointer.check_shell()
         _,output=local.native_console.split_output(bytes(interaction.received))
         if not interaction.pointer_done or interaction.sent!=len(interaction.case.sent) or output!=interaction.case.expected or interaction.keyboard_bytes!=interaction.sent:
             raise ValueError('inexact native mouse/keyboard interaction')
@@ -152,6 +170,11 @@ def main():
             keyboard_batch=interaction.keyboard_batch,batches=interaction.batches,keyboard_input_bytes=interaction.keyboard_bytes,
             unpaced_burst_input_qualified=False,source_unchanged=before==local.source.source_bindings(),
             iso_unchanged=local.digest(iso)==result['iso_sha256'],elapsed_seconds=round(time.monotonic()-started,3))
+        if vbox_pointer is not None:
+            result['pointer_api_diagnostics']=vbox_pointer.diagnostics
+            result['pointer_api']=dict(contract_id='PVBMOUSE1',powershell_sha256=vbox_pointer.shell_hash,
+                events=vbox_pointer.records,failed=vbox_pointer.failed,host_cursor_moved=False,unlocked_per_event=True,
+                api_bound_seconds=5,maximum_events=96)
         if not result['source_unchanged'] or not result['iso_unchanged']:result['status']='fail'
         (work/'receipt.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
     print(result['status'],result.get('failure',''),flush=True)

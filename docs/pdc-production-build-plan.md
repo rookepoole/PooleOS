@@ -1,15 +1,58 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-15
-Plan version: 2.199.0-native-rendering
-Roadmap cycle: PooleOS Cycle 296
+Plan version: 2.200.0-native-virtualbox-pointer
+Roadmap cycle: PooleOS Cycle 297
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 296: Native Rendering And QEMU Mouse Qualification
+## Cycle 297: Owned VirtualBox Pointer Qualification
+
+Both full visible VirtualBox mouse/keyboard modes pass: one-byte and
+four-character keyboard input, each 17 pointer steps/41 observed movements at
+1024x768, 573 challenge characters plus a discarded focus probe, zero serial
+input, exact application/file/recovery output and 4096-dispatch progress for all
+six roles. Focus, dragging, minimize/taskbar restore, pixels and owned cleanup
+pass. Wrapper times are 206.968s and 192.906s respectively. Existing 240-second
+guest, 12-second observation and bounded device-motion limits remain unchanged.
+
+The new per-event relative mouse adapter uses installed VirtualBox COM because
+VBoxManage has no mouse injection command. It validates exact owned UUID/name/
+config/running state, registered runtime paths, shared-session use and unlock.
+The PowerShell executable is pinned; helper/profile/tests are execution-bound.
+Five-second event and 96-event limits fail closed; an unknown effect poisons the
+channel and is never retried. No host cursor injection, arbitrary COM endpoint,
+execution-policy change, new installation or guest authority is introduced.
+
+118 focused checks pass, including 11 new adapter/helper tests. Four fresh optical
+controls and both QEMU pointer modes also pass. The keyboard-only VirtualBox
+regression passes, for six QEMU and three visible VirtualBox guests overall.
+404 overlapping metadata/integration checks pass after correcting two stale
+current-binding cardinalities in historical tests. The first failed run is
+retained; 1559 discovered tests are not a full-suite execution. Architecture binds
+821 sources and execution binds 969. Native Rust and 84 program
+bindings are unchanged; all 24 prior program pairs and 182-per-profile user tests
+remain explicitly Cycle296 evidence, not newly executed host tests. The kernel
+remains 128/208 pages with 36 guarded stack pages. The ISO bytes are identical.
+An initial host-fixture error is corrected with its failed run retained.
+
+[Checkpoint](checkpoints/cycle297-virtualbox-mouse.md) and
+[VBM-1 through VBM-6 contract](native-virtualbox-mouse.md).
+Next resolve the 40-byte window-service code margin through service separation
+or separately qualified loader work, then surface retirement/status/restart,
+general application input and useful apps. Native overflow/reset telemetry,
+accessible PooleGlass, full microkernel, stage117/watchdog, five legacy entry
+failures, PooleGlyph/PDC and every N0-N39 production requirement remain open.
+
+Totals remain 40 phases/301 subphases/8996 requirements/59 additions, 99 flags
+(44 open), 20 gap groups, 24 partial phases, 1 blocked, 15 not started, 0 complete.
+Earlier readiness receipts remain unchanged and historical. No full canonical
+pass, main merge, signing, release or production promotion is claimed.
+
+## Historical Cycle 296: Native Rendering And QEMU Mouse Qualification
 
 Compact row expansion replaces per-pixel glyph-mask construction. Blank terminal
 glyphs are omitted only after the compositor clears their damaged background.

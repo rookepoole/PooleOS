@@ -32,6 +32,9 @@ def source_bindings() -> dict[str, str]:
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "runtime").glob("*.py"))
     paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT / "tools").glob("qualify_native_*.py"))
     paths.update({
+        "tools/native_virtualbox_mouse.ps1",
+        "specs/native-virtualbox-mouse-profile.json",
+        "tests/test_native_virtualbox_mouse.py",
         "tests/test_native_windows.py",
         "native/kernel/src/ps2.rs",
         "native/userspace/src/desktop/mouse.rs",
