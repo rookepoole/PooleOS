@@ -115,18 +115,21 @@ def main():
     parser.add_argument('--optical', action='store_true')
     parser.add_argument('--desktop', action='store_true', help='opt-in native local-console optical development profile')
     parser.add_argument('--windows', action='store_true', help='opt-in native application surfaces and window manager')
+    parser.add_argument('--window-capacity', action='store_true', help='separate PWCODE1 seven-page window service qualification')
     args = parser.parse_args(); work, programs = args.work_dir.resolve(), args.program_dir.resolve()
     if args.desktop and not args.optical: parser.error('local console requires the optical development profile')
     if args.windows and (not args.optical or args.desktop): parser.error('windows requires optical and is separate from the terminal profile')
+    if args.window_capacity and not args.windows: parser.error('window capacity requires the windows profile')
     if sum((args.deferred_cleanup,args.file_controls,args.exhaust_cleanup,args.claimed_requester,args.optical)) > 1: parser.error('separate control profiles required')
     if not work.is_relative_to(ROOT/'outputs') or not programs.is_relative_to(ROOT/'outputs'):
         parser.error('workspace output paths required')
     storage = require_space(work); work.mkdir(parents=True, exist_ok=False)
     before = source.source_bindings()
-    report = dict(cycle=297 if args.windows else 296 if args.desktop else 292 if args.optical else 287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
+    report = dict(cycle=298 if args.window_capacity else 297 if args.windows else 296 if args.desktop else 292 if args.optical else 287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
                   contract_id=optical.CONTRACT if args.optical else 'PCLAIM1' if args.claimed_requester else 'PCLEANUP3' if args.exhaust_cleanup else 'PFILECONTROL1' if args.file_controls else 'PAPPRECOVERY1' if args.deferred_cleanup else 'PAPPSESSION1',
                   optical=args.optical, optical_images={}, file_waits=args.optical,
                   local_console=args.desktop or args.windows, window_surfaces=args.windows, graphical_desktop=False,
+                  window_capacity=args.window_capacity,
                   claimed_requester=args.claimed_requester,
                   exhaust_cleanup=args.exhaust_cleanup,
                   file_controls=args.file_controls,
@@ -140,6 +143,8 @@ def main():
             selected=[('PooleDesktopConsole' if key=='CONSOLE' else name,key) for name,key in selected]
         if args.windows:
             selected=[({'CONSOLE':'PooleWindowConsole','TEXT':'PooleWindowText','NUMBERS':'PooleWindowNumbers'}.get(key,name),key) for name,key in selected]
+        if args.window_capacity:
+            selected=[('PooleWindowCapacity' if key=='CONSOLE' else name,key) for name,key in selected]
         if args.claimed_requester:
             selected=[({'TEXT':'PooleWaitingFileProbe','COUNTER':'PooleClaimedFiles'}.get(key,name),key) for name,key in probe.PROGRAMS]
         report['program_build'] = program_inputs(programs, env, selected)
@@ -157,6 +162,9 @@ def main():
         if args.windows:
             normal_features=('development-windows',)
             bad_features=('development-windows','development-applications-bad-file')
+        if args.window_capacity:
+            normal_features=('development-window-capacity',)
+            bad_features=('development-window-capacity','development-applications-bad-file')
         if args.exhaust_cleanup:
             normal_features=('development-app-cleanup-exhaustion',)
             bad_features=normal_features+('development-applications-bad-file',)
@@ -202,7 +210,7 @@ def main():
             if args.exhaust_cleanup: scenario=exhaustion.scenario
             case = probe.file_control_scenario(secrets.token_hex(8),bad_file=bad_file,claimed_requester=True) if args.claimed_requester else scenario(secrets.token_hex(8), bad_file=bad_file)
             interaction = Interaction(case, args.deferred_cleanup, args.file_controls or args.claimed_requester, args.exhaust_cleanup, sustained=args.optical)
-            validator = (lambda m: exhaustion.validate_markers(m,bad_file=bad_file)) if args.exhaust_cleanup else (lambda m: probe.validate_markers(m, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows))
+            validator = (lambda m: exhaustion.validate_markers(m,bad_file=bad_file)) if args.exhaust_cleanup else (lambda m: probe.validate_markers(m, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows,window_capacity=args.window_capacity))
             print(f'Native application session {name}: frozen 240-second bound', flush=True)
             try:
                 run, _, handoff = shared.boot._execute_once(name, lock, profile, qemu, path, run_dir, 240,
@@ -237,7 +245,7 @@ def main():
             shared.load.validate_oracle_binding(prefix['boot_prefix'], inspected, run['pbp1_transcript'])
             run['transcript_binding'] = shared.transfer.validate_transcript_binding(prefix, run['pbp1_transcript'])
             run['independent_revalidation'] = shared.transfer.validate_revalidation_binding(prefix, handoff, retained)
-            run['hostile_marker_cases_rejected'] = exhaustion.negative_controls(run['markers'],bad_file=bad_file) if args.exhaust_cleanup else probe.negative_controls(run['markers'], bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows)
+            run['hostile_marker_cases_rejected'] = exhaustion.negative_controls(run['markers'],bad_file=bad_file) if args.exhaust_cleanup else probe.negative_controls(run['markers'], bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows,window_capacity=args.window_capacity)
             run.update(media_sha256=shared.sha(media), kernel_sha256=shared.sha(image))
             report['guest_runs'].append(run)
         if args.optical:

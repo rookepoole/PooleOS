@@ -138,10 +138,13 @@ pub fn run(
     IST2_BOTTOM.store(descriptors.ist2_bottom, Ordering::Release);
     IST2_TOP.store(descriptors.ist2_top, Ordering::Release);
     let quota = if cfg!(feature = "development-shell-process") {
-        6 * (12 + poolekernel::user_entry::MAX_CODE_PAGES) + 12
+        6 * (12 + poolekernel::user_entry::MAX_CODE_PAGES)
+            + 12
+            + (poolekernel::user_entry::MAX_IMAGE_CODE_PAGES
+                - poolekernel::user_entry::MAX_CODE_PAGES)
     } else if cfg!(feature = "development-process-launch") {
         // Two one-page workers and one bounded multipage supervisor.
-        38 + poolekernel::user_entry::MAX_CODE_PAGES + 12
+        38 + poolekernel::user_entry::MAX_IMAGE_CODE_PAGES + 12
     } else if cfg!(feature = "development-process-control") {
         39 + 12
     } else if cfg!(feature = "development-session-capacity") {

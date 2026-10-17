@@ -11,23 +11,30 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle297 qualifies visible VirtualBox mouse
-input in both one-byte and burst-keyboard modes, including focus, dragging,
-minimize/restore, exact application/file results, fault/restart and owned cleanup.
-Terminal and two capability-isolated result surfaces run under the native
-user-space window manager. The guest binaries are unchanged from Cycle296;
-this is additional device-integration evidence, not new guest code. Use
+**Current development checkpoint:** Cycle298 implements explicit seven-page
+window-service capacity while ordinary programs retain their four-page limit.
+Native startup reaches page seven, and service exit reclaims all 19 owned pages.
+Page permissions, stack guards and allocation ownership remain enforced. The
+capacity probe includes deliberate layout padding; it is not new UI functionality.
+Six QEMU and two visible VirtualBox checks pass on current source, including both
+complete mouse/keyboard modes, application recovery and owned cleanup. Terminal and two isolated
+read-only result windows remain the visible experience, not a complete desktop.
+A changed host PowerShell binary was reviewed and pinned, then all eight guest
+checks were replayed. The failed audit and prior evidence remain retained.
+No main merge or release is claimed.
+[Current evidence](docs/checkpoints/cycle298-window-capacity.md).
+
+Use
 `Launch-Local-Console.cmd` on the qualified development host for a VM window.
 This is an unsigned one-CPU native window preview with read-only result panes,
 not a complete desktop, PooleGlass environment, installer or production release.
 [Run the preview](docs/native-userspace-preview.md).
-[Evidence](docs/checkpoints/cycle297-virtualbox-mouse.md).
 The separate default diagnostic kernel still fails at VirtualBox stage117;
 actual watchdog delivery there remains unqualified. This working application
 profile does not close those gates. Windows' "DVD Disc Image" label does not
 mean the optical `.iso` is the wrong format. The launcher supplies the tested
 configuration, including the still-required COM2 mirror.
-Next: resolve the window service's tight code budget, then surface
+Next: surface
 lifecycle/recovery, general app input and useful applications.
 Complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass work continues.
 

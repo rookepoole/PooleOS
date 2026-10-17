@@ -24,6 +24,13 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle298-window-capacity.md",
+    "docs/native-window-capacity.md",
+    "runs/native-window-capacity-readiness.json",
+    "native/userspace/build.rs",
+    "native/userspace/src/window_main.rs",
+    "native/userspace/src/bin/window_capacity.rs",
+    "tests/test_native_window_capacity.py",
     "docs/checkpoints/cycle297-virtualbox-mouse.md",
     "docs/native-virtualbox-mouse.md",
     "runs/native-virtualbox-mouse-readiness.json",

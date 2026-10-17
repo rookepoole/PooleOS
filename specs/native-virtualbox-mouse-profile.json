@@ -1,6 +1,6 @@
 {
   "contract_id": "PVBMOUSE1",
-  "powershell_sha256": "8BB6FA8C283B4D92120B1EF249A9B311B0F804D4CABBE9981159976C8BE76A5E",
+  "powershell_sha256": "60C9B29843624DD8AF6B6A7B26147753BE6AEEF65098B9A503CC50850AFE410F",
   "scope": "Installed Windows PowerShell executable and existing VirtualBox runtime pins, not complete host attestation. No installation or execution-policy change.",
   "api_reference": "https://download.virtualbox.org/virtualbox/7.2.2/SDKRef.pdf",
   "maximum_axis_delta": 96,

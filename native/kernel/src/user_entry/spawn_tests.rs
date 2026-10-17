@@ -32,10 +32,13 @@ fn setup_program(program: &crate::user_entry::startup::Program<'_>) -> (Fixture,
 #[test]
 fn multipage_program_copies_all_bytes_zero_tail_and_keeps_five_owned_allocations() {
     use crate::user_entry::startup::{Arguments, Program};
-    for pages in 2..=crate::user_entry::MAX_CODE_PAGES {
+    for pages in 2..=crate::user_entry::MAX_IMAGE_CODE_PAGES {
         let code: Vec<u8> = (0..pages * PAGE_BYTES - 3)
             .map(|i| (i % 251) as u8)
             .collect();
+        #[cfg(feature = "development-window-capacity")]
+        let program = Program::window_service(&code, PAGE_BYTES as usize + 1).unwrap();
+        #[cfg(not(feature = "development-window-capacity"))]
         let program = Program::new(&code, PAGE_BYTES as usize + 1).unwrap();
         let args = Arguments::new(&[b"large", b"--check"]).unwrap();
         let (mut f, mut c) = setup_program(&program);
@@ -88,11 +91,19 @@ fn multipage_program_copies_all_bytes_zero_tail_and_keeps_five_owned_allocations
 #[test]
 fn later_code_page_write_failures_retain_and_scrub_entire_construction() {
     use crate::user_entry::startup::{Arguments, Program};
-    let code = [0x90; 16381];
+    let pages = crate::user_entry::MAX_IMAGE_CODE_PAGES;
+    let code = std::vec![0x90; (pages * PAGE_BYTES - 3) as usize];
+    #[cfg(feature = "development-window-capacity")]
+    let program = Program::window_service(&code, 0).unwrap();
+    #[cfg(not(feature = "development-window-capacity"))]
     let program = Program::new(&code, 0).unwrap();
     let args = Arguments::new(&[b"large"]).unwrap();
-    // Nine erased data pages, followed by code words spanning all four pages.
-    for at in [9 * 512 + 512, 9 * 512 + 1024, 9 * 512 + 2047] {
+    // Code, user stack and four kernel-stack pages are erased before copying.
+    let erased = (pages + 5) as usize * 512;
+    for at in (1..pages as usize)
+        .map(|page| erased + page * 512)
+        .chain(core::iter::once(erased + pages as usize * 512 - 1))
+    {
         for corrupt in [false, true] {
             let (mut f, mut c) = setup_program(&program);
             if corrupt {
@@ -115,7 +126,7 @@ fn later_code_page_write_failures_retain_and_scrub_entire_construction() {
                 .is_err()
             );
             retained(&mut f, &c);
-            assert_eq!(f.manager.summary().allocated_pages, 16);
+            assert_eq!(f.manager.summary().allocated_pages, 12 + pages);
             f.memory.corrupt_write = None;
             f.memory.fail_write = Some(f.memory.writes + 512);
             assert!(c.abort(&mut f.manager, &mut f.memory).is_err());

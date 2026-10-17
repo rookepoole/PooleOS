@@ -136,7 +136,7 @@ fn admits_real_vm_tree_with_guarded_stack_and_fixed_unprivileged_frame() {
 
 #[test]
 fn bounded_code_regions_admit_every_page_and_preserve_guard_geometry() {
-    for pages in 2..=MAX_CODE_PAGES {
+    for pages in 2..=MAX_IMAGE_CODE_PAGES {
         let (manager, space, mut memory, image) = fixture_pages(pages);
         let before = memory.pages;
         let admitted = admit_initial_image(&manager, &space, &mut memory, image, 36).unwrap();
@@ -168,7 +168,7 @@ fn bounded_code_regions_admit_every_page_and_preserve_guard_geometry() {
                 ..image
             },
             InitialImage {
-                code_pages: MAX_CODE_PAGES + 1,
+                code_pages: MAX_IMAGE_CODE_PAGES + 1,
                 ..image
             },
             InitialImage {
@@ -203,9 +203,9 @@ fn bounded_code_regions_admit_every_page_and_preserve_guard_geometry() {
 
 #[test]
 fn multipage_readback_rejects_each_code_leaf_mutation_holes_and_extra_leaves() {
-    let (manager, space, memory, image) = fixture_pages(MAX_CODE_PAGES);
+    let (manager, space, memory, image) = fixture_pages(MAX_IMAGE_CODE_PAGES);
     let first = ((image.code_page >> 12) & 511) as usize;
-    for offset in 0..MAX_CODE_PAGES as usize {
+    for offset in 0..MAX_IMAGE_CODE_PAGES as usize {
         for bit in 0..64 {
             if bit == 5 || bit == 6 {
                 continue;
@@ -223,7 +223,7 @@ fn multipage_readback_rejects_each_code_leaf_mutation_holes_and_extra_leaves() {
         assert!(admit_initial_image(&manager, &space, &mut changed, image, 36).is_err());
     }
     let mut changed = memory.clone();
-    changed.pages[3][first + MAX_CODE_PAGES as usize] = memory.pages[3][first];
+    changed.pages[3][first + MAX_IMAGE_CODE_PAGES as usize] = memory.pages[3][first];
     assert_eq!(
         admit_initial_image(&manager, &space, &mut changed, image, 36),
         Err(Error::UnexpectedMapping)
@@ -232,8 +232,8 @@ fn multipage_readback_rejects_each_code_leaf_mutation_holes_and_extra_leaves() {
 
 #[test]
 fn multipage_owned_offsets_and_permissions_cannot_be_replaced_with_matching_raw_entries() {
-    for offset in 1..MAX_CODE_PAGES {
-        let (mut manager, mut space, mut memory, image) = fixture_pages(MAX_CODE_PAGES);
+    for offset in 1..MAX_IMAGE_CODE_PAGES {
+        let (mut manager, mut space, mut memory, image) = fixture_pages(MAX_IMAGE_CODE_PAGES);
         let handle = space.owned_mapping(image.code_page).unwrap().0;
         let address = image.code_page + offset * PAGE_BYTES;
         let token = space.begin_unmap(&mut memory, address).unwrap();
@@ -254,7 +254,7 @@ fn multipage_owned_offsets_and_permissions_cannot_be_replaced_with_matching_raw_
             admit_initial_image(&manager, &space, &mut memory, image, 36),
             Err(Error::Ownership)
         );
-        let (manager, mut space, mut memory, image) = fixture_pages(MAX_CODE_PAGES);
+        let (manager, mut space, mut memory, image) = fixture_pages(MAX_IMAGE_CODE_PAGES);
         let index = ((address >> 12) & 511) as usize;
         let original = memory.pages[3][index];
         space

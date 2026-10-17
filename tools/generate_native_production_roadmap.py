@@ -15917,14 +15917,78 @@ def apply_cycle297(roadmap: dict, test_count: int) -> dict:
             "service separation or independently qualified loader capacity preserving authority, image and stack bounds",
             "surface retirement/status and compositor restart/resynchronization, then general application input",
             "native overload/reset and loss telemetry; full microkernel, PooleGlyph/PDC, accessible PooleGlass and N0-N39 gates"])
+    return apply_cycle298(roadmap, test_count)
+
+
+def apply_cycle298(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle298-window-capacity.md"
+    contract = "docs/native-window-capacity.md"
+    path = "runs/native-window-capacity-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle297_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=298, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 298
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 298
+    gate["qualification_status"] = "native_window_capacity_partial_canonical_pending"
+    baseline["native_virtualbox_pointer"]["evidence_status"] = "historical_cycle297"
+    gate["current_native_virtualbox_pointer_qualification"]["evidence_status"] = "historical_cycle297_not_current_image_qualification"
+    record = dict(cycle=298, contract_id="PWCODE1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("iso_built", "iso_sha256", "iso_byte_count", "host_kernel_tests", "host_python_tests",
+                "qemu_guest_runs", "virtualbox_guest_runs", "ordinary_code_pages_maximum",
+                "service_code_pages_maximum", "vm_mapping_slots", "capacity_probe_offset",
+                "seventh_page_native_execution", "window_service_released_pages", "console_code_bytes",
+                "console_code_margin", "ordinary_console_code_bytes", "kernel_image_pages", "kernel_rodata_boundary",
+                "standard_mouse_qualified", "burst_mouse_qualified", "virtualbox_standard_mouse_qualified",
+                "virtualbox_burst_mouse_qualified", "virtualbox_mouse_verified", "production_ready", "signed",
+                "canonical_full_replay_performed", "merge_qualified"):
+        record[key] = receipt[key]
+    baseline["native_window_capacity"] = copy.deepcopy(record)
+    gate["current_native_window_capacity_qualification"] = record
+    baseline["user_space_integration"].update(cycle=298, receipt_path=path, receipt_section="native_execution",
+        native_execution_status="native_seven_page_window_service_see_exact_guest_statuses",
+        native_execution_evidence_cycle=298, shell_native_execution_evidence_cycle=298,
+        optical_iso_sha256=receipt["iso_sha256"], kernel_profile="opt_in_development_window_capacity",
+        kernel_image_pages=receipt["kernel_image_pages"], kernel_remaining_capacity_pages=208-receipt["kernel_image_pages"],
+        combined_mouse_keyboard_qualified=receipt["standard_mouse_qualified"],burst_mouse_qualified=receipt["burst_mouse_qualified"],
+        virtualbox_mouse_qualified=receipt["virtualbox_mouse_verified"],
+        virtualbox_standard_mouse_qualified=receipt["virtualbox_standard_mouse_qualified"],
+        virtualbox_burst_mouse_qualified=receipt["virtualbox_burst_mouse_qualified"],
+        console_code_bytes=receipt["console_code_bytes"],console_code_margin=receipt["console_code_margin"],
+        capacity_probe_padding_is_test_instrumentation=True,
+        window_service_executable_byte_limit=28672, window_service_capacity_launch_slot=2,
+        keyboard_only_profile_replayed_this_cycle=False)
+    evidence = ("Cycle298: explicit seven-page window-service image admission with ordinary four-page linking/extraction/Program::new preserved. Existing eight VM mappings, RX code, RW/NX stack and guards remain. The separate native build executes a seventh-page startup probe before the shared compositor and reclaims19 owned pages. Kernel rodata uses a capacity-only0x1A000 selector; first old-boundary link failure is retained.25 independently identical program pairs,182 user tests per profile,576/595/601/607/608 kernel tests per profile and81 focused Python checks. Exact current guest outcomes are bound in PWCODE1. " + checkpoint)
+    gap = ("Capacity qualification is not new desktop functionality. The seven-page probe contains deliberate layout padding and does not silently replace the ordinary four-page binary. Next implement generation-bound surface retirement/status, stale-view cleanup and restart/resynchronization, then general application input and useful apps. Retain native overload/reset telemetry, service separation/scalable address spaces, accessible PooleGlass, default stage117/watchdog, five legacy entry failures and all complete microkernel/PooleGlyph/PDC/N0-N39 gates. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N3", "N9", "N13", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-NATIVE-UI-001", "FLAG-N13-USERSPACE-ISO-001", "FLAG-N3-VIRTUALBOX-PREVIEW-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle298 does not close this flag. " + gap
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical earlier gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Implement surface lifecycle on qualified window-service capacity",
+        entry_evidence=[checkpoint, contract, path, "docs/native-window-manager.md"],
+        exit_evidence=["generation-bound process retirement/status notifications remove stale surfaces without cross-client effects",
+            "larger functionality uses an explicit capacity-only path or service split while preserving the ordinary four-page regression binary",
+            "compositor restart/resynchronization and bounded backpressure recovery",
+            "general application input, launch UI and useful editor/file-manager workflows",
+            "retain native overload/reset and complete microkernel, PooleGlyph/PDC, accessible PooleGlass and N0-N39 gates"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1559)
-    parser.add_argument("--status-date", default="2026-10-15")
+    parser.add_argument("--test-count", type=int, default=1566)
+    parser.add_argument("--status-date", default="2026-10-17")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
     args.out.write_text(json.dumps(roadmap, indent=2, ensure_ascii=True) + "\n", encoding="utf-8", newline="\n")

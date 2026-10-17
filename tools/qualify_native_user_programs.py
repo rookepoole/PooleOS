@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from runtime.native_user_program import extract
+from runtime.native_user_program import extract, profile_for
 from tools.qualify_native_elf_loader import _toolchain
 from tools.native_build_space import require_space
 
@@ -44,7 +44,7 @@ def codegen_object(deps: Path, name: str) -> Path:
     return objects[0]
 
 
-def local_relocations(audit: dict) -> list[dict]:
+def local_relocations(audit: dict, *, window_capacity: bool = False) -> list[dict]:
     """Verify symbol definitions, not a compiler-specific spelling of locals."""
     sections = {s["Section"]["Index"]: s["Section"] for s in audit["Sections"]}
     symbols = [s["Symbol"] for s in audit["Symbols"]]
@@ -62,7 +62,8 @@ def local_relocations(audit: dict) -> list[dict]:
                 or symbol["Name"]["Name"] != r["Symbol"]["Name"]
                 or symbol["Binding"]["Name"] != "Local" or symbol["Binding"]["Value"] != 0
                 or section is None or section["Type"]["Value"] != 1
-                or not section["Name"]["Name"].startswith((".text.", ".rodata."))
+                or not (section["Name"]["Name"].startswith((".text.", ".rodata."))
+                    or window_capacity and section["Name"]["Name"] == ".window_capacity")
                 or section["Name"]["Name"] != symbol["Section"]["Name"]
                 or section["Flags"]["Value"] not in (2, 6, 0x12, 0x32)
                 or not 0 <= symbol["Value"] < section["Size"]):
@@ -96,16 +97,20 @@ def build(cargo: Path, env: dict, target: Path, log: Path) -> dict:
                          ("PooleWaitingFileProbe", "waiting_file_probe"), ("PooleClaimedFiles", "claimed_files"),
                          ("PooleDesktopConsole", "desktop_console"),
                          ("PooleWindowConsole", "window_console"), ("PooleWindowText", "window_text"),
+                         ("PooleWindowCapacity", "window_capacity"),
                          ("PooleWindowNumbers", "window_numbers")):
         path = target / TARGET / "release" / name
         blob = path.read_bytes()
-        code, record = extract(blob)
+        code, record = extract(blob, profile=profile_for(name))
         object_path = codegen_object(path.parent / "deps", name)
         readobj = cargo.parent.parent / "lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-readobj.exe"
         audit = json.loads(run([str(readobj), "--elf-output-style=JSON", "--relocations", "--symbols", "--sections", str(object_path)],
             env, target.parent / f"{target.name}-{name}-relocations.json"))
         if len(audit) != 1: raise ValueError("ambiguous object audit")
-        relocs = local_relocations(audit[0])
+        relocs = local_relocations(audit[0], window_capacity=name == "PooleWindowCapacity")
+        if name == "PooleWindowCapacity":
+            if record['load_pages'] != 7 or not code[24576:]:
+                raise ValueError('seventh-page capacity probe absent')
         record["object_relocation_count"] = len(relocs)
         record["object_relocation_kinds"] = sorted({r["Type"]["Name"] for r in relocs})
         (target.parent / f"{target.name}-{name}.bin").write_bytes(code)

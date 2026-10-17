@@ -23,6 +23,7 @@ development-applications = ["development-files"]
 development-desktop = ["development-applications"]
 
 development-windows = ["development-desktop"]
+development-window-capacity = ["development-windows"]
 development-applications-bad-file = ["development-applications"]
 development-file-controls = ["development-applications"]
 development-claimed-requester = ["development-applications"]

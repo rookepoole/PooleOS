@@ -3,7 +3,7 @@ OUTPUT_ARCH(i386:x86-64)
 ENTRY(poole_kernel_entry)
 
 /* Only reviewed opt-in session builds supply these absolute selectors. */
-__poole_ro_capacity = DEFINED(__poole_windows_profile) ? 0x18000 : (DEFINED(__poole_desktop_profile) ? 0x15000 : (DEFINED(__poole_apps_profile) ? 0x13000 : (DEFINED(__poole_files_profile) ? 0xE000 : 0xD000)));
+__poole_ro_capacity = DEFINED(__poole_window_capacity_profile) ? 0x1A000 : (DEFINED(__poole_windows_profile) ? 0x18000 : (DEFINED(__poole_desktop_profile) ? 0x15000 : (DEFINED(__poole_apps_profile) ? 0x13000 : (DEFINED(__poole_files_profile) ? 0xE000 : 0xD000))));
 
 PHDRS
 {

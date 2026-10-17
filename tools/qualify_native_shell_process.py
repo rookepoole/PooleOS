@@ -28,7 +28,7 @@ def program_inputs(directory, env, programs=PROGRAMS):
         for build in ('build1','build2'):
             snapshot = directory/f'{build}-{name}.elf'
             elf = (snapshot if snapshot.is_file() else directory/build/'x86_64-unknown-none/release'/name).read_bytes()
-            extracted, record = native_user_program.extract(elf)
+            extracted, record = native_user_program.extract(elf, profile=native_user_program.profile_for(name))
             if extracted != code or record['elf_sha256'] != receipt['programs'][name]['elf_sha256']:
                 raise ValueError('independent ELF mismatch')
         env[f'POOLEOS_{key}_CODE'] = str(directory/f'build1-{name}.bin')

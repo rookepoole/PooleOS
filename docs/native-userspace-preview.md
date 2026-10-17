@@ -1,6 +1,10 @@
 # Run The Native Window Preview
 
-Cycle297, 2026-10-15. Native PooleBoot + PooleKernel, not Linux.
+The host PowerShell binary changed after the October16 tests. Its replacement
+was signature/version/hash reviewed and pinned; all eight source-bound guest
+checks pass after fresh replay. The old receipt and failed audit are retained.
+
+Cycle298, closeout and final native replay 2026-10-17. Native PooleBoot + PooleKernel, not Linux.
 This experimental build draws Terminal and two independent native application
 result windows inside the VM and accepts its keyboard. It is not a complete
 desktop, PooleGlass environment, installer or production release.
@@ -9,9 +13,14 @@ Both full visible VirtualBox mouse/keyboard modes pass: one-byte and four-charac
 keyboard input, each with 17 pointer steps/41 observed movements at 1024x768.
 The challenge verifies 573 keyboard characters, a separate discarded focus-probe
 key, exact application/file/recovery results, pixels, sustained progress and owned
-cleanup within the unchanged 240-second guest bound. This extends the Cycle296
-QEMU result on unchanged guest binaries; fresh regressions are recorded in the
-checkpoint. Historical timeouts remain retained, not rewritten as successes.
+cleanup within the unchanged 240-second guest bound. Both QEMU modes also pass
+on the current image. Historical failures remain retained, not rewritten as successes.
+
+Cycle298 gives only the trusted window-service slot an explicit seven-code-page
+profile. Ordinary programs remain four pages. Code permissions, stack guards,
+allocation ownership and rollback checks remain in force. A small function on
+page seven executes before the actual compositor; deliberate padding proves the
+boundary, not additional UI functionality. The visible desktop is unchanged.
 
 ## Start On This Machine
 
@@ -89,13 +98,13 @@ if a retained failure requires manual recovery; do not touch unrelated VMs.
 
 ## ISO And File Type
 
-Image: `outputs/cycle297-optical1/PooleOS-UserSpace-Preview.iso`.
+Image: `outputs/cycle298-optical4/PooleOS-UserSpace-Preview.iso`.
 
-Convenience copy: `PooleOS-Native-Windows-Cycle297.iso` in Downloads.
+Convenience copy: `PooleOS-Native-Windows-Cycle298.iso` in Downloads.
 Size 66109440 bytes; SHA256:
-`8B4D32976D7C85E44F7D14915013AE4AB3EE4E28B392F0073F4318C8089881A2`.
-The ISO bytes are identical to Cycle296. Cycle297 qualifies another input backend;
-it does not claim new guest features or newly executed user-program host tests.
+`419C7CD084062B4AEF11D5D8664EB351EA6EF922D75ECFE3ACF610AA8BACFE52`.
+The ISO contains the new capacity-profile kernel/service, not Cycle297 bytes.
+Final-source replay and convenience-copy hash verification pass.
 
 Windows may call this a "DVD Disc Image". It is still a real ISO9660 image with
 an EFI El Torito boot entry. It belongs in a VM's **optical-drive** picker, not
@@ -116,22 +125,22 @@ not open SDL, which previously crashed on this host. Both use the current pointe
 `outputs/native-userspace-preview.json`. The new visible entry point is:
 
 ```powershell
-.\Launch-Local-Console.cmd --receipt outputs/cycle297-optical1/receipt.json
+.\Launch-Local-Console.cmd --receipt outputs/cycle298-optical4/receipt.json
 ```
 
-With the configured Python runtime, `-B` and repository `PYTHONPATH`:
+From the repository root with the configured Python runtime:
 
 ```text
-tools/qualify_native_app_session.py --work-dir outputs/NEW-OPTICAL --program-dir outputs/cycle296-programs3 --optical --windows
-tools/qualify_native_local_console.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-KEYBOARD-QEMU --backend qemu
-tools/qualify_native_local_console.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-KEYBOARD-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible --keyboard-batch 4
-tools/qualify_native_windows.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-QEMU
-tools/qualify_native_windows.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-BURST-QEMU --keyboard-batch 4
-tools/qualify_native_windows.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible
-tools/qualify_native_windows.py --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-BURST-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible --keyboard-batch 4
+python -B -m tools.qualify_native_app_session --work-dir outputs/NEW-OPTICAL --program-dir outputs/cycle298-programs1 --optical --windows --window-capacity
+python -B -m tools.qualify_native_local_console --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-KEYBOARD-QEMU --backend qemu
+python -B -m tools.qualify_native_local_console --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-KEYBOARD-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible --keyboard-batch 4
+python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-QEMU
+python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-BURST-QEMU --keyboard-batch 4
+python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible
+python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-BURST-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible --keyboard-batch 4
 ```
 
-Use unused directories. The program directory contains 24 independently rebuilt,
+Use unused directories. The program directory contains 25 independently rebuilt,
 source-bound pairs. Kernel/boot pairs and ISO variants must reproduce exactly;
 positive, stale-file-grant and ordinary unsigned-denial controls remain required.
 Native keyboard tests inject device scancodes, never serial input, and compare
@@ -146,13 +155,15 @@ test helper; VirtualBox supplies the user's device input.
 
 ## Remaining Work
 
-Next: resolve desktop code capacity, then
-surface lifecycle/restart recovery, native input overload, general application
+Next: surface lifecycle/restart recovery, native input overload, general application
 input and accessible PooleGlass styling. Bounded emulator pointer evidence does
 not establish unrestricted input or physical-device behavior. The console
-is40 code bytes below its four-page cap, so further compositor growth requires
-a service split or separately qualified loader capacity. Rendering work was
-reduced; code margin did not improve and no hardware speedup is claimed.
+has an explicit seven-page capacity profile. Its24594-byte test image includes
+deliberate padding and has4078 bytes below the28672-byte ceiling; ordinary
+WindowConsole still has40 bytes free at16344/16384. The fixed probe starts at24576,
+so future service growth/layout changes require fresh build and execution checks.
+Service separation and scalable address spaces remain required; no hardware
+speedup is claimed.
 Continue robust microkernel work, persistence, networking and PooleGlyph/PDC.
 Default VirtualBox diagnostics still fail stage117; actual watchdog delivery
 there remains separately unqualified. This application profile does not close it.
@@ -161,7 +172,8 @@ Production layout, hardware drivers, multi-host reproduction, complete runtime
 attestation, signing and the full canonical/merge gates remain open.
 See the [contract and tracked gaps](native-window-manager.md) and
 [input contract](native-window-input.md), [rendering contract](native-rendering.md)
-and [checkpoint](checkpoints/cycle297-virtualbox-mouse.md).
+and [capacity contract](native-window-capacity.md),
+[checkpoint](checkpoints/cycle298-window-capacity.md).
 VirtualBox's [lifecycle controls](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/vboxmanage.html)
 and [optical/EFI setup](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/working-with-vms.html)
 describe the host-side operations.

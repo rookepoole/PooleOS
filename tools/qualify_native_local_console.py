@@ -106,7 +106,7 @@ def qemu_run(report,iso,work,interaction,result):
             client.execute('screendump',{'filename':str(work/'initial.ppm'),'format':'ppm'})
             captured=True
     run,_,_=shared.boot._execute_once('native-keyboard',lock,optical.optical_profile(base),qemu,iso,work,240,
-        marker_validator=lambda m:apps.validate_markers(m,file_waits=True,windows=windows),marker_extractor=native_session.extract_markers,
+        marker_validator=lambda m:apps.validate_markers(m,file_waits=True,windows=windows,window_capacity=report.get('window_capacity',False)),marker_extractor=native_session.extract_markers,
         hpet_msi=True,pause_on_completion=True,console_port=interaction.port,console_poll=interaction.poll,
         capture_log_limit_bytes=LOG_LIMIT,guest_control=control,frame_validator=pixels.inspect_ppm)
     if not captured:raise ValueError('initial frame missing')
@@ -143,7 +143,7 @@ def vbox_run(report,iso,work,interaction,result,executable,visible=False,control
                 owner.pause()
                 log=vbox.serial_payload(vbox.bounded_read(path,LOG_LIMIT))
                 markers=native_session.extract_markers(log)
-                result['run']=dict(markers=markers,marker_summary=apps.validate_markers(markers,file_waits=True,windows=windows),pbp1_transcript=handoff.extract_transcript(log).summary)
+                result['run']=dict(markers=markers,marker_summary=apps.validate_markers(markers,file_waits=True,windows=windows,window_capacity=report.get('window_capacity',False)),pbp1_transcript=handoff.extract_transcript(log).summary)
                 owner.checked('controlvm',owner.identity,'screenshotpng',work/'final.png')
                 result.update(initial_frame_sha256=digest(work/'initial.png'),final_frame_sha256=digest(work/'final.png'))
                 from PIL import Image
@@ -199,7 +199,7 @@ def main():
         qualification.shared.load.validate_oracle_binding(prefix['boot_prefix'],qualification.shared.load.inspect_media_bytes(disk),result['run']['pbp1_transcript'])
         result.update(status='pass',keyboard_input_bytes=interaction.keyboard_bytes,exact_interaction=True,
             sustained_window=interaction.sustained_evidence,framebuffer_changed=True,
-            hostile_marker_cases_rejected=apps.negative_controls(result['run']['markers'],file_waits=True,windows=windows))
+            hostile_marker_cases_rejected=apps.negative_controls(result['run']['markers'],file_waits=True,windows=windows,window_capacity=report.get('window_capacity',False)))
     except Exception as e:result['failure']=f'{type(e).__name__}: {e}'
     finally:
         interaction.close()

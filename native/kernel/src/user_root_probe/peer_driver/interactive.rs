@@ -45,8 +45,15 @@ pub(crate) fn run(
     let programs =
         [INIT, COUNTER, CONSOLE, SHELL, WORKER, WORKER].map(|code| checked!(Program::new(code, 0)));
     #[cfg(feature = "development-applications")]
-    let programs =
-        [INIT, COUNTER, CONSOLE, SHELL, TEXT, NUMBERS].map(|code| checked!(Program::new(code, 0)));
+    let programs = [INIT, COUNTER, CONSOLE, SHELL, TEXT, NUMBERS];
+    #[cfg(feature = "development-applications")]
+    let programs = core::array::from_fn::<_, 6, _>(|i| {
+        #[cfg(feature = "development-window-capacity")]
+        if i == 2 {
+            return checked!(Program::window_service(programs[i], 0));
+        }
+        checked!(Program::new(programs[i], 0))
+    });
     #[allow(unused_mut)]
     let mut args = [
         checked!(Arguments::new(&[

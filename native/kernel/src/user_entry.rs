@@ -26,6 +26,11 @@ pub mod timer;
 
 pub const CONTRACT_ID: &str = "PKUSER1";
 pub const MAX_CODE_PAGES: u64 = 4;
+// The opt-in service uses all eight existing VM slots: seven RX plus one RW/NX.
+#[cfg(feature = "development-window-capacity")]
+pub const MAX_IMAGE_CODE_PAGES: u64 = 7;
+#[cfg(not(feature = "development-window-capacity"))]
+pub const MAX_IMAGE_CODE_PAGES: u64 = MAX_CODE_PAGES;
 // Preserve the existing kernel code/data and two-slot TSS at GDT indices 1..4.
 // Data before code also leaves the required ordering for a later SYSRET ABI.
 pub const USER_DATA_SELECTOR: u64 = (5 << 3) | 3;
@@ -65,7 +70,7 @@ pub struct InitialImage {
 
 impl InitialImage {
     fn code_end(self) -> Result<u64, Error> {
-        if !(1..=MAX_CODE_PAGES).contains(&self.code_pages) {
+        if !(1..=MAX_IMAGE_CODE_PAGES).contains(&self.code_pages) {
             return Err(Error::Layout);
         }
         self.code_pages

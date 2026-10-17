@@ -33,7 +33,8 @@ def parse(line: str, event: str) -> dict:
     return dict(zip(names, values))
 
 
-def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False, windows: bool = False) -> dict:
+def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False, windows: bool = False, window_capacity: bool = False) -> dict:
+    if type(window_capacity) is not bool or window_capacity and not windows: raise ValueError('explicit window capacity profile required')
     if windows and (deferred_cleanup or file_controls or claimed_requester): raise ValueError('unqualified window control profile')
     if sum((deferred_cleanup,file_controls,claimed_requester)) > 1: raise ValueError('unqualified combined control modes')
     if len(markers) < 51: raise ValueError('incomplete application session')
@@ -49,7 +50,8 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
     if markers[29] != FILE_MARKER: raise ValueError('file role binding differs')
     start = parse(markers[30], 'START')
     sizes = [start[n+'_bytes'] for n in ('init','files','console','shell','text','numbers')]
-    if any(not 0 < n <= 16384 for n in sizes): raise ValueError('program size bound')
+    if any(not 0 < n <= (28672 if window_capacity and i==2 else 16384) for i,n in enumerate(sizes)): raise ValueError('program size bound')
+    if window_capacity and sizes[2] <= 24576: raise ValueError('seventh-page service probe absent')
     pages = [12+(n+4095)//4096 for n in sizes]
     roots = [start[f'root{i}'] for i in range(6)]
     def valid_root(r): return 0 < r < 1 << 32 and r % 4096 == 0 and r != common['transfer_arm']['root']
@@ -260,6 +262,8 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
                 bundled_files=False, iso_built=False, production_ready=False)
     if windows:
         result.update(surface_grants=surfaces, window_profile=True)
+    if window_capacity:
+        result.update(window_capacity=True,window_service_code_pages=7,ordinary_code_pages_maximum=4)
     if claimed_requester:
         result.update(claimed_requester=True,claimed_waiters=claimed_waiters,diagnostic_requester_is_useful_app=False,
                       kernel_injected_waiting_cancellation=True,late_reply_denial_asserted_by_native_service=True,
@@ -349,8 +353,8 @@ def file_control_scenario(nonce: str, *, bad_file: bool = False, claimed_request
     return shell.Scenario('claimed-requester-controls' if claimed_requester else 'file-request-controls',nonce,tuple(steps))
 
 
-def negative_controls(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False, windows: bool = False) -> int:
-    validate_markers(markers, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester,file_waits=file_waits,windows=windows)
+def negative_controls(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False, windows: bool = False, window_capacity: bool = False) -> int:
+    validate_markers(markers, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester,file_waits=file_waits,windows=windows,window_capacity=window_capacity)
     cases = [markers[:i]+markers[i+1:] for i in range(len(markers)-1)]
     cases += [markers+[markers[-1]], markers+['POOLEOS:PANIC injected']]
     for i in range(29,len(markers)):
@@ -363,7 +367,7 @@ def negative_controls(markers: list[str], *, bad_file: bool = False, deferred_cl
                 changed[i] = re.sub(r' '+field+r'=[0-9]+', ' '+field+'='+str((1<<64)-1), changed[i])
                 cases.append(changed)
     for case in cases:
-        try: validate_markers(case, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester,file_waits=file_waits,windows=windows)
+        try: validate_markers(case, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester,file_waits=file_waits,windows=windows,window_capacity=window_capacity)
         except ValueError: continue
         raise ValueError('hostile application observation accepted')
     return len(cases)

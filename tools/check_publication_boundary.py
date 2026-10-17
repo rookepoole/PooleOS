@@ -100,6 +100,7 @@ ALLOWED_RUNS = {
     "runs/native-window-input-readiness.json",
     "runs/native-rendering-readiness.json",
     "runs/native-virtualbox-mouse-readiness.json",
+    "runs/native-window-capacity-readiness.json",
     "runs/native-kernel-virtual-memory-readiness.json",
     "runs/native_model_readiness.json",
     "runs/native_microcode_readiness.json",

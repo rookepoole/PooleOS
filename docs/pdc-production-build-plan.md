@@ -1,15 +1,62 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-10-15
-Plan version: 2.200.0-native-virtualbox-pointer
-Roadmap cycle: PooleOS Cycle 297
+Status date: 2026-10-17
+Plan version: 2.201.0-native-window-capacity
+Roadmap cycle: PooleOS Cycle 298
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 297: Owned VirtualBox Pointer Qualification
+## Cycle 298: Qualified Development Window-Service Capacity
+
+Closeout update: the final host identity check detected a changed PowerShell
+binary after the successful October16 guests. The prior candidate and failure
+are retained; a valid Microsoft-signed10.0.26100.8972 replacement is now pinned
+exactly. All eight final-source guest checks pass on the refreshed host profile,
+with unchanged native source, ISO bytes, ownership checks and timing bounds.
+Earlier passes remain historical; no merge or release qualification is implied.
+
+An explicit development profile admits a seven-page window service while ordinary
+program linking/extraction/admission remains limited to four pages. The existing
+eight VM mapping slots, RX code, separate RW/NX user stack and guards are retained.
+Host tests challenge every code leaf and added-page copy/readback/rollback paths.
+The new capacity binary shares the real window service and executes a small
+seventh-page startup probe; padding is deliberate test instrumentation, not UI
+functionality. No device authority or general application size limit is broadened.
+
+25 independent native program pairs match;182 user tests pass per debug/release.
+Kernel debug/release suites576/595/601/607/608 and81 focused Python checks pass.
+An initial link failure is retained. Its capacity-only rodata repair uses0x1A000,
+preserving older profile selectors, the208-page kernel budget and36-page stack.
+The current kernel occupies130 pages. Six QEMU and two visible VirtualBox checks
+pass on final source, including both full mouse/keyboard modes, exact output,
+fault/restart, sustained all-role progress and owned cleanup. The first optical
+cohort also passed. Input qualification then exposed a missing capacity argument in the
+post-guest hostile checker; all three affected input/launcher paths are repaired
+and regression-tested, and the complete guest cohort was replayed on final source.
+The failed invocation and post-guest check remain retained. Actual normal traces
+show the real24594-byte service and exact19-page retirement.
+
+411 overlapping metadata/integration tests pass; 1566 discovered Python tests
+are not a full-suite execution. Architecture binds828 inputs, native execution
+973 sources and user-program builds87 sources. The exact tested unsigned ISO is
+copied to Downloads as `PooleOS-Native-Windows-Cycle298.iso`. Historical evidence
+and owner/PooleGlyph inputs remain unchanged. Full canonical and merge gates
+are still open; no production phase is completed.
+
+[Checkpoint](checkpoints/cycle298-window-capacity.md) and
+[WC1 through WC6 contract](native-window-capacity.md).
+Next implement surface retirement/status and stale
+view cleanup, restart/resynchronization and general application input. All full
+microkernel, PooleGlyph/PDC, accessible PooleGlass, canonical, release and N0-N39
+requirements remain. No phase/flag is closed by this capacity increment.
+The ordinary four-page window binary remains a regression target: larger future
+logic needs an explicit capacity-only path/instantiation or service separation,
+not unqualified growth of its shared code or removal of the ordinary limit.
+
+## Historical Cycle 297: Owned VirtualBox Pointer Qualification
 
 Both full visible VirtualBox mouse/keyboard modes pass: one-byte and
 four-character keyboard input, each 17 pointer steps/41 observed movements at

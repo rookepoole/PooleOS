@@ -23,6 +23,12 @@ test = false
 bench = false
 
 [[bin]]
+name = "PooleWindowCapacity"
+path = "src/bin/window_capacity.rs"
+test = false
+bench = false
+
+[[bin]]
 name = "PooleWindowText"
 path = "src/bin/window_text.rs"
 test = false

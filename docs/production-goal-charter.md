@@ -1,15 +1,37 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-10-15
+Status date: 2026-10-17
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 297
+Last roadmap reconciliation: PooleOS Cycle 298
 
-Cycle297 adds a bounded, identity-checked VirtualBox mouse verification path.
+Closeout repair: a changed installed PowerShell hash invalidated the first final host
+identity check. Its reviewed Microsoft-signed replacement is pinned without
+relaxing controls; all eight source-bound guest checks pass after replay on
+October17. The preceding October16 passes and failed audit remain historical
+evidence. Native source and ISO bytes are unchanged by this host-pin repair.
+
+Cycle298 implements explicit seven-page window-service capacity while retaining
+ordinary four-page program limits, eight VM mappings, RX code, RW/NX stacks,
+guards, exact ownership and rollback/scrubbing. Native startup reaches page seven
+and service retirement releases19 owned pages. The kernel is130/208 pages with36
+guarded stack pages.25 independent user-program pairs and the kernel/user host
+suites pass. The capacity probe contains deliberate padding, not new UI logic.
+Six QEMU and two visible VirtualBox final-source checks pass, including both
+full mouse/keyboard modes, application recovery, exact output and owned cleanup.
+A linker-boundary failure, host invocation error and missing post-guest profile
+propagation were preserved and repaired. All full canonical, release and
+production gates remain required.
+411 overlapping metadata/integration tests pass; 1566 is discovered inventory,
+not a full canonical-suite execution. No historical receipt or owner input changes.
+Next surface lifecycle/status, stale-view removal, recovery and application input.
+[Evidence](checkpoints/cycle298-window-capacity.md).
+
+Historical Cycle297 adds a bounded, identity-checked VirtualBox mouse verification path.
 Both complete mouse/keyboard modes pass unchanged bounds, including native
 focus/drag/minimize/restore, app recovery, exact output and owned cleanup.
 Guest source and binaries remain unchanged; this does not claim new kernel or

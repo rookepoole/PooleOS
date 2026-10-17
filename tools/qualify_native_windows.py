@@ -138,7 +138,7 @@ def main():
                     client.execute('input-send-event',{'events':[{'type':'key','data':{'down':not bool(c&128),'key':{'type':'number','data':c&127}}} for c in codes]})
                 interaction.inject=inject;pointer.tick(client,interaction,debug)
             run,_,_=shared.boot._execute_once('native-windows',lock,local.optical.optical_profile(base),qemu,iso,work,240,
-                marker_validator=lambda m:local.apps.validate_markers(m,file_waits=True,windows=True),marker_extractor=local.native_session.extract_markers,
+                marker_validator=lambda m:local.apps.validate_markers(m,file_waits=True,windows=True,window_capacity=report.get('window_capacity',False)),marker_extractor=local.native_session.extract_markers,
                 hpet_msi=True,pause_on_completion=True,console_port=interaction.port,console_poll=interaction.poll,
                 capture_log_limit_bytes=local.LOG_LIMIT,guest_control=control,frame_validator=frames.inspect_ppm)
         else:
@@ -160,7 +160,7 @@ def main():
         result.update(status='pass',run=run,mouse_interaction_verified=True,drag_minimize_restore_verified=True,
             focus_routing_verified=True,focused_nonterminal_keys_discarded=1,keyboard_input_bytes=interaction.keyboard_bytes,
             exact_interaction=True,sustained_window=interaction.sustained_evidence,
-            hostile_marker_cases_rejected=local.apps.negative_controls(run['markers'],file_waits=True,windows=True))
+            hostile_marker_cases_rejected=local.apps.negative_controls(run['markers'],file_waits=True,windows=True,window_capacity=report.get('window_capacity',False)))
     except Exception as e:result['failure']=f'{type(e).__name__}: {e}'
     finally:
         interaction.close()

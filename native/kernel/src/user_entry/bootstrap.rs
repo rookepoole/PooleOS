@@ -59,7 +59,7 @@ impl Access {
                 .and_then(|p| p.checked_mul(PAGE_BYTES))
                 .ok_or(Error::MemoryAccess)?;
             let pages_valid = if i == 1 {
-                (1..=super::MAX_CODE_PAGES).contains(&h.page_count)
+                (1..=super::MAX_IMAGE_CODE_PAGES).contains(&h.page_count)
             } else {
                 h.page_count == shapes[i].1
             };
@@ -204,12 +204,12 @@ mod tests {
 
     #[test]
     fn bounded_code_allocation_allows_every_page_but_not_larger_or_stack_shapes() {
-        for pages in 2..=super::super::MAX_CODE_PAGES + 1 {
+        for pages in 2..=super::super::MAX_IMAGE_CODE_PAGES + 1 {
             let (mut p, mut owned) = fixture();
             p.free(owned[1]).unwrap();
             owned[1] = p.allocate(Zone::Dma32, pages, vm::DATA_OWNER).unwrap();
             let access = Access::new(&p, 0x100000, 36, owned);
-            if pages > super::super::MAX_CODE_PAGES {
+            if pages > super::super::MAX_IMAGE_CODE_PAGES {
                 assert!(access.is_err());
                 continue;
             }

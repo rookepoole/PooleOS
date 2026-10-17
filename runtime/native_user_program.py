@@ -7,13 +7,21 @@ import struct
 CONTRACT = "PUSERBIN1"
 MAX_FILE = 65536
 MAX_CODE_PAGES = 4
+WINDOW_SERVICE_CONTRACT = "PWCODE1"
+WINDOW_SERVICE_CODE_PAGES = 7
 
 
-def inspect(blob: bytes) -> dict:
+def profile_for(name: str) -> str:
+    return WINDOW_SERVICE_CONTRACT if name == "PooleWindowCapacity" else CONTRACT
+
+
+def inspect(blob: bytes, *, profile: str = CONTRACT) -> dict:
     def require(ok: bool, why: str) -> None:
         if not ok:
             raise ValueError(why)
 
+    require(profile in (CONTRACT, WINDOW_SERVICE_CONTRACT), "unknown code profile")
+    maximum = WINDOW_SERVICE_CODE_PAGES if profile == WINDOW_SERVICE_CONTRACT else MAX_CODE_PAGES
     require(type(blob) is bytes and 64 <= len(blob) <= MAX_FILE, "ELF size")
     require(blob[:16] == b"\x7fELF\x02\x01\x01" + bytes(9), "ELF identification")
     fields = struct.unpack_from("<HHIQQQIHHHHHH", blob, 16)
@@ -26,7 +34,7 @@ def inspect(blob: bytes) -> dict:
     ptype, permissions, offset, address, physical, size, memory, alignment = segment
     require((ptype, permissions, address, physical, alignment) == (1, 5, 0, 0, 4096),
             "single RX program segment")
-    require(0 < size <= MAX_CODE_PAGES * 4096 and memory == size and offset >= 120 and offset % 4096 == 0,
+    require(0 < size <= maximum * 4096 and memory == size and offset >= 120 and offset % 4096 == 0,
             "bounded code geometry")
     require(offset + size <= shoff, "segment overlaps section table")
     sections = [struct.unpack_from("<IIQQQQIIQQ", blob, shoff + i * 64) for i in range(shnum)]
@@ -60,7 +68,7 @@ def inspect(blob: bytes) -> dict:
     require(len(allocated) == 1, "one allocated section")
     code = blob[offset:offset + size]
     require(code[:2] == b"\x31\xed", "entry frame initialization")
-    return {"contract_id": CONTRACT, "elf_bytes": len(blob),
+    return {"contract_id": profile, "elf_bytes": len(blob),
             "elf_sha256": hashlib.sha256(blob).hexdigest().upper(),
             "code_offset": offset, "code_bytes": size,
             "code_sha256": hashlib.sha256(code).hexdigest().upper(),
@@ -70,7 +78,7 @@ def inspect(blob: bytes) -> dict:
             "native_execution_verified": False, "production_ready": False}
 
 
-def extract(blob: bytes) -> tuple[bytes, dict]:
-    record = inspect(blob)
+def extract(blob: bytes, *, profile: str = CONTRACT) -> tuple[bytes, dict]:
+    record = inspect(blob, profile=profile)
     at = record["code_offset"]
     return blob[at:at + record["code_bytes"]], record
