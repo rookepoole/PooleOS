@@ -98,6 +98,7 @@ def build(cargo: Path, env: dict, target: Path, log: Path) -> dict:
                          ("PooleDesktopConsole", "desktop_console"),
                          ("PooleWindowConsole", "window_console"), ("PooleWindowText", "window_text"),
                          ("PooleWindowCapacity", "window_capacity"),
+                         ("PooleWindowLifecycle", "window_lifecycle"),
                          ("PooleWindowNumbers", "window_numbers")):
         path = target / TARGET / "release" / name
         blob = path.read_bytes()
@@ -107,8 +108,8 @@ def build(cargo: Path, env: dict, target: Path, log: Path) -> dict:
         audit = json.loads(run([str(readobj), "--elf-output-style=JSON", "--relocations", "--symbols", "--sections", str(object_path)],
             env, target.parent / f"{target.name}-{name}-relocations.json"))
         if len(audit) != 1: raise ValueError("ambiguous object audit")
-        relocs = local_relocations(audit[0], window_capacity=name == "PooleWindowCapacity")
-        if name == "PooleWindowCapacity":
+        relocs = local_relocations(audit[0], window_capacity=profile_for(name) == "PWCODE1")
+        if profile_for(name) == "PWCODE1":
             if record['load_pages'] != 7 or not code[24576:]:
                 raise ValueError('seventh-page capacity probe absent')
         record["object_relocation_count"] = len(relocs)
@@ -155,7 +156,7 @@ def main() -> int:
             if release: command.append("--release")
             output=run(command,env,work / ("release.log" if release else "debug.log"))
             match=re.search(r"test result: ok\. (\d+) passed; 0 failed; 0 ignored;",output)
-            if not match or int(match[1]) != 182: raise ValueError("expected182 Rust host tests")
+            if not match or int(match[1]) != 187: raise ValueError("expected187 Rust host tests")
             report["host_tests"].append(dict(profile="release" if release else "debug", tests_passed=int(match[1])))
         first=build(cargo,env,work / "build1",work / "build1.log")
         second=build(cargo,env,work / "build2",work / "build2.log")

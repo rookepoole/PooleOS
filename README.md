@@ -11,18 +11,20 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle298 implements explicit seven-page
-window-service capacity while ordinary programs retain their four-page limit.
-Native startup reaches page seven, and service exit reclaims all 19 owned pages.
-Page permissions, stack guards and allocation ownership remain enforced. The
-capacity probe includes deliberate layout padding; it is not new UI functionality.
-Six QEMU and two visible VirtualBox checks pass on current source, including both
-complete mouse/keyboard modes, application recovery and owned cleanup. Terminal and two isolated
-read-only result windows remain the visible experience, not a complete desktop.
-A changed host PowerShell binary was reviewed and pinned, then all eight guest
-checks were replayed. The failed audit and prior evidence remain retained.
-No main merge or release is claimed.
-[Current evidence](docs/checkpoints/cycle298-window-capacity.md).
+**Current development checkpoint:** Cycle299 connects process lifetime to isolated
+application surfaces. Faulted or stopped applications lose their windows and
+taskbar entries; fresh generations reopen them. Stale surface operations cannot
+resurrect or close a restarted application. The window service receives only
+read-only process observation, not termination authority. Existing process-lease,
+memory, code-page and stack-guard limits remain enforced.
+Fresh optical and both QEMU/visible VirtualBox input modes pass, including six
+lifecycle pixel barriers per device run, mouse interaction and owned cleanup.
+The legacy capacity profile also passes its four optical controls. Ten QEMU and
+two visible VirtualBox checks pass in total. Terminal and
+two isolated read-only result panes remain the experience, not a complete desktop.
+The failed attempts and historical evidence remain retained. No main merge or
+release is claimed.
+[Current evidence](docs/checkpoints/cycle299-surface-lifecycle.md).
 
 Use
 `Launch-Local-Console.cmd` on the qualified development host for a VM window.
@@ -34,8 +36,7 @@ actual watchdog delivery there remains unqualified. This working application
 profile does not close those gates. Windows' "DVD Disc Image" label does not
 mean the optical `.iso` is the wrong format. The launcher supplies the tested
 configuration, including the still-required COM2 mirror.
-Next: surface
-lifecycle/recovery, general app input and useful applications.
+Next: bounded application input, compositor recovery and useful editable applications.
 Complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass work continues.
 
 **Historical development checkpoint:** Cycle287 verifies cancellation of native apps

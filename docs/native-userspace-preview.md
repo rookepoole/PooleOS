@@ -1,10 +1,9 @@
 # Run The Native Window Preview
 
-The host PowerShell binary changed after the October16 tests. Its replacement
-was signature/version/hash reviewed and pinned; all eight source-bound guest
-checks pass after fresh replay. The old receipt and failed audit are retained.
+Ten QEMU and two visible VirtualBox checks pass on final source. The local
+launch pointer and hash-verified Downloads copy now select this image.
 
-Cycle298, closeout and final native replay 2026-10-17. Native PooleBoot + PooleKernel, not Linux.
+Cycle299, 2026-10-17. Native PooleBoot + PooleKernel, not Linux.
 This experimental build draws Terminal and two independent native application
 result windows inside the VM and accepts its keyboard. It is not a complete
 desktop, PooleGlass environment, installer or production release.
@@ -13,14 +12,19 @@ Both full visible VirtualBox mouse/keyboard modes pass: one-byte and four-charac
 keyboard input, each with 17 pointer steps/41 observed movements at 1024x768.
 The challenge verifies 573 keyboard characters, a separate discarded focus-probe
 key, exact application/file/recovery results, pixels, sustained progress and owned
-cleanup within the unchanged 240-second guest bound. Both QEMU modes also pass
-on the current image. Historical failures remain retained, not rewritten as successes.
+cleanup within the unchanged 240-second guest bound. Each run also verifies six
+intermediate framebuffer captures against exact process generations: fault/stop
+removal, fresh restart and survival of the other application. Both QEMU input
+modes also pass on this image. Historical failures remain retained, not rewritten
+as successes.
 
-Cycle298 gives only the trusted window-service slot an explicit seven-code-page
-profile. Ordinary programs remain four pages. Code permissions, stack guards,
-allocation ownership and rollback checks remain in force. A small function on
-page seven executes before the actual compositor; deliberate padding proves the
-boundary, not additional UI functionality. The visible desktop is unchanged.
+Cycle299 gives the window service read-only process-lifetime observation through
+already-held capability authority. It cannot terminate applications. Faulted or
+stopped generations lose their surfaces; stale messages cannot resurrect them
+or close a newer generation. The explicit seven-code-page service profile and
+ordinary four-page application limit are unchanged. Code permissions, stack
+guards, fixed process-lease quotas and allocation ownership remain enforced.
+The seventh-page probe includes deliberate test padding, not additional UI.
 
 ## Start On This Machine
 
@@ -47,9 +51,10 @@ Text counts bytes/words/lines; Numbers summarizes the bundled integer file.
 These are separate native applications using capability IPC and native file
 wait/wakeup, not a host simulation or a kernel command interpreter.
 Their result windows appear after `start text` and `start numbers`. They are
-read-only snapshots, not editors. Stopping/faulting an app may leave its last
-snapshot visible; use `status` in Terminal for process state. Surface lifecycle
-notifications and recovery are still in development.
+read-only snapshots, not editors. Stopping/faulting an app now removes its window
+and taskbar entry; `status` in Terminal reports process state. A restarted app
+opens a fresh window. Automatic restart of the window service itself remains
+unimplemented and is not implied by application restart.
 
 To exercise containment: `fault numbers`, then `status numbers`, `start numbers`
 and `numbers /numbers.csv`. To finish normally: `stop text`, `status text`,
@@ -98,12 +103,12 @@ if a retained failure requires manual recovery; do not touch unrelated VMs.
 
 ## ISO And File Type
 
-Image: `outputs/cycle298-optical4/PooleOS-UserSpace-Preview.iso`.
+Image: `outputs/cycle299-optical3/PooleOS-UserSpace-Preview.iso`.
 
-Convenience copy: `PooleOS-Native-Windows-Cycle298.iso` in Downloads.
+Convenience copy: `PooleOS-Native-Windows-Cycle299.iso` in Downloads.
 Size 66109440 bytes; SHA256:
-`419C7CD084062B4AEF11D5D8664EB351EA6EF922D75ECFE3ACF610AA8BACFE52`.
-The ISO contains the new capacity-profile kernel/service, not Cycle297 bytes.
+`691826E53A6EEAB9947C74F405E75B34C4D3DE4455C50D15CADD3AB1F8F5FCBC`.
+The ISO contains the lifecycle-profile kernel/service, not Cycle298 bytes.
 Final-source replay and convenience-copy hash verification pass.
 
 Windows may call this a "DVD Disc Image". It is still a real ISO9660 image with
@@ -125,13 +130,13 @@ not open SDL, which previously crashed on this host. Both use the current pointe
 `outputs/native-userspace-preview.json`. The new visible entry point is:
 
 ```powershell
-.\Launch-Local-Console.cmd --receipt outputs/cycle298-optical4/receipt.json
+.\Launch-Local-Console.cmd --receipt outputs/cycle299-optical3/receipt.json
 ```
 
 From the repository root with the configured Python runtime:
 
 ```text
-python -B -m tools.qualify_native_app_session --work-dir outputs/NEW-OPTICAL --program-dir outputs/cycle298-programs1 --optical --windows --window-capacity
+python -B -m tools.qualify_native_app_session --work-dir outputs/NEW-OPTICAL --program-dir outputs/cycle299-programs2 --optical --windows --window-capacity --surface-lifecycle
 python -B -m tools.qualify_native_local_console --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-KEYBOARD-QEMU --backend qemu
 python -B -m tools.qualify_native_local_console --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-KEYBOARD-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible --keyboard-batch 4
 python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-QEMU
@@ -140,7 +145,7 @@ python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.
 python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-BURST-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible --keyboard-batch 4
 ```
 
-Use unused directories. The program directory contains 25 independently rebuilt,
+Use unused directories. The program directory contains 26 independently rebuilt,
 source-bound pairs. Kernel/boot pairs and ISO variants must reproduce exactly;
 positive, stale-file-grant and ordinary unsigned-denial controls remain required.
 Native keyboard tests inject device scancodes, never serial input, and compare
@@ -155,12 +160,14 @@ test helper; VirtualBox supplies the user's device input.
 
 ## Remaining Work
 
-Next: surface lifecycle/restart recovery, native input overload, general application
-input and accessible PooleGlass styling. Bounded emulator pointer evidence does
+Next: bounded input to application surfaces, native retirement while focused or
+dragging, compositor restart/resynchronization, launch controls and useful
+editable applications. Native input overload and accessible PooleGlass styling
+remain separate requirements. Bounded emulator pointer evidence does
 not establish unrestricted input or physical-device behavior. The console
-has an explicit seven-page capacity profile. Its24594-byte test image includes
-deliberate padding and has4078 bytes below the28672-byte ceiling; ordinary
-WindowConsole still has40 bytes free at16344/16384. The fixed probe starts at24576,
+has an explicit seven-page capacity profile. Its 24594-byte test image includes
+deliberate padding and has 4078 bytes below the 28672-byte ceiling; ordinary
+WindowConsole has 48 bytes free at 16336/16384. The fixed probe starts at 24576,
 so future service growth/layout changes require fresh build and execution checks.
 Service separation and scalable address spaces remain required; no hardware
 speedup is claimed.

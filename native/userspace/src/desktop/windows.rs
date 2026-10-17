@@ -151,7 +151,8 @@ impl Manager {
                 .find(|&i| self.visible.get(i).copied().unwrap_or(false));
         }
         if self.drag.is_some_and(|(i, _, _)| i == index) {
-            self.reset_input();
+            // Keep the physical press consumed until release; no click-through.
+            self.drag = None;
         }
         Ok(())
     }
@@ -250,6 +251,45 @@ impl Manager {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn closing_dragged_window_consumes_press_until_release() {
+        let mut m = Manager::new(1024, 768).unwrap();
+        m.show(1).unwrap();
+        m.x = m.windows[1].x + 8;
+        m.y = m.windows[1].y + 8;
+        m.motion(Motion {
+            dx: 0,
+            dy: 0,
+            buttons: 1,
+        });
+        assert!(m.drag.is_some());
+        m.close(1).unwrap();
+        assert!(m.drag.is_none());
+        assert_eq!(m.focus, Some(0));
+        let terminal = m.windows[0];
+        m.x = terminal.x + 8;
+        m.y = terminal.y + 8;
+        m.motion(Motion {
+            dx: 20,
+            dy: 20,
+            buttons: 1,
+        });
+        assert_eq!(m.windows[0], terminal);
+        assert!(m.drag.is_none());
+        m.motion(Motion {
+            dx: 0,
+            dy: 0,
+            buttons: 0,
+        });
+        m.x = terminal.x + 8;
+        m.y = terminal.y + 8;
+        m.motion(Motion {
+            dx: 0,
+            dy: 0,
+            buttons: 1,
+        });
+        assert!(m.drag.is_some());
+    }
     #[test]
     fn closing_focused_surface_restores_focus_and_does_not_restore_closed_taskbar_entry() {
         let mut m = Manager::new(1024, 768).unwrap();

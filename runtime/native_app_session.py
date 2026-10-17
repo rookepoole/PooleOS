@@ -33,7 +33,8 @@ def parse(line: str, event: str) -> dict:
     return dict(zip(names, values))
 
 
-def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False, windows: bool = False, window_capacity: bool = False) -> dict:
+def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False, windows: bool = False, window_capacity: bool = False, surface_lifecycle: bool = False) -> dict:
+    if type(surface_lifecycle) is not bool or surface_lifecycle and not window_capacity: raise ValueError('explicit lifecycle capacity profile required')
     if type(window_capacity) is not bool or window_capacity and not windows: raise ValueError('explicit window capacity profile required')
     if windows and (deferred_cleanup or file_controls or claimed_requester): raise ValueError('unqualified window control profile')
     if sum((deferred_cleanup,file_controls,claimed_requester)) > 1: raise ValueError('unqualified combined control modes')
@@ -176,6 +177,7 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
                 raise ValueError('admission has no exact owned handoff')
             expected = generation[task]+1
             process_slot = 6-task if file_controls or claimed_requester else task-3
+            if surface_lifecycle: process_slot = 2*(task-4)+1
             if v['sequence'] != expected or v['handle'] != (expected<<32)|0x50000|process_slot or v['owned_pages'] != pages[task]:
                 raise ValueError('launch sequence, handle or pages')
             if not valid_root(v['root']) or any(v['root'] == roots[j] for j in owned if j != task) or (expected == 1 and v['root'] != roots[task]):
@@ -264,6 +266,8 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
         result.update(surface_grants=surfaces, window_profile=True)
     if window_capacity:
         result.update(window_capacity=True,window_service_code_pages=7,ordinary_code_pages_maximum=4)
+    if surface_lifecycle:
+        result['surface_lifecycle'] = True
     if claimed_requester:
         result.update(claimed_requester=True,claimed_waiters=claimed_waiters,diagnostic_requester_is_useful_app=False,
                       kernel_injected_waiting_cancellation=True,late_reply_denial_asserted_by_native_service=True,
@@ -353,8 +357,8 @@ def file_control_scenario(nonce: str, *, bad_file: bool = False, claimed_request
     return shell.Scenario('claimed-requester-controls' if claimed_requester else 'file-request-controls',nonce,tuple(steps))
 
 
-def negative_controls(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False, windows: bool = False, window_capacity: bool = False) -> int:
-    validate_markers(markers, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester,file_waits=file_waits,windows=windows,window_capacity=window_capacity)
+def negative_controls(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False, windows: bool = False, window_capacity: bool = False, surface_lifecycle: bool = False) -> int:
+    validate_markers(markers, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester,file_waits=file_waits,windows=windows,window_capacity=window_capacity,surface_lifecycle=surface_lifecycle)
     cases = [markers[:i]+markers[i+1:] for i in range(len(markers)-1)]
     cases += [markers+[markers[-1]], markers+['POOLEOS:PANIC injected']]
     for i in range(29,len(markers)):
@@ -367,7 +371,7 @@ def negative_controls(markers: list[str], *, bad_file: bool = False, deferred_cl
                 changed[i] = re.sub(r' '+field+r'=[0-9]+', ' '+field+'='+str((1<<64)-1), changed[i])
                 cases.append(changed)
     for case in cases:
-        try: validate_markers(case, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester,file_waits=file_waits,windows=windows,window_capacity=window_capacity)
+        try: validate_markers(case, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester,file_waits=file_waits,windows=windows,window_capacity=window_capacity,surface_lifecycle=surface_lifecycle)
         except ValueError: continue
         raise ValueError('hostile application observation accepted')
     return len(cases)

@@ -45,6 +45,8 @@ pub enum Status {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Request {
+    #[cfg(feature = "development-window-lifecycle")]
+    ProcessObservation(crate::scheduler_smp::TaskId),
     #[cfg(feature = "development-desktop")]
     Desktop {
         number: u64,
@@ -276,6 +278,14 @@ pub fn request(
         19 => Err(Status::Arguments),
         20 if destination == 0 && bytes == 0 => Ok(Request::ProcessCompletion(source)),
         20 => Err(Status::Arguments),
+        #[cfg(feature = "development-window-lifecycle")]
+        27 if source <= u8::MAX as u64 && destination <= u32::MAX as u64 && bytes == 0 => {
+            crate::scheduler_smp::TaskId::new(source as u8, destination as u32)
+                .map(Request::ProcessObservation)
+                .map_err(|_| Status::Arguments)
+        }
+        #[cfg(feature = "development-window-lifecycle")]
+        27 => Err(Status::Arguments),
         #[cfg(feature = "development-windows")]
         26 if destination == 0 && bytes == 0 => Ok(Request::Desktop {
             number,

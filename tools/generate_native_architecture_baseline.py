@@ -24,6 +24,14 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle299-surface-lifecycle.md",
+    "docs/native-surface-lifecycle.md",
+    "runs/native-surface-lifecycle-readiness.json",
+    "native/userspace/src/bin/window_lifecycle.rs",
+    "native/userspace/src/desktop/lifecycle.rs",
+    "native/kernel/src/capability_ipc/process/observer_tests.rs",
+    "runtime/native_surface_lifecycle.py",
+    "tests/test_native_surface_lifecycle.py",
     "docs/checkpoints/cycle298-window-capacity.md",
     "docs/native-window-capacity.md",
     "runs/native-window-capacity-readiness.json",

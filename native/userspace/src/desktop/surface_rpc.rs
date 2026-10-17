@@ -84,6 +84,50 @@ mod tests {
         assert!(s.open(0) && s.open(1));
     }
     #[test]
+    fn lifecycle_retirement_runs_while_reply_is_backpressured_and_old_writes_stay_dead() {
+        struct Dead;
+        impl crate::supervisor::Calls for Dead {
+            fn invoke(&mut self, n: u64, slot: u64, generation: u64) -> (u64, u64) {
+                assert_eq!((n, slot, generation), (27, 4, 1));
+                (6, 4)
+            }
+        }
+        let mut f = Fake {
+            incoming: [envelope(4, 1, Frame::new(surfaces::OPEN, 1, 0))].into(),
+            reply_status: 6,
+            sent: Vec::new(),
+            discarded: 0,
+        };
+        let mut storage = [0; 384];
+        let mut s = Surfaces::new(&mut storage);
+        let mut server = Server::new(1);
+        assert_eq!(server.poll(&mut f, &mut s).unwrap(), Some(0));
+        let handle = Frame::decode(&f.sent[0]).unwrap().handle;
+        assert_eq!(super::super::lifecycle::poll(&mut s, &mut Dead), Ok(1));
+        assert_eq!(server.poll(&mut f, &mut s).unwrap(), None);
+        assert!(!s.open(0));
+        assert_eq!(f.sent[0], f.sent[1]);
+        f.reply_status = 9;
+        server.poll(&mut f, &mut s).unwrap();
+        let mut old = Frame::new(surfaces::WRITE, 2, handle);
+        old.len = 1;
+        old.data[0] = b'X';
+        f.incoming.extend([
+            envelope(4, 1, old),
+            envelope(4, 2, Frame::new(surfaces::OPEN, 1, 0)),
+        ]);
+        f.reply_status = 0;
+        assert_eq!(server.poll(&mut f, &mut s).unwrap(), None);
+        assert_eq!(
+            Frame::decode(f.sent.last().unwrap()).unwrap().status,
+            surfaces::DENIED
+        );
+        assert_eq!(server.poll(&mut f, &mut s).unwrap(), Some(0));
+        assert!(s.open(0));
+        assert_eq!(s.generation(0), 2);
+        assert!(!s.retire(0, 1));
+    }
+    #[test]
     fn malicious_and_retired_clients_do_not_kill_surface_service() {
         let mut bad = envelope(4, 1, Frame::new(surfaces::OPEN, 1, 0));
         bad[39] = 1;

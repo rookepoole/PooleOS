@@ -7,15 +7,35 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 298
+Last roadmap reconciliation: PooleOS Cycle 299
 
-Closeout repair: a changed installed PowerShell hash invalidated the first final host
+Cycle299 implementation: generation-bound process observation now removes
+faulted/stopped application surfaces and permits fresh-generation restarts.
+Observer admission is failure-atomic and read-only, within the existing four
+total/two-per-owner process leases. Stale requests cannot resurrect old windows
+or close new generations. Host tests also cover held-button consumption when a
+dragged surface closes; native retirement during active drag remains unqualified.
+The new kernel is 132/208 pages with 36 guarded stack pages. All 26 independent
+program pairs match, with 187 user tests per profile and six kernel profiles in
+both debug/release. Optical and both visible VirtualBox device modes pass on
+final source. Both QEMU device modes and the legacy capacity cohort also pass:
+ten QEMU and two visible VirtualBox checks, including 24 lifecycle pixel barriers.
+All earlier failures remain retained. 418 overlapping metadata/integration tests
+pass; 1573 is discovered inventory, not a full-suite pass. Architecture binds 836
+files. Stale current gap summaries are reconciled without closing production
+requirements. No full canonical qualification, merge or release is claimed.
+Next: bounded application input, native focus/drag retirement stress, compositor
+recovery/resynchronization and useful editable applications. Complete microkernel,
+PooleGlyph/PDC, accessible PooleGlass and N0-N39 requirements remain mandatory.
+[Evidence](checkpoints/cycle299-surface-lifecycle.md).
+
+Historical Cycle298 closeout repair: a changed installed PowerShell hash invalidated the first final host
 identity check. Its reviewed Microsoft-signed replacement is pinned without
 relaxing controls; all eight source-bound guest checks pass after replay on
 October17. The preceding October16 passes and failed audit remain historical
 evidence. Native source and ISO bytes are unchanged by this host-pin repair.
 
-Cycle298 implements explicit seven-page window-service capacity while retaining
+Historical Cycle298 implements explicit seven-page window-service capacity while retaining
 ordinary four-page program limits, eight VM mappings, RX code, RW/NX stacks,
 guards, exact ownership and rollback/scrubbing. Native startup reaches page seven
 and service retirement releases19 owned pages. The kernel is130/208 pages with36

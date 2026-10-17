@@ -1,15 +1,65 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-17
-Plan version: 2.201.0-native-window-capacity
-Roadmap cycle: PooleOS Cycle 298
+Plan version: 2.202.0-native-surface-lifecycle
+Roadmap cycle: PooleOS Cycle 299
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 298: Qualified Development Window-Service Capacity
+## Cycle 299: Generation-Bound Surface Lifecycle
+
+Generation-bound read-only process observation now drives surface retirement,
+focus/drag cleanup and fresh-generation restart. Ordinary profiles and fixed
+lease/memory bounds are preserved. The window service cannot terminate apps;
+stale operations cannot resurrect old surfaces or close a newer generation.
+[SL1 through SL6 and evidence](checkpoints/cycle299-surface-lifecycle.md).
+Implementation and host verification are complete for this increment: 26
+independent program pairs, 187 user tests per debug/release, six kernel profiles
+in both modes and 77 focused Python checks. The first optical fault test exposed
+a retirement fan-out count left at one; the lifecycle profile requires parent
+plus Inspect-only observer. That failure is retained and the repaired native
+cohort passes all four optical checks: two normal boots, stale-file authority and
+ordinary unsigned denial. The legacy capacity cohort and both full QEMU input
+modes also pass. The first VirtualBox attempt exposes an overly narrow capture
+filename allowlist; the six lifecycle capture names are now allowed only within
+the owned directory, with byte-exact conversion tests. Only that Python adapter
+and its test change after the host/native passes. Fresh optical and both visible
+VirtualBox modes now pass on the final source and ISO. Each VirtualBox run
+verifies all six lifecycle pixel barriers, 17 pointer steps, 573 keyboard bytes
+and owned cleanup. Both QEMU device modes and the final legacy capacity cohort
+also pass. Total: ten QEMU and two visible VirtualBox checks, including 24 native
+lifecycle pixel barriers. Earlier passes remain historical snapshots. The local
+preview pointer and byte-verified Downloads copy select the Cycle299 ISO.
+The kernel is 132/208 pages with 36 guarded stack pages; ordinary window code is
+16336/16384 bytes and the explicit lifecycle service is 24594/28672 bytes.
+418 overlapping metadata/integration tests pass; 1573 is discovered Python
+inventory, not a full-suite execution. Architecture binds 836 files. The first
+metadata failure is retained; exact inventory assertions are updated, and stale
+"no shell/compositor" summaries now distinguish implemented development services
+from unfinished production requirements. No full canonical replay, phase closure,
+main merge, release or production promotion is claimed.
+
+Chronological next work after qualification: bounded, generation-bound input to
+isolated application surfaces; native retirement while focused/dragging;
+compositor restart/resynchronization; launch controls and useful editable apps.
+Persistence, unrestricted input overload and accessible PooleGlass each require
+their own implementation and acceptance evidence. Keep the complete microkernel,
+PooleGlyph/PDC, canonical qualification and N0-N39 work in the production path.
+
+Next input acceptance must bind the focused surface's exact admitted generation
+to its own capability endpoint, keep queues and per-turn work bounded, and reject
+stale events after stop/restart. Retiring a focused or dragged surface must not
+transfer held keys/buttons into another client. Client failure must not block the
+window service or other applications. Qualify real native interaction on both
+emulators before claiming editable or generally interactive application windows.
+Compositor recovery is a separate requirement: loss of the window service must
+not reuse stale surface handles, silently lose application ownership or weaken
+memory-reclamation checks. None of these next-step requirements is marked done.
+
+## Historical Cycle 298: Qualified Development Window-Service Capacity
 
 Closeout update: the final host identity check detected a changed PowerShell
 binary after the successful October16 guests. The prior candidate and failure

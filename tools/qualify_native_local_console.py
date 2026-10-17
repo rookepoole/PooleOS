@@ -15,6 +15,7 @@ from runtime import native_app_session as apps, native_console, native_session, 
 from runtime import native_virtualbox as vbox, native_live_boot_handoff as handoff
 from runtime import native_local_console as frames
 from runtime import native_windows as window_frames
+from runtime import native_surface_lifecycle as lifecycle_frames
 from tools import qualify_native_app_session as qualification, qualify_native_user_entry as source
 from tools.launch_native_userspace_iso import check_preview, LOG_LIMIT
 from tools.launch_native_virtualbox import listener_socket
@@ -89,7 +90,7 @@ def digest(path):return hashlib.sha256(path.read_bytes()).hexdigest().upper()
 
 def qemu_run(report,iso,work,interaction,result):
     windows=report.get('window_surfaces',False)
-    pixels=window_frames if windows else frames
+    pixels=lifecycle_frames if report.get('surface_lifecycle') else window_frames if windows else frames
     shared=qualification.shared
     lock,base=shared.tier0.validate_contracts(ROOT)
     qemu=shared.tier0._require_workspace_tool_path(shared.tier0.DEFAULT_QEMU_ROOT,ROOT)
@@ -106,7 +107,7 @@ def qemu_run(report,iso,work,interaction,result):
             client.execute('screendump',{'filename':str(work/'initial.ppm'),'format':'ppm'})
             captured=True
     run,_,_=shared.boot._execute_once('native-keyboard',lock,optical.optical_profile(base),qemu,iso,work,240,
-        marker_validator=lambda m:apps.validate_markers(m,file_waits=True,windows=windows,window_capacity=report.get('window_capacity',False)),marker_extractor=native_session.extract_markers,
+        marker_validator=lambda m:apps.validate_markers(m,file_waits=True,windows=windows,window_capacity=report.get('window_capacity',False),surface_lifecycle=report.get('surface_lifecycle',False)),marker_extractor=native_session.extract_markers,
         hpet_msi=True,pause_on_completion=True,console_port=interaction.port,console_poll=interaction.poll,
         capture_log_limit_bytes=LOG_LIMIT,guest_control=control,frame_validator=pixels.inspect_ppm)
     if not captured:raise ValueError('initial frame missing')
@@ -115,7 +116,7 @@ def qemu_run(report,iso,work,interaction,result):
 
 def vbox_run(report,iso,work,interaction,result,executable,visible=False,control=None):
     windows=report.get('window_surfaces',False)
-    pixels=window_frames if windows else frames
+    pixels=lifecycle_frames if report.get('surface_lifecycle') else window_frames if windows else frames
     profile=json.loads((ROOT/'specs/native-virtualbox-preview-profile.json').read_bytes())
     hashes=vbox.verify_runtime(executable,profile,visible=visible)
     command=vbox.Command(executable)
@@ -143,7 +144,7 @@ def vbox_run(report,iso,work,interaction,result,executable,visible=False,control
                 owner.pause()
                 log=vbox.serial_payload(vbox.bounded_read(path,LOG_LIMIT))
                 markers=native_session.extract_markers(log)
-                result['run']=dict(markers=markers,marker_summary=apps.validate_markers(markers,file_waits=True,windows=windows,window_capacity=report.get('window_capacity',False)),pbp1_transcript=handoff.extract_transcript(log).summary)
+                result['run']=dict(markers=markers,marker_summary=apps.validate_markers(markers,file_waits=True,windows=windows,window_capacity=report.get('window_capacity',False),surface_lifecycle=report.get('surface_lifecycle',False)),pbp1_transcript=handoff.extract_transcript(log).summary)
                 owner.checked('controlvm',owner.identity,'screenshotpng',work/'final.png')
                 result.update(initial_frame_sha256=digest(work/'initial.png'),final_frame_sha256=digest(work/'final.png'))
                 from PIL import Image
@@ -199,7 +200,7 @@ def main():
         qualification.shared.load.validate_oracle_binding(prefix['boot_prefix'],qualification.shared.load.inspect_media_bytes(disk),result['run']['pbp1_transcript'])
         result.update(status='pass',keyboard_input_bytes=interaction.keyboard_bytes,exact_interaction=True,
             sustained_window=interaction.sustained_evidence,framebuffer_changed=True,
-            hostile_marker_cases_rejected=apps.negative_controls(result['run']['markers'],file_waits=True,windows=windows,window_capacity=report.get('window_capacity',False)))
+            hostile_marker_cases_rejected=apps.negative_controls(result['run']['markers'],file_waits=True,windows=windows,window_capacity=report.get('window_capacity',False),surface_lifecycle=report.get('surface_lifecycle',False)))
     except Exception as e:result['failure']=f'{type(e).__name__}: {e}'
     finally:
         interaction.close()

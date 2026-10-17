@@ -29,6 +29,12 @@ test = false
 bench = false
 
 [[bin]]
+name = "PooleWindowLifecycle"
+path = "src/bin/window_lifecycle.rs"
+test = false
+bench = false
+
+[[bin]]
 name = "PooleWindowText"
 path = "src/bin/window_text.rs"
 test = false

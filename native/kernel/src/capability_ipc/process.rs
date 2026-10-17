@@ -53,6 +53,109 @@ pub struct StopPermit {
 }
 
 impl Space {
+    /// Read-only selection within existing Inspect authority, never a task-ID grant.
+    /// Revoked/0 means the watched slot has advanced, not physical reclamation of
+    /// the queried generation. Exact generations retain PCOMP1 completion semantics.
+    pub fn observe_process(&self, caller: Caller, target: TaskId) -> (Status, u64) {
+        if !self.process_attached(caller) || TaskId::new(target.slot, target.generation).is_err() {
+            return (Status::Denied, 0);
+        }
+        let mut found = None;
+        for (i, p) in self.processes.iter().enumerate() {
+            if let Some(l) = p.value {
+                if l.owner == caller
+                    && l.rights == Rights::Inspect
+                    && l.target.id.slot == target.slot
+                {
+                    if found.is_some() {
+                        return (Status::Denied, 0);
+                    }
+                    found = Some((i, p.generation, l.target.id.generation));
+                }
+            }
+        }
+        match found {
+            Some((i, generation, current)) if target.generation == current => self
+                .process_completion(caller, (u64::from(generation) << 32) | TAG | (i + 1) as u64),
+            Some((_, _, current)) if target.generation < current => (Status::Revoked, 0),
+            _ => (Status::Denied, 0),
+        }
+    }
+
+    /// Preflight the observer slot before admit_launch allocates its one parent
+    /// process lease. This plan stays private to one exclusive launch operation.
+    pub(super) fn prepare_observer(
+        &self,
+        owner: TaskId,
+        parent: TaskId,
+        target: TaskId,
+        image: ImageAdmission,
+    ) -> Result<ObserverGrant, Error> {
+        if owner == parent || owner.slot == target.slot {
+            return Err(Error::Denied);
+        }
+        let owner = self.tables[self.table(owner)?]
+            .caller
+            .ok_or(Error::Identity)?;
+        let mut previous = None;
+        let mut owned = 0;
+        for (i, p) in self.processes.iter().enumerate() {
+            if let Some(l) = p.value.filter(|l| l.owner == owner) {
+                owned += 1;
+                if l.target.id.slot == target.slot {
+                    if previous.is_some()
+                        || l.rights != Rights::Inspect
+                        || l.target.id.generation >= target.generation
+                        || l.state != State::Revoked
+                        || l.completion.is_none()
+                        || self.process_attached(l.target)
+                    {
+                        return Err(Error::Denied);
+                    }
+                    previous = Some(i);
+                }
+            }
+        }
+        let slot = if let Some(i) = previous {
+            i
+        } else {
+            if owned >= PER_OWNER {
+                return Err(Error::Quota);
+            }
+            // The first usable vacancy belongs to the launch parent's grant.
+            self.processes
+                .iter()
+                .enumerate()
+                .filter(|(_, p)| p.value.is_none() && p.generation < u32::MAX)
+                .nth(1)
+                .map(|(i, _)| i)
+                .ok_or(Error::Quota)?
+        };
+        let before = self.processes[slot];
+        let generation = before.generation.checked_add(1).ok_or(Error::Quota)?;
+        Ok(ObserverGrant {
+            slot,
+            before,
+            after: Slot {
+                generation,
+                value: Some(Lease {
+                    owner,
+                    target: Caller::new(target, image),
+                    rights: Rights::Inspect,
+                    state: State::Attached,
+                    completion: None,
+                }),
+            },
+        })
+    }
+
+    pub(super) fn commit_observer(&mut self, grant: ObserverGrant) {
+        // admit_launch rejects extra Process steps, so only its first vacancy
+        // can change. A retained old observer or second vacancy remains untouched.
+        assert_eq!(self.processes[grant.slot], grant.before);
+        self.processes[grant.slot] = grant.after;
+    }
+
     fn process_attached(&self, caller: Caller) -> bool {
         self.table(caller.id)
             .is_ok_and(|i| self.tables[i].caller == Some(caller))
@@ -300,8 +403,17 @@ impl Space {
     }
 }
 
+pub(super) struct ObserverGrant {
+    slot: usize,
+    before: Slot,
+    after: Slot,
+}
+
 #[cfg(test)]
 mod tests;
 
 #[cfg(test)]
 mod completion_tests;
+
+#[cfg(test)]
+mod observer_tests;

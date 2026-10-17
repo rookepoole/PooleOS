@@ -622,6 +622,8 @@ pub(crate) fn run(
                 poolekernel::development_apps::window_grants(peers[3].id, peers[1].id, peers[2].id);
             #[cfg(not(feature = "development-applications"))]
             let steps = [];
+            #[cfg(feature = "development-window-lifecycle")]
+            let observer = peers[2].id;
             let p = &mut peers[j];
             if generations[j - 4] == 0 {
                 if !owned[j] || p.slot.state(p.id) != Ok(task::State::Prepared) {
@@ -645,6 +647,21 @@ pub(crate) fn run(
             }
             let admitted = checked!(unsafe {
                 arch::x86_64::user_ipc::with_waits(|s| {
+                    #[cfg(feature = "development-window-lifecycle")]
+                    return s
+                        .admit_observed_launch(
+                            &permit,
+                            &mut scheduler,
+                            Member {
+                                id: p.id,
+                                image: p.admission,
+                                priority: 16,
+                            },
+                            &steps,
+                            observer,
+                        )
+                        .map_err(|_| poolekernel::capability_ipc::Error::Identity);
+                    #[cfg(not(feature = "development-window-lifecycle"))]
                     s.admit_launch(
                         &permit,
                         &mut scheduler,
@@ -905,12 +922,15 @@ fn finish_retire(
         .teardown(scheduler::TaskId::new(p.id.slot, p.id.generation).map_err(|_| ())?)
         .map_err(|_| ())?;
     // Completion becomes visible only after revocation, memory release and scheduler teardown.
+    // The lifecycle profile also retains one Inspect-only window observer.
+    let expected_recipients = usize::from(!job.is_closing())
+        + usize::from(cfg!(feature = "development-window-lifecycle"));
     if publish
         && unsafe {
             arch::x86_64::user_ipc::with_waits(|s| s.publish_process_completion(outcome, scheduler))
         }
         .map_err(|_| ())?
-            != usize::from(!job.is_closing())
+            != expected_recipients
     {
         return Err(());
     }

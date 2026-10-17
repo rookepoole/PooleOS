@@ -112,15 +112,18 @@ class VirtualBoxMouseTests(unittest.TestCase):
         from PIL import Image
         with tempfile.TemporaryDirectory() as directory:
             work=Path(directory);vm=owner(work);c=client(vm)
-            for path in (work.parent/'pointer-before.ppm',work/'arbitrary.ppm'):
+            for path in (work.parent/'pointer-before.ppm',work/'arbitrary.ppm',
+                         work.parent/'lifecycle-00.ppm',work/'lifecycle-06.ppm',
+                         work/'lifecycle-0.ppm',work/'lifecycle-000.ppm',work/'lifecycle-00.png'):
                 with self.assertRaises(ValueError):c.execute('screendump',dict(filename=str(path),format='ppm'))
             vm.checked.assert_not_called()
             raw=bytes([11,43,79])*(1024*768)
             def capture(*args):Image.frombytes('RGB',(1024,768),raw).save(args[-1])
             vm.checked.side_effect=capture
-            target=work/'pointer-before.ppm';c.execute('screendump',dict(filename=str(target),format='ppm'))
-            self.assertEqual(target.read_bytes(),b'P6\n1024 768\n255\n'+raw)
-            self.assertEqual(vm.checked.call_args.args[:3],('controlvm',IDENTITY,'screenshotpng'))
+            for name in ['pointer-before.ppm']+[f'lifecycle-{n:02}.ppm' for n in range(6)]:
+                target=work/name;c.execute('screendump',dict(filename=str(target),format='ppm'))
+                self.assertEqual(target.read_bytes(),b'P6\n1024 768\n255\n'+raw)
+                self.assertEqual(vm.checked.call_args.args[:3],('controlvm',IDENTITY,'screenshotpng'))
 
     @unittest.skipUnless(os.name=='nt','Windows COM helper rejection test')
     def test_actual_helper_rejects_identity_and_registry_mismatch_before_vm_access(self):

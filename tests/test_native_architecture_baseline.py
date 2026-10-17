@@ -69,7 +69,11 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
         bound_paths = {item["path"] for item in self.artifact["bound_sources"]}
-        self.assertEqual(len(self.artifact["bound_sources"]), 828)
+        self.assertEqual(len(self.artifact["bound_sources"]), 836)
+        self.assertTrue({"docs/checkpoints/cycle299-surface-lifecycle.md", "docs/native-surface-lifecycle.md",
+            "runs/native-surface-lifecycle-readiness.json", "native/userspace/src/bin/window_lifecycle.rs",
+            "native/userspace/src/desktop/lifecycle.rs", "native/kernel/src/capability_ipc/process/observer_tests.rs",
+            "runtime/native_surface_lifecycle.py", "tests/test_native_surface_lifecycle.py"}.issubset(bound_paths))
         self.assertTrue({"docs/checkpoints/cycle298-window-capacity.md", "docs/native-window-capacity.md",
             "runs/native-window-capacity-readiness.json", "native/userspace/build.rs",
             "native/userspace/src/window_main.rs", "native/userspace/src/bin/window_capacity.rs",

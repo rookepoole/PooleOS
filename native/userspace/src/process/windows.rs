@@ -14,7 +14,7 @@ use crate::{
         windows::{Manager, Rect},
     },
 };
-pub struct Local<'a> {
+pub struct Local<'a, const LIFETIME: bool = false> {
     serial: Console,
     display: Display,
     terminal: Terminal<'a>,
@@ -34,7 +34,7 @@ impl Device for Ps2 {
         }
     }
 }
-impl<'a> Local<'a> {
+impl<'a, const LIFETIME: bool> Local<'a, LIFETIME> {
     #[inline(always)]
     pub fn new(
         port: Console,
@@ -123,6 +123,21 @@ impl<'a> Local<'a> {
                 })?;
             }
         }
+        if LIFETIME {
+            let retired = desktop::lifecycle::poll(&mut self.surfaces, &mut super::ProcessCalls)?;
+            if retired != 0 {
+                let focus = self.manager.focus;
+                for i in 0..2 {
+                    if retired & (1 << i) != 0 {
+                        self.manager.close(i + 1)?;
+                    }
+                }
+                if focus != self.manager.focus {
+                    self.input.clear_focus();
+                }
+                self.paint(self.manager.bounds)?;
+            }
+        }
         let update = self
             .input
             .poll(&mut self.manager, &mut Ps2(self.display.0))?;
@@ -146,7 +161,7 @@ impl<'a> Local<'a> {
         Ok(())
     }
 }
-impl Registers for Local<'_> {
+impl<const LIFETIME: bool> Registers for Local<'_, LIFETIME> {
     #[inline(always)]
     fn read(&mut self, offset: u8) -> Result<u8, Error> {
         let focused = self.manager.focus == Some(0) && self.manager.visible[0];

@@ -101,7 +101,9 @@ fn local_console_syscall_shape_rejects_reserved_fields_and_wrong_version() {
     assert!(request(24, 1, 3, 0, 0, u64::MAX, 0).is_ok());
     #[cfg(not(feature = "development-windows"))]
     assert_eq!(request(26, 1, 0, 0, 0, 0, 0), Err(Status::Unknown));
+    #[cfg(not(feature = "development-window-lifecycle"))]
     assert_eq!(request(27, 1, 0, 0, 0, 0, 0), Err(Status::Unknown));
+    assert_eq!(request(28, 1, 0, 0, 0, 0, 0), Err(Status::Unknown));
 }
 #[derive(Default)]
 struct Ports(Vec<(u16, Option<u8>)>);

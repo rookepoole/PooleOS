@@ -5,6 +5,7 @@ pub mod compositor;
 pub mod font;
 pub mod input;
 pub mod keyboard;
+pub mod lifecycle;
 pub mod mouse;
 pub mod publisher;
 pub mod surface_rpc;

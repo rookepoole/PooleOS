@@ -4,25 +4,75 @@ import argparse, json, time
 from pathlib import Path
 from tools import qualify_native_local_console as local
 from runtime import native_windows as frames
+from runtime import native_surface_lifecycle as lifecycle_frames
 ROOT=local.ROOT
 
+def lifecycle_barriers(sent):
+    """Six ordered observations after acknowledged application commands."""
+    cursor=sent.index(b'fault numbers\r')+len(b'fault numbers\r')
+    result={}
+    for command,visible,event,task,generation in (
+        (b'status numbers', (True,False), 'RETIRE',5,1),
+        (b'numbers /numbers.csv', (True,True), 'ADMIT',5,2),
+        (b'status text', (False,True), 'RETIRE',4,1),
+        (b'text /numbers.csv', (True,True), 'ADMIT',4,2),
+        (b'status text', (False,True), 'RETIRE',4,2),
+        (b'status numbers', (False,False), 'RETIRE',5,2),
+    ):
+        cursor=sent.index(command+b'\r',cursor)+len(command)+1
+        result[cursor]=dict(visible=visible,event=event,task=task,generation=generation)
+    return result
+
 class WindowInteraction(local.Interaction):
-    def __init__(self, keyboard_batch=1):
+    def __init__(self, keyboard_batch=1, surface_lifecycle=False):
+        if type(surface_lifecycle) is not bool:raise ValueError('explicit lifecycle mode required')
         super().__init__(keyboard_batch)
         self.pointer_done=False
+        self.surface_barriers=lifecycle_barriers(self.case.sent) if surface_lifecycle else {}
+        self.observed_surfaces=set()
+    def blocked(self):
+        return (self.step==self.sustained_barrier and not self.pointer_done or
+                self.step in self.surface_barriers and self.step not in self.observed_surfaces)
     def send_ready(self):
-        if self.step==self.sustained_barrier and not self.pointer_done:return
+        if self.blocked():return
         return super().send_ready()
     def wrap(self, connection):
         owner=self
         class DeviceSocket(local.KeyboardSocket):
             def send(self, data):
-                if owner.step==owner.sustained_barrier and not owner.pointer_done:return 0
+                if owner.blocked():return 0
                 return super().send(data)
         def inject(codes):
             if self.inject is None:raise ValueError('unbound keyboard')
             self.inject(codes);self.keyboard_bytes+=1
         self.sock=DeviceSocket(connection,inject)
+
+class SurfaceProbe:
+    def __init__(self,work):
+        self.work=work;self.step=None;self.deadline=0;self.sample=0;self.evidence=[]
+    def tick(self,client,interaction,debug):
+        step=interaction.step
+        if step not in interaction.surface_barriers or step in interaction.observed_surfaces:return
+        now=time.monotonic()
+        if self.step!=step:
+            self.step=step;self.deadline=now+12;self.sample=0
+        if now>self.deadline:raise TimeoutError(f'surface lifecycle step {step} not observed')
+        _,output=local.native_console.split_output(bytes(interaction.received),partial=True)
+        if not interaction.expected.startswith(output):raise ValueError('lifecycle transcript differs')
+        if output!=interaction.expected or now<self.sample:return
+        barrier=interaction.surface_barriers[step]
+        event=barrier['event']
+        markers=local.native_session.extract_markers(debug)
+        observations=[local.apps.parse(m,event) for m in markers if m.startswith('POOLEOS:APPS '+event+' ')]
+        identity=(barrier['task'],barrier['generation'])
+        if identity not in {(m['task'],m['generation']) for m in observations}:return
+        self.sample=now+.15
+        path=self.work/f'lifecycle-{len(self.evidence):02}.ppm'
+        client.execute('screendump',{'filename':str(path),'format':'ppm'})
+        try:pixels=frames.inspect_ppm(path.read_bytes(),expected=barrier['visible'])
+        except ValueError:return
+        self.evidence.append(dict(step=step,**barrier,frame_sha256=local.digest(path),pixels=pixels))
+        interaction.observed_surfaces.add(step)
 
 def bounded_motion(x,y,target_x,target_y):
     return max(-96,min(96,target_x-x)),max(-96,min(96,target_y-y))
@@ -122,8 +172,10 @@ def main():
     work=args.work_dir.resolve()
     if not work.is_relative_to(ROOT/'outputs') or work==ROOT/'outputs':raise ValueError('new workspace output required')
     work.mkdir(parents=True,exist_ok=False)
-    before=local.source.source_bindings();interaction=WindowInteraction(args.keyboard_batch);pointer=PointerProbe(work)
-    result=dict(cycle=297,contract_id='PWS1',status='fail',source_bindings=before,iso_sha256=local.digest(iso),
+    lifecycle=report.get('surface_lifecycle',False)
+    before=local.source.source_bindings();interaction=WindowInteraction(args.keyboard_batch,lifecycle);pointer=PointerProbe(work)
+    surfaces=SurfaceProbe(work)
+    result=dict(cycle=299 if lifecycle else 297,contract_id='PWS1',surface_lifecycle=lifecycle,status='fail',source_bindings=before,iso_sha256=local.digest(iso),
         backend=args.backend,visible=args.visible,serial_input_bytes=0,physical_hardware_tested=False,production_ready=False,guest_bound_seconds=240)
     vbox_pointer=None
     started=time.monotonic()
@@ -136,18 +188,18 @@ def main():
             def control(client,debug):
                 def inject(codes):
                     client.execute('input-send-event',{'events':[{'type':'key','data':{'down':not bool(c&128),'key':{'type':'number','data':c&127}}} for c in codes]})
-                interaction.inject=inject;pointer.tick(client,interaction,debug)
+                interaction.inject=inject;pointer.tick(client,interaction,debug);surfaces.tick(client,interaction,debug)
             run,_,_=shared.boot._execute_once('native-windows',lock,local.optical.optical_profile(base),qemu,iso,work,240,
-                marker_validator=lambda m:local.apps.validate_markers(m,file_waits=True,windows=True,window_capacity=report.get('window_capacity',False)),marker_extractor=local.native_session.extract_markers,
+                marker_validator=lambda m:local.apps.validate_markers(m,file_waits=True,windows=True,window_capacity=report.get('window_capacity',False),surface_lifecycle=lifecycle),marker_extractor=local.native_session.extract_markers,
                 hpet_msi=True,pause_on_completion=True,console_port=interaction.port,console_poll=interaction.poll,
-                capture_log_limit_bytes=local.LOG_LIMIT,guest_control=control,frame_validator=frames.inspect_ppm)
+                capture_log_limit_bytes=local.LOG_LIMIT,guest_control=control,frame_validator=lifecycle_frames.inspect_ppm if lifecycle else frames.inspect_ppm)
         else:
             from runtime.native_virtualbox_mouse import PointerClient
             def control(owner,debug):
                 nonlocal vbox_pointer
                 if not interaction.sustained_evidence:return
                 if vbox_pointer is None:vbox_pointer=PointerClient(owner,args.virtualbox.resolve())
-                pointer.tick(vbox_pointer,interaction,debug)
+                pointer.tick(vbox_pointer,interaction,debug);surfaces.tick(vbox_pointer,interaction,debug)
             local.vbox_run(report,iso,work,interaction,result,args.virtualbox.resolve(),args.visible,control)
             run=result['run']
             if vbox_pointer is None:raise ValueError('pointer API was not reached')
@@ -155,18 +207,21 @@ def main():
         _,output=local.native_console.split_output(bytes(interaction.received))
         if not interaction.pointer_done or interaction.sent!=len(interaction.case.sent) or output!=interaction.case.expected or interaction.keyboard_bytes!=interaction.sent:
             raise ValueError('inexact native mouse/keyboard interaction')
+        if interaction.observed_surfaces!=set(interaction.surface_barriers) or len(surfaces.evidence)!=(6 if lifecycle else 0):
+            raise ValueError('incomplete surface lifecycle observations')
         prefix=run['marker_summary']['transfer_prefix']
         shared.load.validate_oracle_binding(prefix['boot_prefix'],shared.load.inspect_media_bytes(disk),run['pbp1_transcript'])
         result.update(status='pass',run=run,mouse_interaction_verified=True,drag_minimize_restore_verified=True,
             focus_routing_verified=True,focused_nonterminal_keys_discarded=1,keyboard_input_bytes=interaction.keyboard_bytes,
             exact_interaction=True,sustained_window=interaction.sustained_evidence,
-            hostile_marker_cases_rejected=local.apps.negative_controls(run['markers'],file_waits=True,windows=True,window_capacity=report.get('window_capacity',False)))
+            hostile_marker_cases_rejected=local.apps.negative_controls(run['markers'],file_waits=True,windows=True,window_capacity=report.get('window_capacity',False),surface_lifecycle=lifecycle))
     except Exception as e:result['failure']=f'{type(e).__name__}: {e}'
     finally:
         interaction.close()
         (work/'keyboard-input.bin').write_bytes(interaction.case.sent[:interaction.sent])
         (work/'console-output.bin').write_bytes(bytes(interaction.received))
         result.update(pointer_steps=pointer.evidence,movement_samples=pointer.movements,maximum_injected_axis_delta=96,
+            surface_observations=surfaces.evidence,surface_observation_bound_seconds=12,
             keyboard_batch=interaction.keyboard_batch,batches=interaction.batches,keyboard_input_bytes=interaction.keyboard_bytes,
             unpaced_burst_input_qualified=False,source_unchanged=before==local.source.source_bindings(),
             iso_unchanged=local.digest(iso)==result['iso_sha256'],elapsed_seconds=round(time.monotonic()-started,3))

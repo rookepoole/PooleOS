@@ -270,6 +270,10 @@ pub(super) fn dispatch_owned(
         Ok(Request::ProcessCompletion(handle)) => caller.map_or((Status::Denied, 0), |caller| {
             super::user_ipc::process_completion(caller, handle)
         }),
+        #[cfg(feature = "development-window-lifecycle")]
+        Ok(Request::ProcessObservation(target)) => caller.map_or((Status::Denied, 0), |caller| {
+            super::user_ipc::observe_process(caller, target)
+        }),
         Ok(Request::Launch { handle, sequence }) => caller.map_or((Status::Denied, 0), |caller| {
             super::user_ipc::request_launch(caller, handle, sequence)
         }),

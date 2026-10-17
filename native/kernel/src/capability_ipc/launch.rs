@@ -246,6 +246,28 @@ impl Space {
         Ok(admitted)
     }
 
+    /// Trusted read-only observer admission; not a user delegation operation.
+    /// A completed prior observer is replaced only after admission succeeds.
+    /// No callback, allocation or dispatch occurs between admission and commit.
+    pub fn admit_observed_launch(
+        &mut self,
+        permit: &Permit,
+        scheduler: &mut Scheduler,
+        member: Member,
+        steps: &[Step],
+        observer: TaskId,
+    ) -> Result<admission::Admitted, admission::Error> {
+        let plan = self
+            .validate_launch(permit)
+            .map_err(admission::Error::Ipc)?;
+        let grant = self
+            .prepare_observer(observer, plan.owner, member.id, member.image)
+            .map_err(admission::Error::Ipc)?;
+        let admitted = self.admit_launch(permit, scheduler, member, steps)?;
+        self.commit_observer(grant);
+        Ok(admitted)
+    }
+
     /// Trusted failure completion only after construction has been rolled back
     /// or no image was allocated. Retained cleanup must not call this method.
     pub fn fail_launch(&mut self, permit: &Permit) -> Result<(), Error> {

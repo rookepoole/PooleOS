@@ -12,7 +12,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from runtime import native_userspace_iso as optical, native_app_session as apps
 from runtime import native_console as console, native_shell as shell, native_session as session
-from runtime import native_local_console, native_windows
+from runtime import native_local_console, native_windows, native_surface_lifecycle
 from tools import qualify_native_app_session as qualification, qualify_native_user_entry as source
 shared=qualification.shared
 LOG_LIMIT=16*1024*1024
@@ -45,7 +45,7 @@ def check_preview(receipt: Path):
         window=run['sustained_window']
         if window!=optical.validate_sustained(samples,window['first_dispatch'],window['last_dispatch']):
             raise ValueError('sustained evidence differs')
-        apps.validate_markers(run['markers'],bad_file=run['run_id']=='bad-file',file_waits=report.get('file_waits',False),windows=report.get('window_surfaces',False),window_capacity=report.get('window_capacity',False))
+        apps.validate_markers(run['markers'],bad_file=run['run_id']=='bad-file',file_waits=report.get('file_waits',False),windows=report.get('window_surfaces',False),window_capacity=report.get('window_capacity',False),surface_lifecycle=report.get('surface_lifecycle',False))
     ordinary=report['ordinary_denial']
     if ordinary['qemu_exit_code']!=0 or ordinary['iso_sha256']!=report['optical_images']['ordinary-denial']['iso_sha256']:
         raise ValueError('ordinary denial image differs')
@@ -136,10 +136,10 @@ def run_session(receipt: Path, work: Path, interaction, self_test: bool):
     try:
         run,_,handoff=shared.boot._execute_once('launcher-self-test' if self_test else 'manual-session',
             lock,optical.optical_profile(base),qemu,path,work,result['guest_bound_seconds'],
-            marker_validator=(lambda m: apps.validate_markers(m,file_waits=report.get('file_waits',False),windows=report.get('window_surfaces',False),window_capacity=report.get('window_capacity',False))) if self_test else manual_summary,
+            marker_validator=(lambda m: apps.validate_markers(m,file_waits=report.get('file_waits',False),windows=report.get('window_surfaces',False),window_capacity=report.get('window_capacity',False),surface_lifecycle=report.get('surface_lifecycle',False))) if self_test else manual_summary,
             marker_extractor=session.extract_markers,hpet_msi=True,pause_on_completion=True,
             console_port=interaction.port,console_poll=interaction.poll,capture_log_limit_bytes=LOG_LIMIT,
-            frame_validator=native_windows.inspect_ppm if report.get('window_surfaces') else native_local_console.inspect_ppm if report.get('local_console') else None)
+            frame_validator=native_surface_lifecycle.inspect_ppm if report.get('surface_lifecycle') else native_windows.inspect_ppm if report.get('window_surfaces') else native_local_console.inspect_ppm if report.get('local_console') else None)
         if self_test:
             case=interaction.case
             _,output=console.split_output(bytes(interaction.received))

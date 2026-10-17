@@ -143,6 +143,11 @@ pub(super) fn process_completion(caller: Caller, handle: u64) -> (Status, u64) {
     unsafe { &*(&raw const IPC) }.process_completion(caller, handle)
 }
 
+#[cfg(feature = "development-window-lifecycle")]
+pub(super) fn observe_process(caller: Caller, target: TaskId) -> (Status, u64) {
+    unsafe { &*(&raw const IPC) }.observe_process(caller, target)
+}
+
 pub(super) fn request_launch(caller: Caller, handle: u64, sequence: u32) -> (Status, u64) {
     unsafe { &mut *(&raw mut IPC) }.request_launch(caller, handle, sequence)
 }

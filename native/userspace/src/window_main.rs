@@ -1,5 +1,9 @@
 use poole_userspace::{console, console_ipc::Server, process};
 pub extern "C" fn main(address: u64, bytes: u64, version: u64) -> ! {
+    run::<false>(address, bytes, version)
+}
+#[inline(always)]
+pub fn run<const LIFETIME: bool>(address: u64, bytes: u64, version: u64) -> ! {
     let (mut port, mut channel, endpoint) =
         unsafe { process::windows::boot(address, bytes, version) }
             .unwrap_or_else(|_| process::exit(150));
@@ -32,7 +36,8 @@ pub extern "C" fn main(address: u64, bytes: u64, version: u64) -> ! {
             keys.assume_init_mut(),
         )
     };
-    let mut local = process::windows::Local::new(port, endpoint, cells, app_cells, key_cells);
+    let mut local =
+        process::windows::Local::<LIFETIME>::new(port, endpoint, cells, app_cells, key_cells);
     local.start().unwrap_or_else(|_| process::exit(154));
     let mut server = Server::new();
     loop {

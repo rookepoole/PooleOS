@@ -132,6 +132,22 @@ impl<'a> Surfaces<'a> {
     pub fn open(&self, index: usize) -> bool {
         self.owners.get(index).is_some_and(|o| o.handle != 0)
     }
+    /// Trusted lifecycle observation only, never a client-supplied PWS1 command.
+    /// Keep the generation tombstone so late OPEN/WRITE cannot resurrect it.
+    #[inline]
+    pub fn retire(&mut self, index: usize, generation: u32) -> bool {
+        if generation == 0
+            || !self
+                .owners
+                .get(index)
+                .is_some_and(|o| o.generation == generation && o.handle != 0)
+        {
+            return false;
+        }
+        self.clear(index);
+        self.owners[index].handle = 0;
+        true
+    }
     #[inline]
     fn clear(&mut self, index: usize) {
         if let Some(c) = self
