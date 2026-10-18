@@ -8,6 +8,14 @@ use crate::{
     apps::{Kind, wire},
     console_ipc::{Error, rpc::Calls},
 };
+pub mod interactive;
+
+pub trait View {
+    fn new(endpoint: u64, kind: Kind) -> Self;
+    fn pending(&self) -> bool;
+    fn observe(&mut self, result: wire::Frame);
+    fn poll(&mut self, calls: &mut impl Calls) -> Result<(), Error>;
+}
 
 #[derive(Clone, Copy)]
 struct Snapshot {
@@ -21,6 +29,24 @@ pub struct Publisher {
     latest: Snapshot,
     active: Snapshot,
     phase: u8,
+}
+impl View for Publisher {
+    #[inline(always)]
+    fn new(endpoint: u64, kind: Kind) -> Self {
+        Self::new(endpoint, kind)
+    }
+    #[inline(always)]
+    fn pending(&self) -> bool {
+        self.pending()
+    }
+    #[inline(always)]
+    fn observe(&mut self, result: wire::Frame) {
+        self.observe(result);
+    }
+    #[inline(always)]
+    fn poll(&mut self, calls: &mut impl Calls) -> Result<(), Error> {
+        self.poll(calls)
+    }
 }
 impl Publisher {
     #[inline(always)]
@@ -116,6 +142,10 @@ impl Publisher {
     /// One bounded RPC step. Call only outside application file-read/wait states.
     #[inline(always)]
     pub fn poll(&mut self, calls: &mut impl Calls) -> Result<(), Error> {
+        self.poll_mode::<false>(calls)
+    }
+    #[inline(always)]
+    pub fn poll_mode<const INPUT: bool>(&mut self, calls: &mut impl Calls) -> Result<(), Error> {
         if self.phase == 9 {
             return Ok(());
         }
@@ -126,15 +156,15 @@ impl Publisher {
             self.active = self.latest;
             self.phase = 2;
         }
-        match self.client.step(calls, self.request()) {
-            Ok(true) => {
+        match self.client.step_mode::<INPUT>(calls, self.request()) {
+            Ok(Some(_)) => {
                 self.phase = if self.phase == 1 {
                     8
                 } else {
                     self.phase.saturating_add(1)
                 }
             }
-            Ok(false) => {}
+            Ok(None) => {}
             Err(e) => {
                 self.phase = 9;
                 return Err(e);

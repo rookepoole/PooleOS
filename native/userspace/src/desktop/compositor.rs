@@ -12,6 +12,56 @@ pub struct Damage(pub Option<Rect>);
 mod tests {
     use super::*;
     #[test]
+    fn interactive_wait_budget_covers_two_maximum_scene_compositions() {
+        struct Work(u32);
+        impl Canvas for Work {
+            fn fill(&mut self, _: u16, _: u16, w: u16, h: u16, _: u32) -> Result<(), Error> {
+                self.0 += u32::from(w).div_ceil(64) * u32::from(h).div_ceil(32);
+                Ok(())
+            }
+            fn tile(
+                &mut self,
+                _: u16,
+                _: u16,
+                _: u16,
+                _: u16,
+                _: u64,
+                _: u32,
+                _: u32,
+            ) -> Result<(), Error> {
+                self.0 += 1;
+                Ok(())
+            }
+        }
+        use crate::desktop::surfaces::{Frame, OPEN, WRITE};
+        for (w, h) in [(1000, 600), (1280, 800), (4096, 2160)] {
+            let mut m = Manager::new(w, h).unwrap();
+            let mut cells = [b'W'; 1920];
+            let mut app = [0; 384];
+            let mut terminal = Terminal::window(&mut cells);
+            terminal.relocate(24, 84);
+            terminal.cells.fill(b'W');
+            let mut s = Surfaces::new(&mut app);
+            for index in 0..2 {
+                let handle = s.apply(4 + index, 1, Frame::new(OPEN, 1, 0)).0.handle;
+                for row in 0..8 {
+                    let mut f = Frame::new(WRITE, 2 + row, handle);
+                    f.offset = 24 * row as u16;
+                    f.len = 24;
+                    f.data[..24].fill(b'W');
+                    assert_eq!(s.apply(4 + index, 1, f).0.status, 0);
+                }
+                m.show(index as usize + 1).unwrap();
+            }
+            let mut work = Work(0);
+            paint(&m, &terminal, &s, &mut work, m.bounds).unwrap();
+            // Two consecutive full scenes, with one Again for each accepted draw
+            // at the fixed32-command display queue. Ordinary4096 is insufficient.
+            assert!(work.0 > 4096);
+            assert!(work.0 * 4 < crate::desktop::surface_rpc::INPUT_POLL_LIMIT);
+        }
+    }
+    #[test]
     fn terminal_region_skips_undamaged_glyphs() {
         struct Count(usize);
         impl Canvas for Count {

@@ -1,6 +1,7 @@
 //! Native local console policy. No kernel link, allocator, firmware calls or ports.
 #![forbid(unsafe_code)]
 use crate::console::Error;
+pub mod application_input;
 pub mod compositor;
 pub mod font;
 pub mod input;

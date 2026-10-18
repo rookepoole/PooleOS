@@ -4,6 +4,9 @@
 use super::surfaces;
 use super::surfaces::{Frame, Surfaces};
 use crate::console_ipc::{Error, rpc::Calls};
+// Interactive clients can wait behind a full software composition. The render
+// work test bounds two scene turns including display-queue backpressure retries.
+pub const INPUT_POLL_LIMIT: u32 = 65_536;
 #[inline(always)]
 fn word(w: &[u8], start: usize) -> Result<u64, Error> {
     Ok(u64::from_le_bytes(
@@ -238,6 +241,191 @@ mod tests {
         assert_eq!(server.poll(&mut f, &mut s).unwrap(), Some(0));
         assert!(s.open(0));
     }
+
+    #[test]
+    fn input_reply_backpressure_is_exact_and_cannot_drain_next_owner() {
+        use crate::desktop::application_input::{INPUT, Queues};
+        let mut storage = [0; 384];
+        let mut s = Surfaces::new(&mut storage);
+        let a = s.apply(4, 1, Frame::new(surfaces::OPEN, 1, 0)).0.handle;
+        let b = s.apply(5, 1, Frame::new(surfaces::OPEN, 1, 0)).0.handle;
+        let mut q = Queues::new();
+        q.sync(&s);
+        q.push(0, b'A');
+        q.push(1, b'B');
+        let mut f = Fake {
+            incoming: [
+                envelope(4, 1, Frame::new(INPUT, 2, a)),
+                envelope(5, 1, Frame::new(INPUT, 2, b)),
+            ]
+            .into(),
+            reply_status: 6,
+            sent: Vec::new(),
+            discarded: 0,
+        };
+        let mut server = Server::new(1);
+        server
+            .poll_mode::<true>(&mut f, &mut s, Some(&mut q))
+            .unwrap();
+        q.push(0, b'C');
+        for _ in 0..8 {
+            server
+                .poll_mode::<true>(&mut f, &mut s, Some(&mut q))
+                .unwrap();
+        }
+        assert_eq!(f.incoming.len(), 1);
+        assert!(f.sent.iter().all(|r| r == &f.sent[0]));
+        assert_eq!(
+            Frame::decode_mode::<true>(&f.sent[0]).unwrap().data[0],
+            b'A'
+        );
+        f.reply_status = 0;
+        server
+            .poll_mode::<true>(&mut f, &mut s, Some(&mut q))
+            .unwrap();
+        server
+            .poll_mode::<true>(&mut f, &mut s, Some(&mut q))
+            .unwrap();
+        assert_eq!(
+            Frame::decode_mode::<true>(f.sent.last().unwrap())
+                .unwrap()
+                .data[0],
+            b'B'
+        );
+        f.incoming
+            .push_back(envelope(4, 1, Frame::new(INPUT, 3, a)));
+        server
+            .poll_mode::<true>(&mut f, &mut s, Some(&mut q))
+            .unwrap();
+        assert_eq!(
+            Frame::decode_mode::<true>(f.sent.last().unwrap())
+                .unwrap()
+                .data[0],
+            b'C'
+        );
+    }
+
+    #[test]
+    fn interactive_poll_budget_survives_composition_but_still_cancels_once() {
+        struct Delayed {
+            polls: u32,
+            ready: u32,
+            requests: u32,
+            cancels: u32,
+        }
+        impl Calls for Delayed {
+            fn invoke(&mut self, n: u64, _: u64, wire: &mut [u8]) -> (u64, u64) {
+                match n {
+                    10 => {
+                        self.requests += 1;
+                        (0, 0x100030001)
+                    }
+                    11 => {
+                        self.polls += 1;
+                        if self.polls <= self.ready {
+                            return (6, 0);
+                        }
+                        let mut response = envelope(2, 1, Frame::new(surfaces::OPEN, 1, 1));
+                        response[16..24].fill(0);
+                        wire.copy_from_slice(&response);
+                        (0, 96)
+                    }
+                    12 => {
+                        self.cancels += 1;
+                        (0, 0)
+                    }
+                    _ => panic!(),
+                }
+            }
+        }
+        let mut client = Client::new(1);
+        let mut calls = Delayed {
+            polls: 0,
+            ready: 5000,
+            requests: 0,
+            cancels: 0,
+        };
+        for _ in 0..5000 {
+            assert!(
+                client
+                    .step_mode::<true>(&mut calls, Frame::new(surfaces::OPEN, 1, 0))
+                    .unwrap()
+                    .is_none()
+            );
+        }
+        assert!(
+            client
+                .step_mode::<true>(&mut calls, Frame::new(surfaces::OPEN, 1, 0))
+                .unwrap()
+                .is_some()
+        );
+        assert_eq!((calls.requests, calls.cancels), (1, 0));
+        let mut client = Client::new(1);
+        calls = Delayed {
+            polls: 0,
+            ready: u32::MAX,
+            requests: 0,
+            cancels: 0,
+        };
+        for _ in 0..INPUT_POLL_LIMIT {
+            assert!(
+                client
+                    .step_mode::<true>(&mut calls, Frame::new(surfaces::OPEN, 1, 0))
+                    .unwrap()
+                    .is_none()
+            );
+        }
+        assert!(
+            client
+                .step_mode::<true>(&mut calls, Frame::new(surfaces::OPEN, 1, 0))
+                .is_err()
+        );
+        assert_eq!(
+            (calls.requests, calls.cancels, calls.polls),
+            (1, 1, INPUT_POLL_LIMIT + 1)
+        );
+        assert!(!client.pending());
+    }
+
+    #[test]
+    fn cancelled_and_denied_input_requests_preserve_unconsumed_owned_queue() {
+        use crate::desktop::application_input::{INPUT, Queues};
+        let mut storage = [0; 384];
+        let mut s = Surfaces::new(&mut storage);
+        let a = s.apply(4, 1, Frame::new(surfaces::OPEN, 1, 0)).0.handle;
+        let mut q = Queues::new();
+        q.sync(&s);
+        q.push(0, b'X');
+        let mut cancelled = envelope(4, 1, Frame::new(INPUT, 2, a));
+        cancelled[16..24].fill(0);
+        let mut f = Fake {
+            incoming: [
+                cancelled,
+                envelope(5, 1, Frame::new(INPUT, 2, a)),
+                envelope(4, 1, Frame::new(INPUT, 2, a)),
+            ]
+            .into(),
+            reply_status: 0,
+            sent: Vec::new(),
+            discarded: 0,
+        };
+        let mut server = Server::new(1);
+        for _ in 0..3 {
+            server
+                .poll_mode::<true>(&mut f, &mut s, Some(&mut q))
+                .unwrap();
+        }
+        assert_eq!(f.sent.len(), 2);
+        assert_eq!(
+            Frame::decode_mode::<true>(&f.sent[0]).unwrap().status,
+            surfaces::DENIED
+        );
+        assert_eq!(
+            Frame::decode_mode::<true>(&f.sent[1]).unwrap().data[0],
+            b'X'
+        );
+        assert!(!s.open(1));
+    }
 }
 #[inline]
 fn token(h: u64, tag: u64) -> bool {
@@ -262,6 +450,18 @@ impl Server {
         calls: &mut impl Calls,
         surfaces: &mut Surfaces<'_>,
     ) -> Result<Option<usize>, Error> {
+        self.poll_mode::<false>(calls, surfaces, None)
+    }
+    #[inline]
+    pub fn poll_mode<const INPUT: bool>(
+        &mut self,
+        calls: &mut impl Calls,
+        surfaces: &mut Surfaces<'_>,
+        mut input: Option<&mut super::application_input::Queues>,
+    ) -> Result<Option<usize>, Error> {
+        if INPUT && input.is_none() {
+            return Err(Error::Transport);
+        }
         let mut changed = None;
         if self.reply == 0 {
             let mut w = [0; 96];
@@ -277,7 +477,7 @@ impl Server {
                         return Err(Error::Transport);
                     }
                     let frame = if n == 96 && word(&w, 24)? == 64 {
-                        Frame::decode(&w[32..])
+                        Frame::decode_mode::<INPUT>(&w[32..])
                     } else {
                         None
                     };
@@ -291,7 +491,18 @@ impl Server {
                     };
                     let slot = word(&w, 0)?;
                     let generation = word(&w, 8)?;
-                    let (output, dirty) = surfaces.apply(slot, generation, frame);
+                    let (output, dirty) = if INPUT && frame.op == super::application_input::INPUT {
+                        let (mut output, index) = surfaces.input_request(slot, generation, frame);
+                        if let Some(i) = index {
+                            input
+                                .as_mut()
+                                .ok_or(Error::Transport)?
+                                .drain(i, surfaces, &mut output);
+                        }
+                        (output, false)
+                    } else {
+                        surfaces.apply(slot, generation, frame)
+                    };
                     output.encode_into(&mut self.output);
                     self.reply = reply;
                     if dirty {
@@ -338,7 +549,15 @@ impl Client {
     }
     /// At most one submit and one completion poll. A pending operation retains its identity.
     #[inline(always)]
-    pub fn step(&mut self, calls: &mut impl Calls, mut frame: Frame) -> Result<bool, Error> {
+    pub fn step(&mut self, calls: &mut impl Calls, frame: Frame) -> Result<bool, Error> {
+        self.step_mode::<false>(calls, frame).map(|r| r.is_some())
+    }
+    #[inline(always)]
+    pub fn step_mode<const INPUT: bool>(
+        &mut self,
+        calls: &mut impl Calls,
+        mut frame: Frame,
+    ) -> Result<Option<Frame>, Error> {
         frame.sequence = self.sequence.checked_add(1).ok_or(Error::Wire)?;
         frame.handle = self.handle;
         if self.pending == 0 {
@@ -350,12 +569,12 @@ impl Client {
                     self.op = frame.op;
                     self.polls = 0;
                 }
-                (6, 0) => return Ok(false),
+                (6, 0) => return Ok(None),
                 _ => return Err(Error::Transport),
             }
         }
         let mut w = [0; 96];
-        if self.polls >= 4096 {
+        if self.polls >= if INPUT { INPUT_POLL_LIMIT } else { 4096 } {
             let _ = calls.invoke(12, self.pending, &mut []);
             let _ = calls.invoke(11, self.pending, &mut w);
             self.pending = 0;
@@ -363,7 +582,7 @@ impl Client {
         }
         self.polls += 1;
         match calls.invoke(11, self.pending, &mut w) {
-            (6, 0) => Ok(false),
+            (6, 0) => Ok(None),
             (0, 96)
                 if word(&w, 0)? == 2
                     && word(&w, 8)? == 1
@@ -371,20 +590,30 @@ impl Client {
                     && word(&w, 24)? == 64 =>
             {
                 self.pending = 0;
-                let reply = Frame::decode(&w[32..]).ok_or(Error::Wire)?;
+                let reply = Frame::decode_mode::<INPUT>(&w[32..]).ok_or(Error::Wire)?;
+                let payload = if INPUT && self.op == super::application_input::INPUT {
+                    (reply.offset == 0
+                        || reply.offset == super::application_input::RESET && reply.len == 0)
+                        && reply
+                            .data
+                            .iter()
+                            .take(usize::from(reply.len))
+                            .all(|&b| super::application_input::valid_key(b))
+                } else {
+                    reply.offset == 0 && reply.len == 0
+                };
                 if reply.status != 0
                     || reply.op != self.op
                     || reply.sequence != frame.sequence
                     || reply.handle == 0
-                    || reply.offset != 0
-                    || reply.len != 0
+                    || !payload
                     || (self.handle != 0 && reply.handle != self.handle)
                 {
                     return Err(Error::Peer);
                 }
                 self.handle = reply.handle;
                 self.sequence = reply.sequence;
-                Ok(true)
+                Ok(Some(reply))
             }
             _ => {
                 self.pending = 0;

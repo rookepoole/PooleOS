@@ -60,11 +60,20 @@ impl Frame {
     }
     #[inline(always)]
     pub fn decode(b: &[u8]) -> Option<Self> {
+        Self::decode_mode::<false>(b)
+    }
+    #[inline(always)]
+    pub fn decode_mode<const INPUT: bool>(b: &[u8]) -> Option<Self> {
         if b.len() != BYTES
             || &b[..4] != b"PWS1"
             || b[7] != 0
             || b[26..32].iter().any(|&v| v != 0)
-            || !(OPEN..=CLOSE).contains(&b[4])
+            || !(OPEN..=if INPUT {
+                super::application_input::INPUT
+            } else {
+                CLOSE
+            })
+                .contains(&b[4])
             || b[5] > INVALID
             || b[6] > 32
         {
@@ -131,6 +140,50 @@ impl<'a> Surfaces<'a> {
     #[inline]
     pub fn open(&self, index: usize) -> bool {
         self.owners.get(index).is_some_and(|o| o.handle != 0)
+    }
+    #[inline]
+    pub fn identity(&self, index: usize) -> Option<(u32, u64)> {
+        self.owners
+            .get(index)
+            .filter(|o| o.handle != 0)
+            .map(|o| (o.generation, o.handle))
+    }
+    /// Interactive-profile query, with the same exact owner/sequence as writes.
+    #[inline]
+    pub fn input_request(
+        &mut self,
+        slot: u64,
+        generation: u64,
+        f: Frame,
+    ) -> (Frame, Option<usize>) {
+        let mut reply = Frame::new(f.op, f.sequence, f.handle);
+        reply.status = DENIED;
+        if !(4..=5).contains(&slot) {
+            return (reply, None);
+        }
+        let index = (slot - 4) as usize;
+        let owner = &mut self.owners[index];
+        if f.op != super::application_input::INPUT
+            || f.status != 0
+            || f.offset != 0
+            || f.len != 0
+            || f.data.iter().any(|&b| b != 0)
+            || f.sequence == 0
+            || f.sequence == u64::MAX
+        {
+            reply.status = INVALID;
+            return (reply, None);
+        }
+        if generation != u64::from(owner.generation)
+            || owner.handle == 0
+            || f.handle != owner.handle
+            || owner.sequence.checked_add(1) != Some(f.sequence)
+        {
+            return (reply, None);
+        }
+        owner.sequence = f.sequence;
+        reply.status = OK;
+        (reply, Some(index))
     }
     /// Trusted lifecycle observation only, never a client-supplied PWS1 command.
     /// Keep the generation tombstone so late OPEN/WRITE cannot resurrect it.

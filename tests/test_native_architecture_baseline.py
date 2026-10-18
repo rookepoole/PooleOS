@@ -69,7 +69,14 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
         bound_paths = {item["path"] for item in self.artifact["bound_sources"]}
-        self.assertEqual(len(self.artifact["bound_sources"]), 836)
+        self.assertEqual(len(self.artifact["bound_sources"]), 849)
+        self.assertTrue({"docs/checkpoints/cycle300-application-input.md", "docs/native-application-input.md",
+            "runs/native-application-input-readiness.json", "native/userspace/src/bin/window_input.rs",
+            "native/userspace/src/bin/input_text.rs", "native/userspace/src/bin/input_numbers.rs",
+            "native/userspace/src/desktop/application_input.rs", "native/userspace/src/desktop/application_input/tests.rs",
+            "native/userspace/src/desktop/publisher/interactive.rs", "native/userspace/src/desktop/publisher/interactive/tests.rs",
+            "runtime/native_application_input.py", "tools/native_application_input_probe.py",
+            "tests/test_native_application_input.py"}.issubset(bound_paths))
         self.assertTrue({"docs/checkpoints/cycle299-surface-lifecycle.md", "docs/native-surface-lifecycle.md",
             "runs/native-surface-lifecycle-readiness.json", "native/userspace/src/bin/window_lifecycle.rs",
             "native/userspace/src/desktop/lifecycle.rs", "native/kernel/src/capability_ipc/process/observer_tests.rs",

@@ -98,6 +98,18 @@ impl Keyboard {
         }
         Some(byte)
     }
+    #[inline]
+    pub fn focus_reset(&mut self) {
+        self.shifts = 0;
+        self.controls = 0;
+        self.extended = false;
+        self.pause = 0;
+    }
+    #[inline]
+    pub fn cancel_prefix(&mut self) {
+        self.extended = false;
+        self.pause = 0;
+    }
 }
 #[cfg(test)]
 mod tests {

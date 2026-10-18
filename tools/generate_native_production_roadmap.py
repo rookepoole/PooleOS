@@ -16048,13 +16048,81 @@ def apply_cycle299(roadmap: dict, test_count: int) -> dict:
             "native retirement while focused/dragging and compositor restart/resynchronization",
             "launch controls and useful editable application workflows with persistent storage separately gated",
             "native overload/reset evidence and complete microkernel, PooleGlyph/PDC, accessible PooleGlass and N0-N39 gates"])
+    return apply_cycle300(roadmap, test_count)
+
+
+def apply_cycle300(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle300-application-input.md"
+    contract = "docs/native-application-input.md"
+    path = "runs/native-application-input-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle299_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=300, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 300
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 300
+    gate["qualification_status"] = "native_application_input_partial_canonical_pending"
+    baseline["native_surface_lifecycle"]["evidence_status"] = "historical_cycle299"
+    gate["current_native_surface_lifecycle_qualification"]["evidence_status"] = "historical_cycle299_not_current_image_qualification"
+    record = dict(cycle=300, contract_id="PWS1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("iso_built", "iso_sha256", "iso_byte_count", "host_kernel_tests", "host_python_tests",
+                "qemu_guest_runs", "virtualbox_guest_runs", "kernel_image_pages", "console_code_bytes",
+                "ordinary_console_code_bytes", "native_surface_lifecycle_qualified", "process_lease_limit",
+                "per_owner_process_lease_limit", "standard_mouse_qualified", "burst_mouse_qualified",
+                "virtualbox_standard_mouse_qualified", "virtualbox_burst_mouse_qualified", "production_ready",
+                "isolated_application_input_qualified", "native_draft_overflow_qualified",
+                "ordinary_surface_poll_limit", "input_surface_poll_limit", "host_render_work_bound_verified",
+                "native_typematic_focus_stress_qualified",
+                "canonical_full_replay_performed", "merge_qualified"):
+        record[key] = receipt[key]
+    baseline["native_application_input"] = copy.deepcopy(record)
+    gate["current_native_application_input_qualification"] = record
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=300, receipt_path=path, receipt_section="native_execution",
+        native_execution_status="native_isolated_ascii_application_input_see_exact_guest_statuses",
+        native_execution_evidence_cycle=300, shell_native_execution_evidence_cycle=300,
+        optical_iso_sha256=receipt["iso_sha256"], kernel_profile="opt_in_development_window_input",
+        kernel_image_pages=receipt["kernel_image_pages"], kernel_remaining_capacity_pages=208-receipt["kernel_image_pages"],
+        combined_mouse_keyboard_qualified=receipt["standard_mouse_qualified"], burst_mouse_qualified=receipt["burst_mouse_qualified"],
+        virtualbox_mouse_qualified=receipt["virtualbox_standard_mouse_qualified"] and receipt["virtualbox_burst_mouse_qualified"],
+        virtualbox_standard_mouse_qualified=receipt["virtualbox_standard_mouse_qualified"],
+        virtualbox_burst_mouse_qualified=receipt["virtualbox_burst_mouse_qualified"],
+        console_code_bytes=receipt["console_code_bytes"], console_code_margin=28672-receipt["console_code_bytes"],
+        generation_bound_surface_lifecycle=receipt["native_surface_lifecycle_qualified"],
+        isolated_application_input=receipt["isolated_application_input_qualified"], scratch_draft_bytes=48)
+    lane["stages"]["USI-4"] = "partial_native_ascii_application_input_recovery_persistence_and_overload_pending"
+    gaps = roadmap["gap_summary"]["native_program_gaps"]
+    baseline["historical_cycle299_user_space_gap_summary"] = copy.deepcopy(gaps[11:14])
+    gaps[13] = "A native CPL3 compositor and window manager render isolated application surfaces with bounded emulator mouse/keyboard and generation-bound lifecycle. Applications own48-byte ASCII scratch drafts and checked numeric results; general input, persistent editing, compositor recovery, production graphics/network/audio, accessible PooleGlass and a complete application platform remain open"
+    evidence = ("Cycle300: authenticated per-surface input queues and held-key focus fences connect native windows to app-owned ASCII scratch editing and checked integer calculations. Cancellation, stale/foreign/replayed authority denial, reply backpressure, Terminal boundary handling and fixed process/mapping/code limits remain enforced. Exact real-guest pixels and independent binaries are bound in the input receipt. " + checkpoint)
+    gap = ("This is bounded scratch input, not a persistent editor or complete desktop. Keep focused/dragging process death, compositor restart/resynchronization, native general transport overflow/reset, launch controls, persistent files, richer input and accessible PooleGlass open. Native continuous-typematic focus/retirement stress remains unqualified; backend-filtered duplicate host makes are not proof of guest delivery. Event-driven surface waits, scheduler fairness under composition load, coalesced presentation and measured repaint latency remain required; a finite poll budget is not a production responsiveness guarantee. The input-only kernel read-only boundary is0x1C000 within208 total pages; ordinary window code has only20 bytes of margin. Stage117/watchdog, five legacy entry checks, complete microkernel, PooleGlyph/PDC and all N0-N39 gates remain. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N3", "N9", "N13", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-NATIVE-UI-001", "FLAG-N13-USERSPACE-ISO-001", "FLAG-N3-VIRTUALBOX-PREVIEW-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle300 does not close this flag. " + gap
+    gaps[8] = gap + " Historical earlier gaps: " + gaps[8]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Harden active-window lifecycle and advance useful native desktop workflows",
+        entry_evidence=[checkpoint, contract, path],
+        exit_evidence=["native focused/dragging application retirement without stale input or capture",
+            "compositor restart/resynchronization and bounded transport overload/reset recovery",
+            "graphical launch controls and useful editing with persistent storage separately qualified",
+            "complete microkernel, PooleGlyph/PDC, accessible PooleGlass and N0-N39 gates remain required"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1573)
+    parser.add_argument("--test-count", type=int, default=1582)
     parser.add_argument("--status-date", default="2026-10-17")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

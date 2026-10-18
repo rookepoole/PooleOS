@@ -87,9 +87,20 @@ impl<'a, const LIFETIME: bool> Local<'a, LIFETIME> {
     }
     #[inline(always)]
     pub fn poll(&mut self) -> Result<(), Error> {
+        self.poll_mode::<false>(None)
+    }
+    #[inline(always)]
+    pub fn poll_mode<const INPUT: bool>(
+        &mut self,
+        mut input: Option<&mut desktop::application_input::Queues>,
+    ) -> Result<(), Error> {
+        if INPUT && (!LIFETIME || input.is_none()) {
+            return Err(Error::Transport);
+        }
+        let old_focus = self.manager.focus;
         if let Some(i) = self
             .rpc
-            .poll(&mut ConsoleCalls, &mut self.surfaces)
+            .poll_mode::<INPUT>(&mut ConsoleCalls, &mut self.surfaces, input.as_deref_mut())
             .map_err(|_| Error::Transport)?
         {
             if i >= 2 {
@@ -138,9 +149,20 @@ impl<'a, const LIFETIME: bool> Local<'a, LIFETIME> {
                 self.paint(self.manager.bounds)?;
             }
         }
-        let update = self
-            .input
-            .poll(&mut self.manager, &mut Ps2(self.display.0))?;
+        if INPUT {
+            let queues = input.as_mut().ok_or(Error::Transport)?;
+            let changed = queues.sync(&self.surfaces);
+            let replacement = self
+                .manager
+                .focus
+                .is_some_and(|i| (1..=2).contains(&i) && changed & (1 << (i - 1)) != 0);
+            if old_focus != self.manager.focus || replacement {
+                self.input.focus_boundary(queues, old_focus);
+            }
+        }
+        let update =
+            self.input
+                .poll_mode::<INPUT>(&mut self.manager, &mut Ps2(self.display.0), input)?;
         if update.scene_changed {
             self.locate();
             self.paint(self.manager.bounds)?;
@@ -213,10 +235,20 @@ pub unsafe fn boot(
 /// SAFETY: caller supplies the live kernel-owned PSTART1 entry block.
 #[inline(always)]
 pub unsafe fn application(address: u64, bytes: u64, version: u64, kind: crate::apps::Kind) -> ! {
+    unsafe { application_view::<desktop::publisher::Publisher>(address, bytes, version, kind) }
+}
+/// SAFETY: caller supplies the live kernel-owned PSTART1 entry block.
+#[inline(always)]
+pub unsafe fn application_view<V: desktop::publisher::View>(
+    address: u64,
+    bytes: u64,
+    version: u64,
+    kind: crate::apps::Kind,
+) -> ! {
     let block = unsafe { super::file_block(address, bytes) }.unwrap_or_else(|_| super::exit(200));
     let (boot, endpoint) = crate::startup::window_application(block, version, kind)
         .unwrap_or_else(|_| super::exit(200));
-    let mut publisher = desktop::publisher::Publisher::new(endpoint, kind);
+    let mut publisher = V::new(endpoint, kind);
     let files = crate::files::rpc::Client::new(boot.files, boot.file_peer, ConsoleCalls);
     let mut app = crate::apps::program::Program::new(
         kind,

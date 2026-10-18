@@ -41,6 +41,24 @@ test = false
 bench = false
 
 [[bin]]
+name = "PooleWindowInput"
+path = "src/bin/window_input.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleInputText"
+path = "src/bin/input_text.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleInputNumbers"
+path = "src/bin/input_numbers.rs"
+test = false
+bench = false
+
+[[bin]]
 name = "PooleWindowNumbers"
 path = "src/bin/window_numbers.rs"
 test = false

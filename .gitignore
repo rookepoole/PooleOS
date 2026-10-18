@@ -112,6 +112,7 @@ runs/*
 !runs/native-file-controls-readiness.json
 !runs/native-cleanup-exhaustion-readiness.json
 !runs/native-claimed-requester-readiness.json
+!runs/native-application-input-readiness.json
 !runs/native_initial_system_readiness.json
 !runs/native_microcode_readiness.json
 !runs/native_recovery_readiness.json

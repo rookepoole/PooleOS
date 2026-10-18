@@ -12,7 +12,7 @@ WINDOW_SERVICE_CODE_PAGES = 7
 
 
 def profile_for(name: str) -> str:
-    return WINDOW_SERVICE_CONTRACT if name in ("PooleWindowCapacity", "PooleWindowLifecycle") else CONTRACT
+    return WINDOW_SERVICE_CONTRACT if name in ("PooleWindowCapacity", "PooleWindowLifecycle", "PooleWindowInput") else CONTRACT
 
 
 def inspect(blob: bytes, *, profile: str = CONTRACT) -> dict:

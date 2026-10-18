@@ -1,15 +1,71 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-17
-Plan version: 2.202.0-native-surface-lifecycle
-Roadmap cycle: PooleOS Cycle 299
+Plan version: 2.203.0-native-application-input
+Roadmap cycle: PooleOS Cycle 300
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 299: Generation-Bound Surface Lifecycle
+## Cycle 300: Isolated Application Input
+
+Implemented: authenticated PWS1 input queries, two generation-bound64-byte
+queues, held-key focus fences and cancellation for lost input. Each isolated
+application owns a48-byte ASCII scratch draft and its computation. Text counts
+bytes/words/lines; Numbers evaluates signed32-bit integer lists. The window
+manager routes and paints; it gains no new syscall, device grant, process lease
+or termination right. File jobs, surface retirement and fresh-generation drafts
+remain integrated. [Contract](native-application-input.md).
+
+Hardening: a real native client freeze was traced to4096 completion polls being
+exhausted while the service composed a scene. Interactive accepted requests now
+have a finite65536-poll work allowance with delayed-peer, renderer-work and exact
+cancellation tests; ordinary clients stay at4096. This is not an overall
+submission deadline or a wall-clock latency guarantee. Input-only kernel entry
+is0x1C000, with912 bytes of read-only padding,134/208 image pages and36 guarded
+stack pages. Four/seven code pages, eight VM mappings and four total/two-per-owner
+process leases are unchanged. Ordinary window code has20 bytes of remaining
+capacity; growth requires an explicit service/layout decision.
+
+Passed:29 independent program pairs;209 user tests per debug/release; seven
+kernel profiles in both modes (582/601/607/613/614/614/614). The current optical
+cohort passes two normal boots, stale-file authority and unsigned denial.
+Both QEMU and visible VirtualBox device modes pass96 exact app observations,
+six lifecycle pixel barriers,17 pointer steps and a332-byte shell case each.
+The full557-byte serial workflow is separately covered.36 focused Python and9
+publication-boundary checks pass;1582 is discovered Python inventory, not a
+full-suite execution. Legacy capacity regression also passes. The final cohort
+totals ten QEMU and two visible VirtualBox checks, 24 lifecycle pixel barriers
+and 384 exact application observations. All 427 overlapping metadata/integration
+tests pass after repairing stale current-count, cycle and next-move assertions;
+failed logs remain retained. Architecture binds 849 files and execution binds
+988. The launcher and verified Downloads copy select the Cycle300 ISO. These
+passes do not imply full canonical replay, main merge or production readiness.
+Final staged audit passes 50 files, 84 immutable prior receipts, direct ISO-copy
+byte equality, native pixels, owner-input hashes and generated ledgers. The
+publication scan covers 2,089 paths with zero violations. Exact audit details
+and retained metadata failures are in the checkpoint record.
+
+Retained failures include freestanding code/layout guards, premature capture
+exhaustion, native poll exhaustion, and a VirtualBox typematic assumption in the
+test. The corrected controlled test stops unsolicited repeat without releasing
+the held A/Shift pair. Backend-filtered duplicate makes do not prove guest
+delivery; native continuous-typematic stress remains unqualified. Diagnostic
+receipts cannot substitute for final guest evidence. Superseded media/captures
+are retained losslessly with verified hashes, not discarded.
+[AI1-AI7, exact attempts and receipts](checkpoints/cycle300-application-input.md).
+
+Next N13/N27 work: focused/dragging process death including undecoded controller
+bytes, compositor restart/resynchronization, native transport overload/reset,
+event-driven surface waits, scheduler fairness under composition load, coalesced
+presentation and measured repaint latency, graphical launch controls and
+persistent editing. Richer input, accessible PooleGlass, complete microkernel,
+PooleGlyph/PDC, stage117/watchdog, five legacy entry checks and all N0-N39
+production gates remain open. No phase closure, main merge or release is claimed.
+
+## Historical Cycle 299: Generation-Bound Surface Lifecycle
 
 Generation-bound read-only process observation now drives surface retirement,
 focus/drag cleanup and fresh-generation restart. Ordinary profiles and fixed

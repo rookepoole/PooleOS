@@ -88,7 +88,7 @@ class PointerClient:
             import re
             if (set(arguments) != {'filename', 'format'} or arguments['format'] != 'ppm'
                     or path.parent != self.owner.work.resolve()
-                    or not re.fullmatch(r'(?:pointer-(?:before|\d{2}-\d{2})|lifecycle-0[0-5])\.ppm', path.name)):
+                    or not re.fullmatch(r'(?:pointer-(?:before|\d{2}-\d{2})|lifecycle-0[0-5]|application-(?:[01]\d{2}|2[0-4]\d|25[0-5]))\.ppm', path.name)):
                 raise ValueError('owned pointer capture path required')
             png = path.with_suffix('.png')
             self.owner.checked('controlvm', self.owner.identity, 'screenshotpng', png)

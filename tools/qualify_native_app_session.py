@@ -117,22 +117,25 @@ def main():
     parser.add_argument('--windows', action='store_true', help='opt-in native application surfaces and window manager')
     parser.add_argument('--window-capacity', action='store_true', help='separate PWCODE1 seven-page window service qualification')
     parser.add_argument('--surface-lifecycle', action='store_true', help='opt-in generation-bound window retirement')
+    parser.add_argument('--surface-input', action='store_true', help='opt-in isolated application input over owned surfaces')
     args = parser.parse_args(); work, programs = args.work_dir.resolve(), args.program_dir.resolve()
     if args.desktop and not args.optical: parser.error('local console requires the optical development profile')
     if args.windows and (not args.optical or args.desktop): parser.error('windows requires optical and is separate from the terminal profile')
     if args.window_capacity and not args.windows: parser.error('window capacity requires the windows profile')
     if args.surface_lifecycle and not args.window_capacity: parser.error('surface lifecycle requires the explicit capacity profile')
+    if args.surface_input and not args.surface_lifecycle: parser.error('surface input requires generation-bound lifecycle')
     if sum((args.deferred_cleanup,args.file_controls,args.exhaust_cleanup,args.claimed_requester,args.optical)) > 1: parser.error('separate control profiles required')
     if not work.is_relative_to(ROOT/'outputs') or not programs.is_relative_to(ROOT/'outputs'):
         parser.error('workspace output paths required')
     storage = require_space(work); work.mkdir(parents=True, exist_ok=False)
     before = source.source_bindings()
-    report = dict(cycle=299 if args.surface_lifecycle else 298 if args.window_capacity else 297 if args.windows else 296 if args.desktop else 292 if args.optical else 287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
+    report = dict(cycle=300 if args.surface_input else 299 if args.surface_lifecycle else 298 if args.window_capacity else 297 if args.windows else 296 if args.desktop else 292 if args.optical else 287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
                   contract_id=optical.CONTRACT if args.optical else 'PCLAIM1' if args.claimed_requester else 'PCLEANUP3' if args.exhaust_cleanup else 'PFILECONTROL1' if args.file_controls else 'PAPPRECOVERY1' if args.deferred_cleanup else 'PAPPSESSION1',
                   optical=args.optical, optical_images={}, file_waits=args.optical,
                   local_console=args.desktop or args.windows, window_surfaces=args.windows, graphical_desktop=False,
                   window_capacity=args.window_capacity,
                   surface_lifecycle=args.surface_lifecycle,
+                  surface_input=args.surface_input,
                   claimed_requester=args.claimed_requester,
                   exhaust_cleanup=args.exhaust_cleanup,
                   file_controls=args.file_controls,
@@ -150,6 +153,8 @@ def main():
             selected=[('PooleWindowCapacity' if key=='CONSOLE' else name,key) for name,key in selected]
         if args.surface_lifecycle:
             selected=[('PooleWindowLifecycle' if key=='CONSOLE' else name,key) for name,key in selected]
+        if args.surface_input:
+            selected=[({'CONSOLE':'PooleWindowInput','TEXT':'PooleInputText','NUMBERS':'PooleInputNumbers'}.get(key,name),key) for name,key in selected]
         if args.claimed_requester:
             selected=[({'TEXT':'PooleWaitingFileProbe','COUNTER':'PooleClaimedFiles'}.get(key,name),key) for name,key in probe.PROGRAMS]
         report['program_build'] = program_inputs(programs, env, selected)
@@ -173,6 +178,9 @@ def main():
         if args.surface_lifecycle:
             normal_features=('development-window-lifecycle',)
             bad_features=('development-window-lifecycle','development-applications-bad-file')
+        if args.surface_input:
+            normal_features=('development-window-input',)
+            bad_features=('development-window-input','development-applications-bad-file')
         if args.exhaust_cleanup:
             normal_features=('development-app-cleanup-exhaustion',)
             bad_features=normal_features+('development-applications-bad-file',)

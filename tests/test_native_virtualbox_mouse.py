@@ -114,13 +114,15 @@ class VirtualBoxMouseTests(unittest.TestCase):
             work=Path(directory);vm=owner(work);c=client(vm)
             for path in (work.parent/'pointer-before.ppm',work/'arbitrary.ppm',
                          work.parent/'lifecycle-00.ppm',work/'lifecycle-06.ppm',
-                         work/'lifecycle-0.ppm',work/'lifecycle-000.ppm',work/'lifecycle-00.png'):
+                         work/'lifecycle-0.ppm',work/'lifecycle-000.ppm',work/'lifecycle-00.png',
+                         work/'application-256.ppm',work/'application-00.ppm',work/'application-0000.ppm',
+                         work.parent/'application-000.ppm'):
                 with self.assertRaises(ValueError):c.execute('screendump',dict(filename=str(path),format='ppm'))
             vm.checked.assert_not_called()
             raw=bytes([11,43,79])*(1024*768)
             def capture(*args):Image.frombytes('RGB',(1024,768),raw).save(args[-1])
             vm.checked.side_effect=capture
-            for name in ['pointer-before.ppm']+[f'lifecycle-{n:02}.ppm' for n in range(6)]:
+            for name in ['pointer-before.ppm','application-000.ppm','application-255.ppm']+[f'lifecycle-{n:02}.ppm' for n in range(6)]:
                 target=work/name;c.execute('screendump',dict(filename=str(target),format='ppm'))
                 self.assertEqual(target.read_bytes(),b'P6\n1024 768\n255\n'+raw)
                 self.assertEqual(vm.checked.call_args.args[:3],('controlvm',IDENTITY,'screenshotpng'))

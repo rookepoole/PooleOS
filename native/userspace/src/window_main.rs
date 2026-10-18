@@ -4,6 +4,14 @@ pub extern "C" fn main(address: u64, bytes: u64, version: u64) -> ! {
 }
 #[inline(always)]
 pub fn run<const LIFETIME: bool>(address: u64, bytes: u64, version: u64) -> ! {
+    run_input::<LIFETIME, false>(address, bytes, version)
+}
+#[inline(always)]
+pub fn run_input<const LIFETIME: bool, const INPUT: bool>(
+    address: u64,
+    bytes: u64,
+    version: u64,
+) -> ! {
     let (mut port, mut channel, endpoint) =
         unsafe { process::windows::boot(address, bytes, version) }
             .unwrap_or_else(|_| process::exit(150));
@@ -39,9 +47,12 @@ pub fn run<const LIFETIME: bool>(address: u64, bytes: u64, version: u64) -> ! {
     let mut local =
         process::windows::Local::<LIFETIME>::new(port, endpoint, cells, app_cells, key_cells);
     local.start().unwrap_or_else(|_| process::exit(154));
+    let mut input = poole_userspace::desktop::application_input::Queues::new();
     let mut server = Server::new();
     loop {
-        local.poll().unwrap_or_else(|_| process::exit(157));
+        local
+            .poll_mode::<INPUT>(if INPUT { Some(&mut input) } else { None })
+            .unwrap_or_else(|_| process::exit(157));
         match server.poll(&mut local, &mut channel) {
             Ok(false) => {}
             Ok(true) => process::exit(0),

@@ -11,24 +11,24 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle299 connects process lifetime to isolated
-application surfaces. Faulted or stopped applications lose their windows and
-taskbar entries; fresh generations reopen them. Stale surface operations cannot
-resurrect or close a restarted application. The window service receives only
-read-only process observation, not termination authority. Existing process-lease,
-memory, code-page and stack-guard limits remain enforced.
-Fresh optical and both QEMU/visible VirtualBox input modes pass, including six
-lifecycle pixel barriers per device run, mouse interaction and owned cleanup.
-The legacy capacity profile also passes its four optical controls. Ten QEMU and
-two visible VirtualBox checks pass in total. Terminal and
-two isolated read-only result panes remain the experience, not a complete desktop.
-The failed attempts and historical evidence remain retained. No main merge or
-release is claimed.
-[Current evidence](docs/checkpoints/cycle299-surface-lifecycle.md).
+**Current development checkpoint:** Cycle300 makes the isolated Text and Numbers
+windows directly interactive. Each app owns a48-byte ASCII scratch draft and its
+computation. The window service routes focused input through authenticated,
+generation-bound queues; it does not edit documents or receive new device or
+process-control authority. Existing lease, mapping, code-page and stack-guard
+limits remain enforced. A native reply-poll timeout during composition was
+diagnosed and repaired with a separately bounded interactive-client budget.
+The final native cohort passes ten QEMU and two visible VirtualBox checks,
+including 384 exact application observations and 24 lifecycle pixel barriers.
+All 29 independent program pairs match; 209 user tests per debug/release and
+seven kernel profiles in both modes pass. The failed attempts and historical
+evidence remain retained. No full canonical replay, main merge, release or
+production readiness is claimed.
+[Current evidence](docs/checkpoints/cycle300-application-input.md).
 
 Use
 `Launch-Local-Console.cmd` on the qualified development host for a VM window.
-This is an unsigned one-CPU native window preview with read-only result panes,
+This is an unsigned one-CPU native window preview with bounded scratch input,
 not a complete desktop, PooleGlass environment, installer or production release.
 [Run the preview](docs/native-userspace-preview.md).
 The separate default diagnostic kernel still fails at VirtualBox stage117;
@@ -36,7 +36,9 @@ actual watchdog delivery there remains unqualified. This working application
 profile does not close those gates. Windows' "DVD Disc Image" label does not
 mean the optical `.iso` is the wrong format. The launcher supplies the tested
 configuration, including the still-required COM2 mirror.
-Next: bounded application input, compositor recovery and useful editable applications.
+Next: active-window lifecycle stress, compositor recovery, efficient input waits,
+graphical launch controls and persistent editing. Native continuous-typematic
+stress and general transport overload/reset remain unqualified.
 Complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass work continues.
 
 **Historical development checkpoint:** Cycle287 verifies cancellation of native apps

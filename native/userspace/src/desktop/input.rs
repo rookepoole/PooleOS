@@ -79,6 +79,20 @@ impl<'a> Input<'a> {
         self.len = 0;
     }
     #[inline]
+    pub fn focus_boundary(
+        &mut self,
+        input: &mut super::application_input::Queues,
+        old: Option<usize>,
+    ) {
+        if old == Some(0) && self.len != 0 {
+            self.cancel = true;
+            self.discard_line = true;
+        }
+        self.clear_focus();
+        self.keyboard.focus_reset();
+        input.focus_lost(old);
+    }
+    #[inline]
     fn key(&mut self, byte: u8, focused: bool) {
         self.stats.received = self.stats.received.saturating_add(1);
         if !focused || self.discard_line {
@@ -108,6 +122,18 @@ impl<'a> Input<'a> {
         manager: &mut Manager,
         device: &mut impl Device,
     ) -> Result<Update, Error> {
+        self.poll_mode::<false>(manager, device, None)
+    }
+    #[inline(always)]
+    pub fn poll_mode<const APPS: bool>(
+        &mut self,
+        manager: &mut Manager,
+        device: &mut impl Device,
+        mut apps: Option<&mut super::application_input::Queues>,
+    ) -> Result<Update, Error> {
+        if APPS && apps.is_none() {
+            return Err(Error::Transport);
+        }
         let old_pointer = (manager.x, manager.y);
         let windows = manager.windows;
         let focus = manager.focus;
@@ -119,8 +145,25 @@ impl<'a> Input<'a> {
             };
             match value {
                 0..=255 => {
+                    if APPS
+                        && !apps
+                            .as_mut()
+                            .ok_or(Error::Transport)?
+                            .fence
+                            .feed(value as u8)
+                    {
+                        self.keyboard.cancel_prefix();
+                        continue;
+                    }
                     if let Some(key) = self.keyboard.feed(value as u8) {
                         self.key(key, manager.focus == Some(0) && manager.visible[0]);
+                        if APPS {
+                            if let Some(i) = manager.focus.filter(|&i| {
+                                i > 0 && manager.visible.get(i).copied().unwrap_or(false)
+                            }) {
+                                apps.as_mut().ok_or(Error::Transport)?.push(i - 1, key);
+                            }
+                        }
                     }
                 }
                 256..=511 => {
@@ -128,7 +171,14 @@ impl<'a> Input<'a> {
                         let old_focus = manager.focus;
                         manager.motion(motion);
                         if old_focus != manager.focus {
-                            self.clear_focus();
+                            if APPS {
+                                self.focus_boundary(
+                                    apps.as_mut().ok_or(Error::Transport)?,
+                                    old_focus,
+                                );
+                            } else {
+                                self.clear_focus();
+                            }
                         }
                     }
                 }
@@ -140,6 +190,9 @@ impl<'a> Input<'a> {
                     self.cancel = true;
                     self.discard_line = true;
                     self.stats.resets = self.stats.resets.saturating_add(1);
+                    if APPS {
+                        apps.as_mut().ok_or(Error::Transport)?.reset();
+                    }
                 }
                 _ => return Err(Error::Transport),
             }
@@ -299,5 +352,109 @@ mod tests {
             polls: 0,
         };
         assert!(input.poll(&mut manager, &mut bad).is_err());
+    }
+
+    #[test]
+    fn real_device_focus_routes_app_keys_without_terminal_leak_or_held_shift() {
+        use crate::desktop::{
+            application_input::{INPUT, Queues, RESET},
+            surfaces::{Frame, OPEN, Surfaces},
+        };
+        let mut storage = [0; CAPACITY];
+        let mut input = Input::new(&mut storage);
+        let mut cells = [0; 384];
+        let mut surfaces = Surfaces::new(&mut cells);
+        let a = surfaces.apply(4, 1, Frame::new(OPEN, 1, 0)).0.handle;
+        let b = surfaces.apply(5, 1, Frame::new(OPEN, 1, 0)).0.handle;
+        let mut queues = Queues::new();
+        queues.sync(&surfaces);
+        let mut manager = Manager::new(1280, 800).unwrap();
+        manager.show(1).unwrap();
+        manager.show(2).unwrap();
+        manager.focus = Some(1);
+        let mut device = Fake {
+            bytes: [0x2a, 0x1e].into(),
+            polls: 0,
+        };
+        input
+            .poll_mode::<true>(&mut manager, &mut device, Some(&mut queues))
+            .unwrap();
+        assert_eq!(input.pop(), None);
+        manager.x = 1060;
+        manager.y = 304;
+        device.bytes = [
+            265, 256, 256, 264, 256, 256, 0x1e, 0x30, 0xb0, 0x9e, 0xaa, 0x1e, 0x9e,
+        ]
+        .into();
+        device.polls = 0;
+        input
+            .poll_mode::<true>(&mut manager, &mut device, Some(&mut queues))
+            .unwrap();
+        assert_eq!(manager.focus, Some(2));
+        assert!(device.polls <= DRAIN_LIMIT);
+        assert_eq!(input.pop(), None);
+        let (mut reply, index) = surfaces.input_request(5, 1, Frame::new(INPUT, 2, b));
+        queues.drain(index.unwrap(), &surfaces, &mut reply);
+        assert_eq!(&reply.data[..usize::from(reply.len)], b"ba");
+        let (mut reply, index) = surfaces.input_request(4, 1, Frame::new(INPUT, 2, a));
+        queues.drain(index.unwrap(), &surfaces, &mut reply);
+        assert_eq!((reply.offset, reply.len), (RESET, 0));
+    }
+
+    #[test]
+    fn input_profile_requires_queues_and_keeps_raw_drain_bound() {
+        use crate::desktop::application_input::Queues;
+        let mut storage = [0; CAPACITY];
+        let mut input = Input::new(&mut storage);
+        let mut manager = Manager::new(1280, 800).unwrap();
+        let mut device = Fake {
+            bytes: [0x1e, 0x9e].repeat(40).into(),
+            polls: 0,
+        };
+        assert!(
+            input
+                .poll_mode::<true>(&mut manager, &mut device, None)
+                .is_err()
+        );
+        assert_eq!(device.polls, 0);
+        let mut queues = Queues::new();
+        input
+            .poll_mode::<true>(&mut manager, &mut device, Some(&mut queues))
+            .unwrap();
+        assert_eq!(device.polls, DRAIN_LIMIT);
+        assert_eq!(device.bytes.len(), 48);
+        for _ in 0..16 {
+            assert_eq!(input.pop(), Some(b'a'));
+        }
+        assert_eq!(input.pop(), None);
+    }
+
+    #[test]
+    fn terminal_unclaimed_keys_cancel_only_terminal_draft_on_focus_loss() {
+        use crate::desktop::application_input::Queues;
+        let mut storage = [0; CAPACITY];
+        let mut input = Input::new(&mut storage);
+        let mut queues = Queues::new();
+        let mut manager = Manager::new(1280, 800).unwrap();
+        manager.show(1).unwrap();
+        manager.focus = Some(0);
+        manager.x = 1060;
+        manager.y = 84;
+        let mut device = Fake {
+            bytes: [0x1e, 0x9e, 265, 256, 256, 264, 256, 256].into(),
+            polls: 0,
+        };
+        input
+            .poll_mode::<true>(&mut manager, &mut device, Some(&mut queues))
+            .unwrap();
+        assert_eq!(manager.focus, Some(1));
+        assert_eq!(input.pop(), Some(3));
+        assert_eq!(input.pop(), None);
+        input.key(b'z', false);
+        input.key(b'x', true);
+        input.key(b'\r', true);
+        input.key(b'n', true);
+        assert_eq!(input.pop(), Some(b'n'));
+        assert_eq!(input.pop(), None);
     }
 }

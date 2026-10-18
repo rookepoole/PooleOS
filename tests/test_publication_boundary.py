@@ -102,6 +102,8 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-window-capacity-readiness-private.json",
             "runs/native-surface-lifecycle-readiness-raw.json",
             "runs/native-surface-lifecycle-readiness-private.json",
+            "runs/native-application-input-readiness-raw.json",
+            "runs/native-application-input-readiness-private.json",
             "runs/native-console-ipc-private.json",
             "firmware/private/device.bin",
         )
@@ -138,7 +140,7 @@ class PublicationBoundaryTests(unittest.TestCase):
                      "runs/native-local-console-readiness.json", "runs/native-window-manager-readiness.json",
                      "runs/native-window-input-readiness.json", "runs/native-rendering-readiness.json",
                      "runs/native-virtualbox-mouse-readiness.json", "runs/native-window-capacity-readiness.json",
-                     "runs/native-surface-lifecycle-readiness.json"):
+                     "runs/native-surface-lifecycle-readiness.json", "runs/native-application-input-readiness.json"):
             for data, kind in ((fake_token, "secret_pattern"), (user_path, "absolute_user_path")):
                 self.assertTrue(any(item["type"] == kind for item in publication.inspect_public_blob(path, data)))
 
@@ -170,6 +172,7 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-virtualbox-mouse-readiness.json",
             "runs/native-window-capacity-readiness.json",
             "runs/native-surface-lifecycle-readiness.json",
+            "runs/native-application-input-readiness.json",
             "runs/native-userspace-iso-readiness.json",
             "runs/native-app-file-wait-readiness.json",
             "runs/native_toolchain_qualification.json",

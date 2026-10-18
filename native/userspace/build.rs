@@ -5,5 +5,6 @@ fn main() {
         println!(
             "cargo:rustc-link-arg-bin=PooleWindowLifecycle=--defsym=__poole_window_capacity=1"
         );
+        println!("cargo:rustc-link-arg-bin=PooleWindowInput=--defsym=__poole_window_capacity=1");
     }
 }

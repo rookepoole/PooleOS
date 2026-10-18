@@ -198,8 +198,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 299)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1573)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 300)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1582)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -239,8 +239,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "native_surface_lifecycle_partial_canonical_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 299)
+        self.assertEqual(current["qualification_status"], "native_application_input_partial_canonical_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 300)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -6790,7 +6790,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(record['evidence_status'],'historical_cycle287_diagnostics_not_replayed_apps_now_changed')
         self.assertEqual(len(r['source_bindings']),921)
         self.assertNotEqual(r['program_build']['source_bindings'],bindings())
-        self.assertEqual(len(bindings()),89)
+        self.assertEqual(len(bindings()),96)
         self.assertEqual((len(r['program_build']['programs']),r['program_build']['independent_builds']),(20,2))
         self.assertEqual([p['tests_passed'] for p in r['program_build']['host_tests']],[138,138])
         self.assertEqual(r['captures']['hosts']['passed_test_counts'],[554,554,573,573,26])
@@ -6864,7 +6864,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
         self.assertEqual(record['receipt_sha256'],'BEE1CDEF65E2B3E3983CE1D981DDA91BB69EDF45208AF1A5D160D35832F545EB')
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(288,'PUSIISO1','pass'))
-        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),978)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),988)
         self.assertEqual((r['guest_runs'],r['iso_byte_count']),(6,66109440))
         self.assertEqual(r['iso_sha256'],'1E4752E3D45972CEA7711AF443C15EFC22CD82558F1A975B6B676ADF6C7841AE')
         prior=json.loads((ROOT/'runs/native-claimed-requester-readiness.json').read_bytes())
@@ -6904,7 +6904,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         lane=self.roadmap['baseline']['user_space_integration']
         self.assertTrue(lane['optical_iso_built'] and lane['continue_full_microkernel_after_iso'])
         self.assertEqual(self.roadmap['immediate_next_move']['title'],
-            'Extend native application input and compositor recovery')
+            'Harden active-window lifecycle and advance useful native desktop workflows')
 
     def test_cycle289_file_wait_is_native_bound_and_preserves_the_optical_preview(self) -> None:
         from runtime import native_app_session as apps, native_userspace_iso as optical, native_shell
@@ -6972,7 +6972,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertNotEqual(r['program_build']['source_bindings'], bindings())
         self.assertEqual(r['program_build']['source_bindings'], json.loads(
             (ROOT / 'runs/native-app-file-wait-readiness.json').read_bytes())['program_build']['source_bindings'])
-        self.assertEqual(len(bindings()), 89)
+        self.assertEqual(len(bindings()), 96)
         self.assertEqual(len(r['program_build']['programs']), 20)
         self.assertEqual(r['reused_program_build_cycle'], 289)
         self.assertTrue(r['user_program_sources_unchanged'])
@@ -7057,7 +7057,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertNotEqual(r['program_build']['source_bindings'], bindings())
         self.assertEqual(r['program_build']['source_bindings'], json.loads(
             (ROOT / 'runs/native-app-file-wait-readiness.json').read_bytes())['program_build']['source_bindings'])
-        self.assertEqual((len(bindings()), len(r['program_build']['programs']), r['reused_program_build_cycle']), (89, 20, 289))
+        self.assertEqual((len(bindings()), len(r['program_build']['programs']), r['reused_program_build_cycle']), (96, 20, 289))
         self.assertEqual(r['host_kernel_test_counts'], [576, 576, 595, 595, 26])
         self.assertEqual(r['new_kernel_tests'], 15)
         self.assertEqual((r['reserved_image_pages'], r['guarded_stack_pages']), (208, 36))
@@ -7280,7 +7280,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(len(r['source_bindings']), 964)
         self.assertEqual(r['native_execution']['source_bindings'], r['source_bindings'])
         self.assertNotEqual(r['program_build']['source_bindings'], bindings())
-        self.assertEqual(len(bindings()), 89)
+        self.assertEqual(len(bindings()), 96)
         self.assertEqual(len(r['program_build']['programs']), 24)
         self.assertTrue(r['program_build']['direct_byte_equality'])
         self.assertEqual(r['program_build']['host_tests'], [dict(profile=m, tests_passed=172) for m in ('debug', 'release')])
@@ -7339,8 +7339,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         raw=(ROOT/record['receipt_path']).read_bytes();r=json.loads(raw)
         self.assertEqual(record['receipt_sha256'],hashlib.sha256(raw).hexdigest().upper())
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(295,'PWINPUT1','partial'))
-        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),978)
-        self.assertNotEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),89)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),988)
+        self.assertNotEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),96)
         self.assertEqual(len(r['program_build']['programs']),24)
         self.assertEqual(r['program_build']['host_tests'],[dict(profile=m,tests_passed=178) for m in ('debug','release')])
         self.assertTrue(r['program_build']['direct_byte_equality'])
@@ -7400,7 +7400,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(record['receipt_sha256'],hashlib.sha256(raw).hexdigest().upper())
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(296,'PRENDER1','partial'))
         self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(r['source_bindings']),965)
-        self.assertNotEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),89)
+        self.assertNotEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),96)
         self.assertEqual(r['program_build']['host_tests'],[dict(profile=m,tests_passed=182) for m in ('debug','release')])
         self.assertTrue(r['program_build']['direct_byte_equality'])
         self.assertEqual(len(r['program_build']['programs']),24)
@@ -7596,8 +7596,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         raw=(ROOT/record['receipt_path']).read_bytes();r=json.loads(raw)
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(299,'PWS1','partial'))
-        self.assertEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),978)
-        self.assertEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),89)
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),'A5D51ADEE585DD7FA07C5525C4FCDAD6686A9FAEEE3C67DD0A63BF416C097521')
+        self.assertEqual(record['evidence_status'],'historical_cycle299')
+        self.assertEqual(len(r['source_bindings']),978)
+        self.assertEqual(len(r['program_build']['source_bindings']),89)
         self.assertEqual((len(r['program_build']['programs']),r['program_build']['independent_builds']),(26,2))
         self.assertTrue(r['program_build']['direct_byte_equality'])
         self.assertEqual(r['program_build']['host_tests'],[{'profile':'debug','tests_passed':187},{'profile':'release','tests_passed':187}])
@@ -7610,7 +7612,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(r['native_execution']['surface_lifecycle'])
         self.assertEqual({(g['backend'],g['keyboard_batch']) for g in r['input_guests']},{(b,n) for b in ('qemu','virtualbox') for n in (1,4)})
         for guest in r['input_guests']:
-            self.assertEqual(guest['source_bindings'],source_bindings())
+            self.assertEqual(guest['source_bindings'],r['source_bindings'])
             self.assertEqual((guest['status'],guest['guest_bound_seconds'],guest['keyboard_input_bytes'],guest['serial_input_bytes']),('pass',240,573,0))
             summary=apps.validate_markers(guest['run']['markers'],file_waits=True,windows=True,window_capacity=True,surface_lifecycle=True)
             self.assertEqual(json.loads(json.dumps(summary)),guest['run']['marker_summary'])
@@ -7646,6 +7648,67 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(old).hexdigest().upper(),r['historical_cycle298_receipt_sha256'])
         for key in ('native_active_drag_retirement_qualified','compositor_restart_qualified','general_application_input',
                     'native_overflow_reset_qualified','production_ready','signed','canonical_full_replay_performed','merge_qualified','physical_hardware_tested'):
+            self.assertFalse(r[key],key)
+
+    def test_cycle300_application_input_binds_native_evidence_and_preserves_production_gaps(self) -> None:
+        from tools.qualify_native_user_entry import source_bindings
+        from tools.qualify_native_user_programs import bindings
+        from tools.native_application_input_probe import actions
+        from tools.qualify_native_windows import WindowInteraction
+        from runtime import native_console
+        from unittest.mock import patch
+        record=self.roadmap['baseline']['native_application_input']
+        raw=(ROOT/record['receipt_path']).read_bytes();r=json.loads(raw)
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
+        self.assertEqual((r['cycle'],r['status']),(300,'partial'))
+        self.assertEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),988)
+        self.assertEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),96)
+        self.assertEqual((len(r['program_build']['programs']),r['program_build']['independent_builds']),(29,2))
+        self.assertTrue(r['program_build']['direct_byte_equality'])
+        self.assertEqual(r['program_build']['host_tests'],[{'profile':'debug','tests_passed':209},{'profile':'release','tests_passed':209}])
+        self.assertEqual((r['ordinary_surface_poll_limit'],r['input_surface_poll_limit']),(4096,65536))
+        self.assertTrue(r['host_render_work_bound_verified'])
+        self.assertEqual((r['process_lease_limit'],r['per_owner_process_lease_limit'],r['vm_mapping_slots']),(4,2,8))
+        self.assertEqual((r['ordinary_code_pages_maximum'],r['service_code_pages_maximum']),(4,7))
+        self.assertEqual((r['kernel_image_pages'],r['kernel_capacity_pages'],r['kernel_guarded_stack_pages']),(134,208,36))
+        self.assertEqual((r['kernel_budget']['entry_offset'],r['kernel_budget']['ro_padding_bytes']),(0x1c000,912))
+        self.assertEqual(r['host_kernel_tests'],[{'profile':name+'-'+mode,'passed':count} for name,count in
+            [('default',582),('applications',601),('desktop',607),('windows',613),('capacity',614),('lifecycle',614),('input',614)] for mode in ('debug','release')])
+        self.assertEqual(r['native_execution']['source_bindings'],source_bindings())
+        self.assertEqual(r['native_execution']['status'],'pass');self.assertTrue(r['native_execution']['surface_input'])
+        self.assertEqual({(g['backend'],g['keyboard_batch']) for g in r['input_guests']},{(b,n) for b in ('qemu','virtualbox') for n in (1,4)})
+        planned=actions()
+        for guest in r['input_guests']:
+            self.assertFalse(guest.get('diagnostic_only'))
+            self.assertEqual(guest['source_bindings'],source_bindings())
+            self.assertEqual((guest['status'],guest['guest_bound_seconds'],guest['serial_input_bytes']),('pass',240,0))
+            self.assertTrue(guest['isolated_application_input_verified'])
+            self.assertEqual(len(guest['pointer_steps']),17);self.assertEqual(len(guest['surface_observations']),6)
+            observed=guest['application_input']
+            self.assertTrue(observed['complete']);self.assertEqual(len(observed['actions']),len(planned))
+            self.assertLessEqual(observed['captures'],256);self.assertEqual(observed['action_bound_seconds'],12)
+            for step,(actual,expected) in enumerate(zip(observed['actions'],planned)):
+                self.assertEqual((actual['step'],actual['label'],actual['rows_verified'],actual['pixels_verified']),(step,expected['label'],16,73728))
+                self.assertEqual(actual['expected'],json.loads(json.dumps(expected['expected'])))
+            with patch('tools.qualify_native_local_console.secrets.token_hex',return_value=guest['nonce']):case=WindowInteraction(guest['keyboard_batch'],True,True)
+            try:
+                self.assertEqual(bytes.fromhex(guest['input_hex']),case.case.sent)
+                self.assertEqual(native_console.split_output(bytes.fromhex(guest['output_hex']))[1],case.case.expected)
+                self.assertEqual(guest['keyboard_input_bytes'],len(case.case.sent))
+            finally:case.close()
+            for surface in guest['surface_observations']:
+                if surface['event']=='ADMIT':self.assertEqual(surface['pixels']['fresh_draft']['rows_verified'],2)
+            if guest['backend']=='virtualbox':
+                self.assertTrue(guest['visible']);self.assertTrue(guest['runtime_unchanged'])
+                self.assertFalse(guest['cleanup']['errors']);self.assertFalse(guest['pointer_api']['failed'])
+                self.assertTrue(all(guest['cleanup'][key] for key in ('stopped','unregistered','prior_registrations_unchanged')))
+        old=(ROOT/'runs/native-surface-lifecycle-readiness.json').read_bytes()
+        self.assertEqual(hashlib.sha256(old).hexdigest().upper(),r['historical_cycle299_receipt_sha256'])
+        for key in ('isolated_application_input_qualified','native_draft_overflow_qualified','native_surface_lifecycle_qualified'):
+            self.assertTrue(r[key],key)
+        for key in ('native_active_drag_retirement_qualified','compositor_restart_qualified','general_application_input',
+                    'native_overflow_reset_qualified','native_typematic_focus_stress_qualified','persistent_editing_qualified','production_ready','signed',
+                    'canonical_full_replay_performed','merge_qualified','physical_hardware_tested'):
             self.assertFalse(r[key],key)
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
