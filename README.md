@@ -11,7 +11,21 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle302 replaces permanent COM1 disable
+**Current development checkpoint:** Cycle303 adds the typed launch-control
+foundation: strict start/inspect messages, a bounded generation/replay broker
+using the shell's process capabilities, and an explicitly selected authenticated
+RPC mode. All246 userspace tests pass per debug/release and29 ordinary programs
+match across two independent builds. No kernel authority, guard or code allowance
+grows. Graphical controls and the shell session binding are still required;
+host-tested PLC1 is not connected native execution. The rebuilt ordinary ISO
+passes eight QEMU and four visible VirtualBox runs, including the full prior
+input/lifetime matrix. The launcher and byte-verified Downloads copy now select
+Cycle303; this refresh preserves the existing desktop, not new graphical launch
+controls. [Scope and remaining integration](docs/checkpoints/cycle303-graphical-launch.md).
+All441 selected metadata/integration checks pass after retained stale assertions
+were repaired. This is not the full canonical suite or merge qualification.
+
+**Historical development checkpoint:** Cycle302 replaces permanent COM1 disable
 after a temporary stall with a fixed1024-byte retained queue, bounded4096-read
 drains and explicit rejection after overflow. Compiled controlled backpressure
 recovers the exact diagnostic record; this does not establish the historical
@@ -28,7 +42,7 @@ artifact audit pass, preserving86 historical receipts. This is not a full
 canonical-suite execution.
 No new UI control, full canonical replay, main merge, release or production
 readiness is claimed.
-[Current evidence](docs/checkpoints/cycle302-bounded-serial.md).
+[Cycle302 evidence](docs/checkpoints/cycle302-bounded-serial.md).
 
 **Historical development checkpoint:** Cycle301 hardens the interactive native
 window manager against focused-app death and identity replacement. Pending keys

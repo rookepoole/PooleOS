@@ -29,10 +29,17 @@ impl Transport {
     }
     #[inline(always)]
     pub fn send(&mut self, message: Message, calls: &mut impl Calls) -> Result<bool, Error> {
+        self.send_encoded(message.encode(), calls)
+    }
+    #[inline(always)]
+    pub(crate) fn send_encoded(
+        &mut self,
+        mut wire: [u8; BYTES],
+        calls: &mut impl Calls,
+    ) -> Result<bool, Error> {
         if self.server == (self.pending == 0) {
             return Err(Error::Transport);
         }
-        let mut wire = message.encode();
         let (number, handle) = if self.server {
             (8, self.pending)
         } else {
@@ -53,6 +60,14 @@ impl Transport {
     }
     #[inline(always)]
     pub fn receive(&mut self, calls: &mut impl Calls) -> Result<Option<Message>, Error> {
+        self.receive_with(calls, Message::decode)
+    }
+    #[inline(always)]
+    pub(crate) fn receive_with<T>(
+        &mut self,
+        calls: &mut impl Calls,
+        decode: impl FnOnce(&[u8]) -> Result<T, Error>,
+    ) -> Result<Option<T>, Error> {
         if self.server != (self.pending == 0) {
             return Err(Error::Transport);
         }
@@ -70,14 +85,14 @@ impl Transport {
                     if !token(reply, 2) {
                         return Err(Error::Peer);
                     }
-                    // Authenticate the remaining kernel envelope using the unchanged PCS1 decoder.
+                    // Authentication precedes decoding for every explicit protocol mode.
                     wire[16..24].fill(0);
-                    let message = self.peer.decode(&wire)?;
+                    let message = decode(self.peer.payload(&wire)?)?;
                     self.pending = reply;
                     Ok(Some(message))
                 } else {
                     self.pending = 0;
-                    self.peer.decode(&wire).map(Some)
+                    decode(self.peer.payload(&wire)?).map(Some)
                 }
             }
             (6, 0) => Ok(None),

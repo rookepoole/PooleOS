@@ -2,6 +2,7 @@
 #![forbid(unsafe_code)]
 use super::{Commands, Error};
 use crate::supervisor::{Calls, Completion};
+mod launch;
 
 #[derive(Clone, Copy)]
 struct Task {
@@ -26,6 +27,9 @@ enum Operation {
     InspectStart,
     Stop,
     Status,
+    LaunchStart,
+    LaunchInspect,
+    LaunchStatus,
 }
 pub type Processes<C> = Policy<C, false>;
 pub type ApplicationProcesses<C> = Policy<C, true>;
@@ -237,33 +241,30 @@ impl<C: Calls, const APPLICATIONS: bool> Commands for Policy<C, APPLICATIONS> {
     fn poll(&mut self) -> Result<bool, Error> {
         let (slot, operation) = self.pending.ok_or(Error::Sequence)?;
         let task = *self.tasks.get(slot).ok_or(Error::Wire)?;
-        if operation == Operation::Start {
-            let sequence = task.sequence.checked_add(1).ok_or(Error::Sequence)?;
-            match self.calls.invoke(19, task.factory, u64::from(sequence)) {
-                (6, 0) => Ok(false),
-                (0, handle)
-                    if typed(handle, 5) && self.tasks.iter().all(|t| t.handle != Some(handle)) =>
-                {
-                    *self.tasks.get_mut(slot).ok_or(Error::Wire)? = Task {
-                        sequence,
-                        handle: Some(handle),
-                        complete: false,
-                        ..task
-                    };
-                    self.reply(slot, b"admitted", None)
-                }
-                (8, 0) => {
-                    *self.tasks.get_mut(slot).ok_or(Error::Wire)? = Task {
-                        sequence,
-                        handle: None,
-                        complete: true,
-                        ..task
-                    };
-                    self.reply(slot, b"launch failed", None)
-                }
-                (5, 0) => self.reply(slot, b"denied", None),
-                _ => Err(Error::Transport),
-            }
+        if matches!(
+            operation,
+            Operation::LaunchStart | Operation::LaunchInspect | Operation::LaunchStatus
+        ) {
+            return Err(Error::Sequence);
+        }
+        if matches!(operation, Operation::Start | Operation::InspectStart) {
+            use crate::session_control::Status;
+            let Some(status) =
+                self.start_step(slot, operation == Operation::InspectStart, Operation::Start)?
+            else {
+                return Ok(false);
+            };
+            let label: &[u8] = match status {
+                Status::Admitted => b"admitted",
+                Status::LaunchFailed => b"launch failed",
+                Status::Denied => b"denied",
+                Status::Running => b"attached",
+                Status::StopPending => b"stop pending",
+                Status::StopClaimed => b"stop claimed",
+                Status::Retiring => b"retiring",
+                _ => return Err(Error::Transport),
+            };
+            self.reply(slot, label, None)
         } else {
             let Some(handle) = task.handle else {
                 return self.reply(slot, b"not started", None);
@@ -280,16 +281,7 @@ impl<C: Calls, const APPLICATIONS: bool> Commands for Policy<C, APPLICATIONS> {
                 };
             }
             match self.calls.invoke(20, handle, 0) {
-                (0, value) => {
-                    Completion::decode(value).map_err(|_| Error::Transport)?;
-                    if operation == Operation::InspectStart {
-                        self.tasks.get_mut(slot).ok_or(Error::Wire)?.complete = true;
-                        self.pending = Some((slot, Operation::Start));
-                        Ok(false)
-                    } else {
-                        self.terminal(slot, value)
-                    }
-                }
+                (0, value) => self.terminal(slot, value),
                 (6, value @ 1..=4) if !task.complete => self.reply(
                     slot,
                     match value {

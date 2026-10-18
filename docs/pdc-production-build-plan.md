@@ -1,13 +1,56 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-18
-Plan version: 2.205.0-native-bounded-serial
-Roadmap cycle: PooleOS Cycle 302
+Plan version: 2.206.0-native-launch-control
+Roadmap cycle: PooleOS Cycle 303
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 303: Graphical Launch Foundation
+
+Implemented: strict32-byte PLC1 start/inspect requests, a bounded replay/generation
+broker using the shell's existing process ownership, and an explicit authenticated
+PCS1/PLC1 RPC mode. Terminal observation precedes restart; pending launches and
+retained replies cannot duplicate admission. Malformed results retain ownership
+and fail closed. Ordinary PCS1 still rejects PLC1. No new factory/device authority,
+guard allowance or code profile is introduced.
+
+246 userspace tests pass per debug/release, including29 new cases;29 existing
+native programs match across two independent builds with relocation audits.
+Shared changes affect11 programs;18 remain byte-identical. The ordinary shell is
+15440/16384 bytes, leaving944 bytes, and ordinary WindowConsole is16268/16384.
+Unused PLC1 code is not evidence that the connected profile fits or executes.
+Retained compilation/storage failures, scope and gates:
+[LC1-LC7 and progress](checkpoints/cycle303-graphical-launch.md).
+
+Required next: shell Read/result/ack session binding with draft/file-job preservation,
+explicit native startup/profile, measured connected code/stack, graphical launch
+and restart states with keyboard access, and actual connected ISO qualification.
+Do not inject command text or give the compositor unrestricted process factories.
+Native admission and a visible running window remain distinct outcomes.
+The rebuilt ordinary Cycle303 ISO passes eight QEMU and four visible VirtualBox
+runs, including the full two-mode input/lifetime matrix: 384 app observations,
+96 lifetime observations and 48 lifecycle pixel barriers. It is now selected by
+the launcher and byte-verified Downloads copy. This is shared-code regression,
+not native PLC1 execution or new graphical launch controls. The kernel remains
+134/208 pages with36 guarded kernel-stack pages and360 read-only bytes free
+before entry0x1C000. No kernel source or allowance changed this cycle.
+The complete native production goal and all existing gaps remain in scope.
+
+New required open `FLAG-N13-LAUNCH-FAILURE-001`: implement and verify recoverable
+native launch failure with retained prepared-image ownership, safe cleanup and
+factory-attempt/task/surface generation reconciliation. The current dispatcher
+fails stop on preparation/admission errors; host retry tests do not qualify this
+native path.101 implementation flags remain,46 open; no phase is closed here.
+
+All 441 selected metadata/integration checks pass after retained stale
+schema/history/decoder assertions were repaired. The oracle-only program rebuild
+is byte-identical to the executed programs; native evidence is preserved, not
+rewritten. Python inventory is1596, not a full canonical replay. Final source,
+index and publication gates still govern cloud backup and any later merge.
 
 ## Cycle 302: Bounded Serial Delivery
 

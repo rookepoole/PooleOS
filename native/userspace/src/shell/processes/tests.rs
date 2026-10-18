@@ -286,3 +286,33 @@ fn completed_generation_cannot_regress_and_sequence_cannot_wrap() {
     assert_eq!(p.poll(), Err(Error::Sequence));
     assert!(p.calls.calls.is_empty());
 }
+
+#[test]
+fn graphical_exhaustion_and_terminal_regression_fail_closed() {
+    use crate::session_control::{Action, App, Broker, Request, Status};
+    let mut p = ApplicationProcesses::new(FACTORIES, Fake::default()).unwrap();
+    p.tasks[0].sequence = u32::MAX;
+    let mut broker = Broker::new();
+    broker
+        .begin(
+            Request::new(1, App::Text, Action::Start, u32::MAX).unwrap(),
+            &mut p,
+        )
+        .unwrap();
+    assert_eq!(broker.poll(&mut p), Ok(true));
+    assert_eq!(broker.reply().unwrap().status(), Status::Exhausted);
+    assert!(p.calls.calls.is_empty());
+    assert!(p.close_allowed());
+    broker.acknowledge(1).unwrap();
+    p.tasks[0].handle = Some(CHILD);
+    broker
+        .begin(
+            Request::new(2, App::Text, Action::Inspect, u32::MAX).unwrap(),
+            &mut p,
+        )
+        .unwrap();
+    p.calls.replies.push_back((6, 1));
+    assert_eq!(broker.poll(&mut p), Err(Error::Transport));
+    assert!(p.child(0).is_none());
+    assert!(!p.close_allowed());
+}

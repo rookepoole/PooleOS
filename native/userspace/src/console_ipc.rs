@@ -127,6 +127,11 @@ impl Peer {
     /// Only a successful kernel receive7 may supply this envelope.
     #[inline]
     pub fn decode(self, wire: &[u8]) -> Result<Message, Error> {
+        Message::decode(self.payload(wire)?)
+    }
+    /// Authenticate the kernel envelope before selecting an explicit wire codec.
+    #[inline]
+    pub(crate) fn payload(self, wire: &[u8]) -> Result<&[u8], Error> {
         if wire.len() != ENVELOPE_BYTES {
             return Err(Error::Wire);
         }
@@ -139,7 +144,7 @@ impl Peer {
                 return Err(Error::Peer);
             }
         }
-        Message::decode(&wire[32..])
+        Ok(&wire[32..])
     }
 }
 

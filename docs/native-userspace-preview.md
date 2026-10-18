@@ -1,12 +1,18 @@
 # Run The Native Window Preview
 
-Cycle302's controlled native qualification passes on QEMU and visible VirtualBox.
+Cycle303's controlled native qualification passes on QEMU and visible VirtualBox.
 The local launcher and byte-verified Downloads copy select this checkpoint.
 
-Cycle302, 2026-10-18. Native PooleBoot + PooleKernel, not Linux.
+Cycle303, 2026-10-18. Native PooleBoot + PooleKernel, not Linux.
 This experimental build draws Terminal and two independent native application
 windows inside the VM and accepts focused keyboard input. It is not a complete
 desktop, PooleGlass environment, installer or production release.
+
+Cycle303 adds a host-tested typed launch broker and authenticated transport,
+but does not connect graphical launch controls yet. The ordinary shared-code
+image is rebuilt and requalified: eight QEMU and four VirtualBox runs, including
+the complete two-mode input/lifetime matrix. Start applications through Terminal
+as below. This checkpoint does not add a launch button or change the UI design.
 
 The controlled device challenge covers96 exact app-input observations, a332-byte
 shell case,17 pointer steps and six generation-bound lifecycle pixel barriers.
@@ -135,11 +141,11 @@ if a retained failure requires manual recovery; do not touch unrelated VMs.
 
 ## ISO And File Type
 
-Qualified development image: `outputs/cycle302-optical1/PooleOS-UserSpace-Preview.iso`.
+Qualified development image: `outputs/cycle303-optical1/PooleOS-UserSpace-Preview.iso`.
 
-Verified convenience copy: `PooleOS-Native-Windows-Cycle302.iso` in Downloads.
+Verified convenience copy: `PooleOS-Native-Windows-Cycle303.iso` in Downloads.
 Size 66109440 bytes; SHA256:
-`E7AA840981B2A109619CD94B28CA2BF12DF9066E965002C13C6E22A8E6F2A12C`.
+`4FAC38AA0A631CC2D4D2AD428AAFEE07EE33A2CEB7FAEF8128655D9A6553D8F8`.
 The ISO contains the explicit input-profile kernel/service and interactive apps.
 Final-source native replay and convenience-copy hash verification pass.
 
@@ -162,13 +168,13 @@ not open SDL, which previously crashed on this host. Both use the current pointe
 `outputs/native-userspace-preview.json`. The new visible entry point is:
 
 ```powershell
-.\Launch-Local-Console.cmd --receipt outputs/cycle302-optical1/receipt.json
+.\Launch-Local-Console.cmd --receipt outputs/cycle303-optical1/receipt.json
 ```
 
 From the repository root with the configured Python runtime:
 
 ```text
-python -B -m tools.qualify_native_app_session --work-dir outputs/NEW-OPTICAL --program-dir outputs/cycle301-programs6 --optical --windows --window-capacity --surface-lifecycle --surface-input
+python -B -m tools.qualify_native_app_session --work-dir outputs/NEW-OPTICAL --program-dir outputs/cycle303-programs4 --optical --windows --window-capacity --surface-lifecycle --surface-input
 python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-QEMU
 python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-BURST-QEMU --keyboard-batch 4
 python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible
@@ -205,12 +211,12 @@ remain separate requirements. Bounded emulator pointer evidence does
 not establish unrestricted input or physical-device behavior. The console
 has an explicit seven-page capacity profile. Its 24594-byte test image includes
 deliberate padding and has 4078 bytes below the 28672-byte ceiling; ordinary
-WindowConsole has20 bytes free at16364/16384. The fixed probe starts at24576,
+WindowConsole has116 bytes free at16268/16384. The fixed probe starts at24576,
 so future service growth/layout changes require fresh build and execution checks.
 Service separation and scalable address spaces remain required; no hardware
 speedup is claimed.
 The input-only kernel uses134/208 pages,36 guarded stack pages and a0x1C000
-read-only boundary with664 bytes of padding. Interactive accepted-request polls
+read-only boundary with360 bytes of padding. Interactive accepted-request polls
 are limited to65536 attempts; ordinary clients retain4096. This is not a
 wall-clock responsiveness guarantee. Repaint latency and partial frames need
 separate presentation work. Two intermediate cursor frames in Cycle301 settled
@@ -229,7 +235,8 @@ See the [contract and tracked gaps](native-window-manager.md) and
 and [capacity contract](native-window-capacity.md),
 [application-input contract](native-application-input.md),
 [input-lifetime contract](native-input-lifetime.md),
-[checkpoint](checkpoints/cycle301-input-lifetime.md).
+[launch-control contract](native-launch-control.md),
+[current checkpoint](checkpoints/cycle303-graphical-launch.md).
 VirtualBox's [lifecycle controls](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/vboxmanage.html)
 and [optical/EFI setup](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/working-with-vms.html)
 describe the host-side operations.

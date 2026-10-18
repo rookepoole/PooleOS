@@ -24,6 +24,14 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle303-graphical-launch.md",
+    "docs/native-launch-control.md",
+    "runs/native-launch-control-readiness.json",
+    "native/userspace/src/session_control.rs",
+    "native/userspace/src/session_control/tests.rs",
+    "native/userspace/src/session_control/rpc.rs",
+    "native/userspace/src/session_control/rpc/tests.rs",
+    "native/userspace/src/shell/processes/launch.rs",
     "docs/checkpoints/cycle302-bounded-serial.md",
     "docs/native-bounded-serial.md",
     "runs/native-bounded-serial-readiness.json",

@@ -7,6 +7,7 @@ pub mod desktop;
 pub mod files;
 pub mod protocol;
 pub mod service;
+pub mod session_control;
 pub mod shell;
 pub mod startup;
 pub mod supervisor;

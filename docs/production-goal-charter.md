@@ -7,9 +7,30 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 302
+Last roadmap reconciliation: PooleOS Cycle 303
 
-Cycle302 implements bounded retained COM1 delivery after transient backpressure,
+Cycle303 implements PLC1's strict start/inspect wire, bounded process-owner broker
+and explicit peer-authenticated console/control transport.246 userspace tests pass
+per debug/release;29 ordinary program pairs reproduce independently. No privilege,
+guard, lease or code-page limit grows. Read/result/ack session binding, draft and
+file-job preservation, explicit connected native profile, measured code/stack,
+graphical controls and actual connected ISO qualification remain required.
+The ordinary shell's944-byte margin excludes unused PLC1 connection code.
+The rebuilt ordinary Cycle303 preview passes eight QEMU and four visible
+VirtualBox runs: 384 app observations, 96 lifetime observations and 48 lifecycle
+pixel barriers. The launcher and byte-verified Downloads copy select this image.
+Its kernel remains134/208 pages,36 guarded kernel-stack pages and360 bytes of
+read-only padding. Host policy/transport tests and ordinary native regressions
+do not qualify graphical launching. A new required native launch-failure/cleanup
+flag leaves101 flags,46 open. All40 phases,301 subphases,
+complete native microkernel, PooleGlyph/PDC, accessible PooleGlass and every
+canonical/release gate remain in scope. No production promotion or phase closure.
+The corrected441-test selected metadata/integration replay passes;1596 is Python
+inventory, not full-suite execution. The static-oracle refresh is explicitly
+bound to byte-identical rebuilt programs and unchanged native execution evidence.
+[Current progress](checkpoints/cycle303-graphical-launch.md).
+
+Historical Cycle302 implements bounded retained COM1 delivery after transient backpressure,
 with explicit sticky saturation rather than silent stream corruption. Fixed
 storage, total work bounds, original guards and unchanged authority remain.
 Eight kernel profiles pass debug/release;47 focused Python checks and the full
@@ -34,7 +55,7 @@ text. COM2-mirror-independent local graphical boot is explicitly required before
 claiming standalone demo readiness. Compositor recovery, persistence, accessible
 PooleGlass, complete microkernel, PooleGlyph/PDC and all N0-N39/canonical/release
 requirements remain. No phase closure, main merge or production promotion.
-[Current evidence](checkpoints/cycle302-bounded-serial.md).
+[Cycle302 evidence](checkpoints/cycle302-bounded-serial.md).
 
 Historical Cycle301 hardens focused-surface retirement/replacement and input reset with
 bounded raw-controller quarantine and explicit release/fresh-focus recovery.

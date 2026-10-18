@@ -155,7 +155,9 @@ class NativeUserProgramTests(unittest.TestCase):
         self.assertIn("self.0.receive(&mut ConsoleCalls)",adapter)
         self.assertIn("(7, self.endpoint)",rpc)
         self.assertIn("(11, self.pending)",rpc)
-        self.assertIn("self.peer.decode(&wire)",rpc)
+        self.assertIn("self.receive_with(calls, Message::decode)",rpc)
+        self.assertEqual(rpc.count("decode(self.peer.payload(&wire)?)"),2)
+        self.assertIn("Message::decode(self.payload(wire)?)",console)
         for name in ("init","counter","console_service","console_client"):
             main=(ROOT/f"native/userspace/src/bin/{name}.rs").read_text()
             self.assertIn("entry!(main)",main)

@@ -16229,13 +16229,75 @@ def apply_cycle302(roadmap: dict, test_count: int) -> dict:
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
     roadmap["immediate_next_move"]["entry_evidence"] = [checkpoint, contract, path]
+    return apply_cycle303(roadmap, test_count)
+
+
+def apply_cycle303(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle303-graphical-launch.md"
+    contract = "docs/native-launch-control.md"
+    path = "runs/native-launch-control-readiness.json"
+    raw = (ROOT/path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline.update(pooleos_cycle=303, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 303
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 303
+    gate["qualification_status"] = "typed_launch_control_partial_canonical_pending"
+    baseline["native_bounded_serial"]["evidence_status"] = "historical_cycle302"
+    gate["current_native_bounded_serial_qualification"]["evidence_status"] = "historical_cycle302_not_current_source_qualification"
+    record = dict(cycle=303, contract_id="PLC1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("host_userspace_tests", "ordinary_program_pairs", "ordinary_shell_code_bytes",
+                "typed_broker_host_qualified", "typed_transport_host_qualified", "native_plc1_execution_verified",
+                "graphical_launch_connected", "terminal_draft_preservation_qualified", "connected_stack_bound_verified",
+                "qemu_guest_runs", "virtualbox_guest_runs", "ordinary_native_regression_passed",
+                "selected_preview_cycle", "canonical_full_replay_performed", "merge_qualified", "production_ready"):
+        record[key] = receipt[key]
+    baseline["native_launch_control"] = copy.deepcopy(record)
+    gate["current_native_launch_control_qualification"] = record
+    # This is the ordinary regression image, not native execution of PLC1.
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=303, receipt_path=path, receipt_section="native_execution",
+        retained_kernel_sources_unchanged=True,
+        native_execution_status="ordinary_shared_launch_and_rpc_regression_plc1_not_connected",
+        native_execution_evidence_cycle=303, shell_native_execution_evidence_cycle=303,
+        optical_iso_sha256=receipt["regression_iso_sha256"],
+        kernel_image_pages=receipt["kernel_budget"]["image_pages"],
+        kernel_remaining_capacity_pages=receipt["kernel_budget"]["remaining_pages"])
+    lane["graphical_launch_control"] = dict(cycle=303, broker="host_qualified", transport="host_qualified",
+        session_binding="required", graphical_controls="required", connected_native_iso="required")
+    roadmap["implementation_flags"].append(dict(id="FLAG-N13-LAUNCH-FAILURE-001", **{"class":"REQUIRED"},
+        status="open", phase_id="N13",
+        closure_condition="Qualify native recoverable launch preparation/admission failure, retained prepared-image ownership, safe cleanup and retry, and factory-attempt/task/surface generation reconciliation. The current application dispatcher fails stop; host LaunchFailed/retry tests do not qualify this native path. Do not weaken fail-stop or ownership checks without evidence.",
+        evidence=[checkpoint, contract, "native/kernel/src/user_root_probe/peer_driver/interactive.rs",
+                  "native/kernel/src/capability_ipc/launch.rs", "native/kernel/src/user_entry/task.rs"]))
+    evidence = ("Cycle303: strict PLC1 start/inspect codec, replay/generation-bound process-owner broker and explicit peer-authenticated transport pass246 userspace tests per debug/release. All29 ordinary programs reproduce independently; no privilege, guard or code-page limit grows. The ordinary shared-code native regression is separate from currently unconnected graphical launching. " + checkpoint)
+    gap = ("Bind PLC1 to the shell Read/result/ack session without altering drafts or active file jobs; implement explicit startup roles, measured connected code/stack, graphical launch/restart states and keyboard access; qualify actual connected native execution and the resulting ISO. Ordinary shell944-byte headroom excludes unused PLC1 code; its embedded kernel read-only region has360 bytes free. The selected source-matched ordinary Cycle303 regression image is not graphical-launch qualification. Compositor recovery, COM2-independent boot, persistence, event-driven waits, production all-path stack bounds, accessible PooleGlass, robust microkernel, PooleGlyph/PDC and all N0-N39 gates remain. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N3", "N9", "N13", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-NATIVE-UI-001", "FLAG-N13-USERSPACE-ISO-001", "FLAG-N13-USERSTACK-001", "FLAG-N3-VIRTUALBOX-PREVIEW-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle303 does not close this flag. " + gap
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["immediate_next_move"].update(title="Connect typed graphical launch to the native shell and window manager",
+        entry_evidence=[checkpoint, contract, path], exit_evidence=[
+            "authenticated Read/result/ack session with terminal draft and file-job preservation",
+            "measured explicit native launch profile within original authority and guard budgets",
+            "real graphical launch/restart, stale/delayed/failed/repeated controls and keyboard access",
+            "qualified connected ISO plus complete microkernel, PooleGlyph/PDC, PooleGlass and all N0-N39 gates"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1595)
+    parser.add_argument("--test-count", type=int, default=1596)
     parser.add_argument("--status-date", default="2026-10-18")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
