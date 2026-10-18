@@ -1,9 +1,9 @@
 # Run The Native Window Preview
 
-Cycle300's controlled native qualification passes on QEMU and visible VirtualBox.
+Cycle301's controlled native qualification passes on QEMU and visible VirtualBox.
 The local launcher and byte-verified Downloads copy select this checkpoint.
 
-Cycle300, 2026-10-17. Native PooleBoot + PooleKernel, not Linux.
+Cycle301, 2026-10-17. Native PooleBoot + PooleKernel, not Linux.
 This experimental build draws Terminal and two independent native application
 windows inside the VM and accepts focused keyboard input. It is not a complete
 desktop, PooleGlass environment, installer or production release.
@@ -17,6 +17,14 @@ The longer557-byte serial workflow is separately replayed. Historical failures
 remain retained, not rewritten as successes. Native continuous-typematic stress
 is not qualified by this controlled scenario: VirtualBox may filter duplicate
 host makes before they reach the guest.
+
+The new lifetime challenge adds24 ordered observations per guest: fault or exit
+while the app has focus, an active drag and Shift held, followed by release and
+fresh explicit focus. Its24 serial fault/stop-control bytes are separate from308
+device-keyboard bytes. Both modes pass on both backends. One additional ordinary
+VirtualBox burst attempt lost COM1 retirement diagnostics while COM2 reported
+the fault; an unchanged replay passed. The cause and diagnostic repeatability
+remain open. This preview is not an everyday-reliability qualification.
 
 Cycle299 gives the window service read-only process-lifetime observation through
 already-held capability authority. It cannot terminate applications. Faulted or
@@ -63,6 +71,11 @@ Stopping/faulting an app removes its window
 and taskbar entry; `status` in Terminal reports process state. A restarted app
 opens a fresh window with an empty draft. Automatic restart of the window service itself remains
 unimplemented and is not implied by application restart.
+If the focused app disappears, neither another app nor Terminal inherits focus
+or pending input. Release the mouse button, then click the intended window.
+When the button was already up and no release packet arrives, the first
+click-and-release may be consumed; the next click selects focus. Held modifiers
+remain fenced until released. Keyboard-only recovery is not implemented yet.
 
 To exercise containment: `fault numbers`, then `status numbers`, `start numbers`
 and `numbers /numbers.csv`. To finish normally: `stop text`, `status text`,
@@ -115,11 +128,11 @@ if a retained failure requires manual recovery; do not touch unrelated VMs.
 
 ## ISO And File Type
 
-Qualified development image: `outputs/cycle300-optical6/PooleOS-UserSpace-Preview.iso`.
+Qualified development image: `outputs/cycle301-optical1/PooleOS-UserSpace-Preview.iso`.
 
-Verified convenience copy: `PooleOS-Native-Windows-Cycle300.iso` in Downloads.
+Verified convenience copy: `PooleOS-Native-Windows-Cycle301.iso` in Downloads.
 Size 66109440 bytes; SHA256:
-`CC11DBF0F101AB464C0343140DDAEF5BCD5497E19E034D3A0BCF11E7EA8D0304`.
+`CC437211E7AF65EC0753E940AB49C68E1AE6495ACE2FDD9681D9E7BA5E996F47`.
 The ISO contains the explicit input-profile kernel/service and interactive apps.
 Final-source native replay and convenience-copy hash verification pass.
 
@@ -142,13 +155,13 @@ not open SDL, which previously crashed on this host. Both use the current pointe
 `outputs/native-userspace-preview.json`. The new visible entry point is:
 
 ```powershell
-.\Launch-Local-Console.cmd --receipt outputs/cycle300-optical6/receipt.json
+.\Launch-Local-Console.cmd --receipt outputs/cycle301-optical1/receipt.json
 ```
 
 From the repository root with the configured Python runtime:
 
 ```text
-python -B -m tools.qualify_native_app_session --work-dir outputs/NEW-OPTICAL --program-dir outputs/cycle300-programs3 --optical --windows --window-capacity --surface-lifecycle --surface-input
+python -B -m tools.qualify_native_app_session --work-dir outputs/NEW-OPTICAL --program-dir outputs/cycle301-programs6 --optical --windows --window-capacity --surface-lifecycle --surface-input
 python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-QEMU
 python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-BURST-QEMU --keyboard-batch 4
 python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible
@@ -168,10 +181,17 @@ PowerShell executable and exact COM registration. It does not change execution
 policy or move the host cursor. Normal interactive launching does not use that
 test helper; VirtualBox supplies the user's device input.
 
+For the distinct lifetime challenge, run `tools.qualify_native_input_lifetime`
+with the same `--receipt`, a new `--work-dir`, and each backend/batch combination
+above. It intentionally uses the separately counted serial controls described
+earlier, not an all-device-input claim. Each run retains the240-second guest and
+12-second action bounds and192-capture ceiling. Diagnostic-only images cannot
+qualify the local preview.
+
 ## Remaining Work
 
-Next: native retirement while focused or dragging, compositor restart/resynchronization,
-efficient event waits, launch controls and persistent editing. Native input
+Next: reliable bounded diagnostic delivery, graphical launch controls,
+compositor restart/resynchronization, efficient event waits and persistent editing. Native input
 overload/reset, continuous-typematic stress and accessible PooleGlass styling
 remain separate requirements. Bounded emulator pointer evidence does
 not establish unrestricted input or physical-device behavior. The console
@@ -182,10 +202,14 @@ so future service growth/layout changes require fresh build and execution checks
 Service separation and scalable address spaces remain required; no hardware
 speedup is claimed.
 The input-only kernel uses134/208 pages,36 guarded stack pages and a0x1C000
-read-only boundary with912 bytes of padding. Interactive accepted-request polls
+read-only boundary with736 bytes of padding. Interactive accepted-request polls
 are limited to65536 attempts; ordinary clients retain4096. This is not a
 wall-clock responsiveness guarantee. Repaint latency and partial frames need
-separate presentation work.
+separate presentation work. Two intermediate cursor frames in this cohort settle
+in subsequent recorded frames; atomic presentation/double buffering is not
+implemented. Native stack overflows were repaired by ending input polling before
+nested painting, without enlarging guards. All-path stack-depth/high-water
+verification remains open as `FLAG-N13-USERSTACK-001`.
 Continue robust microkernel work, persistence, networking and PooleGlyph/PDC.
 Default VirtualBox diagnostics still fail stage117; actual watchdog delivery
 there remains separately unqualified. This application profile does not close it.
@@ -196,7 +220,8 @@ See the [contract and tracked gaps](native-window-manager.md) and
 [input contract](native-window-input.md), [rendering contract](native-rendering.md)
 and [capacity contract](native-window-capacity.md),
 [application-input contract](native-application-input.md),
-[checkpoint](checkpoints/cycle300-application-input.md).
+[input-lifetime contract](native-input-lifetime.md),
+[checkpoint](checkpoints/cycle301-input-lifetime.md).
 VirtualBox's [lifecycle controls](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/vboxmanage.html)
 and [optical/EFI setup](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/working-with-vms.html)
 describe the host-side operations.

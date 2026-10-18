@@ -7,34 +7,39 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 300
+Last roadmap reconciliation: PooleOS Cycle 301
 
-Cycle300 implements isolated focused input over the existing authenticated
-surface channel. Each app owns its 48-byte scratch draft and computations;
-the window manager routes input and displays results without new authority.
-Generation-bound queues, cancellation on lost input, held-key fences and exact
-reply validation preserve isolation. Native client poll exhaustion during scene
-composition was diagnosed and repaired with a finite interactive work budget;
-ordinary behavior and all code-page, mapping, lease and stack-guard limits remain.
-Ten QEMU and two visible VirtualBox final-source checks pass, including 384 exact
-application observations and 24 lifecycle pixel barriers. All 29 independent
-program pairs match, with 209 user tests per debug/release and seven kernel
-profiles in both modes. The kernel uses 134/208 pages, 36 guarded stack pages
-and 912 bytes of padding at the explicit input-profile read-only boundary.
-The narrow increment does not qualify continuous typematic stress, arbitrary
-input loss/reset, active-drag retirement, compositor recovery, event-driven
-surface waits, latency, persistent editing or a complete graphical desktop.
-These remain chronological N13/N27 work alongside graphical launch controls.
-Complete microkernel, PooleGlyph/PDC, accessible PooleGlass, stage117/watchdog,
-five legacy entry checks and all N0-N39/canonical/release gates remain required.
-No phase closure, main merge, release or production promotion is claimed.
-427 overlapping metadata/integration tests pass; 1582 is discovered inventory,
-not a full-suite execution. Stale metadata assertions are repaired with failures
-retained. Architecture binds 849 files. The local launcher and verified ISO copy
-now select Cycle300; full canonical and release qualification remain mandatory.
-The final staged byte/pixel/source audit and publication scan pass, preserving
-all 84 historical readiness/execution receipts and owner-input hashes.
-[Evidence](checkpoints/cycle300-application-input.md).
+Cycle301 hardens focused-surface retirement/replacement and input reset with
+bounded raw-controller quarantine and explicit release/fresh-focus recovery.
+The existing isolated scratch apps retain authenticated generation-bound input;
+no application authority, lease, mapping, code-page or stack allowance grows.
+Native user-stack failures exposed nested polling/rendering frame overflow.
+Polling now returns a bounded damage plan before rendering; the original guards
+and unconditional critical-service stop remain, with bounded reason diagnostics.
+Twelve QEMU and four visible VirtualBox final-source checks pass, including 384
+app observations, 96 lifetime observations and 48 lifecycle pixel barriers.
+All 29 independent program pairs match; 28 ordinary binaries are unchanged.
+217 user tests per debug/release and seven kernel profiles in both modes pass.
+The kernel remains 134/208 pages with 36 guarded kernel-stack pages, one guarded
+user-stack page and 736 bytes of input-profile read-only padding at0x1C000.
+One additional VirtualBox attempt lost COM1 retirement evidence while COM2
+reported the app fault. Its unchanged replay passes, but diagnostic repeatability
+and cause remain unqualified. Two intermediate cursor frames require subsequent
+complete-frame evidence; atomic presentation is not claimed.
+Graphical launch controls, compositor recovery, event-driven waits, measured
+latency, persistent editing and all-path stack-depth/high-water proof remain.
+The observed empty controller read is not a physical-device buffering guarantee;
+native arbitrary backlog, continuous typematic and reset injection remain open.
+Complete microkernel, isolated drivers, PooleGlyph/PDC, accessible PooleGlass,
+stage117/watchdog, five legacy entry checks and all N0-N39/canonical/release gates
+remain required. No phase closure, main merge or production promotion is claimed.
+The local launcher and byte-verified Downloads ISO now select Cycle301. All434
+selected metadata/integration tests pass;1589 is discovered inventory, not a
+full-suite execution. Architecture binds857 files, execution993 and programs97.
+There are100 implementation flags,45 open. The staged byte/pixel/source audit and
+publication scan pass:30 staged files,85 unchanged historical receipts and2097
+scanned paths with zero violations. Owner inputs remain unchanged.
+[Evidence](checkpoints/cycle301-input-lifetime.md).
 
 Historical Cycle299 implementation: generation-bound process observation now removes
 faulted/stopped application surfaces and permits fresh-generation restarts.

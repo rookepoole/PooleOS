@@ -93,6 +93,17 @@ impl<'a> Input<'a> {
         input.focus_lost(old);
     }
     #[inline]
+    pub fn lifetime_boundary(
+        &mut self,
+        input: &mut super::application_input::Queues,
+        manager: &mut Manager,
+        old: Option<usize>,
+    ) {
+        self.focus_boundary(input, old);
+        manager.quarantine_input();
+        input.quarantined = true;
+    }
+    #[inline]
     fn key(&mut self, byte: u8, focused: bool) {
         self.stats.received = self.stats.received.saturating_add(1);
         if !focused || self.discard_line {
@@ -141,10 +152,25 @@ impl<'a> Input<'a> {
         let order = manager.order;
         for _ in 0..DRAIN_LIMIT {
             let Some(value) = device.next()? else {
+                if APPS {
+                    let queues = apps.as_mut().ok_or(Error::Transport)?;
+                    if queues.quarantined {
+                        queues.fence.boundary();
+                        self.keyboard.focus_reset();
+                        queues.quarantined = false;
+                    }
+                }
                 break;
             };
             match value {
                 0..=255 => {
+                    if APPS && apps.as_ref().ok_or(Error::Transport)?.quarantined {
+                        apps.as_mut()
+                            .ok_or(Error::Transport)?
+                            .fence
+                            .feed(value as u8);
+                        continue;
+                    }
                     if APPS
                         && !apps
                             .as_mut()
@@ -168,6 +194,10 @@ impl<'a> Input<'a> {
                 }
                 256..=511 => {
                     if let Some(motion) = self.mouse.feed((value - 256) as u8) {
+                        if APPS && apps.as_ref().ok_or(Error::Transport)?.quarantined {
+                            manager.quarantine_motion(motion);
+                            continue;
+                        }
                         let old_focus = manager.focus;
                         manager.motion(motion);
                         if old_focus != manager.focus {
@@ -191,7 +221,10 @@ impl<'a> Input<'a> {
                     self.discard_line = true;
                     self.stats.resets = self.stats.resets.saturating_add(1);
                     if APPS {
-                        apps.as_mut().ok_or(Error::Transport)?.reset();
+                        let queues = apps.as_mut().ok_or(Error::Transport)?;
+                        queues.reset();
+                        queues.quarantined = true;
+                        manager.quarantine_input();
                     }
                 }
                 _ => return Err(Error::Transport),
@@ -210,6 +243,10 @@ impl<'a> Input<'a> {
         })
     }
 }
+
+#[cfg(test)]
+#[path = "input_lifetime_tests.rs"]
+mod lifetime_tests;
 
 #[cfg(test)]
 mod tests {

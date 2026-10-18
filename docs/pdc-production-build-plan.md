@@ -1,15 +1,77 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-17
-Plan version: 2.203.0-native-application-input
-Roadmap cycle: PooleOS Cycle 300
+Plan version: 2.204.0-native-input-lifetime
+Roadmap cycle: PooleOS Cycle 301
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 300: Isolated Application Input
+## Cycle 301: Input Lifetime Boundaries
+
+Implemented: asynchronous focused-surface retirement/replacement and controller
+reset enter bounded raw-input quarantine through an observed empty device read.
+No implicit fallback receives pending keys or drag capture; observed release and
+fresh focus are required. Polling returns a bounded damage plan before painting,
+repairing two native guarded-user-stack failures without increasing any limit.
+IL1-IL7, alternatives and exact failures are recorded in
+[Cycle301](checkpoints/cycle301-input-lifetime.md).
+
+Passed: 217 user tests per debug/release, seven kernel profiles in both modes,
+29 independent program pairs and 42 focused Python checks. All 28 ordinary user
+binaries remain unchanged. The final optical, interactive and legacy controls
+provide 12 passing QEMU and four passing visible VirtualBox checks, 384 app
+observations, 96 lifetime observations and 48 lifecycle pixel barriers. Lifetime
+tests distinguish their 24 serial control bytes from 308 device-keyboard bytes.
+The launcher and byte-verified Downloads copy select the Cycle301 optical ISO.
+Kernel134/208 pages, 36 guarded kernel-stack pages, one guarded user-stack page,
+input entry0x1C000, read-only padding736 bytes; all original authority/lease/code
+limits remain. [Policy and verification scope](native-input-lifetime.md).
+
+Retained limits: an additional VBox burst attempt lost COM1 retirement evidence
+while COM2 reported the app fault. Its unchanged replay passes, but cause and
+diagnostic repeatability remain open under the N3 preview flag. Two intermediate
+cursor frames settle in the next recorded movement frames; atomic presentation
+remains open. The release fence can consume an initial click-and-release before
+fresh focus. Host reset coverage is not native reset, arbitrary backlog or
+continuous-typematic qualification. No physical-device guarantee is implied.
+
+New open `FLAG-N13-USERSTACK-001` requires all-path stack-depth/high-water evidence;
+scenario passes alone cannot close it. All434 selected metadata/integration tests
+pass after repairing one stale open-flag count, with the failure retained.1589 is
+discovered Python inventory, not a full-suite execution. Architecture binds857
+files and execution993. There are100 implementation flags,45 open. The staged
+audit passes30 files,85 unchanged historical receipts, exact native/ISO pixels
+and owner hashes; the publication scan passes2097 paths with zero violations.
+All 40 phases and 301 subphases remain in scope, with no phase
+closure, full canonical replay, main merge, release or production claim.
+
+### Next Desktop Integration Steps
+
+1. N3/N13 diagnostics: investigate the retained Cycle301 COM1 interruption and
+   establish bounded, observable record delivery without unbounded UART waits.
+   Keep native failures distinguishable from missing host observations.
+2. N13/N29 launch control: use an authenticated, generation-bound session-control
+   path for graphical start/restart requests. Keep application device/framebuffer
+   authority absent; do not silently give the compositor arbitrary process control.
+   Preserve launch rollback, fixed quotas and stale/replayed-request rejection.
+3. N29 launcher interaction: expose Text/Numbers launch actions with pending,
+   running and failed states, keyboard access and double-activation suppression.
+   Distinguish hide/minimize, surface close and process termination. Verify actual
+   device input and application admission in both native emulator backends.
+4. N13/N27/N29 service recovery: reconstruct surfaces and fresh input ownership after
+   compositor restart; retain independent app state and reject stale generations.
+   Add event-driven waits, bounded presentation work and measured responsiveness.
+5. N17/N19/N29 useful editing: add authorized writable file/storage paths, failure
+   recovery and persistence across reboot before claiming saved documents.
+   Keep accessible PooleGlass, robust microkernel and PooleGlyph/PDC gates intact.
+
+These are dependency-ordered implementation steps, not new phase closures.
+Each increment must update its receipt, checkpoint, flags and machine ledger.
+
+## Historical Cycle 300: Isolated Application Input
 
 Implemented: authenticated PWS1 input queries, two generation-bound64-byte
 queues, held-key focus fences and cancellation for lost input. Each isolated

@@ -172,6 +172,19 @@ impl Manager {
         self.drag = None;
     }
     #[inline]
+    pub fn quarantine_input(&mut self) {
+        self.focus = None;
+        self.held = true;
+        self.drag = None;
+    }
+    #[inline]
+    pub fn quarantine_motion(&mut self, motion: Motion) {
+        // Observe position and physical release without creating a UI action.
+        self.held = true;
+        self.drag = None;
+        self.motion(motion);
+    }
+    #[inline]
     pub fn motion(&mut self, motion: Motion) -> bool {
         let old = (self.x, self.y);
         self.x = (i32::from(self.x) + i32::from(motion.dx))

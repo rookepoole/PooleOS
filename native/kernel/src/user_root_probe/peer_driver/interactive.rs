@@ -410,6 +410,37 @@ pub(crate) fn run(
                         None
                     };
                     if i < 2 || (i == 2 && outcome.reason != Reason::Exit(0)) {
+                        let (component, code) = match outcome.reason {
+                            Reason::Exit(code) => ("service-exit", u64::from(code)),
+                            Reason::Fault(fault) => {
+                                arch::x86_64::user::report_failure(
+                                    "service-fault-ip",
+                                    i as u64,
+                                    fault.instruction,
+                                );
+                                arch::x86_64::user::report_failure(
+                                    "service-fault-address",
+                                    i as u64,
+                                    fault.address,
+                                );
+                                arch::x86_64::user::report_failure(
+                                    "service-fault-error",
+                                    i as u64,
+                                    fault.error,
+                                );
+                                ("service-fault", fault.vector)
+                            }
+                            Reason::InvalidReturn { violation, .. } => {
+                                ("service-return", violation as u64)
+                            }
+                            Reason::Cancelled => ("service-cancelled", 0),
+                            Reason::CallLimit => ("service-call-limit", outcome.syscalls),
+                            Reason::CallCounterExhausted => {
+                                ("service-call-counter", outcome.syscalls)
+                            }
+                            Reason::Watchdog => ("service-watchdog", outcome.syscalls),
+                        };
+                        arch::x86_64::user::report_failure(component, i as u64, code);
                         stop(34004, serial, debugcon);
                     }
                     if i == 3 {

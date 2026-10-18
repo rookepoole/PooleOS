@@ -16116,13 +16116,78 @@ def apply_cycle300(roadmap: dict, test_count: int) -> dict:
             "compositor restart/resynchronization and bounded transport overload/reset recovery",
             "graphical launch controls and useful editing with persistent storage separately qualified",
             "complete microkernel, PooleGlyph/PDC, accessible PooleGlass and N0-N39 gates remain required"])
+    return apply_cycle301(roadmap, test_count)
+
+
+def apply_cycle301(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle301-input-lifetime.md"
+    contract = "docs/native-input-lifetime.md"
+    path = "runs/native-input-lifetime-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle300_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=301, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 301
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 301
+    gate["qualification_status"] = "native_input_lifetime_partial_canonical_pending"
+    baseline["native_application_input"]["evidence_status"] = "historical_cycle300"
+    gate["current_native_application_input_qualification"]["evidence_status"] = "historical_cycle300_not_current_image_qualification"
+    record = dict(cycle=301, contract_id="PWS1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("iso_built", "iso_sha256", "iso_byte_count", "host_kernel_tests", "host_python_tests",
+                "qemu_guest_runs", "virtualbox_guest_runs", "kernel_image_pages", "console_code_bytes",
+                "ordinary_console_code_bytes", "native_surface_lifecycle_qualified", "isolated_application_input_qualified",
+                "native_active_drag_retirement_qualified", "native_focused_fault_and_exit_qualified",
+                "native_explicit_focus_recovery_qualified", "bounded_controller_quarantine", "host_controller_reset_qualified",
+                "native_overflow_reset_qualified", "native_arbitrary_backlog_qualified", "native_typematic_focus_stress_qualified",
+                "all_path_user_stack_bound_verified", "diagnostic_transport_repeatability_qualified", "atomic_presentation_qualified", "compositor_restart_qualified", "persistent_editing_qualified",
+                "production_ready", "canonical_full_replay_performed", "merge_qualified"):
+        record[key] = receipt[key]
+    baseline["native_input_lifetime"] = copy.deepcopy(record)
+    gate["current_native_input_lifetime_qualification"] = record
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=301, receipt_path=path, receipt_section="native_execution",
+        native_execution_status="native_focused_dragging_fault_and_exit_with_explicit_focus_recovery",
+        native_execution_evidence_cycle=301, shell_native_execution_evidence_cycle=301,
+        optical_iso_sha256=receipt["iso_sha256"], kernel_image_pages=receipt["kernel_image_pages"],
+        kernel_remaining_capacity_pages=208-receipt["kernel_image_pages"],
+        console_code_bytes=receipt["console_code_bytes"], console_code_margin=28672-receipt["console_code_bytes"],
+        active_drag_retirement=receipt["native_active_drag_retirement_qualified"],
+        explicit_focus_recovery=receipt["native_explicit_focus_recovery_qualified"])
+    lane["stages"]["USI-4"] = "partial_focused_lifetime_recovery_compositor_restart_persistence_and_overload_pending"
+    evidence = ("Cycle301: focused-surface retirement clears capture and focus, quarantines bounded raw input through observed quiescence and requires a fresh press. Real QEMU/VirtualBox fault and exit while dragging and holding Shift, explicit focus recovery and exact transcripts/pixels pass on the final optical image. Guarded-user-stack faults were repaired by returning polling damage before nested rendering, without enlarging limits. " + checkpoint)
+    gap = ("Native arbitrary backlog, continuous typematic and controller-reset injection remain unqualified; host reset coverage is not native reset proof. A retained VirtualBox burst attempt loses COM1 diagnostics before a lifecycle marker despite COM2 fault output; its cause is unproven and an unchanged repeat does not qualify diagnostic repeatability. Diagnose bounded serial record delivery under the N3 preview flag. Graphical launch controls, persistent editing/storage, compositor restart/resynchronization, event-driven waits, scheduler fairness, measured latency and production all-path stack-depth/high-water verification remain required. The empty i8042 poll boundary does not describe delayed physical-device reports. Complete microkernel, isolated drivers, PooleGlyph/PDC, accessible PooleGlass, stage117/watchdog, five legacy entry checks and every open N0-N39 gate remain. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N3", "N9", "N13", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-NATIVE-UI-001", "FLAG-N13-USERSPACE-ISO-001", "FLAG-N3-VIRTUALBOX-PREVIEW-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle301 does not close this flag. " + gap
+    roadmap["implementation_flags"].append(dict(id="FLAG-N13-USERSTACK-001", **{"class": "REQUIRED"},
+        status="open", phase_id="N13", closure_condition="Establish production all-path stack-depth or equivalent bounded high-water evidence for each native service and its compiler-built image, including nested rendering, parsing and failure paths; maintain guards and reject over-budget images. Scenario passes alone do not close this flag.",
+        evidence=[checkpoint, contract, path]))
+    gaps = roadmap["gap_summary"]["native_program_gaps"]
+    gaps[8] = gap + " Historical earlier gaps: " + gaps[8]
+    gaps[13] = "A native CPL3 compositor and window manager provide isolated scratch application input with bounded focused/dragging retirement recovery. Graphical launch, persistence, compositor restart, production graphics/network/audio, accessible PooleGlass and a complete application platform remain open"
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["immediate_next_move"].update(title="Add graphical launch controls and harden desktop service recovery",
+        entry_evidence=[checkpoint, contract, path],
+        exit_evidence=["graphical application launch/restart through authenticated least-authority control",
+            "compositor restart/resynchronization and native bounded transport overload/reset recovery",
+            "production stack-depth evidence, event-driven waits and measured responsiveness",
+            "persistent editing, complete microkernel, PooleGlyph/PDC, accessible PooleGlass and N0-N39 gates remain required"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1582)
+    parser.add_argument("--test-count", type=int, default=1589)
     parser.add_argument("--status-date", default="2026-10-17")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

@@ -24,6 +24,14 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle301-input-lifetime.md",
+    "docs/native-input-lifetime.md",
+    "runs/native-input-lifetime-readiness.json",
+    "native/userspace/src/desktop/input_lifetime_tests.rs",
+    "runtime/native_input_lifetime.py",
+    "tools/native_input_lifetime_probe.py",
+    "tools/qualify_native_input_lifetime.py",
+    "tests/test_native_input_lifetime.py",
     "docs/checkpoints/cycle300-application-input.md",
     "docs/native-application-input.md",
     "runs/native-application-input-readiness.json",

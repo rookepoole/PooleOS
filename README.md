@@ -11,20 +11,23 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle300 makes the isolated Text and Numbers
-windows directly interactive. Each app owns a48-byte ASCII scratch draft and its
-computation. The window service routes focused input through authenticated,
-generation-bound queues; it does not edit documents or receive new device or
-process-control authority. Existing lease, mapping, code-page and stack-guard
-limits remain enforced. A native reply-poll timeout during composition was
-diagnosed and repaired with a separately bounded interactive-client budget.
-The final native cohort passes ten QEMU and two visible VirtualBox checks,
-including 384 exact application observations and 24 lifecycle pixel barriers.
-All 29 independent program pairs match; 209 user tests per debug/release and
-seven kernel profiles in both modes pass. The failed attempts and historical
-evidence remain retained. No full canonical replay, main merge, release or
-production readiness is claimed.
-[Current evidence](docs/checkpoints/cycle300-application-input.md).
+**Current development checkpoint:** Cycle301 hardens the interactive native
+window manager against focused-app death and identity replacement. Pending keys
+and held drags cannot transfer to an implicit fallback window within the observed
+controller boundary; recovery requires release and fresh explicit focus. Two
+real user-stack overflows were traced and repaired by separating polling from
+rendering. No stack guard, memory limit or application authority was enlarged.
+The passing final-source cohort contains 12 QEMU and four visible VirtualBox
+checks, with 384 application observations, 96 lifetime observations and 48
+lifecycle pixel barriers. All 29 independent program pairs match; 217 user tests
+per debug/release and seven kernel profiles in both modes pass. One additional
+VirtualBox attempt lost COM1 diagnostics; an unchanged replay passed, but the
+cause and repeatability remain open. Partial repaint frames are also retained;
+atomic presentation is not implemented. All 434 selected metadata/integration
+tests pass; this is not the full canonical suite. The staged byte/pixel/source
+audit and publication-boundary scan pass, preserving 85 historical receipts.
+No full canonical replay, main merge, release or production readiness is claimed.
+[Current evidence](docs/checkpoints/cycle301-input-lifetime.md).
 
 Use
 `Launch-Local-Console.cmd` on the qualified development host for a VM window.
@@ -36,9 +39,9 @@ actual watchdog delivery there remains unqualified. This working application
 profile does not close those gates. Windows' "DVD Disc Image" label does not
 mean the optical `.iso` is the wrong format. The launcher supplies the tested
 configuration, including the still-required COM2 mirror.
-Next: active-window lifecycle stress, compositor recovery, efficient input waits,
-graphical launch controls and persistent editing. Native continuous-typematic
-stress and general transport overload/reset remain unqualified.
+Next: reliable bounded diagnostics, graphical launch controls, compositor recovery,
+efficient input waits and persistent editing. Production all-path stack bounds,
+native continuous-typematic stress and general transport overload/reset remain open.
 Complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass work continues.
 
 **Historical development checkpoint:** Cycle287 verifies cancellation of native apps

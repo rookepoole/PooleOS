@@ -92,12 +92,40 @@ impl<'a, const LIFETIME: bool> Local<'a, LIFETIME> {
     #[inline(always)]
     pub fn poll_mode<const INPUT: bool>(
         &mut self,
+        input: Option<&mut desktop::application_input::Queues>,
+    ) -> Result<(), Error> {
+        if INPUT {
+            // Polling must return before composition uses its nested draw frames.
+            for rect in self.poll_input(input)?.into_iter().flatten() {
+                self.paint(rect)?;
+            }
+            Ok(())
+        } else {
+            self.poll_inner::<false>(input, &mut [None; 3])
+        }
+    }
+    // Keep interactive poll temporaries out of the long-lived entry frame.
+    #[inline(never)]
+    fn poll_input(
+        &mut self,
+        input: Option<&mut desktop::application_input::Queues>,
+    ) -> Result<[Option<Rect>; 3], Error> {
+        let mut damage = [None; 3];
+        self.poll_inner::<true>(input, &mut damage)?;
+        Ok(damage)
+    }
+    #[inline(always)]
+    fn poll_inner<const INPUT: bool>(
+        &mut self,
         mut input: Option<&mut desktop::application_input::Queues>,
+        pending: &mut [Option<Rect>; 3],
     ) -> Result<(), Error> {
         if INPUT && (!LIFETIME || input.is_none()) {
             return Err(Error::Transport);
         }
         let old_focus = self.manager.focus;
+        let mut damage = None;
+        let mut pointer_damage = [None; 2];
         if let Some(i) = self
             .rpc
             .poll_mode::<INPUT>(&mut ConsoleCalls, &mut self.surfaces, input.as_deref_mut())
@@ -120,12 +148,21 @@ impl<'a, const LIFETIME: bool> Local<'a, LIFETIME> {
                     self.input.clear_focus();
                 }
             }
-            self.paint(if !self.surfaces.open(i) {
+            let rect = if !self.surfaces.open(i) {
                 self.manager.bounds
             } else {
                 self.manager.windows[i + 1]
-            })?;
-            if newly_open {
+            };
+            if INPUT {
+                damage = Some(if newly_open {
+                    self.manager.bounds
+                } else {
+                    rect
+                });
+            } else {
+                self.paint(rect)?;
+            }
+            if newly_open && !INPUT {
                 self.paint(Rect {
                     x: 0,
                     y: self.manager.bounds.h.saturating_sub(32),
@@ -146,7 +183,11 @@ impl<'a, const LIFETIME: bool> Local<'a, LIFETIME> {
                 if focus != self.manager.focus {
                     self.input.clear_focus();
                 }
-                self.paint(self.manager.bounds)?;
+                if INPUT {
+                    damage = Some(self.manager.bounds);
+                } else {
+                    self.paint(self.manager.bounds)?;
+                }
             }
         }
         if INPUT {
@@ -157,7 +198,9 @@ impl<'a, const LIFETIME: bool> Local<'a, LIFETIME> {
                 .focus
                 .is_some_and(|i| (1..=2).contains(&i) && changed & (1 << (i - 1)) != 0);
             if old_focus != self.manager.focus || replacement {
-                self.input.focus_boundary(queues, old_focus);
+                self.input
+                    .lifetime_boundary(queues, &mut self.manager, old_focus);
+                damage = Some(self.manager.bounds);
             }
         }
         let update =
@@ -165,20 +208,44 @@ impl<'a, const LIFETIME: bool> Local<'a, LIFETIME> {
                 .poll_mode::<INPUT>(&mut self.manager, &mut Ps2(self.display.0), input)?;
         if update.scene_changed {
             self.locate();
-            self.paint(self.manager.bounds)?;
-        } else if update.pointer_changed {
-            self.paint(Rect {
-                x: update.old_pointer.0,
-                y: update.old_pointer.1,
-                w: 12,
-                h: 20,
-            })?;
-            self.paint(Rect {
-                x: self.manager.x,
-                y: self.manager.y,
-                w: 12,
-                h: 20,
-            })?;
+            if INPUT {
+                damage = Some(self.manager.bounds);
+            } else {
+                self.paint(self.manager.bounds)?;
+            }
+        } else if update.pointer_changed && (!INPUT || damage != Some(self.manager.bounds)) {
+            if INPUT {
+                pointer_damage = [
+                    Some(Rect {
+                        x: update.old_pointer.0,
+                        y: update.old_pointer.1,
+                        w: 12,
+                        h: 20,
+                    }),
+                    Some(Rect {
+                        x: self.manager.x,
+                        y: self.manager.y,
+                        w: 12,
+                        h: 20,
+                    }),
+                ];
+            } else {
+                self.paint(Rect {
+                    x: update.old_pointer.0,
+                    y: update.old_pointer.1,
+                    w: 12,
+                    h: 20,
+                })?;
+                self.paint(Rect {
+                    x: self.manager.x,
+                    y: self.manager.y,
+                    w: 12,
+                    h: 20,
+                })?;
+            }
+        }
+        if INPUT {
+            *pending = [pointer_damage[0], pointer_damage[1], damage];
         }
         Ok(())
     }

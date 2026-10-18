@@ -127,6 +127,7 @@ pub struct Queues {
     first: Queue,
     second: Queue,
     pub fence: Fence,
+    pub(super) quarantined: bool,
 }
 impl Queues {
     #[inline(always)]
@@ -135,6 +136,7 @@ impl Queues {
             first: Queue::new(),
             second: Queue::new(),
             fence: Fence::new(),
+            quarantined: false,
         }
     }
     #[inline]

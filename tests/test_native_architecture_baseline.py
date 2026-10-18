@@ -69,7 +69,11 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
         bound_paths = {item["path"] for item in self.artifact["bound_sources"]}
-        self.assertEqual(len(self.artifact["bound_sources"]), 849)
+        self.assertEqual(len(self.artifact["bound_sources"]), 857)
+        self.assertTrue({"docs/checkpoints/cycle301-input-lifetime.md", "docs/native-input-lifetime.md",
+            "runs/native-input-lifetime-readiness.json", "native/userspace/src/desktop/input_lifetime_tests.rs",
+            "runtime/native_input_lifetime.py", "tools/native_input_lifetime_probe.py",
+            "tools/qualify_native_input_lifetime.py", "tests/test_native_input_lifetime.py"}.issubset(bound_paths))
         self.assertTrue({"docs/checkpoints/cycle300-application-input.md", "docs/native-application-input.md",
             "runs/native-application-input-readiness.json", "native/userspace/src/bin/window_input.rs",
             "native/userspace/src/bin/input_text.rs", "native/userspace/src/bin/input_numbers.rs",
