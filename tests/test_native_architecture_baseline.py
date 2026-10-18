@@ -69,7 +69,10 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
         bound_paths = {item["path"] for item in self.artifact["bound_sources"]}
-        self.assertEqual(len(self.artifact["bound_sources"]), 857)
+        self.assertEqual(len(self.artifact["bound_sources"]), 862)
+        self.assertTrue({"docs/checkpoints/cycle302-bounded-serial.md", "docs/native-bounded-serial.md",
+            "runs/native-bounded-serial-readiness.json", "runtime/native_serial_recovery.py",
+            "tests/test_native_serial_recovery.py"}.issubset(bound_paths))
         self.assertTrue({"docs/checkpoints/cycle301-input-lifetime.md", "docs/native-input-lifetime.md",
             "runs/native-input-lifetime-readiness.json", "native/userspace/src/desktop/input_lifetime_tests.rs",
             "runtime/native_input_lifetime.py", "tools/native_input_lifetime_probe.py",

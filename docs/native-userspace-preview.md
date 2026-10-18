@@ -1,9 +1,9 @@
 # Run The Native Window Preview
 
-Cycle301's controlled native qualification passes on QEMU and visible VirtualBox.
+Cycle302's controlled native qualification passes on QEMU and visible VirtualBox.
 The local launcher and byte-verified Downloads copy select this checkpoint.
 
-Cycle301, 2026-10-17. Native PooleBoot + PooleKernel, not Linux.
+Cycle302, 2026-10-18. Native PooleBoot + PooleKernel, not Linux.
 This experimental build draws Terminal and two independent native application
 windows inside the VM and accepts focused keyboard input. It is not a complete
 desktop, PooleGlass environment, installer or production release.
@@ -18,13 +18,20 @@ remain retained, not rewritten as successes. Native continuous-typematic stress
 is not qualified by this controlled scenario: VirtualBox may filter duplicate
 host makes before they reach the guest.
 
-The new lifetime challenge adds24 ordered observations per guest: fault or exit
+The lifetime challenge adds24 ordered observations per guest: fault or exit
 while the app has focus, an active drag and Shift held, followed by release and
 fresh explicit focus. Its24 serial fault/stop-control bytes are separate from308
-device-keyboard bytes. Both modes pass on both backends. One additional ordinary
+device-keyboard bytes. Both modes pass on both backends. One additional Cycle301
 VirtualBox burst attempt lost COM1 retirement diagnostics while COM2 reported
 the fault; an unchanged replay passed. The cause and diagnostic repeatability
 remain open. This preview is not an everyday-reliability qualification.
+
+Cycle302 adds a bounded retained COM1 queue and a separate diagnostic image that
+recovers an exact record after a controlled stall. It does not establish the
+historical interruption's cause, qualify permanent-device failure, or replace
+the ordinary image's input/lifetime regression requirements. Overflow rejection
+is sticky; no apparently valid continuation is invented across a lost-byte gap.
+See the [bounded serial contract](native-bounded-serial.md).
 
 Cycle299 gives the window service read-only process-lifetime observation through
 already-held capability authority. It cannot terminate applications. Faulted or
@@ -128,11 +135,11 @@ if a retained failure requires manual recovery; do not touch unrelated VMs.
 
 ## ISO And File Type
 
-Qualified development image: `outputs/cycle301-optical1/PooleOS-UserSpace-Preview.iso`.
+Qualified development image: `outputs/cycle302-optical1/PooleOS-UserSpace-Preview.iso`.
 
-Verified convenience copy: `PooleOS-Native-Windows-Cycle301.iso` in Downloads.
+Verified convenience copy: `PooleOS-Native-Windows-Cycle302.iso` in Downloads.
 Size 66109440 bytes; SHA256:
-`CC437211E7AF65EC0753E940AB49C68E1AE6495ACE2FDD9681D9E7BA5E996F47`.
+`E7AA840981B2A109619CD94B28CA2BF12DF9066E965002C13C6E22A8E6F2A12C`.
 The ISO contains the explicit input-profile kernel/service and interactive apps.
 Final-source native replay and convenience-copy hash verification pass.
 
@@ -155,7 +162,7 @@ not open SDL, which previously crashed on this host. Both use the current pointe
 `outputs/native-userspace-preview.json`. The new visible entry point is:
 
 ```powershell
-.\Launch-Local-Console.cmd --receipt outputs/cycle301-optical1/receipt.json
+.\Launch-Local-Console.cmd --receipt outputs/cycle302-optical1/receipt.json
 ```
 
 From the repository root with the configured Python runtime:
@@ -190,8 +197,9 @@ qualify the local preview.
 
 ## Remaining Work
 
-Next: reliable bounded diagnostic delivery, graphical launch controls,
-compositor restart/resynchronization, efficient event waits and persistent editing. Native input
+Next: authenticated graphical launch controls, compositor restart/resynchronization,
+local graphical boot without the COM2 helper, efficient event waits and persistent
+editing. Native input
 overload/reset, continuous-typematic stress and accessible PooleGlass styling
 remain separate requirements. Bounded emulator pointer evidence does
 not establish unrestricted input or physical-device behavior. The console
@@ -202,10 +210,10 @@ so future service growth/layout changes require fresh build and execution checks
 Service separation and scalable address spaces remain required; no hardware
 speedup is claimed.
 The input-only kernel uses134/208 pages,36 guarded stack pages and a0x1C000
-read-only boundary with736 bytes of padding. Interactive accepted-request polls
+read-only boundary with664 bytes of padding. Interactive accepted-request polls
 are limited to65536 attempts; ordinary clients retain4096. This is not a
 wall-clock responsiveness guarantee. Repaint latency and partial frames need
-separate presentation work. Two intermediate cursor frames in this cohort settle
+separate presentation work. Two intermediate cursor frames in Cycle301 settled
 in subsequent recorded frames; atomic presentation/double buffering is not
 implemented. Native stack overflows were repaired by ending input polling before
 nested painting, without enlarging guards. All-path stack-depth/high-water

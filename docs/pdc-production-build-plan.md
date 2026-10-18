@@ -1,15 +1,48 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-10-17
-Plan version: 2.204.0-native-input-lifetime
-Roadmap cycle: PooleOS Cycle 301
+Status date: 2026-10-18
+Plan version: 2.205.0-native-bounded-serial
+Roadmap cycle: PooleOS Cycle 302
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 301: Input Lifetime Boundaries
+## Cycle 302: Bounded Serial Delivery
+
+Implemented: a fixed1024-byte retained COM1 queue replaces permanent disable after
+one timeout. Drains use at most4096 status reads total, retry at newline/dispatch
+boundaries, preserve byte order and reject further input after saturation. Guards,
+authority and image allowances are unchanged. Compiled controlled backpressure
+recovers an exact record; the historical Cycle301 interruption's cause remains
+unproven. SD1-SD7, alternatives, retained failures and evidence:
+[Cycle302](checkpoints/cycle302-bounded-serial.md). No new graphical control,
+phase closure or production claim is made here.
+
+Passed:17 focused serial Rust tests, eight kernel profiles in debug/release,
+47 focused Python checks, four diagnostic optical controls, four ordinary optical
+controls and the full two-backend/two-mode input/lifetime matrix. Total:12 QEMU
+and four visible VirtualBox checks,384 app observations,96 lifetime observations
+and48 lifecycle pixel barriers. All29 prior independent program pairs are unchanged.
+The ordinary kernel uses134/208 pages,36 guarded stack pages and664 bytes of
+read-only padding. The separate default product compiles at207/208 pages; its
+native legacy matrix was not replayed. Reconstructed evidence and the verified
+Downloads copy select the ordinary Cycle302 ISO. All440 selected metadata/integration
+checks pass after retained schema/baseline failures;1595 is discovered inventory,
+not full-suite execution. Architecture binds862 files, execution995 and programs97.
+The100 implementation flags remain,45 open. Nine publication checks and the
+27-file staged artifact audit pass:86 historical receipts and owner inputs are
+unchanged;2102 indexed paths have zero publication violations. This supports a
+development-branch checkpoint, not main merge or production promotion.
+
+Native saturation, physical UARTs, general diagnostic repeatability, complete
+stack bounds, atomic presentation, controller backlog/reset and continuous
+typematic remain unqualified. All40 phases,301 subphases and complete native
+microkernel, PooleGlyph/PDC and accessible PooleGlass requirements remain.
+[Serial contract](native-bounded-serial.md).
+
+## Historical Cycle 301: Input Lifetime Boundaries
 
 Implemented: asynchronous focused-surface retirement/replacement and controller
 reset enter bounded raw-input quarantine through an observed empty device read.
@@ -50,9 +83,10 @@ closure, full canonical replay, main merge, release or production claim.
 
 ### Next Desktop Integration Steps
 
-1. N3/N13 diagnostics: investigate the retained Cycle301 COM1 interruption and
-   establish bounded, observable record delivery without unbounded UART waits.
-   Keep native failures distinguishable from missing host observations.
+1. N3/N13 diagnostics: Cycle302 implements and qualifies bounded retained-record
+   recovery. Keep the historical cause, general repeatability, native saturation,
+   permanent-device loss and complete stack bounds open. Do not substitute missing
+   host observations for native success. Continue next with graphical launch control.
 2. N13/N29 launch control: use an authenticated, generation-bound session-control
    path for graphical start/restart requests. Keep application device/framebuffer
    authority absent; do not silently give the compositor arbitrary process control.
@@ -64,7 +98,11 @@ closure, full canonical replay, main merge, release or production claim.
 4. N13/N27/N29 service recovery: reconstruct surfaces and fresh input ownership after
    compositor restart; retain independent app state and reject stale generations.
    Add event-driven waits, bounded presentation work and measured responsiveness.
-5. N17/N19/N29 useful editing: add authorized writable file/storage paths, failure
+5. N3/N16/N29 standalone graphical boot: make the COM2 host mirror optional and
+   separate local-display/input startup authority from diagnostic transport.
+   Verify unattended EFI boot and local interaction without the helper's serial
+   connection, while preserving an explicit headless diagnostic mode.
+6. N17/N19/N29 useful editing: add authorized writable file/storage paths, failure
    recovery and persistence across reboot before claiming saved documents.
    Keep accessible PooleGlass, robust microkernel and PooleGlyph/PDC gates intact.
 

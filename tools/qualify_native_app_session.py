@@ -8,6 +8,7 @@ from runtime import native_app_session as probe, native_shell, native_console, n
 from runtime import native_cleanup_exhaustion as exhaustion
 from runtime import native_userspace_iso as optical
 from runtime import native_local_console, native_windows, native_surface_lifecycle
+from runtime import native_serial_recovery
 from tools import qualify_native_console_ipc as shared, qualify_native_user_entry as source
 from tools.qualify_native_shell_process import program_inputs
 from tools.native_build_space import require_space
@@ -118,12 +119,14 @@ def main():
     parser.add_argument('--window-capacity', action='store_true', help='separate PWCODE1 seven-page window service qualification')
     parser.add_argument('--surface-lifecycle', action='store_true', help='opt-in generation-bound window retirement')
     parser.add_argument('--surface-input', action='store_true', help='opt-in isolated application input over owned surfaces')
+    parser.add_argument('--serial-recovery', action='store_true', help='diagnostic-only bounded UART backpressure challenge')
     args = parser.parse_args(); work, programs = args.work_dir.resolve(), args.program_dir.resolve()
     if args.desktop and not args.optical: parser.error('local console requires the optical development profile')
     if args.windows and (not args.optical or args.desktop): parser.error('windows requires optical and is separate from the terminal profile')
     if args.window_capacity and not args.windows: parser.error('window capacity requires the windows profile')
     if args.surface_lifecycle and not args.window_capacity: parser.error('surface lifecycle requires the explicit capacity profile')
     if args.surface_input and not args.surface_lifecycle: parser.error('surface input requires generation-bound lifecycle')
+    if args.serial_recovery and not args.surface_input: parser.error('serial challenge requires the isolated-input desktop profile')
     if sum((args.deferred_cleanup,args.file_controls,args.exhaust_cleanup,args.claimed_requester,args.optical)) > 1: parser.error('separate control profiles required')
     if not work.is_relative_to(ROOT/'outputs') or not programs.is_relative_to(ROOT/'outputs'):
         parser.error('workspace output paths required')
@@ -136,6 +139,7 @@ def main():
                   window_capacity=args.window_capacity,
                   surface_lifecycle=args.surface_lifecycle,
                   surface_input=args.surface_input,
+                  diagnostic_only=args.serial_recovery, serial_recovery=args.serial_recovery,
                   claimed_requester=args.claimed_requester,
                   exhaust_cleanup=args.exhaust_cleanup,
                   file_controls=args.file_controls,
@@ -187,6 +191,9 @@ def main():
         if args.claimed_requester:
             normal_features=('development-claimed-requester',)
             bad_features=normal_features+('development-applications-bad-file',)
+        if args.serial_recovery:
+            normal_features += ('development-serial-recovery',)
+            bad_features += ('development-serial-recovery',)
         linked, kernel, plan = shared.entry._build_product(cargo, env, work/'kernel1', features=normal_features)
         linked2, kernel2, _ = shared.entry._build_product(cargo, env, work/'kernel2', features=normal_features)
         if (linked,kernel) != (linked2,kernel2): raise ValueError('independent kernel mismatch')
@@ -227,6 +234,9 @@ def main():
             case = probe.file_control_scenario(secrets.token_hex(8),bad_file=bad_file,claimed_requester=True) if args.claimed_requester else scenario(secrets.token_hex(8), bad_file=bad_file)
             interaction = Interaction(case, args.deferred_cleanup, args.file_controls or args.claimed_requester, args.exhaust_cleanup, sustained=args.optical)
             validator = (lambda m: exhaustion.validate_markers(m,bad_file=bad_file)) if args.exhaust_cleanup else (lambda m: probe.validate_markers(m, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows,window_capacity=args.window_capacity,surface_lifecycle=args.surface_lifecycle))
+            if args.serial_recovery:
+                validator = lambda m: native_serial_recovery.validate_markers(m, bad_file=bad_file,
+                    file_waits=True, windows=True, window_capacity=True, surface_lifecycle=True)
             print(f'Native application session {name}: frozen 240-second bound', flush=True)
             try:
                 run, _, handoff = shared.boot._execute_once(name, lock, profile, qemu, path, run_dir, 240,
@@ -261,7 +271,18 @@ def main():
             shared.load.validate_oracle_binding(prefix['boot_prefix'], inspected, run['pbp1_transcript'])
             run['transcript_binding'] = shared.transfer.validate_transcript_binding(prefix, run['pbp1_transcript'])
             run['independent_revalidation'] = shared.transfer.validate_revalidation_binding(prefix, handoff, retained)
-            run['hostile_marker_cases_rejected'] = exhaustion.negative_controls(run['markers'],bad_file=bad_file) if args.exhaust_cleanup else probe.negative_controls(run['markers'], bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows,window_capacity=args.window_capacity,surface_lifecycle=args.surface_lifecycle)
+            ordinary_markers = run['markers']
+            if args.serial_recovery:
+                ordinary_markers, _ = native_serial_recovery.separate(run['markers'])
+                run['hostile_serial_cases_rejected'] = native_serial_recovery.negative_controls(run['markers'])
+                try:
+                    probe.validate_markers(run['markers'], bad_file=bad_file, file_waits=True,
+                        windows=True, window_capacity=True, surface_lifecycle=True)
+                except ValueError:
+                    run['ordinary_oracle_rejected_diagnostic'] = True
+                else:
+                    raise ValueError('ordinary oracle accepted diagnostic profile')
+            run['hostile_marker_cases_rejected'] = exhaustion.negative_controls(ordinary_markers,bad_file=bad_file) if args.exhaust_cleanup else probe.negative_controls(ordinary_markers, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows,window_capacity=args.window_capacity,surface_lifecycle=args.surface_lifecycle)
             run.update(media_sha256=shared.sha(media), kernel_sha256=shared.sha(image))
             report['guest_runs'].append(run)
         if args.optical:

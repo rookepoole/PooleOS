@@ -1,15 +1,42 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-10-17
+Status date: 2026-10-18
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 301
+Last roadmap reconciliation: PooleOS Cycle 302
 
-Cycle301 hardens focused-surface retirement/replacement and input reset with
+Cycle302 implements bounded retained COM1 delivery after transient backpressure,
+with explicit sticky saturation rather than silent stream corruption. Fixed
+storage, total work bounds, original guards and unchanged authority remain.
+Eight kernel profiles pass debug/release;47 focused Python checks and the full
+native cohort pass:12 QEMU and four visible VirtualBox checks,384 app observations,
+96 lifetime observations and48 lifecycle pixel barriers. All29 earlier independent
+userspace program pairs are revalidated unchanged; their217 user-test passes per
+mode are historical Cycle301 evidence, not a new test execution. The ordinary
+kernel remains134/208 pages with36 guarded stack pages and664 bytes of read-only
+padding. Reconstructed evidence and the byte-verified Downloads ISO select Cycle302.
+All440 selected metadata/integration checks pass after retained schema/baseline
+failures;1595 is discovered inventory, not a full-suite execution. Architecture
+binds862 files, execution995 and programs97. The100 implementation flags remain,
+45 open. Nine publication checks and the27-file staged artifact audit pass;
+86 historical receipts and owner inputs are unchanged, and2102 indexed paths
+have zero publication violations. The separately compiled default
+kernel remains207/208 pages; this is not a native legacy-regression replay.
+Controlled recovery does not prove the historical VirtualBox interruption's
+cause, permanent-device losslessness or general diagnostic repeatability.
+Graphical launch/restart must use authenticated generation-bound control through
+the process owner, not unrestricted compositor factories or synthesized command
+text. COM2-mirror-independent local graphical boot is explicitly required before
+claiming standalone demo readiness. Compositor recovery, persistence, accessible
+PooleGlass, complete microkernel, PooleGlyph/PDC and all N0-N39/canonical/release
+requirements remain. No phase closure, main merge or production promotion.
+[Current evidence](checkpoints/cycle302-bounded-serial.md).
+
+Historical Cycle301 hardens focused-surface retirement/replacement and input reset with
 bounded raw-controller quarantine and explicit release/fresh-focus recovery.
 The existing isolated scratch apps retain authenticated generation-bound input;
 no application authority, lease, mapping, code-page or stack allowance grows.

@@ -29,8 +29,6 @@ use poolekernel::{
 
 const COM1_BASE: u16 = 0x03f8;
 const DEBUGCON_PORT: u16 = 0x0402;
-const TRANSMIT_READY: u8 = 1 << 5;
-const MAX_READY_POLLS: usize = 4096;
 const IDT_ENTRY_COUNT: usize = 256;
 const BREAKPOINT_VECTOR: usize = 3;
 const INVALID_OPCODE_VECTOR: usize = 6;
@@ -3731,18 +3729,27 @@ const _: () = assert!(size_of::<TaskStateSegment>() == 104);
 const _: () = assert!(size_of::<TrapFrame>() == 176);
 
 pub struct Com1 {
-    available: bool,
+    transmitter: poolekernel::early_serial::Transmitter,
+    registers: Com1Registers,
 }
 
-struct Com1Registers;
+struct Com1Registers {
+    #[cfg(feature = "development-serial-recovery")]
+    withheld_polls: usize,
+}
 
 impl poolekernel::early_serial::Registers for Com1Registers {
     fn read(&mut self, offset: u16) -> u8 {
-        // SAFETY: constructed only by the privileged, exclusive COM1 probe.
+        #[cfg(feature = "development-serial-recovery")]
+        if offset == 5 && self.withheld_polls != 0 {
+            self.withheld_polls -= 1;
+            return 0;
+        }
+        // SAFETY: constructed only by the privileged, exclusive COM1 owner.
         unsafe { inb(COM1_BASE + offset) }
     }
     fn write(&mut self, offset: u16, value: u8) {
-        // SAFETY: the probe uses only fixed COM1 register offsets 0 through 5.
+        // SAFETY: probe and transmitter use only fixed COM1 offsets 0 through 5.
         unsafe { outb(COM1_BASE + offset, value) };
     }
 }
@@ -3754,30 +3761,48 @@ impl Com1 {
     ///
     /// The caller must execute at a privilege level permitted to access x86 I/O ports.
     pub unsafe fn initialize() -> Self {
-        let available = poolekernel::early_serial::probe(&mut Com1Registers);
-        Self { available }
+        let mut registers = Com1Registers {
+            #[cfg(feature = "development-serial-recovery")]
+            withheld_polls: 0,
+        };
+        let available = poolekernel::early_serial::probe(&mut registers);
+        Self {
+            transmitter: poolekernel::early_serial::Transmitter::new(available),
+            registers,
+        }
     }
 
     pub const fn available(&self) -> bool {
-        self.available
+        self.transmitter.status().available
+    }
+
+    #[cfg(feature = "development-shell-process")]
+    pub fn flush(&mut self) {
+        self.transmitter.flush(&mut self.registers);
+    }
+
+    #[cfg(feature = "development-serial-recovery")]
+    pub fn status(&self) -> poolekernel::early_serial::TransmitStatus {
+        self.transmitter.status()
+    }
+
+    #[cfg(feature = "development-serial-recovery")]
+    pub fn challenge_busy_interval(&mut self) {
+        self.registers.withheld_polls = poolekernel::early_serial::READY_POLLS;
     }
 }
 
 impl ByteSink for Com1 {
     fn write_byte(&mut self, byte: u8) {
-        if !self.available {
-            return;
-        }
-        for _ in 0..MAX_READY_POLLS {
-            // SAFETY: availability was established by the bounded fixed-port probe.
-            if unsafe { inb(COM1_BASE + 5) } & TRANSMIT_READY != 0 {
-                // SAFETY: the UART reports that its transmit register is ready.
-                unsafe { outb(COM1_BASE, byte) };
-                return;
+        let saturated = self.transmitter.status().saturated;
+        self.transmitter.write_byte(&mut self.registers, byte);
+        if !saturated && self.transmitter.status().saturated {
+            // Independent diagnostics must fail qualification after any stream gap.
+            let mut debugcon = DebugCon::new();
+            for byte in b"\r\nPOOLEOS:SERIAL LOSS capacity=1024 production=0\r\n" {
+                debugcon.write_byte(*byte);
             }
-            core::hint::spin_loop();
         }
-        self.available = false;
     }
 }
 

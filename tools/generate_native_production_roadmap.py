@@ -16181,14 +16181,62 @@ def apply_cycle301(roadmap: dict, test_count: int) -> dict:
             "compositor restart/resynchronization and native bounded transport overload/reset recovery",
             "production stack-depth evidence, event-driven waits and measured responsiveness",
             "persistent editing, complete microkernel, PooleGlyph/PDC, accessible PooleGlass and N0-N39 gates remain required"])
+    return apply_cycle302(roadmap, test_count)
+
+
+def apply_cycle302(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle302-bounded-serial.md"
+    contract = "docs/native-bounded-serial.md"
+    path = "runs/native-bounded-serial-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle301_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=302, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 302
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 302
+    gate["qualification_status"] = "native_bounded_serial_partial_canonical_pending"
+    baseline["native_input_lifetime"]["evidence_status"] = "historical_cycle301"
+    gate["current_native_input_lifetime_qualification"]["evidence_status"] = "historical_cycle301_not_current_image_qualification"
+    record = dict(cycle=302, contract_id="PSERIAL1", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("iso_sha256", "iso_byte_count", "kernel_image_pages", "host_kernel_tests",
+                "qemu_guest_runs", "virtualbox_guest_runs", "native_bounded_recovery_qualified",
+                "ordinary_desktop_revalidated", "historical_com1_failure_cause_proven",
+                "full_input_mode_matrix_replayed", "legacy_native_replay_performed",
+                "production_ready", "canonical_full_replay_performed", "merge_qualified"):
+        record[key] = receipt[key]
+    baseline["native_bounded_serial"] = copy.deepcopy(record)
+    gate["current_native_bounded_serial_qualification"] = record
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=302, receipt_path=path, receipt_section="native_execution",
+        native_execution_status="bounded_serial_recovery_and_scoped_native_desktop_regression",
+        native_execution_evidence_cycle=302, shell_native_execution_evidence_cycle=302,
+        optical_iso_sha256=receipt["iso_sha256"], kernel_image_pages=receipt["kernel_image_pages"],
+        kernel_remaining_capacity_pages=208-receipt["kernel_image_pages"])
+    evidence = ("Cycle302: fixed1024-byte COM1 retention,4096-read total drain budgets, newline/dispatch recovery and sticky overflow rejection replace permanent disable after one timeout. Compiled controlled backpressure and scoped ordinary desktop regressions pass without enlarging authority or guards. " + checkpoint)
+    gap = ("Controlled serial recovery does not prove the historical VirtualBox interruption's cause, permanent-device losslessness or general transport repeatability. Native saturation, physical UARTs, all-path stack bounds and the legacy/production matrices remain unqualified in this cycle. Graphical authenticated launch/restart controls are next, followed by compositor recovery, COM2-mirror-independent local graphical boot, accessible PooleGlass, persistent editing and all N0-N39, microkernel and PooleGlyph/PDC gates. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N3", "N9", "N13", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N3-VIRTUALBOX-PREVIEW-001", "FLAG-N13-USERSPACE-ISO-001", "FLAG-N13-USERSTACK-001", "FLAG-NATIVE-UI-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle302 does not close this flag. " + gap
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["immediate_next_move"]["entry_evidence"] = [checkpoint, contract, path]
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1589)
-    parser.add_argument("--status-date", default="2026-10-17")
+    parser.add_argument("--test-count", type=int, default=1595)
+    parser.add_argument("--status-date", default="2026-10-18")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
     args.out.write_text(json.dumps(roadmap, indent=2, ensure_ascii=True) + "\n", encoding="utf-8", newline="\n")

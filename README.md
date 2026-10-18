@@ -11,7 +11,26 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle301 hardens the interactive native
+**Current development checkpoint:** Cycle302 replaces permanent COM1 disable
+after a temporary stall with a fixed1024-byte retained queue, bounded4096-read
+drains and explicit rejection after overflow. Compiled controlled backpressure
+recovers the exact diagnostic record; this does not establish the historical
+VirtualBox interruption's cause. No application, device or process authority,
+stack guard or image allowance grows. Eight kernel profiles pass debug/release,
+47 focused Python checks pass, and the final native cohort passes12 QEMU and four
+visible VirtualBox checks. The full input/lifetime matrix covers384 application
+observations,96 lifetime observations and48 lifecycle pixel barriers. All29 prior
+independent userspace program pairs remain unchanged. The reconstructed evidence
+and byte-verified Downloads ISO select Cycle302. All440 selected metadata/integration
+checks pass after repairing stale schema pins and a failed baseline write; the
+failed runs remain retained. Nine publication checks and the complete staged
+artifact audit pass, preserving86 historical receipts. This is not a full
+canonical-suite execution.
+No new UI control, full canonical replay, main merge, release or production
+readiness is claimed.
+[Current evidence](docs/checkpoints/cycle302-bounded-serial.md).
+
+**Historical development checkpoint:** Cycle301 hardens the interactive native
 window manager against focused-app death and identity replacement. Pending keys
 and held drags cannot transfer to an implicit fallback window within the observed
 controller boundary; recovery requires release and fresh explicit focus. Two
@@ -27,7 +46,7 @@ atomic presentation is not implemented. All 434 selected metadata/integration
 tests pass; this is not the full canonical suite. The staged byte/pixel/source
 audit and publication-boundary scan pass, preserving 85 historical receipts.
 No full canonical replay, main merge, release or production readiness is claimed.
-[Current evidence](docs/checkpoints/cycle301-input-lifetime.md).
+[Cycle301 evidence](docs/checkpoints/cycle301-input-lifetime.md).
 
 Use
 `Launch-Local-Console.cmd` on the qualified development host for a VM window.
@@ -39,8 +58,9 @@ actual watchdog delivery there remains unqualified. This working application
 profile does not close those gates. Windows' "DVD Disc Image" label does not
 mean the optical `.iso` is the wrong format. The launcher supplies the tested
 configuration, including the still-required COM2 mirror.
-Next: reliable bounded diagnostics, graphical launch controls, compositor recovery,
-efficient input waits and persistent editing. Production all-path stack bounds,
+Next: authenticated graphical launch controls, compositor recovery, local graphical
+boot without the COM2 helper, efficient input waits and persistent editing.
+Production all-path stack bounds,
 native continuous-typematic stress and general transport overload/reset remain open.
 Complete robust microkernel, PooleGlyph/PDC and accessible PooleGlass work continues.
 

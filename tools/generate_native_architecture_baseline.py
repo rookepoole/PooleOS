@@ -24,6 +24,11 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle302-bounded-serial.md",
+    "docs/native-bounded-serial.md",
+    "runs/native-bounded-serial-readiness.json",
+    "runtime/native_serial_recovery.py",
+    "tests/test_native_serial_recovery.py",
     "docs/checkpoints/cycle301-input-lifetime.md",
     "docs/native-input-lifetime.md",
     "runs/native-input-lifetime-readiness.json",

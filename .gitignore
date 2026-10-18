@@ -114,6 +114,7 @@ runs/*
 !runs/native-claimed-requester-readiness.json
 !runs/native-application-input-readiness.json
 !runs/native-input-lifetime-readiness.json
+!runs/native-bounded-serial-readiness.json
 !runs/native_initial_system_readiness.json
 !runs/native_microcode_readiness.json
 !runs/native_recovery_readiness.json

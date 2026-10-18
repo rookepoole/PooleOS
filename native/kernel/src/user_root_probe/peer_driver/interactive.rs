@@ -265,6 +265,8 @@ pub(crate) fn run(
     let mut cleanup_cursor = 0;
     let mut job_drained = false;
     loop {
+        // A retained diagnostic tail can progress even without another log record.
+        serial.flush();
         // At most one due retained owner is serviced between real user dispatches.
         for offset in 0..6 {
             let j = (cleanup_cursor + offset) % 6;
@@ -862,6 +864,12 @@ pub(crate) fn run(
             stop(34016, serial, debugcon);
         }
         if d.is_multiple_of(64) {
+            #[cfg(feature = "development-serial-recovery")]
+            let serial_before = serial.status();
+            #[cfg(feature = "development-serial-recovery")]
+            if d == 64 {
+                serial.challenge_busy_interval();
+            }
             record(
                 serial,
                 debugcon,
@@ -895,6 +903,32 @@ pub(crate) fn run(
                     ("unused", cancelled),
                 ],
             );
+            #[cfg(feature = "development-serial-recovery")]
+            if d == 64 {
+                let state = serial.status();
+                if !state.available
+                    || state.pending != 0
+                    || state.saturated
+                    || state.rejected != 0
+                    || state.timeouts != serial_before.timeouts + 1
+                    || state.transmitted <= serial_before.transmitted
+                {
+                    stop(34090, serial, debugcon);
+                }
+                record(
+                    serial,
+                    debugcon,
+                    "SERIAL",
+                    &[
+                        ("dispatches", d),
+                        ("withheld", poolekernel::early_serial::READY_POLLS as u64),
+                        ("timeouts", state.timeouts - serial_before.timeouts),
+                        ("pending", state.pending as u64),
+                        ("rejected", state.rejected),
+                        ("transmitted", state.transmitted - serial_before.transmitted),
+                    ],
+                );
+            }
             #[cfg(feature = "development-app-cleanup-exhaustion")]
             for p in &peers[4..6] {
                 checked!(reclaim::exhausted_observation(

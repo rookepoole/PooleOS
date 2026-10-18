@@ -104,6 +104,7 @@ ALLOWED_RUNS = {
     "runs/native-surface-lifecycle-readiness.json",
     "runs/native-application-input-readiness.json",
     "runs/native-input-lifetime-readiness.json",
+    "runs/native-bounded-serial-readiness.json",
     "runs/native-kernel-virtual-memory-readiness.json",
     "runs/native_model_readiness.json",
     "runs/native_microcode_readiness.json",
