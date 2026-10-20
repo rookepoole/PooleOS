@@ -129,6 +129,7 @@ def main():
     parser.add_argument('--launch-shell-dir', type=Path, help='separately qualified PLCODE1 shell for native admission; no graphical control claim')
     parser.add_argument('--launch-console-dir', type=Path, help='separately qualified PWCODE1 launch console; requires launch shell')
     parser.add_argument('--serial-recovery', action='store_true', help='diagnostic-only bounded UART backpressure challenge')
+    parser.add_argument('--launch-failure', action='store_true', help='diagnostic-only partial admission rollback and deferred cleanup')
     args = parser.parse_args(); work, programs = args.work_dir.resolve(), args.program_dir.resolve()
     if args.desktop and not args.optical: parser.error('local console requires the optical development profile')
     if args.windows and (not args.optical or args.desktop): parser.error('windows requires optical and is separate from the terminal profile')
@@ -142,6 +143,8 @@ def main():
     if args.launch_console_dir and not launch_programs:
         parser.error('launch console requires the separate launch shell')
     launch_console = args.launch_console_dir.resolve() if args.launch_console_dir else None
+    if args.launch_failure and not launch_console:
+        parser.error('launch failure requires the complete launch desktop profile')
     if launch_console and not launch_console.is_relative_to(ROOT/'outputs'):
         parser.error('launch console directory must be under workspace outputs')
     if launch_programs and not launch_programs.is_relative_to(ROOT/'outputs'):
@@ -151,7 +154,7 @@ def main():
         parser.error('workspace output paths required')
     storage = require_space(work); work.mkdir(parents=True, exist_ok=False)
     before = source.source_bindings()
-    report = dict(cycle=307 if launch_console else 305 if launch_programs else 300 if args.surface_input else 299 if args.surface_lifecycle else 298 if args.window_capacity else 297 if args.windows else 296 if args.desktop else 292 if args.optical else 287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
+    report = dict(cycle=309 if args.launch_failure else 307 if launch_console else 305 if launch_programs else 300 if args.surface_input else 299 if args.surface_lifecycle else 298 if args.window_capacity else 297 if args.windows else 296 if args.desktop else 292 if args.optical else 287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
                   contract_id=optical.CONTRACT if args.optical else 'PCLAIM1' if args.claimed_requester else 'PCLEANUP3' if args.exhaust_cleanup else 'PFILECONTROL1' if args.file_controls else 'PAPPRECOVERY1' if args.deferred_cleanup else 'PAPPSESSION1',
                   optical=args.optical, optical_images={}, file_waits=args.optical,
                   local_console=args.desktop or args.windows, window_surfaces=args.windows, graphical_desktop=False,
@@ -160,7 +163,8 @@ def main():
                   surface_input=args.surface_input,
                   launch_shell_admission=bool(launch_programs), native_plc1_control_verified=False,
                   launch_console_admission=bool(launch_console),
-                  diagnostic_only=args.serial_recovery, serial_recovery=args.serial_recovery,
+                  diagnostic_only=args.serial_recovery or args.launch_failure, serial_recovery=args.serial_recovery,
+                  launch_failure=args.launch_failure,
                   claimed_requester=args.claimed_requester,
                   exhaust_cleanup=args.exhaust_cleanup,
                   file_controls=args.file_controls,
@@ -235,6 +239,9 @@ def main():
         if args.serial_recovery:
             normal_features += ('development-serial-recovery',)
             bad_features += ('development-serial-recovery',)
+        if args.launch_failure:
+            normal_features += ('development-launch-failure',)
+            bad_features += ('development-launch-failure',)
         linked, kernel, plan = shared.entry._build_product(cargo, env, work/'kernel1', features=normal_features)
         linked2, kernel2, _ = shared.entry._build_product(cargo, env, work/'kernel2', features=normal_features)
         if (linked,kernel) != (linked2,kernel2): raise ValueError('independent kernel mismatch')
@@ -275,8 +282,10 @@ def main():
             scenario=probe.file_control_scenario if args.file_controls else probe.scenario
             if args.exhaust_cleanup: scenario=exhaustion.scenario
             case = probe.file_control_scenario(secrets.token_hex(8),bad_file=bad_file,claimed_requester=True) if args.claimed_requester else scenario(secrets.token_hex(8), bad_file=bad_file)
+            if args.launch_failure:
+                case = probe.scenario(secrets.token_hex(8), bad_file=bad_file, launch_failure=True)
             interaction = Interaction(case, args.deferred_cleanup, args.file_controls or args.claimed_requester, args.exhaust_cleanup, sustained=args.optical)
-            validator = (lambda m: exhaustion.validate_markers(m,bad_file=bad_file)) if args.exhaust_cleanup else (lambda m: probe.validate_markers(m, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows,window_capacity=args.window_capacity,surface_lifecycle=args.surface_lifecycle,launch_session=bool(launch_programs)))
+            validator = (lambda m: exhaustion.validate_markers(m,bad_file=bad_file)) if args.exhaust_cleanup else (lambda m: probe.validate_markers(m, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows,window_capacity=args.window_capacity,surface_lifecycle=args.surface_lifecycle,launch_session=bool(launch_programs),launch_failure=args.launch_failure))
             if args.serial_recovery:
                 validator = lambda m: native_serial_recovery.validate_markers(m, bad_file=bad_file,
                     file_waits=True, windows=True, window_capacity=True, surface_lifecycle=True)
@@ -325,7 +334,15 @@ def main():
                     run['ordinary_oracle_rejected_diagnostic'] = True
                 else:
                     raise ValueError('ordinary oracle accepted diagnostic profile')
-            run['hostile_marker_cases_rejected'] = exhaustion.negative_controls(ordinary_markers,bad_file=bad_file) if args.exhaust_cleanup else probe.negative_controls(ordinary_markers, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows,window_capacity=args.window_capacity,surface_lifecycle=args.surface_lifecycle,launch_session=bool(launch_programs))
+            if args.launch_failure:
+                try:
+                    probe.validate_markers(run['markers'], bad_file=bad_file, file_waits=True,
+                        windows=True, window_capacity=True, surface_lifecycle=True, launch_session=True)
+                except ValueError:
+                    run['ordinary_oracle_rejected_diagnostic'] = True
+                else:
+                    raise ValueError('ordinary oracle accepted launch failure diagnostic')
+            run['hostile_marker_cases_rejected'] = exhaustion.negative_controls(ordinary_markers,bad_file=bad_file) if args.exhaust_cleanup else probe.negative_controls(ordinary_markers, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows,window_capacity=args.window_capacity,surface_lifecycle=args.surface_lifecycle,launch_session=bool(launch_programs),launch_failure=args.launch_failure)
             run.update(media_sha256=shared.sha(media), kernel_sha256=shared.sha(image))
             report['guest_runs'].append(run)
         if args.optical:

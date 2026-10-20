@@ -48,6 +48,14 @@ pub enum Error {
     Ipc(super::Error),
 }
 
+impl Error {
+    /// These rejections roll back authority, not the caller's prepared image.
+    /// Scheduler/plan/identity failures are not ordinary resource pressure.
+    pub const fn recoverable_rejection(self) -> bool {
+        matches!(self, Self::Ipc(super::Error::Quota | super::Error::Denied))
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Admitted {
     pub handles: [u64; MAX_STEPS],

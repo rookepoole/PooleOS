@@ -20,6 +20,33 @@ pub(super) fn reap(
             return Err(());
         }
     }
+    #[cfg(feature = "development-launch-failure")]
+    if !admitted && outcome.id.slot == 5 && outcome.id.generation == 2 {
+        let before = manager.summary().allocated_pages;
+        let mut memory = FaultMemory {
+            inner: &mut p.memory,
+            mode: 4,
+            fired: false,
+        };
+        let children = job.as_ref().ok_or(())?.child_count();
+        let result =
+            job.as_deref_mut()
+                .ok_or(())?
+                .reclaim_child(&mut p.slot, p.id, manager, &mut memory);
+        if !memory.fired
+            || result
+                != Err(task::Error::Reclamation(
+                    poolekernel::user_entry::retirement::Error::Memory,
+                ))
+            || manager.summary().allocated_pages != before
+            || job.as_ref().ok_or(())?.child_count() != children
+            || p.slot.reclaim_remaining_pages(p.id) != Ok(pages)
+        {
+            return Err(());
+        }
+        defer(p, scheduler, false, serial, debugcon)?;
+        return Ok(false);
+    }
     #[cfg(feature = "development-shell-cleanup-retry")]
     if admitted && (4..6).contains(&outcome.id.slot) && (1..=2).contains(&outcome.id.generation) {
         let before = manager.summary().allocated_pages;
@@ -333,14 +360,20 @@ fn cleanup_record(
     log.write_str(" cpl=0 production=0\n");
 }
 
-#[cfg(feature = "development-shell-cleanup-retry")]
+#[cfg(any(
+    feature = "development-shell-cleanup-retry",
+    feature = "development-launch-failure"
+))]
 struct FaultMemory<'a> {
     inner: &'a mut Memory,
     mode: u8,
     fired: bool,
 }
 
-#[cfg(feature = "development-shell-cleanup-retry")]
+#[cfg(any(
+    feature = "development-shell-cleanup-retry",
+    feature = "development-launch-failure"
+))]
 impl TableMemory for FaultMemory<'_> {
     fn prepare_page(&mut self, address: u64) -> Result<(), Error> {
         self.inner.prepare_page(address)

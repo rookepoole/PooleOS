@@ -1,15 +1,60 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-20
-Plan version: 2.211.0-native-connected-desktop
-Roadmap cycle: PooleOS Cycle 308
+Plan version: 2.212.0-native-launch-rollback
+Roadmap cycle: PooleOS Cycle 309
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 308: Connected Desktop Matrix
+## Cycle 309: Native Launch Admission Rollback
+
+Implemented under N13/N14, consumed by N27/N29: recoverable admission rejection
+no longer unconditionally halts the desktop. The dispatcher preserves the exact
+permit and prepared-image owner, cancels without user entry, reclaims pages, and
+publishes launch failure only after the slot is empty. Deferred cleanup retains
+ownership while other tasks run. A fresh user action is required to retry.
+Plan, scheduler, identity and ownership invariant failures remain fail-stop.
+[Ownership and diagnostic contract](native-launch-rollback.md).
+
+Chronological substeps under the existing flags:
+1. Implemented: typed rejection boundary, exact retained permit/image identity,
+   partial-grant rollback and independent attempt/task/handle generations.
+2. Complete for this bounded scope: eight fresh QEMU boot controls verify native
+   immediate and dispatch-separated cleanup, explicit fresh retry, useful file
+   work, ordinary-image regression, stale-file authority and unsigned-boot denial.
+   Paired kernels/ISOs reproduce. The628 kernel host and124 focused checks pass.
+   Native quota-pressure and GUI failure paths are not covered by this result.
+3. Next: native GUI failure acknowledgement and fresh gestures, native quota
+   pressure (the current native injection is Denied), rejected-image
+   cleanup exhaustion and owner-death controls, then the complete source-bound
+   QEMU/VirtualBox desktop matrix before selecting a replacement preview.
+   Under the existing preview flags, also provide a versioned source-pinned
+   launch package with an immutable verified manifest, so later source edits do
+   not strand the qualified demo. This is packaging work, not permission to
+   bypass current-workspace source checks.
+4. Remaining: construction quarantine, committed-admission startup-handoff
+   failures, and window-service restart with endpoint
+   rebinding, all-path stacks, COM2-independent boot, persistence, event-driven
+   waits, accessibility, complete microkernel, PooleGlyph/PDC and all N0-N39 gates.
+
+The Cycle308 preview pointer and ISO copies are preserved as historical builds;
+current-source launchers must fail closed until requalification, not relabel old
+receipts. No new preview selection or production/merge qualification is claimed.
+The normal and diagnostic kernels fit136/208 pages with36 guarded kernel-stack
+pages; capacity, capabilities, code limits and guards have not been enlarged.
+All 40 phases,301 subphases and101 flags (46 open) remain.
+[Current checkpoint](checkpoints/cycle309-native-launch-rollback.md).
+
+Closeout: all 483 selected metadata/integration checks pass after reconciling
+historical mutation-count, source-equality and inventory expectations. Original
+receipts remain unchanged. The 1,631-test inventory is not a full canonical pass;
+focused/selected counts overlap. Exact-index publication checks remain required
+before commit/push, and the checkpoint stays on the draft integration branch.
+
+## Historical Cycle 308: Connected Desktop Matrix
 
 Implemented: strict explicit launch-profile propagation through receipt admission,
 both launchers, local input, window/input/lifetime and GUI validators. Ordinary

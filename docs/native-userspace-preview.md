@@ -1,7 +1,14 @@
 # Run The Native Window Preview
 
+Cycle309 development changes the kernel and launch-failure oracle. The Cycle308
+pointer and Downloads ISO remain preserved, but their receipts are historical
+relative to the current checkout. Current-source launchers must reject that
+mismatch. Do not edit hashes or bypass the check: a replacement selection needs
+the complete desktop matrix. The new launch-failure image is diagnostic-only
+and must not replace the ordinary preview.
+
 Cycle308's controlled native qualification passes on QEMU and headless VirtualBox.
-The local launcher and byte-verified Downloads copy select this checkpoint.
+The retained local pointer and byte-verified Downloads copy name this checkpoint.
 
 Cycle308, 2026-10-20. Native PooleBoot + PooleKernel, not Linux.
 This experimental build draws Terminal and two independent native application

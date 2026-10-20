@@ -38,6 +38,16 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(binding["sha256"], self.historical_receipts[binding["path"]])
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), self.current_receipts[binding["path"]])
 
+    def assert_extended_application_controls(self, actual: int, historical: dict) -> None:
+        # Cycle309 adds one root mutation per admission, not new historical execution.
+        rows = historical["markers"][29:]
+        self.assertFalse(any(re.search(r" (reason|syscalls|published)=", row) for row in rows))
+        added = [row for row in rows if " root=" in row]
+        self.assertTrue(added)
+        self.assertTrue(all(row.startswith("POOLEOS:APPS ADMIT ") for row in added))
+        self.assertEqual(len(added), len(historical["marker_summary"]["admits"]))
+        self.assertEqual(actual, historical["hostile_marker_cases_rejected"] + len(added))
+
     def assert_current_gate_projection(self, check: dict) -> None:
         # Historical receipt integrity does not establish current-image readiness.
         projection = self.roadmap["baseline"]["native_consistency_release_gate"]["current_focused_source_projection"]
@@ -198,8 +208,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 308)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1625)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 309)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1631)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -239,8 +249,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "connected_desktop_matrix_qualified_full_canonical_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 308)
+        self.assertEqual(current["qualification_status"], "native_admission_rollback_verified_full_desktop_requalification_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 309)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -773,9 +783,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertEqual(record[field], receipt["product"][field])
         sources = {p.relative_to(ROOT).as_posix() for p in (ROOT / "native/kernel/src").rglob("*.rs")}
         inputs = receipt["bindings"]["implementation_inputs"]
-        self.assertEqual((len(sources), len(inputs)), (135, 79))
+        self.assertEqual((len(sources), len(inputs)), (136, 79))
         self.assertEqual(sources - {item["path"] for item in inputs},
-                         {"native/kernel/src/capability_ipc/process/observer_tests.rs",
+                         {"native/kernel/src/user_root_probe/peer_driver/interactive/launch_failure.rs",
+                          "native/kernel/src/capability_ipc/process/observer_tests.rs",
                           "native/kernel/src/ps2.rs",
                           "native/kernel/src/display.rs",
                           "native/kernel/src/arch/x86_64/desktop.rs",
@@ -6397,8 +6408,9 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(record['evidence_status'], 'historical_cycle281_kernel_changed_native_handoff_now_qualified')
         self.assertEqual(len(r['source_bindings']), 903)
         self.assertEqual(len(r['tested_changed_kernel_sources']), 5)
-        for path, digest in r['tested_changed_kernel_sources'].items():
-            self.assertEqual(hashlib.sha256((ROOT/path).read_bytes()).hexdigest().upper(), digest)
+        changed = {path for path, digest in r['tested_changed_kernel_sources'].items()
+                   if hashlib.sha256((ROOT/path).read_bytes()).hexdigest().upper() != digest}
+        self.assertEqual(changed, {'native/kernel/src/capability_ipc/launch/tests.rs'})
         for key in ('pre_entry_owned_startup_replacement', 'actual_admission_handle_handoff_host_tested',
                     'equal_encoded_length_required', 'stale_identity_and_exposed_state_rejected',
                     'every_word_read_write_readback_failures_host_tested', 'memory_failure_quarantines_owner',
@@ -6678,7 +6690,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
                 summary=apps.validate_markers(run['markers'],**options)
                 self.assertEqual(summary.pop('file_wait_pairs'),[])
                 self.assertEqual(json.loads(json.dumps(summary)),run['marker_summary'])
-                self.assertEqual(apps.negative_controls(run['markers'],**options),run['hostile_marker_cases_rejected'])
+                self.assert_extended_application_controls(apps.negative_controls(run['markers'],**options),run)
                 interaction=run['interaction']
                 case=(apps.file_control_scenario if controls else apps.scenario)(interaction['nonce'],bad_file=i==2)
                 sent,output=bytes.fromhex(interaction['input_hex']),bytes.fromhex(interaction['output_hex'])
@@ -6754,7 +6766,9 @@ class PdcProductionRoadmapTests(unittest.TestCase):
                 summary=oracle.validate_markers(run['markers'],**options)
                 if name!='exhaustion':self.assertEqual(summary.pop('file_wait_pairs'),[])
                 self.assertEqual(json.loads(json.dumps(summary)),run['marker_summary'])
-                self.assertEqual(oracle.negative_controls(run['markers'],**options),run['hostile_marker_cases_rejected'])
+                count = oracle.negative_controls(run['markers'],**options)
+                if name=='exhaustion': self.assertEqual(count,run['hostile_marker_cases_rejected'])
+                else: self.assert_extended_application_controls(count,run)
                 interaction=run['interaction'];case=oracle.scenario(interaction['nonce'],bad_file=i==2)
                 sent,output=bytes.fromhex(interaction['input_hex']),bytes.fromhex(interaction['output_hex'])
                 self.assertTrue(native_shell.validate_interaction(case,sent,output)['exact_interaction'])
@@ -6831,7 +6845,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
                 summary=apps.validate_markers(run['markers'],**options)
                 self.assertEqual(summary.pop('file_wait_pairs'),[])
                 self.assertEqual(json.loads(json.dumps(summary)),run['marker_summary'])
-                self.assertEqual(apps.negative_controls(run['markers'],**options),run['hostile_marker_cases_rejected'])
+                self.assert_extended_application_controls(apps.negative_controls(run['markers'],**options),run)
                 interaction=run['interaction'];kw=dict(bad_file=i==2)
                 if name=='claimed':kw['claimed_requester']=True
                 case=(apps.scenario if name=='applications' else apps.file_control_scenario)(interaction['nonce'],**kw)
@@ -6864,7 +6878,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
         self.assertEqual(record['receipt_sha256'],'BEE1CDEF65E2B3E3983CE1D981DDA91BB69EDF45208AF1A5D160D35832F545EB')
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(288,'PUSIISO1','pass'))
-        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1011)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1013)
         self.assertEqual((r['guest_runs'],r['iso_byte_count']),(6,66109440))
         self.assertEqual(r['iso_sha256'],'1E4752E3D45972CEA7711AF443C15EFC22CD82558F1A975B6B676ADF6C7841AE')
         prior=json.loads((ROOT/'runs/native-claimed-requester-readiness.json').read_bytes())
@@ -6904,7 +6918,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         lane=self.roadmap['baseline']['user_space_integration']
         self.assertTrue(lane['optical_iso_built'] and lane['continue_full_microkernel_after_iso'])
         self.assertEqual(self.roadmap['immediate_next_move']['title'],
-            'Harden native desktop failure and window-service recovery')
+            'Qualify graphical launch-failure recovery and retained-owner failure paths')
 
     def test_cycle289_file_wait_is_native_bound_and_preserves_the_optical_preview(self) -> None:
         from runtime import native_app_session as apps, native_userspace_iso as optical, native_shell
@@ -6935,7 +6949,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             summary=apps.validate_markers(g['markers'],bad_file=i==2,file_waits=True)
             self.assertEqual(json.loads(json.dumps(summary)),g['marker_summary'])
             self.assertEqual(len(summary['file_wait_pairs']),14 if i==2 else 20)
-            self.assertEqual(apps.negative_controls(g['markers'],bad_file=i==2,file_waits=True),g['hostile_marker_cases_rejected'])
+            self.assert_extended_application_controls(apps.negative_controls(g['markers'],bad_file=i==2,file_waits=True),g)
             window=g['sustained_window']
             self.assertEqual(optical.validate_sustained(summary['samples'],window['first_dispatch'],window['last_dispatch']),window)
             case=apps.scenario(g['interaction']['nonce'],bad_file=i==2)
@@ -6995,7 +7009,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             summary = apps.validate_markers(guest['markers'], bad_file=i == 2, file_waits=True)
             self.assertEqual(json.loads(json.dumps(summary)), guest['marker_summary'])
             self.assertEqual(len(summary['file_wait_pairs']), 14 if i == 2 else 20)
-            self.assertEqual(apps.negative_controls(guest['markers'], bad_file=i == 2, file_waits=True), guest['hostile_marker_cases_rejected'])
+            self.assert_extended_application_controls(apps.negative_controls(guest['markers'], bad_file=i == 2, file_waits=True), guest)
             window = guest['sustained_window']
             self.assertEqual(optical.validate_sustained(summary['samples'], window['first_dispatch'], window['last_dispatch']), window)
             case = apps.scenario(guest['interaction']['nonce'], bad_file=i == 2)
@@ -7076,7 +7090,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             summary = apps.validate_markers(guest['markers'], bad_file=i == 2, file_waits=True)
             self.assertEqual(json.loads(json.dumps(summary)), guest['marker_summary'])
             self.assertEqual(len(summary['file_wait_pairs']), 14 if i == 2 else 20)
-            self.assertEqual(apps.negative_controls(guest['markers'], bad_file=i == 2, file_waits=True), guest['hostile_marker_cases_rejected'])
+            self.assert_extended_application_controls(apps.negative_controls(guest['markers'], bad_file=i == 2, file_waits=True), guest)
             window = guest['sustained_window']
             self.assertEqual(optical.validate_sustained(summary['samples'], window['first_dispatch'], window['last_dispatch']), window)
             case = apps.scenario(guest['interaction']['nonce'], bad_file=i == 2)
@@ -7101,7 +7115,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertTrue(guest['no_guest_network'] and guest['no_host_shares'] and guest['no_guest_disk'])
             summary = apps.validate_markers(guest['markers'], file_waits=True)
             self.assertEqual(json.loads(json.dumps(summary)), guest['marker_summary'])
-            self.assertEqual(apps.negative_controls(guest['markers'], file_waits=True), guest['hostile_marker_cases_rejected'])
+            self.assert_extended_application_controls(apps.negative_controls(guest['markers'], file_waits=True), guest)
             window = guest['sustained_window']
             self.assertEqual(optical.validate_sustained(summary['samples'], window['first_dispatch'], window['last_dispatch']), window)
             case = apps.scenario(guest['interaction']['nonce'])
@@ -7174,7 +7188,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             summary = apps.validate_markers(guest['markers'], file_waits=True)
             self.assertEqual(json.loads(json.dumps(summary)), guest['marker_summary'])
             self.assertEqual(len(summary['file_wait_pairs']), 20)
-            self.assertEqual(apps.negative_controls(guest['markers'], file_waits=True), guest['hostile_marker_cases_rejected'])
+            self.assert_extended_application_controls(apps.negative_controls(guest['markers'], file_waits=True), guest)
             window = guest['sustained_window']
             self.assertEqual(optical.validate_sustained(summary['samples'], window['first_dispatch'], window['last_dispatch']), window)
             native_shell.validate_interaction(apps.scenario(guest['interaction']['nonce']),
@@ -7339,7 +7353,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         raw=(ROOT/record['receipt_path']).read_bytes();r=json.loads(raw)
         self.assertEqual(record['receipt_sha256'],hashlib.sha256(raw).hexdigest().upper())
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(295,'PWINPUT1','partial'))
-        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1011)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1013)
         self.assertNotEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),111)
         self.assertEqual(len(r['program_build']['programs']),24)
         self.assertEqual(r['program_build']['host_tests'],[dict(profile=m,tests_passed=178) for m in ('debug','release')])
@@ -7723,7 +7737,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         raw=(ROOT/record['receipt_path']).read_bytes();r=json.loads(raw)
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
         self.assertEqual((r['cycle'],r['status']),(301,'partial'))
-        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1011)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1013)
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),
                          '35C46536C1E7B66B7DF4B5EC478F9F5A9ABE11AAFA1F42E5D94C650057C36367')
         self.assertNotEqual(r['program_build']['source_bindings'],bindings())
@@ -8024,7 +8038,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         r = json.loads(raw)
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), record["receipt_sha256"])
         self.assertEqual((r["cycle"], r["contract_id"], r["status"]), (308, "PWLAUNCH3", "partial"))
-        self.assertEqual(r["source_bindings"], source_bindings())
+        self.assertNotEqual(r["source_bindings"], source_bindings())
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), "EDB3C7B641C986F87082E495E157507E3C5560FAC4E576721103123B386B143C")
         self.assertEqual((r["qemu_guest_runs"], r["virtualbox_guest_runs"]), (10, 6))
         self.assertEqual((r["starts_verified"], r["inspections_verified"], r["terminal_drafts_preserved"]), (8, 8, 8))
         self.assertEqual(r["held_launch_repeats_verified"], 4)
@@ -8051,7 +8066,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(len(r["launcher_regressions"]), 2)
         for g in r["native_gui"] + r["desktop_regressions"] + r["launcher_regressions"]:
             self.assertEqual(g["status"], "pass")
-            self.assertEqual(g["source_bindings"], source_bindings())
+            self.assertEqual(g["source_bindings"], r["source_bindings"])
             self.assertTrue(g["source_unchanged"])
             self.assertNotIn("commands", g)
             if g["tag"].startswith("vbox-"):
@@ -8064,7 +8079,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         for key in ("connected_stack_bound_verified", "fresh_host_kernel_tests_run",
                     "physical_hardware_tested", "canonical_full_replay_performed", "merge_qualified", "production_ready"):
             self.assertFalse(r[key], key)
-        lane = self.roadmap["baseline"]["user_space_integration"]
+        lane = self.roadmap["baseline"]["historical_cycle308_user_space_integration"]
         self.assertEqual(lane["native_execution_evidence_cycle"], 308)
         self.assertTrue(lane["new_preview_selected"] and lane["full_input_matrix_replayed_this_cycle"])
         self.assertFalse(lane["preview_source_requalification_required"])
@@ -8072,6 +8087,42 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(lane["complete_graphical_desktop"] or lane["virtualbox_usable"])
         self.assertEqual(lane["retained_preview_evidence_cycle"], 308)
         self.assertEqual(lane["historical_preserved_preview_cycle"], 303)
+
+    def test_cycle309_admission_rollback_preserves_desktop_and_production_gaps(self) -> None:
+        from tools.qualify_native_user_entry import source_bindings
+        from runtime import native_app_session as apps
+        record = self.roadmap["baseline"]["native_launch_rollback"]
+        raw = (ROOT / record["receipt_path"]).read_bytes()
+        r = json.loads(raw)
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), record["receipt_sha256"])
+        self.assertEqual((r["cycle"],r["contract_id"],r["status"]),(309,"PLAUNCHFAIL1","partial"))
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),"52F3BE8C31B173B748D62CF5D8D5118EE0903B5DCF1A023E671A4203B5F886A2")
+        self.assertEqual(r["source_bindings"],source_bindings())
+        self.assertEqual(len(r["source_bindings"]),1013)
+        self.assertIn("native/kernel/src/user_root_probe/peer_driver/interactive/launch_failure.rs",r["source_bindings"])
+        self.assertIn("tests/test_native_launch_failure.py",r["source_bindings"])
+        self.assertEqual((r["qemu_guest_runs"],r["virtualbox_guest_runs"]),(8,0))
+        self.assertEqual(r["host_kernel_tests"]["passed"],628)
+        self.assertTrue(all(r[k] for k in ("native_admission_failure_recovery","native_immediate_cleanup",
+                                         "native_deferred_cleanup","fresh_retry_verified")))
+        self.assertFalse(any(r[k] for k in ("graphical_failure_retry_verified","window_service_restart_verified",
+            "construction_failure_recovery_verified","full_input_matrix_replayed","new_preview_selected",
+            "merge_qualified","production_ready")))
+        for key, diagnostic in (("ordinary_native_regression",False),("diagnostic_native_regression",True)):
+            native=r[key]
+            self.assertEqual(native["source_bindings"],source_bindings())
+            self.assertEqual(native["status"],"pass")
+            options=dict(file_waits=True,windows=True,window_capacity=True,surface_lifecycle=True,launch_session=True)
+            for run in native["guest_runs"]:
+                summary=apps.validate_markers(run["markers"],bad_file=run["run_id"]=="bad-file",
+                                             launch_failure=diagnostic,**options)
+                self.assertEqual(json.loads(json.dumps(summary)),run["marker_summary"])
+            if diagnostic:
+                with self.assertRaises(ValueError): apps.profile_options(native)
+        lane=self.roadmap["baseline"]["user_space_integration"]
+        self.assertEqual(lane["cycle"],309)
+        self.assertTrue(lane["preview_source_requalification_required"])
+        self.assertFalse(lane["new_preview_selected"] or lane["full_input_matrix_replayed_this_cycle"])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]

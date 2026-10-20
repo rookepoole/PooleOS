@@ -2,6 +2,7 @@
 use super::*;
 #[cfg(feature = "development-applications")]
 mod applications;
+mod launch_failure;
 mod reclaim;
 use poolekernel::{
     capability_ipc::admission::Member,
@@ -261,6 +262,7 @@ pub(crate) fn run(
     let mut calls = [0u64; 6];
     let mut ticks = [0u64; 6];
     let mut generations = [0u32; 2];
+    let mut failures: [Option<launch_failure::Pending>; 2] = [None, None];
     let mut extra_flushes = 0;
     let mut held_dispatches = 0;
     let mut retired = 0;
@@ -312,16 +314,21 @@ pub(crate) fn run(
                     }
                 } else {
                     cancelled += 1;
-                    record(
-                        serial,
-                        debugcon,
-                        "UNUSED",
-                        &[
-                            ("task", j as u64),
-                            ("released_pages", pages[j]),
-                            ("dispatches", u64::from(scheduler.summary().dispatch_count)),
-                        ],
-                    );
+                    if j >= 4 && failures[j - 4].is_some() {
+                        let pending = checked!(failures[j - 4].take().ok_or(()));
+                        checked!(pending.complete(p, &job, &scheduler, serial, debugcon));
+                    } else {
+                        record(
+                            serial,
+                            debugcon,
+                            "UNUSED",
+                            &[
+                                ("task", j as u64),
+                                ("released_pages", pages[j]),
+                                ("dispatches", u64::from(scheduler.summary().dispatch_count)),
+                            ],
+                        );
+                    }
                 }
                 live[j] = false;
                 owned[j] = false;
@@ -644,6 +651,7 @@ pub(crate) fn run(
                 || plan.owner != peers[3].id
                 || !live[3]
                 || live[j]
+                || failures[j - 4].is_some()
                 || plan.program != (j - 3) as u16
                 || plan.sequence != checked!(generations[j - 4].checked_add(1).ok_or(()))
             {
@@ -659,6 +667,20 @@ pub(crate) fn run(
                 poolekernel::development_apps::window_grants(peers[3].id, peers[1].id, peers[2].id);
             #[cfg(not(feature = "development-applications"))]
             let steps = [];
+            #[cfg(feature = "development-launch-failure")]
+            let steps = {
+                let mut steps = steps;
+                if plan.sequence == 2 {
+                    // Two valid grants are installed before the stale third grant fails.
+                    steps[2] = poolekernel::capability_ipc::admission::Step::Inherit {
+                        source: peers[2].id,
+                        handle: 0x200010003,
+                        member: 0,
+                        rights: poolekernel::capability_ipc::Rights::SEND,
+                    };
+                }
+                steps
+            };
             #[cfg(feature = "development-window-lifecycle")]
             let observer = peers[2].id;
             let p = &mut peers[j];
@@ -682,24 +704,11 @@ pub(crate) fn run(
                 ));
                 checked!(job.adopt(&p.slot, p.id));
             }
+            let before_admission = scheduler.summary();
             let admitted = checked!(unsafe {
                 arch::x86_64::user_ipc::with_waits(|s| {
                     #[cfg(feature = "development-window-lifecycle")]
-                    return s
-                        .admit_observed_launch(
-                            &permit,
-                            &mut scheduler,
-                            Member {
-                                id: p.id,
-                                image: p.admission,
-                                priority: 16,
-                            },
-                            &steps,
-                            observer,
-                        )
-                        .map_err(|_| poolekernel::capability_ipc::Error::Identity);
-                    #[cfg(not(feature = "development-window-lifecycle"))]
-                    s.admit_launch(
+                    return Ok(s.admit_observed_launch(
                         &permit,
                         &mut scheduler,
                         Member {
@@ -708,48 +717,103 @@ pub(crate) fn run(
                             priority: 16,
                         },
                         &steps,
-                    )
-                    .map_err(|_| poolekernel::capability_ipc::Error::Identity)
+                        observer,
+                    ));
+                    #[cfg(not(feature = "development-window-lifecycle"))]
+                    Ok(s.admit_launch(
+                        &permit,
+                        &mut scheduler,
+                        Member {
+                            id: p.id,
+                            image: p.admission,
+                            priority: 16,
+                        },
+                        &steps,
+                    ))
                 })
             });
-            let handle_index = steps.len();
-            if admitted.count != handle_index + 1
-                || p.id.generation != plan.sequence
-                || checked!(unsafe {
-                    arch::x86_64::user_ipc::with_waits(|s| Ok(s.validate_launch(&permit).is_ok()))
-                })
-            {
-                stop(34012, serial, debugcon);
+            match admitted {
+                Err(error) => {
+                    if !error.recoverable_rejection() || scheduler.summary() != before_admission {
+                        stop(34022, serial, debugcon);
+                    }
+                    let pending = checked!(launch_failure::Pending::cancel(p, permit, plan, error));
+                    generations[j - 4] = plan.sequence;
+                    ticks[j] = 0;
+                    calls[j] = 0;
+                    owned[j] = true;
+                    pending.rejected(p, pages[j], &scheduler, serial, debugcon);
+                    let outcome = checked!(p.slot.outcome(p.id));
+                    let previous = manager.summary().allocated_pages;
+                    let complete = checked!(reclaim::reap(
+                        p,
+                        manager,
+                        &mut scheduler,
+                        outcome,
+                        pages[j],
+                        false,
+                        Some(&mut job),
+                        serial,
+                        debugcon
+                    ));
+                    if complete {
+                        if previous.checked_sub(manager.summary().allocated_pages) != Some(pages[j])
+                        {
+                            stop(34023, serial, debugcon);
+                        }
+                        checked!(pending.complete(p, &job, &scheduler, serial, debugcon));
+                        owned[j] = false;
+                        cancelled += 1;
+                    } else {
+                        if previous != manager.summary().allocated_pages {
+                            stop(34024, serial, debugcon);
+                        }
+                        failures[j - 4] = Some(pending);
+                    }
+                }
+                Ok(admitted) => {
+                    let handle_index = steps.len();
+                    if admitted.count != handle_index + 1
+                        || p.id.generation != plan.sequence
+                        || checked!(unsafe {
+                            arch::x86_64::user_ipc::with_waits(|s| {
+                                Ok(s.validate_launch(&permit).is_ok())
+                            })
+                        })
+                    {
+                        stop(34012, serial, debugcon);
+                    }
+                    #[cfg(feature = "development-applications")]
+                    checked!(applications::handoff(
+                        p,
+                        &args[j],
+                        &admitted.handles[..handle_index],
+                        core,
+                        &scheduler,
+                        serial,
+                        debugcon
+                    ));
+                    generations[j - 4] = plan.sequence;
+                    ticks[j] = 0;
+                    calls[j] = 0;
+                    live[j] = true;
+                    owned[j] = true;
+                    record(
+                        serial,
+                        debugcon,
+                        "ADMIT",
+                        &[
+                            ("task", j as u64),
+                            ("generation", u64::from(p.id.generation)),
+                            ("sequence", u64::from(plan.sequence)),
+                            ("handle", admitted.handles[handle_index]),
+                            ("root", p.root),
+                            ("owned_pages", pages[j]),
+                            ("dispatches", u64::from(scheduler.summary().dispatch_count)),
+                        ],
+                    );
+                }
             }
-            #[cfg(feature = "development-applications")]
-            checked!(applications::handoff(
-                p,
-                &args[j],
-                &admitted.handles[..handle_index],
-                core,
-                &scheduler,
-                serial,
-                debugcon
-            ));
-            generations[j - 4] = plan.sequence;
-            ticks[j] = 0;
-            calls[j] = 0;
-            live[j] = true;
-            owned[j] = true;
-            record(
-                serial,
-                debugcon,
-                "ADMIT",
-                &[
-                    ("task", j as u64),
-                    ("generation", u64::from(p.id.generation)),
-                    ("sequence", u64::from(plan.sequence)),
-                    ("handle", admitted.handles[handle_index]),
-                    ("root", p.root),
-                    ("owned_pages", pages[j]),
-                    ("dispatches", u64::from(scheduler.summary().dispatch_count)),
-                ],
-            );
         }
         if job.is_closing() {
             for j in 4..6 {

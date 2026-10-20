@@ -119,6 +119,8 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-launch-desktop-readiness-raw.json",
             "runs/native-launch-desktop-readiness-private.json",
             "runs/native-connected-desktop-readiness-raw.json",
+            "runs/native-launch-rollback-readiness-raw.json",
+            "runs/native-launch-rollback-readiness-private.json",
             "runs/native-connected-desktop-readiness-private.json",
             "runs/native-console-ipc-private.json",
             "firmware/private/device.bin",
@@ -163,7 +165,8 @@ class PublicationBoundaryTests(unittest.TestCase):
                      "runs/native-launch-admission-readiness.json",
                      "runs/native-window-launch-readiness.json",
                      "runs/native-launch-desktop-readiness.json",
-                     "runs/native-connected-desktop-readiness.json"):
+                     "runs/native-connected-desktop-readiness.json",
+                     "runs/native-launch-rollback-readiness.json"):
             for data, kind in ((fake_token, "secret_pattern"), (user_path, "absolute_user_path")):
                 self.assertTrue(any(item["type"] == kind for item in publication.inspect_public_blob(path, data)))
 
@@ -204,6 +207,7 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-window-launch-readiness.json",
             "runs/native-launch-desktop-readiness.json",
             "runs/native-connected-desktop-readiness.json",
+            "runs/native-launch-rollback-readiness.json",
             "runs/native-userspace-iso-readiness.json",
             "runs/native-app-file-wait-readiness.json",
             "runs/native_toolchain_qualification.json",

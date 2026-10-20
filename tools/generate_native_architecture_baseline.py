@@ -24,6 +24,11 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle309-native-launch-rollback.md",
+    "docs/native-launch-rollback.md",
+    "runs/native-launch-rollback-readiness.json",
+    "native/kernel/src/user_root_probe/peer_driver/interactive/launch_failure.rs",
+    "tests/test_native_launch_failure.py",
     "docs/checkpoints/cycle307-native-launch-desktop.md",
     "docs/checkpoints/cycle308-connected-desktop-matrix.md",
     "docs/native-connected-desktop.md",

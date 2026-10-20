@@ -11,7 +11,19 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle308 connects the explicit launch profile
+**Current development checkpoint:** Cycle309 implements native launch-admission
+failure recovery. Rejected images remain owned until cleanup finishes; only then
+does the shell receive failure and permit an explicit fresh attempt. Plan and
+kernel invariant failures remain fail-stop. Eight fresh QEMU boot controls,
+628 kernel host tests and 124 focused checks pass with unchanged source bindings.
+The kernel uses 136/208 image pages with the original 36 guarded stack pages.
+All 483 selected metadata/integration checks also pass; counts overlap and do
+not constitute full canonical qualification.
+The prior Cycle308 ISO and pointer are preserved; a new current-source preview
+requires the complete desktop matrix. No production or merge qualification.
+[Current progress and remaining gates](docs/checkpoints/cycle309-native-launch-rollback.md).
+
+**Historical development checkpoint:** Cycle308 connects the explicit launch profile
 to both emulator launchers and the full desktop input/lifetime test routes.
 Malformed profiles reject without relaxing ordinary application accounting.
 The optical baseline and genuine GUI launch/inspect/restart tests pass on QEMU

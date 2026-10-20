@@ -7,9 +7,20 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 308
+Last roadmap reconciliation: PooleOS Cycle 309
 
-Cycle308 keeps the native launch profile explicit through both emulators'
+Cycle309 implements recoverable native application-admission rejection, exact
+permit/image retention and failure publication after reclamation. Eight fresh
+QEMU boot controls verify immediate/deferred cleanup, fresh retry and normal
+desktop regression;628 kernel host and124 focused checks also pass.
+Construction quarantine, GUI-visible failure controls, native quota pressure,
+cleanup exhaustion,
+owner-death controls, window-service restart and full desktop requalification
+remain. Preserve the Cycle308 preview without bypassing current-source checks.
+No phase, merge or production gate closes from this bounded implementation.
+[Current progress](checkpoints/cycle309-native-launch-rollback.md).
+
+Historical Cycle308 keeps the native launch profile explicit through both emulators'
 launchers and all input/lifetime validators. Ordinary accounting, capabilities
 and guards remain unchanged. The current-source optical baseline and both native
 GUI challenges pass, including held-repeat controls and retained drafts.

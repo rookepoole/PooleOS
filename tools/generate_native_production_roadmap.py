@@ -16646,13 +16646,78 @@ def apply_cycle308(roadmap: dict, test_count: int) -> dict:
             "guarded nested-path and all-path stack evidence without enlarging authority",
             "COM2-independent startup, persistence and accessible native desktop behavior",
             "current-source qualification and remaining N0-N39 microkernel/PooleGlyph/PDC gates"])
+    return apply_cycle309(roadmap, test_count)
+
+
+def apply_cycle309(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle309-native-launch-rollback.md"
+    contract = "docs/native-launch-rollback.md"
+    path = "runs/native-launch-rollback-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle308_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=309, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 309
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    record = dict(cycle=309, contract_id="PLAUNCHFAIL1", status=receipt["status"],
+                  receipt_path=path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+                  source_binding_count=len(receipt["source_bindings"]))
+    for key in ("native_admission_failure_recovery", "native_immediate_cleanup",
+                "native_deferred_cleanup", "fresh_retry_verified", "qemu_guest_runs",
+                "virtualbox_guest_runs", "graphical_failure_retry_verified",
+                "window_service_restart_verified", "construction_failure_recovery_verified",
+                "full_input_matrix_replayed", "new_preview_selected", "merge_qualified", "production_ready"):
+        record[key] = receipt[key]
+    baseline["native_launch_rollback"] = copy.deepcopy(record)
+    baseline["native_connected_desktop"]["evidence_status"] = "historical_kernel_sources_changed_cycle309"
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 309
+    gate["qualification_status"] = "native_admission_rollback_verified_full_desktop_requalification_pending"
+    gate["current_native_launch_rollback_qualification"] = record
+    gate["current_native_connected_desktop_qualification"]["evidence_status"] = "historical_kernel_sources_changed_cycle309"
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=309, receipt_path=path, receipt_section="ordinary_native_regression",
+        retained_kernel_sources_unchanged=False,
+        native_execution_status="native_admission_failure_cleanup_and_fresh_retry_verified",
+        native_execution_evidence_cycle=309, shell_native_execution_evidence_cycle=309,
+        full_input_matrix_replayed_this_cycle=False, new_preview_selected=False,
+        virtualbox_native_execution_replayed_this_cycle=False,
+        preview_source_requalification_required=True,
+        native_gui_scope="historical_cycle308_connected_desktop_current_kernel_matrix_pending",
+        virtualbox_serial_preview_usable_on_qualified_host=False,
+        optical_iso_sha256=receipt["ordinary_iso_sha256"],
+        kernel_image_pages=receipt["kernel_budget"]["image_pages"],
+        kernel_remaining_capacity_pages=receipt["kernel_budget"]["remaining_pages"])
+    lane["graphical_launch_control"]["evidence_status"] = "historical_cycle308_current_kernel_matrix_pending"
+    evidence = ("Cycle309: native atomic admission rejection retains the exact launch permit and prepared image, reclaims immediately or through dispatch-separated cleanup, and publishes failure only after release. Fresh third attempts execute useful work with independent handle generations. " + checkpoint)
+    gap = ("Construction quarantine, rejected-launch cleanup exhaustion and owner death, GUI-visible failure/fresh-gesture recovery, window-service restart/rebinding, all-path stacks, COM2-independent boot, persistence and the current-source full QEMU/VirtualBox desktop matrix remain. Provide a versioned source-pinned launch package with an immutable verified manifest so development does not strand a qualified demo; never bypass current-source checks. Preserve the Cycle308 preview as historical; no new preview, merge or production promotion. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N3", "N9", "N13", "N14", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-NATIVE-UI-001", "FLAG-N13-USERSPACE-ISO-001",
+                          "FLAG-N13-USERSTACK-001", "FLAG-N13-LAUNCH-FAILURE-001",
+                          "FLAG-N3-VIRTUALBOX-PREVIEW-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle309 narrows but does not close this flag. " + gap
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["immediate_next_move"].update(title="Qualify graphical launch-failure recovery and retained-owner failure paths",
+        entry_evidence=[checkpoint, contract, path], exit_evidence=[
+            "native GUI failure acknowledgement and explicit fresh gestures without duplicate launch",
+            "rejected-image cleanup exhaustion and owner-death retention/revocation evidence",
+            "current-source QEMU/VirtualBox desktop matrix before replacement preview selection",
+            "window-service restart with exact generation-bound endpoint rebinding",
+            "construction quarantine, stack bounds and remaining N0-N39 gates"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1625)
+    parser.add_argument("--test-count", type=int, default=1631)
     parser.add_argument("--status-date", default="2026-10-20")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

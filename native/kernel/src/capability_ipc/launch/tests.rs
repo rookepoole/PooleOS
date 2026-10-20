@@ -1,4 +1,54 @@
 use super::*;
+#[test]
+fn only_atomic_authority_rejections_are_recoverable() {
+    for error in [Error::Denied, Error::Quota] {
+        assert!(admission::Error::Ipc(error).recoverable_rejection());
+    }
+    assert!(!admission::Error::Ipc(Error::Identity).recoverable_rejection());
+    assert!(!admission::Error::Plan.recoverable_rejection());
+    assert!(
+        !admission::Error::Scheduler(crate::scheduler::Error::Invariant).recoverable_rejection()
+    );
+}
+
+#[test]
+fn partial_grants_roll_back_but_failure_needs_explicit_completion_and_fresh_sequence() {
+    let (mut s, mut q, c, factory) = fixture();
+    let steps = application_steps(&mut s, c.id);
+    let permit = claim(&mut s, c, factory, 1);
+    let before = q;
+    let mut bad = [steps[0], steps[1], steps[1]];
+    if let Step::Inherit { ref mut handle, .. } = bad[2] {
+        *handle += 1 << 32;
+    }
+    assert_eq!(
+        s.admit_launch(&permit, &mut q, member(1, 1), &bad),
+        Err(admission::Error::Ipc(Error::Denied))
+    );
+    unchanged_scheduler(q, before);
+    assert!(s.table(id(1, 1)).is_err());
+    assert!(s.validate_launch(&permit).is_ok());
+    assert!(s.claim_launch().is_none());
+    assert_eq!(s.request_launch(c, factory, 1), (Status::Again, 0));
+    assert_eq!(s.request_launch(c, factory, 2), (Status::Again, 0));
+    assert_eq!(s.validate_launch(&permit).unwrap().sequence, 1);
+    s.fail_launch(&permit).unwrap();
+    assert!(s.validate_launch(&permit).is_err());
+    assert_eq!(s.request_launch(c, factory, 1), (Status::Cancelled, 0));
+    let retry = claim(&mut s, c, factory, 2);
+    assert!(s.fail_launch(&permit).is_err());
+    assert!(
+        s.admit_launch(&retry, &mut q, member(1, 1), &steps)
+            .is_err()
+    );
+    let admitted = s
+        .admit_launch(&retry, &mut q, member(1, 2), &steps)
+        .unwrap();
+    assert_eq!(admitted.handles[0] >> 32, 2);
+    assert_eq!(admitted.handles[1] >> 32, 2);
+    // No process grant was allocated by the rejected attempt.
+    assert_eq!(admitted.handles[2] >> 32, 1);
+}
 fn unchanged_scheduler(mut actual: Scheduler, mut before: Scheduler) {
     assert_eq!(actual.summary(), before.summary());
     let cpu = crate::scheduler::CpuId::new(0).unwrap();
