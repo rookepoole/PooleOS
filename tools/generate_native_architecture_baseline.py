@@ -24,6 +24,10 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle311-native-launch-quota.md",
+    "docs/native-launch-quota.md",
+    "runs/native-launch-quota-readiness.json",
+    "tests/test_native_launch_quota.py",
     "docs/checkpoints/cycle310-graphical-launch-recovery.md",
     "docs/native-graphical-recovery.md",
     "runs/native-graphical-recovery-readiness.json",

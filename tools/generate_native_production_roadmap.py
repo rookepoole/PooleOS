@@ -16783,13 +16783,80 @@ def apply_cycle310(roadmap: dict, test_count: int) -> dict:
             "full QEMU/VirtualBox desktop matrix and immutable versioned launcher before preview selection",
             "window-service restart/rebinding and construction/committed-handoff recovery",
             "all-path stacks and remaining N0-N39 microkernel/PooleGlyph/PDC/PooleGlass gates"])
+    return apply_cycle311(roadmap, test_count)
+
+
+def apply_cycle311(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle311-native-launch-quota.md"
+    contract = "docs/native-launch-quota.md"
+    path = "runs/native-launch-quota-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle310_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=311, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 311
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    record = dict(cycle=311, contract_id="PLAUNCHQUOTA1", status=receipt["status"],
+        receipt_path=path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        source_binding_count=len(receipt["source_bindings"]))
+    for key in ("kernel_sources_changed", "program_sources_unchanged", "program_pairs_revalidated",
+                "host_kernel_tests", "qemu_guest_runs", "virtualbox_guest_runs", "gui_observations",
+                "native_quota_rejection_verified", "temporary_pressure_released",
+                "graphical_failure_retry_verified", "graphical_failures_verified",
+                "explicit_fresh_retries_verified", "held_launch_repeats_verified",
+                "starts_verified", "inspections_verified", "terminal_drafts_preserved",
+                "rejected_owner_death_native_verified", "rejected_cleanup_exhaustion_verified",
+                "window_service_restart_verified", "construction_failure_recovery_verified",
+                "full_input_matrix_replayed", "new_preview_selected", "merge_qualified", "production_ready"):
+        record[key] = receipt[key]
+    baseline["native_launch_quota"] = copy.deepcopy(record)
+    baseline["native_graphical_recovery"]["evidence_status"] = "historical_native_sources_changed_cycle311"
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 311
+    gate["qualification_status"] = "qemu_launch_quota_recovery_verified_full_desktop_pending"
+    gate["current_native_launch_quota_qualification"] = record
+    gate["current_native_graphical_recovery_qualification"]["evidence_status"] = "historical_native_sources_changed_cycle311"
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=311, receipt_path=path, receipt_section="ordinary_native_regression",
+        retained_kernel_sources_unchanged=False,
+        native_execution_status="qemu_real_process_quota_relief_and_fresh_retry_verified",
+        native_execution_evidence_cycle=311, shell_native_execution_evidence_cycle=311,
+        full_input_matrix_replayed_this_cycle=False, new_preview_selected=False,
+        virtualbox_native_execution_replayed_this_cycle=False, preview_source_requalification_required=True,
+        native_gui_scope="bounded_qemu_process_quota_and_denial_recovery_full_desktop_matrix_pending",
+        virtualbox_evidence_scope="historical_cycle308_only_no_virtualbox_replay_cycle311",
+        optical_iso_sha256=receipt["ordinary_iso_sha256"])
+    lane["graphical_launch_control"].update(cycle=311,
+        evidence_status="qemu_process_quota_recovery_verified_virtualbox_and_full_matrix_pending",
+        connected_native_iso="qemu_process_quota_and_fresh_retry_verified_not_selected_preview")
+    evidence = ("Cycle311: real Inspect-only process-lease pressure reaches the unchanged parent quota, late native admission rolls back, pressure is explicitly released, and the exact prepared image remains owned until deferred reclamation. Native and GUI fresh retry preserves independent handle/observer generations, peer surfaces, drafts and useful file work. Paired builds and current-source ordinary controls are reconstructed. " + checkpoint)
+    gap = ("Rejected-image owner death and cleanup exhaustion remain, followed by the complete QEMU/VirtualBox input/lifetime matrix and immutable source/runtime-pinned launcher package before replacement preview selection. Process-lease quota evidence is not physical-memory OOM or general resource-pressure recovery. Window-service restart/rebinding, construction and committed-handoff recovery, all-path stacks, COM2-independent boot, persistence, event-driven waits, accessible PooleGlass, complete microkernel, PooleGlyph/PDC and every N0-N39 gate remain. Preserve Cycle308; no merge or production promotion. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N3", "N9", "N13", "N14", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-NATIVE-UI-001", "FLAG-N13-USERSPACE-ISO-001",
+                          "FLAG-N13-USERSTACK-001", "FLAG-N13-LAUNCH-FAILURE-001",
+                          "FLAG-N3-VIRTUALBOX-PREVIEW-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle311 narrows but does not close this flag. " + gap
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["immediate_next_move"].update(title="Recover rejected launch owners through death and cleanup exhaustion",
+        entry_evidence=[checkpoint, contract, path], exit_evidence=[
+            "native rejected-owner death and cleanup exhaustion without leaked or resurrected authority",
+            "full QEMU/VirtualBox desktop matrix and immutable versioned launcher before preview selection",
+            "window-service restart/rebinding and construction/committed-handoff recovery",
+            "all-path stacks and remaining N0-N39 microkernel/PooleGlyph/PDC/PooleGlass gates"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1639)
+    parser.add_argument("--test-count", type=int, default=1645)
     parser.add_argument("--status-date", default="2026-10-20")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

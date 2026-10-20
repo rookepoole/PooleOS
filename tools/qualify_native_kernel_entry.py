@@ -216,6 +216,8 @@ def _build_product(cargo: Path, env: dict[str, str], target_dir: Path, *, featur
                         ("development-launch-desktop",), ("development-launch-desktop", "development-applications-bad-file"),
                         ("development-launch-desktop", "development-launch-failure"),
                         ("development-launch-desktop", "development-applications-bad-file", "development-launch-failure"),
+                        ("development-launch-desktop", "development-launch-failure", "development-launch-quota"),
+                        ("development-launch-desktop", "development-applications-bad-file", "development-launch-failure", "development-launch-quota"),
                         ("development-window-input", "development-serial-recovery"),
                         ("development-window-input", "development-applications-bad-file", "development-serial-recovery"),
                         ("development-applications", "development-shell-deferred-cleanup"),

@@ -1,15 +1,45 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-20
-Plan version: 2.213.0-graphical-launch-recovery
-Roadmap cycle: PooleOS Cycle 310
+Plan version: 2.214.0-native-launch-quota
+Roadmap cycle: PooleOS Cycle 311
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 310: Graphical Launch Recovery
+## Cycle 311: Native Launch Quota Recovery
+
+N13/N14 with N27/N29 consumers: exercise real process-quota rejection in the
+native dispatcher while preserving isolated surfaces and existing observers.
+[Contract](native-launch-quota.md) and
+[current checkpoint](checkpoints/cycle311-native-launch-quota.md).
+
+1. Implemented: separate diagnostic feature, real Inspect-only pressure lease,
+   unchanged owner quota, late admission rollback, explicit pressure release,
+   stale-handle denial and independent retry generations. Ordinary previews
+   reject diagnostics; historical Denied evidence is preserved.
+2. Native milestone verified: each debug-quota, release-quota and ordinary kernel
+   profile passes629 host tests;136 focused checks pass. Ten current-source QEMU
+   runs pass quota/ordinary optical and graphical controls, with26 selected
+   rendered observations, two failures and fresh retries, six held repeats and
+   ten preserved drafts. Original inputs/logs/pixels, paired kernel/ISO bytes and
+   all31 unchanged paired user programs are reconstructed. All497 selected
+   integration/roadmap checks pass, including all eight master-checklist coverage
+   checks. Counts overlap;1645 discovered tests are inventory, not full canonical
+   or production qualification.
+3. Next: rejected-owner death and cleanup-exhaustion recovery, then the complete
+   two-emulator input/lifetime matrix and immutable launcher package before a
+   replacement preview. Native Quota here means process leases, not physical OOM.
+4. Remaining: window-service restart/rebinding, construction and committed-handoff
+   recovery, all-path stacks, COM2-independent boot, persistence, event-driven
+   waits, accessible PooleGlass, complete microkernel, PooleGlyph/PDC and all N0-N39.
+
+No resource/authority/guard limit is increased. Preserve Cycle308 and all historical
+evidence. All40 phases,301 subphases and101 flags (46 open) remain; no gate closes.
+
+## Historical Cycle 310: Graphical Launch Recovery
 
 Current N13/N14 work with N27/N29 consumers: connect diagnostic qualification
 to the existing native window-manager failure states and Cycle309 rollback.

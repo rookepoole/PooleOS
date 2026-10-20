@@ -358,6 +358,30 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle311-native-launch-quota.md",
+      "sha256": "BB0973C0CDB8249F64669EEEB4AABE65505E266D5AD658C1F3E3FB8CDB94CAD5",
+      "byte_count": 8028,
+      "line_count": 130
+    },
+    {
+      "path": "docs/native-launch-quota.md",
+      "sha256": "9A956FC0F98F240A8F40E49793D0C09C1E6673593960C206895A399B79F2B7F1",
+      "byte_count": 2873,
+      "line_count": 48
+    },
+    {
+      "path": "runs/native-launch-quota-readiness.json",
+      "sha256": "603DEDEAB8B9F8F3AEF135DAA8375C24189B5F929FDFD309539C869032A91765",
+      "byte_count": 6744214,
+      "line_count": 144409
+    },
+    {
+      "path": "tests/test_native_launch_quota.py",
+      "sha256": "A89F6BF77EB9969845DB5E1F112E91E20A22631185F3AACAC4ECA56E0AE56DDF",
+      "byte_count": 6484,
+      "line_count": 103
+    },
+    {
       "path": "docs/checkpoints/cycle310-graphical-launch-recovery.md",
       "sha256": "7F1768E5E9A04EB9AF2579C593C46F8F0ABCD051D624AABDBB7F9042C8A38F5F",
       "byte_count": 9030,
@@ -401,9 +425,9 @@
     },
     {
       "path": "native/kernel/src/user_root_probe/peer_driver/interactive/launch_failure.rs",
-      "sha256": "1E8E5B783AB78068A8FCA722C84BD1609AE73DFAF602DF6E91AD99FA314B6831",
-      "byte_count": 4144,
-      "line_count": 125
+      "sha256": "C571974E6D5F1EE893D3FBCA52F0A21BA5F5B7D17300EA4D08E5855711B75329",
+      "byte_count": 6004,
+      "line_count": 185
     },
     {
       "path": "tests/test_native_launch_failure.py",
@@ -449,7 +473,7 @@
     },
     {
       "path": "tools/qualify_native_launch_desktop.py",
-      "sha256": "081867A0C90EE855401B7CFA2798EC3A74AE7D257935EA7051758948EC40A823",
+      "sha256": "52B7044C1B79B12D1F2213DE91FE355305F3AAC702C1E41FBBB211A9DFE368EF",
       "byte_count": 17722,
       "line_count": 332
     },
@@ -803,9 +827,9 @@
     },
     {
       "path": "native/kernel/src/capability_ipc/process/observer_tests.rs",
-      "sha256": "2823C76BC5D56B69ECB9A5ECF7D2FC7A8E42B998BD326FD2677669BBE91B9480",
-      "byte_count": 11609,
-      "line_count": 364
+      "sha256": "2D5CBE50CB09DCEA62180F3698B415B7C6ABE9F1B167C46905031108467647E0",
+      "byte_count": 14586,
+      "line_count": 438
     },
     {
       "path": "runtime/native_surface_lifecycle.py",
@@ -1205,8 +1229,8 @@
     },
     {
       "path": "docs/native-userspace-preview.md",
-      "sha256": "62894A8340DDA1AFCA755D4CDCD11CC4138C174B8397CE21721530F1B9DC208C",
-      "byte_count": 17226,
+      "sha256": "7F9901ABFC748BCD3A70A8D033798E3FD732F1EFE6BCE2E8129D6AE6C44484B3",
+      "byte_count": 17235,
       "line_count": 274
     },
     {
@@ -1373,15 +1397,15 @@
     },
     {
       "path": "runtime/native_app_session.py",
-      "sha256": "31A24887D116EAB394513DDC4F11A3D95BA4B9207200F31B0FE5873A86799B02",
-      "byte_count": 35392,
-      "line_count": 491
+      "sha256": "3D4A9A137F219CB7F69387FF05C5142B13711149B190DF29F0876D31F316E79E",
+      "byte_count": 38273,
+      "line_count": 533
     },
     {
       "path": "tools/qualify_native_app_session.py",
-      "sha256": "088F6FCD10DED761FB168BEBE6A713CAC0896F3CE5D65FC331C5490977097386",
-      "byte_count": 29287,
-      "line_count": 384
+      "sha256": "FE44267B7CA7CC69770ED8DE75B7334A0726CEA20075E4CE7504BF2F4ACF3A04",
+      "byte_count": 29835,
+      "line_count": 391
     },
     {
       "path": "tests/test_native_app_session.py",
@@ -1811,9 +1835,9 @@
     },
     {
       "path": "native/kernel/src/user_root_probe/peer_driver/interactive.rs",
-      "sha256": "6D8C589AE9E393B75E88170F79F7454BFF4EB2B5317AC2214EAB89C5CB731C39",
-      "byte_count": 45462,
-      "line_count": 1193
+      "sha256": "98545F131D572AC818A39769BDAEE69FABF47AB3AC4FC0AB6BEFA52C6C685B57",
+      "byte_count": 47030,
+      "line_count": 1225
     },
     {
       "path": "native/userspace/src/bin/control_shell.rs",
@@ -2027,9 +2051,9 @@
     },
     {
       "path": "native/kernel/src/capability_ipc/launch.rs",
-      "sha256": "642EAF4D7A1CEDECE27C8D728ACD4D054AAA477F0A186BA21225C7B7658B262B",
-      "byte_count": 10103,
-      "line_count": 302
+      "sha256": "3D87A2F66D574725B759A3621A48F9C19ADE97478D46416794F0BC8F3505AB57",
+      "byte_count": 11840,
+      "line_count": 347
     },
     {
       "path": "native/kernel/src/capability_ipc/launch/tests.rs",
@@ -3305,9 +3329,9 @@
     },
     {
       "path": "tools/qualify_native_user_entry.py",
-      "sha256": "C34DF29E83025F1FBCCFC60612C4D9610575DD51CF06456ADF8F27CF246FF3C2",
-      "byte_count": 27278,
-      "line_count": 411
+      "sha256": "49A8C1BEBF082A2376CA84CF5FECEBAD9C3E3BF2F496CB2AA3266D683D7598E2",
+      "byte_count": 27323,
+      "line_count": 412
     },
     {
       "path": "runs/native-user-entry-readiness.json",
@@ -4637,15 +4661,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "FC7B31F013480EC1BD65EBCD3006128BB460A794C72EE95E98173EB9D449081A",
-      "byte_count": 178873,
-      "line_count": 2444
+      "sha256": "17FD320173BD04BBBE87C5F4CD5F1637F89B8A23638267C3B573EF58B803EBBB",
+      "byte_count": 179650,
+      "line_count": 2455
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "5562D48063AAE948E2C759EB7D4D29576FB9339DF950CA54D9386901EC057528",
-      "byte_count": 686159,
-      "line_count": 7289
+      "sha256": "D00B19B587E04D47889B23AFBDAB3649B8E535F7C374223F7B0C9ED7CE1D62BE",
+      "byte_count": 688097,
+      "line_count": 7319
     },
     {
       "path": "docs/publication-boundary.md",

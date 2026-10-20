@@ -208,8 +208,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 310)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1639)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 311)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1645)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -249,8 +249,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "qemu_graphical_launch_recovery_verified_full_desktop_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 310)
+        self.assertEqual(current["qualification_status"], "qemu_launch_quota_recovery_verified_full_desktop_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 311)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -6878,7 +6878,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
         self.assertEqual(record['receipt_sha256'],'BEE1CDEF65E2B3E3983CE1D981DDA91BB69EDF45208AF1A5D160D35832F545EB')
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(288,'PUSIISO1','pass'))
-        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1014)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1015)
         self.assertEqual((r['guest_runs'],r['iso_byte_count']),(6,66109440))
         self.assertEqual(r['iso_sha256'],'1E4752E3D45972CEA7711AF443C15EFC22CD82558F1A975B6B676ADF6C7841AE')
         prior=json.loads((ROOT/'runs/native-claimed-requester-readiness.json').read_bytes())
@@ -6918,7 +6918,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         lane=self.roadmap['baseline']['user_space_integration']
         self.assertTrue(lane['optical_iso_built'] and lane['continue_full_microkernel_after_iso'])
         self.assertEqual(self.roadmap['immediate_next_move']['title'],
-            'Harden retained launch owners and native resource-pressure recovery')
+            'Recover rejected launch owners through death and cleanup exhaustion')
 
     def test_cycle289_file_wait_is_native_bound_and_preserves_the_optical_preview(self) -> None:
         from runtime import native_app_session as apps, native_userspace_iso as optical, native_shell
@@ -7353,7 +7353,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         raw=(ROOT/record['receipt_path']).read_bytes();r=json.loads(raw)
         self.assertEqual(record['receipt_sha256'],hashlib.sha256(raw).hexdigest().upper())
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(295,'PWINPUT1','partial'))
-        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1014)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1015)
         self.assertNotEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),111)
         self.assertEqual(len(r['program_build']['programs']),24)
         self.assertEqual(r['program_build']['host_tests'],[dict(profile=m,tests_passed=178) for m in ('debug','release')])
@@ -7737,7 +7737,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         raw=(ROOT/record['receipt_path']).read_bytes();r=json.loads(raw)
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
         self.assertEqual((r['cycle'],r['status']),(301,'partial'))
-        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1014)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1015)
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),
                          '35C46536C1E7B66B7DF4B5EC478F9F5A9ABE11AAFA1F42E5D94C650057C36367')
         self.assertNotEqual(r['program_build']['source_bindings'],bindings())
@@ -8099,7 +8099,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),"52F3BE8C31B173B748D62CF5D8D5118EE0903B5DCF1A023E671A4203B5F886A2")
         current=source_bindings()
         self.assertNotEqual(r["source_bindings"],current)
-        self.assertTrue(all(current[p]==v for p,v in r["source_bindings"].items() if p.startswith("native/")))
+        historical=json.loads((ROOT/"runs/native-graphical-recovery-readiness.json").read_bytes())["source_bindings"]
+        self.assertTrue(all(historical[p]==v for p,v in r["source_bindings"].items() if p.startswith("native/")))
         self.assertEqual(len(r["source_bindings"]),1013)
         self.assertIn("native/kernel/src/user_root_probe/peer_driver/interactive/launch_failure.rs",r["source_bindings"])
         self.assertIn("tests/test_native_launch_failure.py",r["source_bindings"])
@@ -8135,7 +8136,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         r=json.loads(raw)
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record["receipt_sha256"])
         self.assertEqual((r["cycle"],r["contract_id"],r["status"]),(310,"PGLAUNCHFAIL1","partial"))
-        self.assertEqual(r["source_bindings"],source_bindings())
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),"DE0D21EEA2CB7D34BA7E97CB73D4E53ED77EE5D9F54A0A03049910EBB3279EEC")
+        self.assertNotEqual(r["source_bindings"],source_bindings())
         self.assertEqual(len(r["source_bindings"]),1014)
         self.assertEqual((r["qemu_guest_runs"],r["virtualbox_guest_runs"],r["gui_observations"]),(10,0,26))
         self.assertEqual(r["focused_tests"]["passed"],131)
@@ -8187,11 +8189,75 @@ class PdcProductionRoadmapTests(unittest.TestCase):
                 self.assertIn("absent_surface" if e["action"].get("failure") else "fresh_surface",e["pixels"])
             if diagnostic:
                 with self.assertRaises(ValueError): apps.profile_options(native)
-        lane=self.roadmap["baseline"]["user_space_integration"]
+        lane=self.roadmap["baseline"]["historical_cycle310_user_space_integration"]
         self.assertEqual(lane["cycle"],310)
         self.assertEqual(lane["selected_preview_cycle"],308)
         self.assertTrue(lane["preview_source_requalification_required"])
         self.assertFalse(lane["new_preview_selected"] or lane["full_input_matrix_replayed_this_cycle"])
+
+    def test_cycle311_real_quota_recovery_preserves_independent_generations(self) -> None:
+        from tools.qualify_native_user_entry import source_bindings
+        from tools.qualify_native_launch_desktop import scenario
+        from runtime import native_app_session as apps, native_console
+        record=self.roadmap["baseline"]["native_launch_quota"]
+        raw=(ROOT/record["receipt_path"]).read_bytes()
+        r=json.loads(raw)
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record["receipt_sha256"])
+        self.assertEqual((r["cycle"],r["contract_id"],r["status"]),(311,"PLAUNCHQUOTA1","partial"))
+        self.assertEqual(r["source_bindings"],source_bindings())
+        self.assertEqual(len(r["source_bindings"]),1015)
+        self.assertEqual((r["qemu_guest_runs"],r["virtualbox_guest_runs"],r["gui_observations"]),(10,0,26))
+        self.assertEqual(r["focused_tests"]["passed"],136)
+        self.assertEqual(r["program_pairs_revalidated"],31)
+        self.assertEqual(set(r["host_kernel_tests"]),{"debug_quota","release_quota","debug_ordinary"})
+        for result in r["host_kernel_tests"].values():
+            self.assertEqual(result["passed"],629)
+            self.assertRegex(result["log_sha256"],r"^[0-9A-F]{64}$")
+        self.assertTrue(all(r[k] for k in ("kernel_sources_changed","program_sources_unchanged",
+            "native_quota_rejection_verified","temporary_pressure_released",
+            "graphical_failure_retry_verified","prior_preview_preserved")))
+        self.assertFalse(any(r[k] for k in ("rejected_owner_death_native_verified",
+            "rejected_cleanup_exhaustion_verified","window_service_restart_verified",
+            "construction_failure_recovery_verified","full_input_matrix_replayed","new_preview_selected",
+            "canonical_full_replay_performed","physical_hardware_tested","merge_qualified","production_ready")))
+        for key,diagnostic in (("ordinary1",False),("quota3",True)):
+            native=r["diagnostic_native_regression" if diagnostic else "ordinary_native_regression"]
+            self.assertEqual(native["source_bindings"],r["source_bindings"])
+            options=apps.launch_failure_options(native) if diagnostic else apps.profile_options(native)
+            self.assertEqual(options.get("launch_quota",False),diagnostic)
+            g=r["gui_runs"][key]
+            self.assertEqual(g["source_bindings"],r["source_bindings"])
+            self.assertEqual(g["application_profile"],options)
+            self.assertEqual(g["status"],"pass")
+            self.assertTrue(g["source_unchanged"] and g["iso_unchanged"])
+            self.assertEqual(g["serial_input_bytes"],0)
+            self.assertEqual(len(g["evidence"]),16 if diagnostic else 10)
+            self.assertEqual(g["explicit_fresh_retries_verified"],2 if diagnostic else 0)
+            typed=bytes.fromhex(g["input_hex"])
+            nonce=re.search(rb"GUI([0-9a-f]{16})0",typed)[1].decode()
+            case,actions=scenario(nonce,launch_failure=diagnostic)
+            self.assertEqual(typed,case.sent)
+            self.assertNotIn(b"start ",typed)
+            self.assertEqual(native_console.split_output(bytes.fromhex(g["output_hex"]))[1],case.expected)
+            self.assertEqual(g["terminal_drafts_preserved"],len(actions))
+            self.assertEqual([v["step"] for v in g["action_boundaries"]],list(actions))
+            for run in [*native["guest_runs"],g["run"]]:
+                summary=apps.validate_markers(run["markers"],bad_file=run.get("run_id")=="bad-file",**options)
+                self.assertEqual(json.loads(json.dumps(summary)),run["marker_summary"])
+                if diagnostic:
+                    self.assertTrue(summary["native_process_quota_recovery"])
+                    self.assertEqual([e["event"] for e in summary["pressure_events"]],["PRESSURE","RELIEF"])
+                    events=lambda kind:[apps.parse(m,kind) for m in run["markers"] if m.startswith("POOLEOS:APPS "+kind+" ")]
+                    self.assertEqual([e["reason"] for e in events("REJECT")],[2,1])
+                    self.assertEqual([e["handle"]>>32 for e in events("ADMIT") if e["task"]==5 and e["generation"]==3],[3])
+                    with self.assertRaises(ValueError): apps.validate_markers(run["markers"],**dict(options,launch_quota=False))
+            if diagnostic:
+                with self.assertRaises(ValueError): apps.profile_options(native)
+        lane=self.roadmap["baseline"]["user_space_integration"]
+        self.assertEqual((lane["cycle"],lane["selected_preview_cycle"]),(311,308))
+        self.assertTrue(lane["preview_source_requalification_required"])
+        self.assertFalse(lane["retained_kernel_sources_unchanged"] or lane["new_preview_selected"]
+                         or lane["full_input_matrix_replayed_this_cycle"])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]

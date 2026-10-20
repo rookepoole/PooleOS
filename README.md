@@ -11,7 +11,18 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development work:** Cycle310 adds explicit diagnostic graphical
+**Current development work:** Cycle311 implements a separate native process-quota
+challenge with real read-only pressure, late admission rollback, exact pressure
+release and fresh retry generations. Ten current-source QEMU runs pass, including
+both graphical profiles and26 rendered observations. All629 kernel host checks
+pass in each of debug-quota, release-quota and ordinary profiles;136 focused
+checks pass. Original logs, inputs, pixels and paired builds are reconstructed.
+All497 selected integration/roadmap checks pass, including checklist coverage.
+Counts overlap;1645 discovered tests are inventory, not full canonical execution.
+No replacement preview, full desktop qualification or production claim.
+[Current progress and remaining gates](docs/checkpoints/cycle311-native-launch-quota.md).
+
+**Historical development checkpoint:** Cycle310 adds explicit diagnostic graphical
 qualification for launch failure, held-input suppression, absence inspection
 and fresh retry. All 131 code-focused checks and ten fresh QEMU guests pass,
 including 26 graphical observations, both failed launches and explicit retries,

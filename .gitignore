@@ -123,6 +123,7 @@ runs/*
 !runs/native-connected-desktop-readiness.json
 !runs/native-launch-rollback-readiness.json
 !runs/native-graphical-recovery-readiness.json
+!runs/native-launch-quota-readiness.json
 !runs/native_initial_system_readiness.json
 !runs/native_microcode_readiness.json
 !runs/native_recovery_readiness.json

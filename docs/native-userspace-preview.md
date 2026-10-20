@@ -1,6 +1,6 @@
 # Run The Native Window Preview
 
-Cycle309 changed the kernel; Cycle310 changes diagnostic GUI qualification.
+Cycle311 changes native quota diagnostics and qualification; Cycle310 is historical.
 The Cycle308 pointer and Downloads ISO remain preserved, but their receipts are historical
 relative to the current checkout. Current-source launchers must reject that
 mismatch. Do not edit hashes or bypass the check: a replacement selection needs

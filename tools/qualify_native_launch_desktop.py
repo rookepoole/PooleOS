@@ -247,7 +247,7 @@ def main():
     work.mkdir(parents=True, exist_ok=False)
     before = local.source.source_bindings()
     interaction, probe = Interaction(launch_failure=args.launch_failure), Probe(work)
-    result = dict(cycle=310, status='fail', source_bindings=before, storage_preflight=storage,
+    result = dict(cycle=311, status='fail', source_bindings=before, storage_preflight=storage,
                   diagnostic_only=args.launch_failure, launch_failure=args.launch_failure,
                   iso_sha256=local.digest(iso), serial_input_bytes=0, production_ready=False,
                   native_plc1_control_verified=False, guest_bound_seconds=240,

@@ -298,5 +298,50 @@ impl Space {
     }
 }
 
+/// Diagnostic-only lease: caller identity stays inside the authenticated library.
+#[cfg(feature = "development-launch-quota")]
+#[must_use = "diagnostic pressure must be explicitly released"]
+pub struct ProcessPressure {
+    owner: Caller,
+    handle: u64,
+}
+
+#[cfg(feature = "development-launch-quota")]
+impl ProcessPressure {
+    pub fn hold(space: &mut Space, permit: &Permit, target: TaskId) -> Result<Self, Error> {
+        let plan = space.validate_launch(permit)?;
+        if plan.child_slot != 5 || plan.sequence != 2 {
+            return Err(Error::Identity);
+        }
+        let owner = permit.lease.owner;
+        let handle = space.grant_process(owner.id, target, process::Rights::Inspect)?;
+        // Exercise the real quota without giving the lease to userspace.
+        if space.process_operation(owner, handle, false) != (Status::Ok, 1)
+            || space.process_operation(owner, handle, true) != (Status::Denied, 0)
+            || space.grant_process(owner.id, target, process::Rights::Inspect) != Err(Error::Quota)
+        {
+            return Err(Error::Identity);
+        }
+        Ok(Self { owner, handle })
+    }
+
+    pub fn release(&self, space: &mut Space) -> Result<(), Error> {
+        if space.process_operation(self.owner, self.handle, false) != (Status::Ok, 1) {
+            return Err(Error::Identity);
+        }
+        space.revoke_process(self.owner.id, self.handle)?;
+        if space.process_operation(self.owner, self.handle, false) != (Status::Denied, 0)
+            || space.process_operation(self.owner, self.handle, true) != (Status::Denied, 0)
+        {
+            return Err(Error::Identity);
+        }
+        Ok(())
+    }
+
+    pub fn handle(&self) -> u64 {
+        self.handle
+    }
+}
+
 #[cfg(test)]
 mod tests;

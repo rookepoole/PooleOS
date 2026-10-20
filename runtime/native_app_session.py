@@ -8,6 +8,8 @@ PROGRAMS = [('PooleFileInit', 'INIT'), ('PooleAppFiles', 'COUNTER'),
             ('PooleConsoleService', 'CONSOLE'), ('PooleAppShell', 'CONSOLE_CLIENT'),
             ('PooleText', 'TEXT'), ('PooleNumbers', 'NUMBERS')]
 FIELDS = {
+    'PRESSURE': 'task generation owner owner_generation target target_generation handle owner_limit dispatches',
+    'RELIEF': 'task generation owner owner_generation target target_generation handle owner_limit dispatches',
     'REJECT': 'task generation sequence root owned_pages reason syscalls dispatches',
     'FAILED': 'task generation sequence root published dispatches',
     'SURFACE': 'task generation send entered dispatches',
@@ -33,8 +35,14 @@ def launch_failure_options(report: dict) -> dict:
     if (not isinstance(report, dict) or any(report.get(name) is not True for name in required)
             or report.get('serial_recovery') is not False):
         raise ValueError('exact diagnostic launch-failure profile required')
-    ordinary = dict(report, diagnostic_only=False, launch_failure=False)
-    return dict(profile_options(ordinary), launch_failure=True)
+    quota = report.get('launch_quota', False)
+    if type(quota) is not bool:
+        raise ValueError('exact boolean quota profile required')
+    ordinary = dict(report, diagnostic_only=False, launch_failure=False, launch_quota=False)
+    options = dict(profile_options(ordinary), launch_failure=True)
+    if quota:
+        options['launch_quota'] = True
+    return options
 
 
 def profile_options(report: dict) -> dict:
@@ -43,11 +51,11 @@ def profile_options(report: dict) -> dict:
         raise ValueError('application profile object required')
     names = ('file_waits', 'window_surfaces', 'window_capacity', 'surface_lifecycle',
              'surface_input', 'launch_shell_admission', 'launch_console_admission',
-             'diagnostic_only', 'serial_recovery', 'launch_failure')
+             'diagnostic_only', 'serial_recovery', 'launch_failure', 'launch_quota')
     flags = {name: report.get(name, False) for name in names}
     if any(type(value) is not bool for value in flags.values()):
         raise ValueError('explicit boolean application profile required')
-    if flags['diagnostic_only'] or flags['serial_recovery'] or flags['launch_failure']:
+    if flags['diagnostic_only'] or flags['serial_recovery'] or flags['launch_failure'] or flags['launch_quota']:
         raise ValueError('diagnostic profile is not an ordinary preview')
     if flags['launch_console_admission'] and not flags['launch_shell_admission']:
         raise ValueError('launch console requires launch shell')
@@ -68,7 +76,9 @@ def parse(line: str, event: str) -> dict:
     return dict(zip(names, values))
 
 
-def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False, windows: bool = False, window_capacity: bool = False, surface_lifecycle: bool = False, launch_session: bool = False, launch_failure: bool = False) -> dict:
+def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False, windows: bool = False, window_capacity: bool = False, surface_lifecycle: bool = False, launch_session: bool = False, launch_failure: bool = False, launch_quota: bool = False) -> dict:
+    if type(launch_quota) is not bool or launch_quota and not launch_failure:
+        raise ValueError('quota challenge requires explicit rejection profile')
     if type(launch_failure) is not bool or launch_failure and not launch_session:
         raise ValueError('launch rejection requires explicit diagnostic launch profile')
     if type(launch_session) is not bool or launch_session and not (file_waits and windows and window_capacity and surface_lifecycle):
@@ -110,9 +120,12 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
     waiting, wake_pairs = {}, []
     surfaces, surface_pending = [], False
     failures, rejections, failed = {}, [], []
+    pressure, pressure_events = None, []
     final_generation = 3 if launch_failure else 2
     for marker in markers[31:]:
         if marker.startswith(cleanup.PREFIX):
+            if pressure is not None:
+                raise ValueError('quota pressure was not released before reclamation')
             if launch_failure:
                 event = marker.split()[1]
                 if event not in ('DEFER', 'COMPLETE') or pending is not None or complete_pending is not None:
@@ -179,7 +192,11 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
             cleanup_events.append(dict(event=event, **v))
             continue
         event = next((e for e in FIELDS if marker.startswith('POOLEOS:APPS '+e+' ')), None)
-        if event not in ('HANDOFF','ADMIT','RETIRE','RUN','REQUESTER','CLAIMED','WAIT','WAKE','SURFACE','REJECT','FAILED'): raise ValueError('unknown application event')
+        if event not in ('HANDOFF','ADMIT','RETIRE','RUN','REQUESTER','CLAIMED','WAIT','WAKE','SURFACE','REJECT','FAILED','PRESSURE','RELIEF'): raise ValueError('unknown application event')
+        if event in ('PRESSURE','RELIEF') and not launch_quota:
+            raise ValueError('quota event outside explicit profile')
+        if pressure is not None and event != ('RELIEF' if 5 in failures else 'REJECT'):
+            raise ValueError('quota pressure/rejection/relief must be contiguous')
         if event in ('REJECT','FAILED') and not launch_failure: raise ValueError('diagnostic rejection outside profile')
         if event == 'SURFACE' and not windows: raise ValueError('surface outside window profile')
         if claim_pending is not None and event != 'REQUESTER': raise ValueError('claimed waiter lacks requester retirement')
@@ -197,12 +214,28 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
             last_event = dispatches
             task = v['task']
             if not 2 <= task <= 5: raise ValueError('unexpected survivor retirement')
-        if event == 'REJECT':
+        if event == 'PRESSURE':
+            if (pressure is not None or pressure_events or task != 5 or task in live or task in owned
+                or 3 not in live or 4 not in live or generation[task] != 1
+                or v != dict(task=5,generation=2,owner=3,owner_generation=1,target=0,
+                    target_generation=1,handle=(2<<32)|0x50003,owner_limit=2,dispatches=dispatches)):
+                raise ValueError('quota pressure identity, lease or unchanged limit differs')
+            pressure = v
+            pressure_events.append(dict(event=event, **v))
+        elif event == 'RELIEF':
+            if pressure is None or task != 5 or task not in failures or v != pressure:
+                raise ValueError('quota relief lacks exact retained pressure lease')
+            pressure_events.append(dict(event=event, **v))
+            pressure = None
+        elif event == 'REJECT':
+            reason = 2 if launch_quota and task == 5 else 1
             if (task not in (4,5) or task in live or task in owned or task in failures or 3 not in live
                 or generation[task] != 1 or v['generation'] != 2 or v['sequence'] != 2
-                or v['owned_pages'] != pages[task] or v['reason'] != 1 or v['syscalls'] != 0
+                or v['owned_pages'] != pages[task] or v['reason'] != reason or v['syscalls'] != 0
                 or not valid_root(v['root']) or any(v['root'] == roots[j] for j in owned)):
                 raise ValueError('rejection identity, authority or image ownership')
+            if reason == 2 and (pressure is None or pressure['dispatches'] != dispatches):
+                raise ValueError('quota rejection lacks actual pressure boundary')
             roots[task], generation[task] = v['root'], 2
             previous_calls[task] = previous_ticks[task] = 0
             frozen.pop(task, None)
@@ -223,6 +256,8 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
             owned.remove(task); failures.pop(task); failed.append(v)
         elif event == 'SURFACE':
             surface_generation = 2 if launch_failure and v['generation'] == 3 else v['generation']
+            if launch_quota and task == 5 and v['generation'] == 3:
+                surface_generation = 3
             if (pending is None or surface_pending or any(v[n] != pending[n] for n in ('task','generation','dispatches'))
                 or v['entered'] != 0 or v['send'] != (surface_generation<<32)|0x10003):
                 raise ValueError('surface lacks exact pre-entry handoff and attenuated grant')
@@ -276,6 +311,8 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
             process_slot = 6-task if file_controls or claimed_requester else task-3
             if surface_lifecycle: process_slot = 2*(task-4)+1
             process_generation = 2 if launch_failure and expected == 3 else expected
+            if launch_quota and task == 5 and expected == 3:
+                process_generation = 3
             if v['sequence'] != expected or v['handle'] != (process_generation<<32)|0x50000|process_slot or v['owned_pages'] != pages[task]:
                 raise ValueError('launch sequence, handle or pages')
             if not valid_root(v['root']) or any(v['root'] == roots[j] for j in owned if j != task) or (expected == 1 and v['root'] != roots[task]):
@@ -334,6 +371,8 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
         raise ValueError('incomplete application lifecycle')
     if launch_failure and (len(rejections) != 2 or len(failed) != 2 or set(completed) != {(5,2)}):
         raise ValueError('both admission failures and deferred cleanup required')
+    if launch_quota and (pressure is not None or len(pressure_events) != 2):
+        raise ValueError('complete native quota pressure and relief required')
     if deferred_cleanup and set(completed) != {(4,1),(4,2),(5,1),(5,2)}:
         raise ValueError('both generations require deferred cleanup')
     if file_controls and len(requesters) != 2: raise ValueError('both diagnostic generations required')
@@ -375,6 +414,9 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
     if launch_failure:
         result.update(launch_failure=True, diagnostic_only=True, rejections=rejections,
                       failed_launches=failed, graphical_failure_retry_verified=False)
+    if launch_quota:
+        result.update(launch_quota=True, pressure_events=pressure_events,
+                      native_process_quota_recovery=True)
     if claimed_requester:
         result.update(claimed_requester=True,claimed_waiters=claimed_waiters,diagnostic_requester_is_useful_app=False,
                       kernel_injected_waiting_cancellation=True,late_reply_denial_asserted_by_native_service=True,
@@ -470,8 +512,8 @@ def file_control_scenario(nonce: str, *, bad_file: bool = False, claimed_request
     return shell.Scenario('claimed-requester-controls' if claimed_requester else 'file-request-controls',nonce,tuple(steps))
 
 
-def negative_controls(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False, windows: bool = False, window_capacity: bool = False, surface_lifecycle: bool = False, launch_session: bool = False, launch_failure: bool = False) -> int:
-    validate_markers(markers, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester,file_waits=file_waits,windows=windows,window_capacity=window_capacity,surface_lifecycle=surface_lifecycle,launch_session=launch_session,launch_failure=launch_failure)
+def negative_controls(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False, windows: bool = False, window_capacity: bool = False, surface_lifecycle: bool = False, launch_session: bool = False, launch_failure: bool = False, launch_quota: bool = False) -> int:
+    validate_markers(markers, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester,file_waits=file_waits,windows=windows,window_capacity=window_capacity,surface_lifecycle=surface_lifecycle,launch_session=launch_session,launch_failure=launch_failure,launch_quota=launch_quota)
     cases = [markers[:i]+markers[i+1:] for i in range(len(markers)-1)]
     cases += [markers+[markers[-1]], markers+['POOLEOS:PANIC injected']]
     for i in range(29,len(markers)):
@@ -485,7 +527,7 @@ def negative_controls(markers: list[str], *, bad_file: bool = False, deferred_cl
                 changed[i] = re.sub(r' '+field+r'=[0-9]+', ' '+field+'='+str((1<<64)-1), changed[i])
                 cases.append(changed)
     for case in cases:
-        try: validate_markers(case, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester,file_waits=file_waits,windows=windows,window_capacity=window_capacity,surface_lifecycle=surface_lifecycle,launch_session=launch_session,launch_failure=launch_failure)
+        try: validate_markers(case, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester,file_waits=file_waits,windows=windows,window_capacity=window_capacity,surface_lifecycle=surface_lifecycle,launch_session=launch_session,launch_failure=launch_failure,launch_quota=launch_quota)
         except ValueError: continue
         raise ValueError('hostile application observation accepted')
     return len(cases)

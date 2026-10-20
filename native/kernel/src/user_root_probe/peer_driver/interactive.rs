@@ -670,7 +670,7 @@ pub(crate) fn run(
             #[cfg(feature = "development-launch-failure")]
             let steps = {
                 let mut steps = steps;
-                if plan.sequence == 2 {
+                if plan.sequence == 2 && !(cfg!(feature = "development-launch-quota") && j == 5) {
                     // Two valid grants are installed before the stale third grant fails.
                     steps[2] = poolekernel::capability_ipc::admission::Step::Inherit {
                         source: peers[2].id,
@@ -683,6 +683,8 @@ pub(crate) fn run(
             };
             #[cfg(feature = "development-window-lifecycle")]
             let observer = peers[2].id;
+            #[cfg(feature = "development-launch-quota")]
+            let pressure_target = peers[0].id;
             let p = &mut peers[j];
             if generations[j - 4] == 0 {
                 if !owned[j] || p.slot.state(p.id) != Ok(task::State::Prepared) {
@@ -705,6 +707,18 @@ pub(crate) fn run(
                 checked!(job.adopt(&p.slot, p.id));
             }
             let before_admission = scheduler.summary();
+            #[cfg(feature = "development-launch-quota")]
+            let pressure = if j == 5 && plan.sequence == 2 {
+                let held = checked!(unsafe {
+                    arch::x86_64::user_ipc::with_waits(|s| {
+                        launch_failure::Pressure::hold(s, &permit, pressure_target)
+                    })
+                });
+                held.record("PRESSURE", &scheduler, serial, debugcon);
+                Some(held)
+            } else {
+                None
+            };
             let admitted = checked!(unsafe {
                 arch::x86_64::user_ipc::with_waits(|s| {
                     #[cfg(feature = "development-window-lifecycle")]
@@ -743,6 +757,20 @@ pub(crate) fn run(
                     calls[j] = 0;
                     owned[j] = true;
                     pending.rejected(p, pages[j], &scheduler, serial, debugcon);
+                    #[cfg(feature = "development-launch-quota")]
+                    if let Some(pressure) = pressure {
+                        if error
+                            != poolekernel::capability_ipc::admission::Error::Ipc(
+                                poolekernel::capability_ipc::Error::Quota,
+                            )
+                        {
+                            stop(34025, serial, debugcon);
+                        }
+                        checked!(unsafe {
+                            arch::x86_64::user_ipc::with_waits(|s| pressure.release(s))
+                        });
+                        pressure.record("RELIEF", &scheduler, serial, debugcon);
+                    }
                     let outcome = checked!(p.slot.outcome(p.id));
                     let previous = manager.summary().allocated_pages;
                     let complete = checked!(reclaim::reap(
@@ -772,6 +800,10 @@ pub(crate) fn run(
                     }
                 }
                 Ok(admitted) => {
+                    #[cfg(feature = "development-launch-quota")]
+                    if pressure.is_some() {
+                        stop(34026, serial, debugcon);
+                    }
                     let handle_index = steps.len();
                     if admitted.count != handle_index + 1
                         || p.id.generation != plan.sequence

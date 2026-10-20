@@ -2,6 +2,66 @@
 use super::*;
 use poolekernel::capability_ipc::{admission, launch};
 
+#[cfg(feature = "development-launch-quota")]
+#[must_use = "diagnostic pressure must be explicitly released"]
+pub(super) struct Pressure {
+    lease: launch::ProcessPressure,
+    target: TaskId,
+    plan: launch::Plan,
+}
+
+#[cfg(feature = "development-launch-quota")]
+impl Pressure {
+    pub(super) fn hold(
+        space: &mut poolekernel::capability_ipc::Space,
+        permit: &launch::Permit,
+        target: TaskId,
+    ) -> Result<Self, poolekernel::capability_ipc::Error> {
+        let plan = space.validate_launch(permit)?;
+        let lease = launch::ProcessPressure::hold(space, permit, target)?;
+        Ok(Self {
+            lease,
+            target,
+            plan,
+        })
+    }
+
+    pub(super) fn release(
+        &self,
+        space: &mut poolekernel::capability_ipc::Space,
+    ) -> Result<(), poolekernel::capability_ipc::Error> {
+        self.lease.release(space)
+    }
+
+    pub(super) fn record(
+        &self,
+        event: &str,
+        scheduler: &scheduler::Scheduler,
+        serial: &mut Com1,
+        debugcon: &mut DebugCon,
+    ) {
+        record(
+            serial,
+            debugcon,
+            event,
+            &[
+                ("task", u64::from(self.plan.child_slot)),
+                ("generation", u64::from(self.plan.sequence)),
+                ("owner", u64::from(self.plan.owner.slot)),
+                ("owner_generation", u64::from(self.plan.owner.generation)),
+                ("target", u64::from(self.target.slot)),
+                ("target_generation", u64::from(self.target.generation)),
+                ("handle", self.lease.handle()),
+                (
+                    "owner_limit",
+                    poolekernel::capability_ipc::process::PER_OWNER as u64,
+                ),
+                ("dispatches", u64::from(scheduler.summary().dispatch_count)),
+            ],
+        );
+    }
+}
+
 #[must_use = "failed admission retains its permit until image reclamation"]
 pub(super) struct Pending {
     permit: launch::Permit,

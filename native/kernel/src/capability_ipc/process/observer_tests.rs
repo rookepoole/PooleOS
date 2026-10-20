@@ -209,6 +209,80 @@ fn failed_launch_retains_completed_observer_and_scheduler_without_new_authority(
 }
 
 #[test]
+fn quota_relief_requires_explicit_failure_and_preserves_independent_generations() {
+    let (mut s, mut q, c, factory) = fixture();
+    let endpoint = s.create_endpoint(c.id).unwrap();
+    let steps = [Step::Inherit {
+        source: c.id,
+        handle: endpoint,
+        member: 0,
+        rights: crate::capability_ipc::Rights::SEND,
+    }; 3];
+    let first = claim(&mut s, c, factory, 1);
+    s.admit_observed_launch(&first, &mut q, member(1, 1), &steps, observer().id)
+        .unwrap();
+    finish(&mut s, &mut q, 1, 1);
+    let rejected = claim(&mut s, c, factory, 2);
+    let pressure = [
+        s.grant_process(c.id, id(2, 1), process::Rights::Inspect)
+            .unwrap(),
+        s.grant_process(c.id, id(3, 1), process::Rights::Inspect)
+            .unwrap(),
+    ];
+    let processes = s.processes;
+    let scheduler = q;
+    for handle in pressure {
+        assert_eq!(s.process_operation(c, handle, false), (Status::Ok, 1));
+        assert_eq!(s.process_operation(c, handle, true), (Status::Denied, 0));
+    }
+    assert_eq!(
+        s.grant_process(c.id, id(2, 1), process::Rights::Inspect),
+        Err(Error::Quota)
+    );
+    assert_eq!(
+        s.admit_observed_launch(&rejected, &mut q, member(1, 2), &steps, observer().id),
+        Err(admission::Error::Ipc(Error::Quota)),
+    );
+    assert_eq!(s.processes, processes);
+    unchanged_scheduler(q, scheduler);
+    assert!(s.table(id(1, 2)).is_err());
+    assert!(s.tables[1].caps.iter().all(|slot| slot.value.is_none()));
+    assert_eq!(
+        s.observe_process(observer(), id(1, 1)),
+        (Status::Ok, 4 << 32)
+    );
+    assert_eq!(s.observe_process(observer(), id(1, 2)), (Status::Denied, 0));
+    for handle in pressure {
+        s.revoke_process(c.id, handle).unwrap();
+        assert_eq!(s.process_operation(c, handle, false), (Status::Denied, 0));
+    }
+    assert_eq!(s.request_launch(c, factory, 2), (Status::Again, 0));
+    assert_eq!(s.request_launch(c, factory, 3), (Status::Again, 0));
+    // The native owner separately proves image reclamation before this publication.
+    s.fail_launch(&rejected).unwrap();
+    assert_eq!(s.request_launch(c, factory, 2), (Status::Cancelled, 0));
+    let retry = claim(&mut s, c, factory, 3);
+    assert!(s.fail_launch(&rejected).is_err());
+    let admitted = s
+        .admit_observed_launch(&retry, &mut q, member(1, 3), &steps, observer().id)
+        .unwrap();
+    assert_eq!(admitted.count, 4);
+    for (i, handle) in admitted.handles[..3].iter().enumerate() {
+        assert_eq!(*handle, (3 << 32) | 0x10000 | (i + 1) as u64);
+    }
+    assert_eq!(admitted.handles[3], (3 << 32) | 0x50001);
+    assert_eq!(s.observe_process(observer(), id(1, 3)), (Status::Again, 1));
+    assert_eq!(
+        s.observe_process(observer(), id(1, 2)),
+        (Status::Revoked, 0)
+    );
+    assert_eq!(s.processes[1].generation, 2);
+    for handle in pressure {
+        assert_eq!(s.process_operation(c, handle, true), (Status::Denied, 0));
+    }
+}
+
+#[test]
 fn observer_preflight_rejects_missing_duplicate_unfinished_exhausted_and_extra_authority() {
     for case in 0..7 {
         let (mut s, mut q, c, h) = fixture();

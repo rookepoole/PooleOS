@@ -122,6 +122,8 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-launch-rollback-readiness-raw.json",
             "runs/native-graphical-recovery-readiness-raw.json",
             "runs/native-graphical-recovery-readiness-private.json",
+            "runs/native-launch-quota-readiness-raw.json",
+            "runs/native-launch-quota-readiness-private.json",
             "runs/native-launch-rollback-readiness-private.json",
             "runs/native-connected-desktop-readiness-private.json",
             "runs/native-console-ipc-private.json",
@@ -169,7 +171,8 @@ class PublicationBoundaryTests(unittest.TestCase):
                      "runs/native-launch-desktop-readiness.json",
                      "runs/native-connected-desktop-readiness.json",
                      "runs/native-launch-rollback-readiness.json",
-                     "runs/native-graphical-recovery-readiness.json"):
+                     "runs/native-graphical-recovery-readiness.json",
+                     "runs/native-launch-quota-readiness.json"):
             for data, kind in ((fake_token, "secret_pattern"), (user_path, "absolute_user_path")):
                 self.assertTrue(any(item["type"] == kind for item in publication.inspect_public_blob(path, data)))
 
@@ -212,6 +215,7 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-connected-desktop-readiness.json",
             "runs/native-launch-rollback-readiness.json",
             "runs/native-graphical-recovery-readiness.json",
+            "runs/native-launch-quota-readiness.json",
             "runs/native-userspace-iso-readiness.json",
             "runs/native-app-file-wait-readiness.json",
             "runs/native_toolchain_qualification.json",
