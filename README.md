@@ -11,7 +11,19 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle309 implements native launch-admission
+**Current development work:** Cycle310 adds explicit diagnostic graphical
+qualification for launch failure, held-input suppression, absence inspection
+and fresh retry. All 131 code-focused checks and ten fresh QEMU guests pass,
+including 26 graphical observations, both failed launches and explicit retries,
+six held-input repeats and ten preserved terminal drafts. Kernel and application
+sources and rebuilt kernel bytes are unchanged from Cycle309. This is bounded
+graphical recovery evidence, not complete desktop or production qualification.
+All 491 selected metadata/integration checks also pass; counts overlap and the
+1,639-test inventory is not a full canonical-suite result.
+The Cycle308 preview remains preserved and historical, with strict source checks.
+[Current progress and remaining gates](docs/checkpoints/cycle310-graphical-launch-recovery.md).
+
+**Historical development checkpoint:** Cycle309 implements native launch-admission
 failure recovery. Rejected images remain owned until cleanup finishes; only then
 does the shell receive failure and permit an explicit fresh attempt. Plan and
 kernel invariant failures remain fail-stop. Eight fresh QEMU boot controls,

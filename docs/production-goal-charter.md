@@ -7,9 +7,22 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 309
+Last roadmap reconciliation: PooleOS Cycle 310
 
-Cycle309 implements recoverable native application-admission rejection, exact
+Cycle310 qualifies bounded graphical launch-failure recovery using the existing
+native window manager and Cycle309 kernel rollback. Strict diagnostic optical
+admission, held-input controls, failure/absence pixels and explicit fresh retry
+pass 131 code-focused checks and ten fresh QEMU guests, including 26 accepted
+graphical observations. Both GUI failures and fresh retries preserve peer
+surfaces and terminal drafts. Kernel/application sources, rebuilt kernel bytes
+and original guards/authority are unchanged. Native quota pressure, rejected-owner
+death, cleanup exhaustion and the complete two-emulator desktop matrix remain.
+All 491 selected metadata/integration checks pass, including master-checklist
+coverage; this does not constitute full canonical, merge or production acceptance.
+Retain the historical Cycle308 preview and every N0-N39 production requirement.
+[Current progress](checkpoints/cycle310-graphical-launch-recovery.md).
+
+Historical Cycle309 implements recoverable native application-admission rejection, exact
 permit/image retention and failure publication after reclamation. Eight fresh
 QEMU boot controls verify immediate/deferred cleanup, fresh retry and normal
 desktop regression;628 kernel host and124 focused checks also pass.

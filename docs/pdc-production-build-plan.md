@@ -1,15 +1,48 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-20
-Plan version: 2.212.0-native-launch-rollback
-Roadmap cycle: PooleOS Cycle 309
+Plan version: 2.213.0-graphical-launch-recovery
+Roadmap cycle: PooleOS Cycle 310
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 309: Native Launch Admission Rollback
+## Cycle 310: Graphical Launch Recovery
+
+Current N13/N14 work with N27/N29 consumers: connect diagnostic qualification
+to the existing native window-manager failure states and Cycle309 rollback.
+The ordinary preview entry remains diagnostic-denying. The explicit test route
+requires exact current-source optical evidence and the complete launch profile.
+[Qualification contract](native-graphical-recovery.md).
+
+Chronological substeps under the existing flags:
+1. Implemented and host-tested: strict diagnostic admission, real pointer/key
+   scenario, no terminal start commands, independent failure/surface pixels,
+   held-input suppression, release/inspect and explicit fresh retry.
+2. Native milestone verified: eight fresh optical boot controls and both QEMU
+   GUI cases pass, including both graphical failures/retries, six held repeats,
+   ten retained drafts and 26 rendered observations. All 131 code-focused checks
+   pass. Independent reconstruction of raw inputs, logs, pixels and images and
+   all 491 selected metadata/integration checks pass, including all eight
+   checklist/roadmap coverage checks. Counts overlap; the 1,639-test inventory
+   is not full canonical execution.
+   Kernel/application sources and rebuilt kernel bytes are unchanged from Cycle309.
+3. Next: native quota pressure, rejected-owner death and cleanup exhaustion.
+   Then qualify the complete QEMU/VirtualBox input/lifetime matrix and a
+   versioned immutable source/runtime-pinned launcher package before selecting
+   a replacement preview. No source guard bypass is permitted.
+4. Remaining: window-service restart/rebinding, construction quarantine,
+   committed-handoff recovery, all-path stacks, COM2-independent startup,
+   persistence, event-driven waits, accessible PooleGlass, complete microkernel,
+   PooleGlyph/PDC and every N0-N39 gate.
+
+Preserve Cycle308 and all historical evidence. No phase or flag closes; all40
+phases,301 subphases and101 flags (46 open) remain. No merge or production claim.
+[Current checkpoint](checkpoints/cycle310-graphical-launch-recovery.md).
+
+## Historical Cycle 309: Native Launch Admission Rollback
 
 Implemented under N13/N14, consumed by N27/N29: recoverable admission rejection
 no longer unconditionally halts the desktop. The dispatcher preserves the exact

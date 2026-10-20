@@ -151,10 +151,13 @@ class SurfaceLifecycleTests(unittest.TestCase):
                 adapters=[n.value for n in ast.walk(tree) if isinstance(n,ast.Assign)
                     and any(isinstance(t,ast.Name) and t.id=='options' for t in n.targets)]
                 self.assertTrue(adapters,name)
+                expected={'profile_options','launch_failure_options'} if name in (
+                    'launch_native_userspace_iso','qualify_native_launch_desktop') else {'profile_options'}
+                self.assertEqual({a.func.attr for a in adapters},expected,name)
                 for adapter in adapters:
                     self.assertIsInstance(adapter,ast.Call)
                     self.assertIsInstance(adapter.func,ast.Attribute)
-                    self.assertEqual(adapter.func.attr,'profile_options',name)
+                    self.assertIn(adapter.func.attr,expected,name)
                     self.assertEqual([ast.dump(a) for a in adapter.args],[ast.dump(ast.Name(id='report',ctx=ast.Load()))])
         for report,expected in (({},False),({'surface_lifecycle':False},False),({'surface_lifecycle':True},True)):
             self.assertIs(apps.profile_options(report)['surface_lifecycle'],expected)

@@ -31,8 +31,10 @@ def inspect_header(data, text):
     return dict(width=w, height=h, text=text, pixels_verified=len(text)*12*16)
 
 
-def scenario(nonce):
-    original = pixels.compact_scenario(local.apps.scenario(nonce))
+def scenario(nonce, *, launch_failure=False):
+    if type(launch_failure) is not bool:
+        raise ValueError('explicit graphical diagnostic mode required')
+    original = pixels.compact_scenario(local.apps.scenario(nonce, launch_failure=launch_failure))
     steps, actions, command = [], {}, []
     counts = {b'text': 0, b'numbers': 0}
     for step in original.steps:
@@ -47,19 +49,22 @@ def scenario(nonce):
             steps.extend((bytes([b]), bytes([b])) for b in b'echo '+draft)
             actions[len(steps)] = dict(app=app.decode(), generation=counts[app],
                                       mouse=app == b'text', draft=draft.decode())
+            if launch_failure and counts[app] == 2:
+                actions[len(steps)]['failure'] = True
             steps.append((b'\r', b'\r\n'+draft+b'\r\n'+local.apps.shell.PROMPT))
         else:
             steps.extend(command)
         command = []
-    if command or counts != {b'text': 2, b'numbers': 2}:
+    expected = 3 if launch_failure else 2
+    if command or counts != {b'text': expected, b'numbers': expected}:
         raise ValueError('launch scenario incomplete')
     return local.apps.shell.Scenario('native-gui-launch', nonce, tuple(steps)), actions
 
 
 class Interaction(local.Interaction):
-    def __init__(self):
+    def __init__(self, *, launch_failure=False):
         # No serial send path: ordinary script bytes also enter as device keys.
-        case, self.actions = scenario(secrets.token_hex(8))
+        case, self.actions = scenario(secrets.token_hex(8), launch_failure=launch_failure)
         local.qualification.Interaction.__init__(self, case)
         self.inject = None
         self.keyboard_bytes = 0
@@ -84,6 +89,7 @@ class Probe:
         self.x = self.y = None
         self.left = False
         self.evidence, self.events = [], []
+        self.action_boundaries = []
         self.captures = 0
 
     def capture(self, client):
@@ -107,6 +113,23 @@ class Probe:
             return
         self.sample = now+.35
         action = interaction.actions[self.step]
+        failure = action.get('failure') is True
+        boundary = None
+        starting = self.phase == (1 if action['mouse'] else 0)
+        if starting:
+            markers = local.native_session.extract_markers(debug)
+            identity = (4 if action['app'] == 'text' else 5, action['generation'])
+            for kind in ('ADMIT', 'REJECT', 'FAILED'):
+                for marker in markers:
+                    if marker.startswith('POOLEOS:APPS '+kind+' '):
+                        value = local.apps.parse(marker, kind)
+                        if (value['task'], value['generation']) == identity:
+                            raise ValueError('attempt already observed before fresh graphical input')
+            samples = [local.apps.parse(m, 'RUN') for m in markers if m.startswith('POOLEOS:APPS RUN ')]
+            if not samples:
+                return
+            boundary = dict(step=self.step, task=identity[0], generation=identity[1],
+                            dispatches=samples[-1]['dispatches'])
         path = self.capture(client)
         data = path.read_bytes()
         w, h, rgb = pixels.frame(data)
@@ -126,36 +149,64 @@ class Probe:
                     events.append({'type': 'btn', 'data': {'button': 'left', 'down': left}})
                     self.left = left
                 client.execute('input-send-event', {'events': events})
+                if starting:
+                    self.action_boundaries.append(boundary)
                 self.events.append(dict(step=self.step, phase=self.phase, events=events))
                 self.x += dx
                 self.y += dy
                 if (self.x, self.y) == target:
                     self.phase += 1
+                    if failure and self.phase == 2:
+                        self.phase = 3  # Hold the button through failure acknowledgement.
             else:
                 interaction.inject([0x3d])
+                self.action_boundaries.append(boundary)
                 self.events.append(dict(step=self.step, codes=[0x3d]))
                 self.phase = 3
             return
         title = 'Text' if action['app'] == 'text' else 'Numbers'
-        label = title+(': admitted / surface' if self.phase in (3, 4) else ': running / surface')
+        label = title + ((': launch failed / no surface' if self.phase in (3, 4)
+                          else ': absent / no surface') if failure else
+                         (': admitted / surface' if self.phase in (3, 4) else ': running / surface'))
         markers = local.native_session.extract_markers(debug)
         admits = [local.apps.parse(m, 'ADMIT') for m in markers if m.startswith('POOLEOS:APPS ADMIT ')]
         identity = (4 if action['app'] == 'text' else 5, action['generation'])
-        if identity not in {(v['task'], v['generation']) for v in admits}:
+        admitted = {(v['task'], v['generation']) for v in admits}
+        if failure:
+            if identity in admitted or (identity[0], 3) in admitted:
+                raise ValueError('failed or unrequested retry was admitted')
+            failed = [local.apps.parse(m, 'FAILED') for m in markers if m.startswith('POOLEOS:APPS FAILED ')]
+            if not any((v['task'], v['generation'], v['published']) == (*identity, 1) for v in failed):
+                return
+        elif identity not in admitted:
             return
         try:
             observed = inspect_header(data, label)
-            observed['fresh_surface'] = pixels.inspect_rows(data, {identity[0]-4: {6: '', 7: ''}})
+            if failure:
+                visible = (action['app'] != 'text', action['app'] != 'numbers')
+                observed['absent_surface'] = local.window_frames.inspect_ppm(data, expected=visible)
+            else:
+                observed['fresh_surface'] = pixels.inspect_rows(data, {identity[0]-4: {6: '', 7: ''}})
         except ValueError:
             return
         self.evidence.append(dict(step=self.step, phase=self.phase, action=action,
                                   frame=path.name, sha256=local.digest(path), pixels=observed))
-        if self.phase == 3 and not action['mouse']:
+        if self.phase == 3 and (not action['mouse'] or failure):
             # Repeat a still-held launch key: it must not refocus the new surface.
-            interaction.inject([0x3d])
-            self.events.append(dict(step=self.step, codes=[0x3d], held_repeat=True))
+            if action['mouse']:
+                events = [{'type': 'btn', 'data': {'button': 'left', 'down': True}}]
+                client.execute('input-send-event', {'events': events})
+                self.events.append(dict(step=self.step, events=events, held_repeat=True))
+            else:
+                interaction.inject([0x3d])
+                self.events.append(dict(step=self.step, codes=[0x3d], held_repeat=True))
             self.phase = 4
         elif self.phase in (3, 4):
+            if self.left:
+                events = [{'type': 'btn', 'data': {'button': 'left', 'down': False}}]
+                client.execute('input-send-event', {'events': events})
+                self.events.append(dict(step=self.step, events=events, fresh_release=True))
+                self.left = False
             key = 0x3c if action['app'] == 'text' else 0x3d
             codes = ([0xbd] if not action['mouse'] else [])+[0x2a, key, key|0x80, 0xaa]
             interaction.inject(codes)
@@ -172,13 +223,21 @@ def main():
     parser.add_argument('--backend', choices=('qemu', 'virtualbox'), default='qemu')
     parser.add_argument('--virtualbox', type=Path)
     parser.add_argument('--visible', action='store_true')
+    parser.add_argument('--launch-failure', action='store_true')
     args = parser.parse_args()
+    if args.launch_failure and args.backend != 'qemu':
+        parser.error('launch-failure GUI qualification is currently QEMU-only')
     if args.visible and args.backend != 'virtualbox':
         parser.error('visible mode is VirtualBox-only')
     if args.backend == 'virtualbox' and args.virtualbox is None:
         parser.error('explicit VirtualBox executable required')
-    report, iso, disk = local.check_preview(args.receipt.resolve())
-    options = local.apps.profile_options(report)
+    if args.launch_failure:
+        from tools.launch_native_userspace_iso import _check_qualification
+        report, iso, disk = _check_qualification(args.receipt.resolve(), diagnostic_launch_failure=True)
+        options = local.apps.launch_failure_options(report)
+    else:
+        report, iso, disk = local.check_preview(args.receipt.resolve())
+        options = local.apps.profile_options(report)
     if report.get('launch_console_admission') is not True or report.get('launch_shell_admission') is not True:
         raise ValueError('explicit native launch console and shell required')
     work = args.work_dir.resolve()
@@ -187,8 +246,9 @@ def main():
     storage = require_space(work)
     work.mkdir(parents=True, exist_ok=False)
     before = local.source.source_bindings()
-    interaction, probe = Interaction(), Probe(work)
-    result = dict(cycle=308, status='fail', source_bindings=before, storage_preflight=storage,
+    interaction, probe = Interaction(launch_failure=args.launch_failure), Probe(work)
+    result = dict(cycle=310, status='fail', source_bindings=before, storage_preflight=storage,
+                  diagnostic_only=args.launch_failure, launch_failure=args.launch_failure,
                   iso_sha256=local.digest(iso), serial_input_bytes=0, production_ready=False,
                   native_plc1_control_verified=False, guest_bound_seconds=240,
                   backend=args.backend, visible=args.visible, application_profile=options,
@@ -231,14 +291,18 @@ def main():
             pointer.check_shell()
         _, output = local.native_console.split_output(bytes(interaction.received))
         if (interaction.sent != len(interaction.case.sent) or output != interaction.case.expected or
-                interaction.keyboard_bytes != interaction.sent or len(probe.evidence) != 10 or
+                interaction.keyboard_bytes != interaction.sent or len(probe.evidence) != (16 if args.launch_failure else 10) or
                 interaction.completed != set(interaction.actions) or b'start ' in interaction.case.sent):
             raise ValueError('inexact GUI launch or draft-preservation evidence')
         shared.load.validate_oracle_binding(run['marker_summary']['transfer_prefix']['boot_prefix'],
                                            shared.load.inspect_media_bytes(disk), run['pbp1_transcript'])
         result.update(status='pass', run=run, native_plc1_control_verified=True,
-                      starts_verified=4, inspections_verified=4, terminal_drafts_preserved=4,
-                      held_launch_repeats_verified=2,
+                      starts_verified=6 if args.launch_failure else 4,
+                      inspections_verified=6 if args.launch_failure else 4,
+                      terminal_drafts_preserved=6 if args.launch_failure else 4,
+                      held_launch_repeats_verified=4 if args.launch_failure else 2,
+                      graphical_failures_verified=2 if args.launch_failure else 0,
+                      explicit_fresh_retries_verified=2 if args.launch_failure else 0,
                       hostile_marker_cases_rejected=local.apps.negative_controls(run['markers'], **options))
     except Exception as error:
         result['failure'] = f'{type(error).__name__}: {error}'
@@ -247,6 +311,7 @@ def main():
         (work/'keyboard-input.bin').write_bytes(interaction.case.sent[:interaction.sent])
         (work/'console-output.bin').write_bytes(interaction.received)
         result.update(evidence=probe.evidence, events=probe.events, captures=probe.captures,
+                      action_boundaries=probe.action_boundaries,
                       keyboard_input_bytes=interaction.keyboard_bytes,
                       source_unchanged=before == local.source.source_bindings(),
                       iso_unchanged=local.digest(iso) == result['iso_sha256'],

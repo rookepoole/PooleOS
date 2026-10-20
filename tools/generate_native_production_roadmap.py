@@ -16711,13 +16711,85 @@ def apply_cycle309(roadmap: dict, test_count: int) -> dict:
             "current-source QEMU/VirtualBox desktop matrix before replacement preview selection",
             "window-service restart with exact generation-bound endpoint rebinding",
             "construction quarantine, stack bounds and remaining N0-N39 gates"])
+    return apply_cycle310(roadmap, test_count)
+
+
+def apply_cycle310(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle310-graphical-launch-recovery.md"
+    contract = "docs/native-graphical-recovery.md"
+    path = "runs/native-graphical-recovery-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle309_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=310, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 310
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    record = dict(cycle=310, contract_id="PGLAUNCHFAIL1", status=receipt["status"],
+        receipt_path=path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        source_binding_count=len(receipt["source_bindings"]))
+    for key in ("kernel_sources_unchanged", "kernel_bytes_unchanged", "program_pairs_revalidated",
+                "qemu_guest_runs", "virtualbox_guest_runs", "gui_observations",
+                "graphical_failure_retry_verified", "graphical_failures_verified",
+                "explicit_fresh_retries_verified", "held_launch_repeats_verified",
+                "starts_verified", "inspections_verified", "terminal_drafts_preserved",
+                "native_quota_rejection_verified", "rejected_owner_death_native_verified",
+                "rejected_cleanup_exhaustion_verified", "window_service_restart_verified",
+                "construction_failure_recovery_verified", "full_input_matrix_replayed",
+                "new_preview_selected", "merge_qualified", "production_ready"):
+        record[key] = receipt[key]
+    baseline["native_graphical_recovery"] = copy.deepcopy(record)
+    baseline["native_launch_rollback"]["evidence_status"] = "historical_oracle_sources_changed_cycle310"
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 310
+    gate["qualification_status"] = "qemu_graphical_launch_recovery_verified_full_desktop_pending"
+    gate["current_native_graphical_recovery_qualification"] = record
+    gate["current_native_launch_rollback_qualification"]["evidence_status"] = "historical_oracle_sources_changed_cycle310"
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=310, receipt_path=path, receipt_section="ordinary_native_regression",
+        retained_kernel_sources_unchanged=True,
+        native_execution_status="qemu_graphical_failure_inspect_and_explicit_fresh_retry_verified",
+        native_execution_evidence_cycle=310, shell_native_execution_evidence_cycle=310,
+        full_input_matrix_replayed_this_cycle=False, new_preview_selected=False,
+        virtualbox_native_execution_replayed_this_cycle=False,
+        preview_source_requalification_required=True,
+        native_gui_scope="bounded_qemu_graphical_denial_recovery_full_desktop_matrix_pending",
+        virtualbox_evidence_scope="historical_cycle308_only_no_virtualbox_replay_cycle310",
+        optical_iso_sha256=receipt["ordinary_iso_sha256"])
+    lane["graphical_launch_control"].update(cycle=310,
+        evidence_status="qemu_graphical_denial_recovery_verified_virtualbox_and_full_matrix_pending",
+        broker="native_qemu_verified", transport="native_qemu_verified",
+        session_binding="native_qemu_verified",
+        graphical_controls="native_qemu_ordinary_and_diagnostic_verified",
+        connected_native_iso="qemu_failure_and_fresh_retry_verified_not_selected_preview")
+    evidence = ("Cycle310: strict diagnostic-only optical admission supports real GUI-triggered rejection, held-input suppression, absence inspection and explicit third-attempt retry. Independent pixels, exact native identities, retained drafts, useful file work and current-source ordinary regression are reconstructed. Native kernel and program bytes are unchanged. " + checkpoint)
+    gap = ("Native quota pressure, rejected-image owner death and cleanup exhaustion remain before complete recovery qualification. Then replay both emulator desktop matrices and provide the versioned immutable source/runtime-pinned launcher bundle before selecting a replacement preview. Window-service restart/rebinding, construction quarantine, committed-handoff recovery, all-path stacks, COM2-independent boot, persistence, event-driven waits, accessible PooleGlass, complete microkernel, PooleGlyph/PDC and all N0-N39 gates remain. Preserve Cycle308; no merge or production promotion. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N3", "N9", "N13", "N14", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-NATIVE-UI-001", "FLAG-N13-USERSPACE-ISO-001",
+                          "FLAG-N13-USERSTACK-001", "FLAG-N13-LAUNCH-FAILURE-001",
+                          "FLAG-N3-VIRTUALBOX-PREVIEW-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle310 narrows but does not close this flag. " + gap
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["immediate_next_move"].update(title="Harden retained launch owners and native resource-pressure recovery",
+        entry_evidence=[checkpoint, contract, path], exit_evidence=[
+            "native Quota admission rejection with exact prepared-image reclamation and fresh retry",
+            "rejected-owner death and cleanup exhaustion without leaked or resurrected authority",
+            "full QEMU/VirtualBox desktop matrix and immutable versioned launcher before preview selection",
+            "window-service restart/rebinding and construction/committed-handoff recovery",
+            "all-path stacks and remaining N0-N39 microkernel/PooleGlyph/PDC/PooleGlass gates"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1631)
+    parser.add_argument("--test-count", type=int, default=1639)
     parser.add_argument("--status-date", default="2026-10-20")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

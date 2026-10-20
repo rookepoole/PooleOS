@@ -30,13 +30,22 @@ def local_file(path: Path, maximum: int) -> bytes:
 
 
 def check_preview(receipt: Path):
+    return _check_qualification(receipt, diagnostic_launch_failure=False)
+
+
+def _check_qualification(receipt: Path, *, diagnostic_launch_failure: bool):
+    if type(diagnostic_launch_failure) is not bool:
+        raise ValueError('explicit qualification mode required')
     report=json.loads(local_file(receipt,16*1024*1024))
     if (report.get('status')!='pass' or report.get('contract_id')!=optical.CONTRACT
             or report.get('iso_built') is not True or report.get('production_ready') is not False
             or report.get('source_unchanged') is not True or report.get('source_bindings')!=source.source_bindings()):
         raise ValueError('current passing development qualification required; unsigned receipts are not authentication')
     expected=['applications-1','applications-2','bad-file']
-    options=apps.profile_options(report)
+    if diagnostic_launch_failure:
+        options=apps.launch_failure_options(report)
+    else:
+        options=apps.profile_options(report)
     if [v['run_id'] for v in report['guest_runs']]!=expected or report['ordinary_denial']['run_id']!='ordinary-denial':
         raise ValueError('optical controls missing')
     for run in report['guest_runs']:

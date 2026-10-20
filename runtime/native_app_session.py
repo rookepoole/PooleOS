@@ -25,6 +25,18 @@ FILE_MARKER = ('POOLEOS:APPS FILES contract=PAPPSESSION1 version=1 init_slot=0 '
                'service_slot=1 shell_slot=3 bad_handle=0 grants=8 cpl=3 production=0')
 
 
+def launch_failure_options(report: dict) -> dict:
+    """Admit only the explicit diagnostic profile, never an ordinary preview."""
+    required = ('file_waits', 'window_surfaces', 'window_capacity', 'surface_lifecycle',
+                'surface_input', 'launch_shell_admission', 'launch_console_admission',
+                'diagnostic_only', 'launch_failure')
+    if (not isinstance(report, dict) or any(report.get(name) is not True for name in required)
+            or report.get('serial_recovery') is not False):
+        raise ValueError('exact diagnostic launch-failure profile required')
+    ordinary = dict(report, diagnostic_only=False, launch_failure=False)
+    return dict(profile_options(ordinary), launch_failure=True)
+
+
 def profile_options(report: dict) -> dict:
     """Select the explicit receipt profile; never infer authority from code size."""
     if not isinstance(report, dict):

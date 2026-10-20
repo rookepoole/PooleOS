@@ -1,7 +1,7 @@
 # Run The Native Window Preview
 
-Cycle309 development changes the kernel and launch-failure oracle. The Cycle308
-pointer and Downloads ISO remain preserved, but their receipts are historical
+Cycle309 changed the kernel; Cycle310 changes diagnostic GUI qualification.
+The Cycle308 pointer and Downloads ISO remain preserved, but their receipts are historical
 relative to the current checkout. Current-source launchers must reject that
 mismatch. Do not edit hashes or bypass the check: a replacement selection needs
 the complete desktop matrix. The new launch-failure image is diagnostic-only

@@ -34,6 +34,7 @@ def source_bindings() -> dict[str, str]:
     paths.update({
         "native/kernel/src/user_root_probe/peer_driver/interactive/launch_failure.rs",
         "tests/test_native_launch_failure.py",
+        "tests/test_native_graphical_recovery.py",
         "native/userspace/src/bin/launch_console.rs",
         "native/userspace/src/desktop/launch.rs",
         "native/userspace/src/desktop/launch/tests.rs",
