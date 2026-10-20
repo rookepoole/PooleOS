@@ -23,6 +23,34 @@ def fixture(size=3):
     return bytes(blob)
 
 class NativeUserProgramTests(unittest.TestCase):
+    def test_launch_candidate_has_explicit_five_page_build_only_profile(self):
+        self.assertEqual(program.profile_for("PooleLaunchShell"), "PLCODE1")
+        self.assertEqual(program.profile_for("PooleAppShell"), "PUSERBIN1")
+        self.assertEqual(program.profile_for("PooleLaunchShellSuffix"), "PUSERBIN1")
+        for size in (16385, 19464, 20480):
+            with self.assertRaises(ValueError):
+                program.inspect(fixture(size))
+            record = program.inspect(fixture(size), profile="PLCODE1")
+            self.assertEqual(record["load_pages"], 5)
+            self.assertFalse(record["native_execution_verified"])
+        with self.assertRaises(ValueError):
+            program.inspect(fixture(20481), profile="PLCODE1")
+        with self.assertRaises(ValueError):
+            program.inspect(fixture(), profile="unknown")
+    def test_launch_candidate_requires_feature_and_distinct_startup_role(self):
+        import tomllib
+        manifest = tomllib.loads((ROOT / "native/userspace/Cargo.toml").read_text())
+        candidate = next(b for b in manifest["bin"] if b["name"] == "PooleLaunchShell")
+        self.assertEqual(candidate["required-features"], ["launch-session"])
+        self.assertNotIn("default", manifest["features"])
+        source = (ROOT / "native/userspace/src/bin/launch_shell.rs").read_text()
+        self.assertIn("startup::launch_shell", source)
+        self.assertIn("Connection::new", source)
+        self.assertNotIn("startup::application_shell", source)
+        self.assertIn('b"launch-shell"', (ROOT / "native/userspace/src/startup.rs").read_text())
+        linker = (ROOT / "native/userspace/linker.ld").read_text()
+        self.assertIn("SIZEOF(.text) <= 20480", linker)
+        self.assertIn("code profiles are mutually exclusive", linker)
     def test_multipage_exact_bounds_and_single_segment_contract(self):
         for size in (4096,4097,8192,8193,12288,12289,16384):
             code,record=program.extract(fixture(size))

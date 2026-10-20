@@ -11,7 +11,19 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle303 adds the typed launch-control
+**Current development checkpoint:** Cycle304 binds launch control to the shell's
+Read/result/ack session without replacing terminal drafts or active file/job work.
+Both real session ends and authenticated transports pass host integration tests.
+All268 userspace tests pass in debug/release;29 ordinary program pairs remain
+byte-identical to Cycle303. A separate opt-in launch-shell candidate reproduces
+at19464 bytes under a five-page build-only profile, after the ordinary four-page
+gate correctly rejected it. Kernel admission, stack qualification, graphical
+controls and a new connected ISO are next. No new native execution or desktop
+capability is claimed yet. The prior preview remains historical, and its strict
+source checks are not bypassed.
+[Progress and remaining gates](docs/checkpoints/cycle304-launch-session.md).
+
+**Historical development checkpoint:** Cycle303 adds the typed launch-control
 foundation: strict start/inspect messages, a bounded generation/replay broker
 using the shell's process capabilities, and an explicitly selected authenticated
 RPC mode. All246 userspace tests pass per debug/release and29 ordinary programs

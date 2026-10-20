@@ -1,15 +1,52 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-10-18
-Plan version: 2.206.0-native-launch-control
-Roadmap cycle: PooleOS Cycle 303
+Status date: 2026-10-20
+Plan version: 2.207.0-native-launch-session
+Roadmap cycle: PooleOS Cycle 304
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 303: Graphical Launch Foundation
+## Cycle 304: Launch Session And Measured Candidate
+
+Implemented: opt-in shell and console Read/result/ack wrappers, owned authenticated
+transport connection, sequence reservation before effects, retained backpressure
+state and fail-closed poisoning. Terminal drafts, rejected/overlong input, CRLF,
+output position and active file/job work are preserved. Both real session ends
+and transports are tested together with one-use fake-kernel RPC authority.
+
+268 userspace tests pass in both debug and release. All29 ordinary program pairs
+reproduce independently and remain byte-identical to Cycle303. The connected
+PooleLaunchShell initially failed the ordinary16384-byte link gate at19464 bytes.
+A distinct feature, startup role and five-page PLCODE1 build profile now produce
+two identical candidate binaries, with1016 bytes free and audited relocations.
+This is a build-only candidate: no kernel mapping, stack qualification, graphical
+control, native run or new ISO is claimed. No existing kernel/page/guard limit
+was relaxed. [Session contract and admission gates](native-launch-session.md).
+
+Next substeps, under existing N13/N14/N27/N29 flags:
+1. Add explicit candidate kernel mapping and embedded layout, preserving guards
+   and authority. The historical360-byte embedded margin cannot hold4024-byte growth.
+2. Bind the matching window-service role and measure connected nested stack paths.
+3. Add mouse and keyboard launch/inspect/restart controls, distinguishing admission,
+   process liveness and authenticated surface appearance; preserve focus fences.
+4. Qualify real interprocess failure/backpressure/lifetime cases on QEMU and
+   VirtualBox, then build a source-bound bootable ISO and refresh its launcher.
+
+The Cycle303 preview and receipts remain untouched as historical evidence.
+Its strict launcher may reject current-source drift; do not bypass that check.
+The pre-existing12 GiB storage preflight is preserved; no automatic cleanup.
+All40 phases,301 subphases and101 flags (46 open) remain; no production gate closes.
+Complete microkernel, PooleGlyph/PDC, persistence, compositor recovery, accessible
+PooleGlass and the full native production objective remain required.
+[Cycle304 evidence and retained failures](checkpoints/cycle304-launch-session.md).
+All453 selected metadata/integration checks pass after retained source-count,
+linker-profile and next-step-title assertions were reconciled.1601 Python tests
+are discovered without errors; this is not full canonical or merge qualification.
+
+## Historical Cycle 303: Graphical Launch Foundation
 
 Implemented: strict32-byte PLC1 start/inspect requests, a bounded replay/generation
 broker using the shell's existing process ownership, and an explicit authenticated

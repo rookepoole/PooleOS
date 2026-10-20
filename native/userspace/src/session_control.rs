@@ -5,6 +5,20 @@ use crate::{console_ipc::Error, shell::processes::ApplicationProcesses, supervis
 pub const BYTES: usize = 32;
 pub mod rpc;
 
+pub trait Channel {
+    /// Received exchanges must already have authenticated kernel peer identity.
+    fn receive(&mut self) -> Result<Option<rpc::Exchange>, Error>;
+    fn send(&mut self, exchange: rpc::Exchange) -> Result<bool, Error>;
+}
+
+#[inline]
+pub(crate) fn resumed_sequence(sequence: u64) -> Result<u64, Error> {
+    sequence
+        .checked_add(2)
+        .filter(|&next| next < u64::MAX)
+        .ok_or(Error::Sequence)
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(u8)]
 pub enum App {

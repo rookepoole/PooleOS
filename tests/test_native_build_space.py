@@ -9,6 +9,28 @@ from tools import qualify_native_user_programs as programs
 
 
 class NativeBuildSpaceTests(unittest.TestCase):
+    def test_default_keeps_working_reserve_and_build_headroom(self):
+        floor = 12 * 1024 * 1024 * 1024
+        self.assertEqual(space.USER_BUILD_MINIMUM, floor)
+        with tempfile.TemporaryDirectory() as temp:
+            destination = Path(temp) / "uncreated"
+            with mock.patch.object(space.shutil, "disk_usage", return_value=SimpleNamespace(free=floor-1)):
+                with self.assertRaisesRegex(ValueError, "insufficient build storage"):
+                    space.require_space(destination)
+            self.assertFalse(destination.exists())
+            with mock.patch.object(space.shutil, "disk_usage", return_value=SimpleNamespace(free=floor)):
+                record = space.require_space(destination)
+            self.assertEqual(record["minimum_bytes"], floor)
+            self.assertFalse(record["space_reserved"])
+            self.assertFalse(destination.exists())
+
+    def test_manual_preflight_returns_failure_when_space_is_low(self):
+        with mock.patch.object(space.shutil, "disk_usage", return_value=SimpleNamespace(free=1024)), \
+                mock.patch("sys.stderr") as stderr:
+            self.assertEqual(space.main([str(Path.cwd())]), 1)
+        self.assertIn("insufficient build storage", "".join(
+            call.args[0] for call in stderr.write.call_args_list))
+
     def test_available_floor_is_inclusive_and_never_claims_reservation(self):
         with mock.patch.object(space.shutil, "disk_usage", return_value=SimpleNamespace(free=512)):
             record = space.require_space(Path.cwd(), 512)

@@ -525,6 +525,10 @@ pub struct ApplicationCommands<'a, C, P> {
     route: Route,
 }
 impl<'a, C, P> ApplicationCommands<'a, C, P> {
+    pub(super) fn process_owner(&mut self) -> &mut ApplicationProcesses<P> {
+        self.processes
+    }
+
     #[inline(always)]
     pub const fn new(
         files: &'a mut super::files::Files<C>,

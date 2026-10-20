@@ -9,9 +9,13 @@ MAX_FILE = 65536
 MAX_CODE_PAGES = 4
 WINDOW_SERVICE_CONTRACT = "PWCODE1"
 WINDOW_SERVICE_CODE_PAGES = 7
+LAUNCH_CANDIDATE_CONTRACT = "PLCODE1"
+LAUNCH_CANDIDATE_CODE_PAGES = 5
 
 
 def profile_for(name: str) -> str:
+    if name == "PooleLaunchShell":
+        return LAUNCH_CANDIDATE_CONTRACT
     return WINDOW_SERVICE_CONTRACT if name in ("PooleWindowCapacity", "PooleWindowLifecycle", "PooleWindowInput") else CONTRACT
 
 
@@ -20,8 +24,10 @@ def inspect(blob: bytes, *, profile: str = CONTRACT) -> dict:
         if not ok:
             raise ValueError(why)
 
-    require(profile in (CONTRACT, WINDOW_SERVICE_CONTRACT), "unknown code profile")
-    maximum = WINDOW_SERVICE_CODE_PAGES if profile == WINDOW_SERVICE_CONTRACT else MAX_CODE_PAGES
+    limits = {CONTRACT: MAX_CODE_PAGES, WINDOW_SERVICE_CONTRACT: WINDOW_SERVICE_CODE_PAGES,
+              LAUNCH_CANDIDATE_CONTRACT: LAUNCH_CANDIDATE_CODE_PAGES}
+    require(profile in limits, "unknown code profile")
+    maximum = limits[profile]
     require(type(blob) is bytes and 64 <= len(blob) <= MAX_FILE, "ELF size")
     require(blob[:16] == b"\x7fELF\x02\x01\x01" + bytes(9), "ELF identification")
     fields = struct.unpack_from("<HHIQQQIHHHHHH", blob, 16)

@@ -16291,14 +16291,74 @@ def apply_cycle303(roadmap: dict, test_count: int) -> dict:
             "measured explicit native launch profile within original authority and guard budgets",
             "real graphical launch/restart, stale/delayed/failed/repeated controls and keyboard access",
             "qualified connected ISO plus complete microkernel, PooleGlyph/PDC, PooleGlass and all N0-N39 gates"])
+    return apply_cycle304(roadmap, test_count)
+
+
+def apply_cycle304(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle304-launch-session.md"
+    contract = "docs/native-launch-session.md"
+    path = "runs/native-launch-session-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle303_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=304, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 304
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 304
+    gate["qualification_status"] = "launch_session_host_and_build_only_native_pending"
+    baseline["native_launch_control"]["evidence_status"] = "historical_cycle303"
+    gate["current_native_launch_control_qualification"]["evidence_status"] = "historical_cycle303_not_current_source_qualification"
+    record = dict(cycle=304, contract_id="PLC1-SESSION", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("host_userspace_tests", "ordinary_program_pairs", "ordinary_programs_byte_identical_to_cycle303",
+                "launch_candidate_pairs", "session_host_qualified", "authenticated_end_to_end_host_qualified",
+                "terminal_draft_and_file_job_preservation_host_qualified", "connected_code_measured",
+                "candidate_code_bytes", "candidate_code_pages", "candidate_code_margin_bytes",
+                "kernel_admission_implemented", "connected_stack_bound_verified", "native_plc1_execution_verified",
+                "graphical_launch_connected", "iso_built", "qemu_guest_runs", "virtualbox_guest_runs",
+                "selected_preview_cycle", "selected_preview_source_requalified",
+                "canonical_full_replay_performed", "merge_qualified", "production_ready"):
+        record[key] = receipt[key]
+    baseline["native_launch_session"] = copy.deepcopy(record)
+    gate["current_native_launch_session_qualification"] = record
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=304, receipt_path=path, receipt_section="build_reports",
+        native_execution_status="historical_cycle303_only_current_session_host_and_build_qualified",
+        preview_source_requalification_required=True)
+    lane["graphical_launch_control"] = dict(cycle=304, broker="host_qualified", transport="host_qualified",
+        session_binding="host_qualified", graphical_controls="required", connected_native_iso="required",
+        kernel_admission="required", candidate_build_profile="PLCODE1")
+    evidence = ("Cycle304: Read/result/ack wrappers preserve terminal drafts and active file/job ownership; both ends pass actual authenticated transport tests with one-use fake-kernel RPC tokens.268 userspace tests pass in debug/release.29 ordinary program pairs reproduce byte-identically to Cycle303. The separate launch-shell candidate reproduces at19464 bytes under explicit five-page build-only PLCODE1; ordinary four-page admission still rejects it. " + checkpoint)
+    gap = ("Implement explicit native five-page shell mapping and embedded image layout, matching console/window-service startup role, measured nested guarded-stack paths, keyboard-accessible graphical launch states and real QEMU/VirtualBox connected execution before a new ISO. No kernel admission, new native run or ISO is claimed in Cycle304. Retained Cycle303 preview source bindings are historical and must not be rewritten or bypassed. Compositor recovery, native launch-failure cleanup, COM2-independent boot, persistent storage, event-driven waits, accessible PooleGlass, complete microkernel, PooleGlyph/PDC and all N0-N39 gates remain. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N3", "N9", "N13", "N14", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-NATIVE-UI-001", "FLAG-N13-USERSPACE-ISO-001",
+                          "FLAG-N13-USERSTACK-001", "FLAG-N13-LAUNCH-FAILURE-001",
+                          "FLAG-N3-VIRTUALBOX-PREVIEW-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle304 does not close this flag. " + gap
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["immediate_next_move"].update(title="Admit the measured launch session and connect native window-manager controls",
+        entry_evidence=[checkpoint, contract, path], exit_evidence=[
+            "explicit native shell mapping and embedded layout with unchanged authority and guards",
+            "matching window-service role and measured connected guarded-stack paths",
+            "keyboard-accessible graphical launch/restart with observed surface status",
+            "real two-backend native session qualification and new source-bound optical ISO",
+            "complete microkernel, PooleGlyph/PDC, PooleGlass and every N0-N39 production gate"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1596)
-    parser.add_argument("--status-date", default="2026-10-18")
+    parser.add_argument("--test-count", type=int, default=1601)
+    parser.add_argument("--status-date", default="2026-10-20")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
     args.out.write_text(json.dumps(roadmap, indent=2, ensure_ascii=True) + "\n", encoding="utf-8", newline="\n")

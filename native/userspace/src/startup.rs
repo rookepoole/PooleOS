@@ -230,6 +230,10 @@ pub fn application_shell(bytes: &[u8], version: u64) -> Result<FileShellBoot, Er
     file_shell_role(bytes, version, b"app-shell")
 }
 #[inline(always)]
+pub fn launch_shell(bytes: &[u8], version: u64) -> Result<FileShellBoot, Error> {
+    file_shell_role(bytes, version, b"launch-shell")
+}
+#[inline(always)]
 fn file_shell_role(bytes: &[u8], version: u64, role: &[u8]) -> Result<FileShellBoot, Error> {
     let args = arguments::<8>(bytes, version)?;
     if !crate::files::same_bytes(args[0], role) {
@@ -374,6 +378,33 @@ pub fn decode(bytes: &[u8], version: u64, expected: Role) -> Result<Boot, Error>
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn launch_shell_requires_distinct_opt_in_role_and_existing_capability_layout() {
+        let args: [&[u8]; 8] = [
+            b"launch-shell",
+            b"0000000100010001",
+            b"0000000100010002",
+            b"0000000100000002",
+            b"0000000100060001",
+            b"0000000100060002",
+            b"0000000100010003",
+            b"0000000100000001",
+        ];
+        let boot = launch_shell(&block(args), 1).unwrap();
+        assert_eq!(boot.factories, [0x100060001, 0x100060002]);
+        assert_eq!(boot.console.send, 0x100010002);
+        assert!(application_shell(&block(args), 1).is_err());
+        assert!(launch_shell(&block(args), 2).is_err());
+        for index in [0, 2, 3, 6, 7] {
+            let mut bad = args;
+            bad[index] = match index {
+                0 => b"app-shell",
+                2 | 6 => args[1],
+                _ => b"0000000000000001",
+            };
+            assert!(launch_shell(&block(bad), 1).is_err());
+        }
+    }
     #[test]
     fn window_application_startup_requires_third_typed_distinct_endpoint() {
         let a: [&[u8]; 6] = [

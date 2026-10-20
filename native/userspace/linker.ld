@@ -28,7 +28,8 @@ SECTIONS
 }
 ASSERT(_start == 0, "startup must be the first byte")
 ASSERT(SIZEOF(.text) > 0, "program is empty")
-ASSERT(DEFINED(__poole_window_capacity) ? SIZEOF(.text) <= 28672 : SIZEOF(.text) <= 16384, "program exceeds its explicit code profile")
+ASSERT(!(DEFINED(__poole_window_capacity) && DEFINED(__poole_launch_candidate)), "code profiles are mutually exclusive")
+ASSERT(DEFINED(__poole_window_capacity) ? SIZEOF(.text) <= 28672 : (DEFINED(__poole_launch_candidate) ? SIZEOF(.text) <= 20480 : SIZEOF(.text) <= 16384), "program exceeds its explicit code profile")
 ASSERT(DEFINED(__poole_window_capacity) ? (__poole_capacity_start == 24576 && __poole_capacity_end > 24576) : (__poole_capacity_start == __poole_capacity_end), "capacity probe must execute on page seven only in PWCODE1")
 ASSERT(SIZEOF(.forbidden) == 0, "program needs unsupported data or relocation")
 ASSERT(SIZEOF(.rela.forbidden) == 0 && SIZEOF(.rel.forbidden) == 0, "program needs relocations")

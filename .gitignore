@@ -116,6 +116,7 @@ runs/*
 !runs/native-input-lifetime-readiness.json
 !runs/native-bounded-serial-readiness.json
 !runs/native-launch-control-readiness.json
+!runs/native-launch-session-readiness.json
 !runs/native_initial_system_readiness.json
 !runs/native_microcode_readiness.json
 !runs/native_recovery_readiness.json

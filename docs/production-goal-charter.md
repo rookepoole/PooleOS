@@ -1,15 +1,28 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-10-18
+Status date: 2026-10-20
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 303
+Last roadmap reconciliation: PooleOS Cycle 304
 
-Cycle303 implements PLC1's strict start/inspect wire, bounded process-owner broker
+Cycle304 implements the opt-in Read/result/ack session with retained terminal
+drafts, file/job ownership and authenticated one-use RPC.268 userspace tests pass
+per debug/release;29 ordinary program pairs are byte-identical to Cycle303.
+The connected launch-shell candidate is19464 bytes and independently reproducible
+under a separate five-page build-only profile; it correctly fails ordinary
+four-page admission. Explicit native mapping/layout, matching window-service role,
+stack qualification, graphical controls and real connected ISO evidence remain
+required. No kernel admission, new native run, ISO or phase closure is claimed.
+The previous preview remains historical; source-binding checks are not bypassed.
+All40 phases,301 subphases,101 flags (46 open), complete microkernel, PooleGlyph/PDC,
+accessible PooleGlass and every canonical/release gate remain required.
+[Current progress](checkpoints/cycle304-launch-session.md).
+
+Historical Cycle303 implements PLC1's strict start/inspect wire, bounded process-owner broker
 and explicit peer-authenticated console/control transport.246 userspace tests pass
 per debug/release;29 ordinary program pairs reproduce independently. No privilege,
 guard, lease or code-page limit grows. Read/result/ack session binding, draft and

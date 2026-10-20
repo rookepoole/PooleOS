@@ -89,6 +89,31 @@ impl Transport {
     }
 }
 
+/// Owns the explicit protocol mode and its syscall adapter for one peer.
+pub struct Connection<C> {
+    transport: Transport,
+    calls: C,
+}
+impl<C: rpc::Calls> Connection<C> {
+    #[inline]
+    pub fn new(endpoint: u64, peer: Peer, server: bool, calls: C) -> Self {
+        Self {
+            transport: Transport::new(endpoint, peer, server),
+            calls,
+        }
+    }
+}
+impl<C: rpc::Calls> super::Channel for Connection<C> {
+    #[inline(always)]
+    fn send(&mut self, exchange: Exchange) -> Result<bool, Error> {
+        self.transport.send(exchange, &mut self.calls)
+    }
+    #[inline(always)]
+    fn receive(&mut self) -> Result<Option<Exchange>, Error> {
+        self.transport.receive(&mut self.calls)
+    }
+}
+
 /// No raw endpoint or process authority is carried by a control request.
 impl From<Request> for Exchange {
     #[inline]

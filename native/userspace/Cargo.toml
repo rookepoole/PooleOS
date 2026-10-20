@@ -5,7 +5,17 @@ edition = "2024"
 license-file = "../../LICENSE"
 publish = false
 
+[features]
+launch-session = []
+
 [workspace]
+
+[[bin]]
+name = "PooleLaunchShell"
+path = "src/bin/launch_shell.rs"
+required-features = ["launch-session"]
+test = false
+bench = false
 
 [[bin]]
 name = "PooleShell"

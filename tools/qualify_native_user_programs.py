@@ -29,6 +29,7 @@ def bindings() -> dict[str, str]:
             for p in sorted(paths)}
 
 def run(command: list[str], env: dict, log: Path) -> str:
+    require_space(log.parent)
     result = subprocess.run(command, cwd=ROOT, env=env, stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT, timeout=180, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     log.write_bytes(result.stdout)
@@ -71,7 +72,7 @@ def local_relocations(audit: dict, *, window_capacity: bool = False) -> list[dic
     return relocs
 
 
-def build(cargo: Path, env: dict, target: Path, log: Path) -> dict:
+def build(cargo: Path, env: dict, target: Path, log: Path, *, launch_candidate: bool = False) -> dict:
     flags = ["-Cpanic=abort", "-Crelocation-model=pic", "-Ccode-model=small",
         "-Cno-redzone=yes", "-Csave-temps=yes", "-Clink-arg=-static", "-Clink-arg=--no-pie",
         "-Clink-arg=--no-dynamic-linker", "-Clink-arg=--no-eh-frame-hdr",
@@ -81,11 +82,12 @@ def build(cargo: Path, env: dict, target: Path, log: Path) -> dict:
     env = dict(env)
     env.pop("RUSTFLAGS", None)
     env["CARGO_ENCODED_RUSTFLAGS"] = "\x1f".join(flags)
+    selection = ["--bin", "PooleLaunchShell", "--features", "launch-session"] if launch_candidate else ["--bins"]
     command = [str(cargo), "build", "--manifest-path", str(USER / "Cargo.toml"),
-        "--bins", "--release", "--target", TARGET, "--target-dir", str(target), "--locked", "--offline"]
+        *selection, "--release", "--target", TARGET, "--target-dir", str(target), "--locked", "--offline"]
     run(command, env, log)
     result = {}
-    for name, source in (("PooleInit", "init"), ("PooleCounter", "counter"), ("PooleConsole", "console"),
+    programs = (("PooleInit", "init"), ("PooleCounter", "counter"), ("PooleConsole", "console"),
                          ("PooleConsoleService", "console_service"), ("PooleConsoleClient", "console_client"),
                          ("PooleSupervisor", "supervisor"), ("PooleShell", "shell"),
                          ("PooleMultiSupervisor", "multi_supervisor"),
@@ -101,7 +103,10 @@ def build(cargo: Path, env: dict, target: Path, log: Path) -> dict:
                          ("PooleWindowLifecycle", "window_lifecycle"),
                          ("PooleWindowInput", "window_input"),
                          ("PooleInputText", "input_text"), ("PooleInputNumbers", "input_numbers"),
-                         ("PooleWindowNumbers", "window_numbers")):
+                         ("PooleWindowNumbers", "window_numbers"))
+    if launch_candidate:
+        programs = (("PooleLaunchShell", "launch_shell"),)
+    for name, source in programs:
         path = target / TARGET / "release" / name
         blob = path.read_bytes()
         code, record = extract(blob, profile=profile_for(name))
@@ -123,6 +128,8 @@ def build(cargo: Path, env: dict, target: Path, log: Path) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--work-dir", type=Path, required=True)
+    parser.add_argument("--launch-candidate", action="store_true",
+                        help="Qualify only the opt-in PLCODE1 shell; does not admit it to a kernel or ISO")
     args = parser.parse_args()
     work = args.work_dir.resolve()
     if not work.is_relative_to(ROOT / "outputs"):
@@ -130,9 +137,13 @@ def main() -> int:
     storage = require_space(work)
     work.mkdir(parents=True, exist_ok=False)
     before = bindings()
-    report = dict(cycle=274, contract_id="PUSERBIN1", status="fail", source_bindings=before, storage_preflight=storage,
+    report = dict(cycle=304 if args.launch_candidate else 274,
+        contract_id="PLCODE1" if args.launch_candidate else "PUSERBIN1",
+        status="fail", source_bindings=before, storage_preflight=storage,
         source_unchanged=False, native_execution_verified=False, actual_init_service=False,
         normal_session_boot=False, iso_built=False, production_ready=False)
+    if args.launch_candidate:
+        report.update(kernel_admission_implemented=False, selected_for_iso=False)
     try:
         cargo, rustc, env = _toolchain(ROOT / ".toolchains/rust-1.97.0")
         installed = cargo.parent.parent
@@ -158,10 +169,10 @@ def main() -> int:
             if release: command.append("--release")
             output=run(command,env,work / ("release.log" if release else "debug.log"))
             match=re.search(r"test result: ok\. (\d+) passed; 0 failed; 0 ignored;",output)
-            if not match or int(match[1]) != 246: raise ValueError("expected246 Rust host tests")
+            if not match or int(match[1]) != 268: raise ValueError("expected268 Rust host tests")
             report["host_tests"].append(dict(profile="release" if release else "debug", tests_passed=int(match[1])))
-        first=build(cargo,env,work / "build1",work / "build1.log")
-        second=build(cargo,env,work / "build2",work / "build2.log")
+        first=build(cargo,env,work / "build1",work / "build1.log", launch_candidate=args.launch_candidate)
+        second=build(cargo,env,work / "build2",work / "build2.log", launch_candidate=args.launch_candidate)
         if first != second: raise ValueError("independent build metadata differs")
         for name in first:
             for suffix in ("", ".bin"):

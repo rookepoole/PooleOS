@@ -110,6 +110,8 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-bounded-serial-readiness-private.json",
             "runs/native-launch-control-readiness-raw.json",
             "runs/native-launch-control-readiness-private.json",
+            "runs/native-launch-session-readiness-raw.json",
+            "runs/native-launch-session-readiness-private.json",
             "runs/native-console-ipc-private.json",
             "firmware/private/device.bin",
         )
@@ -148,7 +150,8 @@ class PublicationBoundaryTests(unittest.TestCase):
                      "runs/native-virtualbox-mouse-readiness.json", "runs/native-window-capacity-readiness.json",
                      "runs/native-surface-lifecycle-readiness.json", "runs/native-application-input-readiness.json",
                      "runs/native-input-lifetime-readiness.json",
-                     "runs/native-bounded-serial-readiness.json", "runs/native-launch-control-readiness.json"):
+                     "runs/native-bounded-serial-readiness.json", "runs/native-launch-control-readiness.json",
+                     "runs/native-launch-session-readiness.json"):
             for data, kind in ((fake_token, "secret_pattern"), (user_path, "absolute_user_path")):
                 self.assertTrue(any(item["type"] == kind for item in publication.inspect_public_blob(path, data)))
 
@@ -184,6 +187,7 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-input-lifetime-readiness.json",
             "runs/native-bounded-serial-readiness.json",
             "runs/native-launch-control-readiness.json",
+            "runs/native-launch-session-readiness.json",
             "runs/native-userspace-iso-readiness.json",
             "runs/native-app-file-wait-readiness.json",
             "runs/native_toolchain_qualification.json",
