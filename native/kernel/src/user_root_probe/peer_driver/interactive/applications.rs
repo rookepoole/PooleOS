@@ -118,7 +118,11 @@ pub(super) fn configure(args: &mut [Arguments; 6]) -> Result<(), ()> {
     #[cfg(feature = "development-windows")]
     {
         args[2] = Arguments::new(&[
-            b"window-console",
+            if cfg!(feature = "development-launch-desktop") {
+                b"launch-console"
+            } else {
+                b"window-console"
+            },
             b"0000000100040001",
             b"0000000100010001",
             b"0000000100010002",

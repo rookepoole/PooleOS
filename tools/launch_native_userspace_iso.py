@@ -45,7 +45,7 @@ def check_preview(receipt: Path):
         window=run['sustained_window']
         if window!=optical.validate_sustained(samples,window['first_dispatch'],window['last_dispatch']):
             raise ValueError('sustained evidence differs')
-        apps.validate_markers(run['markers'],bad_file=run['run_id']=='bad-file',file_waits=report.get('file_waits',False),windows=report.get('window_surfaces',False),window_capacity=report.get('window_capacity',False),surface_lifecycle=report.get('surface_lifecycle',False))
+        apps.validate_markers(run['markers'],bad_file=run['run_id']=='bad-file',file_waits=report.get('file_waits',False),windows=report.get('window_surfaces',False),window_capacity=report.get('window_capacity',False),surface_lifecycle=report.get('surface_lifecycle',False),launch_session=report.get('launch_shell_admission',False))
     ordinary=report['ordinary_denial']
     if ordinary['qemu_exit_code']!=0 or ordinary['iso_sha256']!=report['optical_images']['ordinary-denial']['iso_sha256']:
         raise ValueError('ordinary denial image differs')

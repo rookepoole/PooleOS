@@ -11,7 +11,18 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle306 implements bounded mouse/key launch
+**Current development checkpoint:** Cycle307 connects the real native launch
+console and shell through an explicit kernel profile. Four baseline QEMU checks
+and a separate GUI run pass: mouse/key launches, inspection, fault/stop/restart
+and preserved unfinished terminal drafts. Exact rendered status/surface pixels
+and kernel admissions are verified with zero serial input. Paired kernels and
+ISOs reproduce without increasing capabilities, stack guards or image limits.
+The full two-emulator input/lifetime matrix and native hostile-control checks
+remain before selecting a replacement for the historical Cycle303 preview.
+This is connected native desktop progress, not production or merge qualification.
+[Progress and remaining gates](docs/checkpoints/cycle307-native-launch-desktop.md).
+
+**Historical development checkpoint:** Cycle306 implements bounded mouse/key launch
 and inspect controls, independent surface status, and a separate native launch
 console candidate. Held inputs, resets, stale replies and backpressure are
 host-tested. Compact terminal storage saves992 bytes of compiled entry-frame

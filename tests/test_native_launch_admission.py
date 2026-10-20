@@ -80,6 +80,7 @@ class NativeLaunchAdmissionTests(unittest.TestCase):
         import tomllib
         manifest = tomllib.loads((ROOT / "native/kernel/Cargo.toml").read_text())
         self.assertEqual(manifest["features"]["development-launch-session"], ["development-window-input"])
+        self.assertEqual(manifest["features"]["development-launch-desktop"], ["development-launch-session"])
         self.assertEqual(manifest["features"]["default"], [])
         startup = (ROOT / "native/kernel/src/user_entry/startup.rs").read_text()
         self.assertIn("Self::bounded(code, entry_offset, MAX_CODE_PAGES)", startup)
@@ -89,6 +90,8 @@ class NativeLaunchAdmissionTests(unittest.TestCase):
         arguments = (ROOT / "native/kernel/src/user_root_probe/peer_driver/interactive/applications.rs").read_text()
         self.assertIn('cfg!(feature = "development-launch-session")', arguments)
         self.assertIn('b"launch-shell"', arguments)
+        self.assertIn('cfg!(feature = "development-launch-desktop")', arguments)
+        self.assertIn('b"launch-console"', arguments)
         user = (ROOT / "native/kernel/src/user_entry.rs").read_text()
         self.assertIn("MAX_CODE_PAGES: u64 = 4", user)
         self.assertIn("LAUNCH_SHELL_CODE_PAGES: u64 = 5", user)
@@ -125,6 +128,93 @@ class NativeLaunchAdmissionTests(unittest.TestCase):
                     qualification.main()
                 self.assertEqual(error.exception.code, 2)
                 self.assertFalse(output.exists())
+
+    def test_desktop_selector_preserves_linker_limits_and_rejects_diagnostics(self):
+        with tempfile.TemporaryDirectory() as temp:
+            for features in (("development-launch-desktop",),
+                             ("development-launch-desktop", "development-applications-bad-file")):
+                with patch("tools.native_build_space.require_space", return_value={}), patch.object(entry, "_run") as run:
+                    with self.assertRaisesRegex(entry.QualificationError, "artifact is missing"):
+                        entry._build_product(Path("cargo"), {}, Path(temp)/str(len(features)), features=features)
+                flags = run.call_args.kwargs["env"]["CARGO_ENCODED_RUSTFLAGS"]
+                for symbol in ("launch_session", "window_input", "window_capacity", "windows", "desktop", "apps"):
+                    self.assertIn(f"--defsym=__poole_{symbol}_profile=1", flags)
+            with patch("tools.native_build_space.require_space", return_value={}), patch.object(entry, "_run") as run:
+                with self.assertRaisesRegex(entry.QualificationError, "unreviewed"):
+                    entry._build_product(Path("cargo"), {}, Path(temp)/"bad",
+                        features=("development-launch-desktop", "development-serial-recovery"))
+                run.assert_not_called()
+
+    def test_console_requires_separately_qualified_shell_before_output(self):
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp)/"absent"
+            base = ["qualifier", "--work-dir", str(output), "--program-dir", str(output),
+                    "--launch-console-dir", str(output), "--optical", "--windows",
+                    "--window-capacity", "--surface-lifecycle", "--surface-input"]
+            with patch("sys.argv", base), patch("sys.stderr"), self.assertRaises(SystemExit) as error:
+                qualification.main()
+            self.assertEqual(error.exception.code, 2)
+            self.assertFalse(output.exists())
+
+    def test_three_independent_builds_are_all_revalidated(self):
+        sources = [(Path(n), [(n, key)], {n: True}) for n, key in
+                   (("ordinary", "CONSOLE"), ("shell", "CONSOLE_CLIENT"), ("console", "CONSOLE"))]
+        for changed in range(3):
+            values = [v[2] for v in sources]
+            values[changed] = {"drift": True}
+            with patch.object(qualification, "program_inputs", side_effect=values), self.assertRaises(ValueError):
+                qualification.revalidate_program_inputs(sources, {})
+        with patch.object(qualification, "program_inputs", side_effect=[v[2] for v in sources]) as check:
+            qualification.revalidate_program_inputs(sources, {})
+            self.assertEqual(check.call_count, 3)
+
+    def test_gui_scenario_removes_all_start_commands_and_preserves_drafts(self):
+        from tools.qualify_native_launch_desktop import scenario
+        case, actions = scenario("0123456789abcdef")
+        self.assertEqual(len(actions), 4)
+        self.assertNotIn(b"start ", case.sent)
+        self.assertEqual([(v["app"], v["generation"], v["mouse"]) for v in actions.values()],
+                         [("text", 1, True), ("numbers", 1, False),
+                          ("numbers", 2, False), ("text", 2, True)])
+        for step, action in actions.items():
+            self.assertTrue(case.sent[:step].endswith(b"echo "+action["draft"].encode()))
+            self.assertEqual(case.steps[step][0], b"\r")
+            self.assertIn(action["draft"].encode()+b"\r\n", case.steps[step][1])
+        with self.assertRaises(ValueError):
+            scenario("not-a-nonce")
+
+    def test_launch_pixel_oracle_checks_every_label_pixel(self):
+        from tools.qualify_native_launch_desktop import HEADER_GLYPHS, inspect_header
+        width, height = 1000, 600
+        raw = bytearray(bytes.fromhex("F7FAF9")*(width*height))
+        label = "Numbers: running / surface"
+        for i, char in enumerate(label):
+            for y in range(14):
+                for x in range(10):
+                    if HEADER_GLYPHS[char][y//2] & (1 << (4-x//2)):
+                        at = ((8+y)*width+144+i*12+x)*3
+                        raw[at:at+3] = bytes.fromhex("253E37")
+        prefix = b"P6\n1000 600\n255\n"
+        self.assertEqual(inspect_header(prefix+raw, label)["pixels_verified"], len(label)*192)
+        for wrong in ("Numbers: admitted / surface", "Text: running / surface", "", "?"*36):
+            with self.assertRaises(ValueError):
+                inspect_header(prefix+raw, wrong)
+        raw[((8+15)*width+144+11)*3] ^= 1
+        with self.assertRaises(ValueError):
+            inspect_header(prefix+raw, label)
+
+    def test_gui_barrier_waits_without_serial_or_key_injection(self):
+        from tools.qualify_native_launch_desktop import Interaction
+        interaction = Interaction()
+        try:
+            interaction.step = next(iter(interaction.actions))
+            interaction.inject = lambda _: self.fail("blocked draft injected a key")
+            interaction.send_ready()
+            self.assertTrue(interaction.ready)
+            self.assertEqual(interaction.sent, 0)
+            self.assertEqual(interaction.completed, set())
+        finally:
+            interaction.close()
 
     def test_final_revalidation_keeps_original_and_replacement_builds_separate(self):
         ordinary = (Path("ordinary"), [("PooleAppShell", "CONSOLE_CLIENT")], {"build": "ordinary"})

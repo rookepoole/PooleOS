@@ -1,15 +1,58 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-20
-Plan version: 2.209.0-native-window-launch-controls
-Roadmap cycle: PooleOS Cycle 306
+Plan version: 2.210.0-native-launch-desktop
+Roadmap cycle: PooleOS Cycle 307
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 306: Window Launch Controls And Stack Headroom
+## Cycle 307: Native Launch Desktop
+
+Implemented: explicit `development-launch-desktop` admission of the launch
+console in trusted slot2, retaining shell-owned process factories in slot3.
+The complete isolated-input feature chain, exact startup roles, original
+capabilities, guarded stacks and code-page limits remain. Three independently
+qualified program selections are revalidated without overwriting the original
+build reports. [Native integration contract](native-launch-desktop.md).
+
+Chronological substeps under existing N13/N14/N27/N29 flags:
+1. Implemented: explicit kernel admission, unchanged budget and separate program
+   selection/revalidation; focused qualification passes47 tests.
+2. Qualified on QEMU: paired kernel/ISO regression and actual GUI Start/Inspect/
+   restart, independent header/surface pixels and retained terminal drafts/file
+   work. Four baseline guests and one GUI guest pass; four starts, four
+   inspections and four pending drafts are verified with zero serial input.
+3. Next: native stale/repeated/delayed/failure controls and complete QEMU/VirtualBox
+   isolated application input and focus/lifetime matrices. Propagate the explicit
+   launch-session profile through the older matrix/launcher validators first;
+   their ordinary-shell accounting must not be bypassed.
+4. Select a replacement source-bound connected desktop ISO only after those
+   checks pass. Preserve the Cycle303 preview and all historical receipts.
+
+The kernel remains135/208 pages with36 guarded kernel-stack pages and992 bytes
+of read-only padding. Observed guarded execution does not establish all-path
+stack safety. All40 phases,301 subphases and101 flags (46 open) remain.
+Native launch-failure cleanup, compositor recovery, persistence, independent
+COM2-free startup, event-driven waits, complete microkernel, PooleGlyph/PDC and
+accessible PooleGlass remain required. No production or merge gate closes.
+[Current checkpoint](checkpoints/cycle307-native-launch-desktop.md).
+
+The GUI run injects370 ordinary command bytes as keyboard events, plus bounded
+mouse/function-key gestures. All start commands are removed from the independent
+scenario. Eight exact rendered status/surface observations, real kernel task
+identities, useful file results and both applications' second-generation
+restarts pass. Terminal drafts remain intact while the shell processes PLC1.
+This is real connected native desktop behavior, not a graphical mockup.
+
+Four kernel host runs pass626 tests each, with Rust formatting clean. The
+selected470 metadata/integration checks and47 focused checks pass;31 paired
+program builds remain independently validated. The1618 Python test inventory
+is not a full canonical pass. No owner action blocks the next desktop work.
+
+## Historical Cycle 306: Window Launch Controls And Stack Headroom
 
 Implemented: a bounded window-manager Start/Inspect controller, mouse taskbar
 actions, keyboard selection/inspection, independently observed surface status

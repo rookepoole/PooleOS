@@ -7,9 +7,23 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 306
+Last roadmap reconciliation: PooleOS Cycle 307
 
-Cycle306 implements bounded window-manager Start/Inspect intents over the real
+Cycle307 admits the launch console in an explicit native kernel profile, keeping
+process factories in the shell and preserving all existing capabilities, page
+limits and stack guards. Four baseline QEMU guests and a separate native GUI
+guest pass. Two mouse and two keyboard launches, four inspections, both apps'
+fault/stop/restart lifetimes and four unfinished terminal drafts are verified.
+Exact header/surface pixels and kernel admissions support the claim; no serial
+input or start-command injection is used. Paired kernels and ISOs reproduce.
+The complete two-emulator input/lifetime matrix, native hostile-control paths
+and all-path stack bounds remain open before replacing the Cycle303 preview.
+No phase closure, merge qualification or production promotion follows.
+All40 phases,301 subphases, complete microkernel, PooleGlyph/PDC and accessible
+PooleGlass remain required.
+[Current progress](checkpoints/cycle307-native-launch-desktop.md).
+
+Historical Cycle306 implements bounded window-manager Start/Inspect intents over the real
 PLC1 service, independent surface status and a separate launch-console role.
 Held inputs, modifiers, resets, quarantine, stale replies and backpressure are
 host-tested; compact terminal storage preserves rendering while reducing the
@@ -20,7 +34,7 @@ two-backend matrix remain required before a connected ISO can replace the
 historical preview. No phase closure, merge qualification or production claim.
 All40 phases,301 subphases and complete microkernel, PooleGlyph/PDC and accessible
 PooleGlass remain required.
-[Current progress](checkpoints/cycle306-window-launch-controls.md).
+[Historical progress](checkpoints/cycle306-window-launch-controls.md).
 
 Historical Cycle305 implements explicit trusted-slot native admission for the measured
 five-page launch shell. Ordinary application limits, original handles and guarded

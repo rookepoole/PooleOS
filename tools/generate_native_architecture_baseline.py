@@ -24,6 +24,10 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle307-native-launch-desktop.md",
+    "docs/native-launch-desktop.md",
+    "runs/native-launch-desktop-readiness.json",
+    "tools/qualify_native_launch_desktop.py",
     "docs/checkpoints/cycle306-window-launch-controls.md",
     "docs/native-window-launch-controls.md",
     "runs/native-window-launch-readiness.json",

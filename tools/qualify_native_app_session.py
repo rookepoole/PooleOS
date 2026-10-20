@@ -127,6 +127,7 @@ def main():
     parser.add_argument('--surface-lifecycle', action='store_true', help='opt-in generation-bound window retirement')
     parser.add_argument('--surface-input', action='store_true', help='opt-in isolated application input over owned surfaces')
     parser.add_argument('--launch-shell-dir', type=Path, help='separately qualified PLCODE1 shell for native admission; no graphical control claim')
+    parser.add_argument('--launch-console-dir', type=Path, help='separately qualified PWCODE1 launch console; requires launch shell')
     parser.add_argument('--serial-recovery', action='store_true', help='diagnostic-only bounded UART backpressure challenge')
     args = parser.parse_args(); work, programs = args.work_dir.resolve(), args.program_dir.resolve()
     if args.desktop and not args.optical: parser.error('local console requires the optical development profile')
@@ -138,6 +139,11 @@ def main():
     if args.launch_shell_dir and (not args.surface_input or args.serial_recovery):
         parser.error('launch shell requires the isolated-input profile without serial fault injection')
     launch_programs = args.launch_shell_dir.resolve() if args.launch_shell_dir else None
+    if args.launch_console_dir and not launch_programs:
+        parser.error('launch console requires the separate launch shell')
+    launch_console = args.launch_console_dir.resolve() if args.launch_console_dir else None
+    if launch_console and not launch_console.is_relative_to(ROOT/'outputs'):
+        parser.error('launch console directory must be under workspace outputs')
     if launch_programs and not launch_programs.is_relative_to(ROOT/'outputs'):
         parser.error('launch program directory must be under workspace outputs')
     if sum((args.deferred_cleanup,args.file_controls,args.exhaust_cleanup,args.claimed_requester,args.optical)) > 1: parser.error('separate control profiles required')
@@ -145,7 +151,7 @@ def main():
         parser.error('workspace output paths required')
     storage = require_space(work); work.mkdir(parents=True, exist_ok=False)
     before = source.source_bindings()
-    report = dict(cycle=305 if launch_programs else 300 if args.surface_input else 299 if args.surface_lifecycle else 298 if args.window_capacity else 297 if args.windows else 296 if args.desktop else 292 if args.optical else 287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
+    report = dict(cycle=307 if launch_console else 305 if launch_programs else 300 if args.surface_input else 299 if args.surface_lifecycle else 298 if args.window_capacity else 297 if args.windows else 296 if args.desktop else 292 if args.optical else 287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
                   contract_id=optical.CONTRACT if args.optical else 'PCLAIM1' if args.claimed_requester else 'PCLEANUP3' if args.exhaust_cleanup else 'PFILECONTROL1' if args.file_controls else 'PAPPRECOVERY1' if args.deferred_cleanup else 'PAPPSESSION1',
                   optical=args.optical, optical_images={}, file_waits=args.optical,
                   local_console=args.desktop or args.windows, window_surfaces=args.windows, graphical_desktop=False,
@@ -153,6 +159,7 @@ def main():
                   surface_lifecycle=args.surface_lifecycle,
                   surface_input=args.surface_input,
                   launch_shell_admission=bool(launch_programs), native_plc1_control_verified=False,
+                  launch_console_admission=bool(launch_console),
                   diagnostic_only=args.serial_recovery, serial_recovery=args.serial_recovery,
                   claimed_requester=args.claimed_requester,
                   exhaust_cleanup=args.exhaust_cleanup,
@@ -184,6 +191,12 @@ def main():
             program_sources.append((launch_programs, launch_selection, report['launch_program_build']))
             selected = [('PooleLaunchShell' if key == 'CONSOLE_CLIENT' else name, key) for name, key in selected]
             selected_records = dict(selected_records, **report['launch_program_build']['programs'])
+        if launch_console:
+            console_selection = [('PooleLaunchConsole', 'CONSOLE')]
+            report['launch_console_build'] = program_inputs(launch_console, env, console_selection)
+            program_sources.append((launch_console, console_selection, report['launch_console_build']))
+            selected = [('PooleLaunchConsole' if key == 'CONSOLE' else name, key) for name, key in selected]
+            selected_records = dict(selected_records, **report['launch_console_build']['programs'])
         lock, profile = shared.tier0.validate_contracts(ROOT)
         qemu = shared.tier0._require_workspace_tool_path(shared.tier0.DEFAULT_QEMU_ROOT, ROOT)
         shared.tier0.verify_local_launch_runtime(lock, qemu, ROOT)
@@ -210,6 +223,9 @@ def main():
         if launch_programs:
             normal_features=('development-launch-session',)
             bad_features=('development-launch-session','development-applications-bad-file')
+        if launch_console:
+            normal_features=('development-launch-desktop',)
+            bad_features=('development-launch-desktop','development-applications-bad-file')
         if args.exhaust_cleanup:
             normal_features=('development-app-cleanup-exhaustion',)
             bad_features=normal_features+('development-applications-bad-file',)
