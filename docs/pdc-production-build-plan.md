@@ -1,15 +1,62 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-20
-Plan version: 2.210.0-native-launch-desktop
-Roadmap cycle: PooleOS Cycle 307
+Plan version: 2.211.0-native-connected-desktop
+Roadmap cycle: PooleOS Cycle 308
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 307: Native Launch Desktop
+## Cycle 308: Connected Desktop Matrix
+
+Implemented: strict explicit launch-profile propagation through receipt admission,
+both launchers, local input, window/input/lifetime and GUI validators. Ordinary
+four-page accounting is preserved; malformed flags, missing prerequisites and
+diagnostic profiles reject. Direct runners now enforce the storage preflight.
+The old nominally-neutral F1 probe uses F12 because F1 is now a desktop command.
+VirtualBox GUI capture permission stays limited to192 exact owned-directory
+filenames. No native kernel/application source, capability, code allowance or
+stack guard is changed. [Qualification contract](native-connected-desktop.md).
+
+Chronological substeps under the existing N13/N14/N27/N29 flags:
+1. Complete:119 focused tests and current-source paired kernel/ISO regression;
+   three real application sessions plus ordinary unsigned-denial pass.
+2. Complete: native GUI Start/Inspect/restart, preserved terminal drafts and
+   held-launch-key repetition pass on QEMU and headless VirtualBox. Eight starts,
+   eight inspections, eight drafts, four held repeats and20 rendered observations
+   are verified; neither GUI case injects serial input or terminal start commands.
+3. Complete: standard/burst isolated app input and focus/drag/held-modifier
+   retirement on both emulators,384 input observations,96 lifetime observations
+   and48 lifecycle barriers. Both actual launcher self-tests also pass.
+4. Complete: reconstruct all exact evidence, then select and byte-verify the
+   Cycle308 connected desktop `.iso`, preserving Cycle303 and all historical
+   evidence. The configured launcher remains required; no standalone COM2-free
+   boot, installer, physical hardware or visible-human-interaction claim follows.
+
+The linked kernel remains135/208 pages with36 guarded kernel-stack pages.
+This is a bounded native desktop, not production or full canonical qualification.
+Native stale/delayed/failed-launch controls, window-service recovery, complete
+stack bounds, persistence, COM2-independent startup, event-driven waits,
+accessible PooleGlass, complete microkernel, PooleGlyph/PDC and all N0-N39 gates
+remain. All40 phases,301 subphases and101 flags (46 open) are retained.
+[Current checkpoint](checkpoints/cycle308-connected-desktop-matrix.md).
+
+Closeout history: the initial metadata/integration replay passed475/477; two old
+AST assertions required inline capacity/lifecycle keywords instead of the adapter.
+The assertions are updated to verify the adapter binding, flag propagation and
+non-boolean rejection, preserving their original quota/retirement checks.
+All119 expanded focused checks pass. These two tests are execution-bound, so the
+initial native cohort and candidate receipt are preserved as superseded oracle
+evidence. A fresh current-source sixteen-guest cohort passes complete
+reconstruction before final preview selection. No original receipt is relabeled
+or source check bypassed. All477 selected metadata/integration checks now pass
+after evidence and documentation regeneration. The1625 discovered Python tests
+are inventory, not full execution; selected/focused counts overlap. The exact
+staged tree must pass publication and final source/document checks before commit.
+
+## Historical Cycle 307: Native Launch Desktop
 
 Implemented: explicit `development-launch-desktop` admission of the launch
 console in trusted slot2, retaining shell-owned process factories in slot3.

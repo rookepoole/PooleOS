@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class WindowCapacityTests(unittest.TestCase):
     def test_native_oracle_binds_seven_page_console_and_exact_retirement_counts(self):
         import ast
+        from types import SimpleNamespace
         from runtime import native_app_session as apps
         from tests.test_native_windows import markers
         # Every public input/launcher path must propagate the explicit profile
@@ -20,11 +21,26 @@ class WindowCapacityTests(unittest.TestCase):
             tree=ast.parse((ROOT/f'tools/{name}.py').read_text())
             calls=[n for n in ast.walk(tree) if isinstance(n,ast.Call) and isinstance(n.func,ast.Attribute) and n.func.attr=='negative_controls']
             self.assertEqual(len(calls),1)
-            values=[k.value for k in calls[0].keywords if k.arg=='window_capacity']
+            values=[k.value for k in calls[0].keywords if k.arg is None]
             self.assertEqual(len(values),1)
-            expr=compile(ast.Expression(values[0]),name,'eval')
-            for report,expected in (({},False),({'window_capacity':False},False),({'window_capacity':True},True)):
-                self.assertIs(eval(expr,{'__builtins__':{}},{'report':report}),expected)
+            self.assertIsInstance(values[0],ast.Name)
+            self.assertEqual(values[0].id,'options')
+            self.assertFalse(any(k.arg=='window_capacity' for k in calls[0].keywords))
+            adapters=[n.value for n in ast.walk(tree) if isinstance(n,ast.Assign)
+                and any(isinstance(t,ast.Name) and t.id=='options' for t in n.targets)]
+            self.assertTrue(adapters)
+            for adapter in adapters:
+                self.assertIsInstance(adapter,ast.Call)
+                self.assertIsInstance(adapter.func,ast.Attribute)
+                self.assertEqual(adapter.func.attr,'profile_options')
+                self.assertEqual([ast.dump(a) for a in adapter.args],[ast.dump(ast.Name(id='report',ctx=ast.Load()))])
+                expr=compile(ast.Expression(adapter),name,'eval')
+                for report,expected in (({},False),({'window_capacity':False},False),({'window_capacity':True},True)):
+                    options=eval(expr,{'__builtins__':{}},{'report':report,'apps':apps,'local':SimpleNamespace(apps=apps)})
+                    self.assertIs(options['window_capacity'],expected)
+                for bad in (None,0,1,'true'):
+                    with self.assertRaises(ValueError):
+                        eval(expr,{'__builtins__':{}},{'report':{'window_capacity':bad},'apps':apps,'local':SimpleNamespace(apps=apps)})
         for bad_file in (False,True):
             wide=[]
             for line in markers(bad_file):

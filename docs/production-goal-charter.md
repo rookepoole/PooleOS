@@ -7,9 +7,29 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 307
+Last roadmap reconciliation: PooleOS Cycle 308
 
-Cycle307 admits the launch console in an explicit native kernel profile, keeping
+Cycle308 keeps the native launch profile explicit through both emulators'
+launchers and all input/lifetime validators. Ordinary accounting, capabilities
+and guards remain unchanged. The current-source optical baseline and both native
+GUI challenges pass, including held-repeat controls and retained drafts.
+The complete standard/burst input, lifetime and actual launcher matrix passes:
+ten QEMU and six headless VirtualBox guests. The source-bound Cycle308 preview
+is selected after complete reconstruction, with a separately verified Downloads
+copy. The Cycle303 preview and all historical evidence remain preserved.
+Native hostile-control/recovery paths, complete stack bounds, persistence,
+COM2-independent startup, PooleGlyph/PDC, accessible PooleGlass and every N0-N39
+gate remain open. No main merge or production promotion follows from this work.
+[Current progress](checkpoints/cycle308-connected-desktop-matrix.md).
+
+The metadata closeout identified two stale inline-keyword assertions. Their
+strict-adapter replacements pass in the expanded119-test focused suite; because
+the tests are source-bound, a fresh sixteen-guest native cohort was executed.
+It passes complete reconstruction before selection. The first cohort and
+candidate receipt remain preserved, and the selected preview now carries the
+corrected source map from actual new execution, not relabeled old evidence.
+
+Historical Cycle307 admits the launch console in an explicit native kernel profile, keeping
 process factories in the shell and preserving all existing capabilities, page
 limits and stack guards. Four baseline QEMU guests and a separate native GUI
 guest pass. Two mouse and two keyboard launches, four inspections, both apps'

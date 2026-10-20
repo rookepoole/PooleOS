@@ -1,23 +1,29 @@
 # Run The Native Window Preview
 
-Cycle303's controlled native qualification passes on QEMU and visible VirtualBox.
+Cycle308's controlled native qualification passes on QEMU and headless VirtualBox.
 The local launcher and byte-verified Downloads copy select this checkpoint.
 
-Cycle303, 2026-10-18. Native PooleBoot + PooleKernel, not Linux.
+Cycle308, 2026-10-20. Native PooleBoot + PooleKernel, not Linux.
 This experimental build draws Terminal and two independent native application
 windows inside the VM and accepts focused keyboard input. It is not a complete
 desktop, PooleGlass environment, installer or production release.
 
-Cycle303 adds a host-tested typed launch broker and authenticated transport,
-but does not connect graphical launch controls yet. The ordinary shared-code
-image is rebuilt and requalified: eight QEMU and four VirtualBox runs, including
-the complete two-mode input/lifetime matrix. Start applications through Terminal
-as below. This checkpoint does not add a launch button or change the UI design.
+The typed launch broker and authenticated transport now connect real graphical
+Start/Inspect controls to the native shell's process authority. Ten QEMU and six
+headless VirtualBox guests pass, including GUI launches, both input/lifetime
+modes and both actual launcher self-tests. Kernel/application binaries are
+unchanged from Cycle307; this checkpoint qualifies the connected image through
+the full current-source matrix. It is not a new boot-screen design.
+
+The latest VM qualification is headless: real guest pixels and emulated devices,
+not a human-driven visible-window test. The visible launcher's19 runtime hashes
+also pass a fresh identity check. Continuous physical typematic delivery, real
+hardware and everyday reliability remain unqualified.
 
 The controlled device challenge covers96 exact app-input observations, a332-byte
 shell case,17 pointer steps and six generation-bound lifecycle pixel barriers.
 Both single-character and four-character shell-input modes must pass on QEMU and
-visible VirtualBox. Editing, calculations, draft overflow recovery, fresh restart,
+headless VirtualBox. Editing, calculations, draft overflow recovery, fresh restart,
 peer survival and cleanup retain the240-second guest and12-second action bounds.
 The longer557-byte serial workflow is separately replayed. Historical failures
 remain retained, not rewritten as successes. Native continuous-typematic stress
@@ -55,7 +61,15 @@ the VM to type. VirtualBox's Host Key (default Right Ctrl) releases captured
 keyboard/mouse input. The host
 terminal is only the launcher; it is not the guest's keyboard/input interface.
 
-Try commands one at a time:
+Click Text or Numbers on the taskbar to launch a missing application. F2 and F3
+do the same; F1 selects Terminal. An existing surface is restored/focused without
+spawning a duplicate. A new application does not steal your terminal draft:
+click its window before typing. Shift+F2 or Shift+F3 inspects the process without
+inserting a terminal command. The top header distinguishes the last control
+result from independently observed surface presence.
+[Connected control details](native-connected-desktop.md#connected-desktop-controls).
+
+Alternatively, try commands one at a time in Terminal:
 
 ```text
 help
@@ -71,7 +85,8 @@ status numbers
 Text counts bytes/words/lines; Numbers summarizes signed32-bit integers.
 These are separate native applications using capability IPC and native file
 wait/wakeup, not a host simulation or a kernel command interpreter.
-Their windows appear after `start text` and `start numbers`. Click Text and type
+Their windows appear after a graphical launch or `start text`/`start numbers`.
+Click Text and type
 `PooleOS native`, then Enter: Bytes14, Words2, Lines0. Click Numbers and type
 `3, -2 8`, then Enter: Rows3, Sum9, Min-2, Max8. Numbers accepts a list, not
 expressions. Backspace edits; Ctrl+C clears the scratch draft. Enter evaluates
@@ -80,8 +95,8 @@ A49th character clears the draft and reports `Input limit`; press Enter or Ctrl+
 before starting afresh. These are scratch tools, not persistent document editors.
 File commands above still work and do not replace the app's scratch draft.
 
-Stopping/faulting an app removes its window
-and taskbar entry; `status` in Terminal reports process state. A restarted app
+Stopping/faulting an app removes its window; its taskbar launcher remains
+available. `status` in Terminal reports process state. A restarted app
 opens a fresh window with an empty draft. Automatic restart of the window service itself remains
 unimplemented and is not implied by application restart.
 If the focused app disappears, neither another app nor Terminal inherits focus
@@ -141,13 +156,14 @@ if a retained failure requires manual recovery; do not touch unrelated VMs.
 
 ## ISO And File Type
 
-Qualified development image: `outputs/cycle303-optical1/PooleOS-UserSpace-Preview.iso`.
+Qualified development image: `outputs/cycle308-native2/PooleOS-UserSpace-Preview.iso`.
 
-Verified convenience copy: `PooleOS-Native-Windows-Cycle303.iso` in Downloads.
+Verified convenience copy: `PooleOS-Native-Desktop-Cycle308.iso` in Downloads.
 Size 66109440 bytes; SHA256:
-`4FAC38AA0A631CC2D4D2AD428AAFEE07EE33A2CEB7FAEF8128655D9A6553D8F8`.
-The ISO contains the explicit input-profile kernel/service and interactive apps.
+`84FC435D3DDD6AC840853E5DC1ACCBD6FC2DD1FA677ED5AB8FC021DFFB4CB06E`.
+The ISO contains the explicit launch-desktop kernel, console, shell and apps.
 Final-source native replay and convenience-copy hash verification pass.
+The Cycle303 image and its previous pointer remain preserved.
 
 Windows may call this a "DVD Disc Image". It is still a real ISO9660 image with
 an EFI El Torito boot entry. It belongs in a VM's **optical-drive** picker, not
@@ -168,21 +184,30 @@ not open SDL, which previously crashed on this host. Both use the current pointe
 `outputs/native-userspace-preview.json`. The new visible entry point is:
 
 ```powershell
-.\Launch-Local-Console.cmd --receipt outputs/cycle303-optical1/receipt.json
+.\Launch-Local-Console.cmd --receipt outputs/cycle308-native2/receipt.json
 ```
 
 From the repository root with the configured Python runtime:
 
 ```text
-python -B -m tools.qualify_native_app_session --work-dir outputs/NEW-OPTICAL --program-dir outputs/cycle303-programs4 --optical --windows --window-capacity --surface-lifecycle --surface-input
+python -B -m tools.qualify_native_user_programs --work-dir outputs/NEW-PROGRAMS
+python -B -m tools.qualify_native_user_programs --work-dir outputs/NEW-SHELL --launch-candidate
+python -B -m tools.qualify_native_user_programs --work-dir outputs/NEW-CONSOLE --launch-console
+python -B -m tools.qualify_native_app_session --work-dir outputs/NEW-OPTICAL --program-dir outputs/NEW-PROGRAMS --launch-shell-dir outputs/NEW-SHELL --launch-console-dir outputs/NEW-CONSOLE --optical --windows --window-capacity --surface-lifecycle --surface-input
 python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-QEMU
 python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-BURST-QEMU --keyboard-batch 4
-python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible
-python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-BURST-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --visible --keyboard-batch 4
+python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe
+python -B -m tools.qualify_native_windows --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-MOUSE-BURST-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe --keyboard-batch 4
+python -B -m tools.qualify_native_launch_desktop --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-GUI-QEMU --backend qemu
+python -B -m tools.qualify_native_launch_desktop --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-GUI-VBOX --backend virtualbox --virtualbox PATH-TO-VBoxManage.exe
+python -B -m tools.launch_native_userspace_iso --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-LAUNCHER-QEMU --self-test
+python -B -m tools.launch_native_virtualbox --receipt outputs/NEW-OPTICAL/receipt.json --work-dir outputs/NEW-LAUNCHER-VBOX --virtualbox PATH-TO-VBoxManage.exe --self-test
 ```
 
-Use unused directories. The program directory contains29 independently rebuilt,
-source-bound pairs. Kernel/boot pairs and ISO variants must reproduce exactly;
+Use unused directories. The ordinary program directory contains29 independently
+rebuilt, source-bound pairs; the shell and console selections contain one pair
+each. Each build/qualification admits storage before output creation.
+Kernel/boot pairs and ISO variants must reproduce exactly;
 positive, stale-file-grant and ordinary unsigned-denial controls remain required.
 Native keyboard tests inject device scancodes, never serial input, and compare
 exact responses and real framebuffer pixels. A human typing is a separate check.

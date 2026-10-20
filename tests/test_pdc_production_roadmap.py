@@ -198,8 +198,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 307)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1618)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 308)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1625)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -239,8 +239,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "native_launch_desktop_connected_full_input_matrix_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 307)
+        self.assertEqual(current["qualification_status"], "connected_desktop_matrix_qualified_full_canonical_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 308)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -6904,7 +6904,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         lane=self.roadmap['baseline']['user_space_integration']
         self.assertTrue(lane['optical_iso_built'] and lane['continue_full_microkernel_after_iso'])
         self.assertEqual(self.roadmap['immediate_next_move']['title'],
-            'Qualify connected desktop input and launch lifetimes on both emulators')
+            'Harden native desktop failure and window-service recovery')
 
     def test_cycle289_file_wait_is_native_bound_and_preserves_the_optical_preview(self) -> None:
         from runtime import native_app_session as apps, native_userspace_iso as optical, native_shell
@@ -7986,21 +7986,23 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         r = json.loads(raw)
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), record["receipt_sha256"])
         self.assertEqual((r["cycle"], r["contract_id"], r["status"]), (307, "PWLAUNCH2", "partial"))
-        self.assertEqual(r["source_bindings"], source_bindings())
+        self.assertEqual(record["receipt_sha256"], "30E71ABCBFDFCA240A28884C4D51A3C09FDE779F15F5C6CE6A63924E828E86C5")
+        self.assertEqual(len(r["source_bindings"]), 1011)
+        self.assertNotEqual(r["source_bindings"], source_bindings())
         self.assertTrue(r["kernel_profile_selected"] and r["native_regression_verified"])
         self.assertTrue(r["graphical_launch_connected"] and r["native_plc1_execution_verified"])
         self.assertEqual((r["qemu_guest_runs"], r["virtualbox_guest_runs"]), (5, 0))
         self.assertEqual((r["starts_verified"], r["inspections_verified"], r["terminal_drafts_preserved"]), (4, 4, 4))
         self.assertEqual(r["program_pairs_revalidated"], 31)
         native = r["native_regression"]
-        self.assertEqual(native["source_bindings"], source_bindings())
+        self.assertEqual(native["source_bindings"], r["source_bindings"])
         self.assertTrue(native["launch_console_admission"] and native["launch_shell_admission"])
         self.assertFalse(native["native_plc1_control_verified"])
         for key in ("program_build", "launch_program_build", "launch_console_build"):
             self.assertEqual(native[key]["source_bindings"], bindings())
         gui = r["native_gui"]
         self.assertEqual(gui["status"], "pass")
-        self.assertEqual(gui["source_bindings"], source_bindings())
+        self.assertEqual(gui["source_bindings"], r["source_bindings"])
         self.assertTrue(gui["native_plc1_control_verified"])
         self.assertEqual(gui["serial_input_bytes"], 0)
         self.assertEqual(len(gui["evidence"]), 8)
@@ -8009,10 +8011,67 @@ class PdcProductionRoadmapTests(unittest.TestCase):
                     "merge_qualified", "production_ready"):
             self.assertFalse(r[key], key)
         self.assertEqual(r["selected_preview_cycle"], 303)
-        lane = self.roadmap["baseline"]["user_space_integration"]
+        lane = self.roadmap["baseline"]["historical_cycle307_user_space_integration"]
         self.assertEqual(lane["native_execution_evidence_cycle"], 307)
         self.assertEqual(lane["kernel_profile"], "opt_in_development_launch_desktop")
         self.assertFalse(lane["new_preview_selected"])
+
+    def test_cycle308_connected_matrix_does_not_promote_full_desktop_or_production(self) -> None:
+        from tools.qualify_native_user_entry import source_bindings
+        from tools.qualify_native_user_programs import bindings
+        record = self.roadmap["baseline"]["native_connected_desktop"]
+        raw = (ROOT / record["receipt_path"]).read_bytes()
+        r = json.loads(raw)
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), record["receipt_sha256"])
+        self.assertEqual((r["cycle"], r["contract_id"], r["status"]), (308, "PWLAUNCH3", "partial"))
+        self.assertEqual(r["source_bindings"], source_bindings())
+        self.assertEqual((r["qemu_guest_runs"], r["virtualbox_guest_runs"]), (10, 6))
+        self.assertEqual((r["starts_verified"], r["inspections_verified"], r["terminal_drafts_preserved"]), (8, 8, 8))
+        self.assertEqual(r["held_launch_repeats_verified"], 4)
+        self.assertEqual(r["focused_tests"]["passed"], 119)
+        superseded = r["superseded_oracle_qualification"]
+        self.assertEqual(superseded["receipt_sha256"], "2CE27E3C3906B51DFF01E66DC031213D053BB2FF99078445568413F439F431D8")
+        self.assertEqual(superseded["changed_execution_sources"],
+                         ["tests/test_native_surface_lifecycle.py", "tests/test_native_window_capacity.py"])
+        self.assertTrue(superseded["new_native_execution_performed"])
+        self.assertFalse(superseded["historical_receipts_rewritten"])
+        self.assertEqual((r["gui_observations"], r["application_input_observations"],
+                          r["input_lifetime_observations"], r["surface_lifecycle_observations"]), (20, 384, 96, 48))
+        for key in ("kernel_sources_unchanged", "kernel_bytes_unchanged", "kernel_profile_selected",
+                    "native_regression_verified", "graphical_launch_connected", "native_plc1_execution_verified",
+                    "full_input_matrix_replayed", "selected_preview_source_requalified",
+                    "prior_preview_preserved", "download_byte_identity_verified"):
+            self.assertTrue(r[key], key)
+        self.assertEqual(r["program_pairs_revalidated"], 31)
+        self.assertEqual(r["selected_preview_cycle"], 308)
+        for key in ("program_build", "launch_program_build", "launch_console_build"):
+            self.assertEqual(r["native_regression"][key]["source_bindings"], bindings())
+        self.assertEqual(len(r["native_gui"]), 2)
+        self.assertEqual(len(r["desktop_regressions"]), 8)
+        self.assertEqual(len(r["launcher_regressions"]), 2)
+        for g in r["native_gui"] + r["desktop_regressions"] + r["launcher_regressions"]:
+            self.assertEqual(g["status"], "pass")
+            self.assertEqual(g["source_bindings"], source_bindings())
+            self.assertTrue(g["source_unchanged"])
+            self.assertNotIn("commands", g)
+            if g["tag"].startswith("vbox-"):
+                self.assertFalse(g["visible"])
+                self.assertTrue(g["runtime_unchanged"])
+                self.assertTrue(all(g["cleanup"][k] for k in ("stopped", "unregistered", "prior_registrations_unchanged")))
+        for g in r["native_gui"]:
+            self.assertEqual((g["serial_input_bytes"], len(g["evidence"])), (0, 10))
+            self.assertEqual(g["held_launch_repeats_verified"], 2)
+        for key in ("connected_stack_bound_verified", "fresh_host_kernel_tests_run",
+                    "physical_hardware_tested", "canonical_full_replay_performed", "merge_qualified", "production_ready"):
+            self.assertFalse(r[key], key)
+        lane = self.roadmap["baseline"]["user_space_integration"]
+        self.assertEqual(lane["native_execution_evidence_cycle"], 308)
+        self.assertTrue(lane["new_preview_selected"] and lane["full_input_matrix_replayed_this_cycle"])
+        self.assertFalse(lane["preview_source_requalification_required"])
+        self.assertTrue(lane["native_gui"] and lane["virtualbox_serial_preview_usable_on_qualified_host"])
+        self.assertFalse(lane["complete_graphical_desktop"] or lane["virtualbox_usable"])
+        self.assertEqual(lane["retained_preview_evidence_cycle"], 308)
+        self.assertEqual(lane["historical_preserved_preview_cycle"], 303)
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]

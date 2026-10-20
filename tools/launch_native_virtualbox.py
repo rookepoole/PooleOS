@@ -18,6 +18,7 @@ from runtime import native_virtualbox as vbox, native_app_session as apps
 from runtime import native_console as console, native_session as session, native_live_boot_handoff as handoff
 from tools import qualify_native_app_session as qualification, qualify_native_user_entry as source
 from tools.launch_native_userspace_iso import check_preview, local_file, Terminal, manual_summary, LOG_LIMIT
+from tools.native_build_space import require_space
 
 
 def installed_virtualbox() -> Path:
@@ -76,6 +77,7 @@ class VisibleConsole:
 
 def run_session(receipt: Path, work: Path, executable: Path, interaction, self_test: bool, *, visible=False):
     report, iso, disk = check_preview(receipt)
+    options = apps.profile_options(report)
     if visible and (self_test or report.get('local_console') is not True):
         raise ValueError('visible mode requires a qualified native local-console ISO')
     profile = json.loads((ROOT / 'specs/native-virtualbox-preview-profile.json').read_bytes())
@@ -83,6 +85,7 @@ def run_session(receipt: Path, work: Path, executable: Path, interaction, self_t
     work = work.resolve()
     if not work.is_relative_to((ROOT / 'outputs').resolve()) or work == (ROOT / 'outputs').resolve():
         raise ValueError('new workspace output session directory required')
+    storage = require_space(work)
     work.mkdir(parents=True, exist_ok=False)
     command = vbox.Command(executable.resolve(strict=True))
     owner = vbox.OwnedVm(work, command)
@@ -97,7 +100,8 @@ def run_session(receipt: Path, work: Path, executable: Path, interaction, self_t
         guest_bound_seconds=240 if self_test else 900, command_bound_seconds=vbox.COMMAND_SECONDS,
         iso_sha256=report['optical_images']['applications-1']['iso_sha256'],
         vm_uuid=owner.identity, vm_name=owner.name, no_guest_network=True,
-        no_host_shares=True, no_guest_disk=True, no_physical_media=True)
+        no_host_shares=True, no_guest_disk=True, no_physical_media=True,
+        application_profile=options, storage_preflight=storage)
     listener = None
     log = b''
     code = 1
@@ -140,7 +144,7 @@ def run_session(receipt: Path, work: Path, executable: Path, interaction, self_t
                 markers = session.extract_markers(log)
                 result['markers'] = markers
                 if self_test:
-                    summary = apps.validate_markers(markers, file_waits=report.get('file_waits', False), windows=report.get('window_surfaces',False), window_capacity=report.get('window_capacity',False),surface_lifecycle=report.get('surface_lifecycle',False))
+                    summary = apps.validate_markers(markers, **options)
                     case = interaction.case
                     _, output = console.split_output(bytes(interaction.received))
                     if (interaction.payload[:interaction.sent] != case.sent or output != case.expected
@@ -154,7 +158,7 @@ def run_session(receipt: Path, work: Path, executable: Path, interaction, self_t
                     result.update(marker_summary=summary,
                         pbp1_transcript=transcript,
                         transcript_binding=qualification.shared.transfer.validate_transcript_binding(prefix, transcript),
-                        hostile_marker_cases_rejected=apps.negative_controls(markers, file_waits=report.get('file_waits', False),windows=report.get('window_surfaces',False),window_capacity=report.get('window_capacity',False),surface_lifecycle=report.get('surface_lifecycle',False)),
+                        hostile_marker_cases_rejected=apps.negative_controls(markers, **options),
                         sustained_window=interaction.sustained_evidence,
                         interaction=dict(nonce=case.nonce, input_hex=case.sent.hex(),
                             output_hex=bytes(interaction.received).hex(), exact=True))

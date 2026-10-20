@@ -5,6 +5,7 @@ from tools import qualify_native_local_console as local
 from tools.qualify_native_windows import SurfaceProbe
 from tools.native_input_lifetime_probe import LifetimeInteraction,LifetimeProbe
 from runtime import native_surface_lifecycle as final_frames
+from tools.native_build_space import require_space
 
 
 def main():
@@ -17,16 +18,19 @@ def main():
     if args.visible and args.backend!='virtualbox':p.error('visible mode is VirtualBox-only')
     if args.backend=='virtualbox' and args.virtualbox is None:p.error('explicit VirtualBox executable required')
     report,iso,disk=local.check_preview(args.receipt.resolve())
+    options=local.apps.profile_options(report)
     if not all(report.get(k) is True for k in ('window_surfaces','window_capacity','surface_lifecycle','surface_input')):
         raise ValueError('qualified interactive lifecycle image required')
     work=args.work_dir.resolve()
     if not work.is_relative_to(local.ROOT/'outputs') or work==local.ROOT/'outputs':raise ValueError('new workspace output required')
+    storage=require_space(work)
     work.mkdir(parents=True,exist_ok=False)
     before=local.source.source_bindings();started=time.monotonic()
     interaction=LifetimeInteraction(args.keyboard_batch);probe=LifetimeProbe(work);surfaces=SurfaceProbe(work)
     result=dict(cycle=301,contract_id='PWS1',status='fail',source_bindings=before,iso_sha256=local.digest(iso),
                 backend=args.backend,visible=args.visible,guest_bound_seconds=240,physical_hardware_tested=False,
-                native_arbitrary_backlog_qualified=False,native_continuous_typematic_qualified=False,production_ready=False)
+                native_arbitrary_backlog_qualified=False,native_continuous_typematic_qualified=False,production_ready=False,
+                application_profile=options,storage_preflight=storage)
     pointer=None
     try:
         shared=local.qualification.shared
@@ -39,7 +43,7 @@ def main():
                     client.execute('input-send-event',{'events':[{'type':'key','data':{'down':not bool(c&128),'key':{'type':'number','data':c&127}}} for c in codes]})
                 interaction.inject=inject;probe.tick(client,interaction,debug);surfaces.tick(client,interaction,debug)
             run,_,_=shared.boot._execute_once('native-input-lifetime',lock,local.optical.optical_profile(base),qemu,iso,work,240,
-                marker_validator=lambda m:local.apps.validate_markers(m,file_waits=True,windows=True,window_capacity=True,surface_lifecycle=True),
+                marker_validator=lambda m:local.apps.validate_markers(m,**options),
                 marker_extractor=local.native_session.extract_markers,hpet_msi=True,pause_on_completion=True,
                 console_port=interaction.port,console_poll=interaction.poll,capture_log_limit_bytes=local.LOG_LIMIT,
                 guest_control=control,frame_validator=final_frames.inspect_ppm)
@@ -66,7 +70,7 @@ def main():
         result.update(status='pass',run=run,exact_interaction=True,focused_fault_and_exit_verified=True,
                       active_drag_retirement_verified=True,explicit_focus_recovery_verified=True,
                       held_modifier_recovery_verified=True,sustained_window=interaction.sustained_evidence,
-                      hostile_marker_cases_rejected=local.apps.negative_controls(run['markers'],file_waits=True,windows=True,window_capacity=True,surface_lifecycle=True))
+                      hostile_marker_cases_rejected=local.apps.negative_controls(run['markers'],**options))
     except Exception as e:result['failure']=f'{type(e).__name__}: {e}'
     finally:
         interaction.close()

@@ -46,7 +46,7 @@ class ApplicationInputTests(unittest.TestCase):
         self.assertLess(len(actions),128)
         self.assertEqual([a['focus'] for a in actions if a['focus'] is not None],[1,0])
         hold=next(a for a in actions if a['label']=='hold-key-and-shift')
-        self.assertEqual(hold['codes'],[0x2a,0x1e,0x3b,0xbb])
+        self.assertEqual(hold['codes'],[0x2a,0x1e,0x58,0xd8])
         self.assertNotIn(0x9e,hold['codes']);self.assertNotIn(0xaa,hold['codes'])
         self.assertEqual(next(a for a in actions if a['label']=='release-held-keys')['codes'],[0x9e,0xaa])
         held=next(a for a in actions if a['label']=='held-repeat-suppressed')

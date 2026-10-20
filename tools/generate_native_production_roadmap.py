@@ -16563,13 +16563,96 @@ def apply_cycle307(roadmap: dict, test_count: int) -> dict:
             "QEMU/VirtualBox isolated application input and focus/lifetime matrices",
             "source-bound replacement desktop ISO without rewriting old evidence",
             "all-path stack bounds and remaining kernel/PooleGlyph/PDC/PooleGlass gates"])
+    return apply_cycle308(roadmap, test_count)
+
+
+def apply_cycle308(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle308-connected-desktop-matrix.md"
+    contract = "docs/native-connected-desktop.md"
+    path = "runs/native-connected-desktop-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle307_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=308, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 308
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 308
+    gate["qualification_status"] = "connected_desktop_matrix_qualified_full_canonical_pending"
+    baseline["native_launch_desktop"]["evidence_status"] = "historical_oracle_sources_changed_cycle308"
+    gate["current_native_launch_desktop_qualification"]["evidence_status"] = "historical_oracle_sources_changed_cycle308"
+    record = dict(cycle=308, contract_id="PWLAUNCH3", status=receipt["status"],
+                  receipt_path=path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+                  source_binding_count=len(receipt["source_bindings"]))
+    for key in ("kernel_sources_unchanged", "kernel_bytes_unchanged",
+                "kernel_profile_selected", "program_pairs_revalidated", "native_regression_verified",
+                "qemu_guest_runs", "virtualbox_guest_runs", "virtualbox_headless",
+                "iso_built", "native_plc1_execution_verified", "graphical_launch_connected",
+                "starts_verified", "inspections_verified", "terminal_drafts_preserved",
+                "held_launch_repeats_verified", "gui_observations", "application_input_observations",
+                "input_lifetime_observations", "surface_lifecycle_observations",
+                "connected_stack_bound_verified", "full_input_matrix_replayed",
+                "selected_preview_cycle", "selected_preview_source_requalified",
+                "prior_preview_preserved", "download_byte_identity_verified",
+                "physical_hardware_tested", "canonical_full_replay_performed",
+                "merge_qualified", "production_ready"):
+        record[key] = receipt[key]
+    baseline["native_connected_desktop"] = copy.deepcopy(record)
+    gate["current_native_connected_desktop_qualification"] = record
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=308, receipt_path=path, receipt_section="native_regression",
+        retained_kernel_sources_unchanged=True,
+        native_execution_status="connected_native_desktop_both_emulators_verified",
+        native_execution_evidence_cycle=308, shell_native_execution_evidence_cycle=308,
+        full_input_matrix_replayed_this_cycle=receipt["full_input_matrix_replayed"],
+        new_preview_selected=receipt["selected_preview_source_requalified"],
+        virtualbox_native_execution_replayed_this_cycle=True,
+        preview_source_requalification_required=not receipt["selected_preview_source_requalified"],
+        selected_preview_cycle=receipt["selected_preview_cycle"],
+        retained_preview_evidence_cycle=receipt["selected_preview_cycle"],
+        historical_preserved_preview_cycle=303,
+        native_gui=True, native_gui_scope="bounded_isolated_launch_desktop_not_complete_graphical_environment",
+        virtualbox_serial_preview_usable_on_qualified_host=True,
+        virtualbox_evidence_scope="headless_device_and_pixel_matrix_visible_host_window_not_replayed_this_cycle",
+        optical_iso_sha256=receipt["regression_iso_sha256"],
+        kernel_image_pages=receipt["kernel_budget"]["image_pages"],
+        kernel_remaining_capacity_pages=receipt["kernel_budget"]["remaining_pages"])
+    lane["graphical_launch_control"].update(cycle=308,
+        broker="native_qemu_and_headless_virtualbox_verified",
+        transport="native_qemu_and_headless_virtualbox_verified",
+        session_binding="native_qemu_and_headless_virtualbox_verified",
+        graphical_controls="native_qemu_and_headless_virtualbox_verified",
+        matching_window_service="native_admitted", kernel_admission="explicit_profile_verified",
+        connected_native_iso="both_emulator_gui_input_lifetime_launchers_verified")
+    evidence = ("Cycle308: explicit profile propagation rejects malformed/diagnostic combinations and preserves ordinary accounting. Current-source paired kernels, genuine GUI launch/inspect/restart and held-repeat controls, complete standard/burst application-input and lifetime matrices, and actual launcher self-tests qualify on QEMU and headless VirtualBox. Native binaries and original authority/guard limits are unchanged. " + checkpoint)
+    gap = ("Extend native stale/delayed/failure control handling and recover the window service without corrupting isolated app state. Prove all-path guarded-stack bounds, independent COM2-free startup, event-driven waits and persistent storage before claiming a complete usable desktop. General VirtualBox diagnostic/watchdog portability, accessible PooleGlass, canonical merge gates, complete microkernel, PooleGlyph/PDC and all N0-N39 gates remain. Headless emulator evidence is not physical hardware or human-driven visible-VM qualification. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N3", "N9", "N13", "N14", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-NATIVE-UI-001", "FLAG-N13-USERSPACE-ISO-001",
+                          "FLAG-N13-USERSTACK-001", "FLAG-N13-LAUNCH-FAILURE-001",
+                          "FLAG-N3-VIRTUALBOX-PREVIEW-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle308 does not close this flag. " + gap
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["immediate_next_move"].update(title="Harden native desktop failure and window-service recovery",
+        entry_evidence=[checkpoint, contract, path], exit_evidence=[
+            "native stale/delayed/failure controls with exact task identities and no duplicate launches",
+            "bounded window-service failure and restart without corrupting isolated application state",
+            "guarded nested-path and all-path stack evidence without enlarging authority",
+            "COM2-independent startup, persistence and accessible native desktop behavior",
+            "current-source qualification and remaining N0-N39 microkernel/PooleGlyph/PDC gates"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1618)
+    parser.add_argument("--test-count", type=int, default=1625)
     parser.add_argument("--status-date", default="2026-10-20")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

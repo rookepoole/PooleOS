@@ -129,14 +129,37 @@ class SurfaceLifecycleTests(unittest.TestCase):
         finally:i.close()
 
     def test_all_positive_and_hostile_oracles_propagate_opt_in(self):
-        for name in ('qualify_native_windows','qualify_native_local_console','qualify_native_app_session','launch_native_virtualbox','launch_native_userspace_iso'):
+        from runtime import native_app_session as apps
+        for name in ('qualify_native_windows','qualify_native_local_console','qualify_native_app_session',
+                     'launch_native_virtualbox','launch_native_userspace_iso',
+                     'qualify_native_input_lifetime','qualify_native_launch_desktop'):
             tree=ast.parse((ROOT/f'tools/{name}.py').read_text())
             calls=[n for n in ast.walk(tree) if isinstance(n,ast.Call) and isinstance(n.func,ast.Attribute) and n.func.attr in ('validate_markers','negative_controls') and isinstance(n.func.value,ast.Name) and n.func.value.id in ('apps','probe')]
             # The window runner accesses the same oracle through local.apps.
             calls += [n for n in ast.walk(tree) if isinstance(n,ast.Call) and isinstance(n.func,ast.Attribute) and n.func.attr in ('validate_markers','negative_controls') and isinstance(n.func.value,ast.Attribute) and n.func.value.attr=='apps']
             self.assertTrue(calls,name)
             for call in calls:
-                self.assertEqual(len([k for k in call.keywords if k.arg=='surface_lifecycle']),1,name)
+                if name=='qualify_native_app_session':
+                    self.assertEqual(len([k for k in call.keywords if k.arg=='surface_lifecycle']),1,name)
+                else:
+                    self.assertFalse(any(k.arg=='surface_lifecycle' for k in call.keywords),name)
+                    unpacked=[k.value for k in call.keywords if k.arg is None]
+                    self.assertEqual(len(unpacked),1,name)
+                    self.assertIsInstance(unpacked[0],ast.Name)
+                    self.assertEqual(unpacked[0].id,'options',name)
+            if name!='qualify_native_app_session':
+                adapters=[n.value for n in ast.walk(tree) if isinstance(n,ast.Assign)
+                    and any(isinstance(t,ast.Name) and t.id=='options' for t in n.targets)]
+                self.assertTrue(adapters,name)
+                for adapter in adapters:
+                    self.assertIsInstance(adapter,ast.Call)
+                    self.assertIsInstance(adapter.func,ast.Attribute)
+                    self.assertEqual(adapter.func.attr,'profile_options',name)
+                    self.assertEqual([ast.dump(a) for a in adapter.args],[ast.dump(ast.Name(id='report',ctx=ast.Load()))])
+        for report,expected in (({},False),({'surface_lifecycle':False},False),({'surface_lifecycle':True},True)):
+            self.assertIs(apps.profile_options(report)['surface_lifecycle'],expected)
+        for bad in (None,0,1,'true'):
+            with self.assertRaises(ValueError):apps.profile_options({'surface_lifecycle':bad})
 
     def test_new_sources_are_bound_and_service_profile_is_not_generalized(self):
         from tools.qualify_native_user_entry import source_bindings

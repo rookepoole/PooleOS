@@ -23,6 +23,27 @@ FILE_MARKER = ('POOLEOS:APPS FILES contract=PAPPSESSION1 version=1 init_slot=0 '
                'service_slot=1 shell_slot=3 bad_handle=0 grants=8 cpl=3 production=0')
 
 
+def profile_options(report: dict) -> dict:
+    """Select the explicit receipt profile; never infer authority from code size."""
+    if not isinstance(report, dict):
+        raise ValueError('application profile object required')
+    names = ('file_waits', 'window_surfaces', 'window_capacity', 'surface_lifecycle',
+             'surface_input', 'launch_shell_admission', 'launch_console_admission',
+             'diagnostic_only', 'serial_recovery')
+    flags = {name: report.get(name, False) for name in names}
+    if any(type(value) is not bool for value in flags.values()):
+        raise ValueError('explicit boolean application profile required')
+    if flags['diagnostic_only'] or flags['serial_recovery']:
+        raise ValueError('diagnostic profile is not an ordinary preview')
+    if flags['launch_console_admission'] and not flags['launch_shell_admission']:
+        raise ValueError('launch console requires launch shell')
+    if flags['launch_shell_admission'] and not all(flags[name] for name in names[:5]):
+        raise ValueError('launch shell requires complete isolated-input profile')
+    return dict(file_waits=flags['file_waits'], windows=flags['window_surfaces'],
+                window_capacity=flags['window_capacity'], surface_lifecycle=flags['surface_lifecycle'],
+                launch_session=flags['launch_shell_admission'])
+
+
 def parse(line: str, event: str) -> dict:
     names = FIELDS[event].split()
     pattern = 'POOLEOS:APPS '+event+' contract=PAPPSESSION1'+''.join(' '+n+'=([0-9]+)' for n in names)+' cpl=3 production=0'

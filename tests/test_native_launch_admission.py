@@ -1,7 +1,7 @@
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import call, patch
+from unittest.mock import Mock, call, patch
 
 from runtime import native_app_session as apps
 from tests.test_native_surface_lifecycle import lifecycle_markers
@@ -10,6 +10,9 @@ from tools import qualify_native_app_session as qualification, qualify_native_ke
 ROOT = Path(__file__).resolve().parents[1]
 OPTIONS = dict(file_waits=True, windows=True, window_capacity=True,
                surface_lifecycle=True, launch_session=True)
+PROFILE = dict(file_waits=True, window_surfaces=True, window_capacity=True,
+               surface_lifecycle=True, surface_input=True,
+               launch_shell_admission=True, launch_console_admission=True)
 
 
 def markers(bad=False):
@@ -33,6 +36,116 @@ def markers(bad=False):
 
 
 class NativeLaunchAdmissionTests(unittest.TestCase):
+    def test_profile_adapter_preserves_ordinary_and_explicit_launch_accounting(self):
+        self.assertEqual(apps.profile_options(PROFILE), OPTIONS)
+        self.assertEqual(apps.profile_options({}), dict(file_waits=False, windows=False,
+            window_capacity=False, surface_lifecycle=False, launch_session=False))
+        self.assertTrue(apps.validate_markers(markers(), **apps.profile_options(PROFILE))["launch_session"])
+        ordinary = dict(PROFILE, launch_shell_admission=False, launch_console_admission=False)
+        with self.assertRaises(ValueError):
+            apps.validate_markers(markers(), **apps.profile_options(ordinary))
+        shell_only = dict(PROFILE, launch_console_admission=False)
+        self.assertEqual(apps.profile_options(shell_only), OPTIONS)
+        self.assertEqual(PROFILE["launch_console_admission"], True)
+
+    def test_profile_adapter_rejects_missing_prerequisites_wrong_types_and_diagnostics(self):
+        for key in ("file_waits", "window_surfaces", "window_capacity", "surface_lifecycle",
+                    "surface_input", "launch_shell_admission"):
+            for candidate in (dict(PROFILE, **{key: False}), {k:v for k,v in PROFILE.items() if k != key}):
+                with self.subTest(key=key), self.assertRaises(ValueError):
+                    apps.profile_options(candidate)
+        for key in (*PROFILE, "diagnostic_only", "serial_recovery"):
+            for wrong in (1, 0, "true", None, []):
+                with self.subTest(key=key, wrong=wrong), self.assertRaises(ValueError):
+                    apps.profile_options(dict(PROFILE, **{key: wrong}))
+        for key in ("diagnostic_only", "serial_recovery"):
+            for candidate in ({key: True}, dict(PROFILE, **{key: True})):
+                with self.assertRaises(ValueError):
+                    apps.profile_options(candidate)
+        for wrong in (None, [], True):
+            with self.assertRaises(ValueError):
+                apps.profile_options(wrong)
+
+    def test_all_desktop_callers_use_the_explicit_profile_for_positive_and_hostile_oracles(self):
+        import ast
+        for path in ("launch_native_userspace_iso", "launch_native_virtualbox",
+                     "qualify_native_local_console", "qualify_native_windows",
+                     "qualify_native_input_lifetime", "qualify_native_launch_desktop"):
+            tree = ast.parse((ROOT/"tools"/(path+".py")).read_text())
+            calls = 0
+            for function in (v for v in tree.body if isinstance(v, ast.FunctionDef)):
+                selected = []
+                for node in ast.walk(function):
+                    if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Attribute):
+                        continue
+                    owner = node.func.value
+                    is_apps = (isinstance(owner, ast.Name) and owner.id == "apps" or
+                               isinstance(owner, ast.Attribute) and owner.attr == "apps")
+                    if is_apps and node.func.attr in ("validate_markers", "negative_controls"):
+                        selected.append(node)
+                if selected:
+                    self.assertTrue(any(isinstance(n, ast.Assign) and
+                        any(isinstance(t, ast.Name) and t.id == "options" for t in n.targets) and
+                        isinstance(n.value, ast.Call) and isinstance(n.value.func, ast.Attribute) and
+                        n.value.func.attr == "profile_options" for n in ast.walk(function)), path)
+                for node in selected:
+                    self.assertTrue(any(k.arg is None and isinstance(k.value, ast.Name) and
+                                        k.value.id == "options" for k in node.keywords), path)
+                calls += len(selected)
+            self.assertGreater(calls, 0, path)
+
+    def test_application_hold_probe_uses_no_desktop_shortcut_as_neutral_key(self):
+        from tools.native_application_input_probe import actions
+        hold, = [a for a in actions() if a["label"] == "hold-key-and-shift"]
+        self.assertEqual(hold["codes"], [0x2a, 0x1e, 0x58, 0xd8])
+        self.assertEqual(hold["expected"][0][6], "draftA")
+
+    def test_gui_backend_validation_precedes_preview_or_output_access(self):
+        from tools import qualify_native_launch_desktop as gui
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp)/"absent"
+            base = ["qualifier", "--receipt", str(output), "--work-dir", str(output)]
+            for flags in (["--backend", "virtualbox"], ["--visible"]):
+                with patch("sys.argv", base+flags), patch("sys.stderr"), \
+                        patch.object(gui.local, "check_preview") as preview, \
+                        self.assertRaises(SystemExit) as error:
+                    gui.main()
+                self.assertEqual(error.exception.code, 2)
+                preview.assert_not_called()
+                self.assertFalse(output.exists())
+
+    def test_gui_repeat_probe_keeps_key_held_until_observed_and_then_releases_for_inspect(self):
+        from types import SimpleNamespace
+        from tools import qualify_native_launch_desktop as gui
+        action = dict(app="numbers", generation=1, mouse=False, draft="GUI")
+        interaction = SimpleNamespace(ready=True, step=10, completed=set(),
+                                      actions={10: action}, inject=Mock())
+        probe = gui.Probe(Path("unused"))
+        probe.step, probe.phase, probe.deadline = 10, 3, 20
+        frame = Mock(name="frame")
+        frame.name = "capture.ppm"
+        frame.read_bytes.return_value = b"fixture"
+        with patch.object(probe, "capture", return_value=frame), \
+                patch.object(gui.time, "monotonic", side_effect=[1, 2, 3]), \
+                patch.object(gui.pixels, "frame", return_value=(1280, 800, b"")), \
+                patch.object(gui.pixels, "inspect_rows", return_value={}), \
+                patch.object(gui, "inspect_header", return_value={}) as header, \
+                patch.object(gui.local, "digest", return_value="fixture"), \
+                patch.object(gui.local.native_session, "extract_markers", return_value=["POOLEOS:APPS ADMIT fixture"]), \
+                patch.object(gui.local.apps, "parse", return_value=dict(task=5, generation=1)):
+            probe.tick(Mock(), interaction, b"")
+            self.assertEqual(probe.phase, 4)
+            interaction.inject.assert_called_once_with([0x3d])
+            probe.tick(Mock(), interaction, b"")
+            self.assertEqual(probe.phase, 5)
+            self.assertEqual(interaction.completed, set())
+            interaction.inject.assert_called_with([0xbd, 0x2a, 0x3d, 0xbd, 0xaa])
+            probe.tick(Mock(), interaction, b"")
+        self.assertEqual(interaction.completed, {10})
+        self.assertEqual([v["phase"] for v in probe.evidence], [3, 4, 5])
+        self.assertEqual([c.args[1] for c in header.call_args_list],
+                         ["Numbers: admitted / surface"]*2+["Numbers: running / surface"])
+
     def test_opt_in_parser_requires_fifth_page_and_exact_accounting(self):
         for bad in (False, True):
             candidate = markers(bad)

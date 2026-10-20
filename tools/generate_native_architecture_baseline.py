@@ -25,6 +25,9 @@ ADR_NAMES = (
 )
 BOUND_SOURCE_PATHS = (
     "docs/checkpoints/cycle307-native-launch-desktop.md",
+    "docs/checkpoints/cycle308-connected-desktop-matrix.md",
+    "docs/native-connected-desktop.md",
+    "runs/native-connected-desktop-readiness.json",
     "docs/native-launch-desktop.md",
     "runs/native-launch-desktop-readiness.json",
     "tools/qualify_native_launch_desktop.py",

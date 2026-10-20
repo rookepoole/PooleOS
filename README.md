@@ -11,7 +11,29 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle307 connects the real native launch
+**Current development checkpoint:** Cycle308 connects the explicit launch profile
+to both emulator launchers and the full desktop input/lifetime test routes.
+Malformed profiles reject without relaxing ordinary application accounting.
+The optical baseline and genuine GUI launch/inspect/restart tests pass on QEMU
+and headless VirtualBox, including preserved terminal drafts and held-key repeats.
+The complete normal/burst input, lifetime and actual launcher matrix passes:
+ten QEMU and six headless VirtualBox guests. The selected preview is Cycle308,
+with a separately verified Downloads ISO; Cycle303 remains preserved.
+Kernel/user binaries and original authority/guard limits are unchanged.
+Use the configured launcher: standalone COM2-free boot, service recovery and
+persistence are still open. No production or merge qualification.
+[Progress and remaining gates](docs/checkpoints/cycle308-connected-desktop-matrix.md).
+
+Closeout found two legacy structural tests still expecting inline profile
+arguments. Their assertions now verify the strict shared adapter, with119 focused
+tests passing. Because those tests are execution-bound, a fresh sixteen-guest
+cohort was executed and passed before selecting its source-matched receipt.
+The first cohort, candidate receipt, image and pointer history remain preserved;
+no historical receipt was relabeled and no source check was bypassed.
+All477 selected metadata/integration checks also pass. Counts overlap; the1625
+discovered Python tests are inventory, not a full canonical-suite pass.
+
+**Historical development checkpoint:** Cycle307 connects the real native launch
 console and shell through an explicit kernel profile. Four baseline QEMU checks
 and a separate GUI run pass: mouse/key launches, inspection, fault/stop/restart
 and preserved unfinished terminal drafts. Exact rendered status/surface pixels

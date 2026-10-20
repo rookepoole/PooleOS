@@ -132,12 +132,12 @@ class Probe:
                 if (self.x, self.y) == target:
                     self.phase += 1
             else:
-                interaction.inject([0x3d, 0xbd])
-                self.events.append(dict(step=self.step, codes=[0x3d, 0xbd]))
+                interaction.inject([0x3d])
+                self.events.append(dict(step=self.step, codes=[0x3d]))
                 self.phase = 3
             return
         title = 'Text' if action['app'] == 'text' else 'Numbers'
-        label = title+(': admitted / surface' if self.phase == 3 else ': running / surface')
+        label = title+(': admitted / surface' if self.phase in (3, 4) else ': running / surface')
         markers = local.native_session.extract_markers(debug)
         admits = [local.apps.parse(m, 'ADMIT') for m in markers if m.startswith('POOLEOS:APPS ADMIT ')]
         identity = (4 if action['app'] == 'text' else 5, action['generation'])
@@ -150,12 +150,17 @@ class Probe:
             return
         self.evidence.append(dict(step=self.step, phase=self.phase, action=action,
                                   frame=path.name, sha256=local.digest(path), pixels=observed))
-        if self.phase == 3:
+        if self.phase == 3 and not action['mouse']:
+            # Repeat a still-held launch key: it must not refocus the new surface.
+            interaction.inject([0x3d])
+            self.events.append(dict(step=self.step, codes=[0x3d], held_repeat=True))
+            self.phase = 4
+        elif self.phase in (3, 4):
             key = 0x3c if action['app'] == 'text' else 0x3d
-            codes = [0x2a, key, key|0x80, 0xaa]
+            codes = ([0xbd] if not action['mouse'] else [])+[0x2a, key, key|0x80, 0xaa]
             interaction.inject(codes)
             self.events.append(dict(step=self.step, codes=codes))
-            self.phase = 4
+            self.phase = 5
         else:
             interaction.completed.add(self.step)
 
@@ -164,8 +169,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--receipt', type=Path, required=True)
     parser.add_argument('--work-dir', type=Path, required=True)
+    parser.add_argument('--backend', choices=('qemu', 'virtualbox'), default='qemu')
+    parser.add_argument('--virtualbox', type=Path)
+    parser.add_argument('--visible', action='store_true')
     args = parser.parse_args()
+    if args.visible and args.backend != 'virtualbox':
+        parser.error('visible mode is VirtualBox-only')
+    if args.backend == 'virtualbox' and args.virtualbox is None:
+        parser.error('explicit VirtualBox executable required')
     report, iso, disk = local.check_preview(args.receipt.resolve())
+    options = local.apps.profile_options(report)
     if report.get('launch_console_admission') is not True or report.get('launch_shell_admission') is not True:
         raise ValueError('explicit native launch console and shell required')
     work = args.work_dir.resolve()
@@ -175,38 +188,58 @@ def main():
     work.mkdir(parents=True, exist_ok=False)
     before = local.source.source_bindings()
     interaction, probe = Interaction(), Probe(work)
-    result = dict(cycle=307, status='fail', source_bindings=before, storage_preflight=storage,
+    result = dict(cycle=308, status='fail', source_bindings=before, storage_preflight=storage,
                   iso_sha256=local.digest(iso), serial_input_bytes=0, production_ready=False,
-                  native_plc1_control_verified=False, guest_bound_seconds=240)
+                  native_plc1_control_verified=False, guest_bound_seconds=240,
+                  backend=args.backend, visible=args.visible, application_profile=options,
+                  physical_hardware_tested=False)
     started = time.monotonic()
+    pointer = None
     try:
         shared = local.qualification.shared
-        lock, base = shared.tier0.validate_contracts(local.ROOT)
-        qemu = shared.tier0._require_workspace_tool_path(shared.tier0.DEFAULT_QEMU_ROOT, local.ROOT)
-        shared.tier0.verify_local_launch_runtime(lock, qemu, local.ROOT)
-        def control(client, debug):
-            def inject(codes):
-                client.execute('input-send-event', {'events': [
-                    {'type': 'key', 'data': {'down': not bool(c&128),
-                                           'key': {'type': 'number', 'data': c&127}}} for c in codes]})
-            interaction.inject = inject
-            probe.tick(client, interaction, debug)
-        run, _, _ = shared.boot._execute_once('native-gui-launch', lock, local.optical.optical_profile(base),
-            qemu, iso, work, 240, marker_validator=lambda m: local.apps.validate_markers(m, **OPTIONS),
-            marker_extractor=local.native_session.extract_markers, hpet_msi=True, pause_on_completion=True,
-            console_port=interaction.port, console_poll=interaction.poll,
-            capture_log_limit_bytes=local.LOG_LIMIT, guest_control=control,
-            frame_validator=native_surface_lifecycle.inspect_ppm)
+        if args.backend == 'qemu':
+            lock, base = shared.tier0.validate_contracts(local.ROOT)
+            qemu = shared.tier0._require_workspace_tool_path(shared.tier0.DEFAULT_QEMU_ROOT, local.ROOT)
+            shared.tier0.verify_local_launch_runtime(lock, qemu, local.ROOT)
+            def control(client, debug):
+                def inject(codes):
+                    client.execute('input-send-event', {'events': [
+                        {'type': 'key', 'data': {'down': not bool(c&128),
+                                               'key': {'type': 'number', 'data': c&127}}} for c in codes]})
+                interaction.inject = inject
+                probe.tick(client, interaction, debug)
+            run, _, _ = shared.boot._execute_once('native-gui-launch', lock, local.optical.optical_profile(base),
+                qemu, iso, work, 240, marker_validator=lambda m: local.apps.validate_markers(m, **options),
+                marker_extractor=local.native_session.extract_markers, hpet_msi=True, pause_on_completion=True,
+                console_port=interaction.port, console_poll=interaction.poll,
+                capture_log_limit_bytes=local.LOG_LIMIT, guest_control=control,
+                frame_validator=native_surface_lifecycle.inspect_ppm)
+        else:
+            from runtime.native_virtualbox_mouse import PointerClient
+            def control(owner, debug):
+                nonlocal pointer
+                if not interaction.ready:
+                    return
+                if pointer is None:
+                    pointer = PointerClient(owner, args.virtualbox.resolve())
+                probe.tick(pointer, interaction, debug)
+            local.vbox_run(report, iso, work, interaction, result, args.virtualbox.resolve(),
+                           args.visible, control)
+            run = result['run']
+            if pointer is None:
+                raise ValueError('pointer API was not reached')
+            pointer.check_shell()
         _, output = local.native_console.split_output(bytes(interaction.received))
         if (interaction.sent != len(interaction.case.sent) or output != interaction.case.expected or
-                interaction.keyboard_bytes != interaction.sent or len(probe.evidence) != 8 or
+                interaction.keyboard_bytes != interaction.sent or len(probe.evidence) != 10 or
                 interaction.completed != set(interaction.actions) or b'start ' in interaction.case.sent):
             raise ValueError('inexact GUI launch or draft-preservation evidence')
         shared.load.validate_oracle_binding(run['marker_summary']['transfer_prefix']['boot_prefix'],
                                            shared.load.inspect_media_bytes(disk), run['pbp1_transcript'])
         result.update(status='pass', run=run, native_plc1_control_verified=True,
                       starts_verified=4, inspections_verified=4, terminal_drafts_preserved=4,
-                      hostile_marker_cases_rejected=local.apps.negative_controls(run['markers'], **OPTIONS))
+                      held_launch_repeats_verified=2,
+                      hostile_marker_cases_rejected=local.apps.negative_controls(run['markers'], **options))
     except Exception as error:
         result['failure'] = f'{type(error).__name__}: {error}'
     finally:
@@ -218,6 +251,11 @@ def main():
                       source_unchanged=before == local.source.source_bindings(),
                       iso_unchanged=local.digest(iso) == result['iso_sha256'],
                       elapsed_seconds=round(time.monotonic()-started, 3))
+        if pointer is not None:
+            result['pointer_api_diagnostics'] = pointer.diagnostics
+            result['pointer_api'] = dict(events=pointer.records, powershell_sha256=pointer.shell_hash,
+                failed=pointer.failed, host_cursor_moved=False, unlocked_per_event=True,
+                api_bound_seconds=5, maximum_events=96)
         if not result['source_unchanged'] or not result['iso_unchanged']:
             result['status'] = 'fail'
         (work/'receipt.json').write_text(json.dumps(result, indent=2)+'\n', encoding='utf-8')

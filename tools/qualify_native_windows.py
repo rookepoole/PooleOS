@@ -7,6 +7,7 @@ from runtime import native_windows as frames
 from runtime import native_surface_lifecycle as lifecycle_frames
 from runtime import native_application_input as application_frames
 from tools.native_application_input_probe import InputProbe
+from tools.native_build_space import require_space
 ROOT=local.ROOT
 
 def lifecycle_barriers(sent):
@@ -181,18 +182,21 @@ def main():
     p.add_argument('--virtualbox',type=Path)
     p.add_argument('--visible',action='store_true')
     args=p.parse_args();report,iso,disk=local.check_preview(args.receipt.resolve())
+    options=local.apps.profile_options(report)
     if args.visible and args.backend!='virtualbox':p.error('visible mode is VirtualBox-only')
     if args.backend=='virtualbox' and args.virtualbox is None:p.error('explicit VirtualBox executable required')
     if report.get('window_surfaces') is not True:raise ValueError('qualified windows profile required')
     work=args.work_dir.resolve()
     if not work.is_relative_to(ROOT/'outputs') or work==ROOT/'outputs':raise ValueError('new workspace output required')
+    storage=require_space(work)
     work.mkdir(parents=True,exist_ok=False)
     lifecycle=report.get('surface_lifecycle',False)
     application_input=report.get('surface_input',False)
     before=local.source.source_bindings();interaction=WindowInteraction(args.keyboard_batch,lifecycle,application_input);pointer=PointerProbe(work,application_input)
     surfaces=SurfaceProbe(work)
     result=dict(cycle=300 if application_input else 299 if lifecycle else 297,contract_id='PWS1',surface_lifecycle=lifecycle,surface_input=application_input,status='fail',source_bindings=before,iso_sha256=local.digest(iso),
-        backend=args.backend,visible=args.visible,serial_input_bytes=0,physical_hardware_tested=False,production_ready=False,guest_bound_seconds=240)
+        backend=args.backend,visible=args.visible,serial_input_bytes=0,physical_hardware_tested=False,production_ready=False,guest_bound_seconds=240,
+        application_profile=options,storage_preflight=storage)
     vbox_pointer=None
     started=time.monotonic()
     try:
@@ -206,7 +210,7 @@ def main():
                     client.execute('input-send-event',{'events':[{'type':'key','data':{'down':not bool(c&128),'key':{'type':'number','data':c&127}}} for c in codes]})
                 interaction.inject=inject;pointer.tick(client,interaction,debug);surfaces.tick(client,interaction,debug)
             run,_,_=shared.boot._execute_once('native-windows',lock,local.optical.optical_profile(base),qemu,iso,work,240,
-                marker_validator=lambda m:local.apps.validate_markers(m,file_waits=True,windows=True,window_capacity=report.get('window_capacity',False),surface_lifecycle=lifecycle),marker_extractor=local.native_session.extract_markers,
+                marker_validator=lambda m:local.apps.validate_markers(m,**options),marker_extractor=local.native_session.extract_markers,
                 hpet_msi=True,pause_on_completion=True,console_port=interaction.port,console_poll=interaction.poll,
                 capture_log_limit_bytes=local.LOG_LIMIT,guest_control=control,frame_validator=lifecycle_frames.inspect_ppm if lifecycle else frames.inspect_ppm)
         else:
@@ -233,7 +237,7 @@ def main():
             focus_routing_verified=True,focused_nonterminal_keys_discarded=0 if application_input else 1,keyboard_input_bytes=interaction.keyboard_bytes,
             isolated_application_input_verified=application_input,
             exact_interaction=True,sustained_window=interaction.sustained_evidence,
-            hostile_marker_cases_rejected=local.apps.negative_controls(run['markers'],file_waits=True,windows=True,window_capacity=report.get('window_capacity',False),surface_lifecycle=lifecycle))
+            hostile_marker_cases_rejected=local.apps.negative_controls(run['markers'],**options))
     except Exception as e:result['failure']=f'{type(e).__name__}: {e}'
     finally:
         interaction.close()

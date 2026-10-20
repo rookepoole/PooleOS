@@ -19,6 +19,7 @@ from runtime import native_surface_lifecycle as lifecycle_frames
 from tools import qualify_native_app_session as qualification, qualify_native_user_entry as source
 from tools.launch_native_userspace_iso import check_preview, LOG_LIMIT
 from tools.launch_native_virtualbox import listener_socket
+from tools.native_build_space import require_space
 
 # Independent host-side US key -> set-1 make code. Break codes are explicit.
 KEYS={}
@@ -89,6 +90,7 @@ class Interaction(qualification.Interaction):
 def digest(path):return hashlib.sha256(path.read_bytes()).hexdigest().upper()
 
 def qemu_run(report,iso,work,interaction,result):
+    options=apps.profile_options(report)
     windows=report.get('window_surfaces',False)
     pixels=lifecycle_frames if report.get('surface_lifecycle') else window_frames if windows else frames
     shared=qualification.shared
@@ -107,7 +109,7 @@ def qemu_run(report,iso,work,interaction,result):
             client.execute('screendump',{'filename':str(work/'initial.ppm'),'format':'ppm'})
             captured=True
     run,_,_=shared.boot._execute_once('native-keyboard',lock,optical.optical_profile(base),qemu,iso,work,240,
-        marker_validator=lambda m:apps.validate_markers(m,file_waits=True,windows=windows,window_capacity=report.get('window_capacity',False),surface_lifecycle=report.get('surface_lifecycle',False)),marker_extractor=native_session.extract_markers,
+        marker_validator=lambda m:apps.validate_markers(m,**options),marker_extractor=native_session.extract_markers,
         hpet_msi=True,pause_on_completion=True,console_port=interaction.port,console_poll=interaction.poll,
         capture_log_limit_bytes=LOG_LIMIT,guest_control=control,frame_validator=pixels.inspect_ppm)
     if not captured:raise ValueError('initial frame missing')
@@ -115,6 +117,7 @@ def qemu_run(report,iso,work,interaction,result):
         final_frame_pixels=pixels.inspect_ppm((work/'pooleboot-frame.ppm').read_bytes()))
 
 def vbox_run(report,iso,work,interaction,result,executable,visible=False,control=None):
+    options=apps.profile_options(report)
     windows=report.get('window_surfaces',False)
     pixels=lifecycle_frames if report.get('surface_lifecycle') else window_frames if windows else frames
     profile=json.loads((ROOT/'specs/native-virtualbox-preview-profile.json').read_bytes())
@@ -144,7 +147,7 @@ def vbox_run(report,iso,work,interaction,result,executable,visible=False,control
                 owner.pause()
                 log=vbox.serial_payload(vbox.bounded_read(path,LOG_LIMIT))
                 markers=native_session.extract_markers(log)
-                result['run']=dict(markers=markers,marker_summary=apps.validate_markers(markers,file_waits=True,windows=windows,window_capacity=report.get('window_capacity',False),surface_lifecycle=report.get('surface_lifecycle',False)),pbp1_transcript=handoff.extract_transcript(log).summary)
+                result['run']=dict(markers=markers,marker_summary=apps.validate_markers(markers,**options),pbp1_transcript=handoff.extract_transcript(log).summary)
                 owner.checked('controlvm',owner.identity,'screenshotpng',work/'final.png')
                 result.update(initial_frame_sha256=digest(work/'initial.png'),final_frame_sha256=digest(work/'final.png'))
                 from PIL import Image
@@ -174,17 +177,20 @@ def main():
     args=p.parse_args()
     if args.visible and args.backend!='virtualbox':p.error('visible mode is VirtualBox-only')
     report,iso,disk=check_preview(args.receipt.resolve())
+    options=apps.profile_options(report)
     if report.get('local_console') is not True:raise ValueError('native local-console ISO required')
     windows=report.get('window_surfaces',False)
     if args.keyboard_batch!=1 and not windows:raise ValueError('burst input requires window FIFO profile')
     work=args.work_dir.resolve()
     if not work.is_relative_to(ROOT/'outputs') or work==ROOT/'outputs':raise ValueError('new workspace output required')
+    storage=require_space(work)
     work.mkdir(parents=True,exist_ok=False)
     before=source.source_bindings();interaction=Interaction(args.keyboard_batch)
     result=dict(contract_id='PWS1' if windows else 'PDISPLAY1',cycle=297,status='fail',source_bindings=before,backend=args.backend,
         guest_bound_seconds=240,iso_sha256=digest(iso),serial_input_bytes=0,physical_keyboard_tested=False,
         visible=args.visible,
-        window_surfaces=windows,mouse_interaction_verified=False,graphical_desktop=False,production_ready=False)
+        window_surfaces=windows,mouse_interaction_verified=False,graphical_desktop=False,production_ready=False,
+        application_profile=options,storage_preflight=storage)
     started=time.monotonic()
     try:
         if args.backend=='qemu':qemu_run(report,iso,work,interaction,result)
@@ -200,7 +206,7 @@ def main():
         qualification.shared.load.validate_oracle_binding(prefix['boot_prefix'],qualification.shared.load.inspect_media_bytes(disk),result['run']['pbp1_transcript'])
         result.update(status='pass',keyboard_input_bytes=interaction.keyboard_bytes,exact_interaction=True,
             sustained_window=interaction.sustained_evidence,framebuffer_changed=True,
-            hostile_marker_cases_rejected=apps.negative_controls(result['run']['markers'],file_waits=True,windows=windows,window_capacity=report.get('window_capacity',False),surface_lifecycle=report.get('surface_lifecycle',False)))
+            hostile_marker_cases_rejected=apps.negative_controls(result['run']['markers'],**options))
     except Exception as e:result['failure']=f'{type(e).__name__}: {e}'
     finally:
         interaction.close()

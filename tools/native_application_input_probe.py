@@ -24,8 +24,8 @@ def actions():
             add(local.scancodes(char.encode()),label='commit' if char=='\r' else 'edit')
     text(0,'PooleOX\bS native\r',[14,2,0])
     clear(0);text(0,'draft')
-    # Release an unused last key to stop device typematic without releasing A/Shift.
-    draft[0]+='A';state[0][6]=draft[0];add([0x2a,0x1e,0x3b,0xbb],label='hold-key-and-shift')
+    # F12 is outside the desktop F1-F3 controls; stop typematic while holding A/Shift.
+    draft[0]+='A';state[0][6]=draft[0];add([0x2a,0x1e,0x58,0xd8],label='hold-key-and-shift')
     add(focus=1,label='focus-numbers-with-held-keys')
     draft[1]='3';state[1][6]='3';add([0x1e,0x2a,0x04,0x84],label='held-repeat-suppressed')
     add([0x9e,0xaa],label='release-held-keys')
