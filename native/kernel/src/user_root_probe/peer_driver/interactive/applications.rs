@@ -99,7 +99,11 @@ pub(super) fn configure(args: &mut [Arguments; 6]) -> Result<(), ()> {
     ])
     .map_err(|_| ())?;
     args[3] = Arguments::new(&[
-        b"app-shell",
+        if cfg!(feature = "development-launch-session") {
+            b"launch-shell"
+        } else {
+            b"app-shell"
+        },
         b"0000000100010001",
         b"0000000100010002",
         b"0000000100000002",

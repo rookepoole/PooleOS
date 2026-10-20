@@ -107,6 +107,7 @@ ALLOWED_RUNS = {
     "runs/native-bounded-serial-readiness.json",
     "runs/native-launch-control-readiness.json",
     "runs/native-launch-session-readiness.json",
+    "runs/native-launch-admission-readiness.json",
     "runs/native-kernel-virtual-memory-readiness.json",
     "runs/native_model_readiness.json",
     "runs/native_microcode_readiness.json",

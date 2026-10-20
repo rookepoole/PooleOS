@@ -16351,13 +16351,84 @@ def apply_cycle304(roadmap: dict, test_count: int) -> dict:
             "keyboard-accessible graphical launch/restart with observed surface status",
             "real two-backend native session qualification and new source-bound optical ISO",
             "complete microkernel, PooleGlyph/PDC, PooleGlass and every N0-N39 production gate"])
+    return apply_cycle305(roadmap, test_count)
+
+
+def apply_cycle305(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle305-native-launch-admission.md"
+    contract = "docs/native-launch-admission.md"
+    path = "runs/native-launch-admission-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle304_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=305, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 305
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 305
+    gate["qualification_status"] = "native_launch_shell_admitted_plc1_window_controls_pending"
+    baseline["native_launch_session"]["evidence_status"] = "historical_cycle304_userspace_sources_unchanged"
+    gate["current_native_launch_session_qualification"]["evidence_status"] = "historical_cycle304_userspace_sources_unchanged"
+    record = dict(cycle=305, contract_id="PLC1-ADMISSION", status=receipt["status"], receipt_path=path,
+        receipt_sha256=hashlib.sha256(raw).hexdigest().upper(), source_binding_count=len(receipt["source_bindings"]))
+    for key in ("kernel_admission_implemented", "native_shell_regression_verified", "candidate_code_bytes",
+                "candidate_code_pages", "candidate_code_margin_bytes", "ordinary_code_pages",
+                "window_code_pages", "user_mapping_capacity", "user_stack_pages", "stack_guards_preserved",
+                "process_authority_unchanged", "host_kernel_tests", "program_pairs_revalidated",
+                "qemu_guest_runs", "virtualbox_guest_runs", "iso_built", "regression_iso_sha256",
+                "native_plc1_execution_verified", "graphical_launch_connected", "full_input_matrix_replayed",
+                "connected_stack_bound_verified", "selected_preview_cycle", "selected_preview_source_requalified",
+                "canonical_full_replay_performed", "merge_qualified", "production_ready"):
+        record[key] = receipt[key]
+    baseline["native_launch_admission"] = copy.deepcopy(record)
+    gate["current_native_launch_admission_qualification"] = record
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=305, receipt_path=path, receipt_section="native_execution",
+        retained_kernel_sources_unchanged=False,
+        native_execution_status="five_page_launch_shell_admitted_ordinary_console_branch_only",
+        native_execution_evidence_cycle=305, shell_native_execution_evidence_cycle=305,
+        kernel_profile="opt_in_development_launch_session",
+        virtualbox_serial_preview_usable_on_qualified_host=False,
+        virtualbox_native_execution_replayed_this_cycle=False,
+        full_input_matrix_replayed_this_cycle=False,
+        retained_preview_evidence_cycle=303, new_preview_selected=False,
+        optical_iso_sha256=receipt["regression_iso_sha256"],
+        kernel_image_pages=receipt["kernel_budget"]["image_pages"],
+        kernel_remaining_capacity_pages=receipt["kernel_budget"]["remaining_pages"],
+        preview_source_requalification_required=True)
+    lane["graphical_launch_control"] = dict(cycle=305, broker="host_qualified", transport="host_qualified",
+        session_binding="host_qualified", kernel_admission="native_regression_qualified",
+        graphical_controls="required", matching_window_service="required", connected_native_iso="required",
+        candidate_build_profile="PLCODE1")
+    evidence = ("Cycle305: explicit trusted-slot five-page launch-shell admission preserves ordinary four-page applications, seven-page window service, eight VM mappings, original handles and stack guards. The19464-byte shell runs as CPL3 with exact startup/running/17-page retirement accounting. Independent native kernels and optical images reproduce; three application guests and ordinary unsigned denial pass on QEMU. Kernel135/208 pages,36 guarded stack pages,432 bytes read-only padding. " + checkpoint)
+    gap = ("Connect the matching window-service role and PLC1 session, bounded mouse/keyboard launch intents, observed admission/liveness/surface states and nested stack paths. Native regression uses ordinary PCS1, not PLC1 control traffic. Real stale/repeated/delayed controls, failure cleanup and two-backend input/lifetime qualification must precede a new selected connected ISO. Retained Cycle303 preview remains historical. Compositor recovery, COM2-independent boot, persistent storage, event-driven waits, all-path stack bounds, accessible PooleGlass, complete microkernel, PooleGlyph/PDC and all N0-N39 gates remain. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N3", "N9", "N13", "N14", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-NATIVE-UI-001", "FLAG-N13-USERSPACE-ISO-001",
+                          "FLAG-N13-USERSTACK-001", "FLAG-N13-LAUNCH-FAILURE-001",
+                          "FLAG-N3-VIRTUALBOX-PREVIEW-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle305 does not close this flag. " + gap
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["immediate_next_move"].update(title="Connect native window-manager launch controls to the admitted shell",
+        entry_evidence=[checkpoint, contract, path], exit_evidence=[
+            "matching window-service role and native PLC1 Read/result/ack session",
+            "bounded mouse/keyboard launch controls with admission/liveness/surface states",
+            "native stale/repeated/delayed/failure controls and draft/file preservation",
+            "measured guarded stacks, two-backend input/lifetime replay and source-bound connected ISO",
+            "complete microkernel, PooleGlyph/PDC, PooleGlass and every N0-N39 production gate"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1601)
+    parser.add_argument("--test-count", type=int, default=1608)
     parser.add_argument("--status-date", default="2026-10-20")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

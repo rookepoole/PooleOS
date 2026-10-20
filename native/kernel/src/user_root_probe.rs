@@ -142,6 +142,12 @@ pub fn run(
             + 12
             + (poolekernel::user_entry::MAX_IMAGE_CODE_PAGES
                 - poolekernel::user_entry::MAX_CODE_PAGES)
+            + if cfg!(feature = "development-launch-session") {
+                // PLCODE1 adds one accounted RX page only to the trusted shell.
+                1
+            } else {
+                0
+            }
     } else if cfg!(feature = "development-process-launch") {
         // Two one-page workers and one bounded multipage supervisor.
         38 + poolekernel::user_entry::MAX_IMAGE_CODE_PAGES + 12

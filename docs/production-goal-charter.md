@@ -7,9 +7,23 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 304
+Last roadmap reconciliation: PooleOS Cycle 305
 
-Cycle304 implements the opt-in Read/result/ack session with retained terminal
+Cycle305 implements explicit trusted-slot native admission for the measured
+five-page launch shell. Ordinary application limits, original handles and guarded
+stacks remain unchanged; the extra code page has explicit quota and teardown
+accounting. The linked kernel measures135/208 pages,36 guarded kernel-stack pages
+and432 bytes of embedded read-only padding. Eight kernel host profile runs and
+four current-source QEMU checks pass; independent native kernels/optical images
+reproduce, including exact17-page shell retirement. The matching window-service
+PLC1 connection, keyboard/mouse launch
+controls, real connected stack/failure tests and two-backend ISO qualification
+remain next. No preview replacement, phase closure or production promotion.
+All40 phases,301 subphases,101 flags (46 open), complete microkernel, PooleGlyph/PDC,
+accessible PooleGlass and all canonical/release gates remain required.
+[Current progress](checkpoints/cycle305-native-launch-admission.md).
+
+Historical Cycle304 implements the opt-in Read/result/ack session with retained terminal
 drafts, file/job ownership and authenticated one-use RPC.268 userspace tests pass
 per debug/release;29 ordinary program pairs are byte-identical to Cycle303.
 The connected launch-shell candidate is19464 bytes and independently reproducible
@@ -20,7 +34,7 @@ required. No kernel admission, new native run, ISO or phase closure is claimed.
 The previous preview remains historical; source-binding checks are not bypassed.
 All40 phases,301 subphases,101 flags (46 open), complete microkernel, PooleGlyph/PDC,
 accessible PooleGlass and every canonical/release gate remain required.
-[Current progress](checkpoints/cycle304-launch-session.md).
+[Historical progress](checkpoints/cycle304-launch-session.md).
 
 Historical Cycle303 implements PLC1's strict start/inspect wire, bounded process-owner broker
 and explicit peer-authenticated console/control transport.246 userspace tests pass

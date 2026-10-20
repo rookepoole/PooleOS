@@ -14,6 +14,13 @@ from tools.qualify_native_shell_process import program_inputs
 from tools.native_build_space import require_space
 
 
+def revalidate_program_inputs(sources, env):
+    """Recheck each build against its original selection, including replacements."""
+    for directory, selection, expected in sources:
+        if program_inputs(directory, env, selection) != expected:
+            raise ValueError('program input drift')
+
+
 def cleanup_barriers(payload):
     """Wait before the following command, not by adding post-hoc wall-time sleeps."""
     generations = {b'text': 0, b'numbers': 0}
@@ -119,6 +126,7 @@ def main():
     parser.add_argument('--window-capacity', action='store_true', help='separate PWCODE1 seven-page window service qualification')
     parser.add_argument('--surface-lifecycle', action='store_true', help='opt-in generation-bound window retirement')
     parser.add_argument('--surface-input', action='store_true', help='opt-in isolated application input over owned surfaces')
+    parser.add_argument('--launch-shell-dir', type=Path, help='separately qualified PLCODE1 shell for native admission; no graphical control claim')
     parser.add_argument('--serial-recovery', action='store_true', help='diagnostic-only bounded UART backpressure challenge')
     args = parser.parse_args(); work, programs = args.work_dir.resolve(), args.program_dir.resolve()
     if args.desktop and not args.optical: parser.error('local console requires the optical development profile')
@@ -127,18 +135,24 @@ def main():
     if args.surface_lifecycle and not args.window_capacity: parser.error('surface lifecycle requires the explicit capacity profile')
     if args.surface_input and not args.surface_lifecycle: parser.error('surface input requires generation-bound lifecycle')
     if args.serial_recovery and not args.surface_input: parser.error('serial challenge requires the isolated-input desktop profile')
+    if args.launch_shell_dir and (not args.surface_input or args.serial_recovery):
+        parser.error('launch shell requires the isolated-input profile without serial fault injection')
+    launch_programs = args.launch_shell_dir.resolve() if args.launch_shell_dir else None
+    if launch_programs and not launch_programs.is_relative_to(ROOT/'outputs'):
+        parser.error('launch program directory must be under workspace outputs')
     if sum((args.deferred_cleanup,args.file_controls,args.exhaust_cleanup,args.claimed_requester,args.optical)) > 1: parser.error('separate control profiles required')
     if not work.is_relative_to(ROOT/'outputs') or not programs.is_relative_to(ROOT/'outputs'):
         parser.error('workspace output paths required')
     storage = require_space(work); work.mkdir(parents=True, exist_ok=False)
     before = source.source_bindings()
-    report = dict(cycle=300 if args.surface_input else 299 if args.surface_lifecycle else 298 if args.window_capacity else 297 if args.windows else 296 if args.desktop else 292 if args.optical else 287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
+    report = dict(cycle=305 if launch_programs else 300 if args.surface_input else 299 if args.surface_lifecycle else 298 if args.window_capacity else 297 if args.windows else 296 if args.desktop else 292 if args.optical else 287 if args.claimed_requester else 286 if args.exhaust_cleanup else 285 if args.file_controls else 284 if args.deferred_cleanup else 283,
                   contract_id=optical.CONTRACT if args.optical else 'PCLAIM1' if args.claimed_requester else 'PCLEANUP3' if args.exhaust_cleanup else 'PFILECONTROL1' if args.file_controls else 'PAPPRECOVERY1' if args.deferred_cleanup else 'PAPPSESSION1',
                   optical=args.optical, optical_images={}, file_waits=args.optical,
                   local_console=args.desktop or args.windows, window_surfaces=args.windows, graphical_desktop=False,
                   window_capacity=args.window_capacity,
                   surface_lifecycle=args.surface_lifecycle,
                   surface_input=args.surface_input,
+                  launch_shell_admission=bool(launch_programs), native_plc1_control_verified=False,
                   diagnostic_only=args.serial_recovery, serial_recovery=args.serial_recovery,
                   claimed_requester=args.claimed_requester,
                   exhaust_cleanup=args.exhaust_cleanup,
@@ -162,6 +176,14 @@ def main():
         if args.claimed_requester:
             selected=[({'TEXT':'PooleWaitingFileProbe','COUNTER':'PooleClaimedFiles'}.get(key,name),key) for name,key in probe.PROGRAMS]
         report['program_build'] = program_inputs(programs, env, selected)
+        program_sources = [(programs, list(selected), report['program_build'])]
+        selected_records = report['program_build']['programs']
+        if launch_programs:
+            launch_selection = [('PooleLaunchShell', 'CONSOLE_CLIENT')]
+            report['launch_program_build'] = program_inputs(launch_programs, env, launch_selection)
+            program_sources.append((launch_programs, launch_selection, report['launch_program_build']))
+            selected = [('PooleLaunchShell' if key == 'CONSOLE_CLIENT' else name, key) for name, key in selected]
+            selected_records = dict(selected_records, **report['launch_program_build']['programs'])
         lock, profile = shared.tier0.validate_contracts(ROOT)
         qemu = shared.tier0._require_workspace_tool_path(shared.tier0.DEFAULT_QEMU_ROOT, ROOT)
         shared.tier0.verify_local_launch_runtime(lock, qemu, ROOT)
@@ -185,6 +207,9 @@ def main():
         if args.surface_input:
             normal_features=('development-window-input',)
             bad_features=('development-window-input','development-applications-bad-file')
+        if launch_programs:
+            normal_features=('development-launch-session',)
+            bad_features=('development-launch-session','development-applications-bad-file')
         if args.exhaust_cleanup:
             normal_features=('development-app-cleanup-exhaustion',)
             bad_features=normal_features+('development-applications-bad-file',)
@@ -206,9 +231,11 @@ def main():
                 if image.count(Path(env[f'POOLEOS_{key}_CODE']).read_bytes()) != 1: raise ValueError('program embedding mismatch')
             (work/f'{name}.elf').write_bytes(image)
             report['kernels'][name] = dict(sha256=shared.sha(image), linked_sha256=shared.sha(link), bytes=len(image), image_pages=layout.image_byte_count//4096)
+        require_space(work/'development')
         development, report['boot_build'] = shared.boot._build_and_test(ROOT/'.toolchains/rust-1.97.0', work/'development', development_feature='development-user-root')
         files, config = shared.load.canonical_artifact_files(), shared.load.canonical_config_bytes()
         for name, image, bad_file in [('applications-1',kernel,False),('applications-2',kernel,False),('bad-file',bad,True)]:
+            require_space(work)
             manifest = shared.load.canonical_manifest_bytes(image, files)
             retained = shared.transfer.canonical_retained_files(manifest, image, files)
             media = shared.load.build_media_bytes(development, config, manifest, image, files)
@@ -233,7 +260,7 @@ def main():
             if args.exhaust_cleanup: scenario=exhaustion.scenario
             case = probe.file_control_scenario(secrets.token_hex(8),bad_file=bad_file,claimed_requester=True) if args.claimed_requester else scenario(secrets.token_hex(8), bad_file=bad_file)
             interaction = Interaction(case, args.deferred_cleanup, args.file_controls or args.claimed_requester, args.exhaust_cleanup, sustained=args.optical)
-            validator = (lambda m: exhaustion.validate_markers(m,bad_file=bad_file)) if args.exhaust_cleanup else (lambda m: probe.validate_markers(m, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows,window_capacity=args.window_capacity,surface_lifecycle=args.surface_lifecycle))
+            validator = (lambda m: exhaustion.validate_markers(m,bad_file=bad_file)) if args.exhaust_cleanup else (lambda m: probe.validate_markers(m, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows,window_capacity=args.window_capacity,surface_lifecycle=args.surface_lifecycle,launch_session=bool(launch_programs)))
             if args.serial_recovery:
                 validator = lambda m: native_serial_recovery.validate_markers(m, bad_file=bad_file,
                     file_waits=True, windows=True, window_capacity=True, surface_lifecycle=True)
@@ -265,7 +292,7 @@ def main():
                 retirement_barriers_observed=len(interaction.observed_retirements),
                 exhaustion_barrier_observed=interaction.exhaustion_observed,
                 kernel_evidence_from_com2=False)
-            if run['marker_summary']['program_bytes'] != [report['program_build']['programs'][n]['code_bytes'] for n,_ in selected]:
+            if run['marker_summary']['program_bytes'] != [selected_records[n]['code_bytes'] for n,_ in selected]:
                 raise ValueError('observed program sizes differ')
             prefix = run['marker_summary']['transfer_prefix']
             shared.load.validate_oracle_binding(prefix['boot_prefix'], inspected, run['pbp1_transcript'])
@@ -282,13 +309,15 @@ def main():
                     run['ordinary_oracle_rejected_diagnostic'] = True
                 else:
                     raise ValueError('ordinary oracle accepted diagnostic profile')
-            run['hostile_marker_cases_rejected'] = exhaustion.negative_controls(ordinary_markers,bad_file=bad_file) if args.exhaust_cleanup else probe.negative_controls(ordinary_markers, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows,window_capacity=args.window_capacity,surface_lifecycle=args.surface_lifecycle)
+            run['hostile_marker_cases_rejected'] = exhaustion.negative_controls(ordinary_markers,bad_file=bad_file) if args.exhaust_cleanup else probe.negative_controls(ordinary_markers, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows,window_capacity=args.window_capacity,surface_lifecycle=args.surface_lifecycle,launch_session=bool(launch_programs))
             run.update(media_sha256=shared.sha(media), kernel_sha256=shared.sha(image))
             report['guest_runs'].append(run)
         if args.optical:
+            require_space(work/'ordinary')
             ordinary, report['ordinary_boot_build'] = shared.boot._build_and_test(ROOT/'.toolchains/rust-1.97.0', work/'ordinary')
             if ordinary == development or b'POOLEBOOT/0.1 TRANSFER_ARM PASS' in ordinary:
                 raise ValueError('ordinary/development boot boundary differs')
+            require_space(work)
             manifest = shared.load.canonical_manifest_bytes(kernel, files)
             disk = shared.load.build_media_bytes(ordinary, config, manifest, kernel, files)
             (work/'ordinary-denial.img').write_bytes(disk)
@@ -307,8 +336,9 @@ def main():
             run['iso_sha256'] = inspection['iso_sha256']
             report['ordinary_denial'] = run
             report['iso_built'] = True
-        if before != source.source_bindings() or program_inputs(programs, env, selected) != report['program_build']:
-            raise ValueError('source or input drift')
+        revalidate_program_inputs(program_sources, env)
+        if before != source.source_bindings():
+            raise ValueError('source drift')
         report.update(status='pass', bundled_files=True, useful_applications=1 if args.file_controls or args.claimed_requester else 2)
     except Exception as error:
         report['failure'] = f'{type(error).__name__}: {error}'; print(report['failure'], flush=True)

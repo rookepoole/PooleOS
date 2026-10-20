@@ -109,6 +109,45 @@ fn fixture_pages(pages: u64) -> (PhysicalMemoryManager, AddressSpace, Memory, In
     (manager, space, memory, image)
 }
 
+#[cfg(feature = "development-launch-session")]
+#[test]
+fn launch_shell_fifth_page_and_stack_guards_require_exact_owned_readback() {
+    let (manager, space, memory, image) = fixture_pages(LAUNCH_SHELL_CODE_PAGES);
+    assert_eq!(space.summary().active_mappings, 6);
+    let first = ((image.code_page >> 12) & 511) as usize;
+    for page in 0..5 {
+        for bit in 0..64 {
+            if bit == 5 || bit == 6 {
+                continue;
+            }
+            let mut changed = memory.clone();
+            changed.pages[3][first + page] ^= 1 << bit;
+            assert!(admit_initial_image(&manager, &space, &mut changed, image, 36).is_err());
+            assert_eq!(changed.writes, memory.writes);
+        }
+    }
+    let mut valid = memory.clone();
+    let admission = admit_initial_image(&manager, &space, &mut valid, image, 36).unwrap();
+    assert_eq!(admission.code_end, image.code_page + 5 * PAGE_BYTES);
+    for address in [
+        image.stack_page - PAGE_BYTES,
+        image.stack_page + PAGE_BYTES,
+        admission.code_end,
+    ] {
+        let mut changed = memory.clone();
+        let index = ((address >> 12) & 511) as usize;
+        assert_eq!(changed.pages[3][index], 0);
+        changed.pages[3][index] = memory.pages[3][first];
+        assert!(admit_initial_image(&manager, &space, &mut changed, image, 36).is_err());
+    }
+    let stack = ((image.stack_page >> 12) & 511) as usize;
+    for mutation in [NX, WRITE, USER] {
+        let mut changed = memory.clone();
+        changed.pages[3][stack] ^= mutation;
+        assert!(admit_initial_image(&manager, &space, &mut changed, image, 36).is_err());
+    }
+}
+
 #[test]
 fn admits_real_vm_tree_with_guarded_stack_and_fixed_unprivileged_frame() {
     let (manager, space, mut memory, image) = fixture();

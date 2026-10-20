@@ -26,6 +26,8 @@ pub mod timer;
 
 pub const CONTRACT_ID: &str = "PKUSER1";
 pub const MAX_CODE_PAGES: u64 = 4;
+#[cfg(feature = "development-launch-session")]
+pub const LAUNCH_SHELL_CODE_PAGES: u64 = 5;
 // The opt-in service uses all eight existing VM slots: seven RX plus one RW/NX.
 #[cfg(feature = "development-window-capacity")]
 pub const MAX_IMAGE_CODE_PAGES: u64 = 7;

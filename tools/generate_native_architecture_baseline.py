@@ -24,6 +24,10 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle305-native-launch-admission.md",
+    "docs/native-launch-admission.md",
+    "runs/native-launch-admission-readiness.json",
+    "tests/test_native_launch_admission.py",
     "docs/checkpoints/cycle304-launch-session.md",
     "docs/native-launch-session.md",
     "runs/native-launch-session-readiness.json",

@@ -1,15 +1,63 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-20
-Plan version: 2.207.0-native-launch-session
-Roadmap cycle: PooleOS Cycle 304
+Plan version: 2.208.0-native-launch-admission
+Roadmap cycle: PooleOS Cycle 305
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 304: Launch Session And Measured Candidate
+## Cycle 305: Native Launch-Shell Admission
+
+Implemented: feature-specific trusted-slot admission and exact launch-shell
+startup role, explicit physical-page quota, five RX code pages and full owned
+mapping readback. Ordinary applications remain limited to four code pages;
+the window service remains seven, within the existing eight-mapping VM.
+The original handles, one-page guarded user stack,36 guarded kernel-stack pages
+and208-page kernel ceiling remain. The embedded boundary is explicitly0x1D000.
+The actual linked kernel is135 pages with432 bytes of read-only padding.
+
+The final source-bound qualification passes all three application sessions and
+ordinary unsigned-boot denial on QEMU. Independent native kernels and optical
+images reproduce. Startup/running totals include the extra page, and shell
+retirement releases17 owned pages, leaving the original26-page init/files state.
+Eight kernel host runs pass (default592, input624, launch626, launch+bad-file626
+in each debug/release);63 focused Python checks pass. All30 existing program
+pairs are revalidated against unchanged userspace sources.
+
+The first complete native qualification failed its final input recheck by looking
+for the separate candidate in the ordinary directory. Retain that failure;
+the repaired recheck independently validates both original selections and rejects
+drift in either. The complete fresh rerun passes. [Admission contract](native-launch-admission.md).
+
+Chronological substeps under existing N13/N14/N27/N29 flags:
+1. Complete: current-source native admission verification and exact shell teardown.
+2. Next: bind the matching window-service role and PLC1 Read/result/ack connection.
+   Its current24594/28672-byte code size does not guarantee embedded capacity;
+   measure both the connected code and nested guarded-stack paths.
+3. Add bounded mouse and keyboard launch/inspect/restart intents, distinguishing
+   admission, liveness and published surfaces. Preserve draft/file ownership
+   and active-window lifetime/focus fences.
+4. Qualify repeated, stale, delayed and failed controls on real QEMU/VirtualBox,
+   replay input/lifetime modes, then select a source-bound connected desktop ISO.
+
+The current native regression exercises the launch shell's ordinary PCS1 branch.
+It is not evidence of native PLC1 messages, new graphical controls or production
+all-path stack safety. Preserve the historical Cycle303 preview and strict
+source-binding checks. All40 phases,301 subphases and101 flags (46 open) remain.
+Complete microkernel, PooleGlyph/PDC, native launch-failure cleanup, compositor
+recovery, COM2-independent boot, persistence, event-driven waits and accessible
+PooleGlass remain required. No production gate closes.
+[Cycle305 evidence and retained failures](checkpoints/cycle305-native-launch-admission.md).
+Final selected metadata/integration replay passes460/460 after one stale
+historical kernel-unchanged assertion was bound to its original snapshot.
+Nine publication checks pass. The1608 discovered Python tests are inventory,
+not full canonical qualification. The current lane explicitly marks VirtualBox,
+full-input replay and preview replacement as unperformed for this source.
+
+## Historical Cycle 304: Launch Session And Measured Candidate
 
 Implemented: opt-in shell and console Read/result/ack wrappers, owned authenticated
 transport connection, sequence reservation before effects, retained backpressure

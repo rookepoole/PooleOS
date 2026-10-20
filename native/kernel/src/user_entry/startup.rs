@@ -28,6 +28,11 @@ impl<'a> Program<'a> {
     pub fn new(code: &'a [u8], entry_offset: usize) -> Result<Self, Error> {
         Self::bounded(code, entry_offset, MAX_CODE_PAGES)
     }
+    /// Only the trusted launch-session shell slot opts into PLCODE1.
+    #[cfg(feature = "development-launch-session")]
+    pub fn launch_shell(code: &'a [u8], entry_offset: usize) -> Result<Self, Error> {
+        Self::bounded(code, entry_offset, super::LAUNCH_SHELL_CODE_PAGES)
+    }
     /// Only the trusted window-service launch slot opts into PWCODE1.
     #[cfg(feature = "development-window-capacity")]
     pub fn window_service(code: &'a [u8], entry_offset: usize) -> Result<Self, Error> {
@@ -136,6 +141,32 @@ impl Startup {
 mod tests {
     use super::*;
     use crate::virtual_memory::USER_WINDOW_START as BASE;
+
+    #[cfg(feature = "development-launch-session")]
+    #[test]
+    fn launch_shell_is_explicit_five_page_code_with_original_stack_geometry() {
+        let bytes = [0x90; 5 * 4096 + 1];
+        assert_eq!(crate::virtual_memory::MAX_MAPPINGS, 8);
+        assert_eq!(super::super::MAX_IMAGE_CODE_PAGES, 7);
+        for size in [1, 4096, 16384, 16385, 19464, 20480, 20481] {
+            assert_eq!(Program::new(&bytes[..size], 0).is_ok(), size <= 16384);
+            let admitted = Program::launch_shell(&bytes[..size], size - 1);
+            assert_eq!(admitted.is_ok(), size <= 20480);
+            if let Ok(program) = admitted {
+                let image = program
+                    .image(BASE + 16 * PAGE_BYTES, BASE + 3 * PAGE_BYTES)
+                    .unwrap();
+                assert_eq!(image.code_pages, (size as u64).div_ceil(PAGE_BYTES));
+                assert_eq!(image.entry, image.code_page + size as u64 - 1);
+                if size > 8192 {
+                    assert!(program.image(BASE, BASE + 3 * PAGE_BYTES).is_err());
+                }
+            }
+        }
+        assert!(Program::launch_shell(&[], 0).is_err());
+        assert!(Program::launch_shell(&bytes[..20480], 20480).is_err());
+        assert!(Program::launch_shell(&bytes[..20480], usize::MAX).is_err());
+    }
 
     #[cfg(feature = "development-window-capacity")]
     #[test]

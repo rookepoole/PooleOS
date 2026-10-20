@@ -198,6 +198,8 @@ def _host_checks(cargo: Path, env: dict[str, str], temporary_root: Path) -> dict
 
 
 def _build_product(cargo: Path, env: dict[str, str], target_dir: Path, *, features: tuple[str, ...] = ()) -> tuple[bytes, bytes, kernel_image.LinkedImagePlan]:
+    from tools.native_build_space import require_space
+    require_space(target_dir)
     if features not in ((), ("development-process-control",), ("development-process-launch",),
                         ("development-process-launch-bad-owner",), ("development-session",), ("development-session-bad-startup",),
                         ("development-console",), ("development-console-bad-handle",),
@@ -210,6 +212,7 @@ def _build_product(cargo: Path, env: dict[str, str], target_dir: Path, *, featur
                         ("development-window-capacity",), ("development-window-capacity", "development-applications-bad-file"),
                         ("development-window-lifecycle",), ("development-window-lifecycle", "development-applications-bad-file"),
                         ("development-window-input",), ("development-window-input", "development-applications-bad-file"),
+                        ("development-launch-session",), ("development-launch-session", "development-applications-bad-file"),
                         ("development-window-input", "development-serial-recovery"),
                         ("development-window-input", "development-applications-bad-file", "development-serial-recovery"),
                         ("development-applications", "development-shell-deferred-cleanup"),
@@ -229,17 +232,19 @@ def _build_product(cargo: Path, env: dict[str, str], target_dir: Path, *, featur
                         ("development-session-capacity",), ("development-session-capacity-bad-startup",)):
         raise QualificationError("unreviewed kernel build feature set")
     product_env = _product_environment(env)
-    if features and features[0] == "development-window-input":
+    if features and features[0] == "development-launch-session":
+        product_env["CARGO_ENCODED_RUSTFLAGS"] += "\x1f-Clink-arg=--defsym=__poole_launch_session_profile=1"
+    if features and features[0] in ("development-window-input", "development-launch-session"):
         product_env["CARGO_ENCODED_RUSTFLAGS"] += "\x1f-Clink-arg=--defsym=__poole_window_input_profile=1"
-    if features and features[0] in ("development-window-capacity", "development-window-lifecycle", "development-window-input"):
+    if features and features[0] in ("development-window-capacity", "development-window-lifecycle", "development-window-input", "development-launch-session"):
         product_env["CARGO_ENCODED_RUSTFLAGS"] += "\x1f-Clink-arg=--defsym=__poole_window_capacity_profile=1"
-    if features and features[0] in ("development-windows", "development-window-capacity", "development-window-lifecycle", "development-window-input"):
+    if features and features[0] in ("development-windows", "development-window-capacity", "development-window-lifecycle", "development-window-input", "development-launch-session"):
         product_env["CARGO_ENCODED_RUSTFLAGS"] += "\x1f-Clink-arg=--defsym=__poole_windows_profile=1"
-    if features and features[0] in ("development-desktop", "development-windows", "development-window-capacity", "development-window-lifecycle", "development-window-input"):
+    if features and features[0] in ("development-desktop", "development-windows", "development-window-capacity", "development-window-lifecycle", "development-window-input", "development-launch-session"):
         product_env["CARGO_ENCODED_RUSTFLAGS"] += "\x1f-Clink-arg=--defsym=__poole_desktop_profile=1"
     if features in (("development-files",), ("development-files-bad-handle",)):
         product_env["CARGO_ENCODED_RUSTFLAGS"] += "\x1f-Clink-arg=--defsym=__poole_files_profile=1"
-    if features and features[0] in ("development-applications", "development-applications-bad-file", "development-file-controls", "development-app-cleanup-exhaustion", "development-claimed-requester", "development-desktop", "development-windows", "development-window-capacity", "development-window-lifecycle", "development-window-input"):
+    if features and features[0] in ("development-applications", "development-applications-bad-file", "development-file-controls", "development-app-cleanup-exhaustion", "development-claimed-requester", "development-desktop", "development-windows", "development-window-capacity", "development-window-lifecycle", "development-window-input", "development-launch-session"):
         product_env["CARGO_ENCODED_RUSTFLAGS"] += "\x1f-Clink-arg=--defsym=__poole_apps_profile=1"
     _run(
         [

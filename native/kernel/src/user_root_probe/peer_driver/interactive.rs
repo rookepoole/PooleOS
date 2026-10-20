@@ -52,6 +52,10 @@ pub(crate) fn run(
         if i == 2 {
             return checked!(Program::window_service(programs[i], 0));
         }
+        #[cfg(feature = "development-launch-session")]
+        if i == 3 {
+            return checked!(Program::launch_shell(programs[i], 0));
+        }
         checked!(Program::new(programs[i], 0))
     });
     #[allow(unused_mut)]

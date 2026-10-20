@@ -11,7 +11,19 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle304 binds launch control to the shell's
+**Current development checkpoint:** Cycle305 adds explicit native admission for
+the five-page launch shell, preserving ordinary four-page applications, original
+capabilities and stack guards. Startup and teardown account for its extra page;
+the linked kernel measures135/208 pages with36 guarded kernel-stack pages.
+Four current-source QEMU checks pass, including application fault/restart,
+17-page shell teardown and ordinary unsigned-boot denial. Independent native
+kernels and optical images reproduce; eight host kernel profile runs pass.
+Matching window-service PLC1 wiring and mouse/keyboard launch controls are next;
+this is not yet connected graphical launching. The historical Cycle303 preview
+is not replaced, and no VirtualBox replay or full canonical pass is claimed.
+[Progress and remaining gates](docs/checkpoints/cycle305-native-launch-admission.md).
+
+**Historical development checkpoint:** Cycle304 binds launch control to the shell's
 Read/result/ack session without replacing terminal drafts or active file/job work.
 Both real session ends and authenticated transports pass host integration tests.
 All268 userspace tests pass in debug/release;29 ordinary program pairs remain
