@@ -140,9 +140,29 @@ impl<'a> Input<'a> {
         &mut self,
         manager: &mut Manager,
         device: &mut impl Device,
-        mut apps: Option<&mut super::application_input::Queues>,
+        apps: Option<&mut super::application_input::Queues>,
     ) -> Result<Update, Error> {
-        if APPS && apps.is_none() {
+        self.poll_modes::<APPS, false>(manager, device, apps, None)
+    }
+    #[inline(always)]
+    pub fn poll_launch(
+        &mut self,
+        manager: &mut Manager,
+        device: &mut impl Device,
+        apps: &mut super::application_input::Queues,
+        controls: &mut super::launch::Controls,
+    ) -> Result<Update, Error> {
+        self.poll_modes::<true, true>(manager, device, Some(apps), Some(controls))
+    }
+    #[inline(always)]
+    fn poll_modes<const APPS: bool, const LAUNCH: bool>(
+        &mut self,
+        manager: &mut Manager,
+        device: &mut impl Device,
+        mut apps: Option<&mut super::application_input::Queues>,
+        mut controls: Option<&mut super::launch::Controls>,
+    ) -> Result<Update, Error> {
+        if APPS && apps.is_none() || LAUNCH && (!APPS || controls.is_none()) {
             return Err(Error::Transport);
         }
         let old_pointer = (manager.x, manager.y);
@@ -150,6 +170,7 @@ impl<'a> Input<'a> {
         let focus = manager.focus;
         let visible = manager.visible;
         let order = manager.order;
+        let mut control_changed = false;
         for _ in 0..DRAIN_LIMIT {
             let Some(value) = device.next()? else {
                 if APPS {
@@ -164,21 +185,35 @@ impl<'a> Input<'a> {
             };
             match value {
                 0..=255 => {
-                    if APPS && apps.as_ref().ok_or(Error::Transport)?.quarantined {
-                        apps.as_mut()
-                            .ok_or(Error::Transport)?
-                            .fence
-                            .feed(value as u8);
-                        continue;
-                    }
-                    if APPS
-                        && !apps
+                    let quarantined = APPS && apps.as_ref().ok_or(Error::Transport)?.quarantined;
+                    let allowed = !APPS
+                        || apps
                             .as_mut()
                             .ok_or(Error::Transport)?
                             .fence
-                            .feed(value as u8)
-                    {
+                            .feed(value as u8);
+                    let mut consumed = false;
+                    if LAUNCH {
+                        let old_focus = manager.focus;
+                        let update = controls.as_mut().ok_or(Error::Transport)?.key(
+                            value as u8,
+                            manager,
+                            allowed && !quarantined,
+                        )?;
+                        consumed = update.0;
+                        control_changed |= update.1;
+                        if old_focus != manager.focus {
+                            self.focus_boundary(apps.as_mut().ok_or(Error::Transport)?, old_focus);
+                        }
+                    }
+                    if quarantined {
+                        continue;
+                    }
+                    if !allowed {
                         self.keyboard.cancel_prefix();
+                        continue;
+                    }
+                    if consumed {
                         continue;
                     }
                     if let Some(key) = self.keyboard.feed(value as u8) {
@@ -196,10 +231,22 @@ impl<'a> Input<'a> {
                     if let Some(motion) = self.mouse.feed((value - 256) as u8) {
                         if APPS && apps.as_ref().ok_or(Error::Transport)?.quarantined {
                             manager.quarantine_motion(motion);
+                            if LAUNCH {
+                                controls
+                                    .as_mut()
+                                    .ok_or(Error::Transport)?
+                                    .pointer(motion, manager, false)?;
+                            }
                             continue;
                         }
                         let old_focus = manager.focus;
                         manager.motion(motion);
+                        if LAUNCH {
+                            control_changed |= controls
+                                .as_mut()
+                                .ok_or(Error::Transport)?
+                                .pointer(motion, manager, true)?;
+                        }
                         if old_focus != manager.focus {
                             if APPS {
                                 self.focus_boundary(
@@ -213,6 +260,10 @@ impl<'a> Input<'a> {
                     }
                 }
                 512 => {
+                    if LAUNCH {
+                        controls.as_mut().ok_or(Error::Transport)?.reset_input();
+                        control_changed = true;
+                    }
                     self.keyboard = Keyboard::new();
                     self.mouse.reset();
                     manager.reset_input();
@@ -233,7 +284,8 @@ impl<'a> Input<'a> {
         Ok(Update {
             old_pointer,
             pointer_changed: old_pointer != (manager.x, manager.y),
-            scene_changed: windows != manager.windows
+            scene_changed: control_changed
+                || windows != manager.windows
                 || focus != manager.focus
                 || visible != manager.visible
                 || order

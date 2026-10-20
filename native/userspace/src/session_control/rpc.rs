@@ -104,11 +104,12 @@ impl<C: rpc::Calls> Connection<C> {
     }
 }
 impl<C: rpc::Calls> super::Channel for Connection<C> {
-    #[inline(always)]
+    // Share bounded transport steps between console and control state machines.
+    #[inline(never)]
     fn send(&mut self, exchange: Exchange) -> Result<bool, Error> {
         self.transport.send(exchange, &mut self.calls)
     }
-    #[inline(always)]
+    #[inline(never)]
     fn receive(&mut self) -> Result<Option<Exchange>, Error> {
         self.transport.receive(&mut self.calls)
     }

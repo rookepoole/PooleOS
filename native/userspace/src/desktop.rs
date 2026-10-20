@@ -6,6 +6,7 @@ pub mod compositor;
 pub mod font;
 pub mod input;
 pub mod keyboard;
+pub mod launch;
 pub mod lifecycle;
 pub mod mouse;
 pub mod publisher;
@@ -15,6 +16,9 @@ pub mod windows;
 
 pub const MAX_COLUMNS: usize = 80;
 pub const MAX_ROWS: usize = 24;
+pub const WINDOW_COLUMNS: usize = 48;
+pub const WINDOW_ROWS: usize = 19;
+pub const WINDOW_CELLS: usize = WINDOW_COLUMNS * WINDOW_ROWS;
 pub const INK: u32 = 0xdce9e3;
 pub const PAPER: u32 = 0x18221e;
 
@@ -83,7 +87,8 @@ pub fn glyph(
 }
 
 pub struct Terminal<'a> {
-    cells: &'a mut [u8; MAX_COLUMNS * MAX_ROWS],
+    cells: &'a mut [u8],
+    stride: core::num::NonZeroUsize,
     columns: usize,
     rows: usize,
     column: usize,
@@ -94,13 +99,28 @@ pub struct Terminal<'a> {
 impl<'a> Terminal<'a> {
     #[inline(always)]
     pub fn window(cells: &'a mut [u8; MAX_COLUMNS * MAX_ROWS]) -> Self {
+        Self::window_storage(
+            cells,
+            const { core::num::NonZeroUsize::new(MAX_COLUMNS).unwrap() },
+        )
+    }
+    #[inline(always)]
+    pub fn compact_window(cells: &'a mut [u8; WINDOW_CELLS]) -> Self {
+        Self::window_storage(
+            cells,
+            const { core::num::NonZeroUsize::new(WINDOW_COLUMNS).unwrap() },
+        )
+    }
+    #[inline(always)]
+    fn window_storage(cells: &'a mut [u8], stride: core::num::NonZeroUsize) -> Self {
         for cell in cells.iter_mut() {
             *cell = core::hint::black_box(b' ');
         }
         Self {
             cells,
-            columns: 48,
-            rows: 19,
+            stride,
+            columns: WINDOW_COLUMNS,
+            rows: WINDOW_ROWS,
             column: 0,
             row: 0,
             left: 0,
@@ -141,7 +161,7 @@ impl<'a> Terminal<'a> {
             for col in first_col..last_col {
                 if *self
                     .cells
-                    .get(row.saturating_mul(MAX_COLUMNS).saturating_add(col))
+                    .get(row.saturating_mul(self.stride.get()).saturating_add(col))
                     .ok_or(Error::Hardware)?
                     != b' '
                 {
@@ -165,6 +185,7 @@ impl<'a> Terminal<'a> {
         }
         Ok(Self {
             cells,
+            stride: const { core::num::NonZeroUsize::new(MAX_COLUMNS).unwrap() },
             columns: usize::from((width - 48) / 12).min(MAX_COLUMNS),
             rows: usize::from((height - 104) / 16).min(MAX_ROWS),
             column: 0,
@@ -203,7 +224,7 @@ impl<'a> Terminal<'a> {
                 .ok_or(Error::Hardware)?,
             *self
                 .cells
-                .get(row.saturating_mul(MAX_COLUMNS).saturating_add(col))
+                .get(row.saturating_mul(self.stride.get()).saturating_add(col))
                 .ok_or(Error::Hardware)?,
             INK,
             PAPER,
@@ -226,12 +247,13 @@ impl<'a> Terminal<'a> {
         if self.row.saturating_add(1) < self.rows {
             self.row = self.row.saturating_add(1);
         } else {
-            let end = self.rows.saturating_mul(MAX_COLUMNS);
+            let stride = self.stride.get();
+            let end = self.rows.saturating_mul(stride);
             for i in 0..end {
-                let byte = if i.saturating_add(MAX_COLUMNS) < end {
+                let byte = if i.saturating_add(stride) < end {
                     *self
                         .cells
-                        .get(i.saturating_add(MAX_COLUMNS))
+                        .get(i.saturating_add(stride))
                         .ok_or(Error::Hardware)?
                 } else {
                     b' '
@@ -240,8 +262,8 @@ impl<'a> Terminal<'a> {
                 let cell = self.cells.get_mut(i).ok_or(Error::Hardware)?;
                 let changed = *cell != byte;
                 *cell = core::hint::black_box(byte);
-                if changed && i % MAX_COLUMNS < self.columns {
-                    self.cell(canvas, i % MAX_COLUMNS, i / MAX_COLUMNS)?;
+                if changed && i % stride < self.columns {
+                    self.cell(canvas, i % stride, i / stride)?;
                 }
             }
         }
@@ -258,7 +280,7 @@ impl<'a> Terminal<'a> {
                     .cells
                     .get_mut(
                         self.row
-                            .saturating_mul(MAX_COLUMNS)
+                            .saturating_mul(self.stride.get())
                             .saturating_add(self.column),
                     )
                     .ok_or(Error::Hardware)? = byte;
@@ -278,6 +300,63 @@ impl<'a> Terminal<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn compact_window_preserves_every_visible_write_scroll_and_cursor_without_touching_guards() {
+        #[derive(Default)]
+        struct Trace(std::vec::Vec<(u8, u16, u16, u16, u16, u64, u32, u32)>);
+        impl Canvas for Trace {
+            fn fill(&mut self, x: u16, y: u16, w: u16, h: u16, color: u32) -> Result<(), Error> {
+                self.0.push((0, x, y, w, h, 0, color, 0));
+                Ok(())
+            }
+            fn tile(
+                &mut self,
+                x: u16,
+                y: u16,
+                w: u16,
+                h: u16,
+                mask: u64,
+                fg: u32,
+                bg: u32,
+            ) -> Result<(), Error> {
+                self.0.push((1, x, y, w, h, mask, fg, bg));
+                Ok(())
+            }
+        }
+        let mut full = [0; MAX_COLUMNS * MAX_ROWS];
+        let mut guarded = [0xa5; WINDOW_CELLS + 2];
+        let compact: &mut [u8; WINDOW_CELLS] = (&mut guarded[1..=WINDOW_CELLS]).try_into().unwrap();
+        let mut old = Terminal::window(&mut full);
+        let mut new = Terminal::compact_window(compact);
+        old.relocate(24, 84);
+        new.relocate(24, 84);
+        let (mut a, mut b) = (Trace::default(), Trace::default());
+        for i in 0..1800 {
+            let byte = match i % 53 {
+                0 => b'\r',
+                1 => b'\n',
+                10 => 8,
+                _ => 32 + (i % 95) as u8,
+            };
+            old.write(&mut a, byte).unwrap();
+            new.write(&mut b, byte).unwrap();
+            assert_eq!(a.0, b.0, "step {i}");
+            assert_eq!((old.column, old.row), (new.column, new.row));
+            for row in 0..WINDOW_ROWS {
+                assert_eq!(
+                    &old.cells[row * MAX_COLUMNS..row * MAX_COLUMNS + WINDOW_COLUMNS],
+                    &new.cells[row * WINDOW_COLUMNS..(row + 1) * WINDOW_COLUMNS]
+                );
+            }
+            a.0.clear();
+            b.0.clear();
+        }
+        old.repaint(&mut a).unwrap();
+        new.repaint(&mut b).unwrap();
+        assert_eq!(a.0, b.0);
+        assert_eq!(guarded[0], 0xa5);
+        assert_eq!(guarded[WINDOW_CELLS + 1], 0xa5);
+    }
     type Tile = (u16, u16, u16, u16, u64, u32, u32);
     #[derive(Default)]
     struct Tiles {

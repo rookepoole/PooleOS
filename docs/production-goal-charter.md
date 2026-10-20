@@ -7,9 +7,22 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 305
+Last roadmap reconciliation: PooleOS Cycle 306
 
-Cycle305 implements explicit trusted-slot native admission for the measured
+Cycle306 implements bounded window-manager Start/Inspect intents over the real
+PLC1 service, independent surface status and a separate launch-console role.
+Held inputs, modifiers, resets, quarantine, stale replies and backpressure are
+host-tested; compact terminal storage preserves rendering while reducing the
+compiled entry-frame allocation by992 bytes. The native candidate retains the
+seven-page code profile and original capability/stack limits. Native profile
+selection, GUI-triggered execution, nested guarded paths and the complete
+two-backend matrix remain required before a connected ISO can replace the
+historical preview. No phase closure, merge qualification or production claim.
+All40 phases,301 subphases and complete microkernel, PooleGlyph/PDC and accessible
+PooleGlass remain required.
+[Current progress](checkpoints/cycle306-window-launch-controls.md).
+
+Historical Cycle305 implements explicit trusted-slot native admission for the measured
 five-page launch shell. Ordinary application limits, original handles and guarded
 stacks remain unchanged; the extra code page has explicit quota and teardown
 accounting. The linked kernel measures135/208 pages,36 guarded kernel-stack pages
@@ -21,7 +34,7 @@ controls, real connected stack/failure tests and two-backend ISO qualification
 remain next. No preview replacement, phase closure or production promotion.
 All40 phases,301 subphases,101 flags (46 open), complete microkernel, PooleGlyph/PDC,
 accessible PooleGlass and all canonical/release gates remain required.
-[Current progress](checkpoints/cycle305-native-launch-admission.md).
+[Historical progress](checkpoints/cycle305-native-launch-admission.md).
 
 Historical Cycle304 implements the opt-in Read/result/ack session with retained terminal
 drafts, file/job ownership and authenticated one-use RPC.268 userspace tests pass

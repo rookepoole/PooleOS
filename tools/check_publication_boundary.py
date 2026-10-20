@@ -23,6 +23,7 @@ FORBIDDEN_PREFIXES = (
     "sources/pdc",
 )
 ALLOWED_RUNS = {
+    "runs/native-window-launch-readiness.json",
     "runs/adr_ratification_manifest.json",
     "runs/adr_ratification_manifest.json.sig",
     "runs/adr_ratification_readiness.json",

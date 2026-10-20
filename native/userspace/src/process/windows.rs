@@ -43,6 +43,38 @@ impl<'a, const LIFETIME: bool> Local<'a, LIFETIME> {
         surface_cells: &'a mut [u8; 384],
         key_cells: &'a mut [u8; 64],
     ) -> Self {
+        Self::with_terminal(
+            port,
+            endpoint,
+            Terminal::window(cells),
+            surface_cells,
+            key_cells,
+        )
+    }
+    #[inline(always)]
+    pub fn new_compact(
+        port: Console,
+        endpoint: u64,
+        cells: &'a mut [u8; desktop::WINDOW_CELLS],
+        surface_cells: &'a mut [u8; 384],
+        key_cells: &'a mut [u8; 64],
+    ) -> Self {
+        Self::with_terminal(
+            port,
+            endpoint,
+            Terminal::compact_window(cells),
+            surface_cells,
+            key_cells,
+        )
+    }
+    #[inline(always)]
+    fn with_terminal(
+        port: Console,
+        endpoint: u64,
+        terminal: Terminal<'a>,
+        surface_cells: &'a mut [u8; 384],
+        key_cells: &'a mut [u8; 64],
+    ) -> Self {
         let (status, h) = invoke(21, port.0, 0, 0, 0);
         if status != 0 {
             super::exit(154);
@@ -56,7 +88,7 @@ impl<'a, const LIFETIME: bool> Local<'a, LIFETIME> {
         let mut local = Self {
             serial: port,
             display: Display(h),
-            terminal: Terminal::window(cells),
+            terminal,
             surfaces: Surfaces::new(surface_cells),
             manager: Manager::new(w, height).unwrap_or_else(|_| super::exit(154)),
             input: Input::new(key_cells),
@@ -68,6 +100,33 @@ impl<'a, const LIFETIME: bool> Local<'a, LIFETIME> {
     #[inline(always)]
     pub fn start(&mut self) -> Result<(), Error> {
         self.paint(self.manager.bounds)
+    }
+    #[inline(always)]
+    pub fn start_launch(&mut self, controls: &desktop::launch::Controls) -> Result<(), Error> {
+        self.paint_launch(self.manager.bounds, controls)
+    }
+    #[inline(always)]
+    fn paint_launch(&mut self, r: Rect, controls: &desktop::launch::Controls) -> Result<(), Error> {
+        compositor::paint_launch(
+            &self.manager,
+            &self.terminal,
+            &self.surfaces,
+            &mut self.display,
+            r,
+            controls,
+        )
+    }
+    #[inline(never)]
+    pub fn launch_status(&mut self, controls: &desktop::launch::Controls) -> Result<(), Error> {
+        self.paint_launch(
+            Rect {
+                x: 0,
+                y: 0,
+                w: self.manager.bounds.w,
+                h: 32,
+            },
+            controls,
+        )
     }
     #[inline(always)]
     fn locate(&mut self) {
@@ -96,29 +155,46 @@ impl<'a, const LIFETIME: bool> Local<'a, LIFETIME> {
     ) -> Result<(), Error> {
         if INPUT {
             // Polling must return before composition uses its nested draw frames.
-            for rect in self.poll_input(input)?.into_iter().flatten() {
+            for rect in self.poll_input::<false>(input, None)?.into_iter().flatten() {
                 self.paint(rect)?;
             }
             Ok(())
         } else {
-            self.poll_inner::<false>(input, &mut [None; 3])
+            self.poll_inner::<false, false>(input, &mut [None; 3], None)
         }
+    }
+    #[inline(always)]
+    pub fn poll_launch(
+        &mut self,
+        input: &mut desktop::application_input::Queues,
+        controls: &mut desktop::launch::Controls,
+    ) -> Result<(), Error> {
+        for rect in self
+            .poll_input::<true>(Some(input), Some(controls))?
+            .into_iter()
+            .flatten()
+        {
+            self.paint_launch(rect, controls)?;
+        }
+        Ok(())
     }
     // Keep interactive poll temporaries out of the long-lived entry frame.
     #[inline(never)]
-    fn poll_input(
+    fn poll_input<const LAUNCH: bool>(
         &mut self,
         input: Option<&mut desktop::application_input::Queues>,
+        controls: Option<&mut desktop::launch::Controls>,
     ) -> Result<[Option<Rect>; 3], Error> {
         let mut damage = [None; 3];
-        self.poll_inner::<true>(input, &mut damage)?;
+        self.poll_inner::<true, LAUNCH>(input, &mut damage, controls)?;
         Ok(damage)
     }
     #[inline(always)]
-    fn poll_inner<const INPUT: bool>(
+    fn poll_inner<const INPUT: bool, const LAUNCH: bool>(
         &mut self,
         mut input: Option<&mut desktop::application_input::Queues>,
         pending: &mut [Option<Rect>; 3],
+        controls: Option<&mut desktop::launch::Controls>,
     ) -> Result<(), Error> {
         if INPUT && (!LIFETIME || input.is_none()) {
             return Err(Error::Transport);
@@ -203,9 +279,17 @@ impl<'a, const LIFETIME: bool> Local<'a, LIFETIME> {
                 damage = Some(self.manager.bounds);
             }
         }
-        let update =
+        let update = if LAUNCH {
+            self.input.poll_launch(
+                &mut self.manager,
+                &mut Ps2(self.display.0),
+                input.ok_or(Error::Transport)?,
+                controls.ok_or(Error::Transport)?,
+            )?
+        } else {
             self.input
-                .poll_mode::<INPUT>(&mut self.manager, &mut Ps2(self.display.0), input)?;
+                .poll_mode::<INPUT>(&mut self.manager, &mut Ps2(self.display.0), input)?
+        };
         if update.scene_changed {
             self.locate();
             if INPUT {
@@ -296,6 +380,28 @@ pub unsafe fn boot(
             boot.peer,
             true,
         )),
+        surface,
+    ))
+}
+/// SAFETY: caller supplies the live kernel-owned PSTART1 entry block.
+#[inline(always)]
+pub unsafe fn launch_boot(
+    address: u64,
+    bytes: u64,
+    version: u64,
+) -> Result<
+    (
+        Console,
+        crate::session_control::rpc::Connection<ConsoleCalls>,
+        u64,
+    ),
+    crate::startup::Error,
+> {
+    let block = unsafe { super::file_block(address, bytes) }?;
+    let (boot, surface) = crate::startup::launch_console(block, version)?;
+    Ok((
+        Console(boot.port.ok_or(crate::startup::Error::Handle)?),
+        crate::session_control::rpc::Connection::new(boot.receive, boot.peer, true, ConsoleCalls),
         surface,
     ))
 }

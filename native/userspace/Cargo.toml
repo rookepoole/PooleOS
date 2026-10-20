@@ -7,8 +7,16 @@ publish = false
 
 [features]
 launch-session = []
+launch-desktop = []
 
 [workspace]
+
+[[bin]]
+name = "PooleLaunchConsole"
+path = "src/bin/launch_console.rs"
+required-features = ["launch-desktop"]
+test = false
+bench = false
 
 [[bin]]
 name = "PooleLaunchShell"

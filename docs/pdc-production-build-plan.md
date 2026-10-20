@@ -1,15 +1,64 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-20
-Plan version: 2.208.0-native-launch-admission
-Roadmap cycle: PooleOS Cycle 305
+Plan version: 2.209.0-native-window-launch-controls
+Roadmap cycle: PooleOS Cycle 306
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 305: Native Launch-Shell Admission
+## Cycle 306: Window Launch Controls And Stack Headroom
+
+Implemented: a bounded window-manager Start/Inspect controller, mouse taskbar
+actions, keyboard selection/inspection, independently observed surface status
+and a distinct launch-console startup role using the real PLC1 service.
+One acknowledged action is retained; held gestures, resets, prefixes, modifiers,
+quarantine, stale replies and backpressure cannot enqueue uncontrolled launches.
+No process factory, additional endpoint or terminal-command injection is added.
+New surfaces preserve focus. [Control contract](native-window-launch-controls.md).
+
+281 userspace tests pass in both debug and release. All31 native program pairs
+reproduce independently (29 ordinary, one launch shell, one launch console).
+The launch console is24594 bytes under the unchanged seven-page PWCODE1 limit,
+with no imports, writable segments or forbidden relocations. Initial builds
+correctly rejected code/relocation violations. Shared rendering and bounded
+transport calls remove duplicated code; limits and guards are not expanded.
+
+Only the launch entry uses compact912-cell terminal storage. Ordinary windows
+retain1920 cells and their80-byte stride. Differential tests verify identical
+visible writes, scrolling, cursors and repaints, with untouched buffer canaries.
+The entry-frame allocation decreases from3384 to2392 bytes. This is measured
+headroom, not a production all-path stack bound.
+
+Chronological substeps under existing N13/N14/N27/N29 flags:
+1. Complete: host-qualified bounded intents, exact startup role and reproducible
+   native candidate, including compact storage and display-work bounds.
+2. Next: explicit kernel profile selection of the launch console and admitted
+   shell; measure actual embedding, startup, quotas and nested guarded execution.
+3. Prove GUI-triggered Start/Inspect/restart, retained drafts/file work,
+   delayed/stale/failure handling and independently published surfaces.
+4. Replay complete QEMU/VirtualBox input/lifetime modes and rendered controls,
+   then qualify and select a new source-bound connected desktop ISO.
+
+The native regression in this cycle still uses the ordinary window-service
+role. It cannot establish GUI-triggered PLC1 traffic or qualify the new console.
+Preserve the Cycle303 preview and all historical receipts. All40 phases,
+301 subphases and101 flags (46 open) remain. All-path stack bounds, native
+launch-failure cleanup, compositor recovery, persistent storage, COM2-independent
+boot, event-driven waits, complete microkernel, PooleGlyph/PDC and accessible
+PooleGlass remain required. No phase, production or merge gate closes.
+[Cycle306 evidence and retained attempts](checkpoints/cycle306-window-launch-controls.md).
+
+The final current-source native regression passes four QEMU checks, with
+independent kernels/optical images and exact17-page shell teardown. It uses the
+ordinary window role, not the launch-console candidate. Final selected checks:
+463 metadata/integration,54 focused and nine publication tests pass. Earlier
+metadata-count/title failures remain recorded;90 historical receipts remain
+unchanged. The1611 discovered Python tests are inventory, not a canonical pass.
+
+## Historical Cycle 305: Native Launch-Shell Admission
 
 Implemented: feature-specific trusted-slot admission and exact launch-shell
 startup role, explicit physical-page quota, five RX code pages and full owned

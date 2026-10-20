@@ -1,6 +1,6 @@
 #![no_std]
 #![no_main]
-//! Opt-in session candidate. Not selected by any admitted native profile.
+//! Opt-in session shell selected only by explicit native launch profiles.
 use poole_userspace::{
     console_ipc::Error,
     files::rpc::Client as FileClient,

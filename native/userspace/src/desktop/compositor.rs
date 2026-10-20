@@ -59,6 +59,12 @@ mod tests {
             // at the fixed32-command display queue. Ordinary4096 is insufficient.
             assert!(work.0 > 4096);
             assert!(work.0 * 4 < crate::desktop::surface_rpc::INPUT_POLL_LIMIT);
+            let mut controls = crate::desktop::launch::Controls::new();
+            controls.activate(2, true, &mut m).unwrap();
+            work.0 = 0;
+            paint_launch(&m, &terminal, &s, &mut work, m.bounds, &controls).unwrap();
+            // Reserve the remaining characters up to the longest status label.
+            assert!((work.0 + 7 * 4) * 4 < crate::desktop::surface_rpc::INPUT_POLL_LIMIT);
         }
     }
     #[test]
@@ -262,6 +268,7 @@ impl Canvas for Damage {
         Ok(())
     }
 }
+#[inline(never)]
 fn text(c: &mut impl Canvas, x: u16, y: u16, s: &[u8], fg: u32, bg: u32) -> Result<(), Error> {
     for (i, &b) in s.iter().enumerate() {
         glyph(
@@ -282,6 +289,29 @@ pub fn paint(
     canvas: &mut impl Canvas,
     damage: Rect,
 ) -> Result<(), Error> {
+    paint_mode(m, t, s, canvas, damage, None)
+}
+#[inline]
+pub fn paint_launch(
+    m: &Manager,
+    t: &Terminal<'_>,
+    s: &Surfaces<'_>,
+    canvas: &mut impl Canvas,
+    damage: Rect,
+    controls: &super::launch::Controls,
+) -> Result<(), Error> {
+    paint_mode(m, t, s, canvas, damage, Some(controls))
+}
+// Keep one renderer when ordinary terminal writes and launch-status paints coexist.
+#[inline(never)]
+fn paint_mode(
+    m: &Manager,
+    t: &Terminal<'_>,
+    s: &Surfaces<'_>,
+    canvas: &mut impl Canvas,
+    damage: Rect,
+    controls: Option<&super::launch::Controls>,
+) -> Result<(), Error> {
     let mut c = Clip {
         canvas,
         rect: damage,
@@ -289,6 +319,26 @@ pub fn paint(
     c.fill(0, 0, m.bounds.w, m.bounds.h, 0xd3dfdf)?;
     c.fill(0, 0, m.bounds.w, 32, 0xf7faf9)?;
     text(&mut c, 16, 8, b"PooleOS", 0x235b4b, 0xf7faf9)?;
+    if let Some(controls) = controls {
+        if let Some(app) = controls.last() {
+            let name: &[u8] = if app == crate::session_control::App::Text {
+                b"Text: "
+            } else {
+                b"Numbers: "
+            };
+            let status = controls.label(app);
+            let surface: &[u8] = if m.available[app.index() + 1] {
+                b" / surface"
+            } else {
+                b" / no surface"
+            };
+            let mut x = 144;
+            for part in [name, status, surface] {
+                text(&mut c, x, 8, part, 0x253e37, 0xf7faf9)?;
+                x = x.saturating_add((part.len() as u16).saturating_mul(12));
+            }
+        }
+    }
     for &i in &m.order {
         if i >= 3 {
             return Err(Error::Hardware);
@@ -367,7 +417,7 @@ pub fn paint(
     let y = m.bounds.h.saturating_sub(32);
     c.fill(0, y, m.bounds.w, 32, 0xf7faf9)?;
     for i in 0..3 {
-        if !m.available[i] {
+        if controls.is_none() && !m.available[i] {
             continue;
         }
         let x = i as u16 * 160;

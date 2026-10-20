@@ -16,7 +16,9 @@ LAUNCH_CANDIDATE_CODE_PAGES = 5
 def profile_for(name: str) -> str:
     if name == "PooleLaunchShell":
         return LAUNCH_CANDIDATE_CONTRACT
-    return WINDOW_SERVICE_CONTRACT if name in ("PooleWindowCapacity", "PooleWindowLifecycle", "PooleWindowInput") else CONTRACT
+    return WINDOW_SERVICE_CONTRACT if name in (
+        "PooleWindowCapacity", "PooleWindowLifecycle", "PooleWindowInput", "PooleLaunchConsole"
+    ) else CONTRACT
 
 
 def inspect(blob: bytes, *, profile: str = CONTRACT) -> dict:

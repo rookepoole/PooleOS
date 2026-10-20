@@ -198,8 +198,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 305)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1608)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 306)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1611)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -239,8 +239,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "native_launch_shell_admitted_plc1_window_controls_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 305)
+        self.assertEqual(current["qualification_status"], "window_launch_candidate_built_native_gui_admission_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 306)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -6790,7 +6790,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(record['evidence_status'],'historical_cycle287_diagnostics_not_replayed_apps_now_changed')
         self.assertEqual(len(r['source_bindings']),921)
         self.assertNotEqual(r['program_build']['source_bindings'],bindings())
-        self.assertEqual(len(bindings()),108)
+        self.assertEqual(len(bindings()),111)
         self.assertEqual((len(r['program_build']['programs']),r['program_build']['independent_builds']),(20,2))
         self.assertEqual([p['tests_passed'] for p in r['program_build']['host_tests']],[138,138])
         self.assertEqual(r['captures']['hosts']['passed_test_counts'],[554,554,573,573,26])
@@ -6864,7 +6864,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
         self.assertEqual(record['receipt_sha256'],'BEE1CDEF65E2B3E3983CE1D981DDA91BB69EDF45208AF1A5D160D35832F545EB')
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(288,'PUSIISO1','pass'))
-        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1007)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1010)
         self.assertEqual((r['guest_runs'],r['iso_byte_count']),(6,66109440))
         self.assertEqual(r['iso_sha256'],'1E4752E3D45972CEA7711AF443C15EFC22CD82558F1A975B6B676ADF6C7841AE')
         prior=json.loads((ROOT/'runs/native-claimed-requester-readiness.json').read_bytes())
@@ -6904,7 +6904,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         lane=self.roadmap['baseline']['user_space_integration']
         self.assertTrue(lane['optical_iso_built'] and lane['continue_full_microkernel_after_iso'])
         self.assertEqual(self.roadmap['immediate_next_move']['title'],
-            'Connect native window-manager launch controls to the admitted shell')
+            'Admit and qualify GUI-triggered native window launches')
 
     def test_cycle289_file_wait_is_native_bound_and_preserves_the_optical_preview(self) -> None:
         from runtime import native_app_session as apps, native_userspace_iso as optical, native_shell
@@ -6972,7 +6972,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertNotEqual(r['program_build']['source_bindings'], bindings())
         self.assertEqual(r['program_build']['source_bindings'], json.loads(
             (ROOT / 'runs/native-app-file-wait-readiness.json').read_bytes())['program_build']['source_bindings'])
-        self.assertEqual(len(bindings()), 108)
+        self.assertEqual(len(bindings()), 111)
         self.assertEqual(len(r['program_build']['programs']), 20)
         self.assertEqual(r['reused_program_build_cycle'], 289)
         self.assertTrue(r['user_program_sources_unchanged'])
@@ -7057,7 +7057,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertNotEqual(r['program_build']['source_bindings'], bindings())
         self.assertEqual(r['program_build']['source_bindings'], json.loads(
             (ROOT / 'runs/native-app-file-wait-readiness.json').read_bytes())['program_build']['source_bindings'])
-        self.assertEqual((len(bindings()), len(r['program_build']['programs']), r['reused_program_build_cycle']), (108, 20, 289))
+        self.assertEqual((len(bindings()), len(r['program_build']['programs']), r['reused_program_build_cycle']), (111, 20, 289))
         self.assertEqual(r['host_kernel_test_counts'], [576, 576, 595, 595, 26])
         self.assertEqual(r['new_kernel_tests'], 15)
         self.assertEqual((r['reserved_image_pages'], r['guarded_stack_pages']), (208, 36))
@@ -7280,7 +7280,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(len(r['source_bindings']), 964)
         self.assertEqual(r['native_execution']['source_bindings'], r['source_bindings'])
         self.assertNotEqual(r['program_build']['source_bindings'], bindings())
-        self.assertEqual(len(bindings()), 108)
+        self.assertEqual(len(bindings()), 111)
         self.assertEqual(len(r['program_build']['programs']), 24)
         self.assertTrue(r['program_build']['direct_byte_equality'])
         self.assertEqual(r['program_build']['host_tests'], [dict(profile=m, tests_passed=172) for m in ('debug', 'release')])
@@ -7339,8 +7339,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         raw=(ROOT/record['receipt_path']).read_bytes();r=json.loads(raw)
         self.assertEqual(record['receipt_sha256'],hashlib.sha256(raw).hexdigest().upper())
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(295,'PWINPUT1','partial'))
-        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1007)
-        self.assertNotEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),108)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1010)
+        self.assertNotEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),111)
         self.assertEqual(len(r['program_build']['programs']),24)
         self.assertEqual(r['program_build']['host_tests'],[dict(profile=m,tests_passed=178) for m in ('debug','release')])
         self.assertTrue(r['program_build']['direct_byte_equality'])
@@ -7400,7 +7400,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(record['receipt_sha256'],hashlib.sha256(raw).hexdigest().upper())
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(296,'PRENDER1','partial'))
         self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(r['source_bindings']),965)
-        self.assertNotEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),108)
+        self.assertNotEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),111)
         self.assertEqual(r['program_build']['host_tests'],[dict(profile=m,tests_passed=182) for m in ('debug','release')])
         self.assertTrue(r['program_build']['direct_byte_equality'])
         self.assertEqual(len(r['program_build']['programs']),24)
@@ -7723,12 +7723,12 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         raw=(ROOT/record['receipt_path']).read_bytes();r=json.loads(raw)
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
         self.assertEqual((r['cycle'],r['status']),(301,'partial'))
-        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1007)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1010)
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),
                          '35C46536C1E7B66B7DF4B5EC478F9F5A9ABE11AAFA1F42E5D94C650057C36367')
         self.assertNotEqual(r['program_build']['source_bindings'],bindings())
         self.assertEqual(len(r['program_build']['source_bindings']),97)
-        self.assertEqual(len(bindings()),108)
+        self.assertEqual(len(bindings()),111)
         self.assertEqual(r['program_build']['host_tests'],[dict(profile=m,tests_passed=217) for m in ('debug','release')])
         self.assertEqual((len(r['program_build']['programs']),r['ordinary_programs_byte_identical_to_cycle300']),(29,28))
         self.assertEqual((r['user_stack_pages'],r['kernel_guarded_stack_pages'],r['kernel_capacity_pages']),(1,36,208))
@@ -7851,13 +7851,13 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(r['ordinary_programs_unchanged'], 18)
 
     def test_cycle304_session_and_candidate_cannot_promote_native_or_iso_claims(self) -> None:
-        from tools.qualify_native_user_programs import bindings
         record = self.roadmap["baseline"]["native_launch_session"]
         raw = (ROOT / record["receipt_path"]).read_bytes()
         r = json.loads(raw)
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), record["receipt_sha256"])
         self.assertEqual((r["cycle"], r["contract_id"], r["status"]), (304, "PLC1-SESSION", "partial"))
-        self.assertEqual(r["source_bindings"], bindings())
+        self.assertEqual(record["receipt_sha256"], "304EB1E5C8D6E78F137C7061FC79FB5113BD1F77900B2610A36553F44AB4E56A")
+        self.assertEqual(len(r["source_bindings"]), 108)
         self.assertEqual(r["host_userspace_tests"], [{"profile": "debug", "tests_passed": 268},
                                                    {"profile": "release", "tests_passed": 268}])
         self.assertEqual((r["ordinary_program_pairs"], r["launch_candidate_pairs"]), (29, 1))
@@ -7872,7 +7872,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
                     "merge_qualified", "production_ready"):
             self.assertFalse(r[key], key)
         for build in r["build_reports"].values():
-            self.assertEqual(build["report"]["source_bindings"], bindings())
+            self.assertEqual(build["report"]["source_bindings"], r["source_bindings"])
             self.assertTrue(build["report"]["direct_byte_equality"])
         self.assertEqual((r["qemu_guest_runs"], r["virtualbox_guest_runs"]), (0, 0))
         lane = self.roadmap["baseline"]["historical_cycle304_user_space_integration"]
@@ -7882,14 +7882,14 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(len(r["retained_attempts"]), 2)
 
     def test_cycle305_native_admission_does_not_promote_connected_desktop(self) -> None:
-        from tools.qualify_native_user_entry import source_bindings
         from runtime import native_app_session as apps
         record = self.roadmap["baseline"]["native_launch_admission"]
         raw = (ROOT / record["receipt_path"]).read_bytes()
         r = json.loads(raw)
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), record["receipt_sha256"])
         self.assertEqual((r["cycle"], r["contract_id"], r["status"]), (305, "PLC1-ADMISSION", "partial"))
-        self.assertEqual(r["source_bindings"], source_bindings())
+        self.assertEqual(record["receipt_sha256"], "BC0A1045D6596CC7B969E988D791EF1A2964410791223991012967250A8B8881")
+        self.assertEqual(len(r["source_bindings"]), 1007)
         self.assertTrue(r["kernel_admission_implemented"] and r["native_shell_regression_verified"])
         self.assertEqual((r["candidate_code_bytes"], r["candidate_code_pages"]), (19464, 5))
         self.assertEqual((r["ordinary_code_pages"], r["window_code_pages"], r["user_mapping_capacity"]), (4, 7, 8))
@@ -7912,7 +7912,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual((layout["image_pages"], layout["reserved_pages"], layout["guarded_stack_pages"],
                           layout["ro_padding_bytes"]), (135, 208, 36, 432))
         native = r["native_execution"]
-        self.assertEqual(native["source_bindings"], source_bindings())
+        self.assertEqual(native["source_bindings"], r["source_bindings"])
         self.assertEqual(native["status"], "pass")
         self.assertTrue(native["source_unchanged"] and native["independent_kernel_builds_equal"])
         self.assertEqual(len(native["guest_runs"]), 3)
@@ -7925,7 +7925,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 apps.validate_markers(run["markers"], bad_file=run["run_id"] == "bad-file",
                     file_waits=True, windows=True, window_capacity=True, surface_lifecycle=True)
-        lane = self.roadmap["baseline"]["user_space_integration"]
+        lane = self.roadmap["baseline"]["historical_cycle305_user_space_integration"]
         self.assertEqual(lane["native_execution_evidence_cycle"], 305)
         self.assertEqual(lane["graphical_launch_control"]["matching_window_service"], "required")
         self.assertTrue(lane["preview_source_requalification_required"])
@@ -7935,6 +7935,46 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(lane["full_input_matrix_replayed_this_cycle"])
         self.assertFalse(lane["new_preview_selected"])
         self.assertEqual(lane["retained_preview_evidence_cycle"], 303)
+
+    def test_cycle306_window_candidate_preserves_native_and_preview_boundaries(self) -> None:
+        from tools.qualify_native_user_entry import source_bindings
+        from tools.qualify_native_user_programs import bindings
+        record = self.roadmap["baseline"]["native_window_launch"]
+        raw = (ROOT / record["receipt_path"]).read_bytes()
+        r = json.loads(raw)
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), record["receipt_sha256"])
+        self.assertEqual((r["cycle"], r["contract_id"], r["status"]), (306, "PWLAUNCH1", "partial"))
+        self.assertEqual(r["source_bindings"], source_bindings())
+        self.assertTrue(r["graphical_controls_implemented"] and r["window_service_candidate_built"])
+        self.assertEqual((r["candidate_code_bytes"], r["candidate_code_pages"]), (24594, 7))
+        self.assertEqual(r["host_tests"], [{"profile": "debug", "tests_passed": 281},
+                                          {"profile": "release", "tests_passed": 281}])
+        self.assertEqual(r["program_pairs_revalidated"], 31)
+        self.assertEqual((r["compact_terminal_cells"], r["entry_allocation_before"],
+                          r["entry_allocation_after"], r["entry_allocation_saved"]), (912, 3384, 2392, 992))
+        for build in r["build_reports"].values():
+            self.assertEqual(build["report"]["source_bindings"], bindings())
+            self.assertEqual(build["report"]["status"], "pass")
+            self.assertTrue(build["report"]["direct_byte_equality"] and build["report"]["source_unchanged"])
+        self.assertTrue(r["kernel_sources_unchanged"] and r["legacy_native_regression_verified"])
+        self.assertEqual((r["qemu_guest_runs"], r["virtualbox_guest_runs"]), (4, 0))
+        native = r["native_regression"]
+        self.assertEqual(native["status"], "pass")
+        self.assertEqual(native["source_bindings"], source_bindings())
+        self.assertEqual(len(native["guest_runs"]), 3)
+        self.assertEqual(native["program_build"]["programs"]["PooleWindowInput"]["code_bytes"], 24594)
+        self.assertNotIn("PooleLaunchConsole", native["program_build"]["programs"])
+        self.assertEqual(r["selected_preview_cycle"], 303)
+        for key in ("kernel_profile_selected", "graphical_launch_connected",
+                    "native_plc1_execution_verified", "connected_stack_bound_verified",
+                    "full_input_matrix_replayed", "selected_preview_source_requalified",
+                    "canonical_full_replay_performed", "merge_qualified", "production_ready"):
+            self.assertFalse(r[key], key)
+        lane = self.roadmap["baseline"]["user_space_integration"]
+        self.assertEqual(lane["native_execution_evidence_cycle"], 306)
+        self.assertEqual(lane["graphical_launch_control"]["matching_window_service"], "build_qualified_not_admitted")
+        self.assertTrue(lane["preview_source_requalification_required"])
+        self.assertFalse(lane["new_preview_selected"])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]

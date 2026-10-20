@@ -23,6 +23,34 @@ def fixture(size=3):
     return bytes(blob)
 
 class NativeUserProgramTests(unittest.TestCase):
+    def test_launch_console_reuses_explicit_window_bound_without_widening_default(self):
+        for name in ("PooleLaunchConsole", "PooleWindowInput"):
+            self.assertEqual(program.profile_for(name), "PWCODE1")
+        self.assertEqual(program.profile_for("PooleLaunchConsoleSuffix"), "PUSERBIN1")
+        for size in (24577, 28672):
+            self.assertEqual(program.inspect(fixture(size), profile="PWCODE1")["load_pages"], 7)
+            with self.assertRaises(ValueError):
+                program.inspect(fixture(size))
+        with self.assertRaises(ValueError):
+            program.inspect(fixture(28673), profile="PWCODE1")
+    def test_launch_console_is_separately_selected_and_requires_distinct_role(self):
+        import tomllib
+        from tools.qualify_native_user_programs import build_selection
+        self.assertEqual(build_selection(), ["--bins"])
+        self.assertEqual(build_selection(launch_console=True),
+                         ["--bin", "PooleLaunchConsole", "--features", "launch-desktop"])
+        self.assertEqual(build_selection(launch_candidate=True),
+                         ["--bin", "PooleLaunchShell", "--features", "launch-session"])
+        with self.assertRaises(ValueError):
+            build_selection(launch_console=True, launch_candidate=True)
+        manifest = tomllib.loads((ROOT / "native/userspace/Cargo.toml").read_text())
+        candidate = next(b for b in manifest["bin"] if b["name"] == "PooleLaunchConsole")
+        self.assertEqual(candidate["required-features"], ["launch-desktop"])
+        source = (ROOT / "native/userspace/src/bin/launch_console.rs").read_text()
+        for required in ("windows::launch_boot", "control::Server", "Controls::new",
+                         "local.poll_launch", "controls.advance", "local.launch_status"):
+            self.assertIn(required, "".join(source.split()))
+        self.assertIn('b"launch-console"', (ROOT / "native/userspace/src/startup.rs").read_text())
     def test_launch_candidate_has_explicit_five_page_build_only_profile(self):
         self.assertEqual(program.profile_for("PooleLaunchShell"), "PLCODE1")
         self.assertEqual(program.profile_for("PooleAppShell"), "PUSERBIN1")

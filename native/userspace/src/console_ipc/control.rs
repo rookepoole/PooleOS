@@ -46,6 +46,7 @@ impl Server {
         }
     }
     /// False means no control slot is available; no request has been queued.
+    #[inline]
     pub fn request(&mut self, app: App, action: Action, generation: u32) -> Result<bool, Error> {
         if matches!(self.phase, Phase::Failed) {
             return Err(Error::Transport);

@@ -11,7 +11,17 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development checkpoint:** Cycle305 adds explicit native admission for
+**Current development checkpoint:** Cycle306 implements bounded mouse/key launch
+and inspect controls, independent surface status, and a separate native launch
+console candidate. Held inputs, resets, stale replies and backpressure are
+host-tested. Compact terminal storage saves992 bytes of compiled entry-frame
+allocation; code remains within the existing seven-page profile. This is not
+yet GUI-triggered native execution: selecting the new startup role, guarded
+connected paths and two-backend ISO qualification remain required. The selected
+preview stays at Cycle303; no production or merge qualification is claimed.
+[Progress and remaining gates](docs/checkpoints/cycle306-window-launch-controls.md).
+
+**Historical development checkpoint:** Cycle305 adds explicit native admission for
 the five-page launch shell, preserving ordinary four-page applications, original
 capabilities and stack guards. Startup and teardown account for its extra page;
 the linked kernel measures135/208 pages with36 guarded kernel-stack pages.

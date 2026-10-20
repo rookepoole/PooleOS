@@ -327,8 +327,20 @@ pub fn console_ipc(bytes: &[u8], version: u64, server: bool) -> Result<ConsoleIp
 }
 #[inline(always)]
 pub fn window_console(bytes: &[u8], version: u64) -> Result<(ConsoleIpcBoot, u64), Error> {
+    window_console_role(bytes, version, b"window-console")
+}
+#[inline(always)]
+pub fn launch_console(bytes: &[u8], version: u64) -> Result<(ConsoleIpcBoot, u64), Error> {
+    window_console_role(bytes, version, b"launch-console")
+}
+#[inline(always)]
+fn window_console_role(
+    bytes: &[u8],
+    version: u64,
+    role: &[u8],
+) -> Result<(ConsoleIpcBoot, u64), Error> {
     let a = arguments::<6>(bytes, version)?;
-    if a[0] != b"window-console" {
+    if a[0] != role {
         return Err(Error::Role);
     }
     let port = handle(a[1])?;
@@ -454,6 +466,39 @@ mod tests {
         let mut b = a;
         b[0] = b"console-service";
         assert!(window_console(&block(b), 1).is_err());
+    }
+    #[test]
+    fn launch_console_requires_exact_distinct_role_without_new_handles() {
+        let a: [&[u8]; 6] = [
+            b"launch-console",
+            b"0000000100040001",
+            b"0000000100010001",
+            b"0000000100010002",
+            b"0000000100000003",
+            b"0000000100010003",
+        ];
+        let (boot, surface) = launch_console(&block(a), 1).unwrap();
+        assert_eq!(boot.port, Some(0x100040001));
+        assert_eq!(
+            (boot.receive, boot.send, surface),
+            (0x100010001, 0x100010002, 0x100010003)
+        );
+        assert!(window_console(&block(a), 1).is_err());
+        assert!(launch_console(&block(a), 2).is_err());
+        for role in [
+            b"window-console".as_slice(),
+            b"console-service",
+            b"launch-shell",
+        ] {
+            let mut b = a;
+            b[0] = role;
+            assert!(launch_console(&block(b), 1).is_err());
+        }
+        for i in [1, 2, 3, 4, 5] {
+            let mut b = a;
+            b[i] = b"0000000000000000";
+            assert!(launch_console(&block(b), 1).is_err());
+        }
     }
     use std::vec::Vec;
     fn block<const N: usize>(args: [&[u8]; N]) -> Vec<u8> {
