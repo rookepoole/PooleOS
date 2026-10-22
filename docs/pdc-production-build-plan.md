@@ -1,15 +1,33 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-22
-Plan version: 2.215.0-native-orphan-cleanup
-Roadmap cycle: PooleOS Cycle 312
+Plan version: 2.216.0-native-entered-cleanup
+Roadmap cycle: PooleOS Cycle 313
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 312: Rejected Orphan Cleanup Recovery
+## Cycle 313: Entered Task Cleanup Accounting
+
+Microkernel work under N13/N14: deferred cleanup now checks the entered task's
+execution-slice count as well as its measured ticks before parking or recovery.
+Host counterexamples reproduced equal-tick, different-slice acceptance and
+incorrect recovery-budget consumption. Two new tests exercise real Slot
+lifecycle execution with exit/cancellation, successful and persistent recovery,
+exact runtime retention, no reentry and no early generation reuse.
+
+Verified:615 host tests in each debug/release deferred profile,633 in the
+ordinary profile,20 focused checks and three non-optical native owner-fault
+guests. Raw logs/inputs, paired kernels, media, programs and source bindings
+reconstruct. All506 selected integration/roadmap checks pass;1,654 discovered
+Python tests are inventory, not full canonical replay. Native exhausted
+entered-child rescue remains a distinct unproven case. No demo packaging or
+visual work is selected. All40 phases,301 subphases and101 flags
+(46 open) remain. [Checkpoint](checkpoints/cycle313-entered-cleanup-accounting.md).
+
+## Historical Cycle 312: Rejected Orphan Cleanup Recovery
 
 N13/N14 with N27/N29 consumers: preserve exact ownership when a rejected
 application exhausts cleanup and its parent closes. [Contract](native-orphan-cleanup-recovery.md)

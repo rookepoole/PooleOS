@@ -1,6 +1,6 @@
 # Run The Native Window Preview
 
-Cycle312 changes closed-job cleanup recovery; Cycle311 is historical.
+Cycle313 changes entered-task cleanup accounting; Cycle312 is historical.
 The Cycle308 pointer and Downloads ISO remain preserved, but their receipts are historical
 relative to the current checkout. Current-source launchers must reject that
 mismatch. Do not edit hashes or bypass the check: a replacement selection needs

@@ -69,7 +69,7 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
         bound_paths = {item["path"] for item in self.artifact["bound_sources"]}
-        self.assertEqual(len(self.artifact["bound_sources"]), 913)
+        self.assertEqual(len(self.artifact["bound_sources"]), 916)
         self.assertTrue({"docs/checkpoints/cycle303-graphical-launch.md", "docs/native-launch-control.md",
             "runs/native-launch-control-readiness.json", "native/userspace/src/session_control.rs",
             "native/userspace/src/session_control/tests.rs", "native/userspace/src/session_control/rpc.rs",

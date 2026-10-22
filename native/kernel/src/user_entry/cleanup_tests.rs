@@ -478,3 +478,255 @@ fn orphan_recovery_requires_exhaustion_and_exact_closed_membership() {
     assert_eq!(job.child_count(), 1);
     retained(&mut f.manager, &f.handles);
 }
+
+fn settled_scheduler(id: TaskId, slices: u32, ticks: u64) -> (Scheduler, CpuId) {
+    let (mut scheduler, cpu) = running_scheduler(id);
+    let sid = crate::scheduler::TaskId::new(id.slot, id.generation).unwrap();
+    for ordinal in 1..=slices {
+        if ordinal > 1 {
+            assert_eq!(scheduler.dispatch(cpu), Ok(sid));
+        }
+        scheduler
+            .account_dispatch(
+                cpu,
+                sid,
+                ordinal,
+                if ordinal == 1 { 0 } else { ticks },
+                if ordinal == 1 { ticks } else { 0 },
+            )
+            .unwrap();
+        scheduler.yield_current(cpu).unwrap();
+    }
+    (scheduler, cpu)
+}
+
+#[test]
+fn entered_cleanup_rejects_equal_ticks_with_wrong_slice_count_before_parking() {
+    let mut f = setup();
+    let (mut slot, control, id) = task_slot(f.owner);
+    let (mut scheduler, cpu) = running_scheduler(id);
+    for terminal in [false, true] {
+        control.borrow_mut().slice_terminal = terminal;
+        slot.activate(id, &f.manager, &mut f.memory).unwrap();
+        slot.run_slice(id).unwrap();
+        slot.account_slice(id, &mut scheduler, cpu).unwrap();
+        if !terminal {
+            scheduler.yield_current(cpu).unwrap();
+            scheduler.dispatch(cpu).unwrap();
+        }
+    }
+    let runtime = slot.runtime(id).unwrap();
+    assert_eq!((runtime.charged_slices, runtime.charged_ticks), (2, 2));
+    f.memory.fail_finish = true;
+    assert!(slot.reclaim(id, &mut f.manager, &mut f.memory).is_err());
+    let writes = f.memory.writes;
+    let sid = crate::scheduler::TaskId::new(id.slot, id.generation).unwrap();
+    for slices in [1, 3] {
+        let (mut mismatched, other_cpu) = settled_scheduler(id, slices, runtime.charged_ticks);
+        let before = mismatched.task_snapshot(sid).unwrap();
+        assert_eq!(
+            slot.defer_reclamation(id, &mut mismatched, other_cpu, true),
+            Err(task::Error::State)
+        );
+        assert_eq!(mismatched.task_snapshot(sid).unwrap(), before);
+        assert_eq!(slot.cleanup_status(id), Ok(None));
+        assert_eq!(slot.runtime(id), Ok(runtime));
+        assert_eq!(f.memory.writes, writes);
+    }
+    slot.defer_reclamation(id, &mut scheduler, cpu, true)
+        .unwrap();
+    assert_eq!(control.borrow().entries, 2);
+    assert_eq!(control.borrow().revocations, 1);
+    retained(&mut f.manager, &f.handles);
+}
+
+#[test]
+fn entered_exhausted_recovery_matches_slices_and_preserves_terminal_accounting() {
+    use task::cleanup::Recovery;
+    for terminal in [false, true] {
+        for persistent in [false, true] {
+            let parent = setup_at(false, 4096);
+            let mut f = setup_at(false, 4224);
+            let (mut p, _, pid) = job_tests::at(parent.owner, 3);
+            let (mut slot, control, id) = job_tests::at(f.owner, 4);
+            let mut job = task::job::Job::<2>::new(&p, pid).unwrap();
+            job.adopt(&slot, id).unwrap();
+            let (mut scheduler, cpu) = running_scheduler(id);
+            let sid = crate::scheduler::TaskId::new(id.slot, id.generation).unwrap();
+            for ordinal in 1..=2 {
+                control.borrow_mut().slice_terminal = terminal && ordinal == 2;
+                slot.activate(id, &f.manager, &mut f.memory).unwrap();
+                slot.run_slice(id).unwrap();
+                slot.account_slice(id, &mut scheduler, cpu).unwrap();
+                if ordinal == 1 {
+                    scheduler.yield_current(cpu).unwrap();
+                    scheduler.dispatch(cpu).unwrap();
+                }
+            }
+            let out = if terminal {
+                slot.outcome(id).unwrap()
+            } else {
+                slot.cancel_suspended(id).unwrap()
+            };
+            let runtime = slot.runtime(id).unwrap();
+            assert_eq!((runtime.charged_slices, runtime.charged_ticks), (2, 2));
+            f.memory.fail_finish = true;
+            assert!(
+                job.reclaim_child(&mut slot, id, &mut f.manager, &mut f.memory)
+                    .is_err()
+            );
+            slot.defer_reclamation(id, &mut scheduler, cpu, true)
+                .unwrap();
+            let parked = scheduler.task_snapshot(sid).unwrap();
+            let peer = scheduler.create_task(7, 1, 16, 1).unwrap();
+            scheduler.activate(peer, cpu).unwrap();
+            for attempt in 1..=MAX_ATTEMPTS {
+                advance(&mut scheduler, cpu, FIRST_DELAY << (attempt - 1));
+                assert_eq!(
+                    job.reclaim_deferred_child(
+                        &mut slot,
+                        id,
+                        &mut f.manager,
+                        &mut f.memory,
+                        &scheduler
+                    ),
+                    Ok(if attempt == MAX_ATTEMPTS {
+                        Progress::Exhausted
+                    } else {
+                        Progress::Retried
+                    })
+                );
+                assert_eq!(slot.runtime(id), Ok(runtime));
+                assert_eq!(scheduler.task_snapshot(sid), Ok(parked));
+            }
+            p.cancel_prepared(pid).unwrap();
+            job.owner_stopped(&p, pid).unwrap();
+            advance(&mut scheduler, cpu, FIRST_DELAY);
+            let writes = f.memory.writes;
+            let roots = f.machine.borrow().writes.clone();
+            let budget = slot.cleanup_status(id).unwrap();
+            for slices in [1, 3] {
+                let (mut mismatched, other_cpu) =
+                    settled_scheduler(id, slices, runtime.charged_ticks);
+                mismatched.park_reclamation(sid, other_cpu, false).unwrap();
+                let other = mismatched.create_task(7, 1, 16, 1).unwrap();
+                mismatched.activate(other, other_cpu).unwrap();
+                advance(
+                    &mut mismatched,
+                    other_cpu,
+                    scheduler.summary().dispatch_count,
+                );
+                assert_eq!(
+                    job.recover_exhausted_child(
+                        &mut slot,
+                        id,
+                        &mut f.manager,
+                        &mut f.memory,
+                        &mismatched
+                    ),
+                    Err(task::Error::State)
+                );
+                assert_eq!(
+                    job.reclaim_deferred_child(
+                        &mut slot,
+                        id,
+                        &mut f.manager,
+                        &mut f.memory,
+                        &mismatched
+                    ),
+                    Err(task::Error::State)
+                );
+                assert_eq!(f.memory.writes, writes);
+                assert_eq!(slot.cleanup_status(id), Ok(budget));
+                assert_eq!(job.child_count(), 1);
+            }
+            f.memory.fail_finish = persistent;
+            assert_eq!(
+                job.recover_exhausted_child(
+                    &mut slot,
+                    id,
+                    &mut f.manager,
+                    &mut f.memory,
+                    &scheduler
+                ),
+                Ok(if persistent {
+                    Recovery::Retained
+                } else {
+                    Recovery::Complete(out)
+                })
+            );
+            assert_eq!(scheduler.task_snapshot(sid), Ok(parked));
+            assert!(
+                scheduler
+                    .create_task(id.slot, id.generation + 1, 16, 1)
+                    .is_err()
+            );
+            assert!(slot.activate(id, &f.manager, &mut f.memory).is_err());
+            assert!(slot.run_slice(id).is_err());
+            if persistent {
+                let writes = f.memory.writes;
+                let peer_ticks = scheduler.task_snapshot(peer).unwrap().runtime_ticks;
+                f.memory.fail_finish = false;
+                advance(&mut scheduler, cpu, 1024);
+                for _ in 0..4 {
+                    assert_eq!(
+                        job.recover_exhausted_child(
+                            &mut slot,
+                            id,
+                            &mut f.manager,
+                            &mut f.memory,
+                            &scheduler
+                        ),
+                        Ok(Recovery::Unavailable)
+                    );
+                    assert_eq!(
+                        job.reclaim_deferred_child(
+                            &mut slot,
+                            id,
+                            &mut f.manager,
+                            &mut f.memory,
+                            &scheduler
+                        ),
+                        Ok(Progress::Exhausted)
+                    );
+                    assert!(
+                        job.reclaim_child(&mut slot, id, &mut f.manager, &mut f.memory)
+                            .is_err()
+                    );
+                }
+                assert_eq!(
+                    scheduler.task_snapshot(peer).unwrap().runtime_ticks,
+                    peer_ticks + 1024
+                );
+                assert_eq!(f.memory.writes, writes);
+                assert_eq!(slot.runtime(id), Ok(runtime));
+                assert_eq!(slot.outcome(id), Ok(out));
+                assert_eq!(slot.reclaim_remaining_pages(id), Ok(13));
+                assert_eq!(job.child_count(), 1);
+                assert!(scheduler.cancel_wait(sid, cpu).is_err());
+                retained(&mut f.manager, &f.handles);
+            } else {
+                assert_eq!(slot.state(id), Err(task::Error::Missing));
+                assert_eq!(f.manager.summary().allocated_pages, 0);
+                assert_eq!(job.child_count(), 0);
+                scheduler.teardown(sid).unwrap();
+                scheduler
+                    .create_task(id.slot, id.generation + 1, 16, 1)
+                    .unwrap();
+                assert!(
+                    job.recover_exhausted_child(
+                        &mut slot,
+                        id,
+                        &mut f.manager,
+                        &mut f.memory,
+                        &scheduler
+                    )
+                    .is_err()
+                );
+            }
+            assert_eq!(f.machine.borrow().writes, roots);
+            assert_eq!(control.borrow().entries, 2);
+            assert_eq!(control.borrow().revocations, 1);
+        }
+    }
+}

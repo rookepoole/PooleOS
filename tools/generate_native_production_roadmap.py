@@ -16919,13 +16919,71 @@ def apply_cycle312(roadmap: dict, test_count: int) -> dict:
             "bounded service restart and exact endpoint rebinding without affecting independent tasks",
             "partial-release and construction/committed-handoff recovery, all-path stacks and scheduler isolation",
             "desktop is regression-only; demo packaging deferred and all eventual preview/promotion gates preserved"])
+    return apply_cycle313(roadmap, test_count)
+
+
+def apply_cycle313(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle313-entered-cleanup-accounting.md"
+    contract = "docs/native-entered-cleanup-accounting.md"
+    path = "runs/native-entered-cleanup-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle312_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=313, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 313
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    record = dict(cycle=313, contract_id="PENTEREDCLEANUP1", status=receipt["status"],
+        receipt_path=path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        source_binding_count=len(receipt["source_bindings"]))
+    for key in ("changed_native_sources", "host_kernel_tests", "focused_tests", "qemu_guest_runs",
+                "virtualbox_guest_runs", "entered_cleanup_ordinal_guard_verified",
+                "entered_exhausted_recovery_host_verified", "native_deferred_owner_fault_regression_verified",
+                "native_exhausted_entered_recovery_verified", "multiple_owner_native_rescue_verified",
+                "general_owner_death_recovery", "service_restart_verified", "iso_built", "gui_replayed",
+                "new_preview_selected", "merge_qualified", "production_ready"):
+        record[key] = receipt[key]
+    baseline["native_entered_cleanup"] = record
+    baseline["native_orphan_cleanup"]["evidence_status"] = "historical_native_sources_changed_cycle313"
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 313
+    gate["qualification_status"] = "entered_cleanup_host_and_native_deferred_regression_verified"
+    gate["current_native_entered_cleanup_qualification"] = copy.deepcopy(record)
+    gate["current_native_orphan_cleanup_qualification"]["evidence_status"] = "historical_native_sources_changed_cycle313"
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=313, retained_kernel_sources_unchanged=False,
+        native_execution_status="historical_application_evidence_current_kernel_deferred_cleanup_only",
+        native_gui_scope="historical_cycle312_only_no_gui_replay_cycle313",
+        full_input_matrix_replayed_this_cycle=False, new_preview_selected=False,
+        virtualbox_native_execution_replayed_this_cycle=False, preview_source_requalification_required=True)
+    lane["graphical_launch_control"]["evidence_status"] = "historical_cycle312_current_kernel_not_replayed"
+    evidence = ("Cycle313: kernel deferral and retry/recovery validate entered-task slice ordinal as well as ticks. Two host counterexamples first reproduced acceptance of a mismatched ledger and recovery-budget consumption; the repair preserves exact outcome/runtime through exit/cancellation and success/persistent failure. Current-source non-optical native owner UD2 and ordinary deferred cleanup pass three guests. " + checkpoint)
+    gap = ("Exhausted entered-child one-shot rescue is host-tested, not yet native-qualified together with real owner fault. Next cover that combined native path, then multiple-owner progress, capability/IPC revocation and service supervision. Partial release, construction/committed-handoff recovery, all-path stacks and scheduler isolation remain. Desktop is a regression consumer; demo packaging deferred. Historical preview and every promotion gate remain intact. All N0-N39, PooleGlyph/PDC and PooleGlass requirements remain; no phase/flag closure, new ISO, merge or production promotion. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N9", "N13", "N14", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N13-LAUNCH-FAILURE-001", "FLAG-N13-USERSTACK-001",
+                          "FLAG-N13-USERSPACE-ISO-001", "FLAG-NATIVE-UI-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle313 narrows but does not close this flag. " + gap
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["immediate_next_move"].update(title="Qualify native exhausted entered-child recovery after owner faults",
+        entry_evidence=[checkpoint, contract, path], exit_evidence=[
+            "native entered-child exhaustion and single closed-job recovery after actual owner fault",
+            "persistent-fault control retains memory and measured runtime without repeated writes or reentry",
+            "multiple-owner progress, capability/IPC revocation and bounded service restart/rebinding",
+            "partial release, construction/committed-handoff and stack/scheduler isolation remain explicit",
+            "desktop remains regression-only; demo packaging deferred; all promotion gates preserved"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1653)
+    parser.add_argument("--test-count", type=int, default=1654)
     parser.add_argument("--status-date", default="2026-10-22")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

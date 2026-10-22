@@ -77,11 +77,10 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
         let sid =
             crate::scheduler::TaskId::new(id.slot, id.generation).map_err(Error::Accounting)?;
         if admitted {
-            if scheduler
-                .task_snapshot(sid)
-                .map_err(Error::Accounting)?
-                .runtime_ticks
-                != task.runtime.charged_ticks
+            let scheduled = scheduler.task_snapshot(sid).map_err(Error::Accounting)?;
+            // Equal tick totals do not establish an equal execution history.
+            if scheduled.runtime_ticks != task.runtime.charged_ticks
+                || (!unentered && scheduled.dispatch_count != task.runtime.charged_slices)
             {
                 return Err(Error::State);
             }
@@ -176,6 +175,8 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
                 || s.wait_kind != WaitKind::Reclamation
                 || s.assigned_cpu != Some(deferred.cpu)
                 || s.runtime_ticks != task.runtime.charged_ticks
+                || (task.runtime != Runtime::default()
+                    && s.dispatch_count != task.runtime.charged_slices)
                 || s.unmeasured_dispatches != 0
             {
                 return Err(Error::State);

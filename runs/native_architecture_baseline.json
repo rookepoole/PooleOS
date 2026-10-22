@@ -376,6 +376,24 @@
       "line_count": 211670
     },
     {
+      "path": "docs/checkpoints/cycle313-entered-cleanup-accounting.md",
+      "sha256": "22D6644371DA2A1506225454BE325659E9F5CD13C7AAEEC729907768B0748022",
+      "byte_count": 4605,
+      "line_count": 75
+    },
+    {
+      "path": "docs/native-entered-cleanup-accounting.md",
+      "sha256": "3E229B5F0BDA8A1E132A55A1914B94996956BB662486BB5763DCB2A00E267223",
+      "byte_count": 1995,
+      "line_count": 32
+    },
+    {
+      "path": "runs/native-entered-cleanup-readiness.json",
+      "sha256": "CA00EE4A95634DC5128FDD0138D9F8C048255D0DEB3AF1ABA3674B8688345302",
+      "byte_count": 526763,
+      "line_count": 8876
+    },
+    {
       "path": "tests/test_native_launch_orphan.py",
       "sha256": "4DF7BF4F0F4034908AA8A681A43A2361B7BFBB91F2C421C12BFDE19ECA8D9759",
       "byte_count": 9912,
@@ -1253,8 +1271,8 @@
     },
     {
       "path": "docs/native-userspace-preview.md",
-      "sha256": "4F0682E9CA361CE68DC887D1CA85C58F83A5697C2D8569D894B169CC1C7B4B2A",
-      "byte_count": 17631,
+      "sha256": "5FEFA05F81B62C6AD9E227100F4CDAE9DCB49E7C99E266271ED093CF6954FF2B",
+      "byte_count": 17635,
       "line_count": 280
     },
     {
@@ -1691,15 +1709,15 @@
     },
     {
       "path": "native/kernel/src/user_entry/task/cleanup.rs",
-      "sha256": "25CBB1024AAEFC52C858C379238E6EE02D6CDB8B541B619FA8286AF66773B4C3",
-      "byte_count": 7864,
-      "line_count": 229
+      "sha256": "3D952F0F5420B3E0066ACBD9C538CF3815D4CC7FDDCA0F990BC0DA99AF089798",
+      "byte_count": 8132,
+      "line_count": 230
     },
     {
       "path": "native/kernel/src/user_entry/cleanup_tests.rs",
-      "sha256": "1569517D61D80F8D05C05CFFAD9889DEFB3ADF016BB13EB9C442DA4C4746D534",
-      "byte_count": 18722,
-      "line_count": 480
+      "sha256": "030C3EF47DB185D41033D22452EB3D8E796F28B37B09EAAB753D456F17ABBC40",
+      "byte_count": 29055,
+      "line_count": 732
     },
     {
       "path": "runtime/native_deferred_cleanup.py",
@@ -4685,15 +4703,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "D956A891EDE387C3114963DD1C087C628DBDB72DB9A4498AF611FD54E9331275",
-      "byte_count": 180867,
-      "line_count": 2472
+      "sha256": "347D89B41323150A9EA19FC2D6BC09626F9F55350357B23BEC05E181C933C4AF",
+      "byte_count": 181565,
+      "line_count": 2482
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "4B0B71E5760EFCFD6A58671A25C554298D900B7829C48FE87870BF7C26BB710D",
-      "byte_count": 691828,
-      "line_count": 7376
+      "sha256": "204DEE6DF86F8A0191F8E7F5168B47C01FC0142D1117BB14B97E7F23F8D1D2C8",
+      "byte_count": 692944,
+      "line_count": 7394
     },
     {
       "path": "docs/publication-boundary.md",

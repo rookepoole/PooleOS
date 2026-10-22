@@ -208,8 +208,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 312)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1653)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 313)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1654)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -249,8 +249,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "qemu_closed_job_cleanup_verified_full_desktop_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 312)
+        self.assertEqual(current["qualification_status"], "entered_cleanup_host_and_native_deferred_regression_verified")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 313)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -6918,7 +6918,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         lane=self.roadmap['baseline']['user_space_integration']
         self.assertTrue(lane['optical_iso_built'] and lane['continue_full_microkernel_after_iso'])
         self.assertEqual(self.roadmap['immediate_next_move']['title'],
-            'Harden microkernel task teardown, memory ownership and fault recovery')
+            'Qualify native exhausted entered-child recovery after owner faults')
 
     def test_cycle289_file_wait_is_native_bound_and_preserves_the_optical_preview(self) -> None:
         from runtime import native_app_session as apps, native_userspace_iso as optical, native_shell
@@ -8267,7 +8267,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         raw=(ROOT/record["receipt_path"]).read_bytes();r=json.loads(raw)
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record["receipt_sha256"])
         self.assertEqual((r["cycle"],r["contract_id"],r["status"]),(312,"PORPHANRECOVERY1","partial"))
-        self.assertEqual(r["source_bindings"],source_bindings())
+        self.assertEqual(record["receipt_sha256"],"D9117AB2AC990C6985C4EC06BFE32712E87BD4CCDA7F7C1FD2128C73AB5345C2")
+        self.assertNotEqual(r["source_bindings"],source_bindings())
         self.assertEqual(len(r["source_bindings"]),1016)
         self.assertEqual((r["qemu_guest_runs"],r["virtualbox_guest_runs"],r["gui_observations"]),(13,0,10))
         self.assertEqual(r["focused_tests"]["passed"],143)
@@ -8313,14 +8314,47 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual((gui["starts_verified"],gui["terminal_drafts_preserved"],len(gui["evidence"])),(4,4,10))
         self.assertEqual(gui["graphical_failures_verified"],0)
         self.assertEqual(gui["iso_sha256"],r["ordinary_iso_sha256"])
-        lane=self.roadmap["baseline"]["user_space_integration"]
+        lane=self.roadmap["baseline"]["historical_cycle312_user_space_integration"]
         self.assertEqual((lane["cycle"],lane["selected_preview_cycle"]),(312,308))
         self.assertTrue(lane["preview_source_requalification_required"])
         self.assertFalse(lane["new_preview_selected"] or lane["full_input_matrix_replayed_this_cycle"])
 
+    def test_cycle313_entered_cleanup_binds_ordinals_without_promoting_host_rescue(self) -> None:
+        from tools.qualify_native_user_entry import source_bindings
+        from runtime import native_deferred_cleanup as probe
+        record=self.roadmap["baseline"]["native_entered_cleanup"]
+        raw=(ROOT/record["receipt_path"]).read_bytes();r=json.loads(raw)
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record["receipt_sha256"])
+        self.assertEqual((r["cycle"],r["contract_id"],r["status"]),(313,"PENTEREDCLEANUP1","partial"))
+        self.assertEqual(r["source_bindings"],source_bindings())
+        self.assertEqual(r["changed_native_sources"],["native/kernel/src/user_entry/cleanup_tests.rs","native/kernel/src/user_entry/task/cleanup.rs"])
+        self.assertEqual({k:v["passed"] for k,v in r["host_kernel_tests"].items()},
+            {"kernel-debug1":615,"kernel-release1":615,"kernel-ordinary1":633,"cleanup-green1":9})
+        self.assertEqual(r["focused_tests"]["passed"],20)
+        self.assertEqual(r["counterexamples"]["mismatch-red1"]["matched_tests"],0)
+        self.assertEqual(r["counterexamples"]["mismatch-red3"]["matched_tests"],2)
+        self.assertEqual(r["counterexamples"]["mismatch-red3"]["return_code"],101)
+        self.assertTrue(all(r[k] for k in ("entered_cleanup_ordinal_guard_verified",
+            "entered_exhausted_recovery_host_verified","native_deferred_owner_fault_regression_verified","prior_preview_preserved")))
+        self.assertFalse(any(r[k] for k in ("native_exhausted_entered_recovery_verified",
+            "multiple_owner_native_rescue_verified","general_owner_death_recovery","service_restart_verified",
+            "iso_built","gui_replayed","new_preview_selected","full_canonical_suite_executed","merge_qualified","production_ready")))
+        self.assertEqual((r["qemu_guest_runs"],r["virtualbox_guest_runs"]),(3,0))
+        native=r["native_controls"]
+        self.assertTrue(native["source_unchanged"] and native["independent_kernel_builds_equal"])
+        self.assertEqual(native["source_bindings"],r["source_bindings"])
+        for run in native["guest_runs"]:
+            measured=probe.validate_markers(run["markers"],bad_owner=run["run_id"]=="bad-owner")
+            self.assertEqual(json.loads(json.dumps(measured)),run["marker_summary"])
+            self.assertEqual(measured["orphan"]["prepared"],0)
+            self.assertEqual(measured["deferred_attempts"],2)
+            self.assertFalse(measured["exhaustion_native_qualified"])
+        lane=self.roadmap["baseline"]["user_space_integration"]
+        self.assertEqual((lane["cycle"],lane["selected_preview_cycle"]),(313,308))
+        self.assertTrue(lane["preview_source_requalification_required"])
+        self.assertFalse(lane["new_preview_selected"])
         move=self.roadmap["immediate_next_move"]
-        self.assertEqual(move["title"],"Harden microkernel task teardown, memory ownership and fault recovery")
-        self.assertIn("entered-child recovery",move["exit_evidence"][0])
+        self.assertEqual(move["title"],"Qualify native exhausted entered-child recovery after owner faults")
         self.assertIn("demo packaging deferred",move["exit_evidence"][-1])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:

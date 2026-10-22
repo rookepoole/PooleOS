@@ -7,9 +7,19 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 312
+Last roadmap reconciliation: PooleOS Cycle 313
 
-Cycle312 implements separately bounded closed-job recovery after rejected-image
+Cycle313 fixes entered-task cleanup accounting: require the scheduler's dispatch
+count and tick total to match the Slot's settled slices and ticks before parking
+or recovery. Host counterexamples reproduce the old acceptance and consumed
+recovery opportunity. The repaired code passes615 tests in each debug/release
+deferred profile,633 ordinary-profile tests,20 focused checks and three native
+non-optical owner-fault/deferred controls. Native exhausted entered-child rescue
+remains next; host coverage is not native qualification. All506 selected
+integration/roadmap checks pass. No new ISO or promotion.
+[Current kernel progress](checkpoints/cycle313-entered-cleanup-accounting.md).
+
+Historical Cycle312 implements separately bounded closed-job recovery after rejected-image
 cleanup exhaustion. Successful reclamation clears exact membership without a
 dead-parent completion; persistent failure retains ownership without repeated
 writes. All631 kernel tests pass in each of three host profiles and143 focused
