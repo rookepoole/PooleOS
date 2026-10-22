@@ -283,3 +283,198 @@ fn deferred_entered_task_preserves_accounting_and_job_until_success() {
     assert_eq!(control.borrow().entries, 1);
     assert_eq!(control.borrow().revocations, 1);
 }
+
+#[test]
+fn closed_job_recovers_exact_exhausted_children_once_without_resetting_normal_budget() {
+    use task::cleanup::Recovery;
+    for admitted in [false, true] {
+        for persistent in [false, true] {
+            let parent = setup_at(false, 4096);
+            let mut f = setup_at(false, 4224);
+            let (mut p, _, pid) = job_tests::at(parent.owner, 3);
+            let (mut slot, control, id) = job_tests::at(f.owner, 4);
+            let mut job = task::job::Job::<2>::new(&p, pid).unwrap();
+            job.adopt(&slot, id).unwrap();
+            let out = slot.cancel_prepared(id).unwrap();
+            f.memory.fail_finish = true;
+            assert!(
+                job.reclaim_child(&mut slot, id, &mut f.manager, &mut f.memory)
+                    .is_err()
+            );
+            let mut s = Scheduler::new(1).unwrap();
+            let cpu = CpuId::new(0).unwrap();
+            if admitted {
+                let child = s.create_task(id.slot, id.generation, 16, 1).unwrap();
+                s.activate(child, cpu).unwrap();
+            }
+            let other = s.create_task(7, 1, 16, 1).unwrap();
+            s.activate(other, cpu).unwrap();
+            slot.defer_reclamation(id, &mut s, cpu, admitted).unwrap();
+            for attempt in 1..=MAX_ATTEMPTS {
+                advance(&mut s, cpu, FIRST_DELAY << (attempt - 1));
+                let expected = if attempt == MAX_ATTEMPTS {
+                    Progress::Exhausted
+                } else {
+                    Progress::Retried
+                };
+                assert_eq!(
+                    job.reclaim_deferred_child(&mut slot, id, &mut f.manager, &mut f.memory, &s),
+                    Ok(expected)
+                );
+            }
+            let frozen = slot.cleanup_status(id).unwrap();
+            let writes = f.memory.writes;
+            assert!(
+                job.recover_exhausted_child(&mut slot, id, &mut f.manager, &mut f.memory, &s)
+                    .is_err()
+            );
+            p.cancel_prepared(pid).unwrap();
+            job.owner_stopped(&p, pid).unwrap();
+            for _ in 0..FIRST_DELAY {
+                assert_eq!(
+                    job.recover_exhausted_child(&mut slot, id, &mut f.manager, &mut f.memory, &s),
+                    Ok(Recovery::Waiting)
+                );
+                advance(&mut s, cpu, 1);
+                // Ordinary observation must not postpone the recovery cooldown.
+                assert_eq!(
+                    slot.reclaim_deferred(id, &mut f.manager, &mut f.memory, &s),
+                    Ok(Progress::Exhausted)
+                );
+            }
+            assert_eq!(f.memory.writes, writes);
+            assert_eq!(job.child_count(), 1);
+            assert_eq!(slot.cleanup_status(id).unwrap(), frozen);
+            let stale = TaskId::new(id.slot, id.generation + 1).unwrap();
+            assert!(
+                job.recover_exhausted_child(&mut slot, stale, &mut f.manager, &mut f.memory, &s)
+                    .is_err()
+            );
+            let wrong_clock = Scheduler::new(1).unwrap();
+            assert!(
+                job.recover_exhausted_child(
+                    &mut slot,
+                    id,
+                    &mut f.manager,
+                    &mut f.memory,
+                    &wrong_clock
+                )
+                .is_err()
+            );
+            let running = s.dispatch(cpu).unwrap();
+            assert!(
+                job.recover_exhausted_child(&mut slot, id, &mut f.manager, &mut f.memory, &s)
+                    .is_err()
+            );
+            let time = s.task_snapshot(running).unwrap();
+            s.account_dispatch(cpu, running, time.dispatch_count, time.runtime_ticks, 1)
+                .unwrap();
+            s.yield_current(cpu).unwrap();
+            assert_eq!(f.memory.writes, writes);
+            f.memory.fail_finish = persistent;
+            assert_eq!(
+                job.recover_exhausted_child(&mut slot, id, &mut f.manager, &mut f.memory, &s),
+                Ok(if persistent {
+                    Recovery::Retained
+                } else {
+                    Recovery::Complete(out)
+                })
+            );
+            assert_eq!(control.borrow().entries, 0);
+            assert_eq!(control.borrow().revocations, 1);
+            assert_eq!(s.summary().teardown_count, 0);
+            if persistent {
+                assert_eq!(job.child_count(), 1);
+                assert_eq!(slot.cleanup_status(id).unwrap(), frozen);
+                assert_eq!(slot.reclaim_remaining_pages(id), Ok(13));
+                let writes = f.memory.writes;
+                f.memory.fail_finish = false;
+                advance(&mut s, cpu, 1024);
+                for _ in 0..8 {
+                    assert_eq!(
+                        job.recover_exhausted_child(
+                            &mut slot,
+                            id,
+                            &mut f.manager,
+                            &mut f.memory,
+                            &s
+                        ),
+                        Ok(Recovery::Unavailable)
+                    );
+                    assert_eq!(
+                        slot.reclaim_deferred(id, &mut f.manager, &mut f.memory, &s),
+                        Ok(Progress::Exhausted)
+                    );
+                    assert!(
+                        job.reclaim_child(&mut slot, id, &mut f.manager, &mut f.memory)
+                            .is_err()
+                    );
+                }
+                assert_eq!(f.memory.writes, writes);
+                retained(&mut f.manager, &f.handles);
+            } else {
+                assert_eq!(job.child_count(), 0);
+                assert_eq!(f.manager.summary().allocated_pages, 0);
+                assert_eq!(slot.state(id), Err(task::Error::Missing));
+                assert!(
+                    job.recover_exhausted_child(&mut slot, id, &mut f.manager, &mut f.memory, &s)
+                        .is_err()
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn orphan_recovery_requires_exhaustion_and_exact_closed_membership() {
+    let parent = setup_at(false, 4096);
+    let foreign = setup_at(false, 4352);
+    let mut f = setup_at(false, 4224);
+    let (mut p, _, pid) = job_tests::at(parent.owner, 3);
+    let (mut q, _, qid) = job_tests::at(foreign.owner, 6);
+    let (mut slot, _, id) = job_tests::at(f.owner, 4);
+    let mut job = task::job::Job::<2>::new(&p, pid).unwrap();
+    let mut other = task::job::Job::<2>::new(&q, qid).unwrap();
+    job.adopt(&slot, id).unwrap();
+    p.cancel_prepared(pid).unwrap();
+    q.cancel_prepared(qid).unwrap();
+    job.owner_stopped(&p, pid).unwrap();
+    other.owner_stopped(&q, qid).unwrap();
+    let mut s = Scheduler::new(1).unwrap();
+    let cpu = CpuId::new(0).unwrap();
+    let peer = s.create_task(7, 1, 16, 1).unwrap();
+    s.activate(peer, cpu).unwrap();
+    assert!(
+        job.recover_exhausted_child(&mut slot, id, &mut f.manager, &mut f.memory, &s)
+            .is_err()
+    );
+    slot.cancel_prepared(id).unwrap();
+    f.memory.fail_finish = true;
+    assert!(
+        job.reclaim_child(&mut slot, id, &mut f.manager, &mut f.memory)
+            .is_err()
+    );
+    slot.defer_reclamation(id, &mut s, cpu, false).unwrap();
+    for attempt in 1..=MAX_ATTEMPTS {
+        let writes = f.memory.writes;
+        let frozen = slot.cleanup_status(id).unwrap();
+        assert!(
+            job.recover_exhausted_child(&mut slot, id, &mut f.manager, &mut f.memory, &s)
+                .is_err()
+        );
+        assert_eq!(f.memory.writes, writes);
+        assert_eq!(slot.cleanup_status(id).unwrap(), frozen);
+        advance(&mut s, cpu, FIRST_DELAY << (attempt - 1));
+        job.reclaim_deferred_child(&mut slot, id, &mut f.manager, &mut f.memory, &s)
+            .unwrap();
+    }
+    advance(&mut s, cpu, FIRST_DELAY);
+    let writes = f.memory.writes;
+    assert_eq!(
+        other.recover_exhausted_child(&mut slot, id, &mut f.manager, &mut f.memory, &s),
+        Err(task::Error::Identity)
+    );
+    assert_eq!(f.memory.writes, writes);
+    assert_eq!(job.child_count(), 1);
+    retained(&mut f.manager, &f.handles);
+}

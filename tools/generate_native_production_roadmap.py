@@ -16850,14 +16850,83 @@ def apply_cycle311(roadmap: dict, test_count: int) -> dict:
             "full QEMU/VirtualBox desktop matrix and immutable versioned launcher before preview selection",
             "window-service restart/rebinding and construction/committed-handoff recovery",
             "all-path stacks and remaining N0-N39 microkernel/PooleGlyph/PDC/PooleGlass gates"])
+    return apply_cycle312(roadmap, test_count)
+
+
+def apply_cycle312(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle312-orphan-cleanup-recovery.md"
+    contract = "docs/native-orphan-cleanup-recovery.md"
+    path = "runs/native-orphan-cleanup-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle311_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=312, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 312
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    record = dict(cycle=312, contract_id="PORPHANRECOVERY1", status=receipt["status"],
+        receipt_path=path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        source_binding_count=len(receipt["source_bindings"]))
+    for key in ("kernel_sources_changed", "program_sources_unchanged", "program_pairs_revalidated",
+                "host_kernel_tests", "qemu_guest_runs", "virtualbox_guest_runs", "gui_observations",
+                "ordinary_graphical_regression_verified", "supervisor_cancelled_owner", "actual_owner_ud2",
+                "rejected_cleanup_exhaustion_verified", "closed_job_cleanup_recovery_verified",
+                "persistent_fault_retention_verified", "single_recovery_write_budget_verified",
+                "dead_parent_completion_suppressed", "general_owner_death_recovery",
+                "entered_child_native_rescue_verified", "multiple_owner_native_rescue_verified",
+                "window_service_restart_verified", "construction_failure_recovery_verified",
+                "full_input_matrix_replayed", "new_preview_selected", "merge_qualified", "production_ready"):
+        record[key] = receipt[key]
+    baseline["native_orphan_cleanup"] = copy.deepcopy(record)
+    baseline["native_launch_quota"]["evidence_status"] = "historical_native_sources_changed_cycle312"
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 312
+    gate["qualification_status"] = "qemu_closed_job_cleanup_verified_full_desktop_pending"
+    gate["current_native_orphan_cleanup_qualification"] = record
+    gate["current_native_launch_quota_qualification"]["evidence_status"] = "historical_native_sources_changed_cycle312"
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=312, receipt_path=path, receipt_section="ordinary_native_regression",
+        retained_kernel_sources_unchanged=False,
+        native_execution_status="qemu_cancelled_owner_exhaustion_single_recovery_and_persistent_retention_verified",
+        native_execution_evidence_cycle=312, shell_native_execution_evidence_cycle=312,
+        full_input_matrix_replayed_this_cycle=False, new_preview_selected=False,
+        virtualbox_native_execution_replayed_this_cycle=False, preview_source_requalification_required=True,
+        native_gui_scope="ordinary_qemu_regression_only_no_orphan_gui_recovery_claim",
+        virtualbox_evidence_scope="historical_cycle308_only_no_virtualbox_replay_cycle312",
+        optical_iso_sha256=receipt["ordinary_iso_sha256"])
+    lane["graphical_launch_control"].update(cycle=312,
+        evidence_status="ordinary_qemu_regression_verified_full_matrix_pending",
+        connected_native_iso="ordinary_qemu_regression_not_selected_preview")
+    evidence = ("Cycle312: three ordinary cleanup attempts retain the rejected unentered image. Authenticated supervisor cancellation closes its real job, retires the sibling and authorizes one further attempt after64 dispatches. Success reclaims ownership without a dead-parent completion; persistent fault retains pages with no repeated writes while init/files/window-console progress. Paired builds, current-source native controls and ordinary graphical regression are reconstructed. " + checkpoint)
+    gap = ("Owner direction 2026-10-22: kernel first; demo packaging and redesign deferred. Supervisor cancellation is not actual owner UD2 or general death recovery. Next implement and qualify entered-child teardown, actual faulted-owner recovery and bounded multiple-owner progress, then capability/IPC revocation and service supervision. Persistent corruption stays retained. Partial release and construction/committed-handoff recovery, all-path stacks, COM2-independent boot, persistence, event-driven waits, accessible PooleGlass, complete microkernel, PooleGlyph/PDC and all N0-N39 gates remain. The desktop is a regression consumer; the full QEMU/VirtualBox matrix and immutable source/runtime-pinned launcher remain prerequisites for eventual preview promotion, not the immediate milestone. Preserve Cycle308; no merge or production promotion. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N3", "N9", "N13", "N14", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-NATIVE-UI-001", "FLAG-N13-USERSPACE-ISO-001",
+                          "FLAG-N13-USERSTACK-001", "FLAG-N13-LAUNCH-FAILURE-001",
+                          "FLAG-N3-VIRTUALBOX-PREVIEW-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle312 narrows but does not close this flag. " + gap
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["immediate_next_move"].update(title="Harden microkernel task teardown, memory ownership and fault recovery",
+        entry_evidence=[checkpoint, contract, path], exit_evidence=[
+            "entered-child recovery preserves measured runtime and exact ownership until complete reclamation",
+            "actual owner-fault teardown and bounded multiple-owner progress without widened retry or authority",
+            "capability/IPC revocation, pending-wait cancellation and stale-generation denial",
+            "bounded service restart and exact endpoint rebinding without affecting independent tasks",
+            "partial-release and construction/committed-handoff recovery, all-path stacks and scheduler isolation",
+            "desktop is regression-only; demo packaging deferred and all eventual preview/promotion gates preserved"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1645)
-    parser.add_argument("--status-date", default="2026-10-20")
+    parser.add_argument("--test-count", type=int, default=1653)
+    parser.add_argument("--status-date", default="2026-10-22")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
     args.out.write_text(json.dumps(roadmap, indent=2, ensure_ascii=True) + "\n", encoding="utf-8", newline="\n")

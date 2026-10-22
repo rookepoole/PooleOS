@@ -1,11 +1,17 @@
 # Run The Native Window Preview
 
-Cycle311 changes native quota diagnostics and qualification; Cycle310 is historical.
+Cycle312 changes closed-job cleanup recovery; Cycle311 is historical.
 The Cycle308 pointer and Downloads ISO remain preserved, but their receipts are historical
 relative to the current checkout. Current-source launchers must reject that
 mismatch. Do not edit hashes or bypass the check: a replacement selection needs
-the complete desktop matrix. The new launch-failure image is diagnostic-only
-and must not replace the ordinary preview.
+the complete desktop matrix and immutable source/runtime-pinned launcher package.
+The new orphan success/persistent-fault images are diagnostic-only and must not
+replace the ordinary preview. Ordinary graphical regression alone is not full
+desktop or arbitrary owner-crash recovery qualification.
+
+Owner direction, 2026-10-22: microkernel development takes priority. Preserve
+this preview as historical regression evidence; defer further demo packaging
+and redesign. The requirements above still apply to any eventual replacement.
 
 Cycle308's controlled native qualification passes on QEMU and headless VirtualBox.
 The retained local pointer and byte-verified Downloads copy name this checkpoint.

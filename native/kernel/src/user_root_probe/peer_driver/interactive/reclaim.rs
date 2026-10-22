@@ -156,9 +156,17 @@ pub(super) fn poll(
 ) -> Result<task::cleanup::Progress, ()> {
     let status = p.slot.cleanup_status(p.id).map_err(|_| ())?.ok_or(())?;
     let result;
-    #[cfg(feature = "development-shell-deferred-cleanup")]
-    if p.id.slot >= 4
-        && (status.attempts == 0 || cfg!(feature = "development-app-cleanup-exhaustion"))
+    #[cfg(any(
+        feature = "development-shell-deferred-cleanup",
+        feature = "development-launch-orphan"
+    ))]
+    if (cfg!(feature = "development-shell-deferred-cleanup")
+        && p.id.slot >= 4
+        && (status.attempts == 0 || cfg!(feature = "development-app-cleanup-exhaustion")))
+        || (cfg!(feature = "development-launch-orphan")
+            && p.id.slot == 5
+            && p.id.generation == 2
+            && !status.admitted)
     {
         let mut memory = FaultMemory {
             inner: &mut p.memory,
@@ -179,7 +187,10 @@ pub(super) fn poll(
     } else {
         result = retry(p, manager, scheduler, job)?;
     }
-    #[cfg(not(feature = "development-shell-deferred-cleanup"))]
+    #[cfg(not(any(
+        feature = "development-shell-deferred-cleanup",
+        feature = "development-launch-orphan"
+    )))]
     {
         let _ = status;
         result = retry(p, manager, scheduler, job)?;
@@ -242,6 +253,125 @@ fn retry(
             .reclaim_deferred(p.id, manager, &mut p.memory, scheduler)
     }
     .map_err(|_| ())
+}
+
+pub(super) fn recover(
+    p: &mut Peer,
+    manager: &mut PhysicalMemoryManager,
+    scheduler: &scheduler::Scheduler,
+    job: &mut task::job::Job<2>,
+    serial: &mut Com1,
+    debugcon: &mut DebugCon,
+) -> Result<Option<task::cleanup::Progress>, ()> {
+    use task::cleanup::{Progress, Recovery};
+    let remaining = p.slot.reclaim_remaining_pages(p.id).map_err(|_| ())?;
+    let progress;
+    #[cfg(feature = "development-launch-orphan-stuck")]
+    {
+        let mut memory = FaultMemory {
+            inner: &mut p.memory,
+            mode: 4,
+            fired: false,
+        };
+        progress = job
+            .recover_exhausted_child(&mut p.slot, p.id, manager, &mut memory, scheduler)
+            .map_err(|_| ())?;
+        if memory.fired != (progress == Recovery::Retained) {
+            return Err(());
+        }
+    }
+    #[cfg(not(feature = "development-launch-orphan-stuck"))]
+    {
+        progress = job
+            .recover_exhausted_child(&mut p.slot, p.id, manager, &mut p.memory, scheduler)
+            .map_err(|_| ())?;
+    }
+    let result = match progress {
+        Recovery::Waiting | Recovery::Unavailable => return Ok(None),
+        Recovery::Retained => {
+            if p.slot.reclaim_remaining_pages(p.id) != Ok(remaining) {
+                return Err(());
+            }
+            for h in p.handles {
+                if manager.free(h) != Err(PhysicalMemoryError::AllocationRetained) {
+                    return Err(());
+                }
+            }
+            Progress::Exhausted
+        }
+        Recovery::Complete(outcome) => Progress::Complete(outcome),
+    };
+    record(
+        serial,
+        debugcon,
+        "RECOVER",
+        &[
+            ("task", u64::from(p.id.slot)),
+            ("generation", u64::from(p.id.generation)),
+            ("root", p.root),
+            ("attempts", 1),
+            (
+                "retained_pages",
+                if matches!(result, Progress::Complete(_)) {
+                    0
+                } else {
+                    remaining
+                },
+            ),
+            (
+                "recovered",
+                u64::from(matches!(result, Progress::Complete(_))),
+            ),
+            ("children", job.child_count() as u64),
+            ("writes", p.memory.physical_write_count()),
+            ("dispatches", u64::from(scheduler.summary().dispatch_count)),
+        ],
+    );
+    Ok(Some(result))
+}
+
+#[cfg(feature = "development-launch-orphan-stuck")]
+pub(super) fn orphan_hold(
+    p: &Peer,
+    scheduler: &scheduler::Scheduler,
+    job: &task::job::Job<2>,
+    serial: &mut Com1,
+    debugcon: &mut DebugCon,
+) -> Result<(), ()> {
+    let status = p.slot.cleanup_status(p.id).map_err(|_| ())?.ok_or(())?;
+    let runtime = p.slot.runtime(p.id).map_err(|_| ())?;
+    if !job.is_closing()
+        || job.child_count() != 1
+        || p.id.slot != 5
+        || p.id.generation != 2
+        || status.admitted
+        || status.attempts != task::cleanup::MAX_ATTEMPTS
+        || status.next_dispatch.is_some()
+        || runtime != task::Runtime::default()
+        || p.slot.state(p.id) != Ok(task::State::Reclaiming)
+    {
+        return Err(());
+    }
+    record(
+        serial,
+        debugcon,
+        "HELD",
+        &[
+            ("task", 5),
+            ("generation", 2),
+            ("root", p.root),
+            (
+                "pages",
+                p.slot.reclaim_remaining_pages(p.id).map_err(|_| ())?,
+            ),
+            ("children", job.child_count() as u64),
+            ("writes", p.memory.physical_write_count()),
+            ("calls", p.slot.outcome(p.id).map_err(|_| ())?.syscalls),
+            ("ticks", runtime.charged_ticks),
+            ("dispatches", u64::from(scheduler.summary().dispatch_count)),
+        ],
+    );
+    Ok(())
 }
 
 #[cfg(feature = "development-app-cleanup-exhaustion")]

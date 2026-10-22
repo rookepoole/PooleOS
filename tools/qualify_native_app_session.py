@@ -46,7 +46,7 @@ def retirement_barriers(payload):
 
 
 class Interaction(shared.Interaction):
-    def __init__(self, case, deferred_cleanup=False, file_controls=False, exhaust_cleanup=False, sustained=False):
+    def __init__(self, case, deferred_cleanup=False, file_controls=False, exhaust_cleanup=False, sustained=False, launch_orphan=False):
         super().__init__(case.sent, False)
         self.case, self.step, self.expected = case, 0, native_shell.BANNER
         self.barriers = cleanup_barriers(case.sent) if deferred_cleanup else {}
@@ -59,6 +59,7 @@ class Interaction(shared.Interaction):
         self.sustained_barrier = case.sent.index(b'start numbers\r')+len(b'start numbers\r') if sustained else None
         self.sustained_first = None
         self.sustained_evidence = None
+        self.launch_orphan = launch_orphan
 
     def send_ready(self):
         byte, response = self.case.steps[self.step]
@@ -108,6 +109,12 @@ class Interaction(shared.Interaction):
                         and self.exhaustion_observed and len(exhausted) == 2 and runs
                         and runs[-1]['dispatches'] >= max(v['dispatches'] for v in exhausted)+512
                         and len([m for m in markers if m.startswith(exhaustion.HOLD)]) >= 16)
+        if self.launch_orphan:
+            recoveries = [probe.parse(m,'RECOVER') for m in markers if m.startswith('POOLEOS:APPS RECOVER ')]
+            return bool(self.step == len(self.case.steps) and application == self.case.expected
+                        and len(recoveries) == 1 and len(runs) >= 8
+                        and runs[-1]['dispatches'] >= recoveries[0]['dispatches']+512
+                        and all(v['live_mask'] == 7 for v in runs[-2:]))
         return bool(self.step == len(self.case.steps) and application == self.case.expected
                     and len(runs) >= 8 and all(v['live_mask'] == 3 for v in runs[-2:]))
 
@@ -131,6 +138,8 @@ def main():
     parser.add_argument('--serial-recovery', action='store_true', help='diagnostic-only bounded UART backpressure challenge')
     parser.add_argument('--launch-failure', action='store_true', help='diagnostic-only partial admission rollback and deferred cleanup')
     parser.add_argument('--launch-quota', action='store_true', help='diagnostic-only real process quota with late admission rollback')
+    parser.add_argument('--launch-orphan', action='store_true', help='diagnostic-only closed-job recovery after rejected-image cleanup exhaustion')
+    parser.add_argument('--orphan-stuck', action='store_true', help='persistent-fault control for the single closed-job recovery opportunity')
     args = parser.parse_args(); work, programs = args.work_dir.resolve(), args.program_dir.resolve()
     if args.desktop and not args.optical: parser.error('local console requires the optical development profile')
     if args.windows and (not args.optical or args.desktop): parser.error('windows requires optical and is separate from the terminal profile')
@@ -148,6 +157,10 @@ def main():
         parser.error('launch failure requires the complete launch desktop profile')
     if args.launch_quota and not args.launch_failure:
         parser.error('launch quota requires the explicit launch failure profile')
+    if args.launch_orphan and not args.launch_quota:
+        parser.error('orphan recovery requires the explicit quota profile')
+    if args.orphan_stuck and not args.launch_orphan:
+        parser.error('persistent orphan control requires the orphan profile')
     if launch_console and not launch_console.is_relative_to(ROOT/'outputs'):
         parser.error('launch console directory must be under workspace outputs')
     if launch_programs and not launch_programs.is_relative_to(ROOT/'outputs'):
@@ -168,6 +181,7 @@ def main():
                   launch_console_admission=bool(launch_console),
                   diagnostic_only=args.serial_recovery or args.launch_failure, serial_recovery=args.serial_recovery,
                   launch_failure=args.launch_failure, launch_quota=args.launch_quota,
+                  launch_orphan=args.launch_orphan, orphan_stuck=args.orphan_stuck,
                   claimed_requester=args.claimed_requester,
                   exhaust_cleanup=args.exhaust_cleanup,
                   file_controls=args.file_controls,
@@ -249,6 +263,13 @@ def main():
             report['cycle'] = 311
             normal_features += ('development-launch-quota',)
             bad_features += ('development-launch-quota',)
+        if args.launch_orphan:
+            report['cycle'] = 312
+            normal_features += ('development-launch-orphan',)
+            bad_features += ('development-launch-orphan',)
+        if args.orphan_stuck:
+            normal_features += ('development-launch-orphan-stuck',)
+            bad_features += ('development-launch-orphan-stuck',)
         linked, kernel, plan = shared.entry._build_product(cargo, env, work/'kernel1', features=normal_features)
         linked2, kernel2, _ = shared.entry._build_product(cargo, env, work/'kernel2', features=normal_features)
         if (linked,kernel) != (linked2,kernel2): raise ValueError('independent kernel mismatch')
@@ -291,8 +312,10 @@ def main():
             case = probe.file_control_scenario(secrets.token_hex(8),bad_file=bad_file,claimed_requester=True) if args.claimed_requester else scenario(secrets.token_hex(8), bad_file=bad_file)
             if args.launch_failure:
                 case = probe.scenario(secrets.token_hex(8), bad_file=bad_file, launch_failure=True)
-            interaction = Interaction(case, args.deferred_cleanup, args.file_controls or args.claimed_requester, args.exhaust_cleanup, sustained=args.optical)
-            validator = (lambda m: exhaustion.validate_markers(m,bad_file=bad_file)) if args.exhaust_cleanup else (lambda m: probe.validate_markers(m, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows,window_capacity=args.window_capacity,surface_lifecycle=args.surface_lifecycle,launch_session=bool(launch_programs),launch_failure=args.launch_failure,launch_quota=args.launch_quota))
+            if args.launch_orphan:
+                case = probe.orphan_scenario(secrets.token_hex(8), bad_file=bad_file)
+            interaction = Interaction(case, args.deferred_cleanup, args.file_controls or args.claimed_requester, args.exhaust_cleanup, sustained=args.optical, launch_orphan=args.launch_orphan)
+            validator = (lambda m: exhaustion.validate_markers(m,bad_file=bad_file)) if args.exhaust_cleanup else (lambda m: probe.validate_markers(m, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows,window_capacity=args.window_capacity,surface_lifecycle=args.surface_lifecycle,launch_session=bool(launch_programs),launch_failure=args.launch_failure,launch_quota=args.launch_quota,launch_orphan=args.launch_orphan,orphan_stuck=args.orphan_stuck))
             if args.serial_recovery:
                 validator = lambda m: native_serial_recovery.validate_markers(m, bad_file=bad_file,
                     file_waits=True, windows=True, window_capacity=True, surface_lifecycle=True)
@@ -349,7 +372,7 @@ def main():
                     run['ordinary_oracle_rejected_diagnostic'] = True
                 else:
                     raise ValueError('ordinary oracle accepted launch failure diagnostic')
-            run['hostile_marker_cases_rejected'] = exhaustion.negative_controls(ordinary_markers,bad_file=bad_file) if args.exhaust_cleanup else probe.negative_controls(ordinary_markers, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows,window_capacity=args.window_capacity,surface_lifecycle=args.surface_lifecycle,launch_session=bool(launch_programs),launch_failure=args.launch_failure,launch_quota=args.launch_quota)
+            run['hostile_marker_cases_rejected'] = exhaustion.negative_controls(ordinary_markers,bad_file=bad_file) if args.exhaust_cleanup else probe.negative_controls(ordinary_markers, bad_file=bad_file, deferred_cleanup=args.deferred_cleanup, file_controls=args.file_controls,claimed_requester=args.claimed_requester,file_waits=args.optical,windows=args.windows,window_capacity=args.window_capacity,surface_lifecycle=args.surface_lifecycle,launch_session=bool(launch_programs),launch_failure=args.launch_failure,launch_quota=args.launch_quota,launch_orphan=args.launch_orphan,orphan_stuck=args.orphan_stuck)
             run.update(media_sha256=shared.sha(media), kernel_sha256=shared.sha(image))
             report['guest_runs'].append(run)
         if args.optical:

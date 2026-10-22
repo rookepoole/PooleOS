@@ -18,6 +18,17 @@ pub(super) struct Deferred {
     snapshot: Snapshot,
     cpu: CpuId,
     last_dispatch: u32,
+    exhausted_at: Option<u32>,
+    recovery_attempted: bool,
+}
+
+/// A separate, single attempt after authenticated job closure, never a retry reset.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Recovery {
+    Waiting,
+    Unavailable,
+    Retained,
+    Complete(Outcome),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -91,6 +102,8 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
             snapshot,
             cpu,
             last_dispatch: now,
+            exhausted_at: None,
+            recovery_attempted: false,
         });
         Ok(snapshot)
     }
@@ -104,8 +117,47 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
         memory: &mut M,
         scheduler: &Scheduler,
     ) -> Result<Progress, Error> {
+        let mut deferred = self.validate_deferred(id, scheduler)?;
+        let now = scheduler.summary().dispatch_count;
+        deferred.last_dispatch = now;
+        self.owned_mut(id)?.deferred = Some(deferred);
+        let Some(due) = deferred.snapshot.next_dispatch else {
+            return Ok(Progress::Exhausted);
+        };
+        if now < due {
+            return Ok(Progress::Waiting);
+        }
+        deferred.snapshot.attempts = deferred
+            .snapshot
+            .attempts
+            .checked_add(1)
+            .ok_or(Error::Exhausted)?;
+        if deferred.snapshot.attempts > MAX_ATTEMPTS {
+            return Err(Error::State);
+        }
+        deferred.snapshot.next_dispatch = if deferred.snapshot.attempts == MAX_ATTEMPTS {
+            None
+        } else {
+            now.checked_add(FIRST_DELAY << deferred.snapshot.attempts)
+        };
+        if deferred.snapshot.next_dispatch.is_none() {
+            deferred.exhausted_at = Some(now);
+        }
+        self.owned_mut(id)?.deferred = Some(deferred);
+        match self.reclaim_inner(id, manager, memory) {
+            Ok(outcome) => Ok(Progress::Complete(outcome)),
+            Err(Error::Reclamation(_)) => Ok(if deferred.snapshot.next_dispatch.is_some() {
+                Progress::Retried
+            } else {
+                Progress::Exhausted
+            }),
+            Err(error) => Err(error),
+        }
+    }
+
+    fn validate_deferred(&self, id: TaskId, scheduler: &Scheduler) -> Result<Deferred, Error> {
         let task = self.owned(id)?;
-        let mut deferred = task.deferred.ok_or(Error::State)?;
+        let deferred = task.deferred.ok_or(Error::State)?;
         if task.state != State::Reclaiming
             || task.pending_charge.is_some()
             || task.runtime.unknown
@@ -137,35 +189,40 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
         if now < deferred.last_dispatch {
             return Err(Error::Accounting(crate::scheduler::Error::Invariant));
         }
-        deferred.last_dispatch = now;
-        self.owned_mut(id)?.deferred = Some(deferred);
-        let Some(due) = deferred.snapshot.next_dispatch else {
-            return Ok(Progress::Exhausted);
-        };
-        if now < due {
-            return Ok(Progress::Waiting);
-        }
-        deferred.snapshot.attempts = deferred
-            .snapshot
-            .attempts
-            .checked_add(1)
-            .ok_or(Error::Exhausted)?;
-        if deferred.snapshot.attempts > MAX_ATTEMPTS {
+        Ok(deferred)
+    }
+
+    /// Only Job can reach this operation after validating its closed membership.
+    pub(super) fn recover_exhausted<M: TableMemory>(
+        &mut self,
+        id: TaskId,
+        manager: &mut PhysicalMemoryManager,
+        memory: &mut M,
+        scheduler: &Scheduler,
+    ) -> Result<Recovery, Error> {
+        let mut deferred = self.validate_deferred(id, scheduler)?;
+        if deferred.snapshot.attempts != MAX_ATTEMPTS || deferred.snapshot.next_dispatch.is_some() {
             return Err(Error::State);
         }
-        deferred.snapshot.next_dispatch = if deferred.snapshot.attempts == MAX_ATTEMPTS {
-            None
-        } else {
-            now.checked_add(FIRST_DELAY << deferred.snapshot.attempts)
-        };
+        if deferred.recovery_attempted {
+            return Ok(Recovery::Unavailable);
+        }
+        let due = deferred
+            .exhausted_at
+            .ok_or(Error::State)?
+            .checked_add(FIRST_DELAY)
+            .ok_or(Error::Exhausted)?;
+        let now = scheduler.summary().dispatch_count;
+        if now < due {
+            return Ok(Recovery::Waiting);
+        }
+        // Consume before the first memory access, including failure paths.
+        deferred.recovery_attempted = true;
+        deferred.last_dispatch = now;
         self.owned_mut(id)?.deferred = Some(deferred);
         match self.reclaim_inner(id, manager, memory) {
-            Ok(outcome) => Ok(Progress::Complete(outcome)),
-            Err(Error::Reclamation(_)) => Ok(if deferred.snapshot.next_dispatch.is_some() {
-                Progress::Retried
-            } else {
-                Progress::Exhausted
-            }),
+            Ok(outcome) => Ok(Recovery::Complete(outcome)),
+            Err(Error::Reclamation(_)) => Ok(Recovery::Retained),
             Err(error) => Err(error),
         }
     }

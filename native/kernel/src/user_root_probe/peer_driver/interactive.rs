@@ -270,6 +270,8 @@ pub(crate) fn run(
     let mut owner_fault = false;
     let mut cleanup_cursor = 0;
     let mut job_drained = false;
+    #[cfg(feature = "development-launch-orphan")]
+    let mut orphan_recovery_observed = false;
     loop {
         // A retained diagnostic tail can progress even without another log record.
         serial.flush();
@@ -283,18 +285,31 @@ pub(crate) fn run(
             let Some(status) = checked!(p.slot.cleanup_status(p.id)) else {
                 continue;
             };
-            let Some(due) = status.next_dispatch else {
-                continue;
-            };
-            if scheduler.summary().dispatch_count < due {
-                continue;
-            }
-            cleanup_cursor = (j + 1) % 6;
             let prepared = checked!(p.slot.runtime(p.id)) == task::Runtime::default();
             let previous = manager.summary().allocated_pages;
-            let result = checked!(reclaim::poll(
-                p, manager, &scheduler, &mut job, serial, debugcon
-            ));
+            let result = if let Some(due) = status.next_dispatch {
+                if scheduler.summary().dispatch_count < due {
+                    continue;
+                }
+                checked!(reclaim::poll(
+                    p, manager, &scheduler, &mut job, serial, debugcon
+                ))
+            } else {
+                if j < 4 || !job.is_closing() || status.attempts != task::cleanup::MAX_ATTEMPTS {
+                    continue;
+                }
+                let Some(progress) = checked!(reclaim::recover(
+                    p, manager, &scheduler, &mut job, serial, debugcon
+                )) else {
+                    continue;
+                };
+                #[cfg(feature = "development-launch-orphan")]
+                {
+                    orphan_recovery_observed = true;
+                }
+                progress
+            };
+            cleanup_cursor = (j + 1) % 6;
             if let task::cleanup::Progress::Complete(outcome) = result {
                 if previous.checked_sub(manager.summary().allocated_pages) != Some(pages[j]) {
                     stop(34020, serial, debugcon);
@@ -847,6 +862,62 @@ pub(crate) fn run(
                 }
             }
         }
+        #[cfg(feature = "development-launch-orphan")]
+        if live[3]
+            && failures[1].is_some()
+            && checked!(peers[5].slot.cleanup_status(peers[5].id)).is_some_and(|s| {
+                s.attempts == task::cleanup::MAX_ATTEMPTS && s.next_dispatch.is_none()
+            })
+        {
+            let p = &mut peers[3];
+            let outcome = if let Some(ticket) = waiting[3] {
+                checked!(p.slot.cancel_waiting(p.id, ticket))
+            } else {
+                checked!(p.slot.cancel_suspended(p.id))
+            };
+            checked!(job.owner_stopped(&p.slot, p.id));
+            owner_fault = true;
+            job_record(
+                serial,
+                debugcon,
+                "OWNER",
+                &[
+                    ("task", 3),
+                    ("generation", u64::from(p.id.generation)),
+                    ("root", p.root),
+                    ("children", job.child_count() as u64),
+                    ("dispatches", u64::from(scheduler.summary().dispatch_count)),
+                ],
+            );
+            let writes = arch::x86_64::user_root_write_count();
+            if !checked!(retire(
+                p,
+                outcome,
+                manager,
+                &mut scheduler,
+                pages[3],
+                false,
+                &mut job,
+                serial,
+                debugcon
+            )) || arch::x86_64::user_root_write_count() != writes + 1
+            {
+                stop(34027, serial, debugcon);
+            }
+            extra_flushes += 1;
+            waiting[3] = None;
+            calls[3] = outcome.syscalls;
+            live[3] = false;
+            owned[3] = false;
+            retired += 1;
+            retirement(
+                serial,
+                debugcon,
+                outcome,
+                pages[3],
+                scheduler.summary().dispatch_count,
+            );
+        }
         if job.is_closing() {
             for j in 4..6 {
                 if !owned[j] {
@@ -1003,6 +1074,17 @@ pub(crate) fn run(
                     ("unused", cancelled),
                 ],
             );
+            #[cfg(feature = "development-launch-orphan-stuck")]
+            if orphan_recovery_observed {
+                checked!(reclaim::orphan_hold(
+                    &peers[5], &scheduler, &job, serial, debugcon
+                ));
+            }
+            #[cfg(all(
+                feature = "development-launch-orphan",
+                not(feature = "development-launch-orphan-stuck")
+            ))]
+            let _ = orphan_recovery_observed;
             #[cfg(feature = "development-serial-recovery")]
             if d == 64 {
                 let state = serial.status();

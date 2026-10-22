@@ -26,6 +26,7 @@ ALLOWED_RUNS = {
     "runs/native-launch-rollback-readiness.json",
     "runs/native-graphical-recovery-readiness.json",
     "runs/native-launch-quota-readiness.json",
+    "runs/native-orphan-cleanup-readiness.json",
     "runs/native-window-launch-readiness.json",
     "runs/native-launch-desktop-readiness.json",
     "runs/native-connected-desktop-readiness.json",

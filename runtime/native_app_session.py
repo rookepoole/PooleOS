@@ -3,11 +3,14 @@ from __future__ import annotations
 import re
 from runtime import native_kernel_transfer as transfer, native_shell as shell, native_files as files
 from runtime import native_deferred_cleanup as cleanup
+from runtime import native_shell_orphan as job_probe
 
 PROGRAMS = [('PooleFileInit', 'INIT'), ('PooleAppFiles', 'COUNTER'),
             ('PooleConsoleService', 'CONSOLE'), ('PooleAppShell', 'CONSOLE_CLIENT'),
             ('PooleText', 'TEXT'), ('PooleNumbers', 'NUMBERS')]
 FIELDS = {
+    'RECOVER': 'task generation root attempts retained_pages recovered children writes dispatches',
+    'HELD': 'task generation root pages children writes calls ticks dispatches',
     'PRESSURE': 'task generation owner owner_generation target target_generation handle owner_limit dispatches',
     'RELIEF': 'task generation owner owner_generation target target_generation handle owner_limit dispatches',
     'REJECT': 'task generation sequence root owned_pages reason syscalls dispatches',
@@ -35,6 +38,8 @@ def launch_failure_options(report: dict) -> dict:
     if (not isinstance(report, dict) or any(report.get(name) is not True for name in required)
             or report.get('serial_recovery') is not False):
         raise ValueError('exact diagnostic launch-failure profile required')
+    if any(report.get(name, False) is not False for name in ('launch_orphan','orphan_stuck')):
+        raise ValueError('orphan recovery requires its separate diagnostic profile')
     quota = report.get('launch_quota', False)
     if type(quota) is not bool:
         raise ValueError('exact boolean quota profile required')
@@ -45,17 +50,25 @@ def launch_failure_options(report: dict) -> dict:
     return options
 
 
+def launch_orphan_options(report: dict) -> dict:
+    if (not isinstance(report, dict) or report.get('launch_orphan') is not True
+            or report.get('launch_quota') is not True or type(report.get('orphan_stuck')) is not bool):
+        raise ValueError('exact orphan recovery diagnostic profile required')
+    options = launch_failure_options(dict(report,launch_orphan=False,orphan_stuck=False))
+    return dict(options,launch_orphan=True,orphan_stuck=report['orphan_stuck'])
+
+
 def profile_options(report: dict) -> dict:
     """Select the explicit receipt profile; never infer authority from code size."""
     if not isinstance(report, dict):
         raise ValueError('application profile object required')
     names = ('file_waits', 'window_surfaces', 'window_capacity', 'surface_lifecycle',
              'surface_input', 'launch_shell_admission', 'launch_console_admission',
-             'diagnostic_only', 'serial_recovery', 'launch_failure', 'launch_quota')
+             'diagnostic_only', 'serial_recovery', 'launch_failure', 'launch_quota', 'launch_orphan', 'orphan_stuck')
     flags = {name: report.get(name, False) for name in names}
     if any(type(value) is not bool for value in flags.values()):
         raise ValueError('explicit boolean application profile required')
-    if flags['diagnostic_only'] or flags['serial_recovery'] or flags['launch_failure'] or flags['launch_quota']:
+    if any(flags[name] for name in ('diagnostic_only','serial_recovery','launch_failure','launch_quota','launch_orphan','orphan_stuck')):
         raise ValueError('diagnostic profile is not an ordinary preview')
     if flags['launch_console_admission'] and not flags['launch_shell_admission']:
         raise ValueError('launch console requires launch shell')
@@ -76,7 +89,9 @@ def parse(line: str, event: str) -> dict:
     return dict(zip(names, values))
 
 
-def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False, windows: bool = False, window_capacity: bool = False, surface_lifecycle: bool = False, launch_session: bool = False, launch_failure: bool = False, launch_quota: bool = False) -> dict:
+def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False, windows: bool = False, window_capacity: bool = False, surface_lifecycle: bool = False, launch_session: bool = False, launch_failure: bool = False, launch_quota: bool = False, launch_orphan: bool = False, orphan_stuck: bool = False) -> dict:
+    if type(launch_orphan) is not bool or type(orphan_stuck) is not bool or launch_orphan and not launch_quota or orphan_stuck and not launch_orphan:
+        raise ValueError('orphan recovery requires exact quota diagnostic profile')
     if type(launch_quota) is not bool or launch_quota and not launch_failure:
         raise ValueError('quota challenge requires explicit rejection profile')
     if type(launch_failure) is not bool or launch_failure and not launch_session:
@@ -121,6 +136,7 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
     surfaces, surface_pending = [], False
     failures, rejections, failed = {}, [], []
     pressure, pressure_events = None, []
+    job_events, recovery, holds = [], None, []
     final_generation = 3 if launch_failure else 2
     for marker in markers[31:]:
         if marker.startswith(cleanup.PREFIX):
@@ -128,7 +144,8 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
                 raise ValueError('quota pressure was not released before reclamation')
             if launch_failure:
                 event = marker.split()[1]
-                if event not in ('DEFER', 'COMPLETE') or pending is not None or complete_pending is not None:
+                allowed = ('DEFER','RETRY','EXHAUSTED') if launch_orphan else ('DEFER','COMPLETE')
+                if event not in allowed or pending is not None or complete_pending is not None:
                     raise ValueError('invalid rejected-image cleanup event')
                 v = cleanup.parse(marker, event)
                 task, dispatches = v['task'], v['dispatches']
@@ -143,6 +160,17 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
                         or v['pages'] != pages[task] or v['next'] != dispatches+64):
                         raise ValueError('rejected-image deferral differs')
                     cleaning[task] = dict(defer=v, samples=[])
+                    if launch_orphan: cleaning[task]['last'] = v
+                elif launch_orphan:
+                    state = cleaning.get(task)
+                    previous = state['last'] if state else None
+                    attempt = previous['attempts']+1 if previous else 0
+                    if (previous is None or attempt > 3 or v['attempts'] != attempt
+                        or dispatches != previous['next'] or v['pages'] != pages[5]
+                        or event != ('EXHAUSTED' if attempt == 3 else 'RETRY')
+                        or v['next'] != (0 if attempt == 3 else dispatches+(64<<attempt))):
+                        raise ValueError('orphan cleanup attempts or bounded backoff differ')
+                    state['last'] = v
                 else:
                     state = cleaning.get(task)
                     if (state is None or dispatches != state['defer']['next'] or v['attempts'] != 1
@@ -191,8 +219,13 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
                     complete_pending = v
             cleanup_events.append(dict(event=event, **v))
             continue
-        event = next((e for e in FIELDS if marker.startswith('POOLEOS:APPS '+e+' ')), None)
-        if event not in ('HANDOFF','ADMIT','RETIRE','RUN','REQUESTER','CLAIMED','WAIT','WAKE','SURFACE','REJECT','FAILED','PRESSURE','RELIEF'): raise ValueError('unknown application event')
+        job_event = marker.startswith(job_probe.PREFIX)
+        event = marker.split()[1] if job_event else next((e for e in FIELDS if marker.startswith('POOLEOS:APPS '+e+' ')), None)
+        if event not in ('HANDOFF','ADMIT','RETIRE','RUN','REQUESTER','CLAIMED','WAIT','WAKE','SURFACE','REJECT','FAILED','PRESSURE','RELIEF','OWNER','CHILD','DRAINED','RECOVER','HELD'): raise ValueError('unknown application event')
+        if (job_event or event in ('RECOVER','HELD')) and not launch_orphan:
+            raise ValueError('orphan event outside its diagnostic profile')
+        if job_event and event not in job_probe.FIELDS:
+            raise ValueError('unknown orphan job event')
         if event in ('PRESSURE','RELIEF') and not launch_quota:
             raise ValueError('quota event outside explicit profile')
         if pressure is not None and event != ('RELIEF' if 5 in failures else 'REJECT'):
@@ -204,17 +237,53 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
         if pending is not None and event not in (('SURFACE','ADMIT') if windows else ('ADMIT',)): raise ValueError('handoff not immediately admitted')
         if complete_pending is not None and event != ('FAILED' if launch_failure else 'RETIRE'): raise ValueError('cleanup completion not immediately settled')
         if 4 in failures and event != 'FAILED': raise ValueError('immediate rejection not settled')
-        v = parse(marker, event)
+        v = job_probe.parse(marker,event) if job_event else parse(marker, event)
+        if launch_orphan and v.get('calls', 0) >= 1 << 32:
+            raise ValueError('bounded orphan diagnostic syscall count exceeded')
         dispatches = v['dispatches']
         last_sample = samples[-1]['dispatches'] if samples else 0
         if event != 'RUN':
-            lower = last_sample if complete_pending is not None else last_sample+1
+            lower = last_sample if complete_pending is not None or event in ('RECOVER','HELD') else last_sample+1
             if not lower <= dispatches <= last_sample+64 or dispatches < last_event:
                 raise ValueError('event ordering')
             last_event = dispatches
-            task = v['task']
-            if not 2 <= task <= 5: raise ValueError('unexpected survivor retirement')
-        if event == 'PRESSURE':
+            task = v.get('task')
+            if event != 'DRAINED' and not 2 <= task <= 5: raise ValueError('unexpected survivor retirement')
+        if event == 'OWNER':
+            state = cleaning.get(5)
+            if (job_events or recovery is not None or state is None or state['last']['attempts'] != 3
+                or state['last']['next'] != 0 or not {3,4}.issubset(live)
+                or v != dict(task=3,generation=1,root=roots[3],children=2,dispatches=state['last']['dispatches']+1)):
+                raise ValueError('owner cancellation is not bound to exhausted child')
+            job_events.append(dict(event=event,**v))
+        elif event == 'CHILD':
+            if (len(job_events) != 1 or 3 in live or 4 in live or recovery is not None
+                or v != dict(task=4,generation=1,root=roots[4],prepared=0,remaining=1,published=0,dispatches=job_events[0]['dispatches'])):
+                raise ValueError('orphan sibling not reclaimed without parent completion')
+            job_events.append(dict(event=event,**v))
+        elif event == 'DRAINED':
+            if (orphan_stuck or recovery is None or len(job_events) != 2 or failures or cleaning
+                or v != dict(children=0,owned_pages=sum(pages[:3]),dispatches=recovery['dispatches']+1)):
+                raise ValueError('job drained before retained ownership is released')
+            job_events.append(dict(event=event,**v))
+        elif event == 'RECOVER':
+            state = cleaning.get(5)
+            if (recovery is not None or len(job_events) != 2 or live != {0,1,2} or state is None
+                or state['last']['attempts'] != 3 or not 0 < v['writes'] < 1<<32
+                or v != dict(task=5,generation=2,root=roots[5],attempts=1,
+                    retained_pages=pages[5] if orphan_stuck else 0,recovered=int(not orphan_stuck),
+                    children=int(orphan_stuck),writes=v['writes'],dispatches=state['last']['dispatches']+64)):
+                raise ValueError('unbounded or unauthenticated orphan recovery')
+            recovery = v
+            if not orphan_stuck: complete_pending = v
+        elif event == 'HELD':
+            if (not orphan_stuck or recovery is None or not samples or dispatches != samples[-1]['dispatches']
+                or holds and dispatches != holds[-1]['dispatches']+64
+                or v != dict(task=5,generation=2,root=roots[5],pages=pages[5],children=1,
+                    writes=recovery['writes'],calls=0,ticks=0,dispatches=dispatches)):
+                raise ValueError('failed recovery changed retained ownership or performed extra writes')
+            holds.append(v)
+        elif event == 'PRESSURE':
             if (pressure is not None or pressure_events or task != 5 or task in live or task in owned
                 or 3 not in live or 4 not in live or generation[task] != 1
                 or v != dict(task=5,generation=2,owner=3,owner_generation=1,target=0,
@@ -242,7 +311,7 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
             owned.add(task); failures[task] = v; rejections.append(v)
         elif event == 'FAILED':
             rejected = failures.get(task)
-            if (rejected is None or task in live or task not in owned or v['published'] != 1
+            if (rejected is None or task in live or task not in owned or v['published'] != int(not launch_orphan)
                 or any(v[n] != rejected[n] for n in ('task','generation','sequence','root'))):
                 raise ValueError('failed launch lacks exact retained permit')
             if task == 4:
@@ -327,6 +396,11 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
             if task not in live or task not in owned or v['generation'] != generation[task] or v['released_pages'] != pages[task]:
                 raise ValueError('retirement identity or pages')
             expected = (1<<32) if task < 4 else (2<<32)|6 if task == 5 and generation[task] == 1 else 4<<32
+            if launch_orphan and task in (3,4):
+                if (not job_events or dispatches != job_events[0]['dispatches']
+                    or task == 3 and len(retires) != 1 or task == 4 and 3 in live):
+                    raise ValueError('owner or sibling retired outside exact job closure')
+                expected = 4<<32
             if (file_controls or claimed_requester) and task == 4:
                 expected = 4<<32 if claimed_requester else (1<<32)|85
                 if requester_pending is None or any(v[n] != requester_pending[n] for n in ('task','generation','dispatches')):
@@ -346,7 +420,7 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
                 raise ValueError('wrong cleanup owner retired')
             # CLOSE reply can retire the console before the shell consumes it.
             # Neither service may exit while either application remains live.
-            if task < 4 and (4 in live or 5 in live or failures): raise ValueError('service abandoned live children or retained launch')
+            if task < 4 and (4 in live or 5 in live or failures) and not (launch_orphan and task == 3 and job_events): raise ValueError('service abandoned live children or retained launch')
             previous_calls[task] = v['calls']
             live.remove(task); owned.remove(task); retires.append(v)
         else:
@@ -358,18 +432,35 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
                 raise ValueError('lifecycle accounting')
             for j in range(6):
                 pair = (v[f'calls{j}'], v[f'ticks{j}'])
+                if j in failures and pair != (0,0): raise ValueError('rejected image executed or consumed runtime')
                 if j in waiting and pair[0] != waiting[j]['calls']: raise ValueError('blocked task executed syscalls')
                 if pair[0] < previous_calls[j] or pair[1] < previous_ticks[j]: raise ValueError('accounting regressed')
                 if j < 2 and (pair[0] <= previous_calls[j] or pair[1] <= previous_ticks[j]): raise ValueError('survivor stopped progressing')
-                if failures and j < 4 and (pair[0] <= previous_calls[j] or pair[1] <= previous_ticks[j]):
+                if failures and j < 4 and j in live and (pair[0] <= previous_calls[j] or pair[1] <= previous_ticks[j]):
                     raise ValueError('service stopped during rejected-image retention')
                 if j not in live and pair != frozen.setdefault(j, pair): raise ValueError('retired image resumed')
                 previous_calls[j], previous_ticks[j] = pair
             samples.append(v)
             for state in cleaning.values(): state['samples'].append(v)
-    if pending is not None or failures or cleaning or complete_pending is not None or requester_pending is not None or claim_pending is not None or waiting or live != {0,1} or owned != {0,1} or generation[4:] != [final_generation]*2 or len(retires) != 6:
+    if launch_orphan:
+        if (pending is not None or complete_pending is not None or requester_pending is not None or claim_pending is not None or waiting
+            or recovery is None or live != {0,1,2} or owned != ({0,1,2,5} if orphan_stuck else {0,1,2})
+            or generation[4:] != [1,2] or [(r['task'],r['generation']) for r in retires] != [(5,1),(3,1),(4,1)]
+            or [(a['task'],a['generation']) for a in admits] != [(4,1),(5,1)]
+            or len(handoffs) != 2 or len(surfaces) != 2 or len(rejections) != 1
+            or set(failures) != ({5} if orphan_stuck else set()) or set(cleaning) != ({5} if orphan_stuck else set())
+            or set(completed) != (set() if orphan_stuck else {(5,2)}) or len(failed) != int(not orphan_stuck)
+            or len(job_events) != (2 if orphan_stuck else 3)):
+            raise ValueError('incomplete rejected orphan lifecycle')
+        after = [s for s in samples if s['dispatches'] > recovery['dispatches']]
+        if (len(after) < 8 or after[-1]['dispatches'] < recovery['dispatches']+512
+            or any(b[f'{field}{peer}'] <= a[f'{field}{peer}'] for a,b in zip(after,after[1:])
+                   for peer in (0,1,2) for field in ('calls','ticks'))
+            or (len(holds) != len(after) if orphan_stuck else bool(holds))):
+            raise ValueError('independent services or bounded retained observation missing')
+    elif pending is not None or failures or cleaning or complete_pending is not None or requester_pending is not None or claim_pending is not None or waiting or live != {0,1} or owned != {0,1} or generation[4:] != [final_generation]*2 or len(retires) != 6:
         raise ValueError('incomplete application lifecycle')
-    if launch_failure and (len(rejections) != 2 or len(failed) != 2 or set(completed) != {(5,2)}):
+    if launch_failure and not launch_orphan and (len(rejections) != 2 or len(failed) != 2 or set(completed) != {(5,2)}):
         raise ValueError('both admission failures and deferred cleanup required')
     if launch_quota and (pressure is not None or len(pressure_events) != 2):
         raise ValueError('complete native quota pressure and relief required')
@@ -379,15 +470,16 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
     if claimed_requester and (len(requesters) != 2 or len(claimed_waiters) != 2): raise ValueError('both waiting requester generations required')
     if file_waits:
         expected = {(4,1),(4,final_generation)} if bad_file else {(4,1),(4,final_generation),(5,1),(5,final_generation)}
+        if launch_orphan: expected = {(4,1)} if bad_file else {(4,1),(5,1)}
         if {(p['wait']['task'],p['wait']['generation']) for p in wake_pairs} != expected:
             raise ValueError('native file wait/wakeup coverage missing')
     concurrent = any(v['live_mask'] == 63 and min(v['calls4'],v['calls5'],v['ticks4'],v['ticks5']) > 0 for v in samples)
     if claimed_requester:
         concurrent = any(v['live_mask'] & (1<<5) and min(v['calls5'],v['ticks5']) > 0 for v in samples)
-    if len(samples) < 8 or any(v['live_mask'] != 3 for v in samples[-2:]) or not concurrent:
+    if len(samples) < 8 or any(v['live_mask'] != (7 if launch_orphan else 3) for v in samples[-2:]) or not concurrent:
         raise ValueError('concurrent apps or post-retirement survival missing')
     fault = next(r for r in retires if r['task'] == 5 and r['generation'] == 1)
-    restart = next(a for a in admits if a['task'] == 5 and a['generation'] == final_generation)
+    restart = job_events[0] if launch_orphan else next(a for a in admits if a['task'] == 5 and a['generation'] == final_generation)
     survivors = [v for v in samples if fault['dispatches'] < v['dispatches'] < restart['dispatches']]
     before_fault = [v for v in samples if v['dispatches'] < fault['dispatches']]
     mask = 15 if file_controls or claimed_requester else 31
@@ -416,7 +508,12 @@ def validate_markers(markers: list[str], *, bad_file: bool = False, deferred_cle
                       failed_launches=failed, graphical_failure_retry_verified=False)
     if launch_quota:
         result.update(launch_quota=True, pressure_events=pressure_events,
-                      native_process_quota_recovery=True)
+                      native_process_quota_recovery=not launch_orphan)
+    if launch_orphan:
+        result.update(launch_orphan=True,orphan_stuck=orphan_stuck,job_events=job_events,
+            orphan_recovery=recovery,retained_observations=holds,supervisor_cancelled_owner=True,
+            actual_owner_ud2=False,orphan_cleanup_recovered=not orphan_stuck,
+            repeated_recovery_writes_rejected=orphan_stuck,general_owner_death_recovery=False)
     if claimed_requester:
         result.update(claimed_requester=True,claimed_waiters=claimed_waiters,diagnostic_requester_is_useful_app=False,
                       kernel_injected_waiting_cancellation=True,late_reply_denial_asserted_by_native_service=True,
@@ -483,6 +580,22 @@ def scenario(nonce: str, *, bad_file: bool = False, launch_failure: bool = False
     return shell.Scenario('stale-app-file' if bad_file else 'application-session', nonce, tuple(steps))
 
 
+def orphan_scenario(nonce: str, *, bad_file: bool = False) -> shell.Scenario:
+    original = scenario(nonce, bad_file=bad_file, launch_failure=True)
+    command, starts, steps = bytearray(), 0, []
+    for byte, response in original.steps:
+        if byte == b'\r':
+            if command == b'start numbers': starts += 1
+            if starts == 2:
+                steps.append((byte, b'\r\n'))
+                return shell.Scenario('rejected-orphan', nonce, tuple(steps))
+            command.clear()
+        else:
+            command.extend(byte)
+        steps.append((byte, response))
+    raise ValueError('rejected launch command missing')
+
+
 def file_control_scenario(nonce: str, *, bad_file: bool = False, claimed_requester: bool = False) -> shell.Scenario:
     if re.fullmatch(r'[0-9a-f]{16}', nonce) is None: raise ValueError('independent challenge required')
     steps=[]
@@ -512,8 +625,12 @@ def file_control_scenario(nonce: str, *, bad_file: bool = False, claimed_request
     return shell.Scenario('claimed-requester-controls' if claimed_requester else 'file-request-controls',nonce,tuple(steps))
 
 
-def negative_controls(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False, windows: bool = False, window_capacity: bool = False, surface_lifecycle: bool = False, launch_session: bool = False, launch_failure: bool = False, launch_quota: bool = False) -> int:
-    validate_markers(markers, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester,file_waits=file_waits,windows=windows,window_capacity=window_capacity,surface_lifecycle=surface_lifecycle,launch_session=launch_session,launch_failure=launch_failure,launch_quota=launch_quota)
+def negative_controls(markers: list[str], *, bad_file: bool = False, deferred_cleanup: bool = False, file_controls: bool = False, claimed_requester: bool = False, file_waits: bool = False, windows: bool = False, window_capacity: bool = False, surface_lifecycle: bool = False, launch_session: bool = False, launch_failure: bool = False, launch_quota: bool = False, launch_orphan: bool = False, orphan_stuck: bool = False) -> int:
+    options = dict(bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,
+        claimed_requester=claimed_requester,file_waits=file_waits,windows=windows,window_capacity=window_capacity,
+        surface_lifecycle=surface_lifecycle,launch_session=launch_session,launch_failure=launch_failure,
+        launch_quota=launch_quota,launch_orphan=launch_orphan,orphan_stuck=orphan_stuck)
+    validate_markers(markers, **options)
     cases = [markers[:i]+markers[i+1:] for i in range(len(markers)-1)]
     cases += [markers+[markers[-1]], markers+['POOLEOS:PANIC injected']]
     for i in range(29,len(markers)):
@@ -521,13 +638,14 @@ def negative_controls(markers: list[str], *, bad_file: bool = False, deferred_cl
                       'handle','generation','sequence','released_pages','owned_pages','outcome','live_mask','cr3_writes',
                       'attempts','next','pages','admitted','dispatches','queued','claimed','completed','detached',
                       'waiting','stale_wait_rejected','service_task','service_generation',
-                      'reason','syscalls','published','root'):
+                      'reason','syscalls','published','root') + (('children','retained_pages','recovered','writes','calls','ticks') if launch_orphan else ()):
             if ' '+field+'=' in markers[i]:
                 changed = markers.copy()
                 changed[i] = re.sub(r' '+field+r'=[0-9]+', ' '+field+'='+str((1<<64)-1), changed[i])
                 cases.append(changed)
-    for case in cases:
-        try: validate_markers(case, bad_file=bad_file, deferred_cleanup=deferred_cleanup, file_controls=file_controls,claimed_requester=claimed_requester,file_waits=file_waits,windows=windows,window_capacity=window_capacity,surface_lifecycle=surface_lifecycle,launch_session=launch_session,launch_failure=launch_failure,launch_quota=launch_quota)
+    for index, case in enumerate(cases):
+        try: validate_markers(case, **options)
         except ValueError: continue
-        raise ValueError('hostile application observation accepted')
+        changed = next((line for line, original in zip(case, markers) if line != original), '<length>')
+        raise ValueError(f'hostile application observation accepted: case {index}: {changed}')
     return len(cases)

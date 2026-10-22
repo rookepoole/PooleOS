@@ -161,4 +161,25 @@ impl<const N: usize> Job<N> {
         }
         Ok(progress)
     }
+
+    /// One post-exhaustion attempt is available only to the exact closed job.
+    /// A failed attempt retains membership and cannot be rearmed by this API.
+    pub fn recover_exhausted_child<H: Cpu, D: Driver, M: TableMemory>(
+        &mut self,
+        child: &mut Slot<H, D>,
+        id: TaskId,
+        manager: &mut PhysicalMemoryManager,
+        memory: &mut M,
+        scheduler: &crate::scheduler::Scheduler,
+    ) -> Result<cleanup::Recovery, Error> {
+        let index = self.member(child, id)?;
+        if !self.closing {
+            return Err(Error::State);
+        }
+        let progress = child.recover_exhausted(id, manager, memory, scheduler)?;
+        if matches!(progress, cleanup::Recovery::Complete(_)) {
+            self.children[index] = None;
+        }
+        Ok(progress)
+    }
 }

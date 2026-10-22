@@ -7,9 +7,26 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 311
+Last roadmap reconciliation: PooleOS Cycle 312
 
-Cycle311 implements and qualifies real native process-lease quota rejection,
+Cycle312 implements separately bounded closed-job recovery after rejected-image
+cleanup exhaustion. Successful reclamation clears exact membership without a
+dead-parent completion; persistent failure retains ownership without repeated
+writes. All631 kernel tests pass in each of three host profiles and143 focused
+checks pass. Thirteen QEMU controls, independent reconstruction and505 selected
+integration/roadmap checks pass. Counts overlap; full canonical replay is not
+claimed. Preserve
+Cycle308 and historical evidence; no production or merge qualification is inferred.
+Owner direction, 2026-10-22: prioritize microkernel development. The next kernel
+milestone is entered-child teardown, actual owner-fault recovery and bounded
+multi-owner progress, followed by capability/IPC lifetime and service supervision.
+Use the desktop as a regression workload; defer demo redesign, packaging and
+the full desktop matrix until relevant kernel contracts hold or the owner changes
+priority. All preview and production acceptance gates remain intact. Bootable ISO
+is still the final delivery format, not the immediate driver of development.
+[Current progress](checkpoints/cycle312-orphan-cleanup-recovery.md).
+
+Historical Cycle311 implements and qualifies real native process-lease quota rejection,
 late admission rollback, retained-image cleanup and explicit fresh retry under
 the unchanged limits. Ten current-source QEMU runs and26 graphical observations
 pass independent reconstruction. Each of three kernel host profiles passes629
@@ -18,7 +35,7 @@ gates remain; preserve the Cycle308 preview and every old receipt. No production
 or merge qualification is inferred from this bounded diagnostic milestone.
 All497 selected integration/roadmap checks pass, including all eight checklist
 coverage checks; overlapping counts are not full canonical acceptance.
-[Current progress](checkpoints/cycle311-native-launch-quota.md).
+[Historical progress](checkpoints/cycle311-native-launch-quota.md).
 
 Historical Cycle310 qualifies bounded graphical launch-failure recovery using the existing
 native window manager and Cycle309 kernel rollback. Strict diagnostic optical

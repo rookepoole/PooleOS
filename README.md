@@ -11,7 +11,24 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development work:** Cycle311 implements a separate native process-quota
+**Current development work:** Cycle312 adds one closed-job recovery opportunity
+after rejected-image cleanup exhaustion. Exact ownership, the original retry
+budget and a further cooldown remain enforced. Persistent failure retains the
+image without rearming writes; no completion is revived for a dead parent.
+All631 kernel tests pass in each of three host profiles;143 focused checks pass.
+Thirteen native QEMU controls pass, including success, persistent failure and
+ordinary regression; independent byte/source reconstruction passes. No new
+selected preview or production qualification is claimed.
+All505 selected integration/roadmap checks pass. Counts overlap;1,653 discovered
+Python tests are inventory, not full canonical qualification.
+[Current progress and remaining gates](docs/checkpoints/cycle312-orphan-cleanup-recovery.md).
+
+**Current priority:** microkernel task teardown, memory ownership, capability/IPC
+lifetime and service supervision. Desktop work is a regression consumer; demo
+packaging and visual polish are deferred. See the
+[kernel-first build order](docs/pdc-production-build-plan.md#owner-priority-correction-kernel-first).
+
+**Historical development checkpoint:** Cycle311 implements a separate native process-quota
 challenge with real read-only pressure, late admission rollback, exact pressure
 release and fresh retry generations. Ten current-source QEMU runs pass, including
 both graphical profiles and26 rendered observations. All629 kernel host checks
@@ -20,7 +37,7 @@ checks pass. Original logs, inputs, pixels and paired builds are reconstructed.
 All497 selected integration/roadmap checks pass, including checklist coverage.
 Counts overlap;1645 discovered tests are inventory, not full canonical execution.
 No replacement preview, full desktop qualification or production claim.
-[Current progress and remaining gates](docs/checkpoints/cycle311-native-launch-quota.md).
+[Historical progress and remaining gates](docs/checkpoints/cycle311-native-launch-quota.md).
 
 **Historical development checkpoint:** Cycle310 adds explicit diagnostic graphical
 qualification for launch failure, held-input suppression, absence inspection

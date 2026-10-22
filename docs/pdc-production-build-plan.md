@@ -1,15 +1,72 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-10-20
-Plan version: 2.214.0-native-launch-quota
-Roadmap cycle: PooleOS Cycle 311
+Status date: 2026-10-22
+Plan version: 2.215.0-native-orphan-cleanup
+Roadmap cycle: PooleOS Cycle 312
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 311: Native Launch Quota Recovery
+## Cycle 312: Rejected Orphan Cleanup Recovery
+
+N13/N14 with N27/N29 consumers: preserve exact ownership when a rejected
+application exhausts cleanup and its parent closes. [Contract](native-orphan-cleanup-recovery.md)
+and [checkpoint](checkpoints/cycle312-orphan-cleanup-recovery.md).
+
+1. Implemented: an authenticated closed job can authorize one recovery attempt
+   after the original three attempts and an additional64-dispatch cooldown.
+   Consume the opportunity before memory access. Success clears membership only
+   after reclamation; persistent failure retains ownership without repeated
+   writes. No failure completion is published to a dead parent.
+2. Verified:631 kernel tests in each of three host profiles,143 focused checks,
+   and13 QEMU controls cover successful and persistent recovery, stale-file and
+   unsigned denial, plus ordinary regression. Original logs/inputs, paired builds,
+   ten rendered observations and31 unchanged paired user programs reconstruct.
+   All505 selected integration/metadata checks and nine publication tests pass.
+   Counts overlap;1,653 discovered tests are inventory, not full canonical replay.
+   No preview or production promotion is inferred from these bounded results.
+3. Next kernel milestone: task teardown and recovery for entered children and
+   faulted owners, with exact memory ownership, scheduler accounting and bounded
+   multi-owner progress. Supervisor cancellation does not establish these cases.
+   Follow with capability/IPC revocation and generation-safe service supervision.
+4. Remaining: window-service restart/rebinding, construction and committed-handoff
+   recovery, all-path stacks, COM2-independent boot, persistence, event-driven
+   waits, accessible PooleGlass, complete microkernel, PooleGlyph/PDC and all N0-N39.
+
+The native owner-control uses supervisor cancellation, not an owner UD2 fault.
+No resource, authority or guard limit increases; no phase or flag closes.
+Preserve Cycle308, all40 phases,301 subphases and101 flags (46 open).
+
+### Owner Priority Correction: Kernel First
+
+On 2026-10-22 the owner redirected development away from demo ISO delivery.
+This order supersedes the demo-first next steps in historical checkpoints:
+
+1. N13/N14 task lifecycle: entered-child cleanup, actual owner-fault teardown,
+   multi-owner fairness and safe partial-reclamation failure. Prove no use after
+   free, duplicate release, retry reset, stale identity or accounting loss.
+2. N13 capability/IPC lifetime: revoke dead-task authority, resolve blocked
+   senders/receivers and invalidate outstanding replies and stale generations.
+3. N14 service supervision: bounded restart and exact endpoint rebinding, with
+   unrelated services continuing and no inherited obsolete authority.
+4. Kernel isolation and scheduling: audit nested stacks, active address-space
+   ownership, event-driven waits and applicable SMP/preemption paths. Qualify
+   each changed mechanism before extending its consumers.
+5. Resume desktop integration and ISO delivery after the relevant kernel
+   contracts hold, or on an explicit owner priority change. The existing desktop
+   is a regression workload. No redesign, full demo matrix or new launcher bundle
+   is the immediate milestone; their acceptance gates remain required before
+   any later preview promotion. Bootable ISO remains the final product format.
+
+Use the existing phase and implementation flags above; do not mark them complete
+from a diagnostic alone. Each cycle must identify its kernel implementation,
+focused host/native tests, remaining gaps and exact next kernel change. Run broad
+qualification when warranted by blast radius or promotion, not merely to refresh
+a demo after every kernel edit.
+
+## Historical Cycle 311: Native Launch Quota Recovery
 
 N13/N14 with N27/N29 consumers: exercise real process-quota rejection in the
 native dispatcher while preserving isolated surfaces and existing observers.
