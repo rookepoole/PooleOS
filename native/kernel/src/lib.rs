@@ -18,10 +18,16 @@ use poole_handoff::{
 pub mod acpi;
 pub mod active_virtual_memory;
 pub mod atomics;
+pub mod capability_ipc;
+#[cfg(feature = "development-applications")]
+pub mod development_apps;
+pub mod early_serial;
 pub mod interrupt_time;
 pub mod locks;
 pub mod physical_memory;
 pub mod privilege_msr;
+#[cfg(feature = "development-windows")]
+pub mod ps2;
 pub mod revalidation;
 pub mod scheduler;
 pub mod scheduler_ap_workers;
@@ -32,6 +38,7 @@ pub mod scheduler_smp_preempt;
 pub mod smp;
 pub mod smp_ipi;
 pub mod smp_runtime;
+pub mod user_entry;
 pub mod virtual_memory;
 pub mod xstate;
 pub mod xstate_exception;
@@ -57,7 +64,37 @@ pub const LOCKS_CONTRACT_ID: &str = locks::CONTRACT_ID;
 #[unsafe(link_section = ".text.pkbuild_literal")]
 static BUILD_ID_BYTES: [u8; 44] = *b"PKBUILD1-CYCLE216-N12-SMP-TXN-V1-00000000001";
 pub const BUILD_ID: &[u8] = &BUILD_ID_BYTES;
-pub const ENTRY_OFFSET: u64 = 0xa000;
+#[cfg(not(feature = "development-files"))]
+pub const ENTRY_OFFSET: u64 = 0xd000;
+#[cfg(all(
+    feature = "development-files",
+    not(feature = "development-applications")
+))]
+pub const ENTRY_OFFSET: u64 = 0xe000;
+#[cfg(all(
+    feature = "development-applications",
+    not(feature = "development-desktop")
+))]
+pub const ENTRY_OFFSET: u64 = 0x13000;
+#[cfg(all(feature = "development-desktop", not(feature = "development-windows")))]
+pub const ENTRY_OFFSET: u64 = 0x15000;
+#[cfg(all(
+    feature = "development-windows",
+    not(feature = "development-window-capacity")
+))]
+pub const ENTRY_OFFSET: u64 = 0x18000;
+#[cfg(all(
+    feature = "development-window-capacity",
+    not(feature = "development-window-input")
+))]
+pub const ENTRY_OFFSET: u64 = 0x1a000;
+#[cfg(all(
+    feature = "development-window-input",
+    not(feature = "development-launch-session")
+))]
+pub const ENTRY_OFFSET: u64 = 0x1c000;
+#[cfg(feature = "development-launch-session")]
+pub const ENTRY_OFFSET: u64 = 0x1d000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 
 #[used]
@@ -116,6 +153,7 @@ pub enum PanicCode {
     SchedulerSmpPreempt = 0x101c,
     Atomics = 0x101d,
     Locks = 0x101e,
+    UserRoot = 0x101f,
     UnexpectedReturn = 0x10ff,
 }
 
@@ -145,6 +183,7 @@ pub enum DevelopmentTrapScenario {
     SchedulerSmpPreempt = 20,
     Atomics = 21,
     Locks = 22,
+    UserRoot = 23,
 }
 
 macro_rules! scenario_label {
@@ -178,6 +217,7 @@ scenario_label!(SCENARIO_SCHEDULER_AP_WORKERS, b"scheduler_ap_workers");
 scenario_label!(SCENARIO_SCHEDULER_SMP_PREEMPT, b"scheduler_smp_preempt");
 scenario_label!(SCENARIO_ATOMICS, b"atomics");
 scenario_label!(SCENARIO_LOCKS, b"locks");
+scenario_label!(SCENARIO_USER_ROOT, b"user_root");
 
 const fn scenario_label_text(bytes: &'static [u8]) -> &'static str {
     // SAFETY: every caller supplies an ASCII byte string declared immediately above.
@@ -210,6 +250,7 @@ impl DevelopmentTrapScenario {
             20 => Some(Self::SchedulerSmpPreempt),
             21 => Some(Self::Atomics),
             22 => Some(Self::Locks),
+            23 => Some(Self::UserRoot),
             _ => None,
         }
     }
@@ -239,6 +280,7 @@ impl DevelopmentTrapScenario {
             Self::SchedulerSmpPreempt => scenario_label_text(&SCENARIO_SCHEDULER_SMP_PREEMPT),
             Self::Atomics => scenario_label_text(&SCENARIO_ATOMICS),
             Self::Locks => scenario_label_text(&SCENARIO_LOCKS),
+            Self::UserRoot => scenario_label_text(&SCENARIO_USER_ROOT),
         }
     }
 }
@@ -898,6 +940,9 @@ pub struct FramebufferSpec {
     pub foreground: u32,
 }
 
+#[cfg(feature = "development-desktop")]
+pub mod display;
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ValidatedEntry {
     pub core: CoreRecord,
@@ -1171,16 +1216,20 @@ impl<S: ByteSink> EarlyLogger<S> {
         Self { sink }
     }
 
+    // Share diagnostic emitters instead of duplicating them across boot probes.
+    #[inline(never)]
     pub fn write_bytes(&mut self, bytes: &[u8]) {
         for byte in bytes {
             self.sink.write_byte(*byte);
         }
     }
 
+    #[inline(never)]
     pub fn write_str(&mut self, text: &str) {
         self.write_bytes(text.as_bytes());
     }
 
+    #[inline(never)]
     pub fn write_hex_u64(&mut self, value: u64) {
         self.write_bytes(&HEX_PREFIX);
         for shift in (0..16).rev() {
@@ -1196,6 +1245,7 @@ impl<S: ByteSink> EarlyLogger<S> {
         }
     }
 
+    #[inline(never)]
     pub fn write_decimal_u64(&mut self, mut value: u64) {
         let mut digits = [0u8; 20];
         let mut used = 0usize;
@@ -1464,6 +1514,37 @@ mod tests {
 
     use super::*;
     use std::vec::Vec;
+
+    #[test]
+    fn runtime_entry_offset_matches_linker_text_start() {
+        let linker = include_str!("../linker.ld").replace("\r\n", "\n");
+        assert!(
+            linker.contains(
+                "__poole_ro_capacity = DEFINED(__poole_launch_session_profile) ? 0x1D000 : (DEFINED(__poole_window_input_profile) ? 0x1C000 : (DEFINED(__poole_window_capacity_profile) ? 0x1A000 : (DEFINED(__poole_windows_profile) ? 0x18000 : (DEFINED(__poole_desktop_profile) ? 0x15000 : (DEFINED(__poole_apps_profile) ? 0x13000 : (DEFINED(__poole_files_profile) ? 0xE000 : 0xD000))))));"
+            )
+        );
+        assert!(linker.contains(". = __poole_ro_capacity;\n  __poole_text_start = .;"));
+        assert_eq!(
+            ENTRY_OFFSET,
+            if cfg!(feature = "development-launch-session") {
+                0x1d000
+            } else if cfg!(feature = "development-window-input") {
+                0x1c000
+            } else if cfg!(feature = "development-window-capacity") {
+                0x1a000
+            } else if cfg!(feature = "development-windows") {
+                0x18000
+            } else if cfg!(feature = "development-desktop") {
+                0x15000
+            } else if cfg!(feature = "development-applications") {
+                0x13000
+            } else if cfg!(feature = "development-files") {
+                0xe000
+            } else {
+                0xd000
+            }
+        );
+    }
 
     #[derive(Default)]
     struct TestSink(Vec<u8>);
@@ -1833,7 +1914,12 @@ mod tests {
             DevelopmentTrapScenario::from_selector(22),
             Some(DevelopmentTrapScenario::Locks)
         );
-        assert_eq!(DevelopmentTrapScenario::from_selector(23), None);
+        assert_eq!(
+            DevelopmentTrapScenario::from_selector(23),
+            Some(DevelopmentTrapScenario::UserRoot)
+        );
+        assert_eq!(DevelopmentTrapScenario::UserRoot.label(), "user_root");
+        assert_eq!(DevelopmentTrapScenario::from_selector(24), None);
     }
 
     #[test]

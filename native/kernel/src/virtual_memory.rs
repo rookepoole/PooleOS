@@ -58,6 +58,8 @@ const ENTRY_WRITABLE: u64 = 1 << 1;
 const ENTRY_USER: u64 = 1 << 2;
 const ENTRY_PWT: u64 = 1 << 3;
 const ENTRY_PCD: u64 = 1 << 4;
+const ENTRY_ACCESSED: u64 = 1 << 5;
+const ENTRY_DIRTY: u64 = 1 << 6;
 const ENTRY_LARGE_OR_PAT: u64 = 1 << 7;
 const ENTRY_NO_EXECUTE: u64 = 1 << 63;
 const PHYSICAL_MASK_52: u64 = 0x000f_ffff_ffff_f000;
@@ -232,6 +234,7 @@ pub struct InvalidationToken {
 struct MappingRecord {
     virtual_address: u64,
     frame: AllocationHandle,
+    page_offset: u64,
     permissions: Permissions,
     cache: CachePolicy,
 }
@@ -340,13 +343,23 @@ fn physical_address(handle: AllocationHandle) -> Result<u64, Error> {
 
 fn leaf_entry(
     frame: AllocationHandle,
+    page_offset: u64,
     permissions: Permissions,
     cache: CachePolicy,
 ) -> Result<u64, Error> {
-    if !permissions.valid() || frame.page_count != 1 || frame.owner == 0 {
+    if !permissions.valid() || frame.owner == 0 {
         return Err(Error::Permission);
     }
-    let mut value = physical_address(frame)? | ENTRY_PRESENT | ENTRY_USER;
+    if page_offset >= frame.page_count {
+        return Err(Error::DataAllocation);
+    }
+    let physical = frame
+        .start_page
+        .checked_add(page_offset)
+        .and_then(|page| page.checked_mul(PAGE_BYTES))
+        .filter(|address| *address != 0 && *address & !PHYSICAL_MASK_52 == 0)
+        .ok_or(Error::PhysicalAddress)?;
+    let mut value = physical | ENTRY_PRESENT | ENTRY_USER;
     if permissions.write {
         value |= ENTRY_WRITABLE;
     }
@@ -379,6 +392,27 @@ fn decode_leaf(value: u64, virtual_address: u64) -> Result<Translation, Error> {
             return Err(Error::MemoryAccess);
         },
     })
+}
+
+// The inactive owner may regain a root after hardware used it. Accept only
+// hardware bookkeeping; retain the exact observed word for transactional rollback.
+fn observed_leaf<M: TableMemory>(
+    memory: &mut M,
+    table: u64,
+    index: usize,
+    expected: u64,
+) -> Result<u64, Error> {
+    let observed = memory.read_entry(table, index)?;
+    let hardware = ENTRY_ACCESSED
+        | if expected & ENTRY_WRITABLE != 0 {
+            ENTRY_DIRTY
+        } else {
+            0
+        };
+    if observed & !hardware != expected {
+        return Err(Error::TransactionRejected);
+    }
+    Ok(observed)
 }
 
 fn replace_entry<M: TableMemory>(
@@ -421,6 +455,21 @@ pub struct AddressSpace {
 }
 
 impl AddressSpace {
+    /// Owner-side mapping identity, independent of mutable page-table bytes.
+    pub(crate) fn owned_mapping(
+        &self,
+        address: u64,
+    ) -> Option<(AllocationHandle, u64, Permissions, CachePolicy)> {
+        self.mappings.iter().flatten().find_map(|mapping| {
+            (mapping.virtual_address == address).then_some((
+                mapping.frame,
+                mapping.page_offset,
+                mapping.permissions,
+                mapping.cache,
+            ))
+        })
+    }
+
     /// Includes frames awaiting invalidation, not only currently mapped leaves.
     pub(crate) fn allocation_handles(&self) -> [Option<AllocationHandle>; MAX_FRAMES + 1] {
         let mut handles = [None; MAX_FRAMES + 1];
@@ -517,12 +566,43 @@ impl AddressSpace {
         permissions: Permissions,
         cache: CachePolicy,
     ) -> Result<(), Error> {
+        // Keep the original single-page API strict. A page offset never creates
+        // a smaller PMM handle or independent ownership of part of an allocation.
+        if frame.page_count != 1 {
+            return Err(Error::DataAllocation);
+        }
+        self.map_page(
+            manager,
+            memory,
+            virtual_address,
+            frame,
+            0,
+            permissions,
+            cache,
+        )
+    }
+
+    /// Map one page of an exact, live allocation. All offsets and aliases share
+    /// its frame binding; retirement frees the WHOLE allocation only after the
+    /// last mapping and invalidation receipt. The caller retains exclusive PMM
+    /// ownership, as with `map`; this is not a user-facing memory capability.
+    #[allow(clippy::too_many_arguments)]
+    pub fn map_page<M: TableMemory>(
+        &mut self,
+        manager: &PhysicalMemoryManager,
+        memory: &mut M,
+        virtual_address: u64,
+        frame: AllocationHandle,
+        page_offset: u64,
+        permissions: Permissions,
+        cache: CachePolicy,
+    ) -> Result<(), Error> {
         if self.released {
             return Err(Error::ReleaseBusy);
         }
         Self::validate_virtual(virtual_address)?;
         manager.validate_allocation(frame).map_err(|_| Error::Pmm)?;
-        if frame.page_count != 1 || frame.owner != DATA_OWNER {
+        if page_offset >= frame.page_count || frame.owner != DATA_OWNER {
             return Err(Error::DataAllocation);
         }
         if self.mapping_index(virtual_address).is_some() {
@@ -549,12 +629,13 @@ impl AddressSpace {
                 return Err(Error::FrameCapacity);
             }
         }
-        let value = leaf_entry(frame, permissions, cache)?;
+        let value = leaf_entry(frame, page_offset, permissions, cache)?;
         let leaf_index = table_indices(virtual_address)[3];
         replace_entry(memory, self.tables[3], leaf_index, 0, value)?;
         self.mappings[mapping_slot] = Some(MappingRecord {
             virtual_address,
             frame,
+            page_offset,
             permissions,
             cache,
         });
@@ -593,8 +674,24 @@ impl AddressSpace {
             .mapping_index(virtual_address)
             .ok_or(Error::MappingMissing)?;
         let mut mapping = self.mappings[index].ok_or(Error::MappingMissing)?;
-        let previous = leaf_entry(mapping.frame, mapping.permissions, mapping.cache)?;
-        let replacement = leaf_entry(mapping.frame, permissions, mapping.cache)?;
+        let previous = leaf_entry(
+            mapping.frame,
+            mapping.page_offset,
+            mapping.permissions,
+            mapping.cache,
+        )?;
+        let replacement = leaf_entry(
+            mapping.frame,
+            mapping.page_offset,
+            permissions,
+            mapping.cache,
+        )?;
+        let previous = observed_leaf(
+            memory,
+            self.tables[3],
+            table_indices(virtual_address)[3],
+            previous,
+        )?;
         replace_entry(
             memory,
             self.tables[3],
@@ -617,12 +714,22 @@ impl AddressSpace {
         let indices = table_indices(virtual_address);
         for (level, table) in self.tables[..3].iter().enumerate() {
             let expected = self.tables[level + 1] | PARENT_FLAGS;
-            if memory.read_entry(*table, indices[level])? != expected {
+            if memory.read_entry(*table, indices[level])? & !ENTRY_ACCESSED != expected {
                 return Err(Error::ParentEntry);
             }
         }
+        let index = self
+            .mapping_index(virtual_address & !(PAGE_BYTES - 1))
+            .ok_or(Error::MappingMissing)?;
+        let mapping = self.mappings[index].ok_or(Error::MappingMissing)?;
+        let expected = leaf_entry(
+            mapping.frame,
+            mapping.page_offset,
+            mapping.permissions,
+            mapping.cache,
+        )?;
         decode_leaf(
-            memory.read_entry(self.tables[3], indices[3])?,
+            observed_leaf(memory, self.tables[3], indices[3], expected)?,
             virtual_address,
         )
     }
@@ -644,7 +751,18 @@ impl AddressSpace {
         let mapping = self.mappings[mapping_index].ok_or(Error::MappingMissing)?;
         let frame_index = self.frame_index(mapping.frame).ok_or(Error::Ownership)?;
         let mut binding = self.frames[frame_index].ok_or(Error::Ownership)?;
-        let previous = leaf_entry(mapping.frame, mapping.permissions, mapping.cache)?;
+        let previous = leaf_entry(
+            mapping.frame,
+            mapping.page_offset,
+            mapping.permissions,
+            mapping.cache,
+        )?;
+        let previous = observed_leaf(
+            memory,
+            self.tables[3],
+            table_indices(virtual_address)[3],
+            previous,
+        )?;
         replace_entry(
             memory,
             self.tables[3],
@@ -727,7 +845,7 @@ impl AddressSpace {
         self.pending[pending_index] = None;
         if release {
             self.frames[frame_index] = None;
-            self.released_frames += 1;
+            self.released_frames += binding.frame.page_count;
         } else {
             self.frames[frame_index] = Some(binding);
         }
@@ -898,6 +1016,7 @@ mod tests {
         entries: [[u64; TABLE_ENTRIES]; TABLE_PAGE_COUNT as usize],
         writes: u64,
         reject_next_write: bool,
+        reject_after_write: bool,
     }
 
     impl Memory {
@@ -907,6 +1026,7 @@ mod tests {
                 entries: [[0; TABLE_ENTRIES]; TABLE_PAGE_COUNT as usize],
                 writes: 0,
                 reject_next_write: false,
+                reject_after_write: false,
             }
         }
 
@@ -948,6 +1068,10 @@ mod tests {
             }
             self.entries[page][entry] = value;
             self.writes += 1;
+            if self.reject_after_write {
+                self.reject_after_write = false;
+                return Err(Error::MemoryAccess);
+            }
             Ok(())
         }
 
@@ -981,6 +1105,551 @@ mod tests {
         let data = manager.allocate(Zone::Dma32, 1, DATA_OWNER).unwrap();
         let memory = Memory::new(physical_address(tables).unwrap());
         (manager, tables, data, memory)
+    }
+
+    #[test]
+    fn hardware_accessed_dirty_walk_protect_and_retire_are_supported() {
+        let (mut manager, tables, data, mut memory) = fixture();
+        let mut space = AddressSpace::initialize(&manager, tables, &mut memory).unwrap();
+        space
+            .map(
+                &manager,
+                &mut memory,
+                USER_WINDOW_START,
+                data,
+                Permissions::USER_RW,
+                CachePolicy::WriteBack,
+            )
+            .unwrap();
+        let indices = table_indices(USER_WINDOW_START);
+        for level in 0..3 {
+            memory.entries[level][indices[level]] |= ENTRY_ACCESSED;
+        }
+        memory.entries[3][indices[3]] |= ENTRY_ACCESSED | ENTRY_DIRTY;
+        assert_eq!(
+            space
+                .translate(&mut memory, USER_WINDOW_START + 7)
+                .unwrap()
+                .physical_address,
+            physical_address(data).unwrap() + 7
+        );
+        space
+            .protect(&mut memory, USER_WINDOW_START, Permissions::USER_RX)
+            .unwrap();
+        assert_eq!(
+            memory.entries[3][indices[3]],
+            leaf_entry(data, 0, Permissions::USER_RX, CachePolicy::WriteBack).unwrap()
+        );
+        memory.entries[3][indices[3]] |= ENTRY_ACCESSED;
+        let token = space.begin_unmap(&mut memory, USER_WINDOW_START).unwrap();
+        assert_eq!(
+            space.complete_unmap(&mut manager, token),
+            Err(Error::InvalidationRequired)
+        );
+        space.acknowledge_inactive(token).unwrap();
+        assert!(space.complete_unmap(&mut manager, token).unwrap());
+        space.release(&mut manager, &mut memory).unwrap();
+        assert_eq!(manager.summary().allocated_pages, 0);
+    }
+
+    fn page_fixture(
+        pages: u64,
+    ) -> (
+        PhysicalMemoryManager,
+        AddressSpace,
+        AllocationHandle,
+        Memory,
+    ) {
+        let (mut manager, tables, old, mut memory) = fixture();
+        manager.free(old).unwrap();
+        let data = manager.allocate(Zone::Dma32, pages, DATA_OWNER).unwrap();
+        let space = AddressSpace::initialize(&manager, tables, &mut memory).unwrap();
+        (manager, space, data, memory)
+    }
+
+    #[test]
+    fn allocation_pages_translate_distinct_offsets_and_release_as_one_owner() {
+        let (mut manager, mut space, data, mut memory) = page_fixture(3);
+        for (index, offset) in [2, 0, 1, 2].into_iter().enumerate() {
+            let address = USER_WINDOW_START + index as u64 * PAGE_BYTES;
+            space
+                .map_page(
+                    &manager,
+                    &mut memory,
+                    address,
+                    data,
+                    offset,
+                    Permissions::USER_RX,
+                    CachePolicy::WriteBack,
+                )
+                .unwrap();
+            assert_eq!(
+                space
+                    .translate(&mut memory, address + 117)
+                    .unwrap()
+                    .physical_address,
+                (data.start_page + offset) * PAGE_BYTES + 117
+            );
+            assert_eq!(
+                space.owned_mapping(address),
+                Some((data, offset, Permissions::USER_RX, CachePolicy::WriteBack))
+            );
+        }
+        assert_eq!(space.summary().bound_frames, 1);
+        assert_eq!(space.allocation_handles().iter().flatten().count(), 2);
+        let tokens: [_; 4] = core::array::from_fn(|index| {
+            space
+                .begin_unmap(&mut memory, USER_WINDOW_START + index as u64 * PAGE_BYTES)
+                .unwrap()
+        });
+        for index in [3, 0, 2, 1] {
+            assert_eq!(
+                space.complete_unmap(&mut manager, tokens[index]),
+                Err(Error::InvalidationRequired)
+            );
+            space.acknowledge_inactive(tokens[index]).unwrap();
+            assert_eq!(
+                space.complete_unmap(&mut manager, tokens[index]).unwrap(),
+                index == 1
+            );
+            assert_eq!(manager.validate_allocation(data).is_ok(), index != 1);
+        }
+        assert_eq!(space.summary().released_frames, 3);
+        assert_eq!(
+            space.complete_unmap(&mut manager, tokens[1]),
+            Err(Error::StaleInvalidation)
+        );
+        space.release(&mut manager, &mut memory).unwrap();
+        assert_eq!(space.summary().released_frames, 7);
+        assert_eq!(manager.summary().allocated_pages, 0);
+    }
+
+    #[test]
+    fn allocation_page_offsets_handles_and_permissions_reject_without_writes() {
+        let (mut manager, mut space, data, mut memory) = page_fixture(3);
+        let summary = space.summary();
+        let writes = memory.writes;
+        for offset in [3, 4, u64::MAX] {
+            assert_eq!(
+                space.map_page(
+                    &manager,
+                    &mut memory,
+                    USER_WINDOW_START,
+                    data,
+                    offset,
+                    Permissions::USER_RX,
+                    CachePolicy::WriteBack
+                ),
+                Err(Error::DataAllocation)
+            );
+        }
+        assert_eq!(
+            space.map(
+                &manager,
+                &mut memory,
+                USER_WINDOW_START,
+                data,
+                Permissions::USER_RX,
+                CachePolicy::WriteBack
+            ),
+            Err(Error::DataAllocation)
+        );
+        let mut forged_handles = [data; 3];
+        forged_handles[0].start_page += 1;
+        forged_handles[0].page_count = 1;
+        forged_handles[1].page_count = 2;
+        forged_handles[2].owner = 1;
+        for forged in forged_handles {
+            assert_eq!(
+                space.map_page(
+                    &manager,
+                    &mut memory,
+                    USER_WINDOW_START,
+                    forged,
+                    0,
+                    Permissions::USER_RX,
+                    CachePolicy::WriteBack
+                ),
+                Err(Error::Pmm)
+            );
+        }
+        assert_eq!(
+            space.map_page(
+                &manager,
+                &mut memory,
+                USER_WINDOW_START,
+                data,
+                2,
+                Permissions {
+                    write: true,
+                    ..Permissions::USER_RX
+                },
+                CachePolicy::WriteBack
+            ),
+            Err(Error::Permission)
+        );
+        manager.free(data).unwrap();
+        let replacement = manager.allocate(Zone::Dma32, 3, DATA_OWNER).unwrap();
+        assert_ne!(data.generation, replacement.generation);
+        assert_eq!(
+            space.map_page(
+                &manager,
+                &mut memory,
+                USER_WINDOW_START,
+                data,
+                1,
+                Permissions::USER_RX,
+                CachePolicy::WriteBack
+            ),
+            Err(Error::Pmm)
+        );
+        assert_eq!(space.summary(), summary);
+        assert_eq!(memory.writes, writes);
+        let mut invalid_physical = [replacement; 2];
+        invalid_physical[0].start_page = u64::MAX;
+        invalid_physical[1].start_page = (1u64 << 52) / PAGE_BYTES - 1;
+        for bad in invalid_physical {
+            assert_eq!(
+                leaf_entry(bad, 2, Permissions::USER_RX, CachePolicy::WriteBack),
+                Err(Error::PhysicalAddress)
+            );
+        }
+    }
+
+    #[test]
+    fn allocation_pages_preserve_offsets_on_protect_and_detect_substitution() {
+        let (manager, mut space, data, mut memory) = page_fixture(3);
+        space
+            .map_page(
+                &manager,
+                &mut memory,
+                USER_WINDOW_START,
+                data,
+                2,
+                Permissions::USER_RW,
+                CachePolicy::WriteBack,
+            )
+            .unwrap();
+        memory.entries[3][0] |= ENTRY_ACCESSED | ENTRY_DIRTY;
+        space
+            .protect(&mut memory, USER_WINDOW_START, Permissions::USER_RX)
+            .unwrap();
+        let exact = leaf_entry(data, 2, Permissions::USER_RX, CachePolicy::WriteBack).unwrap();
+        assert_eq!(memory.entries[3][0], exact);
+        memory.entries[3][0] =
+            leaf_entry(data, 1, Permissions::USER_RX, CachePolicy::WriteBack).unwrap();
+        let writes = memory.writes;
+        let summary = space.summary();
+        assert_eq!(
+            space.translate(&mut memory, USER_WINDOW_START),
+            Err(Error::TransactionRejected)
+        );
+        assert_eq!(
+            space.protect(&mut memory, USER_WINDOW_START, Permissions::USER_RW),
+            Err(Error::TransactionRejected)
+        );
+        assert_eq!(
+            space.begin_unmap(&mut memory, USER_WINDOW_START),
+            Err(Error::TransactionRejected)
+        );
+        assert_eq!(memory.writes, writes);
+        assert_eq!(space.summary(), summary);
+        memory.entries[3][0] = exact | ENTRY_ACCESSED;
+        assert_eq!(
+            space
+                .translate(&mut memory, USER_WINDOW_START)
+                .unwrap()
+                .permissions,
+            Permissions::USER_RX
+        );
+    }
+
+    #[test]
+    fn allocation_page_transactions_rollback_after_effect_without_losing_binding() {
+        let (manager, mut space, data, mut memory) = page_fixture(3);
+        let summary = space.summary();
+        memory.reject_after_write = true;
+        assert_eq!(
+            space.map_page(
+                &manager,
+                &mut memory,
+                USER_WINDOW_START,
+                data,
+                2,
+                Permissions::USER_RW,
+                CachePolicy::WriteBack
+            ),
+            Err(Error::TransactionRejected)
+        );
+        assert_eq!(space.summary(), summary);
+        assert_eq!(memory.entries[3][0], 0);
+        space
+            .map_page(
+                &manager,
+                &mut memory,
+                USER_WINDOW_START,
+                data,
+                2,
+                Permissions::USER_RW,
+                CachePolicy::WriteBack,
+            )
+            .unwrap();
+        memory.entries[3][0] |= ENTRY_ACCESSED | ENTRY_DIRTY;
+        let exact = memory.entries[3][0];
+        let summary = space.summary();
+        memory.reject_after_write = true;
+        assert_eq!(
+            space.protect(&mut memory, USER_WINDOW_START, Permissions::USER_RX),
+            Err(Error::TransactionRejected)
+        );
+        assert_eq!(memory.entries[3][0], exact);
+        assert_eq!(space.summary(), summary);
+        memory.reject_after_write = true;
+        assert_eq!(
+            space.begin_unmap(&mut memory, USER_WINDOW_START),
+            Err(Error::TransactionRejected)
+        );
+        assert_eq!(memory.entries[3][0], exact);
+        assert_eq!(space.summary(), summary);
+        space.begin_unmap(&mut memory, USER_WINDOW_START).unwrap();
+    }
+
+    #[test]
+    fn allocation_page_pending_alias_keeps_cache_and_whole_allocation_bound() {
+        let (mut manager, mut space, data, mut memory) = page_fixture(3);
+        space
+            .map_page(
+                &manager,
+                &mut memory,
+                USER_WINDOW_START,
+                data,
+                1,
+                Permissions::USER_RX,
+                CachePolicy::WriteBack,
+            )
+            .unwrap();
+        let first = space.begin_unmap(&mut memory, USER_WINDOW_START).unwrap();
+        let summary = space.summary();
+        let writes = memory.writes;
+        assert_eq!(
+            space.map_page(
+                &manager,
+                &mut memory,
+                USER_WINDOW_START,
+                data,
+                2,
+                Permissions::USER_RX,
+                CachePolicy::Uncacheable
+            ),
+            Err(Error::CacheAlias)
+        );
+        assert_eq!(space.summary(), summary);
+        assert_eq!(memory.writes, writes);
+        space
+            .map_page(
+                &manager,
+                &mut memory,
+                USER_WINDOW_START,
+                data,
+                2,
+                Permissions::USER_RX,
+                CachePolicy::WriteBack,
+            )
+            .unwrap();
+        space.acknowledge_inactive(first).unwrap();
+        assert!(!space.complete_unmap(&mut manager, first).unwrap());
+        assert!(manager.validate_allocation(data).is_ok());
+        let last = space.begin_unmap(&mut memory, USER_WINDOW_START).unwrap();
+        assert_ne!(first, last);
+        space.acknowledge_inactive(last).unwrap();
+        assert!(space.complete_unmap(&mut manager, last).unwrap());
+        space.release(&mut manager, &mut memory).unwrap();
+        assert_eq!(manager.summary().allocated_pages, 0);
+    }
+
+    #[test]
+    fn allocation_page_free_failure_retains_receipt_for_exact_retry() {
+        let (mut manager, mut space, data, mut memory) = page_fixture(3);
+        let retained = manager.retain_allocation(data).unwrap();
+        space
+            .map_page(
+                &manager,
+                &mut memory,
+                USER_WINDOW_START,
+                data,
+                2,
+                Permissions::USER_RX,
+                CachePolicy::WriteBack,
+            )
+            .unwrap();
+        let token = space.begin_unmap(&mut memory, USER_WINDOW_START).unwrap();
+        space.active = true;
+        assert_eq!(
+            space.acknowledge_inactive(token),
+            Err(Error::ActiveRootUnsupported)
+        );
+        space.active = false;
+        space.acknowledge_inactive(token).unwrap();
+        let summary = space.summary();
+        assert_eq!(space.complete_unmap(&mut manager, token), Err(Error::Pmm));
+        assert_eq!(space.summary(), summary);
+        assert!(manager.validate_allocation(data).is_ok());
+        assert_eq!(manager.release_retention(retained).unwrap(), data);
+        assert!(space.complete_unmap(&mut manager, token).unwrap());
+        space.release(&mut manager, &mut memory).unwrap();
+        assert_eq!(manager.summary().allocated_pages, 0);
+    }
+
+    #[test]
+    fn allocation_pages_use_one_frame_binding_without_raising_mapping_capacity() {
+        let (mut manager, mut space, data, mut memory) = page_fixture(MAX_MAPPINGS as u64 + 1);
+        for offset in 0..MAX_MAPPINGS as u64 {
+            space
+                .map_page(
+                    &manager,
+                    &mut memory,
+                    USER_WINDOW_START + offset * PAGE_BYTES,
+                    data,
+                    offset,
+                    Permissions::USER_RX,
+                    CachePolicy::WriteBack,
+                )
+                .unwrap();
+        }
+        let summary = space.summary();
+        let writes = memory.writes;
+        assert_eq!(summary.bound_frames, 1);
+        assert_eq!(
+            space.map_page(
+                &manager,
+                &mut memory,
+                USER_WINDOW_START + MAX_MAPPINGS as u64 * PAGE_BYTES,
+                data,
+                MAX_MAPPINGS as u64,
+                Permissions::USER_RX,
+                CachePolicy::WriteBack
+            ),
+            Err(Error::MappingCapacity)
+        );
+        assert_eq!(space.summary(), summary);
+        assert_eq!(memory.writes, writes);
+        let tokens: [_; MAX_MAPPINGS] = core::array::from_fn(|index| {
+            space
+                .begin_unmap(&mut memory, USER_WINDOW_START + index as u64 * PAGE_BYTES)
+                .unwrap()
+        });
+        for (index, token) in tokens.into_iter().enumerate() {
+            space.acknowledge_inactive(token).unwrap();
+            assert_eq!(
+                space.complete_unmap(&mut manager, token).unwrap(),
+                index == MAX_MAPPINGS - 1
+            );
+        }
+        assert_eq!(space.summary().released_frames, data.page_count);
+        space.release(&mut manager, &mut memory).unwrap();
+        assert_eq!(manager.summary().allocated_pages, 0);
+    }
+
+    #[test]
+    fn hardware_bits_survive_failed_protect_and_unmap_rollback() {
+        let (manager, tables, data, mut memory) = fixture();
+        let mut space = AddressSpace::initialize(&manager, tables, &mut memory).unwrap();
+        space
+            .map(
+                &manager,
+                &mut memory,
+                USER_WINDOW_START,
+                data,
+                Permissions::USER_RW,
+                CachePolicy::WriteBack,
+            )
+            .unwrap();
+        memory.entries[3][0] |= ENTRY_ACCESSED | ENTRY_DIRTY;
+        let original = memory.entries[3][0];
+        let summary = space.summary();
+        memory.reject_next_write = true;
+        assert_eq!(
+            space.protect(&mut memory, USER_WINDOW_START, Permissions::USER_RX),
+            Err(Error::TransactionRejected)
+        );
+        assert_eq!(memory.entries[3][0], original);
+        memory.reject_next_write = true;
+        assert_eq!(
+            space.begin_unmap(&mut memory, USER_WINDOW_START),
+            Err(Error::TransactionRejected)
+        );
+        assert_eq!(memory.entries[3][0], original);
+        assert_eq!(space.summary(), summary);
+    }
+
+    #[test]
+    fn non_bookkeeping_leaf_bits_still_reject_without_writes() {
+        for permissions in [Permissions::USER_RX, Permissions::USER_RW] {
+            let (manager, tables, data, mut memory) = fixture();
+            let mut space = AddressSpace::initialize(&manager, tables, &mut memory).unwrap();
+            space
+                .map(
+                    &manager,
+                    &mut memory,
+                    USER_WINDOW_START,
+                    data,
+                    permissions,
+                    CachePolicy::WriteBack,
+                )
+                .unwrap();
+            let original = memory.entries[3][0];
+            let summary = space.summary();
+            for bit in 0..64 {
+                if bit == 5 || (bit == 6 && permissions.write) {
+                    continue;
+                }
+                memory.entries[3][0] = original ^ (1 << bit);
+                let writes = memory.writes;
+                assert!(space.translate(&mut memory, USER_WINDOW_START).is_err());
+                assert_eq!(
+                    space.protect(&mut memory, USER_WINDOW_START, permissions),
+                    Err(Error::TransactionRejected)
+                );
+                assert_eq!(
+                    space.begin_unmap(&mut memory, USER_WINDOW_START),
+                    Err(Error::TransactionRejected)
+                );
+                assert_eq!(memory.writes, writes);
+                assert_eq!(space.summary(), summary);
+            }
+        }
+    }
+
+    #[test]
+    fn parent_walk_accepts_only_accessed_bit_changes() {
+        let (manager, tables, data, mut memory) = fixture();
+        let mut space = AddressSpace::initialize(&manager, tables, &mut memory).unwrap();
+        space
+            .map(
+                &manager,
+                &mut memory,
+                USER_WINDOW_START,
+                data,
+                Permissions::USER_RW,
+                CachePolicy::WriteBack,
+            )
+            .unwrap();
+        let indices = table_indices(USER_WINDOW_START);
+        for level in 0..3 {
+            let original = memory.entries[level][indices[level]];
+            for bit in 0..64 {
+                if bit == 5 {
+                    continue;
+                }
+                memory.entries[level][indices[level]] = original ^ (1 << bit);
+                assert_eq!(
+                    space.translate(&mut memory, USER_WINDOW_START),
+                    Err(Error::ParentEntry)
+                );
+            }
+            memory.entries[level][indices[level]] = original | ENTRY_ACCESSED;
+        }
+        assert!(space.translate(&mut memory, USER_WINDOW_START).is_ok());
     }
 
     #[test]

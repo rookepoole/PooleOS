@@ -1,0 +1,213 @@
+[package]
+name = "poole-userspace"
+version = "0.0.0"
+edition = "2024"
+license-file = "../../LICENSE"
+publish = false
+
+[features]
+launch-session = []
+launch-desktop = []
+
+[workspace]
+
+[[bin]]
+name = "PooleLaunchConsole"
+path = "src/bin/launch_console.rs"
+required-features = ["launch-desktop"]
+test = false
+bench = false
+
+[[bin]]
+name = "PooleLaunchShell"
+path = "src/bin/launch_shell.rs"
+required-features = ["launch-session"]
+test = false
+bench = false
+
+[[bin]]
+name = "PooleShell"
+path = "src/bin/shell.rs"
+test = false
+bench = false
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "PooleWindowConsole"
+path = "src/bin/window_console.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleWindowCapacity"
+path = "src/bin/window_capacity.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleWindowLifecycle"
+path = "src/bin/window_lifecycle.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleWindowText"
+path = "src/bin/window_text.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleWindowInput"
+path = "src/bin/window_input.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleInputText"
+path = "src/bin/input_text.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleInputNumbers"
+path = "src/bin/input_numbers.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleWindowNumbers"
+path = "src/bin/window_numbers.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleDesktopConsole"
+path = "src/bin/desktop_console.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleAppShell"
+path = "src/bin/application_shell.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleAppFiles"
+path = "src/bin/application_files.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleText"
+path = "src/bin/text.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleNumbers"
+path = "src/bin/numbers.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleFiles"
+path = "src/bin/files.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleFileInit"
+path = "src/bin/file_init.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleFileShell"
+path = "src/bin/file_shell.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleControlShell"
+path = "src/bin/control_shell.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleWorker"
+path = "src/bin/worker.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleSupervisor"
+path = "src/bin/supervisor.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleInit"
+path = "src/bin/init.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleMultiSupervisor"
+path = "src/bin/multi_supervisor.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleCounter"
+path = "src/bin/counter.rs"
+test = false
+bench = false
+
+[profile.release]
+opt-level = "s"
+codegen-units = 1
+lto = false
+debug = 0
+incremental = false
+overflow-checks = true
+panic = "abort"
+strip = "symbols"
+
+[[bin]]
+name = "PooleFileProbe"
+path = "src/bin/file_probe.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleWaitingFileProbe"
+path = "src/bin/waiting_file_probe.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleClaimedFiles"
+path = "src/bin/claimed_files.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleConsole"
+path = "src/bin/console.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleConsoleService"
+path = "src/bin/console_service.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "PooleConsoleClient"
+path = "src/bin/console_client.rs"
+test = false
+bench = false

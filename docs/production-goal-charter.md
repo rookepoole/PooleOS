@@ -1,15 +1,756 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-10-07
+Status date: 2026-10-20
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 233
+Last roadmap reconciliation: PooleOS Cycle 316
 
-Cycle 233 completes fourteen downstream corrected-media profiles: 28 fresh guest
+Cycle316 adds a bounded job registry and managed ancestry checks to the native
+microkernel supervisor. Host round-robin selection spans multiple owners and
+children through cleanup failure. Native supervisor admission and reclamation use
+registry-owned records; native multi-owner dispatch is the next implementation
+step, not an accepted result. Host profiles pass 632 debug/release and 650 ordinary
+tests. Whole-registry loss, IPC/service recovery and SMP fairness remain open.
+Nine headless native regressions and 514 selected integration/roadmap checks pass;
+these do not replace full canonical qualification or native multi-owner controls.
+Keep desktop regression-only, demo packaging deferred and all promotion gates.
+[Current kernel progress](checkpoints/cycle316-bounded-job-registry.md).
+
+Historical Cycle315 strengthens actual microkernel task/job ownership. Slot-owned claims
+prevent duplicate jobs, duplicate child membership and premature reclamation;
+failed cleanup and dropped job records retain obligations. Three reproduced host
+counterexamples are repaired; debug/release profiles pass 624 tests each and the
+ordinary profile passes 642. Next: bounded multi-owner registry, topology and fair
+reclamation, then capability/IPC lifetime and service restart. Keep desktop as a
+regression consumer and defer demo packaging. General recovery, SMP safety and
+production promotion remain independently gated.
+Nine headless native regressions and 513 selected integration/roadmap checks pass;
+these do not constitute full canonical qualification.
+[Cycle315 checkpoint](checkpoints/cycle315-exclusive-job-ownership.md).
+
+Historical Cycle314 qualifies actual owner UD2 with an already-entered child through three
+failed deferred retries and one closed-job recovery attempt. Successful release,
+persistent retention without repeated writes and ordinary deferred regression
+pass 9 non-graphical QEMU cases with independent denied-authority controls. Host
+debug/release recovery profiles pass 615 tests each; 633 ordinary-profile and 36
+focused tests pass. Raw logs/input, paired kernels/programs, boot media and current
+sources reconstruct. All 512 selected integration/roadmap checks pass.
+Next: bounded multi-owner reclamation and fault isolation,
+then capability/IPC lifetime and service restart. No new ISO or production claim.
+[Cycle314 checkpoint](checkpoints/cycle314-native-entered-recovery.md).
+
+Historical Cycle313 fixes entered-task cleanup accounting: require the scheduler's dispatch
+count and tick total to match the Slot's settled slices and ticks before parking
+or recovery. Host counterexamples reproduce the old acceptance and consumed
+recovery opportunity. The repaired code passes615 tests in each debug/release
+deferred profile,633 ordinary-profile tests,20 focused checks and three native
+non-optical owner-fault/deferred controls. Native exhausted entered-child rescue
+remains next; host coverage is not native qualification. All506 selected
+integration/roadmap checks pass. No new ISO or promotion.
+[Cycle313 kernel progress](checkpoints/cycle313-entered-cleanup-accounting.md).
+
+Historical Cycle312 implements separately bounded closed-job recovery after rejected-image
+cleanup exhaustion. Successful reclamation clears exact membership without a
+dead-parent completion; persistent failure retains ownership without repeated
+writes. All631 kernel tests pass in each of three host profiles and143 focused
+checks pass. Thirteen QEMU controls, independent reconstruction and505 selected
+integration/roadmap checks pass. Counts overlap; full canonical replay is not
+claimed. Preserve
+Cycle308 and historical evidence; no production or merge qualification is inferred.
+Owner direction, 2026-10-22: prioritize microkernel development. The next kernel
+milestone is entered-child teardown, actual owner-fault recovery and bounded
+multi-owner progress, followed by capability/IPC lifetime and service supervision.
+Use the desktop as a regression workload; defer demo redesign, packaging and
+the full desktop matrix until relevant kernel contracts hold or the owner changes
+priority. All preview and production acceptance gates remain intact. Bootable ISO
+is still the final delivery format, not the immediate driver of development.
+[Current progress](checkpoints/cycle312-orphan-cleanup-recovery.md).
+
+Historical Cycle311 implements and qualifies real native process-lease quota rejection,
+late admission rollback, retained-image cleanup and explicit fresh retry under
+the unchanged limits. Ten current-source QEMU runs and26 graphical observations
+pass independent reconstruction. Each of three kernel host profiles passes629
+checks, and136 focused checks pass. Owner-death/exhaustion and all other N0-N39
+gates remain; preserve the Cycle308 preview and every old receipt. No production
+or merge qualification is inferred from this bounded diagnostic milestone.
+All497 selected integration/roadmap checks pass, including all eight checklist
+coverage checks; overlapping counts are not full canonical acceptance.
+[Historical progress](checkpoints/cycle311-native-launch-quota.md).
+
+Historical Cycle310 qualifies bounded graphical launch-failure recovery using the existing
+native window manager and Cycle309 kernel rollback. Strict diagnostic optical
+admission, held-input controls, failure/absence pixels and explicit fresh retry
+pass 131 code-focused checks and ten fresh QEMU guests, including 26 accepted
+graphical observations. Both GUI failures and fresh retries preserve peer
+surfaces and terminal drafts. Kernel/application sources, rebuilt kernel bytes
+and original guards/authority are unchanged. Native quota pressure, rejected-owner
+death, cleanup exhaustion and the complete two-emulator desktop matrix remain.
+All 491 selected metadata/integration checks pass, including master-checklist
+coverage; this does not constitute full canonical, merge or production acceptance.
+Retain the historical Cycle308 preview and every N0-N39 production requirement.
+[Current progress](checkpoints/cycle310-graphical-launch-recovery.md).
+
+Historical Cycle309 implements recoverable native application-admission rejection, exact
+permit/image retention and failure publication after reclamation. Eight fresh
+QEMU boot controls verify immediate/deferred cleanup, fresh retry and normal
+desktop regression;628 kernel host and124 focused checks also pass.
+Construction quarantine, GUI-visible failure controls, native quota pressure,
+cleanup exhaustion,
+owner-death controls, window-service restart and full desktop requalification
+remain. Preserve the Cycle308 preview without bypassing current-source checks.
+No phase, merge or production gate closes from this bounded implementation.
+[Current progress](checkpoints/cycle309-native-launch-rollback.md).
+
+Historical Cycle308 keeps the native launch profile explicit through both emulators'
+launchers and all input/lifetime validators. Ordinary accounting, capabilities
+and guards remain unchanged. The current-source optical baseline and both native
+GUI challenges pass, including held-repeat controls and retained drafts.
+The complete standard/burst input, lifetime and actual launcher matrix passes:
+ten QEMU and six headless VirtualBox guests. The source-bound Cycle308 preview
+is selected after complete reconstruction, with a separately verified Downloads
+copy. The Cycle303 preview and all historical evidence remain preserved.
+Native hostile-control/recovery paths, complete stack bounds, persistence,
+COM2-independent startup, PooleGlyph/PDC, accessible PooleGlass and every N0-N39
+gate remain open. No main merge or production promotion follows from this work.
+[Current progress](checkpoints/cycle308-connected-desktop-matrix.md).
+
+The metadata closeout identified two stale inline-keyword assertions. Their
+strict-adapter replacements pass in the expanded119-test focused suite; because
+the tests are source-bound, a fresh sixteen-guest native cohort was executed.
+It passes complete reconstruction before selection. The first cohort and
+candidate receipt remain preserved, and the selected preview now carries the
+corrected source map from actual new execution, not relabeled old evidence.
+
+Historical Cycle307 admits the launch console in an explicit native kernel profile, keeping
+process factories in the shell and preserving all existing capabilities, page
+limits and stack guards. Four baseline QEMU guests and a separate native GUI
+guest pass. Two mouse and two keyboard launches, four inspections, both apps'
+fault/stop/restart lifetimes and four unfinished terminal drafts are verified.
+Exact header/surface pixels and kernel admissions support the claim; no serial
+input or start-command injection is used. Paired kernels and ISOs reproduce.
+The complete two-emulator input/lifetime matrix, native hostile-control paths
+and all-path stack bounds remain open before replacing the Cycle303 preview.
+No phase closure, merge qualification or production promotion follows.
+All40 phases,301 subphases, complete microkernel, PooleGlyph/PDC and accessible
+PooleGlass remain required.
+[Current progress](checkpoints/cycle307-native-launch-desktop.md).
+
+Historical Cycle306 implements bounded window-manager Start/Inspect intents over the real
+PLC1 service, independent surface status and a separate launch-console role.
+Held inputs, modifiers, resets, quarantine, stale replies and backpressure are
+host-tested; compact terminal storage preserves rendering while reducing the
+compiled entry-frame allocation by992 bytes. The native candidate retains the
+seven-page code profile and original capability/stack limits. Native profile
+selection, GUI-triggered execution, nested guarded paths and the complete
+two-backend matrix remain required before a connected ISO can replace the
+historical preview. No phase closure, merge qualification or production claim.
+All40 phases,301 subphases and complete microkernel, PooleGlyph/PDC and accessible
+PooleGlass remain required.
+[Historical progress](checkpoints/cycle306-window-launch-controls.md).
+
+Historical Cycle305 implements explicit trusted-slot native admission for the measured
+five-page launch shell. Ordinary application limits, original handles and guarded
+stacks remain unchanged; the extra code page has explicit quota and teardown
+accounting. The linked kernel measures135/208 pages,36 guarded kernel-stack pages
+and432 bytes of embedded read-only padding. Eight kernel host profile runs and
+four current-source QEMU checks pass; independent native kernels/optical images
+reproduce, including exact17-page shell retirement. The matching window-service
+PLC1 connection, keyboard/mouse launch
+controls, real connected stack/failure tests and two-backend ISO qualification
+remain next. No preview replacement, phase closure or production promotion.
+All40 phases,301 subphases,101 flags (46 open), complete microkernel, PooleGlyph/PDC,
+accessible PooleGlass and all canonical/release gates remain required.
+[Historical progress](checkpoints/cycle305-native-launch-admission.md).
+
+Historical Cycle304 implements the opt-in Read/result/ack session with retained terminal
+drafts, file/job ownership and authenticated one-use RPC.268 userspace tests pass
+per debug/release;29 ordinary program pairs are byte-identical to Cycle303.
+The connected launch-shell candidate is19464 bytes and independently reproducible
+under a separate five-page build-only profile; it correctly fails ordinary
+four-page admission. Explicit native mapping/layout, matching window-service role,
+stack qualification, graphical controls and real connected ISO evidence remain
+required. No kernel admission, new native run, ISO or phase closure is claimed.
+The previous preview remains historical; source-binding checks are not bypassed.
+All40 phases,301 subphases,101 flags (46 open), complete microkernel, PooleGlyph/PDC,
+accessible PooleGlass and every canonical/release gate remain required.
+[Historical progress](checkpoints/cycle304-launch-session.md).
+
+Historical Cycle303 implements PLC1's strict start/inspect wire, bounded process-owner broker
+and explicit peer-authenticated console/control transport.246 userspace tests pass
+per debug/release;29 ordinary program pairs reproduce independently. No privilege,
+guard, lease or code-page limit grows. Read/result/ack session binding, draft and
+file-job preservation, explicit connected native profile, measured code/stack,
+graphical controls and actual connected ISO qualification remain required.
+The ordinary shell's944-byte margin excludes unused PLC1 connection code.
+The rebuilt ordinary Cycle303 preview passes eight QEMU and four visible
+VirtualBox runs: 384 app observations, 96 lifetime observations and 48 lifecycle
+pixel barriers. The launcher and byte-verified Downloads copy select this image.
+Its kernel remains134/208 pages,36 guarded kernel-stack pages and360 bytes of
+read-only padding. Host policy/transport tests and ordinary native regressions
+do not qualify graphical launching. A new required native launch-failure/cleanup
+flag leaves101 flags,46 open. All40 phases,301 subphases,
+complete native microkernel, PooleGlyph/PDC, accessible PooleGlass and every
+canonical/release gate remain in scope. No production promotion or phase closure.
+The corrected441-test selected metadata/integration replay passes;1596 is Python
+inventory, not full-suite execution. The static-oracle refresh is explicitly
+bound to byte-identical rebuilt programs and unchanged native execution evidence.
+[Current progress](checkpoints/cycle303-graphical-launch.md).
+
+Historical Cycle302 implements bounded retained COM1 delivery after transient backpressure,
+with explicit sticky saturation rather than silent stream corruption. Fixed
+storage, total work bounds, original guards and unchanged authority remain.
+Eight kernel profiles pass debug/release;47 focused Python checks and the full
+native cohort pass:12 QEMU and four visible VirtualBox checks,384 app observations,
+96 lifetime observations and48 lifecycle pixel barriers. All29 earlier independent
+userspace program pairs are revalidated unchanged; their217 user-test passes per
+mode are historical Cycle301 evidence, not a new test execution. The ordinary
+kernel remains134/208 pages with36 guarded stack pages and664 bytes of read-only
+padding. Reconstructed evidence and the byte-verified Downloads ISO select Cycle302.
+All440 selected metadata/integration checks pass after retained schema/baseline
+failures;1595 is discovered inventory, not a full-suite execution. Architecture
+binds862 files, execution995 and programs97. The100 implementation flags remain,
+45 open. Nine publication checks and the27-file staged artifact audit pass;
+86 historical receipts and owner inputs are unchanged, and2102 indexed paths
+have zero publication violations. The separately compiled default
+kernel remains207/208 pages; this is not a native legacy-regression replay.
+Controlled recovery does not prove the historical VirtualBox interruption's
+cause, permanent-device losslessness or general diagnostic repeatability.
+Graphical launch/restart must use authenticated generation-bound control through
+the process owner, not unrestricted compositor factories or synthesized command
+text. COM2-mirror-independent local graphical boot is explicitly required before
+claiming standalone demo readiness. Compositor recovery, persistence, accessible
+PooleGlass, complete microkernel, PooleGlyph/PDC and all N0-N39/canonical/release
+requirements remain. No phase closure, main merge or production promotion.
+[Cycle302 evidence](checkpoints/cycle302-bounded-serial.md).
+
+Historical Cycle301 hardens focused-surface retirement/replacement and input reset with
+bounded raw-controller quarantine and explicit release/fresh-focus recovery.
+The existing isolated scratch apps retain authenticated generation-bound input;
+no application authority, lease, mapping, code-page or stack allowance grows.
+Native user-stack failures exposed nested polling/rendering frame overflow.
+Polling now returns a bounded damage plan before rendering; the original guards
+and unconditional critical-service stop remain, with bounded reason diagnostics.
+Twelve QEMU and four visible VirtualBox final-source checks pass, including 384
+app observations, 96 lifetime observations and 48 lifecycle pixel barriers.
+All 29 independent program pairs match; 28 ordinary binaries are unchanged.
+217 user tests per debug/release and seven kernel profiles in both modes pass.
+The kernel remains 134/208 pages with 36 guarded kernel-stack pages, one guarded
+user-stack page and 736 bytes of input-profile read-only padding at0x1C000.
+One additional VirtualBox attempt lost COM1 retirement evidence while COM2
+reported the app fault. Its unchanged replay passes, but diagnostic repeatability
+and cause remain unqualified. Two intermediate cursor frames require subsequent
+complete-frame evidence; atomic presentation is not claimed.
+Graphical launch controls, compositor recovery, event-driven waits, measured
+latency, persistent editing and all-path stack-depth/high-water proof remain.
+The observed empty controller read is not a physical-device buffering guarantee;
+native arbitrary backlog, continuous typematic and reset injection remain open.
+Complete microkernel, isolated drivers, PooleGlyph/PDC, accessible PooleGlass,
+stage117/watchdog, five legacy entry checks and all N0-N39/canonical/release gates
+remain required. No phase closure, main merge or production promotion is claimed.
+The local launcher and byte-verified Downloads ISO now select Cycle301. All434
+selected metadata/integration tests pass;1589 is discovered inventory, not a
+full-suite execution. Architecture binds857 files, execution993 and programs97.
+There are100 implementation flags,45 open. The staged byte/pixel/source audit and
+publication scan pass:30 staged files,85 unchanged historical receipts and2097
+scanned paths with zero violations. Owner inputs remain unchanged.
+[Evidence](checkpoints/cycle301-input-lifetime.md).
+
+Historical Cycle299 implementation: generation-bound process observation now removes
+faulted/stopped application surfaces and permits fresh-generation restarts.
+Observer admission is failure-atomic and read-only, within the existing four
+total/two-per-owner process leases. Stale requests cannot resurrect old windows
+or close new generations. Host tests also cover held-button consumption when a
+dragged surface closes; native retirement during active drag remains unqualified.
+The new kernel is 132/208 pages with 36 guarded stack pages. All 26 independent
+program pairs match, with 187 user tests per profile and six kernel profiles in
+both debug/release. Optical and both visible VirtualBox device modes pass on
+final source. Both QEMU device modes and the legacy capacity cohort also pass:
+ten QEMU and two visible VirtualBox checks, including 24 lifecycle pixel barriers.
+All earlier failures remain retained. 418 overlapping metadata/integration tests
+pass; 1573 is discovered inventory, not a full-suite pass. Architecture binds 836
+files. Stale current gap summaries are reconciled without closing production
+requirements. No full canonical qualification, merge or release is claimed.
+Next: bounded application input, native focus/drag retirement stress, compositor
+recovery/resynchronization and useful editable applications. Complete microkernel,
+PooleGlyph/PDC, accessible PooleGlass and N0-N39 requirements remain mandatory.
+[Evidence](checkpoints/cycle299-surface-lifecycle.md).
+
+Historical Cycle298 closeout repair: a changed installed PowerShell hash invalidated the first final host
+identity check. Its reviewed Microsoft-signed replacement is pinned without
+relaxing controls; all eight source-bound guest checks pass after replay on
+October17. The preceding October16 passes and failed audit remain historical
+evidence. Native source and ISO bytes are unchanged by this host-pin repair.
+
+Historical Cycle298 implements explicit seven-page window-service capacity while retaining
+ordinary four-page program limits, eight VM mappings, RX code, RW/NX stacks,
+guards, exact ownership and rollback/scrubbing. Native startup reaches page seven
+and service retirement releases19 owned pages. The kernel is130/208 pages with36
+guarded stack pages.25 independent user-program pairs and the kernel/user host
+suites pass. The capacity probe contains deliberate padding, not new UI logic.
+Six QEMU and two visible VirtualBox final-source checks pass, including both
+full mouse/keyboard modes, application recovery, exact output and owned cleanup.
+A linker-boundary failure, host invocation error and missing post-guest profile
+propagation were preserved and repaired. All full canonical, release and
+production gates remain required.
+411 overlapping metadata/integration tests pass; 1566 is discovered inventory,
+not a full canonical-suite execution. No historical receipt or owner input changes.
+Next surface lifecycle/status, stale-view removal, recovery and application input.
+[Evidence](checkpoints/cycle298-window-capacity.md).
+
+Historical Cycle297 adds a bounded, identity-checked VirtualBox mouse verification path.
+Both complete mouse/keyboard modes pass unchanged bounds, including native
+focus/drag/minimize/restore, app recovery, exact output and owned cleanup.
+Guest source and binaries remain unchanged; this does not claim new kernel or
+language implementation. Six QEMU and three visible VirtualBox checks, 118 focused
+checks and 404 overlapping metadata/integration checks pass. Historical receipts
+and failed host attempts remain retained; no full canonical replay is claimed.
+Next resolve the desktop code-capacity constraint, then surface lifecycle and
+general application input. Every full microkernel, PooleGlyph/PDC, accessible
+PooleGlass, N0-N39, canonical and release requirement remains required.
+[Evidence](checkpoints/cycle297-virtualbox-mouse.md).
+
+Historical Cycle296 preserves exact glyph and framebuffer pixels while removing unnecessary
+blank-terminal drawing calls. Both combined QEMU mouse/keyboard modes now pass
+unchanged bounds, alongside windowed optical and visible VirtualBox keyboard
+checks. Four legacy-terminal optical checks, fresh kernel host profiles, 107
+focused and 392 overlapping metadata/integration checks pass. A stale cycle
+assertion was repaired without changing canonical audit or production gates;
+the first failed metadata run is retained. This is not a full canonical replay.
+Next qualify VirtualBox mouse and resolve desktop code capacity, then surface
+lifecycle/recovery, native input overload and general app input. The window
+console has40 code bytes free; no loader/kernel limit was relaxed. Five legacy
+entry failures, VirtualBox stage117/watchdog, complete robust microkernel,
+PooleGlyph/PDC, accessible PooleGlass and every N0-N39/canonical/release gate remain
+required. [Evidence](checkpoints/cycle296-native-rendering.md).
+
+Historical Cycle295 adds a bounded focus-aware native keyboard FIFO, bounded tagged-input
+draining, ordered mouse transitions and host-tested overflow/reset cancellation.
+Optical, standalone QEMU keyboard and visible VirtualBox burst-keyboard checks
+pass; both combined mouse modes time out and remain failed. Kernel host profiles,
+107 focused Python checks and391 metadata/integration checks pass. Next harden
+surface lifecycle and qualify native overload recovery while addressing those
+timeouts and the tight compositor code budget. Five legacy entry failures,
+VirtualBox stage117/watchdog and all canonical/release gates remain open. No
+N0-N39, PooleGlyph/PDC, accessible PooleGlass, signing or production requirement
+is waived. [Evidence](checkpoints/cycle295-native-window-input.md).
+
+Historical Cycle294 implements capability-isolated application result surfaces, bounded PS/2
+mouse transport, and a native CPL3 window manager. Current optical and separate
+QEMU/VirtualBox native-keyboard checks pass; the combined mouse regression times
+out and remains failed. Overall readiness is partial. Next complete bounded
+pointer/focus qualification, input buffering and lifecycle recovery while
+continuing the complete robust microkernel. Five legacy kernel-entry test
+failures, VirtualBox stage117/watchdog and all canonical/release gates remain
+open. No N0-N39, PooleGlyph/PDC, accessible PooleGlass, signing or production
+requirement is waived. [Evidence](checkpoints/cycle294-native-windows.md).
+
+Historical Cycle290 repairs bounded early UART detection and refreshes the QEMU-qualified
+optical preview. Actual VirtualBox execution confirms ISO attachment, native
+boot and restored kernel diagnostics, but still fails at first-slice accounting;
+VirtualBox usability remains unqualified. Diagnose the original slice failure,
+then resume waiting-stop and interruption work. No full microkernel, N0-N39,
+PooleGlyph/PDC, PooleGlass, signing or production gate is waived.
+[Evidence](checkpoints/cycle290-native-early-serial.md).
+
+Historical Cycle289 connects ordinary Text/Numbers file reads to the existing native kernel
+request-wait/wakeup path and refreshes the usable optical preview. Six optical
+boots pass, including two normal sessions, stale file authority, unsigned denial,
+launcher and terminal adapter. The kernel wait algorithm is unchanged; this is
+verified user/kernel integration, not comprehensive idle or interruption support.
+Next qualify shell-triggered waiting cancellation and interruptible jobs while
+continuing the complete robust microkernel. Every production requirement remains.
+[Evidence](checkpoints/cycle289-native-app-file-wait.md).
+
+Historical Cycle288 delivers a reproducible unsigned native user-space optical preview and
+a host serial-terminal launcher, with six optical guests and four strict
+4096-dispatch six-role progress windows. Production release layout still fails
+the unchanged policy; the explicit development layout is qualified separately.
+No native GUI, physical keyboard/hardware, signing, persistence or networking is
+claimed. Resume shell-triggered waiting cancellation and the complete robust
+microkernel; all N0-N39, PooleGlyph/PDC, PooleGlass and production gates remain.
+[Evidence](checkpoints/cycle288-native-userspace-iso.md).
+
+Historical Cycle287 qualifies claimed RequestWait-blocked requester cancellation, stale-wait
+rejection and diagnostic-service late-reply denial on three fresh guests, plus
+six ordinary application and file-control regressions. The actual optical ISO
+and interactive VM launcher are next. Generalized interleaving/recovery work
+continues in the full microkernel program; bounded diagnostics do not close it.
+No production, signing, canonical or merge gate is waived. All N0-N39, complete
+robust microkernel, PooleGlyph/PDC and accessible PooleGlass obligations remain.
+[Evidence](checkpoints/cycle287-native-claimed-requester.md).
+
+Historical Cycle286 qualifies overlapping native cleanup exhaustion while the shell and
+services survive, plus ordinary app and successful delayed-cleanup regressions.
+Exhaustion retains all child pages and job members; it is not successful recovery.
+Native waiting/pending/claimed request interleavings remain before optical ISO
+packaging and sustained fresh-boot interaction. No production, canonical or merge
+gate is waived. All N0-N39, complete robust microkernel, PooleGlyph/PDC, accessible
+PooleGlass and signed reproducible ISO obligations remain.
+[Evidence](checkpoints/cycle286-native-cleanup-exhaustion.md).
+
+Historical Cycle285 qualifies native malformed/untracked file requests and queued-requester
+death, with three file-control guests and six application/default regressions.
+The diagnostic remains opt-in; all prior user binaries are unchanged. Claimed
+requester death and remaining cleanup/interleaving controls stay open before
+optical ISO packaging and sustained fresh-boot interaction. No production,
+canonical or main-merge gate is waived. Complete robust microkernel, N0-N39,
+PooleGlyph/PDC, accessible PooleGlass and signed reproducible ISO remain required.
+[Evidence](checkpoints/cycle285-native-file-controls.md).
+
+Historical Cycle284 qualifies live-parent delayed application cleanup and restart in three
+fresh guests. Both app generations retain pages and stop executing until cleanup
+completes, while the shell and services continue. The native algorithm is unchanged;
+the combined fault-injection profile and strict verification are new. Optical ISO
+acceptance follows the remaining targeted file/lifecycle controls. No production,
+canonical or main-merge gate is waived. Full N0-N39, robust microkernel, PooleGlyph,
+PDC, accessible PooleGlass and signed reproducible ISO obligations remain.
+[Evidence](checkpoints/cycle284-live-parent-app-recovery.md).
+
+Historical Cycle283 qualifies two useful native apps, changed inputs, repeated jobs, contained
+fault, stop/restart and stale-file denial on three fresh guests plus nine regression
+boots. Restart timer caching is fixed without reusing old owner measurements.
+The optical ISO remains the immediate deliverable after targeted recovery controls.
+No canonical, main, release or production promotion follows. All N0-N39, complete
+microkernel, PooleGlyph/PDC, accessible PooleGlass, signing and reproducibility
+obligations remain. [Evidence](checkpoints/cycle283-native-applications.md).
+
+Historical Cycle282 implements compiled application shell job/result commands and an opt-in
+file-service application policy.127 user tests per profile and17 independent
+ELF/code pairs pass. Native catalogue/startup wiring and fresh guest qualification
+are next, followed by the actual usable optical ISO. These host/build results do
+not count as native app acceptance. The full robust microkernel and every N0-N39,
+PooleGlyph/PDC, accessible PooleGlass, signing and reproducibility obligation remain.
+[Evidence](checkpoints/cycle282-application-shell.md).
+
+Historical Cycle281 implements owned pre-entry startup-handle replacement and host-verifies
+the two SEND-only launch grants, rollback and restart generations.551 default and
+567 file-profile kernel tests pass per debug/release profile, plus26 ownership
+doctests. Native launch dispatch, file-client authorization, shell application
+commands, fresh guest qualification and the optical ISO remain open. The user-space
+integration ISO stays the immediate milestone; all N0-N39, full robust microkernel,
+PooleGlyph/PDC, accessible PooleGlass, signing and reproducibility obligations remain.
+[Evidence](checkpoints/cycle281-startup-handoff.md).
+
+Historical Cycle280 adds compiled PooleText/PooleNumbers application programs and their
+authenticated file/job/result engines.110 user tests per host profile and15
+independent ELF/code pairs pass. Native shell integration, application grants,
+fresh guest qualification and the optical ISO remain open; these compiled programs
+do not yet count as useful native apps. Cycle279 supplies the isolated read-only
+file service and real shell ls/cat. Next connect both applications, qualify recovery
+and optical interaction, then continue the full robust microkernel. All N0-N39,
+PooleGlyph/PDC, accessible PooleGlass, reproducibility and signing obligations remain.
+[Evidence](checkpoints/cycle280-application-programs.md).
+
+Historical Cycle277 adds durable parent-death child ownership and bounded native cleanup.
+Six shell-fault guests retain independent console/init/counter progress;15 total
+VM runs pass with regressions. Next: native waiting-child/scheduled cleanup
+recovery, bundled files, two useful apps and sustained optical ISO acceptance.
+No usable integration ISO, main merge or production qualification follows.
+Complete robust microkernel development and all N0-N39, PooleGlyph/PDC, PooleGlass,
+reproducibility and signing obligations remain required after the ISO milestone.
+[Evidence](checkpoints/cycle277-native-owner-death.md).
+
+Historical Cycle276 implements owned pre-entry cancellation and retained prepared-child
+cleanup in the interactive integration. Nine final-source VM runs pass, including
+shell lifecycle and default regressions; nine superseded pre-format runs remain
+historical. Next: owner-death/orphan recovery, read-only files, two useful separate
+apps and sustained optical ISO acceptance. No usable integration ISO, main merge
+or production qualification follows. All N0-N39, complete robust microkernel,
+PooleGlyph/PDC, PooleGlass, reproducibility and signing obligations remain.
+[Evidence](checkpoints/cycle276-prepared-cancellation.md).
+
+Historical Cycle275 adds retained terminal-process cleanup ownership and controlled native
+retries; nine VM runs pass including ordinary shell and default regressions.
+Prepared cleanup/owner death, read-only files, two useful separate apps and optical
+ISO acceptance remain the immediate integration path. No usable integration ISO
+or production/main qualification is claimed. This narrower milestone does not
+replace any N0-N39, complete robust microkernel, PooleGlyph/PDC, PooleGlass,
+reproducibility or signing obligation in this charter.
+[Evidence](checkpoints/cycle275-retained-terminal-cleanup.md).
+
+Historical Cycle270 adds a real CPL3 serial command shell over the isolated console service.
+Three fresh guests prove typed commands/editing, clean shutdown and denied-peer
+termination. Seven user programs reproduce; six earlier binaries are unchanged.
+Next connect actual lifecycle/status, read-only files and two useful separate apps,
+then optical ISO acceptance. No kernel interpreter, scripted transcript or splash
+substitution is accepted. Complete robust microkernel, N0-N39, PooleGlyph/PDC and
+accessible PooleGlass remain required afterward. No production or main qualification.
+[Evidence](checkpoints/cycle270-native-command-shell.md).
+
+Historical Cycle269 separates diagnostic storage from user-space entry and enforces measured
+kernel image budgets. Launch/console profiles use110/113 of208 reserved pages;
+default207/208 and full stack bounds still require care. All28 default checks and
+13 VM runs pass, without a new shell or ISO. Next integrate the shell/files/two
+useful apps and optical ISO; complete robust microkernel work continues afterward.
+No phase closure or canonical qualification is implied.
+[Evidence](checkpoints/cycle269-native-kernel-budget.md).
+
+Historical Cycle268 adds atomic, generation-bound launch/restart and a separately compiled
+user-space supervisor. Eleven final-layout guests and all27 default checks pass.
+Image208/208 pages and152-byte default RELRO padding require capacity review before
+growth. Next integrate real shell/files/two useful apps and optical ISO, retaining
+cleanup/exit/owner-death gaps. No usable ISO or production promotion. Complete
+robust microkernel, N0-N39, PooleGlyph/PDC, accessible PooleGlass and signing gates
+remain required. [Evidence](checkpoints/cycle268-native-process-launch.md).
+
+Historical Cycle267 adds narrow capability-authorized stop/inspection, with two fresh native
+guests covering suspended and waiting targets plus independent process survival.
+All26 default checks and three six-process interaction guests pass. Next: bounded
+start/restart and real user-space supervisor policy, then shell/files/two useful
+apps and optical ISO. No usable ISO or production promotion. All N0-N39, complete
+robust microkernel, PooleGlyph/PDC, accessible PooleGlass and signed production
+obligations remain. [Evidence](checkpoints/cycle267-native-process-authority.md).
+
+Historical Cycle266 qualifies six private user-space roots with eight IPC table/endpoint
+slots, bounded admission and independent worker-failure cleanup. Console input
+continues across worker failure; four-process compatibility and all25 default
+regression checks pass after a reviewed207/208-page image repair. Next: narrow
+process lifecycle authority/user supervision, shell/files/two useful apps, then
+optical ISO. Capacity workloads are not applications. No usable ISO or production
+promotion yet; full robust microkernel, N0-N39, PooleGlyph/PDC, accessible PooleGlass
+and signed production gates remain. [Evidence](checkpoints/cycle266-native-session-capacity.md).
+
+Historical Cycle265 replaces console mailbox polling with tracked requests and one-use replies.
+Native service death delivers authenticated revocation and terminates its client;
+normal echo/close and all24 default regression checks pass. Capacity/lifecycle for
+init/console/shell/two apps precede shell/files/optical ISO. Restart is not yet built.
+This is development evidence, not a usable ISO or production promotion. The full
+robust microkernel and all N0-N39, PooleGlyph/PDC, accessible PooleGlass and signed
+production requirements remain. Main remains gated by exact-candidate canonical
+qualification; a focused regression is not the full gate.
+[Cycle265 evidence](checkpoints/cycle265-native-console-rpc.md).
+
+Historical Cycle262 adds an independently compiled user-space console driver with confined
+COM2 authority. Two fresh guests echo actual host input; console exit/bad authority
+reclaims its memory while the separate init/counter pair continues. Default native
+diagnostics and ordinary unsigned-boot denial still pass. Next: console IPC and a
+real shell, bundled files/two usable apps and optical ISO acceptance. No usable ISO
+yet; complete robust microkernel, N0-N39, PooleGlyph/PDC, accessible PooleGlass and
+production-trust obligations remain. Disk preflight/evidence retention is a new
+open risk; exact-candidate canonical gates still block main.
+[Cycle262 evidence](checkpoints/cycle262-native-user-console.md).
+
+Historical Cycle261 executes separately built PooleInit/PooleCounter under the native kernel
+in an explicit development session, separated from diagnostic startup. Two fresh
+boots pass sustained IPC progress; malformed startup retires both dependent tasks
+without a kernel panic. No console, shell or integration ISO exists yet. Next:
+confined console/input, shell/files/apps and optical acceptance, then continue the
+complete robust microkernel. No N0-N39, PooleGlyph/PDC, accessible PooleGlass or
+production-trust obligation is removed. Canonical gates still block main.
+[Cycle261 evidence](checkpoints/cycle261-native-service-session.md).
+
+Historical Cycle260 adds independently compiled PooleInit/PooleCounter programs and user-side
+startup/IPC service-control code. Host tests and byte-identical builds pass; native
+launch is not yet implemented. Next: integrate them into normal session boot and
+qualify CPL3 behavior, then console/input, shell/files/apps and the optical ISO.
+Cycle259 kernel evidence is unchanged, not re-executed. Full N0-N39, PooleGlyph/PDC,
+accessible PooleGlass and production trust gates remain. No ISO or promotion.
+[Cycle260 evidence](checkpoints/cycle260-separate-user-programs.md).
+
+Historical Cycle259 adds owned program/argument startup with complete-image binding and
+retained failure cleanup. Two fresh native boots prove copied arguments read by
+isolated tasks. Next: normal boot/diagnostic separation and separately built actual
+init, then confined console/input, efficient idle, shell/files/apps and optical ISO
+interaction. The image uses205/208 pages; full canonical migration/replay still
+gates main. USI-3 is partial, not a usable session. No ISO or production promotion.
+Full N0-N39, PooleGlyph/PDC and accessible PooleGlass remain required.
+[Cycle259 evidence](checkpoints/cycle259-owned-program-startup.md).
+
+Historical Cycle258 adds bounded replenished user-task dispatch allowances, preserving
+completed syscall results and measured-runtime settlement. Two fresh native boots
+prove sustained task execution and surviving-peer progress after a fault. Next:
+owned executable/argument startup, normal boot separation and init/console/input,
+then efficient idle, shell/files/apps and usable optical ISO acceptance. The image
+uses202/208 pages; canonical migration and full replay still gate main. No ISO or
+production promotion. Full N0-N39, PooleGlyph/PDC and accessible PooleGlass remain.
+[Cycle258 evidence](checkpoints/cycle258-sustained-service-dispatch.md).
+
+Historical Cycle257 adds failure-atomic task/IPC admission, native quota rollback and retained
+cleanup retry, then fresh isolated task execution. Next: sustained service budgets,
+owned image/argument bootstrap and efficient idle, then init/console/shell/apps
+and the usable native ISO. Qualification must remain separate from normal demo
+startup;201/208 image pages requires capacity attention. Full N0-N39, PooleGlyph/PDC
+and accessible PooleGlass remain required. No ISO or production promotion;
+canonical product migration and full replay still gate main.
+[Cycle257 evidence](checkpoints/cycle257-native-task-admission.md).
+
+Historical Cycle256 adds epoch-bound request deadlines and all-tasks-blocked expiry. Two
+fresh native boots prove queued/claimed timeout, retained completion and late-reply
+denial. Next: transactional service admission, sustained budgets and efficient
+idle, then init/console/shell/apps and the usable native ISO. Full N0-N39,
+PooleGlyph/PDC and accessible PooleGlass obligations remain unchanged. No ISO or
+production promotion is claimed; canonical product migration still gates main.
+[Cycle256 evidence](checkpoints/cycle256-native-request-deadlines.md).
+
+Historical Cycle255 adds a continuous owned clock across actual user task dispatches and
+idle periods, with checked MMIO teardown and original configuration restoration.
+Cycle254 supplied tracked request completion/cancellation and service-death
+notification. Next: epoch-bound deadlines, transactional admission and sustained
+budgets, then init/console/shell/apps and the usable native ISO. Full N0-N39,
+PooleGlyph/PDC and accessible PooleGlass obligations remain unchanged.
+[Cycle255 evidence](checkpoints/cycle255-continuous-service-clock.md).
+
+Historical Cycle253 adds kernel-stamped sender identity and one-use reply/discard authority.
+Two fresh native boots prove real requests, copy-fault retry and replay denial
+without permanent server SEND authority, while preserving earlier containment.
+Next: request deadlines/cancellation and dead-service notification, transactional
+admission and sustained budgets, then init/console/shell/apps and the usable ISO.
+All full N0-N39, PooleGlyph/PDC and PooleGlass obligations remain unchanged.
+[Cycle253 evidence](checkpoints/cycle253-native-ipc-reply-authority.md).
+
+Historical Cycle252 adds guarded blocked-wait termination and explicit user startup arguments.
+Two fresh native boots prove queue pressure, partial-copy retry, persistent task
+generations and surviving-peer progress through four enrolled-owner death/recovery
+paths. Next: sender/reply authority and service admission, then init/console/shell/
+apps and the usable ISO. Full N0-N39, PooleGlyph/PDC and PooleGlass obligations remain.
+[Cycle252 evidence](checkpoints/cycle252-native-ipc-pressure-lifecycle.md).
+
+Historical Cycle251 connects IPC readiness to real scheduler waits, cancellation and checked
+resumption, and automatically revokes authority before task retirement. Two fresh
+native boots preserve17 containment cases and complete the new exchange. Native
+death/revocation/saturation, sender/reply ownership and general service admission
+remain next, then shell/apps and the usable ISO. All N0-N39 obligations remain;
+this milestone does not close full microkernel or production requirements.
+[Cycle251 evidence](checkpoints/cycle251-native-ipc-waits.md).
+
+Historical Cycle250 implements bounded capability-protected nonblocking IPC. Two fresh native
+guests exchange transformed request/reply bytes through granted handles while
+preserving17 containment cases and ordinary denial. USI-2/N14 are partial, not
+complete. Next: scheduler waits/cancellation/reply ownership and task-death
+revocation, then native services/shell/apps and optical ISO acceptance. All N0-N39
+production obligations remain; no phase exit, merge or promotion is implied.
+[Cycle250 evidence](checkpoints/cycle250-native-capability-ipc.md).
+
+Historical Cycle249 adds termination-only unmeasured-dispatch recovery. Two fresh guests
+each pass17 containment cases, including lost-sample accounting, retained cleanup
+and a surviving peer. Next: capability IPC, services, shell/apps and the usable
+ISO. General clock/quarantine/stack/hardware limits remain open. No phase exit,
+merge or production promotion; complete robust N0-N39 development continues.
+[Cycle249 evidence](checkpoints/cycle249-unknown-runtime-recovery.md).
+
+Historical Cycle248 adds an owned HPET backup deadline. Two fresh native guests each recover
+a masked-local-timer spinner, retain exact time accounting and preserve16 peer
+survival cases. Next: unknown-runtime recovery, IPC, services, shell/apps and the
+usable ISO. Shared APIC/IF and physical-clock limits remain explicit; no broad
+watchdog, phase exit, merge, release or promotion is claimed. Full robust N0-N39
+microkernel development continues after the integration milestone.
+[Cycle248 evidence](checkpoints/cycle248-native-hpet-backup.md).
+
+Historical Cycle247 proves exactly-once runtime settlement for authenticated returned peer
+quanta, including terminal and failed-cleanup execution. Two fresh guests each
+settle148 dispatches and reject148 duplicate charges while preserving15 survival
+cases. Missing/invalid measurements remain unknown and retain ownership. Next:
+independent missing-IRQ and unknown-runtime recovery, IPC, services, shell/apps
+and the usable ISO. No normative requirement, phase exit, merge, release or
+promotion changes. Full robust N0-N39 development continues after that milestone.
+[Cycle247 evidence](checkpoints/cycle247-native-runtime-accounting.md).
+
+Historical Cycle246 proves bounded owned pending/late timer draining and cleanup-quarantine
+retry with a surviving native peer. Two fresh guests each pass15 survival cases.
+General timer races, terminal/failed-cleanup runtime accounting and independent
+missing-IRQ recovery remain open. Next: accounting/recovery, capability IPC,
+services, shell/apps and the usable ISO. No normative requirement, phase exit,
+merge, release or promotion changes. Full robust N0-N39 development continues
+after the integration ISO. [Cycle246 evidence](checkpoints/cycle246-owned-timer-shutdown.md).
+
+Historical Cycle245 proves transactional task construction, explicit cleanup retry and
+healthy-peer continuation in two fresh native guests. Testing also found and
+repaired a constructor stack overflow. General admission, complete stack bounds
+and persistent-quarantine recovery remain open. Next: timer teardown/accounting,
+then capability IPC, confined services, shell/apps and the usable ISO. No normative
+requirement, phase completion, merge, release or promotion changes. Full robust
+N0-N39 development remains required after the ISO milestone.
+[Cycle245 evidence](checkpoints/cycle245-transactional-user-construction.md).
+
+Historical Cycle244 contains invalid user return state and additional exceptions without
+stopping a healthy peer. Two fresh guests each pass14 survival cases. The TCG
+stack-access deviation is explicit; native #SS remains unqualified. N12/N13
+remain partial. Next: transactional spawn and timer/accounting hardening, then
+IPC, services, shell/apps and the user-space integration ISO. No normative
+requirement, phase completion, merge, release or promotion changes. The full
+microkernel, PooleGlyph/PDC/PooleGlass and production objective remains required.
+[Cycle244 evidence](checkpoints/cycle244-user-state-containment.md).
+
+Historical Cycle243 proves native preemptive execution of two CPL3 tasks across distinct
+private roots, state-preserving suspend/resume, and peer survival after exit,
+fault, cancellation and syscall-budget exhaustion. N12/N13 remain partial.
+Next: remaining admission/containment hardening, then capability IPC, confined
+services, shell/apps and the user-space integration ISO. Full robust microkernel,
+PooleGlyph/PDC/PooleGlass and all production gates remain required. No normative
+requirement, phase completion, merge, release or promotion change occurs.
+[Cycle243 evidence](checkpoints/cycle243-native-user-peer-scheduling.md).
+
+Historical Cycle242 proves four sequential owned task lifetimes per fresh guest: normal
+exit and #UD/#GP/#PF termination, stale-ID/restart rejection, quiescence before
+root restoration and full memory release. N13.1/2/6 are partial. Next: preemptive
+peer execution, then IPC/services and the usable integration ISO. Arbitrary
+programs, full spawn rollback and nonfatal syscall-budget handling remain open.
+No phase closure, production promotion or normative requirement change occurs.
+[Cycle242 evidence](checkpoints/cycle242-user-task-termination.md).
+
+Historical Cycle241 proves12 real user SYSCALLs, checked IRETQ, bounded user copying and
+three exact copy-fault recoveries per fresh guest, followed by syscall MSR
+cleanup, timer recovery and task-page release. Next: owned task exit/fault
+termination, accounting and peer scheduling, then IPC/services and the usable
+integration ISO. No production ABI freeze, interactive ISO, phase closure,
+promotion or normative requirement change is claimed.
+[Cycle241 evidence](checkpoints/cycle241-native-syscall-usercopy.md).
+
+Historical Cycle240 proves three timer preemptions of a fixed CPL3 spinning task, two
+state-preserving resumes, forced kernel recovery and timer-before-descriptor
+cleanup in two fresh guests. Ordinary unsigned boot still denies execution.
+The next dependency is bounded syscall/user copying, followed by task lifecycle,
+peer scheduling and capability IPC. No interactive ISO, independent missing-IRQ
+watchdog, production promotion or normative requirement change is claimed.
+[Cycle240 evidence](checkpoints/cycle240-user-timer-preemption.md).
+
+Historical Cycle239 proves bounded CPL3 entry, seven contained faults, private TSS.RSP0,
+controlled kernel return and complete task-memory release in two fresh QEMU
+guests. Live execution also exposed and repaired VM accessed-bit cleanup.
+User-mode timer preemption, syscall/IPC, services, shell/apps and optical ISO
+remain next. No production promotion or normative requirement change is claimed.
+[Cycle239 evidence](checkpoints/cycle239-bounded-user-entry.md).
+
+Historical Cycle 238 proves bounded timer interrupts under the owned candidate root and
+verified shutdown before restoration and memory release in two fresh QEMU boots.
+Sanitized user entry and contained user faults are next. No user-mode execution,
+usable ISO, production promotion or normative requirement change is claimed.
+[Cycle 238 evidence](checkpoints/cycle238-owned-root-timer.md).
+
+Historical Cycle 237 proves bounded CPL0 activation and restoration of the owned user root
+in two fresh QEMU guests, plus ordinary-boot denial. This is direct kernel
+integration progress, not user-mode execution, a usable ISO or production
+qualification. Timer recovery, sanitized user entry and fault containment remain
+next; no normative requirement changes.
+[Cycle 237 evidence](checkpoints/cycle237-live-user-root.md).
+
+Historical Cycle 236 adds the owning CPU-exposure/restoration lifecycle and compiles its
+privileged x86-64 adapter. Fresh host tests cover failure quarantine and retained
+ownership through restoration and cleanup. The adapter is not boot-wired; actual
+ring-3/fault/timer execution and the user-space ISO remain pending. All normative
+production requirements remain unchanged.
+[Cycle 236 evidence](checkpoints/cycle236-user-root-cpu-lifecycle.md).
+
+Historical Cycle 235 adds an owned inactive user root and guarded kernel-entry stack under
+the existing user-space ISO milestone. Retention, failed construction/cleanup,
+supervisor permission and ownership boundaries receive host tests. CPU activation,
+fault containment and the new ISO remain pending. Normative production scope is
+unchanged. [Cycle 235 evidence](checkpoints/cycle235-owned-user-root.md).
+
+Historical Cycle 234 follows the owner's direction to pursue a usable native user-space
+integration ISO before continuing the complete robust microkernel. The bounded
+milestone and its dependencies are in `docs/native-userspace-integration-iso.md`.
+This sequencing direction changes no normative production requirement. Initial
+inactive user-image admission is host-tested; live user execution and the new ISO
+remain unimplemented. Cycle 233 passed exact qualification and merged as
+`507782d` through PR #80; that pass does not qualify this new kernel source.
+[Cycle 234 evidence](checkpoints/cycle234-user-entry-foundation.md).
+
+Historical Cycle 233 completes fourteen downstream corrected-media profiles: 28 fresh guest
 runs, 663 control groups and 2,863 hostile cases pass. All 27 component/source
 checks are current, projected from original captures. All 354 combined tests
 pass after reconciliation; the failed attempts remain historical. Full

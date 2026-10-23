@@ -391,6 +391,35 @@ const EFI_ALLOCATE_ANY_PAGES: u32 = 0;
 ))]
 compile_error!("only one post-PKXFER1 development scenario may be selected");
 
+#[cfg(all(
+    feature = "development-user-root",
+    any(
+        feature = "development-trap-returning",
+        feature = "development-trap-double-fault",
+        feature = "development-trap-malformed-frame",
+        feature = "development-cpu-policy",
+        feature = "development-xstate-policy",
+        feature = "development-xstate-exception",
+        feature = "development-privilege-msr-policy",
+        feature = "development-physical-memory",
+        feature = "development-virtual-memory",
+        feature = "development-active-virtual-memory",
+        feature = "development-interrupt-time",
+        feature = "development-smp-first-ap",
+        feature = "development-smp-percpu-runtime",
+        feature = "development-smp-ipi",
+        feature = "development-scheduler",
+        feature = "development-scheduler-preempt",
+        feature = "development-scheduler-deferred",
+        feature = "development-scheduler-smp",
+        feature = "development-scheduler-ap-workers",
+        feature = "development-scheduler-smp-preempt",
+        feature = "development-atomics",
+        feature = "development-locks"
+    )
+))]
+compile_error!("user-root development scenario must be selected alone");
+
 #[cfg(feature = "development-transfer")]
 const DEVELOPMENT_TRAP_SCENARIO: u8 = if cfg!(feature = "development-trap-returning") {
     1
@@ -436,6 +465,8 @@ const DEVELOPMENT_TRAP_SCENARIO: u8 = if cfg!(feature = "development-trap-return
     21
 } else if cfg!(feature = "development-locks") {
     22
+} else if cfg!(feature = "development-user-root") {
+    23
 } else {
     0
 };

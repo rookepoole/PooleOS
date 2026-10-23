@@ -68,7 +68,135 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 410)
+        bound_paths = {item["path"] for item in self.artifact["bound_sources"]}
+        self.assertEqual(len(self.artifact["bound_sources"]), 929)
+        self.assertTrue({"docs/checkpoints/cycle303-graphical-launch.md", "docs/native-launch-control.md",
+            "runs/native-launch-control-readiness.json", "native/userspace/src/session_control.rs",
+            "native/userspace/src/session_control/tests.rs", "native/userspace/src/session_control/rpc.rs",
+            "native/userspace/src/session_control/rpc/tests.rs", "native/userspace/src/shell/processes/launch.rs"}.issubset(bound_paths))
+        self.assertTrue({"docs/checkpoints/cycle302-bounded-serial.md", "docs/native-bounded-serial.md",
+            "runs/native-bounded-serial-readiness.json", "runtime/native_serial_recovery.py",
+            "tests/test_native_serial_recovery.py"}.issubset(bound_paths))
+        self.assertTrue({"docs/checkpoints/cycle301-input-lifetime.md", "docs/native-input-lifetime.md",
+            "runs/native-input-lifetime-readiness.json", "native/userspace/src/desktop/input_lifetime_tests.rs",
+            "runtime/native_input_lifetime.py", "tools/native_input_lifetime_probe.py",
+            "tools/qualify_native_input_lifetime.py", "tests/test_native_input_lifetime.py"}.issubset(bound_paths))
+        self.assertTrue({"docs/checkpoints/cycle300-application-input.md", "docs/native-application-input.md",
+            "runs/native-application-input-readiness.json", "native/userspace/src/bin/window_input.rs",
+            "native/userspace/src/bin/input_text.rs", "native/userspace/src/bin/input_numbers.rs",
+            "native/userspace/src/desktop/application_input.rs", "native/userspace/src/desktop/application_input/tests.rs",
+            "native/userspace/src/desktop/publisher/interactive.rs", "native/userspace/src/desktop/publisher/interactive/tests.rs",
+            "runtime/native_application_input.py", "tools/native_application_input_probe.py",
+            "tests/test_native_application_input.py"}.issubset(bound_paths))
+        self.assertTrue({"docs/checkpoints/cycle299-surface-lifecycle.md", "docs/native-surface-lifecycle.md",
+            "runs/native-surface-lifecycle-readiness.json", "native/userspace/src/bin/window_lifecycle.rs",
+            "native/userspace/src/desktop/lifecycle.rs", "native/kernel/src/capability_ipc/process/observer_tests.rs",
+            "runtime/native_surface_lifecycle.py", "tests/test_native_surface_lifecycle.py"}.issubset(bound_paths))
+        self.assertTrue({"docs/checkpoints/cycle298-window-capacity.md", "docs/native-window-capacity.md",
+            "runs/native-window-capacity-readiness.json", "native/userspace/build.rs",
+            "native/userspace/src/window_main.rs", "native/userspace/src/bin/window_capacity.rs",
+            "tests/test_native_window_capacity.py"}.issubset(bound_paths))
+        self.assertTrue({"docs/checkpoints/cycle297-virtualbox-mouse.md", "docs/native-virtualbox-mouse.md",
+            "runs/native-virtualbox-mouse-readiness.json", "runtime/native_virtualbox_mouse.py",
+            "tools/native_virtualbox_mouse.ps1", "tests/test_native_virtualbox_mouse.py",
+            "specs/native-virtualbox-mouse-profile.json"}.issubset(bound_paths))
+        self.assertTrue({"docs/checkpoints/cycle296-native-rendering.md", "docs/native-rendering.md",
+            "runs/native-rendering-readiness.json"}.issubset(bound_paths))
+        self.assertTrue({"native/userspace/src/desktop/input.rs", "docs/native-window-input.md",
+            "runs/native-window-input-readiness.json"}.issubset(bound_paths))
+        self.assertTrue({"native/kernel/src/ps2.rs", "native/userspace/src/process/windows.rs",
+            "native/userspace/src/desktop/surface_rpc.rs", "native/userspace/src/desktop/surfaces.rs",
+            "runs/native-window-manager-readiness.json", "docs/native-window-manager.md"}.issubset(bound_paths))
+        self.assertTrue({"native/kernel/src/display.rs", "native/userspace/src/bin/desktop_console.rs",
+            "runtime/native_local_console.py", "tools/qualify_native_local_console.py",
+            "runs/native-local-console-readiness.json", "Launch-Local-Console.cmd"}.issubset(bound_paths))
+        self.assertTrue({"runtime/native_virtualbox.py", "tools/launch_native_virtualbox.py",
+                         "runs/native-virtualbox-launcher-readiness.json",
+                         "docs/checkpoints/cycle292-virtualbox-terminal-launcher.md"}.issubset(bound_paths))
+        self.assertIn("native/kernel/src/early_serial.rs", bound_paths)
+        self.assertTrue({"docs/checkpoints/cycle288-native-userspace-iso.md",
+            "docs/native-userspace-preview.md", "runs/native-userspace-iso-readiness.json",
+            "runtime/native_userspace_iso.py", "tools/launch_native_userspace_iso.py",
+            "tests/test_native_userspace_iso.py", "Launch-UserSpace-Preview.cmd"}.issubset(bound_paths))
+        self.assertTrue({"docs/checkpoints/cycle287-native-claimed-requester.md",
+            "runs/native-claimed-requester-readiness.json", "native/userspace/src/bin/waiting_file_probe.rs",
+            "native/userspace/src/bin/claimed_files.rs", "native/userspace/src/files/claimed.rs",
+            "native/userspace/src/files/claimed/tests.rs"}.issubset(bound_paths))
+        self.assertTrue({"docs/checkpoints/cycle286-native-cleanup-exhaustion.md",
+            "runs/native-cleanup-exhaustion-readiness.json", "runtime/native_cleanup_exhaustion.py",
+            "tests/test_native_cleanup_exhaustion.py"}.issubset(bound_paths))
+        self.assertTrue({"docs/checkpoints/cycle285-native-file-controls.md",
+                         "runs/native-file-controls-readiness.json", "native/userspace/src/bin/file_probe.rs",
+                         "native/userspace/src/files/probe.rs", "native/userspace/src/files/probe/tests.rs"}.issubset(bound_paths))
+        self.assertTrue({"docs/checkpoints/cycle284-live-parent-app-recovery.md",
+            "runs/native-app-recovery-readiness.json"}.issubset({item["path"] for item in self.artifact["bound_sources"]}))
+        self.assertTrue({"docs/checkpoints/cycle283-native-applications.md", "docs/native-app-session.md",
+            "runs/native-app-session-readiness.json", "native/kernel/src/development_apps.rs",
+            "native/kernel/src/user_root_probe/peer_driver/interactive/applications.rs",
+            "runtime/native_app_session.py", "tools/qualify_native_app_session.py",
+            "tests/test_native_app_session.py"}.issubset({item["path"] for item in self.artifact["bound_sources"]}))
+        self.assertTrue({"docs/checkpoints/cycle282-application-shell.md", "docs/native-application-shell.md",
+            "runs/native-app-shell-readiness.json", "native/userspace/src/shell/applications.rs",
+            "native/userspace/src/shell/applications/tests.rs", "native/userspace/src/bin/application_shell.rs",
+            "native/userspace/src/bin/application_files.rs"}.issubset({item["path"] for item in self.artifact["bound_sources"]}))
+        self.assertTrue({"docs/checkpoints/cycle281-startup-handoff.md", "docs/native-startup-handoff.md",
+            "runs/native-startup-handoff-readiness.json", "native/kernel/src/user_entry/task/arguments.rs",
+            "native/kernel/src/user_entry/startup_handoff_tests.rs"}.issubset({item["path"] for item in self.artifact["bound_sources"]}))
+        self.assertTrue({"docs/checkpoints/cycle280-application-programs.md", "docs/native-application-programs.md",
+                         "runs/native-app-programs-readiness.json", "native/userspace/src/apps/program.rs",
+                         "native/userspace/src/apps/stats/tests.rs", "native/userspace/src/bin/text.rs",
+                         "native/userspace/src/bin/numbers.rs"}.issubset({item["path"] for item in self.artifact["bound_sources"]}))
+        self.assertTrue({"docs/checkpoints/cycle279-native-files.md", "docs/native-files.md",
+            "runs/native-files-readiness.json", "native/userspace/src/files.rs",
+            "native/userspace/src/files/rpc.rs", "native/userspace/src/shell/files.rs",
+            "native/userspace/src/bin/files.rs", "native/userspace/src/bin/file_init.rs",
+            "native/userspace/src/bin/file_shell.rs", "runtime/native_files.py",
+            "tests/test_native_files.py"}.issubset({s["path"] for s in self.artifact["bound_sources"]}))
+        self.assertTrue({"docs/checkpoints/cycle278-native-deferred-cleanup.md", "docs/native-deferred-cleanup.md",
+            "runs/native-deferred-cleanup-readiness.json", "native/kernel/src/scheduler/reclamation.rs",
+            "native/kernel/src/user_entry/task/cleanup.rs", "native/kernel/src/user_entry/cleanup_tests.rs",
+            "runtime/native_deferred_cleanup.py", "tests/test_native_deferred_cleanup.py"}.issubset({s["path"] for s in self.artifact["bound_sources"]}))
+        self.assertTrue({"docs/checkpoints/cycle277-native-owner-death.md", "docs/native-job-lifecycle.md",
+            "runs/native-owner-death-readiness.json", "native/kernel/src/user_entry/task/job.rs",
+            "native/kernel/src/user_entry/job_tests.rs", "runtime/native_shell_orphan.py",
+            "tests/test_native_shell_orphan.py"}.issubset({s["path"] for s in self.artifact["bound_sources"]}))
+        self.assertTrue({"docs/checkpoints/cycle276-prepared-cancellation.md",
+            "docs/native-prepared-cleanup.md", "runs/native-prepared-cleanup-readiness.json",
+            "native/kernel/src/user_entry/prepared_cancel_tests.rs", "runtime/native_prepared_cleanup.py",
+            "tests/test_native_prepared_cleanup.py"}.issubset({s["path"] for s in self.artifact["bound_sources"]}))
+        self.assertTrue({"docs/checkpoints/cycle268-native-process-launch.md",
+            "docs/native-process-launch.md", "runs/native-process-launch-readiness.json",
+            "native/kernel/src/capability_ipc/launch.rs", "native/kernel/src/capability_ipc/launch/tests.rs",
+            "native/kernel/src/user_root_probe/peer_driver/launch.rs",
+            "native/userspace/src/supervisor.rs", "native/userspace/src/bin/supervisor.rs",
+            "runtime/native_process_launch.py", "tools/qualify_native_process_launch.py",
+            "tests/test_native_process_launch.py"}.issubset({s["path"] for s in self.artifact["bound_sources"]}))
+        paths = {item["path"] for item in self.artifact["bound_sources"]}
+        self.assertTrue({"docs/checkpoints/cycle267-native-process-authority.md",
+            "docs/native-process-authority.md", "runs/native-process-authority-readiness.json",
+            "native/kernel/src/capability_ipc/process.rs", "native/kernel/src/capability_ipc/process/tests.rs",
+            "native/kernel/src/arch/x86_64/user_ipc/process.rs",
+            "native/kernel/src/user_root_probe/peer_driver/process_control.rs",
+            "runtime/native_process_authority.py", "tools/qualify_native_process_authority.py",
+            "tests/test_native_process_authority.py"}.issubset(paths))
+        self.assertTrue({"docs/checkpoints/cycle266-native-session-capacity.md",
+            "docs/native-session-capacity.md", "runs/native-session-capacity-readiness.json",
+            "native/kernel/src/capability_ipc/tests/admission/capacity.rs",
+            "runtime/native_session_capacity.py", "tools/qualify_native_session_capacity.py",
+            "tests/test_native_session_capacity.py"}.issubset(paths))
+        self.assertTrue({"docs/checkpoints/cycle263-console-ipc-programs.md",
+            "docs/native-console-ipc.md", "runs/native-console-ipc-program-readiness.json",
+            "native/userspace/src/console_ipc.rs", "native/userspace/src/console_ipc/tests.rs",
+            "native/userspace/src/bin/console_service.rs", "native/userspace/src/bin/console_client.rs",
+            "tools/native_build_space.py", "tests/test_native_build_space.py"}.issubset(paths))
+        self.assertTrue({"docs/checkpoints/cycle262-native-user-console.md",
+            "docs/native-user-console.md", "runs/native-console-readiness.json",
+            "native/kernel/src/capability_ipc/console.rs",
+            "native/kernel/src/capability_ipc/console/tests.rs",
+            "native/kernel/src/arch/x86_64/user_ipc/console.rs",
+            "native/userspace/src/console.rs", "native/userspace/src/bin/console.rs",
+            "runtime/native_console.py", "tools/qualify_native_console.py",
+            "tests/test_native_console.py"}.issubset(paths))
         for path in ("docs/checkpoints/cycle221-current-kernel-smp-and-ap-worker-replay.md",
                      "docs/checkpoints/cycle220-current-kernel-scheduler-replay.md",
                      "docs/checkpoints/cycle219-current-kernel-memory-replay.md",

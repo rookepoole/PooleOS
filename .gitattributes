@@ -5,6 +5,7 @@
 *.ps1 text eol=crlf
 tools/bootstrap_native_models.ps1 text eol=lf
 tools/bootstrap_native_toolchain.ps1 text eol=lf
+tools/native_virtualbox_mouse.ps1 text eol=lf
 
 *.efi binary
 *.elf binary
@@ -28,3 +29,6 @@ demos/native_iso/boot/assets/*.alpha4 binary
 demos/native_iso/boot/assets/*.index8 binary
 demos/native_iso/boot/assets/*.rgb binary
 demos/native_iso/Launch-PooleOS-Demo.cmd text eol=lf
+Launch-UserSpace-Preview.cmd text eol=lf
+Launch-VirtualBox-Preview.cmd text eol=lf
+Launch-Local-Console.cmd text eol=lf

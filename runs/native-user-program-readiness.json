@@ -1,0 +1,106 @@
+{
+  "cycle": 260,
+  "contract_id": "PUSERBIN1",
+  "status": "pass",
+  "source_bindings": {
+    "native/.cargo/config.toml": "7983881C5CAD2B909CCA64BFA7F5895EC56377B0E52967444CB2818A69FA4FE1",
+    "native/userspace/Cargo.lock": "5D1DE2881C0B666B41DF5C5AD188AF18C3F27F0F58B7C288201D8AD2A4F9699A",
+    "native/userspace/Cargo.toml": "560C2F22071C3905109CFA2D0DF369FE8CF288673417366343C1913DC27616D7",
+    "native/userspace/linker.ld": "61BABE59AF15DF901CF4CAC9C2AAF18E6539CD81A0EEB3EA54604D8644AB4686",
+    "native/userspace/src/bin/counter.rs": "ADBF65F08AFAC3226E82D224EA1B1F0C9BB8B9EB68EFE693F3AE7ABFBF15B149",
+    "native/userspace/src/bin/init.rs": "D608A2707096E5524A0E90F0DCB00A4C8EDDDBD8A5A52DC71F3F883436BF9FEB",
+    "native/userspace/src/lib.rs": "2A9E023A660D63DD3F3199630A9F522A5F4DD0B1C08B93B6B0B4B526064352CD",
+    "native/userspace/src/process.rs": "522E745549F9E346EFB02796EB31B514907565D8FB4CF4239163129404FBDB0B",
+    "native/userspace/src/protocol.rs": "A4FD37E4844E18804B314107CBFB3E883586EBFAEFB7DBD96A8370C362590BE5",
+    "native/userspace/src/service.rs": "AB1A71C8D554DCE7963F9847A808EB2A8296B31AF644A2A2C860487E08BB6837",
+    "native/userspace/src/startup.rs": "1F88A1857199E180F478A93306961B49F3F0D31C10ECFA975C9C63994C1026CB",
+    "runtime/native_user_program.py": "FB636AAA4464159F8A7D5085FFCAE1F55BEED48DA575BE699C1307FE3BB75181",
+    "specs/native-host-msvc-profile.json": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+    "specs/native-toolchain-lock.json": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E",
+    "tests/test_native_user_program.py": "8D223025DF03DE4D51A308697935EAA0EDAE049DBCFC4730BFDD3296268C677A",
+    "tools/native_host_toolchain.py": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F",
+    "tools/qualify_native_elf_loader.py": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B",
+    "tools/qualify_native_toolchain.py": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50",
+    "tools/qualify_native_user_programs.py": "B83071A3CB0ACA80021CB3D2FDE68D993438670E35224B5FDA894E5469BD55B9"
+  },
+  "source_unchanged": true,
+  "native_execution_verified": false,
+  "actual_init_service": false,
+  "normal_session_boot": false,
+  "iso_built": false,
+  "production_ready": false,
+  "toolchain": {
+    "rustc_sha256": "6D1C5543ED3A45CFBC1C1332D42D6550D883C14D3C2E323427E631C331CEBEEB",
+    "cargo_sha256": "3CD119FE81DFEDB9DCE4573696BF65058F16B57C9E5BABE415B71624315CBB7D",
+    "lock_path": "specs/native-toolchain-lock.json",
+    "host_msvc_verified": true,
+    "builds_offline_locked": true,
+    "conventional_compilation": true,
+    "kernel_dependency": false,
+    "input_hashes": {
+      "rustc.exe": "6D1C5543ED3A45CFBC1C1332D42D6550D883C14D3C2E323427E631C331CEBEEB",
+      "cargo.exe": "3CD119FE81DFEDB9DCE4573696BF65058F16B57C9E5BABE415B71624315CBB7D",
+      "rust-lld.exe": "55BD23CEE94C73C87DE51106F60B63AD8981390AA7079C435C27FB5B04E283AD",
+      "llvm-readobj.exe": "4C19B0875A8C6367CA589DEC2B75D5F8788B6C53F115679FFAC40C22D82814D5",
+      "libcore-05b8190f7da9d31a.rlib": "6B75C5188DCA46C917A67ADE52DDDEA81460F96DC4732003CEBEA2E22A5B1B09",
+      "libcompiler_builtins-163c2d8ca13074f6.rlib": "CC9B5D38CDE5A0D840A9DC207A1B46872803DDAEB9EB0E2823B731E756D9F94C"
+    },
+    "inputs_unchanged": true
+  },
+  "host_tests": [
+    {
+      "profile": "debug",
+      "tests_passed": 15
+    },
+    {
+      "profile": "release",
+      "tests_passed": 15
+    }
+  ],
+  "programs": {
+    "PooleInit": {
+      "contract_id": "PUSERBIN1",
+      "elf_bytes": 5360,
+      "elf_sha256": "71C8A3BF07152BCA037BD3CC3950B51D3C5A61B5BFFA8B18E069E0D7FA9457A7",
+      "code_offset": 4096,
+      "code_bytes": 1054,
+      "code_sha256": "652744F7106618D27399FC985BDAB42E0BEE3FDF0033B14AFE11F1E8D66C5E87",
+      "entry_offset": 0,
+      "load_pages": 1,
+      "writable_segments": 0,
+      "relocations": 0,
+      "imports": 0,
+      "position_independent_source_and_flags_required": true,
+      "native_execution_verified": false,
+      "production_ready": false,
+      "object_relocation_count": 4,
+      "object_relocation_kinds": [
+        "R_X86_64_PLT32"
+      ],
+      "source_binary": "native/userspace/src/bin/init.rs"
+    },
+    "PooleCounter": {
+      "contract_id": "PUSERBIN1",
+      "elf_bytes": 5400,
+      "elf_sha256": "7D9D5383472FCCA4EC34DCE10141A18A09819818A60D711161F40E2B6C1CA68D",
+      "code_offset": 4096,
+      "code_bytes": 1094,
+      "code_sha256": "78E45268BBEA7EC8D4985DECEB54A7E5F88E27961941C533C926EF2F2722A7C5",
+      "entry_offset": 0,
+      "load_pages": 1,
+      "writable_segments": 0,
+      "relocations": 0,
+      "imports": 0,
+      "position_independent_source_and_flags_required": true,
+      "native_execution_verified": false,
+      "production_ready": false,
+      "object_relocation_count": 4,
+      "object_relocation_kinds": [
+        "R_X86_64_PLT32"
+      ],
+      "source_binary": "native/userspace/src/bin/counter.rs"
+    }
+  },
+  "independent_builds": 2,
+  "direct_byte_equality": true
+}

@@ -41,6 +41,31 @@ counts, and explicit nonclaims. Differential corpora, ephemeral host probes,
 signing material, authenticated mutable state, raw boot logs, and private media
 remain unpublished.
 
+The two PKUSER1 ledgers `runs/native-user-entry-readiness.json` and
+`runs/native-user-entry-gate-projection.json` are explicitly public after content
+review. They contain relative public-source and command/log identities, hashes,
+bounded host-test results, and current admission diagnostics. They must not
+contain private absolute paths, raw logs, excluded inputs, or credentials. Their
+scope is inactive host admission and source consistency, not live user execution
+or ISO qualification. Other user-entry run artifacts remain excluded by default.
+
+The PUSERBIN1 ledger `runs/native-user-program-readiness.json` is explicitly public
+after content review. Its permitted contents are relative public-source bindings,
+compiler/linker/sysroot and output hashes, bounded host-test/build results, and
+explicit nonclaims. It must not include private paths, raw logs, executable bytes,
+excluded inputs or credentials. Repeated-build equality and format audits are not
+native execution, executable trust or ISO acceptance. All other user-program run
+artifacts remain excluded by default; normal content scanning still applies.
+
+The PSESSION1 ledger `runs/native-session-readiness.json` is explicitly public
+after content review. It contains relative source/tool/media hashes, bounded
+test results, structured emulator boot observations and explicit nonclaims.
+Only public canonical boot inputs and simulated guest addresses are recorded;
+no private paths, credentials, executable bytes, raw logs, host memory or owner
+documents are permitted. Native session evidence is not ISO or production
+acceptance. All neighboring session run artifacts remain excluded by default,
+and normal content/secret scanning remains mandatory.
+
 ## Publication Gate
 
 Before every push or release:

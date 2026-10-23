@@ -21,6 +21,7 @@ sys.path.insert(0, str(ROOT))
 from runtime import native_elf_loader as elf  # noqa: E402
 from runtime import native_kernel_entry as entry  # noqa: E402
 from runtime import native_kernel_image as kernel_image  # noqa: E402
+from runtime import native_kernel_budget as kernel_budget  # noqa: E402
 from runtime.native_binary import scan_forbidden_markers  # noqa: E402
 from tools.qualify_native_elf_loader import (  # noqa: E402
     _build_loader,
@@ -196,7 +197,68 @@ def _host_checks(cargo: Path, env: dict[str, str], temporary_root: Path) -> dict
     }
 
 
-def _build_product(cargo: Path, env: dict[str, str], target_dir: Path) -> tuple[bytes, bytes, kernel_image.LinkedImagePlan]:
+def _build_product(cargo: Path, env: dict[str, str], target_dir: Path, *, features: tuple[str, ...] = ()) -> tuple[bytes, bytes, kernel_image.LinkedImagePlan]:
+    from tools.native_build_space import require_space
+    require_space(target_dir)
+    if features not in ((), ("development-process-control",), ("development-process-launch",),
+                        ("development-process-launch-bad-owner",), ("development-session",), ("development-session-bad-startup",),
+                        ("development-console",), ("development-console-bad-handle",),
+                        ("development-console-ipc",), ("development-console-ipc-bad-peer",),
+                        ("development-shell-process",), ("development-shell-process-bad-owner",),
+                        ("development-files",), ("development-files-bad-handle",),
+                        ("development-applications",), ("development-applications-bad-file",),
+                        ("development-desktop",), ("development-desktop", "development-applications-bad-file"),
+                        ("development-windows",), ("development-windows", "development-applications-bad-file"),
+                        ("development-window-capacity",), ("development-window-capacity", "development-applications-bad-file"),
+                        ("development-window-lifecycle",), ("development-window-lifecycle", "development-applications-bad-file"),
+                        ("development-window-input",), ("development-window-input", "development-applications-bad-file"),
+                        ("development-launch-session",), ("development-launch-session", "development-applications-bad-file"),
+                        ("development-launch-desktop",), ("development-launch-desktop", "development-applications-bad-file"),
+                        ("development-launch-desktop", "development-launch-failure"),
+                        ("development-launch-desktop", "development-applications-bad-file", "development-launch-failure"),
+                        ("development-launch-desktop", "development-launch-failure", "development-launch-quota"),
+                        ("development-launch-desktop", "development-applications-bad-file", "development-launch-failure", "development-launch-quota"),
+                        ("development-launch-desktop", "development-launch-failure", "development-launch-quota", "development-launch-orphan"),
+                        ("development-launch-desktop", "development-applications-bad-file", "development-launch-failure", "development-launch-quota", "development-launch-orphan"),
+                        ("development-launch-desktop", "development-launch-failure", "development-launch-quota", "development-launch-orphan", "development-launch-orphan-stuck"),
+                        ("development-launch-desktop", "development-applications-bad-file", "development-launch-failure", "development-launch-quota", "development-launch-orphan", "development-launch-orphan-stuck"),
+                        ("development-window-input", "development-serial-recovery"),
+                        ("development-window-input", "development-applications-bad-file", "development-serial-recovery"),
+                        ("development-applications", "development-shell-deferred-cleanup"),
+                        ("development-applications-bad-file", "development-shell-deferred-cleanup"),
+                        ("development-file-controls",),
+                        ("development-file-controls", "development-applications-bad-file"),
+                        ("development-claimed-requester",),
+                        ("development-claimed-requester", "development-applications-bad-file"),
+                        ("development-app-cleanup-exhaustion",),
+                        ("development-app-cleanup-exhaustion", "development-applications-bad-file"),
+                        ("development-shell-cleanup-retry",), ("development-shell-cleanup-retry", "development-shell-process-bad-owner"),
+                        ("development-shell-prepared-stop",), ("development-shell-prepared-stop", "development-shell-process-bad-owner"),
+                        ("development-shell-cleanup-retry", "development-shell-deferred-cleanup"),
+                        ("development-shell-cleanup-retry", "development-shell-process-bad-owner", "development-shell-deferred-cleanup"),
+                        ("development-shell-prepared-stop", "development-shell-deferred-cleanup"),
+                        ("development-shell-prepared-stop", "development-shell-process-bad-owner", "development-shell-deferred-cleanup"),
+                        ("development-shell-orphan-recovery",),
+                        ("development-shell-orphan-recovery", "development-shell-process-bad-owner"),
+                        ("development-shell-orphan-stuck",),
+                        ("development-shell-orphan-stuck", "development-shell-process-bad-owner"),
+                        ("development-session-capacity",), ("development-session-capacity-bad-startup",)):
+        raise QualificationError("unreviewed kernel build feature set")
+    product_env = _product_environment(env)
+    if features and features[0] in ("development-launch-session", "development-launch-desktop"):
+        product_env["CARGO_ENCODED_RUSTFLAGS"] += "\x1f-Clink-arg=--defsym=__poole_launch_session_profile=1"
+    if features and features[0] in ("development-window-input", "development-launch-session", "development-launch-desktop"):
+        product_env["CARGO_ENCODED_RUSTFLAGS"] += "\x1f-Clink-arg=--defsym=__poole_window_input_profile=1"
+    if features and features[0] in ("development-window-capacity", "development-window-lifecycle", "development-window-input", "development-launch-session", "development-launch-desktop"):
+        product_env["CARGO_ENCODED_RUSTFLAGS"] += "\x1f-Clink-arg=--defsym=__poole_window_capacity_profile=1"
+    if features and features[0] in ("development-windows", "development-window-capacity", "development-window-lifecycle", "development-window-input", "development-launch-session", "development-launch-desktop"):
+        product_env["CARGO_ENCODED_RUSTFLAGS"] += "\x1f-Clink-arg=--defsym=__poole_windows_profile=1"
+    if features and features[0] in ("development-desktop", "development-windows", "development-window-capacity", "development-window-lifecycle", "development-window-input", "development-launch-session", "development-launch-desktop"):
+        product_env["CARGO_ENCODED_RUSTFLAGS"] += "\x1f-Clink-arg=--defsym=__poole_desktop_profile=1"
+    if features in (("development-files",), ("development-files-bad-handle",)):
+        product_env["CARGO_ENCODED_RUSTFLAGS"] += "\x1f-Clink-arg=--defsym=__poole_files_profile=1"
+    if features and features[0] in ("development-applications", "development-applications-bad-file", "development-file-controls", "development-app-cleanup-exhaustion", "development-claimed-requester", "development-desktop", "development-windows", "development-window-capacity", "development-window-lifecycle", "development-window-input", "development-launch-session", "development-launch-desktop"):
+        product_env["CARGO_ENCODED_RUSTFLAGS"] += "\x1f-Clink-arg=--defsym=__poole_apps_profile=1"
     _run(
         [
             str(cargo),
@@ -214,15 +276,18 @@ def _build_product(cargo: Path, env: dict[str, str], target_dir: Path) -> tuple[
             "--offline",
             "--target-dir",
             str(target_dir),
+            *(["--features", ",".join(features)] if features else []),
         ],
         cwd=NATIVE_ROOT,
-        env=_product_environment(env),
+        env=product_env,
     )
     artifact = target_dir / PRODUCT_TARGET / "release" / "PooleKernelLinked"
     if not artifact.is_file():
         raise QualificationError("linked PooleKernel artifact is missing")
     linked = artifact.read_bytes()
     canonical, plan = kernel_image.canonicalize_linked_image(linked)
+    budget = kernel_budget.inspect(linked)
+    (target_dir / "kernel-budget.json").write_text(json.dumps(budget, indent=2) + "\n", encoding="utf-8", newline="\n")
     return linked, canonical, plan
 
 
