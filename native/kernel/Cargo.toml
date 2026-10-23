@@ -41,6 +41,8 @@ development-shell-process-bad-owner = ["development-shell-process"]
 
 development-shell-cleanup-retry = ["development-shell-process"]
 development-shell-deferred-cleanup = ["development-shell-cleanup-retry"]
+development-shell-orphan-recovery = ["development-shell-deferred-cleanup"]
+development-shell-orphan-stuck = ["development-shell-orphan-recovery"]
 development-shell-prepared-stop = ["development-shell-cleanup-retry"]
 development-console-ipc-bad-peer = ["development-console-ipc"]
 development-session-capacity = ["development-console-ipc"]

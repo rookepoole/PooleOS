@@ -1,15 +1,40 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-22
-Plan version: 2.216.0-native-entered-cleanup
-Roadmap cycle: PooleOS Cycle 313
+Plan version: 2.217.0-native-entered-recovery
+Roadmap cycle: PooleOS Cycle 314
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 313: Entered Task Cleanup Accounting
+## Cycle 314: Native Entered-Child Exhausted Recovery
+
+N13/N14 kernel-first development: the existing headless owner-fault profile now
+exercises three exhausted cleanup retries followed by one closed-job recovery
+attempt. Actual parent UD2, entered-child runtime, complete successful release
+and persistently retained failure pass 9 QEMU cases including ordinary deferred
+regression and denied-authority controls. No retry/authority/resource limit grows.
+The new native assertions and independent validator preserve exact accounting,
+page ownership, blocked state and no repeated writes while other services run.
+
+Verified: 615 kernel tests in each debug/release recovery profile, 633 in the ordinary
+profile and 36 focused checks. Raw input/logs, paired kernels and five selected
+paired programs, boot media and 1,018 source bindings reconstruct. All 512 selected
+integration/roadmap checks pass. The 1,660 discovered Python tests are inventory,
+not full canonical execution. All 40 phases, 301 subphases and 101 flags (46 open) remain.
+No ISO, GUI replay, complete canonical run, main merge or production promotion.
+[Checkpoint](checkpoints/cycle314-native-entered-recovery.md).
+
+Next: exclusive generation-bound job membership and bounded fair reclamation
+across multiple stopped owners, then capability/IPC lifetime and bounded service
+restart/rebinding. General owner-death recovery, partial allocator release,
+construction/committed-handoff recovery, all-path stacks and SMP isolation remain.
+Desktop is regression-only; demo packaging stays deferred. Every N0-N39,
+PooleGlyph/PDC, PooleGlass and eventual signed ISO requirement remains intact.
+
+## Historical Cycle 313: Entered Task Cleanup Accounting
 
 Microkernel work under N13/N14: deferred cleanup now checks the entered task's
 execution-slice count as well as its measured ticks before parking or recovery.

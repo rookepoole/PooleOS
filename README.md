@@ -11,7 +11,16 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development work:** Cycle313 fixes a kernel cleanup accounting gap:
+**Current development work:** Cycle314 qualifies entered-child exhausted recovery
+after an actual owner fault. Nine non-graphical QEMU cases cover successful rescue,
+persistent retention and ordinary deferred regression. Host tests pass 615 in each
+debug/release recovery profile, 633 ordinary-profile tests and 36 focused checks.
+Exact source, paired builds, raw logs and boot media reconstruct. Multiple-owner
+fault isolation is next; all 512 selected integration/roadmap checks pass.
+No new ISO, general recovery or production claim.
+[Current kernel checkpoint](docs/checkpoints/cycle314-native-entered-recovery.md).
+
+**Historical development checkpoint:** Cycle313 fixes a kernel cleanup accounting gap:
 entered-task cleanup now requires matching slice counts as well as tick totals.
 The host counterexamples fail before the repair and pass after it. Debug/release
 deferred-cleanup profiles pass615 tests each; the ordinary profile passes633.
@@ -19,7 +28,7 @@ Twenty focused checks and three non-graphical QEMU owner-fault/deferred-cleanup
 controls pass independent reconstruction. Exhausted entered-child rescue is
 host-tested but not yet native-qualified. All506 selected integration/roadmap
 checks pass. No new ISO or production promotion.
-[Current kernel checkpoint](docs/checkpoints/cycle313-entered-cleanup-accounting.md).
+[Cycle313 checkpoint](docs/checkpoints/cycle313-entered-cleanup-accounting.md).
 
 **Historical development checkpoint:** Cycle312 adds one closed-job recovery opportunity
 after rejected-image cleanup exhaustion. Exact ownership, the original retry

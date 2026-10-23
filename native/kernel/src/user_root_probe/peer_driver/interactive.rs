@@ -270,7 +270,10 @@ pub(crate) fn run(
     let mut owner_fault = false;
     let mut cleanup_cursor = 0;
     let mut job_drained = false;
-    #[cfg(feature = "development-launch-orphan")]
+    #[cfg(any(
+        feature = "development-launch-orphan",
+        feature = "development-shell-orphan-recovery"
+    ))]
     let mut orphan_recovery_observed = false;
     loop {
         // A retained diagnostic tail can progress even without another log record.
@@ -303,7 +306,10 @@ pub(crate) fn run(
                 )) else {
                     continue;
                 };
-                #[cfg(feature = "development-launch-orphan")]
+                #[cfg(any(
+                    feature = "development-launch-orphan",
+                    feature = "development-shell-orphan-recovery"
+                ))]
                 {
                     orphan_recovery_observed = true;
                 }
@@ -1083,6 +1089,20 @@ pub(crate) fn run(
             #[cfg(all(
                 feature = "development-launch-orphan",
                 not(feature = "development-launch-orphan-stuck")
+            ))]
+            let _ = orphan_recovery_observed;
+            #[cfg(feature = "development-shell-orphan-stuck")]
+            if orphan_recovery_observed {
+                if !job.is_closing() || job.child_count() != 1 {
+                    stop(34021, serial, debugcon);
+                }
+                checked!(reclaim::entered_observation(
+                    &peers[4], &scheduler, "HELD", serial, debugcon
+                ));
+            }
+            #[cfg(all(
+                feature = "development-shell-orphan-recovery",
+                not(feature = "development-shell-orphan-stuck")
             ))]
             let _ = orphan_recovery_observed;
             #[cfg(feature = "development-serial-recovery")]

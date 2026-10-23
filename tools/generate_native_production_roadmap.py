@@ -16977,13 +16977,70 @@ def apply_cycle313(roadmap: dict, test_count: int) -> dict:
             "multiple-owner progress, capability/IPC revocation and bounded service restart/rebinding",
             "partial release, construction/committed-handoff and stack/scheduler isolation remain explicit",
             "desktop remains regression-only; demo packaging deferred; all promotion gates preserved"])
+    return apply_cycle314(roadmap, test_count)
+
+
+def apply_cycle314(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle314-native-entered-recovery.md"
+    contract = "docs/native-entered-recovery.md"
+    path = "runs/native-entered-recovery-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle313_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=314, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 314
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    record = dict(cycle=314, contract_id="PENTEREDRECOVERY1", status=receipt["status"],
+        receipt_path=path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        source_binding_count=len(receipt["source_bindings"]))
+    for key in ("changed_sources", "host_kernel_tests", "focused_tests", "qemu_guest_runs",
+                "virtualbox_guest_runs", "actual_owner_ud2", "native_exhausted_entered_recovery_verified",
+                "persistent_fault_retention_verified", "single_recovery_write_budget_verified",
+                "dead_parent_completion_suppressed", "native_deferred_owner_fault_regression_verified",
+                "multiple_owner_native_rescue_verified", "general_owner_death_recovery",
+                "service_restart_verified", "partial_allocator_release_verified", "iso_built",
+                "gui_replayed", "new_preview_selected", "merge_qualified", "production_ready"):
+        record[key] = receipt[key]
+    baseline["native_entered_recovery"] = record
+    baseline["native_entered_cleanup"]["evidence_status"] = "historical_native_sources_changed_cycle314"
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 314
+    gate["qualification_status"] = "native_entered_exhausted_recovery_and_persistent_retention_verified"
+    gate["current_native_entered_recovery_qualification"] = copy.deepcopy(record)
+    gate["current_native_entered_cleanup_qualification"]["evidence_status"] = "historical_native_sources_changed_cycle314"
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=314, retained_kernel_sources_unchanged=False,
+        native_execution_status="historical_application_evidence_current_headless_kernel_recovery_only",
+        native_gui_scope="historical_cycle312_only_no_gui_replay_cycle314",
+        full_input_matrix_replayed_this_cycle=False, new_preview_selected=False,
+        virtualbox_native_execution_replayed_this_cycle=False, preview_source_requalification_required=True)
+    evidence = ("Cycle314: actual owner UD2 with an already-entered child, three failed deferred retries and one closed-job recovery opportunity passes native success and persistent-failure controls. Retention preserves pages, calls, ticks, slices and write count while independent services progress. Three ordinary deferred guests remain unchanged. Nine current-source non-graphical QEMU runs, paired kernels/programs, raw inputs/logs and boot media are independently reconstructed. " + checkpoint)
+    gap = ("One owner and one entered child are covered, not multiple-owner fairness or general fault recovery. Next implement bounded multi-owner reclamation and fault isolation, then capability/IPC lifetime and bounded service restart/rebinding. Partial allocator release, construction/committed-handoff recovery, all-path stack and SMP isolation remain. Desktop is regression-only; demo packaging deferred. Preserve Cycle308 and all N0-N39, PooleGlyph/PDC, PooleGlass and eventual signed ISO gates. No phase/flag closure, merge or production promotion. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N9", "N13", "N14", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N13-LAUNCH-FAILURE-001", "FLAG-N13-USERSTACK-001", "FLAG-N13-USERSPACE-ISO-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle314 narrows but does not close this flag. " + gap
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["immediate_next_move"].update(title="Implement bounded multi-owner reclamation and fault isolation",
+        entry_evidence=[checkpoint, contract, path], exit_evidence=[
+            "generation-bound job ownership and bounded fair cleanup across multiple stopped owners",
+            "one persistently retained child cannot starve independent jobs or widen recovery budgets",
+            "capability/IPC revocation, stale-generation denial and service restart/rebinding remain explicit",
+            "partial release, construction/committed-handoff and stack/SMP isolation remain explicit",
+            "desktop remains regression-only; demo packaging deferred; all promotion gates preserved"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1654)
+    parser.add_argument("--test-count", type=int, default=1660)
     parser.add_argument("--status-date", default="2026-10-22")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

@@ -143,7 +143,10 @@ fn defer(
     p.slot
         .defer_reclamation(p.id, scheduler, cpu, admitted)
         .map_err(|_| ())?;
-    observation(p, scheduler, "DEFER", serial, debugcon)
+    observation(p, scheduler, "DEFER", serial, debugcon)?;
+    #[cfg(feature = "development-shell-orphan-recovery")]
+    entered_observation(p, scheduler, "PARKED", serial, debugcon)?;
+    Ok(())
 }
 
 pub(super) fn poll(
@@ -162,7 +165,9 @@ pub(super) fn poll(
     ))]
     if (cfg!(feature = "development-shell-deferred-cleanup")
         && p.id.slot >= 4
-        && (status.attempts == 0 || cfg!(feature = "development-app-cleanup-exhaustion")))
+        && (status.attempts == 0
+            || cfg!(feature = "development-app-cleanup-exhaustion")
+            || cfg!(feature = "development-shell-orphan-recovery")))
         || (cfg!(feature = "development-launch-orphan")
             && p.id.slot == 5
             && p.id.generation == 2
@@ -266,7 +271,10 @@ pub(super) fn recover(
     use task::cleanup::{Progress, Recovery};
     let remaining = p.slot.reclaim_remaining_pages(p.id).map_err(|_| ())?;
     let progress;
-    #[cfg(feature = "development-launch-orphan-stuck")]
+    #[cfg(any(
+        feature = "development-launch-orphan-stuck",
+        feature = "development-shell-orphan-stuck"
+    ))]
     {
         let mut memory = FaultMemory {
             inner: &mut p.memory,
@@ -280,7 +288,10 @@ pub(super) fn recover(
             return Err(());
         }
     }
-    #[cfg(not(feature = "development-launch-orphan-stuck"))]
+    #[cfg(not(any(
+        feature = "development-launch-orphan-stuck",
+        feature = "development-shell-orphan-stuck"
+    )))]
     {
         progress = job
             .recover_exhausted_child(&mut p.slot, p.id, manager, &mut p.memory, scheduler)
@@ -328,6 +339,62 @@ pub(super) fn recover(
         ],
     );
     Ok(Some(result))
+}
+
+#[cfg(feature = "development-shell-orphan-recovery")]
+pub(super) fn entered_observation(
+    p: &Peer,
+    scheduler: &scheduler::Scheduler,
+    event: &str,
+    serial: &mut Com1,
+    debugcon: &mut DebugCon,
+) -> Result<(), ()> {
+    let status = p.slot.cleanup_status(p.id).map_err(|_| ())?.ok_or(())?;
+    let runtime = p.slot.runtime(p.id).map_err(|_| ())?;
+    let outcome = p.slot.outcome(p.id).map_err(|_| ())?;
+    let sid = scheduler::TaskId::new(p.id.slot, p.id.generation).map_err(|_| ())?;
+    let scheduled = scheduler.task_snapshot(sid).map_err(|_| ())?;
+    if p.id.slot != 4
+        || p.id.generation != 1
+        || !status.admitted
+        || p.slot.state(p.id) != Ok(task::State::Reclaiming)
+        || outcome.reason != Reason::Cancelled
+        || outcome.syscalls == 0
+        || runtime.charged_ticks == 0
+        || runtime.charged_slices == 0
+        || runtime.pending_ticks.is_some()
+        || runtime.unknown
+        || scheduled.wait_kind != scheduler::WaitKind::Reclamation
+        || scheduled.runtime_ticks != runtime.charged_ticks
+        || scheduled.dispatch_count != runtime.charged_slices
+        || scheduled.unmeasured_dispatches != 0
+        || (event == "HELD"
+            && (status.attempts != task::cleanup::MAX_ATTEMPTS || status.next_dispatch.is_some()))
+    {
+        return Err(());
+    }
+    record(
+        serial,
+        debugcon,
+        event,
+        &[
+            ("task", u64::from(p.id.slot)),
+            ("generation", u64::from(p.id.generation)),
+            ("root", p.root),
+            ("attempts", u64::from(status.attempts)),
+            ("next", u64::from(status.next_dispatch.unwrap_or(0))),
+            (
+                "pages",
+                p.slot.reclaim_remaining_pages(p.id).map_err(|_| ())?,
+            ),
+            ("writes", p.memory.physical_write_count()),
+            ("calls", outcome.syscalls),
+            ("ticks", runtime.charged_ticks),
+            ("slices", u64::from(runtime.charged_slices)),
+            ("dispatches", u64::from(scheduler.summary().dispatch_count)),
+        ],
+    );
+    Ok(())
 }
 
 #[cfg(feature = "development-launch-orphan-stuck")]

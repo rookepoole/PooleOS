@@ -9,6 +9,7 @@ from runtime import native_shell_cleanup as cleanup
 from runtime import native_prepared_cleanup as prepared
 from runtime import native_shell_orphan as orphan
 from runtime import native_deferred_cleanup as deferred
+from runtime import native_entered_recovery as entered
 from runtime import native_files
 from tools import qualify_native_console_ipc as shared, qualify_native_user_entry as source
 from tools.qualify_native_user_programs import bindings as program_bindings
@@ -35,10 +36,11 @@ def program_inputs(directory, env, programs=PROGRAMS):
     return receipt
 
 class Interaction(shared.Interaction):
-    def __init__(self, case, *, owner_death=False):
+    def __init__(self, case, *, owner_death=False, exhausted_recovery=False, persistent=False):
         super().__init__(case.sent, False)
         self.case, self.step, self.expected = case, 0, native_shell.BANNER
-        self.final_mask = 7 if owner_death else 3
+        self.final_mask = 23 if persistent else 7 if owner_death else 3
+        self.exhausted_recovery, self.persistent = exhausted_recovery, persistent
 
     def poll(self, debug):
         if self.sock is None:
@@ -58,7 +60,10 @@ class Interaction(shared.Interaction):
             byte, response = self.case.steps[self.step]
             if self.sock.send(byte) == 1:
                 self.sent += 1; self.step += 1; self.expected += response
-        return bool(self.step == len(self.case.steps) and application == self.case.expected
+        recovered = [entered.parse(m, 'RECOVER') for m in markers if m.startswith(entered.PREFIX+'RECOVER ')] if self.exhausted_recovery else []
+        held = [entered.parse(m, 'HELD') for m in markers if m.startswith(entered.PREFIX+'HELD ')] if self.persistent else []
+        recovery_done = (not self.exhausted_recovery or len(recovered) == 1) and (not self.persistent or len(held) >= 3 and held[-1]['dispatches']-held[0]['dispatches'] >= 128)
+        return bool(recovery_done and self.step == len(self.case.steps) and application == self.case.expected
             and len(runs) >= 8 and all(v['live_mask'] == self.final_mask for v in runs[-2:]))
 
 def main():
@@ -69,9 +74,15 @@ def main():
     parser.add_argument('--prepared-stop', action='store_true')
     parser.add_argument('--owner-death', action='store_true')
     parser.add_argument('--deferred-cleanup', action='store_true')
+    parser.add_argument('--exhausted-recovery', action='store_true')
+    parser.add_argument('--persistent-recovery', action='store_true')
     parser.add_argument('--files', action='store_true')
     args = parser.parse_args(); work, programs = args.work_dir.resolve(), args.program_dir.resolve()
     if args.deferred_cleanup and not args.owner_death: parser.error('deferred qualification requires owner-death scenario')
+    if args.exhausted_recovery and (not args.deferred_cleanup or args.prepared_stop):
+        parser.error('exhausted recovery requires entered deferred owner-death scenario')
+    if args.persistent_recovery and not args.exhausted_recovery:
+        parser.error('persistent recovery requires exhausted recovery')
     if args.files and any((args.cleanup_retry, args.prepared_stop, args.owner_death, args.deferred_cleanup)):
         parser.error('file profile must be qualified independently of fault-injection profiles')
     selected_programs = native_files.PROGRAMS if args.files else PROGRAMS
@@ -98,6 +109,11 @@ def main():
         oracle = deferred
         features += ('development-shell-deferred-cleanup',)
         bad_features += ('development-shell-deferred-cleanup',)
+    if args.exhausted_recovery:
+        oracle = entered
+        feature = 'development-shell-orphan-stuck' if args.persistent_recovery else 'development-shell-orphan-recovery'
+        features, bad_features = (feature,), (feature, 'development-shell-process-bad-owner')
+        report.update(cycle=314, contract_id='PENTEREDRECOVERY1', persistent=args.persistent_recovery)
     if args.files:
         oracle = native_files
         features, bad_features = ('development-files',), ('development-files-bad-handle',)
@@ -134,7 +150,8 @@ def main():
             case = (native_files if args.files else orphan if args.owner_death else probe).scenario(secrets.token_hex(8), bad_owner=bad_owner)
             oracle_options = dict(bad_owner=bad_owner)
             if args.owner_death: oracle_options['prepared_stop'] = args.prepared_stop
-            interaction = Interaction(case, owner_death=args.owner_death)
+            if args.exhausted_recovery: oracle_options['persistent'] = args.persistent_recovery
+            interaction = Interaction(case, owner_death=args.owner_death, exhausted_recovery=args.exhausted_recovery, persistent=args.persistent_recovery)
             print(f'Native process shell {name}: frozen 180-second bound', flush=True)
             try:
                 run, _, handoff = shared.boot._execute_once(name, lock, profile, qemu, path, run_dir, 180,

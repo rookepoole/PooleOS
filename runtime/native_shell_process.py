@@ -20,7 +20,9 @@ def parse(line: str, event: str) -> dict:
     if any(v >= 1 << 64 for v in values): raise ValueError('observation overflow')
     return dict(zip(names, values))
 
-def validate_markers(markers: list[str], *, bad_owner: bool = False, prepared_dispatch: int | None = None, owner_death: bool = False, cleanup_window: tuple[int, int] | None = None) -> dict:
+def validate_markers(markers: list[str], *, bad_owner: bool = False, prepared_dispatch: int | None = None, owner_death: bool = False, cleanup_window: tuple[int, int] | None = None, retained_cleanup: bool = False) -> dict:
+    if retained_cleanup and (not owner_death or prepared_dispatch is not None or cleanup_window is None or cleanup_window[1] != 1 << 64):
+        raise ValueError('retained cleanup requires entered owner-death profile')
     if prepared_dispatch is not None and (type(prepared_dispatch) is not int or not 0 < prepared_dispatch < 1 << 64):
         raise ValueError('invalid prepared dispatch')
     if len(markers) < 40: raise ValueError('incomplete process session')
@@ -116,10 +118,11 @@ def validate_markers(markers: list[str], *, bad_owner: bool = False, prepared_di
             samples.append(v)
     final_generations = [1,0] if owner_death else [2,0 if bad_owner else 2]
     survivors = {0,1,2} if owner_death else {0,1}
-    if live != survivors or owned != survivors or generation[4:] != final_generations or len(unused) != int(bad_owner or owner_death):
+    occupied = survivors | ({4} if retained_cleanup else set())
+    if live != occupied or owned != occupied or generation[4:] != final_generations or len(unused) != int(bad_owner or owner_death):
         raise ValueError('incomplete launch/stop/restart session')
     needs_live_worker = not (owner_death and prepared_dispatch is not None)
-    if len(samples) < 8 or any(v['live_mask'] != sum(1<<j for j in survivors) for v in samples[-2:]) or (needs_live_worker and not any(v['live_mask'] & 16 and v['calls4'] > 0 and v['ticks4'] > 0 for v in samples)):
+    if len(samples) < 8 or any(v['live_mask'] != sum(1<<j for j in occupied) for v in samples[-2:]) or (needs_live_worker and not any(v['live_mask'] & 16 and v['calls4'] > 0 and v['ticks4'] > 0 for v in samples)):
         raise ValueError('live worker or post-retirement survival missing')
     return dict(transfer_prefix=common, start=start, program_bytes=sizes, admits=admits, retires=retires,
         unused=unused, samples=samples, bad_owner=bad_owner, native_execution_requires_guest_binding=True,

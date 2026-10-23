@@ -7,9 +7,20 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 313
+Last roadmap reconciliation: PooleOS Cycle 314
 
-Cycle313 fixes entered-task cleanup accounting: require the scheduler's dispatch
+Cycle314 qualifies actual owner UD2 with an already-entered child through three
+failed deferred retries and one closed-job recovery attempt. Successful release,
+persistent retention without repeated writes and ordinary deferred regression
+pass 9 non-graphical QEMU cases with independent denied-authority controls. Host
+debug/release recovery profiles pass 615 tests each; 633 ordinary-profile and 36
+focused tests pass. Raw logs/input, paired kernels/programs, boot media and current
+sources reconstruct. All 512 selected integration/roadmap checks pass.
+Next: bounded multi-owner reclamation and fault isolation,
+then capability/IPC lifetime and service restart. No new ISO or production claim.
+[Current kernel progress](checkpoints/cycle314-native-entered-recovery.md).
+
+Historical Cycle313 fixes entered-task cleanup accounting: require the scheduler's dispatch
 count and tick total to match the Slot's settled slices and ticks before parking
 or recovery. Host counterexamples reproduce the old acceptance and consumed
 recovery opportunity. The repaired code passes615 tests in each debug/release
@@ -17,7 +28,7 @@ deferred profile,633 ordinary-profile tests,20 focused checks and three native
 non-optical owner-fault/deferred controls. Native exhausted entered-child rescue
 remains next; host coverage is not native qualification. All506 selected
 integration/roadmap checks pass. No new ISO or promotion.
-[Current kernel progress](checkpoints/cycle313-entered-cleanup-accounting.md).
+[Cycle313 kernel progress](checkpoints/cycle313-entered-cleanup-accounting.md).
 
 Historical Cycle312 implements separately bounded closed-job recovery after rejected-image
 cleanup exhaustion. Successful reclamation clears exact membership without a

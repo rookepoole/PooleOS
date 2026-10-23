@@ -1,6 +1,6 @@
 # Run The Native Window Preview
 
-Cycle313 changes entered-task cleanup accounting; Cycle312 is historical.
+Cycle314 qualifies headless entered-child recovery; graphical evidence remains historical.
 The Cycle308 pointer and Downloads ISO remain preserved, but their receipts are historical
 relative to the current checkout. Current-source launchers must reject that
 mismatch. Do not edit hashes or bypass the check: a replacement selection needs

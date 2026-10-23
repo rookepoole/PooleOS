@@ -154,6 +154,7 @@ def source_bindings() -> dict[str, str]:
         "native/kernel/src/user_entry/task/cleanup.rs",
         "native/kernel/src/user_entry/cleanup_tests.rs",
         "tests/test_native_deferred_cleanup.py",
+        "tests/test_native_entered_recovery.py",
         "native/kernel/src/user_entry/task/job.rs",
         "native/kernel/src/user_entry/job_tests.rs",
         "tests/test_native_shell_orphan.py",
