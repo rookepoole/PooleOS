@@ -8,7 +8,7 @@ pub(super) fn reap(
     outcome: task::Outcome,
     pages: u64,
     admitted: bool,
-    mut job: Option<&mut task::job::Job<2>>,
+    mut job: Option<&mut ManagedJob<'_>>,
     serial: &mut Com1,
     debugcon: &mut DebugCon,
 ) -> Result<bool, ()> {
@@ -153,7 +153,7 @@ pub(super) fn poll(
     p: &mut Peer,
     manager: &mut PhysicalMemoryManager,
     scheduler: &scheduler::Scheduler,
-    job: &mut task::job::Job<2>,
+    job: &mut ManagedJob<'_>,
     serial: &mut Com1,
     debugcon: &mut DebugCon,
 ) -> Result<task::cleanup::Progress, ()> {
@@ -249,7 +249,7 @@ fn retry(
     p: &mut Peer,
     manager: &mut PhysicalMemoryManager,
     scheduler: &scheduler::Scheduler,
-    job: &mut task::job::Job<2>,
+    job: &mut ManagedJob<'_>,
 ) -> Result<task::cleanup::Progress, ()> {
     if p.id.slot >= 4 {
         job.reclaim_deferred_child(&mut p.slot, p.id, manager, &mut p.memory, scheduler)
@@ -264,7 +264,7 @@ pub(super) fn recover(
     p: &mut Peer,
     manager: &mut PhysicalMemoryManager,
     scheduler: &scheduler::Scheduler,
-    job: &mut task::job::Job<2>,
+    job: &mut ManagedJob<'_>,
     serial: &mut Com1,
     debugcon: &mut DebugCon,
 ) -> Result<Option<task::cleanup::Progress>, ()> {
@@ -401,7 +401,7 @@ pub(super) fn entered_observation(
 pub(super) fn orphan_hold(
     p: &Peer,
     scheduler: &scheduler::Scheduler,
-    job: &task::job::Job<2>,
+    job: &ManagedJob<'_>,
     serial: &mut Com1,
     debugcon: &mut DebugCon,
 ) -> Result<(), ()> {
@@ -445,7 +445,7 @@ pub(super) fn orphan_hold(
 pub(super) fn exhausted_observation(
     p: &Peer,
     scheduler: &scheduler::Scheduler,
-    job: &task::job::Job<2>,
+    job: &ManagedJob<'_>,
     serial: &mut Com1,
     debugcon: &mut DebugCon,
 ) -> Result<(), ()> {

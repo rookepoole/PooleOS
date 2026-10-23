@@ -24,6 +24,11 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle316-bounded-job-registry.md",
+    "docs/native-job-registry.md",
+    "runs/native-job-registry-readiness.json",
+    "native/kernel/src/user_entry/job_registry_tests.rs",
+    "native/kernel/src/user_entry/task/job/registry.rs",
     "docs/checkpoints/cycle315-exclusive-job-ownership.md",
     "docs/native-job-ownership.md",
     "runs/native-job-ownership-readiness.json",

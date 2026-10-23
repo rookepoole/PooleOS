@@ -11,7 +11,17 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development work:** Cycle315 fixes three microkernel ownership gaps:
+**Current development work:** Cycle316 adds a bounded microkernel job registry,
+managed parent/child graph, cycle/alias checks and round-robin orphan selection.
+The native supervisor uses registry-owned records; host tests cover multiple
+owners, failed cleanup, record reacquisition and nested lifetimes. Debug/release
+kernel profiles pass 632 tests each; the ordinary profile passes 650.
+Nine headless native regressions and 514 selected integration/roadmap checks pass.
+Next: native multi-owner cleanup dispatch and fault controls. Desktop remains
+regression-only; no demo packaging or production promotion.
+[Current kernel checkpoint](docs/checkpoints/cycle316-bounded-job-registry.md).
+
+**Historical development checkpoint:** Cycle315 fixes three microkernel ownership gaps:
 duplicate jobs for one owner, duplicate child enrollment and premature owner
 reclamation. Task slots now enforce exclusive, generation-bound job claims;
 raw cleanup cannot bypass them. Failed cleanup and dropped jobs retain ownership.
@@ -19,7 +29,7 @@ Host debug/release profiles pass 624 tests each; the ordinary profile passes 642
 Nine headless native regressions and 513 selected integration/roadmap checks pass.
 Next: a bounded multi-owner registry, topology validation and fair reclamation,
 then capability/IPC lifetime and service restart. Demo packaging remains deferred.
-[Current kernel checkpoint](docs/checkpoints/cycle315-exclusive-job-ownership.md).
+[Cycle315 checkpoint](docs/checkpoints/cycle315-exclusive-job-ownership.md).
 
 **Historical development checkpoint:** Cycle314 qualifies entered-child exhausted recovery
 after an actual owner fault. Nine non-graphical QEMU cases cover successful rescue,

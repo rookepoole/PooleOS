@@ -1,6 +1,6 @@
 # Run The Native Window Preview
 
-Cycle315 strengthens microkernel job ownership; graphical evidence remains historical.
+Cycle316 adds a kernel job registry; graphical evidence remains historical.
 The Cycle308 pointer and Downloads ISO remain preserved, but their receipts are historical
 relative to the current checkout. Current-source launchers must reject that
 mismatch. Do not edit hashes or bypass the check: a replacement selection needs

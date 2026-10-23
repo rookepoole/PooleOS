@@ -3,6 +3,7 @@
 use super::*;
 
 pub const CONTRACT_ID: &str = "PJOB1";
+pub mod registry;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) enum OwnerState {
@@ -43,15 +44,25 @@ pub struct Job<const N: usize> {
 }
 impl<const N: usize> Job<N> {
     pub fn new<H: Cpu, D: Driver>(owner: &mut Slot<H, D>, id: TaskId) -> Result<Self, Error> {
+        Self::new_inner(owner, id, false)
+    }
+
+    fn new_inner<H: Cpu, D: Driver>(
+        owner: &mut Slot<H, D>,
+        id: TaskId,
+        managed: bool,
+    ) -> Result<Self, Error> {
         let task = owner.owned_mut(id)?;
         if N == 0
             || N > crate::scheduler::MAX_TASKS
             || task.state != State::Prepared
             || task.owned_job != OwnerState::Unused
+            || (task.registry_owned && !managed)
         {
             return Err(Error::State);
         }
         task.owned_job = OwnerState::Open;
+        task.registry_owned |= managed;
         Ok(Self {
             owner: task.identity,
             closing: false,
@@ -64,10 +75,20 @@ impl<const N: usize> Job<N> {
         child: &mut Slot<H, D>,
         id: TaskId,
     ) -> Result<(), Error> {
+        self.adopt_inner(child, id, false)
+    }
+
+    fn adopt_inner<H: Cpu, D: Driver>(
+        &mut self,
+        child: &mut Slot<H, D>,
+        id: TaskId,
+        managed: bool,
+    ) -> Result<(), Error> {
         let task = child.owned_mut(id)?;
         if self.closing
             || task.state != State::Prepared
             || task.parent_job.is_some()
+            || (task.registry_owned && !managed)
             || id.slot == self.owner.id.slot
             || task.identity.root == self.owner.root
             || self
@@ -85,6 +106,7 @@ impl<const N: usize> Job<N> {
             .ok_or(Error::Occupied)?;
         // Both claims commit only after all validation and capacity checks.
         task.parent_job = Some(self.owner);
+        task.registry_owned |= managed;
         *place = Some(task.identity);
         Ok(())
     }

@@ -7,9 +7,20 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 315
+Last roadmap reconciliation: PooleOS Cycle 316
 
-Cycle315 strengthens actual microkernel task/job ownership. Slot-owned claims
+Cycle316 adds a bounded job registry and managed ancestry checks to the native
+microkernel supervisor. Host round-robin selection spans multiple owners and
+children through cleanup failure. Native supervisor admission and reclamation use
+registry-owned records; native multi-owner dispatch is the next implementation
+step, not an accepted result. Host profiles pass 632 debug/release and 650 ordinary
+tests. Whole-registry loss, IPC/service recovery and SMP fairness remain open.
+Nine headless native regressions and 514 selected integration/roadmap checks pass;
+these do not replace full canonical qualification or native multi-owner controls.
+Keep desktop regression-only, demo packaging deferred and all promotion gates.
+[Current kernel progress](checkpoints/cycle316-bounded-job-registry.md).
+
+Historical Cycle315 strengthens actual microkernel task/job ownership. Slot-owned claims
 prevent duplicate jobs, duplicate child membership and premature reclamation;
 failed cleanup and dropped job records retain obligations. Three reproduced host
 counterexamples are repaired; debug/release profiles pass 624 tests each and the
@@ -19,7 +30,7 @@ regression consumer and defer demo packaging. General recovery, SMP safety and
 production promotion remain independently gated.
 Nine headless native regressions and 513 selected integration/roadmap checks pass;
 these do not constitute full canonical qualification.
-[Current kernel progress](checkpoints/cycle315-exclusive-job-ownership.md).
+[Cycle315 checkpoint](checkpoints/cycle315-exclusive-job-ownership.md).
 
 Historical Cycle314 qualifies actual owner UD2 with an already-entered child through three
 failed deferred retries and one closed-job recovery attempt. Successful release,

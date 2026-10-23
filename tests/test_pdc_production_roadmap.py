@@ -208,8 +208,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 315)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1661)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 316)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1662)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -249,8 +249,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "exclusive_job_ownership_host_and_native_regression_verified")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 315)
+        self.assertEqual(current["qualification_status"], "bounded_job_registry_host_selection_and_native_regression_verified")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 316)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -783,9 +783,11 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertEqual(record[field], receipt["product"][field])
         sources = {p.relative_to(ROOT).as_posix() for p in (ROOT / "native/kernel/src").rglob("*.rs")}
         inputs = receipt["bindings"]["implementation_inputs"]
-        self.assertEqual((len(sources), len(inputs)), (136, 79))
+        self.assertEqual((len(sources), len(inputs)), (138, 79))
         self.assertEqual(sources - {item["path"] for item in inputs},
-                         {"native/kernel/src/user_root_probe/peer_driver/interactive/launch_failure.rs",
+                         {"native/kernel/src/user_entry/task/job/registry.rs",
+                          "native/kernel/src/user_entry/job_registry_tests.rs",
+                          "native/kernel/src/user_root_probe/peer_driver/interactive/launch_failure.rs",
                           "native/kernel/src/capability_ipc/process/observer_tests.rs",
                           "native/kernel/src/ps2.rs",
                           "native/kernel/src/display.rs",
@@ -6411,7 +6413,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         changed = {path for path, digest in r['tested_changed_kernel_sources'].items()
                    if hashlib.sha256((ROOT/path).read_bytes()).hexdigest().upper() != digest}
         self.assertEqual(changed, {'native/kernel/src/capability_ipc/launch/tests.rs',
-                                   'native/kernel/src/user_entry/task.rs'})
+                                   'native/kernel/src/user_entry/task.rs', 'native/kernel/src/user_entry/cpu_tests.rs'})
         for key in ('pre_entry_owned_startup_replacement', 'actual_admission_handle_handoff_host_tested',
                     'equal_encoded_length_required', 'stale_identity_and_exposed_state_rejected',
                     'every_word_read_write_readback_failures_host_tested', 'memory_failure_quarantines_owner',
@@ -6879,7 +6881,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
         self.assertEqual(record['receipt_sha256'],'BEE1CDEF65E2B3E3983CE1D981DDA91BB69EDF45208AF1A5D160D35832F545EB')
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(288,'PUSIISO1','pass'))
-        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1018)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1020)
         self.assertEqual((r['guest_runs'],r['iso_byte_count']),(6,66109440))
         self.assertEqual(r['iso_sha256'],'1E4752E3D45972CEA7711AF443C15EFC22CD82558F1A975B6B676ADF6C7841AE')
         prior=json.loads((ROOT/'runs/native-claimed-requester-readiness.json').read_bytes())
@@ -6919,7 +6921,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         lane=self.roadmap['baseline']['user_space_integration']
         self.assertTrue(lane['optical_iso_built'] and lane['continue_full_microkernel_after_iso'])
         self.assertEqual(self.roadmap['immediate_next_move']['title'],
-            'Implement bounded multi-owner registry and fair reclamation')
+            'Integrate bounded multi-owner cleanup into native supervisor dispatch')
 
     def test_cycle289_file_wait_is_native_bound_and_preserves_the_optical_preview(self) -> None:
         from runtime import native_app_session as apps, native_userspace_iso as optical, native_shell
@@ -7354,7 +7356,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         raw=(ROOT/record['receipt_path']).read_bytes();r=json.loads(raw)
         self.assertEqual(record['receipt_sha256'],hashlib.sha256(raw).hexdigest().upper())
         self.assertEqual((r['cycle'],r['contract_id'],r['status']),(295,'PWINPUT1','partial'))
-        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1018)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1020)
         self.assertNotEqual(r['program_build']['source_bindings'],bindings());self.assertEqual(len(bindings()),111)
         self.assertEqual(len(r['program_build']['programs']),24)
         self.assertEqual(r['program_build']['host_tests'],[dict(profile=m,tests_passed=178) for m in ('debug','release')])
@@ -7738,7 +7740,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         raw=(ROOT/record['receipt_path']).read_bytes();r=json.loads(raw)
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record['receipt_sha256'])
         self.assertEqual((r['cycle'],r['status']),(301,'partial'))
-        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1018)
+        self.assertNotEqual(r['source_bindings'],source_bindings());self.assertEqual(len(source_bindings()),1020)
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),
                          '35C46536C1E7B66B7DF4B5EC478F9F5A9ABE11AAFA1F42E5D94C650057C36367')
         self.assertNotEqual(r['program_build']['source_bindings'],bindings())
@@ -8356,7 +8358,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(lane["preview_source_requalification_required"])
         self.assertFalse(lane["new_preview_selected"])
         move=self.roadmap["immediate_next_move"]
-        self.assertEqual(move["title"],"Implement bounded multi-owner registry and fair reclamation")
+        self.assertEqual(move["title"],"Integrate bounded multi-owner cleanup into native supervisor dispatch")
         self.assertIn("demo packaging deferred",move["exit_evidence"][-1])
 
     def test_cycle314_native_entered_recovery_and_persistence_do_not_promote_general_recovery(self) -> None:
@@ -8424,7 +8426,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         raw=(ROOT/record["receipt_path"]).read_bytes(); r=json.loads(raw)
         self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record["receipt_sha256"])
         self.assertEqual((r["cycle"],r["contract_id"],r["status"]),(315,"PJOBOWN1","partial"))
-        self.assertEqual(r["source_bindings"],source_bindings())
+        self.assertNotEqual(r["source_bindings"],source_bindings())
+        self.assertEqual(record["receipt_sha256"],"545DDBB1D381133AA2AB6852039AB0D835B52B9C35CE6B68E08230D17D68C660")
         self.assertEqual(len(r["source_bindings"]),1018)
         self.assertEqual({k:v["passed"] for k,v in r["host_kernel_tests"].items()},
             {"kernel-debug1":624,"kernel-release1":624,"kernel-ordinary1":642})
@@ -8450,11 +8453,41 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertEqual(profile["kernel_budget"]["guarded_stack_pages"],36)
             self.assertEqual([g["run_id"] for g in profile["guest_runs"]],["control-1","control-2","bad-owner"])
             self.assertTrue(all(g["reconstruction_verified"] and g["qemu_exit_code"]==0 for g in profile["guest_runs"]))
-        lane=self.roadmap["baseline"]["user_space_integration"]
+        lane=self.roadmap["baseline"]["historical_cycle315_user_space_integration"]
         self.assertEqual((lane["cycle"],lane["selected_preview_cycle"]),(315,308))
         self.assertTrue(lane["preview_source_requalification_required"])
         self.assertFalse(lane["new_preview_selected"])
-        self.assertIn("bounded multi-owner registry",self.roadmap["immediate_next_move"]["title"])
+
+    def test_cycle316_registry_topology_and_host_fairness_do_not_promote_native_multi_owner_dispatch(self) -> None:
+        from tools.qualify_native_user_entry import source_bindings
+        record=self.roadmap["baseline"]["native_job_registry"]
+        raw=(ROOT/record["receipt_path"]).read_bytes(); r=json.loads(raw)
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(),record["receipt_sha256"])
+        self.assertEqual((r["cycle"],r["contract_id"],r["status"]),(316,"PJOBREG1","partial"))
+        self.assertEqual(r["source_bindings"],source_bindings())
+        self.assertEqual(len(r["source_bindings"]),1020)
+        self.assertEqual({k:v["passed"] for k,v in r["host_kernel_tests"].items()},
+            {"kernel-debug1":632,"kernel-release1":632,"kernel-ordinary1":650})
+        self.assertEqual(r["focused_tests"]["passed"],36)
+        self.assertEqual((r["new_registry_host_tests"],r["registry_capacity_native"],r["children_per_job_native"]),(8,6,2))
+        self.assertEqual(len(r["changed_sources"]),8)
+        self.assertTrue(all(r[k] for k in ("registry_local_cycle_checks_verified","cross_registry_escape_denied",
+            "registry_alias_denial_verified","round_robin_host_selection_verified","failed_cleanup_host_progress_verified",
+            "supervisor_view_reacquisition_verified","native_supervisor_uses_registry","source_unchanged","prior_preview_preserved")))
+        self.assertFalse(any(r[k] for k in ("whole_registry_loss_recovery_verified","native_multi_owner_dispatch_verified",
+            "native_fair_selection_executed","hard_realtime_fairness_verified","iso_built","gui_replayed",
+            "new_preview_selected","full_canonical_suite_executed","merge_qualified","production_ready")))
+        self.assertEqual((r["qemu_guest_runs"],r["virtualbox_guest_runs"]),(9,0))
+        for profile in r["native_profiles"].values():
+            self.assertTrue(profile["independent_kernel_builds_equal"])
+            self.assertLessEqual(profile["kernel_budget"]["image_pages"],208)
+            self.assertEqual(profile["kernel_budget"]["guarded_stack_pages"],36)
+            self.assertEqual([g["run_id"] for g in profile["guest_runs"]],["control-1","control-2","bad-owner"])
+            self.assertTrue(all(g["reconstruction_verified"] and g["qemu_exit_code"]==0 for g in profile["guest_runs"]))
+        lane=self.roadmap["baseline"]["user_space_integration"]
+        self.assertEqual((lane["cycle"],lane["selected_preview_cycle"]),(316,308))
+        self.assertTrue(lane["preview_source_requalification_required"])
+        self.assertFalse(lane["new_preview_selected"])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
         charter = self.roadmap["goal_charter"]

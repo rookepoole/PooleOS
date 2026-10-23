@@ -1,15 +1,43 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-22
-Plan version: 2.218.0-native-job-ownership
-Roadmap cycle: PooleOS Cycle 315
+Plan version: 2.219.0-native-job-registry
+Roadmap cycle: PooleOS Cycle 316
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 315: Exclusive Kernel Job Ownership
+## Cycle 316: Bounded Kernel Job Registry
+
+N13/N14 kernel-first work now includes a bounded registry, managed ancestry and
+round-robin orphan selection. Registry ownership prevents standalone/foreign-job
+escape, rejects cycle and slot/root alias enrollment, retains nested obligations
+after owner reclamation, and retires only closed/drained records. Short-lived
+supervisor views reacquire retained records; losing the entire registry remains
+fail-closed retention, not implemented recovery.
+
+Eight new host tests cover these boundaries, including two owners/four children
+and independent reclamation after a cleanup failure. Final host profiles pass
+632 debug, 632 release and 650 ordinary tests; 36 focused checks pass. The native
+supervisor now uses registry-owned views, but its scenario still has one parent.
+Nine headless native recovery/persistence/deferred regressions pass independent
+reconstruction. Evidence: [Checkpoint](checkpoints/cycle316-bounded-job-registry.md).
+All 514 selected integration/roadmap checks and nine publication checks pass.
+The 1,662 Python test inventory is not a full canonical pass.
+
+Next substeps: integrate bounded registry selection into native dispatch; qualify
+simultaneous owner faults with persistent and reclaimable children; retain exact
+budgets/identities and independent service progress; then capability/IPC lifetime
+and bounded service restart. Registry-local topology and host selection do not
+prove global topology, native multi-owner fairness, wall-clock bounds or SMP safety.
+Whole-registry loss recovery, partial release, construction/committed-handoff and
+all-path stack/SMP isolation remain. Desktop is regression-only; demo packaging
+stays deferred. All 40 phases, 301 subphases and 101 flags (46 open), PooleGlyph/PDC,
+PooleGlass and eventual signed-ISO gates remain; no phase or flag closes.
+
+## Historical Cycle 315: Exclusive Kernel Job Ownership
 
 N13/N14 kernel-first development: reproduced and repaired duplicate owner jobs,
 duplicate child membership and owner reclamation before job closure. Each task

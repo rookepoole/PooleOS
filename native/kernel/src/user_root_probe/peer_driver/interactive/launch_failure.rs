@@ -138,7 +138,7 @@ impl Pending {
     pub(super) fn complete(
         self,
         p: &Peer,
-        job: &task::job::Job<2>,
+        job: &ManagedJob<'_>,
         scheduler: &scheduler::Scheduler,
         serial: &mut Com1,
         debugcon: &mut DebugCon,

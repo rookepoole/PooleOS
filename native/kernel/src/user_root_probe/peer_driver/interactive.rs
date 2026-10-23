@@ -4,6 +4,7 @@ use super::*;
 mod applications;
 mod launch_failure;
 mod reclaim;
+type ManagedJob<'a> = task::job::registry::Owner<'a, 6, 2>;
 use poolekernel::{
     capability_ipc::admission::Member,
     user_entry::startup::{Arguments, Program},
@@ -144,7 +145,9 @@ pub(crate) fn run(
         .map(|slot| slot.as_mut().expect("initialized peer"));
     let pages = programs.each_ref().map(|p| 12 + p.code_pages());
     let parent = &mut peers[3];
-    let mut job = checked!(task::job::Job::<2>::new(&mut parent.slot, parent.id));
+    let mut registry = checked!(task::job::registry::Registry::<6, 2>::new());
+    checked!(registry.create(&mut parent.slot, parent.id));
+    let mut job = checked!(registry.owner(parent.id));
     for child in &mut peers[4..] {
         checked!(job.adopt(&mut child.slot, child.id));
     }
@@ -1149,7 +1152,7 @@ fn retire(
     scheduler: &mut scheduler::Scheduler,
     pages: u64,
     publish: bool,
-    job: &mut task::job::Job<2>,
+    job: &mut ManagedJob<'_>,
     serial: &mut Com1,
     debugcon: &mut DebugCon,
 ) -> Result<bool, ()> {
@@ -1181,7 +1184,7 @@ fn finish_retire(
     outcome: task::Outcome,
     scheduler: &mut scheduler::Scheduler,
     publish: bool,
-    job: &task::job::Job<2>,
+    job: &ManagedJob<'_>,
 ) -> Result<(), ()> {
     if p.slot.state(p.id) != Err(task::Error::Missing) {
         return Err(());
@@ -1208,7 +1211,7 @@ fn finish_retire(
 fn orphan_retired(
     p: &Peer,
     prepared: bool,
-    job: &task::job::Job<2>,
+    job: &ManagedJob<'_>,
     scheduler: &scheduler::Scheduler,
     serial: &mut Com1,
     debugcon: &mut DebugCon,

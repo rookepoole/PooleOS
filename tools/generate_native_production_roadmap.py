@@ -17091,13 +17091,72 @@ def apply_cycle315(roadmap: dict, test_count: int) -> dict:
             "lost-supervisor-record recovery without raw cleanup or ownership bypass",
             "native multi-owner fault controls, then capability/IPC revocation and service restart",
             "desktop remains regression-only; demo packaging deferred; all promotion gates preserved"])
+    return apply_cycle316(roadmap, test_count)
+
+
+def apply_cycle316(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle316-bounded-job-registry.md"
+    contract = "docs/native-job-registry.md"
+    path = "runs/native-job-registry-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle315_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=316, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 316
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    record = dict(cycle=316, contract_id="PJOBREG1", status=receipt["status"],
+        receipt_path=path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        source_binding_count=len(receipt["source_bindings"]))
+    for key in ("changed_sources", "host_kernel_tests", "focused_tests", "qemu_guest_runs",
+                "new_registry_host_tests", "registry_capacity_native", "children_per_job_native",
+                "registry_local_cycle_checks_verified", "cross_registry_escape_denied",
+                "registry_alias_denial_verified", "round_robin_host_selection_verified",
+                "failed_cleanup_host_progress_verified", "supervisor_view_reacquisition_verified",
+                "whole_registry_loss_recovery_verified", "native_supervisor_uses_registry",
+                "native_multi_owner_dispatch_verified", "native_fair_selection_executed",
+                "hard_realtime_fairness_verified", "iso_built", "gui_replayed", "new_preview_selected",
+                "merge_qualified", "production_ready"):
+        record[key] = receipt[key]
+    baseline["native_job_registry"] = record
+    baseline["native_job_ownership"]["evidence_status"] = "historical_native_sources_changed_cycle316"
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 316
+    gate["qualification_status"] = "bounded_job_registry_host_selection_and_native_regression_verified"
+    gate["current_native_job_registry_qualification"] = copy.deepcopy(record)
+    gate["current_native_job_ownership_qualification"]["evidence_status"] = "historical_native_sources_changed_cycle316"
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=316, retained_kernel_sources_unchanged=False,
+        native_execution_status="historical_application_evidence_current_headless_registry_regression",
+        native_gui_scope="historical_cycle312_only_no_gui_replay_cycle316",
+        full_input_matrix_replayed_this_cycle=False, new_preview_selected=False,
+        virtualbox_native_execution_replayed_this_cycle=False, preview_source_requalification_required=True)
+    evidence = ("Cycle316: bounded registry owns jobs and temporary supervisor views; managed slot claims prevent standalone/cross-registry graph escape, aliases and multi-hop cycles. Host round-robin selection rotates two owners/four children despite cleanup failure; closed/drained retirement, generation reuse and nested obligations are covered. Native supervisor uses registry-owned views and passes nine current-source single-owner recovery/persistence/deferred regressions. " + checkpoint)
+    gap = ("Registry-local topology and host selection are not native multi-owner dispatch or a wall-clock fairness guarantee. Next integrate bounded native multi-owner cleanup selection and qualify simultaneous owner faults, persistent retention and independent reclamation. Dropped views reacquire records, but whole-registry loss recovery remains open. Then capability/IPC lifetime and bounded service restart/rebinding. Partial allocator release, construction/committed-handoff recovery, all-path stacks and SMP isolation remain. Desktop is regression-only; demo packaging deferred. Preserve Cycle308 and all N0-N39, PooleGlyph/PDC, PooleGlass and signed ISO gates; no phase/flag closure, merge or production promotion. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N9", "N13", "N14", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N13-LAUNCH-FAILURE-001", "FLAG-N13-USERSTACK-001", "FLAG-N13-USERSPACE-ISO-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle316 narrows but does not close this flag. " + gap
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["immediate_next_move"].update(title="Integrate bounded multi-owner cleanup into native supervisor dispatch",
+        entry_evidence=[checkpoint, contract, path], exit_evidence=[
+            "native bounded registry selection across simultaneous stopped owners",
+            "persistent retained child cannot starve independent reclamation or widen budgets",
+            "exact task/root generations, topology and stale-selection denial remain enforced",
+            "whole-registry loss, capability/IPC revocation and service restart remain explicit",
+            "desktop remains regression-only; demo packaging deferred; all promotion gates preserved"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1661)
+    parser.add_argument("--test-count", type=int, default=1662)
     parser.add_argument("--status-date", default="2026-10-22")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

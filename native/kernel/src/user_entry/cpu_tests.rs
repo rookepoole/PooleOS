@@ -5,6 +5,8 @@ use std::{cell::RefCell, rc::Rc};
 
 #[path = "cleanup_tests.rs"]
 mod cleanup_tests;
+#[path = "job_registry_tests.rs"]
+mod job_registry_tests;
 #[path = "job_tests.rs"]
 mod job_tests;
 #[path = "prepared_cancel_tests.rs"]
