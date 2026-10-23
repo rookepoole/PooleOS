@@ -17034,13 +17034,70 @@ def apply_cycle314(roadmap: dict, test_count: int) -> dict:
             "capability/IPC revocation, stale-generation denial and service restart/rebinding remain explicit",
             "partial release, construction/committed-handoff and stack/SMP isolation remain explicit",
             "desktop remains regression-only; demo packaging deferred; all promotion gates preserved"])
+    return apply_cycle315(roadmap, test_count)
+
+
+def apply_cycle315(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle315-exclusive-job-ownership.md"
+    contract = "docs/native-job-ownership.md"
+    path = "runs/native-job-ownership-readiness.json"
+    raw = (ROOT / path).read_bytes()
+    receipt = json.loads(raw)
+    baseline = roadmap["baseline"]
+    baseline["historical_cycle314_user_space_integration"] = copy.deepcopy(baseline["user_space_integration"])
+    baseline.update(pooleos_cycle=315, pooleos_test_count=test_count)
+    roadmap["execution_protocol"]["last_updated_cycle"] = 315
+    roadmap["execution_protocol"]["required_records"][:0] = [checkpoint, contract, path]
+    record = dict(cycle=315, contract_id="PJOBOWN1", status=receipt["status"],
+        receipt_path=path, receipt_sha256=hashlib.sha256(raw).hexdigest().upper(),
+        source_binding_count=len(receipt["source_bindings"]))
+    for key in ("changed_sources", "host_kernel_tests", "focused_tests", "qemu_guest_runs",
+                "exclusive_owner_claim_verified", "exclusive_child_claim_verified", "raw_cleanup_bypass_denied",
+                "failed_enrollment_atomic", "drop_preserves_claims", "stale_generation_denied",
+                "nested_owner_closure_required", "independent_jobs_host_progress_verified",
+                "multi_owner_native_progress_verified", "global_cycle_validation_verified",
+                "lost_job_supervisor_recovery_verified", "iso_built", "gui_replayed", "new_preview_selected",
+                "merge_qualified", "production_ready"):
+        record[key] = receipt[key]
+    baseline["native_job_ownership"] = record
+    baseline["native_entered_recovery"]["evidence_status"] = "historical_native_sources_changed_cycle315"
+    gate = baseline["native_consistency_release_gate"]
+    gate["current_candidate_audit"]["cycle"] = 315
+    gate["qualification_status"] = "exclusive_job_ownership_host_and_native_regression_verified"
+    gate["current_native_job_ownership_qualification"] = copy.deepcopy(record)
+    gate["current_native_entered_recovery_qualification"]["evidence_status"] = "historical_native_sources_changed_cycle315"
+    lane = baseline["user_space_integration"]
+    lane.update(cycle=315, retained_kernel_sources_unchanged=False,
+        native_execution_status="historical_application_evidence_current_headless_job_ownership_regression",
+        native_gui_scope="historical_cycle312_only_no_gui_replay_cycle315",
+        full_input_matrix_replayed_this_cycle=False, new_preview_selected=False,
+        virtualbox_native_execution_replayed_this_cycle=False, preview_source_requalification_required=True)
+    evidence = ("Cycle315: three trusted-kernel counterexamples reproduced duplicate owner jobs, duplicate child enrollment and premature owner reclamation. Task-slot-owned generation/root-bound claims now enforce exclusive membership before cleanup effects. Host tests cover failed enrollment, dropped jobs, raw cleanup, stale generations, nested closure and independent-job progress through failures. Current-source single-owner recovery/persistence/deferred regressions pass nine headless QEMU guests. " + checkpoint)
+    gap = ("This is local ownership enforcement, not a global job topology or multi-owner fairness proof. Next add a bounded multi-owner registry, cycle validation and fair retained-child cleanup, including lost-supervisor-record recovery. Then capability/IPC revocation and bounded service restart/rebinding. Partial allocator release, construction/committed-handoff recovery, all-path stacks and SMP isolation remain. Desktop is regression-only; demo packaging deferred. Preserve Cycle308 and all N0-N39, PooleGlyph/PDC, PooleGlass and eventual signed ISO gates. No phase/flag closure, merge or production promotion. " + contract)
+    for phase in roadmap["phases"]:
+        if phase["id"] in ("N9", "N13", "N14", "N27", "N29", "N36", "N39"):
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in ("FLAG-N13-LAUNCH-FAILURE-001", "FLAG-N13-USERSTACK-001", "FLAG-N13-USERSPACE-ISO-001"):
+            flag["evidence"].extend([checkpoint, contract, path])
+            flag["closure_condition"] += " Cycle315 narrows but does not close this flag. " + gap
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    roadmap["gap_summary"]["native_program_gaps"][8] = gap + " Historical gaps: " + roadmap["gap_summary"]["native_program_gaps"][8]
+    roadmap["immediate_next_move"].update(title="Implement bounded multi-owner registry and fair reclamation",
+        entry_evidence=[checkpoint, contract, path], exit_evidence=[
+            "bounded registry with exact generation-bound ownership and topology validation",
+            "fair cleanup across stopped owners while persistent failures retain pages and budgets",
+            "lost-supervisor-record recovery without raw cleanup or ownership bypass",
+            "native multi-owner fault controls, then capability/IPC revocation and service restart",
+            "desktop remains regression-only; demo packaging deferred; all promotion gates preserved"])
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1660)
+    parser.add_argument("--test-count", type=int, default=1661)
     parser.add_argument("--status-date", default="2026-10-22")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

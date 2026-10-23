@@ -116,6 +116,18 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
         memory: &mut M,
         scheduler: &Scheduler,
     ) -> Result<Progress, Error> {
+        self.reclaim_deferred_for(id, None, manager, memory, scheduler)
+    }
+
+    pub(super) fn reclaim_deferred_for<M: TableMemory>(
+        &mut self,
+        id: TaskId,
+        parent: Option<job::Identity>,
+        manager: &mut PhysicalMemoryManager,
+        memory: &mut M,
+        scheduler: &Scheduler,
+    ) -> Result<Progress, Error> {
+        self.require_cleanup_owner(id, parent)?;
         let mut deferred = self.validate_deferred(id, scheduler)?;
         let now = scheduler.summary().dispatch_count;
         deferred.last_dispatch = now;
@@ -197,10 +209,12 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
     pub(super) fn recover_exhausted<M: TableMemory>(
         &mut self,
         id: TaskId,
+        parent: job::Identity,
         manager: &mut PhysicalMemoryManager,
         memory: &mut M,
         scheduler: &Scheduler,
     ) -> Result<Recovery, Error> {
+        self.require_cleanup_owner(id, Some(parent))?;
         let mut deferred = self.validate_deferred(id, scheduler)?;
         if deferred.snapshot.attempts != MAX_ATTEMPTS || deferred.snapshot.next_dispatch.is_some() {
             return Err(Error::State);

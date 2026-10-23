@@ -343,6 +343,8 @@ pub struct Runtime {
 struct Owned<H: Cpu, D: Driver> {
     id: TaskId,
     identity: job::Identity,
+    owned_job: job::OwnerState,
+    parent_job: Option<job::Identity>,
     cpu: Option<CpuImage<H>>,
     reclaim: Option<super::retirement::RetiredImage>,
     deferred: Option<cleanup::Deferred>,
@@ -411,6 +413,8 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
         self.owned = Some(Owned {
             id,
             identity: job::Identity::new(id, image),
+            owned_job: job::OwnerState::Unused,
+            parent_job: None,
             cpu: Some(cpu),
             reclaim: None,
             deferred: None,
@@ -534,6 +538,32 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
         manager: &mut PhysicalMemoryManager,
         memory: &mut M,
     ) -> Result<Outcome, Error> {
+        self.reclaim_for(id, None, manager, memory)
+    }
+
+    fn require_cleanup_owner(
+        &self,
+        id: TaskId,
+        parent: Option<job::Identity>,
+    ) -> Result<(), Error> {
+        let task = self.owned(id)?;
+        if task.parent_job != parent {
+            return Err(Error::Identity);
+        }
+        if task.owned_job == job::OwnerState::Open {
+            return Err(Error::State);
+        }
+        Ok(())
+    }
+
+    fn reclaim_for<M: TableMemory>(
+        &mut self,
+        id: TaskId,
+        parent: Option<job::Identity>,
+        manager: &mut PhysicalMemoryManager,
+        memory: &mut M,
+    ) -> Result<Outcome, Error> {
+        self.require_cleanup_owner(id, parent)?;
         if self.owned(id)?.deferred.is_some() {
             return Err(Error::State);
         }
@@ -591,6 +621,7 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
         manager: &mut PhysicalMemoryManager,
         memory: &mut M,
     ) -> Result<DetachedImage, Error> {
+        self.require_cleanup_owner(id, None)?;
         let task = self.owned_mut(id)?;
         if !matches!(task.state, State::Prepared | State::Quarantined)
             || task.pending_charge.is_some()
@@ -612,6 +643,7 @@ impl<H: Cpu, D: Driver> Slot<H, D> {
         manager: &mut PhysicalMemoryManager,
         memory: &mut M,
     ) -> Result<DetachedImage, Error> {
+        self.require_cleanup_owner(id, None)?;
         let task = self.owned_mut(id)?;
         if task.pending_charge.is_some() || task.runtime.unknown || task.deferred.is_some() {
             return Err(Error::State);

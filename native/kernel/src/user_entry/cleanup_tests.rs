@@ -13,6 +13,57 @@ fn advance(s: &mut Scheduler, cpu: CpuId, count: u32) {
 }
 
 #[test]
+fn exclusive_job_deferred_bypass_preserves_budget_writes_and_runtime() {
+    let p = setup_at(false, 4096);
+    let mut c = setup_at(false, 4224);
+    let (mut parent, _, pid) = job_tests::at(p.owner, 3);
+    let (mut child, control, cid) = job_tests::at(c.owner, 4);
+    let mut job = task::job::Job::<1>::new(&mut parent, pid).unwrap();
+    job.adopt(&mut child, cid).unwrap();
+    child.cancel_prepared(cid).unwrap();
+    c.memory.fail_finish = true;
+    assert!(
+        job.reclaim_child(&mut child, cid, &mut c.manager, &mut c.memory)
+            .is_err()
+    );
+    let mut s = Scheduler::new(1).unwrap();
+    let cpu = CpuId::new(0).unwrap();
+    let other = s.create_task(7, 1, 16, 1).unwrap();
+    s.activate(other, cpu).unwrap();
+    child.defer_reclamation(cid, &mut s, cpu, false).unwrap();
+    advance(&mut s, cpu, FIRST_DELAY);
+    let status = child.cleanup_status(cid).unwrap();
+    let runtime = child.runtime(cid).unwrap();
+    let writes = c.memory.writes;
+    let revokes = control.borrow().revocations;
+    for _ in 0..4 {
+        assert_eq!(
+            child.reclaim_deferred(cid, &mut c.manager, &mut c.memory, &s),
+            Err(task::Error::Identity)
+        );
+        assert!(child.reclaim(cid, &mut c.manager, &mut c.memory).is_err());
+        assert!(child.reap(cid, &mut c.manager, &mut c.memory).is_err());
+    }
+    assert_eq!(child.cleanup_status(cid).unwrap(), status);
+    assert_eq!(child.runtime(cid).unwrap(), runtime);
+    assert_eq!(
+        (c.memory.writes, control.borrow().revocations),
+        (writes, revokes)
+    );
+    assert_eq!(
+        s.task_snapshot(other).unwrap().runtime_ticks,
+        u64::from(FIRST_DELAY)
+    );
+    retained(&mut c.manager, &c.handles);
+    c.memory.fail_finish = false;
+    assert!(matches!(
+        job.reclaim_deferred_child(&mut child, cid, &mut c.manager, &mut c.memory, &s),
+        Ok(Progress::Complete(_))
+    ));
+    assert_eq!(job.child_count(), 0);
+}
+
+#[test]
 fn deferred_prepared_cleanup_waits_retries_once_and_keeps_unrelated_tasks_running() {
     let mut f = setup();
     let (mut slot, control, id) = task_slot(f.owner);
@@ -81,10 +132,10 @@ fn deferred_prepared_cleanup_waits_retries_once_and_keeps_unrelated_tasks_runnin
 fn exhausted_cleanup_keeps_pages_and_job_membership_without_further_memory_writes() {
     let parent = setup_at(false, 4096);
     let mut f = setup_at(false, 4224);
-    let (p, _, pid) = job_tests::at(parent.owner, 3);
+    let (mut p, _, pid) = job_tests::at(parent.owner, 3);
     let (mut slot, _, id) = job_tests::at(f.owner, 4);
-    let mut job = task::job::Job::<2>::new(&p, pid).unwrap();
-    job.adopt(&slot, id).unwrap();
+    let mut job = task::job::Job::<2>::new(&mut p, pid).unwrap();
+    job.adopt(&mut slot, id).unwrap();
     slot.cancel_prepared(id).unwrap();
     f.memory.fail_finish = true;
     assert!(
@@ -120,7 +171,7 @@ fn exhausted_cleanup_keeps_pages_and_job_membership_without_further_memory_write
     advance(&mut s, cpu, 1000);
     for _ in 0..4 {
         assert_eq!(
-            slot.reclaim_deferred(id, &mut f.manager, &mut f.memory, &s),
+            job.reclaim_deferred_child(&mut slot, id, &mut f.manager, &mut f.memory, &s),
             Ok(Progress::Exhausted)
         );
     }
@@ -175,8 +226,8 @@ fn two_exhausted_children_keep_distinct_owners_and_stop_retry_writes() {
     let parent = setup_at(false, 4096);
     let a = setup_at(false, 4224);
     let b = setup_at(false, 4352);
-    let (p, _, pid) = job_tests::at(parent.owner, 3);
-    let mut job = task::job::Job::<2>::new(&p, pid).unwrap();
+    let (mut p, _, pid) = job_tests::at(parent.owner, 3);
+    let mut job = task::job::Job::<2>::new(&mut p, pid).unwrap();
     let mut s = Scheduler::new(1).unwrap();
     let cpu = CpuId::new(0).unwrap();
     let other = s.create_task(7, 1, 16, 1).unwrap();
@@ -186,7 +237,7 @@ fn two_exhausted_children_keep_distinct_owners_and_stop_retry_writes() {
         .enumerate()
         .map(|(i, mut f)| {
             let (mut slot, control, id) = job_tests::at(f.owner, 4 + i as u8);
-            job.adopt(&slot, id).unwrap();
+            job.adopt(&mut slot, id).unwrap();
             slot.cancel_prepared(id).unwrap();
             f.memory.fail_finish = true;
             assert!(
@@ -247,10 +298,10 @@ fn two_exhausted_children_keep_distinct_owners_and_stop_retry_writes() {
 fn deferred_entered_task_preserves_accounting_and_job_until_success() {
     let parent = setup_at(false, 4096);
     let mut f = setup_at(false, 4224);
-    let (p, _, pid) = job_tests::at(parent.owner, 3);
+    let (mut p, _, pid) = job_tests::at(parent.owner, 3);
     let (mut slot, control, id) = job_tests::at(f.owner, 4);
-    let mut job = task::job::Job::<2>::new(&p, pid).unwrap();
-    job.adopt(&slot, id).unwrap();
+    let mut job = task::job::Job::<2>::new(&mut p, pid).unwrap();
+    job.adopt(&mut slot, id).unwrap();
     control.borrow_mut().slice_terminal = true;
     let (mut s, cpu) = running_scheduler(id);
     slot.activate(id, &f.manager, &mut f.memory).unwrap();
@@ -293,8 +344,8 @@ fn closed_job_recovers_exact_exhausted_children_once_without_resetting_normal_bu
             let mut f = setup_at(false, 4224);
             let (mut p, _, pid) = job_tests::at(parent.owner, 3);
             let (mut slot, control, id) = job_tests::at(f.owner, 4);
-            let mut job = task::job::Job::<2>::new(&p, pid).unwrap();
-            job.adopt(&slot, id).unwrap();
+            let mut job = task::job::Job::<2>::new(&mut p, pid).unwrap();
+            job.adopt(&mut slot, id).unwrap();
             let out = slot.cancel_prepared(id).unwrap();
             f.memory.fail_finish = true;
             assert!(
@@ -329,7 +380,7 @@ fn closed_job_recovers_exact_exhausted_children_once_without_resetting_normal_bu
                     .is_err()
             );
             p.cancel_prepared(pid).unwrap();
-            job.owner_stopped(&p, pid).unwrap();
+            job.owner_stopped(&mut p, pid).unwrap();
             for _ in 0..FIRST_DELAY {
                 assert_eq!(
                     job.recover_exhausted_child(&mut slot, id, &mut f.manager, &mut f.memory, &s),
@@ -338,7 +389,7 @@ fn closed_job_recovers_exact_exhausted_children_once_without_resetting_normal_bu
                 advance(&mut s, cpu, 1);
                 // Ordinary observation must not postpone the recovery cooldown.
                 assert_eq!(
-                    slot.reclaim_deferred(id, &mut f.manager, &mut f.memory, &s),
+                    job.reclaim_deferred_child(&mut slot, id, &mut f.manager, &mut f.memory, &s),
                     Ok(Progress::Exhausted)
                 );
             }
@@ -402,7 +453,13 @@ fn closed_job_recovers_exact_exhausted_children_once_without_resetting_normal_bu
                         Ok(Recovery::Unavailable)
                     );
                     assert_eq!(
-                        slot.reclaim_deferred(id, &mut f.manager, &mut f.memory, &s),
+                        job.reclaim_deferred_child(
+                            &mut slot,
+                            id,
+                            &mut f.manager,
+                            &mut f.memory,
+                            &s
+                        ),
                         Ok(Progress::Exhausted)
                     );
                     assert!(
@@ -433,13 +490,13 @@ fn orphan_recovery_requires_exhaustion_and_exact_closed_membership() {
     let (mut p, _, pid) = job_tests::at(parent.owner, 3);
     let (mut q, _, qid) = job_tests::at(foreign.owner, 6);
     let (mut slot, _, id) = job_tests::at(f.owner, 4);
-    let mut job = task::job::Job::<2>::new(&p, pid).unwrap();
-    let mut other = task::job::Job::<2>::new(&q, qid).unwrap();
-    job.adopt(&slot, id).unwrap();
+    let mut job = task::job::Job::<2>::new(&mut p, pid).unwrap();
+    let mut other = task::job::Job::<2>::new(&mut q, qid).unwrap();
+    job.adopt(&mut slot, id).unwrap();
     p.cancel_prepared(pid).unwrap();
     q.cancel_prepared(qid).unwrap();
-    job.owner_stopped(&p, pid).unwrap();
-    other.owner_stopped(&q, qid).unwrap();
+    job.owner_stopped(&mut p, pid).unwrap();
+    other.owner_stopped(&mut q, qid).unwrap();
     let mut s = Scheduler::new(1).unwrap();
     let cpu = CpuId::new(0).unwrap();
     let peer = s.create_task(7, 1, 16, 1).unwrap();
@@ -549,8 +606,8 @@ fn entered_exhausted_recovery_matches_slices_and_preserves_terminal_accounting()
             let mut f = setup_at(false, 4224);
             let (mut p, _, pid) = job_tests::at(parent.owner, 3);
             let (mut slot, control, id) = job_tests::at(f.owner, 4);
-            let mut job = task::job::Job::<2>::new(&p, pid).unwrap();
-            job.adopt(&slot, id).unwrap();
+            let mut job = task::job::Job::<2>::new(&mut p, pid).unwrap();
+            job.adopt(&mut slot, id).unwrap();
             let (mut scheduler, cpu) = running_scheduler(id);
             let sid = crate::scheduler::TaskId::new(id.slot, id.generation).unwrap();
             for ordinal in 1..=2 {
@@ -600,7 +657,7 @@ fn entered_exhausted_recovery_matches_slices_and_preserves_terminal_accounting()
                 assert_eq!(scheduler.task_snapshot(sid), Ok(parked));
             }
             p.cancel_prepared(pid).unwrap();
-            job.owner_stopped(&p, pid).unwrap();
+            job.owner_stopped(&mut p, pid).unwrap();
             advance(&mut scheduler, cpu, FIRST_DELAY);
             let writes = f.memory.writes;
             let roots = f.machine.borrow().writes.clone();

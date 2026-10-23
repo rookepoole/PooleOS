@@ -143,9 +143,10 @@ pub(crate) fn run(
         .each_mut()
         .map(|slot| slot.as_mut().expect("initialized peer"));
     let pages = programs.each_ref().map(|p| 12 + p.code_pages());
-    let mut job = checked!(task::job::Job::<2>::new(&peers[3].slot, peers[3].id));
-    for child in &peers[4..] {
-        checked!(job.adopt(&child.slot, child.id));
+    let parent = &mut peers[3];
+    let mut job = checked!(task::job::Job::<2>::new(&mut parent.slot, parent.id));
+    for child in &mut peers[4..] {
+        checked!(job.adopt(&mut child.slot, child.id));
     }
     let total: u64 = pages.iter().sum();
     if baseline > 12
@@ -478,7 +479,7 @@ pub(crate) fn run(
                         stop(34004, serial, debugcon);
                     }
                     if i == 3 {
-                        checked!(job.owner_stopped(&p.slot, p.id));
+                        checked!(job.owner_stopped(&mut p.slot, p.id));
                         owner_fault = outcome.reason != Reason::Exit(0);
                         if owner_fault {
                             job_record(
@@ -725,7 +726,7 @@ pub(crate) fn run(
                     topology,
                     hpet
                 ));
-                checked!(job.adopt(&p.slot, p.id));
+                checked!(job.adopt(&mut p.slot, p.id));
             }
             let before_admission = scheduler.summary();
             #[cfg(feature = "development-launch-quota")]
@@ -881,7 +882,7 @@ pub(crate) fn run(
             } else {
                 checked!(p.slot.cancel_suspended(p.id))
             };
-            checked!(job.owner_stopped(&p.slot, p.id));
+            checked!(job.owner_stopped(&mut p.slot, p.id));
             owner_fault = true;
             job_record(
                 serial,

@@ -127,6 +127,7 @@ runs/*
 !runs/native-orphan-cleanup-readiness.json
 !runs/native-entered-cleanup-readiness.json
 !runs/native-entered-recovery-readiness.json
+!runs/native-job-ownership-readiness.json
 !runs/native_initial_system_readiness.json
 !runs/native_microcode_readiness.json
 !runs/native_recovery_readiness.json

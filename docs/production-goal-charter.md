@@ -7,9 +7,21 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 314
+Last roadmap reconciliation: PooleOS Cycle 315
 
-Cycle314 qualifies actual owner UD2 with an already-entered child through three
+Cycle315 strengthens actual microkernel task/job ownership. Slot-owned claims
+prevent duplicate jobs, duplicate child membership and premature reclamation;
+failed cleanup and dropped job records retain obligations. Three reproduced host
+counterexamples are repaired; debug/release profiles pass 624 tests each and the
+ordinary profile passes 642. Next: bounded multi-owner registry, topology and fair
+reclamation, then capability/IPC lifetime and service restart. Keep desktop as a
+regression consumer and defer demo packaging. General recovery, SMP safety and
+production promotion remain independently gated.
+Nine headless native regressions and 513 selected integration/roadmap checks pass;
+these do not constitute full canonical qualification.
+[Current kernel progress](checkpoints/cycle315-exclusive-job-ownership.md).
+
+Historical Cycle314 qualifies actual owner UD2 with an already-entered child through three
 failed deferred retries and one closed-job recovery attempt. Successful release,
 persistent retention without repeated writes and ordinary deferred regression
 pass 9 non-graphical QEMU cases with independent denied-authority controls. Host
@@ -18,7 +30,7 @@ focused tests pass. Raw logs/input, paired kernels/programs, boot media and curr
 sources reconstruct. All 512 selected integration/roadmap checks pass.
 Next: bounded multi-owner reclamation and fault isolation,
 then capability/IPC lifetime and service restart. No new ISO or production claim.
-[Current kernel progress](checkpoints/cycle314-native-entered-recovery.md).
+[Cycle314 checkpoint](checkpoints/cycle314-native-entered-recovery.md).
 
 Historical Cycle313 fixes entered-task cleanup accounting: require the scheduler's dispatch
 count and tick total to match the Slot's settled slices and ticks before parking

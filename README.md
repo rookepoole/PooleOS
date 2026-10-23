@@ -11,14 +11,24 @@ Doctor checks, including bundle and replay inputs. The merged tree matches that
 candidate. This is a development baseline, not a production release, and its
 qualification does not extend to later source changes.
 
-**Current development work:** Cycle314 qualifies entered-child exhausted recovery
+**Current development work:** Cycle315 fixes three microkernel ownership gaps:
+duplicate jobs for one owner, duplicate child enrollment and premature owner
+reclamation. Task slots now enforce exclusive, generation-bound job claims;
+raw cleanup cannot bypass them. Failed cleanup and dropped jobs retain ownership.
+Host debug/release profiles pass 624 tests each; the ordinary profile passes 642.
+Nine headless native regressions and 513 selected integration/roadmap checks pass.
+Next: a bounded multi-owner registry, topology validation and fair reclamation,
+then capability/IPC lifetime and service restart. Demo packaging remains deferred.
+[Current kernel checkpoint](docs/checkpoints/cycle315-exclusive-job-ownership.md).
+
+**Historical development checkpoint:** Cycle314 qualifies entered-child exhausted recovery
 after an actual owner fault. Nine non-graphical QEMU cases cover successful rescue,
 persistent retention and ordinary deferred regression. Host tests pass 615 in each
 debug/release recovery profile, 633 ordinary-profile tests and 36 focused checks.
 Exact source, paired builds, raw logs and boot media reconstruct. Multiple-owner
 fault isolation is next; all 512 selected integration/roadmap checks pass.
 No new ISO, general recovery or production claim.
-[Current kernel checkpoint](docs/checkpoints/cycle314-native-entered-recovery.md).
+[Cycle314 checkpoint](docs/checkpoints/cycle314-native-entered-recovery.md).
 
 **Historical development checkpoint:** Cycle313 fixes a kernel cleanup accounting gap:
 entered-task cleanup now requires matching slice counts as well as tick totals.

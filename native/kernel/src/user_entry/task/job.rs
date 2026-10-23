@@ -5,6 +5,13 @@ use super::*;
 pub const CONTRACT_ID: &str = "PJOB1";
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(super) enum OwnerState {
+    Unused,
+    Open,
+    Closed,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) struct Identity {
     id: TaskId,
     root: u64,
@@ -35,11 +42,16 @@ pub struct Job<const N: usize> {
     children: [Option<Identity>; N],
 }
 impl<const N: usize> Job<N> {
-    pub fn new<H: Cpu, D: Driver>(owner: &Slot<H, D>, id: TaskId) -> Result<Self, Error> {
-        let task = owner.owned(id)?;
-        if N == 0 || N > crate::scheduler::MAX_TASKS || task.state != State::Prepared {
+    pub fn new<H: Cpu, D: Driver>(owner: &mut Slot<H, D>, id: TaskId) -> Result<Self, Error> {
+        let task = owner.owned_mut(id)?;
+        if N == 0
+            || N > crate::scheduler::MAX_TASKS
+            || task.state != State::Prepared
+            || task.owned_job != OwnerState::Unused
+        {
             return Err(Error::State);
         }
+        task.owned_job = OwnerState::Open;
         Ok(Self {
             owner: task.identity,
             closing: false,
@@ -49,12 +61,13 @@ impl<const N: usize> Job<N> {
 
     pub fn adopt<H: Cpu, D: Driver>(
         &mut self,
-        child: &Slot<H, D>,
+        child: &mut Slot<H, D>,
         id: TaskId,
     ) -> Result<(), Error> {
-        let task = child.owned(id)?;
+        let task = child.owned_mut(id)?;
         if self.closing
             || task.state != State::Prepared
+            || task.parent_job.is_some()
             || id.slot == self.owner.id.slot
             || task.identity.root == self.owner.root
             || self
@@ -70,6 +83,8 @@ impl<const N: usize> Job<N> {
             .iter_mut()
             .find(|c| c.is_none())
             .ok_or(Error::Occupied)?;
+        // Both claims commit only after all validation and capacity checks.
+        task.parent_job = Some(self.owner);
         *place = Some(task.identity);
         Ok(())
     }
@@ -78,14 +93,24 @@ impl<const N: usize> Job<N> {
     /// Repeated observation of the same terminal owner is harmless, never reopening.
     pub fn owner_stopped<H: Cpu, D: Driver>(
         &mut self,
-        owner: &Slot<H, D>,
+        owner: &mut Slot<H, D>,
         id: TaskId,
     ) -> Result<Outcome, Error> {
         let task = owner.owned(id)?;
-        if task.identity != self.owner || task.pending_charge.is_some() || task.runtime.unknown {
+        let expected = if self.closing {
+            OwnerState::Closed
+        } else {
+            OwnerState::Open
+        };
+        if task.identity != self.owner
+            || task.pending_charge.is_some()
+            || task.runtime.unknown
+            || task.owned_job != expected
+        {
             return Err(Error::Identity);
         }
         let outcome = owner.outcome(id)?;
+        owner.owned_mut(id)?.owned_job = OwnerState::Closed;
         self.closing = true;
         Ok(outcome)
     }
@@ -106,6 +131,9 @@ impl<const N: usize> Job<N> {
 
     fn member<H: Cpu, D: Driver>(&self, child: &Slot<H, D>, id: TaskId) -> Result<usize, Error> {
         let task = child.owned(id)?;
+        if task.parent_job != Some(self.owner) {
+            return Err(Error::Identity);
+        }
         self.children
             .iter()
             .position(|c| *c == Some(task.identity))
@@ -141,7 +169,7 @@ impl<const N: usize> Job<N> {
         memory: &mut M,
     ) -> Result<Outcome, Error> {
         let index = self.member(child, id)?;
-        let outcome = child.reclaim(id, manager, memory)?;
+        let outcome = child.reclaim_for(id, Some(self.owner), manager, memory)?;
         self.children[index] = None;
         Ok(outcome)
     }
@@ -155,7 +183,8 @@ impl<const N: usize> Job<N> {
         scheduler: &crate::scheduler::Scheduler,
     ) -> Result<cleanup::Progress, Error> {
         let index = self.member(child, id)?;
-        let progress = child.reclaim_deferred(id, manager, memory, scheduler)?;
+        let progress =
+            child.reclaim_deferred_for(id, Some(self.owner), manager, memory, scheduler)?;
         if matches!(progress, cleanup::Progress::Complete(_)) {
             self.children[index] = None;
         }
@@ -176,7 +205,7 @@ impl<const N: usize> Job<N> {
         if !self.closing {
             return Err(Error::State);
         }
-        let progress = child.recover_exhausted(id, manager, memory, scheduler)?;
+        let progress = child.recover_exhausted(id, self.owner, manager, memory, scheduler)?;
         if matches!(progress, cleanup::Recovery::Complete(_)) {
             self.children[index] = None;
         }

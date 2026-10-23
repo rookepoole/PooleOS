@@ -1,15 +1,44 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-22
-Plan version: 2.217.0-native-entered-recovery
-Roadmap cycle: PooleOS Cycle 314
+Plan version: 2.218.0-native-job-ownership
+Roadmap cycle: PooleOS Cycle 315
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 314: Native Entered-Child Exhausted Recovery
+## Cycle 315: Exclusive Kernel Job Ownership
+
+N13/N14 kernel-first development: reproduced and repaired duplicate owner jobs,
+duplicate child membership and owner reclamation before job closure. Each task
+slot now retains exclusive generation/root-bound claims independently of the job
+record. Direct cleanup paths reject bypass before device, memory or retry effects.
+Only successful whole-task reclamation permits a fresh generation. No resource
+limits or recovery budgets grow; no new heap or unsafe code is introduced.
+
+Verified host coverage: 624 tests in each debug/release recovery profile and 642
+ordinary-profile tests. New cases cover invalid enrollment, dropped records,
+failed revocation/scrubbing, raw/deferred cleanup, stale generations, nested
+closure and independent jobs progressing despite another job's failure.
+Nine headless single-owner recovery/persistence/deferred QEMU regressions pass
+independent reconstruction, with 36 focused checks and paired kernels/programs.
+All 513 selected integration/roadmap checks and nine publication checks pass;
+1,661 discovered Python tests are inventory, not complete canonical execution.
+Exact evidence: [Checkpoint](checkpoints/cycle315-exclusive-job-ownership.md).
+This is trusted-kernel API hardening, not a demonstrated userspace exploit.
+
+Next substeps, in order: bounded multi-owner registry and topology validation;
+fair cleanup with persistent failures and retained supervisor records; native
+multi-owner fault controls; capability/IPC lifetime and bounded service restart.
+Global cycle detection, lost-job recovery, partial allocator release,
+construction/committed-handoff recovery, all-path stacks and SMP isolation remain
+explicit gaps. Desktop is regression-only; demo packaging stays deferred.
+All 40 phases, 301 subphases, 101 flags (46 open), PooleGlyph/PDC, PooleGlass and
+eventual signed ISO requirements remain. No phase or flag closes in this cycle.
+
+## Historical Cycle 314: Native Entered-Child Exhausted Recovery
 
 N13/N14 kernel-first development: the existing headless owner-fault profile now
 exercises three exhausted cleanup retries followed by one closed-job recovery

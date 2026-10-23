@@ -24,6 +24,9 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle315-exclusive-job-ownership.md",
+    "docs/native-job-ownership.md",
+    "runs/native-job-ownership-readiness.json",
     "docs/checkpoints/cycle312-orphan-cleanup-recovery.md",
     "docs/native-orphan-cleanup-recovery.md",
     "runs/native-orphan-cleanup-readiness.json",
